@@ -207,7 +207,29 @@
                         </select>
                     </div>
                 </div>
-            </div>            
+            </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
+                    <span>Notification Preference:</span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="notification_sync_preference">Choose notification sync preference</label>
+                        <select id="notification_sync_preference" class="form-control" aria-label="Change Notification Sync Preference" data-testid="notification-sync-preference-dropdown">
+                            {% if user.getNotificationsSynced() %}
+                                <option value="sync" selected>Sync</option>
+                                <option value="unsync">Unsync</option>
+                            {% else %}
+                                <option value="sync">Sync</option>
+                                <option value="unsync" selected>Unsync</option>
+                            {% endif %}
+                        </select>
+                        {% if user.getNotificationsSyncedUpdate() %}
+                            <span class="option-alt">Last updated: {{ user.getNotificationsSyncedUpdate() }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div> 
             <div>
                 <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
                 <button class="addpwa btn btn-primary">Install App</button>

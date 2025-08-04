@@ -743,6 +743,108 @@ SQL;
         );
     }
 
+    /**
+     * Update notification sync settings for a user
+     *
+     * @param string $user_id
+     * @param bool $synced
+     * @return void
+     */
+    public function updateNotificationSync(string $user_id, bool $synced, ?string $timestamp): void {
+        $this->submitty_db->query("
+            UPDATE users
+            SET notifications_synced = ?, notifications_synced_update = ?
+            WHERE user_id = ?
+            ", [$synced, $timestamp, $user_id]
+        );
+    }
+
+    /**
+     * Update notification defaults for a user
+     *
+     * @param string $user_id
+     * @param string|null $defaults
+     * @return void
+     */
+    public function updateNotificationDefaults(string $user_id, ?string $defaults): void {
+        $this->submitty_db->query(
+            "UPDATE users
+            SET notification_defaults = ?
+            WHERE user_id = ?
+            ", [$defaults, $user_id]
+        );
+    }
+
+    /**
+     * Sync notification settings from reference course to target course
+     *
+     * @param string $user_id
+     * @param array $settings
+     * @param string $target_term
+     * @param string $target_course
+     * @return void
+     */
+    public function syncNotificationSettingsToCourse(string $user_id, array $settings, string $target_term, string $target_course): void {
+        // Connect to target course database
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($target_term, $target_course);
+        $this->core->loadCourseDatabase();
+        $target_course_db = $this->core->getCourseDB();
+
+        $keys = array_keys($settings);
+        $columns = implode(', ', $keys);
+        $placeholders = implode(', ', array_fill(0, count($keys) + 1, '?')); // +1 for user_id
+
+        $update_clause = implode(', ', array_map(fn($k) => "$k = ?", $keys));
+
+        $params = array_merge([$user_id], array_values($settings), array_values($settings));
+
+        $sql = "
+            INSERT INTO notification_settings (user_id, $columns)
+            VALUES ($placeholders)
+            ON CONFLICT (user_id)
+            DO UPDATE SET $update_clause
+        ";
+
+        $target_course_db->query($sql, $params);
+
+        // Restore original configuration
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+    }
+
+    /**
+     * Get notification settings from a reference course
+     * @param string $user_id
+     * @param string $reference_term
+     * @param string $reference_course
+     * @return array|null
+     */
+    public function getNotificationSettingsFromCourse(string $user_id, string $reference_term, string $reference_course): ?array {
+        // Connect to reference course database
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($reference_term, $reference_course);
+        $this->core->loadCourseDatabase();
+        $reference_course_db = $this->core->getCourseDB();
+
+        $reference_course_db->query("
+            SELECT * FROM notification_settings WHERE user_id = ?
+        ", [$user_id]);
+
+        $settings = null;
+        if ($reference_course_db->getRowCount() > 0) {
+            $row = $reference_course_db->row();
+            unset($row['user_id']); // Remove user_id from settings
+            $settings = $row;
+        }
+
+        // Restore original configuration
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return $settings;
+    }
+
     public function getAuthorOfThread($thread_id) {
         $this->course_db->query("SELECT created_by from threads where id = ?", [$thread_id]);
         return $this->course_db->row()['created_by'];

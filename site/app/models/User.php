@@ -210,6 +210,18 @@ class User extends AbstractModel implements \JsonSerializable {
     protected $notification_settings = [];
 
     /** @prop
+     * @var bool Whether notification settings are synced across all courses */
+    protected $notifications_synced = false;
+
+    /** @prop
+     * @var string Timestamp when notifications sync was last updated */
+    protected $notifications_synced_update;
+
+    /** @prop
+     * @var string|null The reference course for default notification settings (format: term-course) */
+    protected $notification_defaults = null;
+
+    /** @prop
      * @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
 
@@ -305,6 +317,13 @@ class User extends AbstractModel implements \JsonSerializable {
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
+
+        // Initialize notification sync properties
+        $this->notifications_synced = isset($details['notifications_synced']) && $details['notifications_synced'] === true;
+        $this->notifications_synced_update = $details['notifications_synced_update'] ?? null;
+
+        // Initialize notification defaults
+        $this->notification_defaults = $details['notification_defaults'] ?? null;
 
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
@@ -539,6 +558,30 @@ class User extends AbstractModel implements \JsonSerializable {
 
     public function updateUserNotificationSettings($key, $value) {
         $this->notification_settings[$key] = $value;
+    }
+
+    public function getNotificationsSynced(): bool {
+        return $this->notifications_synced;
+    }
+
+    public function setNotificationsSynced(bool $synced): void {
+        $this->notifications_synced = $synced;
+    }
+
+    public function getNotificationsSyncedUpdate(): ?string {
+        return $this->notifications_synced_update;
+    }
+
+    public function setNotificationsSyncedUpdate(?string $timestamp): void {
+        $this->notifications_synced_update = $timestamp;
+    }
+
+    public function getNotificationDefaults(): ?string {
+        return $this->notification_defaults;
+    }
+
+    public function setNotificationDefaults(?string $defaults): void {
+        $this->notification_defaults = $defaults;
     }
 
     /**

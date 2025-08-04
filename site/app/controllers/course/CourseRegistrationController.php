@@ -85,7 +85,58 @@ class CourseRegistrationController extends AbstractController {
             $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
         }
 
+        // Apply default notification settings if user has them configured
+        $this->applyDefaultNotificationSettings($user_id, $term, $course);
+
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
+    }
+
+    /**
+     * Apply default notification settings for a newly enrolled user
+     *
+     * @param string $user_id
+     * @param string $term
+     * @param string $course
+     * @return void
+     */
+    private function applyDefaultNotificationSettings(string $user_id, string $term, string $course): void {
+        $user = $this->core->getUser();
+        $notification_defaults = $user->getNotificationDefaults();
+
+        if ($notification_defaults === null) {
+            // No default settings configured
+            return;
+        }
+
+        // Parse the reference course from the defaults string (format: term-course)
+        $parts = explode('-', $notification_defaults, 2);
+        if (count($parts) !== 2) {
+            // Invalid format
+            return;
+        }
+
+        $reference_term = $parts[0];
+        $reference_course = $parts[1];
+
+        // Get notification settings from reference course
+        $reference_settings = $this->core->getQueries()->getNotificationSettingsFromCourse(
+            $user_id,
+            $reference_term,
+            $reference_course
+        );
+
+        if ($reference_settings === null) {
+            // No settings found in reference course
+            return;
+        }
+
+        // Apply settings to the new course
+        $this->core->getQueries()->syncNotificationSettingsToCourse(
+            $user_id,
+            $reference_settings,
+            $term,
+            $course
+        );
     }
 }

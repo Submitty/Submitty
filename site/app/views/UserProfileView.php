@@ -34,6 +34,7 @@ class UserProfileView extends AbstractView {
             : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
 
         $this->core->getOutput()->addInternalModuleJs('user-profile.js');
+        $this->core->getOutput()->addInternalModuleJs('notifications.js');
 
         $curr_locale = $this->core->getConfig()->getLocale()->getName();
         $supported_locales = $this->core->getSupportedLocales() ?? [];

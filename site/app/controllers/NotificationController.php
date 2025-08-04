@@ -155,6 +155,81 @@ class NotificationController extends AbstractController {
         }
     }
 
+    /**
+     * @return MultiResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/settings/sync", methods: ["POST"])]
+    public function updateNotificationSync() {
+        $user_id = $this->core->getUser()->getId();
+        $synced = isset($_POST['notifications_synced']) && $_POST['notifications_synced'] === 'true';
+        if ($synced) {
+            // Get current course's notification settings
+            $current_settings = $this->core->getUser()->getNotificationSettings();
+            $sync_settings = [];
+            foreach ($this->selections as $setting) {
+                if (isset($current_settings[$setting])) {
+                    $sync_settings[$setting] = $current_settings[$setting];
+                }
+            }
+
+            // Fetch all active courses for the user
+            $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+
+            if (empty($courses)) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('You need to be enrolled in active courses to sync notification settings.')
+                );
+            }
+
+            // Sync settings to all active courses
+            foreach ($courses as $course) {
+                $term = $course->getTerm();
+                $course_name = $course->getTitle();
+
+                // Skip the current course as updates have already been applied
+                if ($term === $this->core->getConfig()->getTerm() && $course_name === $this->core->getConfig()->getCourse()) {
+                    continue;
+                }
+
+                $this->core->getQueries()->syncNotificationSettingsToCourse(
+                    $user_id,
+                    $sync_settings,
+                    $term,
+                    $course_name
+                );
+            }
+        }
+
+        // Update sync status
+        $timestamp = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+        $this->core->getQueries()->updateNotificationSync($user_id, $synced, $timestamp);
+        $this->core->getUser()->setNotificationsSynced($synced);
+        $this->core->getUser()->setNotificationsSyncedUpdate($timestamp);
+        $action = $synced ? 'enabled' : 'disabled';
+        return JsonResponse::getSuccessResponse("Notification sync has been {$action}.");
+    }
+
+    /**
+     * @return MultiResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/settings/defaults", methods: ["POST"])]
+    public function updateNotificationDefaults() {
+        $user_id = $this->core->getUser()->getId();
+        $defaults = $_POST['notification_defaults'] ?? null;
+        if ($defaults === 'null' || $defaults === '') {
+            $defaults = null;
+            $message = 'Default notification settings have been cleared.';
+        } else {
+            $current_term = $this->core->getConfig()->getTerm();
+            $current_course = $this->core->getConfig()->getCourse();
+            $defaults = $current_term . '-' . $current_course;
+            $message = 'These notification settings have been saved as your default for future courses.';
+        }
+        $this->core->getQueries()->updateNotificationDefaults($user_id, $defaults);
+        $this->core->getUser()->setNotificationDefaults($defaults);
+        return JsonResponse::getSuccessResponse($message);
+    }
+
     private function validateNotificationSettings($columns) {
         if (count($columns) <= count($this->selections) && count(array_intersect($columns, $this->selections)) == count($columns)) {
             return true;
