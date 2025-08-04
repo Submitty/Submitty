@@ -2947,12 +2947,12 @@ class Gradeable extends AbstractModel {
         return $this->score_notifications_sent;
     }
 
-    public function setReleaseNotificationsSent(int $release_notifications_sent): void {
+    public function setReleaseNotificationsSent(bool $release_notifications_sent): void {
         $this->release_notifications_sent = $release_notifications_sent;
         $this->modified = true;
     }
 
-    public function getReleaseNotificationsSent(): int {
+    public function getReleaseNotificationsSent(): bool {
         return $this->release_notifications_sent;
     }
 
