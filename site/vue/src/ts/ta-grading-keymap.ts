@@ -15,6 +15,12 @@ import {
 } from '../../../ts/ta-grading-rubric';
 import { gotoNextStudent, gotoPrevStudent } from '../../../ts/ta-grading-toolbar';
 
+declare global {
+    interface Window {
+        updateCheckpointCells: (cells: JQuery, score: number | null) => void;
+    }
+}
+
 export type KeymapEntry<T> = {
     name: string;
     code: string;
@@ -89,7 +95,7 @@ export function handleKeyUp(e: KeyboardEvent, keymap: KeymapEntry<unknown>[], re
 
 export function handleKeyDown(e: KeyboardEvent, keymap: KeymapEntry<unknown>[], remapping: Remapping, visible: boolean) {
     console.log('Keydown event:', e, 'Remapping:', remapping, 'Visible:', visible);
-    if (remapping.active) {
+    if (remapping.active && e.code !== 'Escape') {
         e.preventDefault();
         return;
     }
@@ -99,9 +105,11 @@ export function handleKeyDown(e: KeyboardEvent, keymap: KeymapEntry<unknown>[], 
     }
 
     const target = e.target as HTMLElement;
+    // disable keyboard event when typing to textarea/input
     if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && (target as HTMLInputElement).type !== 'checkbox') || target.tagName === 'SELECT') {
         return;
-    } // disable keyboard event when typing to textarea/input
+    }
+    console.log('got past target check with', target.tagName, (target as HTMLInputElement).type);
 
     const codeName = eventToKeyCode(e);
 
@@ -163,7 +171,7 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
     await oldToggleComponent(component_id, saveChanges);
 }
 
-export function initDefaultHotkeys(
+export function initTaGradingHotkeys(
     keymap: KeymapEntry<unknown>[],
 ) {
     // Navigate to the prev / next student buttons
@@ -339,4 +347,53 @@ export function initDefaultHotkeys(
     registerKeyHandler(keymap, { name: 'Select Mark 9', code: 'Digit9' }, () => {
         checkOpenComponentMark(9);
     });
+}
+
+// check if a cell is focused, then update value
+function keySetCurrentCell(_: KeyboardEvent, options?: { score: number | null }) {
+    console.log('keySetCurrentCell called with options:', options);
+    if (!options) {
+        return;
+    }
+    const cell = $('.cell-grade:focus');
+    // eslint-disable-next-line vue/no-ref-object-reactivity-loss
+    if (cell.length) {
+        // eslint-disable-next-line vue/no-ref-object-reactivity-loss
+        window.updateCheckpointCells(cell, options.score);
+    }
+}
+
+// check if a cell is focused, then update the entire row
+function keySetCurrentRow(_: KeyboardEvent, options?: { score: number | null }) {
+    if (!options) {
+        return;
+    }
+    const cell = $('.cell-grade:focus');
+    // eslint-disable-next-line vue/no-ref-object-reactivity-loss
+    if (cell.length) {
+        // eslint-disable-next-line vue/no-ref-object-reactivity-loss
+        window.updateCheckpointCells(cell.parent().find('.cell-grade'), options.score);
+    }
+}
+
+export function initSimpleGradingHotkeys(
+    keymap: KeymapEntry<unknown>[],
+    type: 'lab' | 'numeric',
+) {
+    registerKeyHandler(keymap, { name: 'Search', code: 'Enter' }, () => {});
+    registerKeyHandler(keymap, { name: 'Move Right', code: 'ArrowRight' }, () => {});
+    registerKeyHandler(keymap, { name: 'Move Left', code: 'ArrowLeft' }, () => {});
+    registerKeyHandler(keymap, { name: 'Move Up', code: 'ArrowUp' }, () => {});
+    registerKeyHandler(keymap, { name: 'Move Down', code: 'ArrowDown' }, () => {});
+
+    if (type === 'lab') {
+        registerKeyHandler(keymap, { name: 'Set Cell to 0', code: 'KeyZ', options: { score: 0 } }, keySetCurrentCell);
+        registerKeyHandler(keymap, { name: 'Set Cell to 0.5', code: 'KeyX', options: { score: 0.5 } }, keySetCurrentCell);
+        registerKeyHandler(keymap, { name: 'Set Cell to 1', code: 'KeyC', options: { score: 1 } }, keySetCurrentCell);
+        registerKeyHandler(keymap, { name: 'Cycle Cell Value', code: 'KeyV', options: { score: null } }, keySetCurrentCell);
+        registerKeyHandler(keymap, { name: 'Set Row to 0', code: 'KeyA', options: { score: 0 } }, keySetCurrentRow);
+        registerKeyHandler(keymap, { name: 'Set Row to 0.5', code: 'KeyS', options: { score: 0.5 } }, keySetCurrentRow);
+        registerKeyHandler(keymap, { name: 'Set Row to 1', code: 'KeyD', options: { score: 1 } }, keySetCurrentRow);
+        registerKeyHandler(keymap, { name: 'Cycle Row Value', code: 'KeyF', options: { score: null } }, keySetCurrentRow);
+    }
 }

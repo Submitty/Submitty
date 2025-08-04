@@ -95,7 +95,8 @@ watch(
                 @click="$emit('toggle', $event)"
               >
                 {{ dismissText }}
-              </button> <button
+              </button>
+              <button
                 v-if="savable"
                 class="btn btn-primary"
                 data-testid="popup-save-button"

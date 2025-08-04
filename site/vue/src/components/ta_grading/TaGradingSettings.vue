@@ -6,9 +6,9 @@ import { getDefaultSettingsData, loadTAGradingSettingData, optionsCallback, type
 import TaGradingHotkeySettings from './TaGradingHotkeySettings.vue';
 import { remapGetLS, type KeymapEntry } from '@/ts/ta-grading-keymap';
 
-const { fullAccess, visible } = defineProps<{
+const { fullAccess, isVisible } = defineProps<{
     fullAccess: boolean;
-    visible: boolean;
+    isVisible: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -19,14 +19,21 @@ const emit = defineEmits<{
 const keymap = inject<KeymapEntry<unknown>[]>('keymap', []);
 
 const togglePopup = () => {
-    emit('changeSettingsVisibility', !visible);
-    keymap.forEach((hotkey) => {
-        const storedCode = remapGetLS(hotkey.name);
-        if (storedCode) {
-            hotkey.code = storedCode;
-        }
-        hotkey.originalCode ||= hotkey.code || 'Unassigned';
-    });
+    console.log('Toggling settings popup visibility');
+    // when the popup becomes available, we need to load the keymap from local storage
+    if (!isVisible) {
+        console.log('Loading keymap from local storage');
+        keymap.forEach((hotkey) => {
+            const storedCode = remapGetLS(hotkey.name);
+            if (storedCode) {
+                hotkey.code = storedCode;
+            }
+            if (!hotkey.originalCode) {
+                hotkey.originalCode = hotkey.code || 'Unassigned';
+            }
+        });
+    }
+    emit('changeSettingsVisibility', !isVisible);
 };
 
 function handleChangeNavigationTitles(titles: [string, string]) {
@@ -51,25 +58,22 @@ onMounted(() => {
   <Popup
     id="settings-popup"
     title="Settings"
-    :visible="visible"
+    :visible="isVisible"
     dismiss-text="Close"
     @toggle="togglePopup"
   >
     <template #trigger>
-      <span
-        id="grading-setting-btn"
-        class="ta-navlink-cont"
-        data-testid="grading-setting-btn"
+      <slot
+        name="trigger"
+        :toggle-popup="togglePopup"
       >
         <button
-          title="Show Grading Settings"
-          class="invisible-btn"
-          tabindex="0"
+          class="btn btn-primary"
           @click="togglePopup"
         >
-          <i class="fas fa-wrench icon-header icon-streched" />
+          You should probably override this
         </button>
-      </span>
+      </slot>
     </template>
 
     <template #default>
@@ -78,9 +82,7 @@ onMounted(() => {
         @change-navigation-titles="handleChangeNavigationTitles"
       />
 
-      <TaGradingHotkeySettings
-        :visible="visible"
-      />
+      <TaGradingHotkeySettings />
     </template>
   </Popup>
 </template>

@@ -5,9 +5,9 @@ import { defineProps, reactive, ref, provide, onMounted } from 'vue';
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
-import { handleKeyDown, handleKeyUp, initDefaultHotkeys, type KeymapEntry } from '@/ts/ta-grading-keymap';
+import { handleKeyDown, handleKeyUp, initTaGradingHotkeys, type KeymapEntry } from '@/ts/ta-grading-keymap';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress, fullAccess } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
@@ -43,10 +43,7 @@ const navigationTitles = ref({
 });
 
 onMounted(() => {
-    console.log('TaGradingToolbar mounted');
-    initDefaultHotkeys(keymap);
-    // window.onkeyup = (e) => console.log(`Key up: ${e.key}`);
-    // window.onkeydown = (e) => console.log(`Key down: ${e.key}`);
+    initTaGradingHotkeys(keymap);
     window.onkeyup = (e) => handleKeyUp(e, keymap, remapping);
     window.onkeydown = (e) => handleKeyDown(e, keymap, remapping, settingsVisible.value);
 });
@@ -107,10 +104,19 @@ onMounted(() => {
   />
   <TaGradingSettings
     :full-access="fullAccess"
-    :visible="settingsVisible"
+    :is-visible="settingsVisible"
     @change-navigation-titles="changeNavigationTitles"
     @change-settings-visibility="changeSettingsVisibility"
-  />
+  >
+    <template #trigger="{ togglePopup }">
+      <NavigationButton
+        :on-click="togglePopup"
+        visible-icon="fa-wrench"
+        button-id="grading-setting-btn"
+        title="Show Grading Settings"
+      />
+    </template>
+  </TaGradingSettings>
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"

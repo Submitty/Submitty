@@ -2,8 +2,8 @@
 import { type KeymapEntry, remapFinish, updateKeymapAndStorage } from '@/ts/ta-grading-keymap';
 import { inject } from 'vue';
 
-const keymap = inject<KeymapEntry<unknown>[]>('keymap', []);
-const remapping = inject<{ active: boolean; index: number }>('remapping', { active: false, index: 0 });
+const keymap = inject('keymap') as KeymapEntry<unknown>[];
+const remapping = inject('remapping') as { active: boolean; index: number };
 
 // Start remapping
 function remapHotkey(index: number) {
