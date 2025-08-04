@@ -144,6 +144,10 @@ class NotificationController extends AbstractController {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);
+
+            // Auto-sync to other courses if user has sync enabled
+            $this->autoSyncIfEnabled($new_settings);
+
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse('Notification settings have been saved.')
             );
@@ -228,6 +232,49 @@ class NotificationController extends AbstractController {
         $this->core->getQueries()->updateNotificationDefaults($user_id, $defaults);
         $this->core->getUser()->setNotificationDefaults($defaults);
         return JsonResponse::getSuccessResponse($message);
+    }
+
+    /**
+     * Automatically sync notification settings to other courses if user has sync enabled
+     * @param array $new_settings The updated notification settings
+     * @return void
+     */
+    private function autoSyncIfEnabled(array $new_settings): void {
+        $user = $this->core->getUser();
+
+        // Only sync if user has sync enabled
+        if (!$user->getNotificationsSynced()) {
+            return;
+        }
+
+        $user_id = $user->getId();
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+
+        // Filter settings to only include valid notification options
+        $sync_settings = [];
+        foreach ($this->selections as $setting) {
+            if (isset($new_settings[$setting])) {
+                $sync_settings[$setting] = $new_settings[$setting];
+            }
+        }
+
+        // Sync to all other active courses
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $course_name = $course->getTitle();
+
+            // Skip the current course as it's already been updated
+            if ($term === $this->core->getConfig()->getTerm() && $course_name === $this->core->getConfig()->getCourse()) {
+                continue;
+            }
+
+            $this->core->getQueries()->syncNotificationSettingsToCourse(
+                $user_id,
+                $sync_settings,
+                $term,
+                $course_name
+            );
+        }
     }
 
     private function validateNotificationSettings($columns) {
