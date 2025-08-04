@@ -1,0 +1,16 @@
+- name: Create gradeables with API
+  ansible.builtin.uri:
+    url: "{{ submitty_homework_creation_api_url }}"
+    method: POST
+    body_format: json
+    body: "{{ lookup('file', submitty_homework_creation_var_json_file) }}"
+    return_content: yes
+    headers:
+      Authorization: "{{ submitty_homework_creation_api_key }}"
+  register: submitty_homework_creation_api_response
+
+- name: Fail when status is error
+  ansible.builtin.fail:
+    msg: "{{ (submitty_homework_creation_api_response.content | from_json).message }}"
+  when:
+    - (submitty_homework_creation_api_response.content | from_json).status != 'success'

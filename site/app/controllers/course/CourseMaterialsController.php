@@ -164,24 +164,9 @@ class CourseMaterialsController extends AbstractController {
         else {
             $success = unlink($path);
         }
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        // delete the topmost parent folder that's empty (contains no files)
-        if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
-            $empty_folders = [];
-            FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
-            if (count($empty_folders) > 0) {
-                $path = $empty_folders[0];
-                $success = $success && FileUtils::recursiveRmdir($path);
-                if (!isset($all_files)) {
-                    $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-                }
-                foreach ($all_files as $file) {
-                    if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
-                    }
-                }
-            }
-        }
+
+        $this->cleanupEmptyDirectoriesAfterDeletion($path);
+
         $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
@@ -413,6 +398,10 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
+                if (dirname($new_path) === $path) {
+                    return JsonResponse::getErrorResponse("Cannot move a file into a directory with the same name as the file.");
+                }
+
                 if (($overflow = strlen($new_path) - self::MAX_PATH_LENGTH) > 0) {
                     return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
@@ -488,7 +477,10 @@ class CourseMaterialsController extends AbstractController {
                     );
                 }
 
-                rename($course_material->getPath(), $new_path);
+                if (!rename($course_material->getPath(), $new_path)) {
+                    return JsonResponse::getErrorResponse("Failure to rename filepath.");
+                }
+
                 $course_material->setPath($new_path);
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
@@ -582,7 +574,9 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
             }
 
-            FileUtils::writeFile($details['path'][0], "");
+            if (!FileUtils::writeFile($details['path'][0], "")) {
+                return JsonResponse::getErrorResponse("Failure to write file");
+            }
         }
         else {
             $uploaded_files = [];
@@ -712,7 +706,9 @@ class CourseMaterialsController extends AbstractController {
                                 );
                             }
 
-                            $zip->extractTo($upload_path, $entries);
+                            if (!$zip->extractTo($upload_path, $entries)) {
+                                return JsonResponse::getErrorResponse('Failed to extract zip');
+                            }
 
                             foreach ($zfiles as $zfile) {
                                 $path = FileUtils::joinPaths($upload_path, $zfile);
@@ -927,6 +923,34 @@ class CourseMaterialsController extends AbstractController {
         }
 
         return $result;
+    }
+
+    /**
+     * Cleans up empty directories after a file or directory deletion.
+     * This method handles the removal of empty parent directories and updates the database accordingly.
+     *
+     * @param string $deleted_path The path that was deleted
+     */
+    private function cleanupEmptyDirectoriesAfterDeletion(string $deleted_path): void {
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+
+        // Delete the topmost parent folder that's empty (contains no files)
+        if (pathinfo($deleted_path, PATHINFO_DIRNAME) !== $base_path) {
+            $empty_folders = [];
+            FileUtils::getTopEmptyDir($deleted_path, $base_path, $empty_folders);
+            if (count($empty_folders) > 0) {
+                $empty_path = $empty_folders[0];
+                FileUtils::recursiveRmdir($empty_path);
+
+                // Remove database entries for the empty folders
+                $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+                foreach ($all_files as $file) {
+                    if (str_starts_with($file->getPath(), $empty_path)) {
+                        $this->core->getCourseEntityManager()->remove($file);
+                    }
+                }
+            }
+        }
     }
 
     /**
