@@ -37,7 +37,7 @@ run_php_unit() {
 
 if [ -z "$1" ] || [ "$1" == "help" ]; then
     echo "
-          phpstan             : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
+          phpstan              : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           regenerate-baseline  : shortcut to regenerate phpstan baseline file
           phpcs                : php CodeSniffer
           php-lint             : phpcs & phpstan
