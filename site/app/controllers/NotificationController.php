@@ -212,7 +212,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings/defaults", methods: ["POST"])]
     public function updateNotificationDefaults() {
