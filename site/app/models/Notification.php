@@ -19,6 +19,9 @@ use app\libraries\DateUtils;
  * @method void     setNotifySource($content)
  * @method void     setNotifyTarget($content)
  * @method void     setType($t)
+ * @method void setSemester(string $semester)
+ * @method void setCourse(string $course)
+
  *
  * @method bool     isViewOnly()
  * @method int      getId()
@@ -34,8 +37,11 @@ use app\libraries\DateUtils;
  * @method string   getNotifyMetadata()
  * @method bool     getNotifyNotToSource()
  * @method string   getType()
+ * @method string|null getSemester()
+ * @method string|null getCourse()
+ * 
  */
-class Notification extends AbstractModel {
+class Notification extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var bool Notification fetched from DB */
     protected $view_only;
@@ -62,6 +68,14 @@ class Notification extends AbstractModel {
     /** @prop
      * @var bool Should $notify_source be ignored from $notify_target */
     protected $notify_not_to_source;
+
+    /** @prop
+     * @var string|null Semester for this notification */
+    protected ?string $semester = null;
+
+    /** @prop
+     * @var string|null Course for this notification */
+    protected ?string $course = null;
 
     /** @prop
      * @var int Notification ID */
@@ -112,6 +126,13 @@ class Notification extends AbstractModel {
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);
         $instance->setNotifyContent($details['content']);
+        if (isset($details['semester'])) {
+            $instance->setSemester($details['semester']);
+        }
+
+        if (isset($details['course'])) {
+            $instance->setCourse($details['course']);
+        }
         return $instance;
     }
 
@@ -175,5 +196,40 @@ class Notification extends AbstractModel {
         else {
             return DateUtils::convertTimeStamp($this->core->getUser(), $actual_time, $this->core->getConfig()->getDateTimeFormat()->getFormat('notification'));
         }
+    }
+
+    public function jsonSerialize(): array {
+        $base_url = '';
+
+        if ($this->getNotifyMetadata() !== null) {
+            $semester = $this->semester;
+            $course = $this->course;
+
+            if (!empty($semester) && !empty($course)) {
+                $base_url = $this->core->buildUrl(['courses', $semester, $course, 'notifications', $this->getId()]);
+            }
+            else {
+                $base_url = $this->core->buildUrl(['home']);
+            }
+        }
+        else {
+            $base_url = $this->core->buildUrl(['home']);
+        }
+
+        $notification_url = $base_url . '?seen=' . ($this->isSeen() ? '1' : '0');
+
+        return [
+            'id' => $this->getId(),
+            'component' => $this->getComponent(),
+            'metadata' => $this->getNotifyMetadata(),
+            'content' => $this->getNotifyContent(),
+            'seen' => $this->isSeen(),
+            'elapsed_time' => $this->getElapsedTime(),
+            'created_at' => $this->getCreatedAt(),
+            'notify_time' => $this->getNotifyTime(),
+            'semester' => $this->semester,
+            'course' => $this->course,
+            'notification_url' => $notification_url
+        ];
     }
 }

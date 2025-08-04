@@ -5467,7 +5467,9 @@ AND gc_id IN (
                     'content' => $row['content'],
                     'seen' => $row['seen'],
                     'elapsed_time' => $row['elapsed_time'],
-                    'created_at' => $row['created_at']
+                    'created_at' => $row['created_at'],
+                    'semester' => $semester,
+                    'course' => $course_name,
                 ]
             );
         }

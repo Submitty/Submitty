@@ -106,58 +106,25 @@ class HomePageController extends AbstractController {
 
     /**
      * Returns recent notifications for a user
-     * @return array<int, array<string, mixed>>
+     * @return array<int, Notification>
      */
-    private function getAllRecentNotifications() {
+    private function getAllRecentNotifications(): array {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $results = [];
         $original_config = clone $this->core->getConfig();
 
-        // Loop through all courses
         foreach ($courses as $course) {
             $semester = $course->getTerm();
             $course_name = $course->getTitle();
             $this->core->loadCourseConfig($semester, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $course_notifications = $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db);
-
-            // Loop through s course's notifications and add attributes.
-            foreach ($course_notifications as $notification) {
-                $notify_time = $notification->getNotifyTime();
-                $base_url = '';
-                if ($notification->getNotifyMetadata() !== null) {
-                    $base_url = $this->core->buildCourseUrl(['notifications', $notification->getId()]);
-                }
-                else {
-                    $base_url = $this->core->buildUrl(['home']);
-                }
-                $notification_url = $base_url . '?seen=' . ($notification->isSeen() ? '1' : '0');
-
-                // Convert to string for Vue
-                $results[] = [
-                    'id' => $notification->getId(),
-                    'component' => $notification->getComponent(),
-                    'metadata' => $notification->getNotifyMetadata(),
-                    'content' => $notification->getNotifyContent(),
-                    'seen' => $notification->isSeen(),
-                    'elapsed_time' => $notification->getElapsedTime(),
-                    'created_at' => $notification->getCreatedAt(),
-                    'notify_time' => $notify_time,
-                    'semester' => $semester,
-                    'course' => $course_name,
-                    'notification_url' => $notification_url
-                ];
-            }
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
         }
 
-        // Sort by recency
-        usort($results, function ($a, $b) {
-            return $a['elapsed_time'] <=> $b['elapsed_time'];
-        });
+        usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
 
-        // Reset to original config where no courses are selected
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
         return $results;
