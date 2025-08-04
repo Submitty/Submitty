@@ -1,0 +1,174 @@
+{
+  "autograding" : {
+        "submission_to_runner" : [  "*.ipynb", "*.png" ],
+        "work_to_details" : [ "**/*.ipynb", "**/*.png", "**/*.txt", "**/*.err" ]
+    },
+  "autograding_method": "docker",
+  "resource_limits" : {
+    "RLIMIT_NPROC" : 32
+  },
+  "container_options": {
+    "container_image": "submitty/jupyter:latest"
+  },
+  "allow_system_calls": [
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "COMMUNICATIONS_AND_NETWORKING_KILL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_RARE",
+    "PROCESS_CONTROL_ADVANCED",
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_MEMORY_ADVANCED",
+    "PROCESS_CONTROL_SYNCHRONIZATION",
+    "PROCESS_CONTROL_SCHEDULING",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "UNKNOWN"
+  ],
+  "testcases": [
+    {
+      "title": "Inserted cells successfully",
+      "command": "insert_cells -i instructor_solution.ipynb -s *.ipynb -o student_submission.ipynb",
+      "points": 1,
+      "validation": [
+        {
+          "method": "fileExists",
+          "actual_file": "student_submission.ipynb",
+          "show_actual" : "never"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "student_submission.ipynb",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Executes successfully",
+      // Although wildcard is used, the grader will only expect one notebook file. Use if filename cannot be determined.
+      "command": "jupyter_notebook_grader -i student_submission.ipynb -o executed.ipynb",
+      "points": 1,
+      "validation": [
+        {
+          "method": "fileExists",
+          "actual_file": "executed.ipynb",
+          "show_actual" : "always",
+          "show_message" : "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test02",
+          "source" : "checkpoint1*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Add Two Numbers",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "checkpoint1.txt",
+          "expected_file" : "add_two_numbers.txt"
+        },
+        {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "checkpoint1_source.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "checkpoint1.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test02",
+          "source" : "checkpoint2*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Array",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "checkpoint2.txt",
+          "show_actual" : "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "checkpoint2.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test02",
+          "source" : "checkpoint3*.*",
+          "destination" : "./"
+        }
+      ],
+      "title": "Bank Account",
+      "points": 3,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "checkpoint3_initialization.txt",
+          "description" : "Initialization of Bank Account",
+          "expected_file": "account_initialization.txt",
+          "show_actual" : "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "checkpoint3_initialization.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        },
+        {
+          "method": "diff",
+          "actual_file": "checkpoint3_deposit.txt",
+          "description" : "Deposit of Bank Account",
+          "expected_file": "account_deposit.txt",
+          "show_actual" : "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "checkpoint3_deposit.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        },
+        {
+          "method": "diff",
+          "actual_file": "checkpoint3_withdrawal.txt",
+          "description" : "Withdrawal of Bank Account",
+          "expected_file": "account_withdrawal.txt",
+          "show_actual" : "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "checkpoint3_withdrawal.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    }
+  ]
+}
