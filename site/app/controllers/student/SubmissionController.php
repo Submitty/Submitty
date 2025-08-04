@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\User;
@@ -472,7 +473,8 @@ class SubmissionController extends AbstractController {
                     "use_ocr"   => $use_ocr
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . $uploaded_file["name"][$i] . ".json");
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT))) {
@@ -498,7 +500,8 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json");
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
@@ -737,10 +740,6 @@ class SubmissionController extends AbstractController {
         //do the same thing for images
         $i = 1;
         foreach ($image_files as $image) {
-            // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
-                return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
-            }
             if (!@unlink($image)) {
                 return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
             }
@@ -842,6 +841,29 @@ class SubmissionController extends AbstractController {
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+        }
+        $generate_images_data = [
+            "job" => "GeneratePdfImages",
+            "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
+            "redactions" => array_map(
+                function (Redaction $redaction) {
+                    return [
+                        'page_number' => $redaction->getPageNumber(),
+                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
+                    ];
+                },
+                $gradeable->getRedactions()
+            ),
+            "output_dir" => str_replace("submissions", "submissions_processed", $version_path),
+        ];
+
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $generate_images_job  = FileUtils::joinPaths($daemon_job_queue_path, "generate_images_" . $who_id . "_" . $new_version . ".json");
+
+        //add new job to queue
+        if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
+            $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
@@ -1086,7 +1108,6 @@ class SubmissionController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $user_id,
-            $gradeable->isTeamAssignment()
         );
 
         if ($graded_gradeable === null) {
