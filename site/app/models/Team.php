@@ -16,7 +16,7 @@ use app\models\gradeable\Gradeable;
  * @method User[] getInvitedUsers()
  * @method string getTeamName()
  */
-class Team extends AbstractModel {
+class Team extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
@@ -217,5 +217,16 @@ class Team extends AbstractModel {
             $this->assignment_settings = FileUtils::readJsonFile($settings_file);
         }
         return $this->assignment_settings ?: ["team_history" => null];
+    }
+
+    /**
+     * @return array{id: string, name: string, members: User[]}
+     */
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getTeamName(),
+            'members' => $this->getMemberUsersSorted(),
+        ];
     }
 }
