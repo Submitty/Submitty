@@ -340,13 +340,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased($details['discussion_based']);
             if (is_string($details['discussion_thread_ids']) && strlen($details['discussion_thread_ids']) > 0) {
-                $thread_ids = json_decode($details['discussion_thread_ids'], true);
-
-                // Covering the edge case of default ""{}"" value
-                if (is_string($thread_ids)) {
-                    $thread_ids = json_decode($thread_ids, true);
-                }
-                $this->setDiscussionThreadId($thread_ids);
+                $this->setDiscussionThreadId(json_decode($details['discussion_thread_ids'], true));
             }
             $this->setAllowCustomMarks($details['allow_custom_marks']);
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
