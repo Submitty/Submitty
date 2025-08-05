@@ -3,6 +3,34 @@
       input[type="checkbox"]:disabled {
           background: gray;
       }
+
+      .button-row {
+          margin: 15px 0;
+          gap: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+      }
+
+      .button-row button {
+          margin-right: 10px;
+          margin-bottom: 5px;
+      }
+
+      [data-defaults-info], [data-sync-timestamp] {
+          margin-left: 15px;
+          font-style: italic;
+          color: #666;
+          font-size: 0.9em;
+      }
+
+      [data-defaults-info] {
+          color: #0066cc;
+      }
+
+      [data-sync-timestamp] {
+          color: #009900;
+      }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -31,25 +59,43 @@
                 </div>
                 {# Notification Sync and Defaults Controls #}
                 <div class="button-row" data-testid="notification-sync-controls">
-                    <button type="button" class="btn btn-default" id="sync-notifications-btn" data-testid="sync-notifications-button">
+                    <button type="button" 
+                            class="{% if core.getUser().getNotificationsSynced() %}btn btn-primary{% else %}btn btn-default{% endif %}" 
+                            id="sync-notifications-btn" 
+                            data-testid="sync-notifications-button"
+                            onclick="window.handleSyncClick()">
                         {% if core.getUser().getNotificationsSynced() %}
                             Unsync Notifications
                         {% else %}
                             Sync Notifications
                         {% endif %}
                     </button>
-                    <button type="button" class="btn btn-primary" id="set-defaults-btn" data-testid="set-defaults-button">
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            id="set-defaults-btn" 
+                            data-testid="set-defaults-button"
+                            onclick="window.handleSetDefaultsClick()">
                         Use as Default for Future Courses
                     </button>
-                    <button type="button" class="btn btn-default" id="clear-defaults-btn" data-testid="clear-defaults-button">
+                    <button type="button" 
+                            class="btn btn-default" 
+                            id="clear-defaults-btn" 
+                            data-testid="clear-defaults-button"
+                            onclick="window.handleClearDefaultsClick()">
                         Clear Defaults
                     </button>
-                    {% if core.getUser().getNotificationDefaults() %}
-                        <span class="defaults-info">Default: {{ core.getUser().getNotificationDefaults() }}</span>
-                    {% endif %}
-                    {% if core.getUser().getNotificationsSyncedUpdate() %}
-                        <span class="sync-info">Last sync: {{ core.getUser().getNotificationsSyncedUpdate() }}</span>
-                    {% endif %}
+                    <span data-defaults-info 
+                          {% if not core.getUser().getNotificationDefaults() %}style="display: none;"{% endif %}>
+                        {% if core.getUser().getNotificationDefaults() %}
+                            Default: {{ core.getUser().getNotificationDefaults() }}
+                        {% endif %}
+                    </span>
+                    <span data-sync-timestamp 
+                          {% if not core.getUser().getNotificationsSyncedUpdate() %}style="display: none;"{% endif %}>
+                        {% if core.getUser().getNotificationsSyncedUpdate() %}
+                            Last sync: {{ core.getUser().getNotificationsSyncedUpdate()|date("Y-m-d H:i:s") }}
+                        {% endif %}
+                    </span>
                 </div>
             </div>
             <div class="row row-spacing">

@@ -747,13 +747,13 @@ SQL;
      * Update notification sync settings for a user
      *
      * @param string $user_id
-     * @param bool $synced
+     * @param bool $syncing
      * @return void
      */
-    public function updateNotificationSync(string $user_id, bool $synced, ?string $timestamp): void {
+    public function updateNotificationSync(string $user_id, bool $syncing, ?string $timestamp): void {
         $this->submitty_db->query(
             "UPDATE users SET notifications_synced = ?, notifications_synced_update = ? WHERE user_id = ?",
-            [$synced, $timestamp, $user_id]
+            [$syncing, $timestamp, $user_id]
         );
     }
 
@@ -772,31 +772,6 @@ SQL;
                 $user_id
             ]
         );
-    }
-
-    /**
-     * Sync notification settings from reference course to target course
-     *
-     * @param string $user_id
-     * @param array<string, bool> $settings
-     * @param string $target_term
-     * @param string $target_course
-     * @return void
-     */
-    public function syncNotificationSettingsToCourse(string $user_id, array $settings, string $target_term, string $target_course): void {
-        // Store the core application configuration
-        $original_config = clone $this->core->getConfig();
-
-        // Connect to the target course
-        $this->core->loadCourseConfig($target_term, $target_course);
-        $this->core->loadCourseDatabase();
-
-        // Update the notification settings for the user in the target course database
-        $this->updateNotificationSettings([$user_id => $settings]);
-
-        // Restore the original core application configuration
-        $this->core->setConfig($original_config);
-        $this->core->loadCourseDatabase();
     }
 
     /**

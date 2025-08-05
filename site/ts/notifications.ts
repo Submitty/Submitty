@@ -19,80 +19,101 @@ interface ApiResponse {
 
 /**
  * Update notification sync status via the API
- *
- * @param synced - Whether to enable or disable sync
- * @returns Promise<ApiResponse>
  */
-export async function updateNotificationSync(synced: boolean): Promise<ApiResponse> {
+async function updateNotificationSync(synced: boolean): Promise<ApiResponse> {
     const formData = new FormData();
     formData.append('notifications_synced', synced.toString());
     formData.append('csrf_token', window.csrfToken);
 
-    try {
-        const response = await fetch(buildCourseUrl(['notifications', 'settings', 'sync']), {
-            method: 'POST',
-            body: formData,
-        });
+    const response = await fetch(buildCourseUrl(['notifications', 'settings', 'sync']), {
+        method: 'POST',
+        body: formData,
+    });
 
-        return response.json() as Promise<ApiResponse>;
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Network error occurred while updating sync settings.');
-    }
+
+    return response.json() as Promise<ApiResponse>;
 }
 
 /**
  * Update notification defaults via the API
- *
- * @param setAsDefault - Whether to set current course as default or clear defaults
- * @returns Promise<ApiResponse>
  */
-export async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiResponse> {
+async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiResponse> {
     const formData = new FormData();
     formData.append('notification_defaults', setAsDefault ? 'current' : 'null');
     formData.append('csrf_token', window.csrfToken);
 
-    try {
-        const response = await fetch(buildCourseUrl(['notifications', 'settings', 'defaults']), {
-            method: 'POST',
-            body: formData,
-        });
+    const response = await fetch(buildCourseUrl(['notifications', 'settings', 'defaults']), {
+        method: 'POST',
+        body: formData,
+    });
 
-        return response.json() as Promise<ApiResponse>;
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-    catch (error) {
-        console.error(error);
-        throw new Error('Network error occurred while updating default settings.');
+
+    return response.json() as Promise<ApiResponse>;
+}
+
+/**
+ * Update DOM elements after sync operation
+ */
+function updateSyncUI(synced: boolean): void {
+    // Update sync button
+    const syncButton = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
+    if (syncButton) {
+        syncButton.textContent = synced ? 'Unsync Notifications' : 'Sync Notifications';
+        syncButton.className = synced ? 'btn btn-primary' : 'btn btn-default';
+    }
+
+    // Update last sync timestamp
+    const syncInfo = document.querySelector('[data-sync-timestamp]') as HTMLElement;
+    if (syncInfo) {
+        syncInfo.textContent = `Last sync: ${new Date().toLocaleString()}`;
+        syncInfo.style.display = 'inline';
+    }
+
+    // Update profile dropdown
+    const profileDropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
+    if (profileDropdown) {
+        profileDropdown.value = synced ? 'sync' : 'unsync';
+    }
+
+    // Update profile timestamp
+    const profileTimestamp = document.querySelector('[data-profile-timestamp]') as HTMLElement;
+    if (profileTimestamp) {
+        profileTimestamp.textContent = `Last updated: ${new Date().toLocaleString()}`;
     }
 }
 
 /**
- * Display success message to the user
- * @param message - Success message to display
+ * Update DOM elements after defaults operation
  */
-export function displaySuccessMessage(message: string): void {
-    window.displaySuccessMessage(message);
+function updateDefaultsUI(hasDefaults: boolean, defaultValue?: string): void {
+    const defaultsInfo = document.querySelector('[data-defaults-info]') as HTMLElement;
+    if (defaultsInfo) {
+        if (hasDefaults && defaultValue) {
+            defaultsInfo.textContent = `Default: ${defaultValue}`;
+            defaultsInfo.style.display = 'inline';
+        } else {
+            defaultsInfo.style.display = 'none';
+        }
+    }
 }
 
 /**
- * Display error message to user
- *
- * @param message - Error message to display
+ * Handle sync button click - can be called directly from onclick
  */
-export function displayErrorMessage(message: string): void {
-    window.displayErrorMessage(message);
-}
+async function handleSyncClick(): Promise<void> {
+    const button = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
+    if (!button) return;
 
-/**
- * Handle sync button click action
- */
-async function handleSyncButtonClick(button: HTMLButtonElement): Promise<void> {
     const currentlySynced = button.textContent?.trim() === 'Unsync Notifications';
     const newSyncState = !currentlySynced;
     const originalText = button.textContent;
 
-    // Disable button to prevent multiple clicks
     button.disabled = true;
     button.textContent = 'Updating...';
 
@@ -100,68 +121,67 @@ async function handleSyncButtonClick(button: HTMLButtonElement): Promise<void> {
         const response = await updateNotificationSync(newSyncState);
 
         if (response.status === 'success') {
-            button.textContent = newSyncState ? 'Unsync Notifications' : 'Sync Notifications';
-            button.className = newSyncState ? 'btn btn-primary' : 'btn btn-default';
-
+            updateSyncUI(newSyncState);
             if (response.data) {
-                displaySuccessMessage(response.data.message);
+                window.displaySuccessMessage(response.data.message);
             }
-
-            const syncInfo = document.querySelector('.sync-info') as HTMLElement;
-            if (syncInfo) {
-                syncInfo.textContent = `Last sync: ${new Date().toLocaleString()}`;
-            }
-        }
-        else {
+        } else {
             button.textContent = originalText;
-            displayErrorMessage(response.data?.message || 'Failed to update sync settings.');
+            window.displayErrorMessage(response.data?.message || 'Failed to update sync settings.');
         }
-    }
-    catch (error) {
+    } catch (error) {
         button.textContent = originalText;
-        console.error(error);
-        displayErrorMessage('An error occurred while updating sync settings.');
-    }
-    finally {
+        console.error('Sync error:', error);
+        window.displayErrorMessage('An error occurred while updating sync settings.');
+    } finally {
         button.disabled = false;
     }
 }
 
 /**
- * Handle set defaults button click action
+ * Handle set defaults button click - can be called directly from onclick
  */
-async function handleSetDefaultsClick(button: HTMLButtonElement): Promise<void> {
+async function handleSetDefaultsClick(): Promise<void> {
+    const button = document.getElementById('set-defaults-btn') as HTMLButtonElement;
+    if (!button) return;
+
     const originalText = button.textContent;
     button.disabled = true;
     button.textContent = 'Updating...';
 
     try {
         const response = await updateNotificationDefaults(true);
+        
         if (response.status === 'success') {
+            // Get current course info from page context or URL
+            const pathParts = window.location.pathname.split('/');
+            const term = pathParts[pathParts.indexOf('courses') + 1];
+            const course = pathParts[pathParts.indexOf('courses') + 2];
+            const defaultValue = `${term}-${course}`;
+            
+            updateDefaultsUI(true, defaultValue);
             if (response.data) {
-                displaySuccessMessage(response.data.message);
+                window.displaySuccessMessage(response.data.message);
             }
-            // TODO: no window reload
-            window.location.reload();
+        } else {
+            window.displayErrorMessage(response.data?.message || 'Failed to set default settings.');
         }
-        else {
-            displayErrorMessage(response.data?.message || 'Failed to set default settings.');
-        }
-    }
-    catch (error) {
-        console.error(error);
-        displayErrorMessage('An error occurred while setting default settings.');
-    }
-    finally {
+    } catch (error) {
+        console.error('Set defaults error:', error);
+        window.displayErrorMessage('An error occurred while setting default settings.');
+    } finally {
         button.disabled = false;
         button.textContent = originalText;
     }
 }
 
 /**
- * Handle clear defaults button click action
+ * Handle clear defaults button click - can be called directly from onclick
  */
-async function handleClearDefaultsClick(button: HTMLButtonElement): Promise<void> {
+async function handleClearDefaultsClick(): Promise<void> {
+    const button = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+    if (!button) return;
+
     const originalText = button.textContent;
     button.disabled = true;
     button.textContent = 'Updating...';
@@ -170,143 +190,67 @@ async function handleClearDefaultsClick(button: HTMLButtonElement): Promise<void
         const response = await updateNotificationDefaults(false);
 
         if (response.status === 'success') {
+            updateDefaultsUI(false);
             if (response.data) {
-                displaySuccessMessage(response.data.message);
+                window.displaySuccessMessage(response.data.message);
             }
-            // TODO: no window reload
-            window.location.reload();
+        } else {
+            window.displayErrorMessage(response.data?.message || 'Failed to clear default settings.');
         }
-        else {
-            displayErrorMessage(response.data?.message || 'Failed to clear default settings.');
-        }
-    }
-    catch (error) {
-        console.error(error);
-        displayErrorMessage('An error occurred while clearing default settings.');
-    }
-    finally {
+    } catch (error) {
+        console.error('Clear defaults error:', error);
+        window.displayErrorMessage('An error occurred while clearing default settings.');
+    } finally {
         button.disabled = false;
         button.textContent = originalText;
     }
 }
 
 /**
- * Create a safe async event handler wrapper
+ * Handle profile sync dropdown change - can be called directly from onchange
  */
-function createAsyncEventHandler<T extends HTMLElement>(
-    handler: (element: T) => Promise<void>,
-): (event: Event) => void {
-    return (event: Event) => {
-        event.preventDefault();
-        const target = event.currentTarget as T;
-        handler(target).catch((error) => {
-            console.error('Async event handler error:', error);
-            displayErrorMessage('An unexpected error occurred.');
-        });
-    };
-}
+async function handleProfileSyncChange(): Promise<void> {
+    const dropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
+    if (!dropdown) return;
 
-/**
- * Initialize notification settings page functionality
- */
-export function initializeNotificationSettings(): void {
-    const syncButton = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
-    if (syncButton) {
-        syncButton.addEventListener('click', createAsyncEventHandler(handleSyncButtonClick));
-    }
-
-    const setDefaultsButton = document.getElementById('set-defaults-btn') as HTMLButtonElement;
-    if (setDefaultsButton) {
-        setDefaultsButton.addEventListener('click', createAsyncEventHandler(handleSetDefaultsClick));
-    }
-
-    const clearDefaultsButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-    if (clearDefaultsButton) {
-        clearDefaultsButton.addEventListener('click', createAsyncEventHandler(handleClearDefaultsClick));
-    }
-}
-
-/**
- * Handle profile sync dropdown change
- */
-async function handleProfileSyncChange(dropdown: HTMLSelectElement): Promise<void> {
     const synced = dropdown.value === 'sync';
-    const originalValue = synced ? 'unsync' : 'sync'; // Store the opposite value for reverting
+    const originalValue = synced ? 'unsync' : 'sync';
 
-    // Disable dropdown to prevent multiple changes during processing
     dropdown.disabled = true;
 
     try {
-        const response = await fetch(buildCourseUrl(['notifications', 'settings', 'sync']), {
-            method: 'POST',
-            body: new URLSearchParams({
-                notifications_synced: synced.toString(),
-                csrf_token: window.csrfToken,
-            }),
-        });
+        const response = await updateNotificationSync(synced);
 
-        const responseData = await response.json() as ApiResponse;
-
-        if (responseData.status === 'success') {
-            if (responseData.data) {
-                displaySuccessMessage(responseData.data.message);
+        if (response.status === 'success') {
+            updateSyncUI(synced);
+            if (response.data) {
+                window.displaySuccessMessage(response.data.message);
             }
-
-            const lastUpdated = document.querySelector('.option-alt') as HTMLElement;
-            if (lastUpdated && lastUpdated.textContent?.includes('Last updated:')) {
-                lastUpdated.textContent = `Last updated: ${new Date().toLocaleString()}`;
-            }
-        }
-        else {
+        } else {
             dropdown.value = originalValue;
-            displayErrorMessage(responseData.data?.message || 'Failed to update sync preference.');
+            window.displayErrorMessage(response.data?.message || 'Failed to update sync preference.');
         }
-    }
-    catch (error) {
-        console.error(error);
-        // Revert dropdown if API call failed
+    } catch (error) {
+        console.error('Profile sync error:', error);
         dropdown.value = originalValue;
-        displayErrorMessage('An error occurred while updating sync preference.');
-    }
-    finally {
+        window.displayErrorMessage('An error occurred while updating sync preference.');
+    } finally {
         dropdown.disabled = false;
     }
 }
 
-/**
- * Create a safe async change handler wrapper for select elements
- */
-function createAsyncChangeHandler<T extends HTMLSelectElement>(
-    handler: (element: T) => Promise<void>,
-): (event: Event) => void {
-    return (event: Event) => {
-        const target = event.currentTarget as T;
-        handler(target).catch((error) => {
-            console.error('Async change handler error:', error);
-            displayErrorMessage('An unexpected error occurred.');
-        });
-    };
-}
-
-/**
- * Initialize user profile page functionality
- */
-export function initializeUserProfile(): void {
-    const syncDropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
-    if (syncDropdown) {
-        syncDropdown.addEventListener('change', createAsyncChangeHandler(handleProfileSyncChange));
+// Make functions available globally for onclick/onchange handlers
+declare global {
+    interface Window {
+        handleSyncClick: () => Promise<void>;
+        handleSetDefaultsClick: () => Promise<void>;
+        handleClearDefaultsClick: () => Promise<void>;
+        handleProfileSyncChange: () => Promise<void>;
     }
 }
 
-// Auto-initialize based on page context
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if we're on notification settings page
-    if (document.getElementById('sync-notifications-btn')) {
-        initializeNotificationSettings();
-    }
-
-    // Check if we're on user profile page
-    if (document.getElementById('notification_sync_preference')) {
-        initializeUserProfile();
-    }
-});
+// Export functions to global scope for inline event handlers
+window.handleSyncClick = handleSyncClick;
+window.handleSetDefaultsClick = handleSetDefaultsClick;
+window.handleClearDefaultsClick = handleClearDefaultsClick;
+window.handleProfileSyncChange = handleProfileSyncChange;
