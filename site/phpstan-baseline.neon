@@ -1903,19 +1903,31 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
+			message: '#^Parameter \#1 \$term of class app\\entities\\CourseUser constructor expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
 			message: '#^Parameter \#1 \$url of method app\\libraries\\Core\:\:redirect\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: '#^Parameter \#2 \$semester of method app\\libraries\\database\\DatabaseQueries\:\:insertCourseUser\(\) expects string, null given\.$#'
+			message: '#^Parameter \#2 \$course of class app\\entities\\CourseUser constructor expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: '#^Parameter \#3 \$course of method app\\libraries\\database\\DatabaseQueries\:\:insertCourseUser\(\) expects string, null given\.$#'
+			message: '#^Parameter \#2 \$semester of method app\\libraries\\database\\DatabaseQueries\:\:updateUserInCourse\(\) expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: '#^Parameter \#3 \$course of method app\\libraries\\database\\DatabaseQueries\:\:updateUserInCourse\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -8369,12 +8381,6 @@ parameters:
 
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertBulkPeerGradingAssignment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertCourseUser\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php

@@ -1054,7 +1054,7 @@ SQL;
      * @param string $semester
      * @param string $course
      */
-    public function updateUserInCourse(User $user, string $semester, string $course) {
+    public function updateUserInCourse(User $user, string $semester, string $course): void {
         $params = [
             $user->getRotatingSection(),
             $user->getRegistrationSubsection(),
