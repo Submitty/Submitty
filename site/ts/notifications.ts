@@ -1,10 +1,14 @@
-import { buildCourseUrl } from './utils/server';
+import { buildUrl, buildCourseUrl } from './utils/server';
 
 declare global {
     interface Window {
         displaySuccessMessage: (message: string) => void;
         displayErrorMessage: (message: string) => void;
         csrfToken: string;
+        handleProfileSyncChange: () => Promise<void>;
+        handleSyncClick: () => Promise<void>;
+        handleSetDefaultsClick: () => Promise<void>;
+        handleClearDefaultsClick: () => Promise<void>;
     }
 }
 
@@ -18,8 +22,12 @@ async function updateNotificationSync(synced: boolean): Promise<ApiResponse> {
     formData.append('notifications_synced', synced.toString());
     formData.append('csrf_token', window.csrfToken);
 
+    const url = window.location.href.includes('notifications')
+        ? buildCourseUrl(['notifications', 'settings', 'sync'])
+        : buildUrl(['notifications', 'settings', 'sync']);
+
     try {
-        const response = await fetch(buildCourseUrl(['notifications', 'settings', 'sync']), {
+        const response = await fetch(url, {
             method: 'POST',
             body: formData,
         });
@@ -81,13 +89,10 @@ function updateSyncUI(synced: boolean): void {
 
 function updateDefaultsUI(hasDefaults: boolean): void {
     const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-    clearButton.hidden = !hasDefaults;
+    clearButton.style.display = hasDefaults ? 'block' : 'none';
 }
 
-/**
- * Handle sync button click - can be called directly from onclick
- */
-async function handleSyncClick(): Promise<void> {
+window.handleSyncClick = async function handleSyncClick(): Promise<void> {
     const button = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
     if (!button) {
         return;
@@ -122,12 +127,9 @@ async function handleSyncClick(): Promise<void> {
     finally {
         button.disabled = false;
     }
-}
+};
 
-/**
- * Handle set defaults button click - can be called directly from onclick
- */
-async function handleSetDefaultsClick(): Promise<void> {
+window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise<void> {
     const button = document.getElementById('set-defaults-btn') as HTMLButtonElement;
     if (!button) {
         return;
@@ -140,12 +142,6 @@ async function handleSetDefaultsClick(): Promise<void> {
     try {
         const response = await updateNotificationDefaults(true);
         if (response.status === 'success') {
-            // Get current course info from page context or URL
-            const pathParts = window.location.pathname.split('/');
-            const term = pathParts[pathParts.indexOf('courses') + 1];
-            const course = pathParts[pathParts.indexOf('courses') + 2];
-            const defaultValue = `${term}-${course}`;
-
             updateDefaultsUI(true);
             if (response.data) {
                 window.displaySuccessMessage(response.data.message);
@@ -163,12 +159,9 @@ async function handleSetDefaultsClick(): Promise<void> {
         button.disabled = false;
         button.textContent = originalText;
     }
-}
+};
 
-/**
- * Handle clear defaults button click - can be called directly from onclick
- */
-async function handleClearDefaultsClick(): Promise<void> {
+window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Promise<void> {
     const button = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
     if (!button) {
         return;
@@ -199,12 +192,12 @@ async function handleClearDefaultsClick(): Promise<void> {
         button.disabled = false;
         button.textContent = originalText;
     }
-}
+};
 
 /**
  * Handle profile sync dropdown change - can be called directly from onchange
  */
-async function handleProfileSyncChange(): Promise<void> {
+window.handleProfileSyncChange = async function handleProfileSyncChange(): Promise<void> {
     const dropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
     if (!dropdown) {
         return;
@@ -237,18 +230,4 @@ async function handleProfileSyncChange(): Promise<void> {
     finally {
         dropdown.disabled = false;
     }
-}
-
-// Make functions available globally for onclick/onchange handlers
-declare global {
-    function handleSyncClick(): Promise<void>;
-    function handleSetDefaultsClick(): Promise<void>;
-    function handleClearDefaultsClick(): Promise<void>;
-    function handleProfileSyncChange(): Promise<void>;
-}
-
-// Export functions to global scope for inline event handlers
-(globalThis as any).handleSyncClick = handleSyncClick;
-(globalThis as any).handleSetDefaultsClick = handleSetDefaultsClick;
-(globalThis as any).handleClearDefaultsClick = handleClearDefaultsClick;
-(globalThis as any).handleProfileSyncChange = handleProfileSyncChange;
+};

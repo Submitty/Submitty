@@ -221,13 +221,8 @@
                             aria-label="Change Notification Sync Preference"
                             data-testid="notification-sync-preference-dropdown"
                             onchange="window.handleProfileSyncChange()">
-                            {% if user.getNotificationsSynced() %}
-                                <option value="sync" selected>Sync</option>
-                                <option value="unsync">Unsync</option>
-                            {% else %}
-                                <option value="sync">Sync</option>
-                                <option value="unsync" selected>Unsync</option>
-                            {% endif %}
+                            <option value="sync" {% if user.getNotificationsSynced() %}selected{% endif %}>Sync</option>
+                            <option value="unsync" {% if not user.getNotificationsSynced() %}selected{% endif %}>No Sync</option>
                         </select>
                     </div>
                 </div>

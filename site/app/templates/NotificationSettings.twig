@@ -51,15 +51,16 @@
                         Set as Default Settings
                     </button>
                     <button
-                        {% if not core.getUser().getNotificationDefaults() %} hidden {% endif %}
-                        type="button"
-                        id="clear-defaults-btn"
-                        class="notification-setting-button btn btn-default"
-                        tabindex="0"
-                        data-testid="clear-defaults-button"
-                        onclick="handleClearDefaultsClick()">
-                            Clear Default Settings
-                        </button>
+                    data-tooltip="Clear Default Settings - {{ core.getUser().getNotificationDefaults() }}"
+                    type="button"
+                    id="clear-defaults-btn"
+                    class="notification-setting-button btn btn-default"
+                    {% if not core.getUser().getNotificationDefaults() %} style="display: none;" {% endif %}
+                    tabindex="0"
+                    data-testid="clear-defaults-button"
+                    onclick="handleClearDefaultsClick()">
+                        Clear Default Settings
+                    </button>
                 </div>
             </div>
             <div class="row row-spacing">

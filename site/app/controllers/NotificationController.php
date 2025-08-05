@@ -162,6 +162,7 @@ class NotificationController extends AbstractController {
     /**
      * @return JsonResponse
      */
+    #[Route("/notifications/settings/sync", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/notifications/settings/sync", methods: ["POST"])]
     public function updateNotificationSync() {
         $user_id = $this->core->getUser()->getId();

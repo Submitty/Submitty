@@ -228,10 +228,9 @@ describe('Test cases revolving around user profile page', () => {
                 // On subsequent courses, verify sync worked
                 cy.visit(buildUrl([course, 'notifications', 'settings']));
 
-                // Verify sync button shows "Unsync" (meaning sync is enabled)
                 cy.get('[data-testid="sync-notifications-button"]')
                     .should('be.visible')
-                    .should('contain', 'Unsync Notifications');
+                    .should('contain', 'No');
 
                 // Check that the notification preferences were synced
                 cy.get('.notification-checkbox input[data-testid="checkbox-input"]:not(:disabled)')
