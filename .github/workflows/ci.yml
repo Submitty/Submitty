@@ -29,7 +29,7 @@ concurrency:
 jobs:
   ansible-lint:
     name: Ansible Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Run ansible-lint
@@ -40,7 +40,7 @@ jobs:
 
   css-lint:
     name: CSS Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -65,7 +65,7 @@ jobs:
 
   js-lint:
     name: JavaScript Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -90,7 +90,7 @@ jobs:
 
   js-unit:
     name: JavaScript Unit
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -118,7 +118,7 @@ jobs:
 
   twig-lint:
     name: Twig Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -145,7 +145,7 @@ jobs:
 
   php-lint:
     name: PHP Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -181,7 +181,7 @@ jobs:
 
   php-unit:
     name: PHP Unit
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: site
@@ -217,7 +217,7 @@ jobs:
 
   python-lint:
     name: Python Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -239,7 +239,7 @@ jobs:
 
   python-unit:
     name: Python Unit
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -324,7 +324,7 @@ jobs:
 
   yaml-lint:
     name: YAML Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: install yamllint
@@ -335,7 +335,7 @@ jobs:
 
   shellcheck:
     name: Shell Lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: install ShellCheck
@@ -346,7 +346,7 @@ jobs:
 
   colors-css:
     name: colors.css Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout main branch
@@ -390,7 +390,7 @@ jobs:
 
   db-check:
     name: DB Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       PGPASSWORD: submitty_dbuser
       MAIN_INSTALL_PATH: ${{ github.WORKSPACE }}/main
@@ -644,7 +644,7 @@ jobs:
 
   Cypress-System:
     name: Cypress (System)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres
@@ -824,7 +824,7 @@ jobs:
         run: sudo bash tests/test_site_error_log.sh
 
   Cypress:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -905,7 +905,7 @@ jobs:
 
   Integration:
     name: Integration
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     # Postgres should not be needed for the integration tests.
     # But unfortunately Configure test suite seems to use it at the moment, and
     # Configure test suite seems to be necessary for the Integration tests
@@ -934,7 +934,7 @@ jobs:
 
   ansible-ci:
     name: Ansible Install
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup SSH
