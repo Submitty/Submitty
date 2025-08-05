@@ -2,9 +2,9 @@ import { buildUrl, buildCourseUrl } from './utils/server';
 
 declare global {
     interface Window {
+        csrfToken: string;
         displaySuccessMessage: (message: string) => void;
         displayErrorMessage: (message: string) => void;
-        csrfToken: string;
         handleProfileSyncChange: () => Promise<void>;
         handleSyncClick: () => Promise<void>;
         handleSetDefaultsClick: () => Promise<void>;
@@ -13,8 +13,8 @@ declare global {
 }
 
 interface ApiResponse {
-    status: 'success' | 'fail' | 'error';
-    data: { message: string } | null;
+    status: 'success' | 'error' | 'fail';
+    data: { message: string };
 }
 
 async function updateNotificationSync(synced: boolean): Promise<ApiResponse> {
@@ -102,6 +102,7 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
     const newSyncState = !currentlySynced;
     const originalText = button.textContent;
 
+    // Display updating text in the case the sync operation is taking a while
     button.disabled = true;
     button.textContent = 'Updating...';
 
@@ -110,19 +111,20 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
 
         if (response.status === 'success') {
             updateSyncUI(newSyncState);
-            if (response.data) {
+
+            if (response.status === 'success') {
                 window.displaySuccessMessage(response.data.message);
             }
         }
         else {
             button.textContent = originalText;
-            window.displayErrorMessage(response.data?.message || 'Failed to update sync settings.');
+            window.displayErrorMessage(response.data.message);
         }
     }
     catch (error) {
         button.textContent = originalText;
         console.error('Sync error:', error);
-        window.displayErrorMessage('An error occurred while updating sync settings.');
+        window.displayErrorMessage('Failed to update sync settings.');
     }
     finally {
         button.disabled = false;
@@ -136,6 +138,8 @@ window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise
     }
 
     const originalText = button.textContent;
+
+    // Display updating text in the case the sync operation is taking a while
     button.disabled = true;
     button.textContent = 'Updating...';
 
@@ -143,17 +147,15 @@ window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise
         const response = await updateNotificationDefaults(true);
         if (response.status === 'success') {
             updateDefaultsUI(true);
-            if (response.data) {
-                window.displaySuccessMessage(response.data.message);
-            }
+            window.displaySuccessMessage(response.data.message);
         }
         else {
-            window.displayErrorMessage(response.data?.message || 'Failed to set default settings.');
+            window.displayErrorMessage(response.data.message);
         }
     }
     catch (error) {
         console.error('Set defaults error:', error);
-        window.displayErrorMessage('An error occurred while setting default settings.');
+        window.displayErrorMessage('Failed to set default settings.');
     }
     finally {
         button.disabled = false;
@@ -181,12 +183,12 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
             }
         }
         else {
-            window.displayErrorMessage(response.data?.message || 'Failed to clear default settings.');
+            window.displayErrorMessage(response.data.message);
         }
     }
     catch (error) {
         console.error('Clear defaults error:', error);
-        window.displayErrorMessage('An error occurred while clearing default settings.');
+        window.displayErrorMessage('Failed to clear default settings.');
     }
     finally {
         button.disabled = false;
@@ -194,9 +196,6 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
     }
 };
 
-/**
- * Handle profile sync dropdown change - can be called directly from onchange
- */
 window.handleProfileSyncChange = async function handleProfileSyncChange(): Promise<void> {
     const dropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
     if (!dropdown) {
@@ -213,19 +212,17 @@ window.handleProfileSyncChange = async function handleProfileSyncChange(): Promi
 
         if (response.status === 'success') {
             updateSyncUI(synced);
-            if (response.data) {
-                window.displaySuccessMessage(response.data.message);
-            }
+            window.displaySuccessMessage(response.data.message);
         }
         else {
             dropdown.value = originalValue;
-            window.displayErrorMessage(response.data?.message || 'Failed to update sync preference.');
+            window.displayErrorMessage(response.data.message);
         }
     }
     catch (error) {
         console.error('Profile sync error:', error);
         dropdown.value = originalValue;
-        window.displayErrorMessage('An error occurred while updating sync preference.');
+        window.displayErrorMessage('Failed to update sync preference.');
     }
     finally {
         dropdown.disabled = false;
