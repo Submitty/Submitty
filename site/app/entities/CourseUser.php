@@ -6,7 +6,6 @@ namespace app\entities;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use app\repositories\CourseUserRepository;
 
 /**
  * Doctrine entity for course users

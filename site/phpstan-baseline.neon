@@ -945,7 +945,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 9
+			count: 10
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
@@ -3608,6 +3608,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<app\\models\\User\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: '#^Parameter \#3 \$team of method app\\libraries\\database\\DatabaseQueries\:\:getGradedGradeable\(\) expects string\|null, bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -6346,6 +6352,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:createNewTerm\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:createPost\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6888,6 +6900,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllTeamViewedTimesForGradeable\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllTerms\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -12214,6 +12232,12 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setRotatingGraderSections\(\) has parameter \$rotating_grader_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setSubmissionDueDate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12364,8 +12388,44 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Parameter \#1 \$g_id of method app\\libraries\\database\\DatabaseQueries\:\:getBadGradedComponentsCountByGradingSections\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Parameter \#1 \$g_id of method app\\libraries\\database\\DatabaseQueries\:\:getBadTeamSubmissionsByGradingSection\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Parameter \#1 \$g_id of method app\\libraries\\database\\DatabaseQueries\:\:getBadUserSubmissionsByGradingSection\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$active_grade_inquiries_count \(bool\) does not accept default value of type int\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$active_grade_inquiries_count \(bool\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$allowed_minutes_overrides type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$instructor_blind \(bool\) does not accept default value of type int\.$#'
+			identifier: property.defaultValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -12376,8 +12436,26 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$limited_access_blind \(bool\) does not accept default value of type int\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$peer_blind \(bool\) does not accept default value of type int\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$peer_grading_pairs type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$rotating_grader_sections \(array\<array\<string\>\>\) does not accept array\<list\<int\<1, max\>\>\>\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -14808,6 +14886,24 @@ parameters:
 		-
 			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderDiscussionForum\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderDiscussionForum\(\) has parameter \$isTeam with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderDiscussionForum\(\) has parameter \$submitter with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderDiscussionForum\(\) has parameter \$threadIds with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
