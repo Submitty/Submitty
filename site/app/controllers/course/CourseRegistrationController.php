@@ -101,25 +101,22 @@ class CourseRegistrationController extends AbstractController {
      * @return void
      */
     private function applyDefaultNotificationSettings(string $user_id, string $term, string $course): void {
-        $user = $this->core->getUser();
-        $notification_defaults = $user->getNotificationDefaults();
+        $notification_defaults = $this->core->getUser()->getNotificationDefaults();
 
         if ($notification_defaults === null) {
-            // No default settings configured
             return;
         }
 
         // Parse the reference course from the defaults string (format: term-course)
         $parts = explode('-', $notification_defaults, 2);
         if (count($parts) !== 2) {
-            // Invalid format
             return;
         }
 
         $reference_term = $parts[0];
         $reference_course = $parts[1];
 
-        // Get notification settings from reference course
+        // Get the notification settings from the reference course
         $reference_settings = $this->core->getQueries()->getNotificationSettingsFromCourse(
             $user_id,
             $reference_term,
@@ -127,11 +124,10 @@ class CourseRegistrationController extends AbstractController {
         );
 
         if ($reference_settings === null) {
-            // No settings found in reference course
             return;
         }
 
-        // Apply settings to the new course
+        // Apply the notification settings to the new course
         $this->core->getQueries()->syncNotificationSettingsToCourse(
             $user_id,
             $reference_settings,

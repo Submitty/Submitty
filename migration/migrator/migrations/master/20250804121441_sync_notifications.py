@@ -20,7 +20,6 @@ def up(config, database):
         CREATE OR REPLACE FUNCTION update_notification_defaults_on_course_updates()
         RETURNS TRIGGER AS $$
         BEGIN
-            -- Handle dangling tuples within notification_defaults for updated or missing courses
             IF TG_OP = 'UPDATE' THEN
                 IF OLD.term != NEW.term OR OLD.course != NEW.course THEN
                     UPDATE users

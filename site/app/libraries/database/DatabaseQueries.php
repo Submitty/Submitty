@@ -784,30 +784,17 @@ SQL;
      * @return void
      */
     public function syncNotificationSettingsToCourse(string $user_id, array $settings, string $target_term, string $target_course): void {
-        // Connect to target course database
+        // Store the core application configuration
         $original_config = clone $this->core->getConfig();
+
+        // Connect to the target course
         $this->core->loadCourseConfig($target_term, $target_course);
         $this->core->loadCourseDatabase();
-        $target_course_db = $this->core->getCourseDB();
 
-        $keys = array_keys($settings);
-        $columns = implode(', ', $keys);
-        $placeholders = implode(', ', array_fill(0, count($keys) + 1, '?')); // +1 for user_id
+        // Update the notification settings for the user in the target course database
+        $this->updateNotificationSettings([$user_id => $settings]);
 
-        $update_clause = implode(', ', array_map(fn($k) => "$k = ?", $keys));
-
-        $params = array_merge([$user_id], array_values($settings), array_values($settings));
-
-        $sql = "
-            INSERT INTO notification_settings (user_id, $columns)
-            VALUES ($placeholders)
-            ON CONFLICT (user_id)
-            DO UPDATE SET $update_clause
-        ";
-
-        $target_course_db->query($sql, $params);
-
-        // Restore original configuration
+        // Restore the original core application configuration
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
     }
@@ -820,24 +807,26 @@ SQL;
      * @return array<string, bool>|null
      */
     public function getNotificationSettingsFromCourse(string $user_id, string $reference_term, string $reference_course): ?array {
-        // Connect to reference course database
+        // Store the core application configuration
         $original_config = clone $this->core->getConfig();
+
+        // Connect to the reference course
         $this->core->loadCourseConfig($reference_term, $reference_course);
         $this->core->loadCourseDatabase();
-        $reference_course_db = $this->core->getCourseDB();
 
-        $reference_course_db->query("
+        // Get the notification settings for the user from the reference course database
+        $this->course_db->query("
             SELECT * FROM notification_settings WHERE user_id = ?
         ", [$user_id]);
 
         $settings = null;
-        if ($reference_course_db->getRowCount() > 0) {
-            $row = $reference_course_db->row();
-            unset($row['user_id']); // Remove user_id from settings
+        if ($this->course_db->getRowCount() > 0) {
+            $row = $this->course_db->row();
+            unset($row['user_id']);
             $settings = $row;
         }
 
-        // Restore original configuration
+        // Restore the original core application configuration
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
 
