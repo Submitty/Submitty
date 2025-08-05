@@ -214,21 +214,13 @@
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <div class="flex-row-col">
-                            <label for="notification_sync_preference">Choose notification sync preference</label>
-                            <span class="option-alt" data-profile-timestamp>
-                                {% if user.getNotificationsSyncedUpdate() %}
-                                    Last updated: {{ user.getNotificationsSyncedUpdate()|date("Y-m-d H:i:s") }}
-                                {% else %}
-                                    Last updated: Never
-                                {% endif %}
-                            </span>
-                        </div>
-                        <select id="notification_sync_preference"
-                                class="form-control"
-                                aria-label="Change Notification Sync Preference"
-                                data-testid="notification-sync-preference-dropdown"
-                                onchange="window.handleProfileSyncChange()">
+                        <label for="notification_sync_preference">Choose notification sync preference</label>
+                        <select
+                            id="notification_sync_preference"
+                            class="form-control"
+                            aria-label="Change Notification Sync Preference"
+                            data-testid="notification-sync-preference-dropdown"
+                            onchange="window.handleProfileSyncChange()">
                             {% if user.getNotificationsSynced() %}
                                 <option value="sync" selected>Sync</option>
                                 <option value="unsync">Unsync</option>

@@ -65,14 +65,7 @@ function updateSyncUI(synced: boolean): void {
     const syncButton = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
     if (syncButton) {
         syncButton.textContent = synced ? 'Unsync Notifications' : 'Sync Notifications';
-        syncButton.className = synced ? 'btn btn-primary' : 'btn btn-default';
-    }
-
-    // Update last sync timestamp
-    const syncInfo = document.querySelector('[data-sync-timestamp]') as HTMLElement;
-    if (syncInfo) {
-        syncInfo.textContent = `Last sync: ${new Date().toLocaleString()}`;
-        syncInfo.style.display = 'inline';
+        syncButton.className = synced ? 'notification-setting-button btn btn-primary' : 'notification-setting-button btn btn-default';
     }
 
     // Update profile dropdown
@@ -80,26 +73,19 @@ function updateSyncUI(synced: boolean): void {
     if (profileDropdown) {
         profileDropdown.value = synced ? 'sync' : 'unsync';
     }
-
-    // Update profile timestamp
-    const profileTimestamp = document.querySelector('[data-profile-timestamp]') as HTMLElement;
-    if (profileTimestamp) {
-        profileTimestamp.textContent = `Last updated: ${new Date().toLocaleString()}`;
-    }
 }
 
 /**
  * Update DOM elements after defaults operation
  */
 function updateDefaultsUI(hasDefaults: boolean, defaultValue?: string): void {
-    const defaultsInfo = document.querySelector('[data-defaults-info]') as HTMLElement;
-    if (defaultsInfo) {
+    const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+    if (clearButton) {
         if (hasDefaults && defaultValue) {
-            defaultsInfo.textContent = `Default: ${defaultValue}`;
-            defaultsInfo.style.display = 'inline';
+            clearButton.textContent = `Clear Default (${defaultValue})`;
         }
         else {
-            defaultsInfo.style.display = 'none';
+            clearButton.textContent = 'Clear Defaults';
         }
     }
 }

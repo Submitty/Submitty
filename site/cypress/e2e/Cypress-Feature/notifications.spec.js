@@ -151,4 +151,16 @@ describe('Test cases revolving around notification/email settings', () => {
         cy.get('input[data-testid="checkbox-input"]')
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
+
+    it('Should allow the user to sync notification settings to other courses', () => {
+        // TODO: Implement this test
+    });
+
+    it('Should allow the user to set default notification settings', () => {
+        // TODO: Implement this test
+    });
+
+    it('Should allow the user to clear default notification settings', () => {
+        // TODO: Implement this test
+    });
 });

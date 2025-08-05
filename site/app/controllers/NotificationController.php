@@ -182,25 +182,20 @@ class NotificationController extends AbstractController {
                 }
             }
 
-            $request = $this->autoSyncNotificationSettings($sync_settings, true);
+            $error_message = $this->autoSyncNotificationSettings($sync_settings, true);
 
-            if ($request !== null) {
-                // Only potential error is that the user has no active courses
-                return JsonResponse::getFailResponse($request);
+            if ($error_message !== null) {
+                // The only potential error is that the user has no active courses
+                return JsonResponse::getFailResponse($error_message);
             }
         }
 
         // Update the sync status
         $action = $syncing ? 'enabled' : 'disabled';
-        $timestamp = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
-        $this->core->getQueries()->updateNotificationSync($user_id, $syncing, $timestamp);
+        $this->core->getQueries()->updateNotificationSync($user_id, $syncing);
         $this->core->getUser()->setNotificationsSynced($syncing);
-        $this->core->getUser()->setNotificationsSyncedUpdate($timestamp);
 
-        return JsonResponse::getSuccessResponse([
-            'message' => 'Notification sync has been ' . ($action),
-            'timestamp' => $timestamp,
-        ]);
+        return JsonResponse::getSuccessResponse(['message' => 'Notification sync has been ' . ($action)]);
     }
 
     /**

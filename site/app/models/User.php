@@ -214,10 +214,6 @@ class User extends AbstractModel implements \JsonSerializable {
     protected $notifications_synced = false;
 
     /** @prop
-     * @var string Timestamp when notifications sync was last updated */
-    protected $notifications_synced_update;
-
-    /** @prop
      * @var string|null The reference course for default notification settings (format: term-course) */
     protected $notification_defaults = null;
 
@@ -320,7 +316,6 @@ class User extends AbstractModel implements \JsonSerializable {
 
         // Initialize notification sync properties
         $this->notifications_synced = isset($details['notifications_synced']) && $details['notifications_synced'] === true;
-        $this->notifications_synced_update = $details['notifications_synced_update'] ?? null;
 
         // Initialize notification defaults
         $this->notification_defaults = $details['notification_defaults'] ?? null;
@@ -566,14 +561,6 @@ class User extends AbstractModel implements \JsonSerializable {
 
     public function setNotificationsSynced(bool $synced): void {
         $this->notifications_synced = $synced;
-    }
-
-    public function getNotificationsSyncedUpdate(): ?string {
-        return $this->notifications_synced_update;
-    }
-
-    public function setNotificationsSyncedUpdate(?string $timestamp): void {
-        $this->notifications_synced_update = $timestamp;
     }
 
     public function getNotificationDefaults(): ?string {

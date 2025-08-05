@@ -13,8 +13,6 @@ def up(config, database):
     database.execute(
         """
         ALTER TABLE users ADD COLUMN notifications_synced BOOLEAN DEFAULT FALSE NOT NULL;
-        ALTER TABLE users ADD COLUMN notifications_synced_update TIMESTAMP WITH TIME ZONE DEFAULT NULL;
-
         ALTER TABLE users ADD COLUMN notification_defaults VARCHAR(255) DEFAULT NULL;
 
         CREATE OR REPLACE FUNCTION update_notification_defaults_on_course_updates()
@@ -69,7 +67,6 @@ def down(config, database):
         DROP FUNCTION IF EXISTS update_notification_defaults_on_course_updates();
 
         ALTER TABLE users DROP COLUMN IF EXISTS notifications_synced;
-        ALTER TABLE users DROP COLUMN IF EXISTS notifications_synced_update;
         ALTER TABLE users DROP COLUMN IF EXISTS notification_defaults;
         """
     )

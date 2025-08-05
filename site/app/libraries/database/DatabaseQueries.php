@@ -760,10 +760,10 @@ SQL;
      * @param bool $syncing
      * @return void
      */
-    public function updateNotificationSync(string $user_id, bool $syncing, ?string $timestamp): void {
+    public function updateNotificationSync(string $user_id, bool $syncing): void {
         $this->submitty_db->query(
-            "UPDATE users SET notifications_synced = ?, notifications_synced_update = ? WHERE user_id = ?",
-            [$syncing, $timestamp, $user_id]
+            "UPDATE users SET notifications_synced = ? WHERE user_id = ?",
+            [$syncing, $user_id]
         );
     }
 
