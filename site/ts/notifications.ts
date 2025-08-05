@@ -13,7 +13,7 @@ declare global {
  */
 
 interface ApiResponse {
-    status: 'success' | 'fail';
+    status: 'success' | 'fail' | 'error';
     data: { message: string } | null;
 }
 
@@ -97,7 +97,8 @@ function updateDefaultsUI(hasDefaults: boolean, defaultValue?: string): void {
         if (hasDefaults && defaultValue) {
             defaultsInfo.textContent = `Default: ${defaultValue}`;
             defaultsInfo.style.display = 'inline';
-        } else {
+        }
+        else {
             defaultsInfo.style.display = 'none';
         }
     }
@@ -108,7 +109,9 @@ function updateDefaultsUI(hasDefaults: boolean, defaultValue?: string): void {
  */
 async function handleSyncClick(): Promise<void> {
     const button = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
-    if (!button) return;
+    if (!button) {
+        return;
+    }
 
     const currentlySynced = button.textContent?.trim() === 'Unsync Notifications';
     const newSyncState = !currentlySynced;
@@ -125,15 +128,18 @@ async function handleSyncClick(): Promise<void> {
             if (response.data) {
                 window.displaySuccessMessage(response.data.message);
             }
-        } else {
+        }
+        else {
             button.textContent = originalText;
             window.displayErrorMessage(response.data?.message || 'Failed to update sync settings.');
         }
-    } catch (error) {
+    }
+    catch (error) {
         button.textContent = originalText;
         console.error('Sync error:', error);
         window.displayErrorMessage('An error occurred while updating sync settings.');
-    } finally {
+    }
+    finally {
         button.disabled = false;
     }
 }
@@ -143,7 +149,9 @@ async function handleSyncClick(): Promise<void> {
  */
 async function handleSetDefaultsClick(): Promise<void> {
     const button = document.getElementById('set-defaults-btn') as HTMLButtonElement;
-    if (!button) return;
+    if (!button) {
+        return;
+    }
 
     const originalText = button.textContent;
     button.disabled = true;
@@ -151,25 +159,27 @@ async function handleSetDefaultsClick(): Promise<void> {
 
     try {
         const response = await updateNotificationDefaults(true);
-        
         if (response.status === 'success') {
             // Get current course info from page context or URL
             const pathParts = window.location.pathname.split('/');
             const term = pathParts[pathParts.indexOf('courses') + 1];
             const course = pathParts[pathParts.indexOf('courses') + 2];
             const defaultValue = `${term}-${course}`;
-            
+
             updateDefaultsUI(true, defaultValue);
             if (response.data) {
                 window.displaySuccessMessage(response.data.message);
             }
-        } else {
+        }
+        else {
             window.displayErrorMessage(response.data?.message || 'Failed to set default settings.');
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Set defaults error:', error);
         window.displayErrorMessage('An error occurred while setting default settings.');
-    } finally {
+    }
+    finally {
         button.disabled = false;
         button.textContent = originalText;
     }
@@ -180,7 +190,9 @@ async function handleSetDefaultsClick(): Promise<void> {
  */
 async function handleClearDefaultsClick(): Promise<void> {
     const button = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-    if (!button) return;
+    if (!button) {
+        return;
+    }
 
     const originalText = button.textContent;
     button.disabled = true;
@@ -194,13 +206,16 @@ async function handleClearDefaultsClick(): Promise<void> {
             if (response.data) {
                 window.displaySuccessMessage(response.data.message);
             }
-        } else {
+        }
+        else {
             window.displayErrorMessage(response.data?.message || 'Failed to clear default settings.');
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Clear defaults error:', error);
         window.displayErrorMessage('An error occurred while clearing default settings.');
-    } finally {
+    }
+    finally {
         button.disabled = false;
         button.textContent = originalText;
     }
@@ -211,7 +226,9 @@ async function handleClearDefaultsClick(): Promise<void> {
  */
 async function handleProfileSyncChange(): Promise<void> {
     const dropdown = document.getElementById('notification_sync_preference') as HTMLSelectElement;
-    if (!dropdown) return;
+    if (!dropdown) {
+        return;
+    }
 
     const synced = dropdown.value === 'sync';
     const originalValue = synced ? 'unsync' : 'sync';
@@ -226,15 +243,18 @@ async function handleProfileSyncChange(): Promise<void> {
             if (response.data) {
                 window.displaySuccessMessage(response.data.message);
             }
-        } else {
+        }
+        else {
             dropdown.value = originalValue;
             window.displayErrorMessage(response.data?.message || 'Failed to update sync preference.');
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Profile sync error:', error);
         dropdown.value = originalValue;
         window.displayErrorMessage('An error occurred while updating sync preference.');
-    } finally {
+    }
+    finally {
         dropdown.disabled = false;
     }
 }

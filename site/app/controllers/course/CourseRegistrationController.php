@@ -116,23 +116,26 @@ class CourseRegistrationController extends AbstractController {
         $reference_term = $parts[0];
         $reference_course = $parts[1];
 
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($reference_term, $reference_course);
+        $this->core->loadCourseDatabase();
+        $course_db = $this->core->getCourseDB();
+
         // Get the notification settings from the reference course
-        $reference_settings = $this->core->getQueries()->getNotificationSettingsFromCourse(
-            $user_id,
-            $reference_term,
-            $reference_course
-        );
+        $reference_settings = $this->core->getQueries()->getNotificationSettings($user_id);
 
         if ($reference_settings === null) {
             return;
         }
 
         // Apply the notification settings to the new course
-        $this->core->getQueries()->syncNotificationSettingsToCourse(
-            $user_id,
-            $reference_settings,
-            $term,
-            $course
-        );
+        $this->core->getQueries()->updateNotificationSettings($reference_settings);
+
+        // Disconnect from the reference course database
+        $course_db->disconnect();
+
+        // Restore the original core application configuration
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
     }
 }

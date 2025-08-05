@@ -744,6 +744,16 @@ SQL;
     }
 
     /**
+     * Get notification settings for a user
+     * @param string $user_id The user ID to get notification settings for
+     * @return array<string, bool>|null Null if no settings are found, otherwise an array of notification settings
+     */
+    public function getNotificationSettings(string $user_id): ?array {
+        $this->course_db->query("SELECT * FROM notification_settings WHERE user_id = ?", [$user_id]);
+        return $this->course_db->row();
+    }
+
+    /**
      * Update notification sync settings for a user
      *
      * @param string $user_id
@@ -772,40 +782,6 @@ SQL;
                 $user_id
             ]
         );
-    }
-
-    /**
-     * Get notification settings from a reference course
-     * @param string $user_id
-     * @param string $reference_term
-     * @param string $reference_course
-     * @return array<string, bool>|null
-     */
-    public function getNotificationSettingsFromCourse(string $user_id, string $reference_term, string $reference_course): ?array {
-        // Store the core application configuration
-        $original_config = clone $this->core->getConfig();
-
-        // Connect to the reference course
-        $this->core->loadCourseConfig($reference_term, $reference_course);
-        $this->core->loadCourseDatabase();
-
-        // Get the notification settings for the user from the reference course database
-        $this->course_db->query("
-            SELECT * FROM notification_settings WHERE user_id = ?
-        ", [$user_id]);
-
-        $settings = null;
-        if ($this->course_db->getRowCount() > 0) {
-            $row = $this->course_db->row();
-            unset($row['user_id']);
-            $settings = $row;
-        }
-
-        // Restore the original core application configuration
-        $this->core->setConfig($original_config);
-        $this->core->loadCourseDatabase();
-
-        return $settings;
     }
 
     public function getAuthorOfThread($thread_id) {
