@@ -97,12 +97,7 @@ class CourseRegistrationController extends AbstractController {
         // Course user exists
         if ($course_user !== null) {
             $user->setRegistrationSection($default_section);
-
             $course_user->setRegistrationSection($user->getRegistrationSection());
-            $course_user->setUserGroup($user->getGroup());
-            $course_user->setManualRegistration($user->isManualRegistration());
-            $course_user->setRegistrationType($user->getRegistrationType());
-
             $em->persist($course_user);
             $em->flush();
             $this->core->getQueries()->updateUser($user, $term, $course);

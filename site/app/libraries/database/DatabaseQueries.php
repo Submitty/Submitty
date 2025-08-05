@@ -1040,11 +1040,6 @@ SQL;
      * @param string $course
      */
     public function unregisterCourseUser(User $user, $semester, $course): void {
-        // $this->submitty_db->query(
-        //     "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
-        //     [$user->getId(), $semester, $course]
-        // );
-
         $this->course_db->query(
             "UPDATE users SET 
                 rotating_section = NULL,
@@ -1060,9 +1055,12 @@ SQL;
      * @param string $course
      */
     public function updateUserInCourse(User $user, string $semester, string $course) {
-        $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        $this->submitty_db->convertBoolean($user->isManualRegistration())];
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+        $params = [
+            $user->getRotatingSection(),
+            $user->getRegistrationSubsection(),
+            $user->getRegistrationType(),
+            $user->getId()
+        ];
         $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
