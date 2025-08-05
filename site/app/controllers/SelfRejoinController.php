@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\RedirectResponse;
 use app\models\Email;
 use app\models\User;
+use app\entities\CourseUser;
 
 class SelfRejoinController extends AbstractController {
     /**

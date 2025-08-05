@@ -117,7 +117,7 @@ class CourseRegistrationController extends AbstractController {
             );
             $em->persist($course_user);
             $em->flush();
-            $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
+            $this->core->getQueries()->updateUserInCourse($user, $term, $course);
         }
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);

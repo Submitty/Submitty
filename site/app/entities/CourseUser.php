@@ -12,7 +12,6 @@ use app\repositories\CourseUserRepository;
  * Doctrine entity for course users
  * @package app\entities
  */
-#[ORM\Entity(repositoryClass: CourseUserRepository::class)]
 #[ORM\Table(name: "courses_users")]
 class CourseUser {
     #[ORM\Column(type: Types::STRING)]
@@ -43,6 +42,7 @@ class CourseUser {
     public function __construct(string $term, string $course, string $user_id, int $user_group, string $registration_section, string $registration_type, bool $manual_registration, string $previous_registration_section = "") {
         $this->term = $term;
         $this->course = $course;
+        $this->user_id = $user_id;
         $this->user_group = $user_group;
         $this->registration_section = $registration_section;
         $this->registration_type = $registration_type;
@@ -50,23 +50,23 @@ class CourseUser {
         $this->previous_registration_section = $previous_registration_section;
     }
 
-    public function setUserGroup(int $user_group) {
+    public function setUserGroup(int $user_group): void {
         $this->user_group = $user_group;
     }
 
-    public function setRegistrationSection(?string $registration_section) {
+    public function setRegistrationSection(?string $registration_section): void {
         $this->registration_section = $registration_section;
     }
 
-    public function setRegistrationType(string $registration_type) {
+    public function setRegistrationType(string $registration_type): void {
         $this->registration_type = $registration_type;
     }
 
-    public function setManualRegistration(bool $manual_registration) {
+    public function setManualRegistration(bool $manual_registration): void {
         $this->manual_registration = $manual_registration;
     }
 
-    public function setPreviousRegistrationSection(string $previous_registration_section) {
-        $this->orevious_registration_section = $previous_registration_section;
+    public function setPreviousRegistrationSection(string $previous_registration_section): void {
+        $this->previous_registration_section = $previous_registration_section;
     }
 }
