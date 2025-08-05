@@ -63,7 +63,7 @@
     "@types/node": "^24.1.0",
     "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
-    "@typescript-eslint/parser": "^8.36.0",
+    "@typescript-eslint/parser": "^8.39.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/tsconfig": "^0.7.0",
