@@ -102,7 +102,7 @@ class SelfRejoinController extends AbstractController {
 
         // findOneBy returns either the CourseUser entity if it was found givin the parameters, or null if one doesn't match
         $course_user = $this->core->getSubmittyEntityManager()
-            ->getRepository(CourseUser::class);
+            ->getRepository(CourseUser::class)
             ->findOneBy([
                 'user_id' => $user_id,
                 'term' => $term,
