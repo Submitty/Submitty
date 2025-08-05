@@ -1,10 +1,10 @@
 import { buildUrl } from '../../support/utils';
 
-const verifyUpdateMessage = (exists = true) => {
+const verifyUpdateMessage = (exists = true, customMessage = 'Notification settings have been saved.') => {
     if (exists) {
         cy.get('[data-testid="popup-message"]')
             .should('be.visible')
-            .should('contain', 'Notification settings have been saved.')
+            .should('contain', customMessage)
             .get('[data-testid="remove-message-popup"]')
             .first()
             .click();
@@ -112,6 +112,74 @@ const toggleSelfRegistration = (enable) => {
     cy.logout();
 };
 
+const verifySyncNotificationSettings = () => {
+    // Reset notification settings to ensure consistent state
+    cy.get('[data-testid="reset-notification-settings"]').click();
+    verifyUpdateMessage();
+
+    // Enable two unique non-disabled notifications for testing
+    cy.get('.notification-checkbox input[data-testid="checkbox-input"]:not(:disabled)')
+        .then(($checkboxes) => {
+            // Click first available non-disabled checkbox
+            cy.wrap($checkboxes[0]).click();
+            verifyUpdateMessage();
+
+            // Click second available non-disabled checkbox
+            cy.wrap($checkboxes[1]).click();
+            verifyUpdateMessage();
+        });
+
+    // Test sync functionality
+    cy.get('[data-testid="sync-notifications-button"]')
+        .should('be.visible')
+        .should('contain', 'Sync Notifications')
+        .click();
+
+    verifyUpdateMessage(true, 'Notification sync has been enabled');
+
+    // Verify button text changes after sync
+    cy.get('[data-testid="sync-notifications-button"]')
+        .should('contain', 'Unsync Notifications');
+
+    // Test unsync functionality
+    cy.get('[data-testid="sync-notifications-button"]').click();
+
+    verifyUpdateMessage(true, 'Notification sync has been disabled');
+
+    cy.get('[data-testid="sync-notifications-button"]')
+        .should('contain', 'Sync Notifications');
+};
+
+const verifySetDefaultNotificationSettings = () => {
+    // Test set defaults functionality
+    cy.get('[data-testid="set-defaults-button"]')
+        .should('be.visible')
+        .should('contain', 'Set as Default Settings')
+        .click();
+
+    verifyUpdateMessage(true, 'notification settings have been saved as your default');
+
+    // Verify clear button appears after setting defaults
+    cy.get('[data-testid="clear-defaults-button"]')
+        .should('be.visible')
+        .should('contain', 'Clear Default Settings');
+};
+
+const verifyClearDefaultNotificationSettings = () => {
+    // Verify that defaults are currently set (button should be visible)
+    cy.get('[data-testid="clear-defaults-button"]')
+        .should('be.visible')
+        .should('contain', 'Clear Default Settings');
+
+    // Test clear defaults functionality
+    cy.get('[data-testid="clear-defaults-button"]').click();
+
+    verifyUpdateMessage(true, 'notification settings have been cleared');
+
+    // Verify button is hidden after clearing defaults
+    cy.get('[data-testid="clear-defaults-button"]').should('not.exist');
+};
+
 describe('Test cases revolving around notification/email settings', () => {
     before(() => {
         // Additional notification settings are displayed for self registration courses
@@ -153,14 +221,15 @@ describe('Test cases revolving around notification/email settings', () => {
     });
 
     it('Should allow the user to sync notification settings to other courses', () => {
-        // TODO: Implement this test
+        verifySyncNotificationSettings();
     });
 
     it('Should allow the user to set default notification settings', () => {
-        // TODO: Implement this test
+        verifySetDefaultNotificationSettings();
     });
 
     it('Should allow the user to clear default notification settings', () => {
-        // TODO: Implement this test
+        verifySetDefaultNotificationSettings(); // Set defaults first
+        verifyClearDefaultNotificationSettings();
     });
 });

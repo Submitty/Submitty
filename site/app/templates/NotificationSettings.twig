@@ -32,10 +32,10 @@
                 <div class="button-row">
                     <button type="button"
                         id="sync-notifications-btn"
-                        class="notification-setting-button {% if core.getUser().getNotificationsSynced() %}btn btn-primary{% else %}btn btn-default{% endif %}" 
+                        class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="sync-notifications-button"
-                        onclick="window.handleSyncClick()">
+                        onclick="handleSyncClick()">
                     {% if core.getUser().getNotificationsSynced() %}
                         Unsync Notifications
                     {% else %}
@@ -44,24 +44,22 @@
                     </button>
                     <button type="button"
                         id="set-defaults-btn"
-                        class="notification-setting-button btn btn-primary"
+                        class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="set-defaults-button"
-                        onclick="window.handleSetDefaultsClick()">
-                        Use as Default for Future Courses
+                        onclick="handleSetDefaultsClick()">
+                        Set as Default Settings
                     </button>
-                    <button type="button"
+                    <button
+                        {% if not core.getUser().getNotificationDefaults() %} hidden {% endif %}
+                        type="button"
                         id="clear-defaults-btn"
                         class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="clear-defaults-button"
-                        onclick="window.handleClearDefaultsClick()">
-                        {% if core.getUser().getNotificationDefaults() %}
-                            Clear Default ({{ core.getUser().getNotificationDefaults() }})
-                        {% else %}
-                            Clear Defaults
-                        {% endif %}
-                    </button>
+                        onclick="handleClearDefaultsClick()">
+                            Clear Default Settings
+                        </button>
                 </div>
             </div>
             <div class="row row-spacing">
