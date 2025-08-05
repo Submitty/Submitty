@@ -7,6 +7,7 @@ use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
+use app\entities\CourseUser;
 
 class CourseRegistrationController extends AbstractController {
     /**

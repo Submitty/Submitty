@@ -14,7 +14,7 @@ use app\repositories\CourseUserRepository;
  */
 #[ORM\Entity(repositoryClass: CourseUserRepository::class)]
 #[ORM\Table(name: "courses_users")]
-class CourseUser {  
+class CourseUser {
     #[ORM\Column(type: Types::STRING)]
     protected string $term;
 
