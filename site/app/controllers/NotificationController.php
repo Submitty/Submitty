@@ -196,7 +196,7 @@ class NotificationController extends AbstractController {
         $this->core->getQueries()->updateNotificationSync($user_id, $syncing);
         $this->core->getUser()->setNotificationsSynced($syncing);
 
-        return JsonResponse::getSuccessResponse(['message' => 'Notification sync has been ' . ($action)]);
+        return JsonResponse::getSuccessResponse(['message' => 'Notification syncing has been ' . ($action)]);
     }
 
     /**
