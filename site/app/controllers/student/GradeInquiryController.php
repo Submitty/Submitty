@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\models\gradeable\GradedGradeable;
 use app\models\Notification;
 use app\models\Email;
+use app\libraries\Utils;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
@@ -427,7 +428,14 @@ class GradeInquiryController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-grade_inquiry-' . $msg_array['g_id'] . '_' . $msg_array['submitter_id'];
+        $params = [
+            'page' => 'grade_inquiry',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'gradeable_id' => isset($msg_array['g_id']) ? strval($msg_array['g_id']) : null,
+            'submitter_id' => isset($msg_array['submitter_id']) ? strval($msg_array['submitter_id']) : null,
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
 
         try {
             $client = new Client($this->core);

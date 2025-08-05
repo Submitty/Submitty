@@ -134,13 +134,13 @@ class Server implements MessageComponentInterface {
                 || ($page === 'chatrooms' && !isset($params['chatroom_id']))
             ) {
                 // These pages are not stored as unique authorized pages as they're available to all authenticated users
-                $key = 'defaults';
+                $params['page'] = 'defaults';
             }
             else {
-                $key = $page;
+                $params['page'] = $page;
             }
 
-            $authorized_page = Utils::buildWebSocketPageIdentifier($key, $params);
+            $authorized_page = Utils::buildWebSocketPageIdentifier($params);
 
             if ($authorized_page === null) {
                 return false;
@@ -150,7 +150,8 @@ class Server implements MessageComponentInterface {
             }
 
             // Create the full page identifier for the true page connection
-            $page_identifier = Utils::buildWebSocketPageIdentifier($page, $params);
+            $params['page'] = $page;
+            $page_identifier = Utils::buildWebSocketPageIdentifier($params);
 
             // Set up the connection
             $this->setSocketClient($user_id, $conn);

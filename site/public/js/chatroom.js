@@ -94,13 +94,12 @@ function appendMessage(displayName, role, ts, content, msgID) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
@@ -121,13 +120,12 @@ function initChatroomSocketClient(chatroomId) {
 function initChatroomListSocketClient() {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_open':
                 handleChatOpen(msg);
                 break;
             case 'chat_close': {
-                const row = document.getElementById(`${msg.id}`);
+                const row = document.getElementById(`${msg.chatroom_id}`);
                 if (row) {
                     row.remove();
                 }
@@ -214,11 +212,11 @@ function handleChatOpen(msg) {
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`${msg.id}`)) {
+    if (document.getElementById(`${msg.chatroom_id}`)) {
         return;
     }
     const tr = document.createElement('tr');
-    tr.id = `${msg.id}`;
+    tr.id = `${msg.chatroom_id}`;
 
     const tdTitle = document.createElement('td');
     const spanTitle = document.createElement('span');
@@ -242,7 +240,7 @@ function handleChatOpen(msg) {
 
     const tdLinks = document.createElement('td');
     const joinLink = document.createElement('a');
-    joinLink.href = `${msg.base_url}/${msg.id}`;
+    joinLink.href = `${msg.base_url}/${msg.chatroom_id}`;
     joinLink.className = 'btn btn-primary';
     joinLink.textContent = 'Join';
     tdLinks.appendChild(joinLink);
@@ -255,7 +253,7 @@ function handleChatOpen(msg) {
         tdLinks.appendChild(document.createTextNode(' '));
 
         const anonJoinLink = document.createElement('a');
-        anonJoinLink.href = `${msg.base_url}/${msg.id}/anonymous`;
+        anonJoinLink.href = `${msg.base_url}/${msg.chatroom_id}/anonymous`;
         anonJoinLink.className = 'btn btn-default';
         anonJoinLink.textContent = 'Join As Anon.';
         tdLinks.appendChild(anonJoinLink);

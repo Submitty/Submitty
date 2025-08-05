@@ -189,7 +189,8 @@ class SubmissionController extends AbstractController {
                 // can this user access grade inquiries for this graded_gradeable
                 $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 if ($can_inquiry) {
-                    $this->core->authorizeWebSocketToken('grade_inquiry', [
+                    $this->core->authorizeWebSocketToken([
+                        'page' => 'grade_inquiry',
                         'gradeable_id' => $gradeable->getId(),
                         'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
                     ]);

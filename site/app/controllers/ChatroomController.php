@@ -10,6 +10,7 @@ use app\entities\chat\Message;
 use app\entities\UserEntity;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
+use app\libraries\Utils;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use WebSocket;
@@ -21,11 +22,11 @@ class ChatroomController extends AbstractController {
      *
      * @param array{
      *     type:        string,
-     *     socket:      string,
-     *     id?:         int,
+     *     message_id?:    int,
+     *     chatroom_id?:   int,
      *     title?:      string,
      *     description?:string,
-     *     allow_anon?: bool,
+     *     allow_anon?:   bool,
      *     host_name?:  string,
      *     base_url?:   string,
      *     user_id?:    string,
@@ -33,11 +34,26 @@ class ChatroomController extends AbstractController {
      *     display_name?:string,
      *     role?:       string,
      *     timestamp?:  string
-     * } $msg_array
+     * } $msg_array The WebSocket message parameters to send
+     * @param bool $is_individual Whether the message is being sent to a specific chatroom or to all chatrooms
      */
-    private function sendSocketMessage(array $msg_array): void {
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['socket'];
+    private function sendSocketMessage(array $msg_array, ?bool $is_individual = false): void {
         $msg_array['user_id'] = $msg_array['user_id'] ?? $this->core->getUser()->getId();
+        $params = [
+            'page' => 'chatrooms',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'message_id' => isset($msg_array['message_id']) ? strval($msg_array['message_id']) : null,
+            'chatroom_id' => isset($msg_array['chatroom_id']) ? strval($msg_array['chatroom_id']) : null,
+        ];
+        if ($params['message_id'] === null) {
+            unset($params['message_id']);
+        }
+        if (!$is_individual || $params['chatroom_id'] === null) {
+            $params['all_chatrooms'] = 'true';
+        }
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
@@ -118,7 +134,8 @@ class ChatroomController extends AbstractController {
             );
         }
 
-        $this->core->authorizeWebSocketToken('chatrooms', [
+        $this->core->authorizeWebSocketToken([
+            'page' => 'chatrooms',
             'chatroom_id' => $chatroom->getId(),
         ]);
 
@@ -187,24 +204,22 @@ class ChatroomController extends AbstractController {
         if (!$chatroom->isActive()) {
             $msg_array = [];
             $msg_array['type'] = 'chat_open';
-            $msg_array['id'] = $chatroom->getId();
+            $msg_array['chatroom_id'] = $chatroom->getId();
             $msg_array['title'] = $chatroom->getTitle();
             $msg_array['description'] = $chatroom->getDescription();
             $msg_array['allow_anon'] = $chatroom->isAllowAnon();
             $msg_array['host_name'] = $chatroom->getHostName();
             $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
-            $msg_array['socket'] = "chatrooms";
         }
         else {
             $msg_array = [];
             $msg_array['type'] = 'chat_close';
-            $msg_array['id'] = $chatroom->getId();
-            $msg_array['socket'] = "chatrooms";
+            $msg_array['chatroom_id'] = $chatroom->getId();
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
             $indiv_msg_array['type'] = 'chat_close';
-            $indiv_msg_array['socket'] = "chatrooms-" . $chatroom_id;
-            $this->sendSocketMessage($indiv_msg_array);
+            $indiv_msg_array['chatroom_id'] = $chatroom->getId();
+            $this->sendSocketMessage($indiv_msg_array, true);
         }
         $this->sendSocketMessage($msg_array);
         $chatroom->setSessionStartedAt($chatroom->isActive() ? null : new \DateTime("now"));
@@ -268,13 +283,13 @@ class ChatroomController extends AbstractController {
         }
         $msg_array['display_name'] = $display_name;
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
-        $msg_array['socket'] = "chatrooms-" . $chatroom_id;
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
+        $msg_array['chatroom_id'] = $chatroom->getId();
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
-        $msg_array['id'] = $message->getId();
-        $this->sendSocketMessage($msg_array);
+        $msg_array['message_id'] = $message->getId();
+        $this->sendSocketMessage($msg_array, true);
         return JsonResponse::getSuccessResponse($message);
     }
 }

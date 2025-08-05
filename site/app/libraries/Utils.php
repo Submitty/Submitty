@@ -427,15 +427,15 @@ class Utils {
     /**
      * Builds a full page identifier based on page type and parameters for a WebSocket page.
      *
-     * @param string|null $page Page type
-     * @param array<string, string> $params Parameters array containing term, course, and other optional parameters
+     * @param array<string, string> $params Parameters array containing page, term, course, and other optional parameters
      * @return string|null Full WebSocket page identifier or null if the inputs are invalid
      */
-    public static function buildWebSocketPageIdentifier(?string $page = null, array $params = []): ?string {
-        if (!isset($params['term'], $params['course'])) {
+    public static function buildWebSocketPageIdentifier(array $params = []): ?string {
+        if (!isset($params['page'], $params['term'], $params['course'])) {
             return null;
         }
 
+        $page = $params['page'];
         $prefix = $params['term'] . '-' . $params['course'] . '-';
 
         switch ($page) {
@@ -444,7 +444,7 @@ class Utils {
             case 'office_hours_queue':
                 return $prefix . $page;
             case 'chatrooms':
-                if (isset($params['chatroom_id'])) {
+                if (!isset($params['all_chatrooms']) && isset($params['chatroom_id'])) {
                     return $prefix . $page . '-' . $params['chatroom_id'];
                 }
                 return $prefix . $page;

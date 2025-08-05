@@ -1940,7 +1940,8 @@ class ElectronicGraderController extends AbstractController {
         $show_verify_all = $show_verify_all && $can_verify;
 
         if ($can_inquiry) {
-            $this->core->authorizeWebSocketToken('grade_inquiry', [
+            $this->core->authorizeWebSocketToken([
+                'page' => 'grade_inquiry',
                 'gradeable_id' => $gradeable_id,
                 'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             ]);

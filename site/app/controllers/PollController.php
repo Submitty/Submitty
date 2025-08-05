@@ -15,6 +15,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
+use app\libraries\Utils;
 use app\views\PollView;
 use app\libraries\socket\Client;
 use WebSocket;
@@ -145,7 +146,8 @@ class PollController extends AbstractController {
             $response_counts = [];
         }
 
-        $this->core->authorizeWebSocketToken('polls', [
+        $this->core->authorizeWebSocketToken([
+            'page' => 'polls',
             'poll_id' => $poll_id,
             'instructor' => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
         ]);
@@ -759,7 +761,8 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $this->core->authorizeWebSocketToken('polls', [
+        $this->core->authorizeWebSocketToken([
+            'page' => 'polls',
             'poll_id' => $poll_id,
             'instructor' => true,
         ]);
@@ -860,7 +863,14 @@ class PollController extends AbstractController {
      */
     private function sendSocketMessage(mixed $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'] . '-' . $msg_array['socket'];
+        $params = [
+            'page' => 'polls',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'poll_id' => isset($msg_array['poll_id']) ? strval($msg_array['poll_id']) : null,
+            'instructor' => isset($msg_array['socket']) && $msg_array['socket'] === 'instructor' ? 'true' : 'false',
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
 
         try {
             $client = new Client($this->core);

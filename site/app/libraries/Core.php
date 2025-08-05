@@ -944,19 +944,19 @@ class Core {
     /**
      * Authorize a WebSocket token, which assumes the authorization checks have already been performed.
      *
-     * @param string|null $page Optional page identifier, defaulting to a course-specific default page, such as 'f25-sample-defaults'
      * @param array<string, mixed> $params Optional parameters to format the full page identifier.
      * @return string|null WebSocket authorization token string or null if generation fails.
      */
-    public function authorizeWebSocketToken(?string $page = null, ?array $params = []): ?string {
+    public function authorizeWebSocketToken(?array $params = []): ?string {
         if (!$this->config->isCourseLoaded() || !$this->userLoaded()) {
             return null;
         }
 
         // Append the term and course to the query params for the full page identifier
+        $params['page'] = $params['page'] ?? 'defaults';
         $params['term'] = $this->config->getTerm();
         $params['course'] = $this->config->getCourse();
-        $page = Utils::buildWebSocketPageIdentifier($page ?? 'defaults', $params);
+        $page = Utils::buildWebSocketPageIdentifier($params);
 
         $user_id = $this->user->getId();
         $existing_authorized_pages = [];
