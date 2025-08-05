@@ -761,7 +761,6 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
-    notifications_synced_update timestamp with time zone,
     notifications_synced boolean DEFAULT false NOT NULL,
     notification_defaults character varying(255) DEFAULT NULL::character varying,
     CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
