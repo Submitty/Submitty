@@ -374,6 +374,35 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
 
 
 --
+-- Name: update_notification_defaults_on_course_updates(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_notification_defaults_on_course_updates() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            -- Handle dangling tuples within notification_defaults for updated or missing courses
+            IF TG_OP = 'UPDATE' THEN
+                IF OLD.term != NEW.term OR OLD.course != NEW.course THEN
+                    UPDATE users
+                    SET notification_defaults = NEW.term || '-' || NEW.course
+                    WHERE notification_defaults = OLD.term || '-' || OLD.course;
+                END IF;
+                RETURN NEW;
+            END IF;
+
+            IF TG_OP = 'DELETE' THEN
+                UPDATE users
+                SET notification_defaults = NULL
+                WHERE notification_defaults = OLD.term || '-' || OLD.course;
+                RETURN OLD;
+            END IF;
+            RETURN NULL;
+        END;
+        $$;
+
+
+--
 -- Name: update_previous_registration_section(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -980,6 +1009,20 @@ CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_us
 --
 
 CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
+
+
+--
+-- Name: courses course_notification_defaults_delete_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER course_notification_defaults_delete_trigger AFTER DELETE ON public.courses FOR EACH ROW EXECUTE PROCEDURE public.update_notification_defaults_on_course_updates();
+
+
+--
+-- Name: courses course_notification_defaults_update_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER course_notification_defaults_update_trigger AFTER UPDATE ON public.courses FOR EACH ROW EXECUTE PROCEDURE public.update_notification_defaults_on_course_updates();
 
 
 --
