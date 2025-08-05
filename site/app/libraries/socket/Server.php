@@ -136,9 +136,6 @@ class Server implements MessageComponentInterface {
                 // These pages are not stored as unique authorized pages as they're available to all authenticated users
                 $params['page'] = 'defaults';
             }
-            else {
-                $params['page'] = $page;
-            }
 
             $authorized_page = Utils::buildWebSocketPageIdentifier($params);
 
