@@ -125,7 +125,7 @@ function initChatroomListSocketClient() {
                 handleChatOpen(msg);
                 break;
             case 'chat_close': {
-                const row = document.getElementById(`${msg.chatroom_id}`);
+                const row = document.getElementById(`chatroom-row-${msg.chatroom_id}`);
                 if (row) {
                     row.remove();
                 }
@@ -212,11 +212,11 @@ function handleChatOpen(msg) {
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`${msg.chatroom_id}`)) {
+    if (document.getElementById(`chatroom-row-${msg.chatroom_id}`)) {
         return;
     }
     const tr = document.createElement('tr');
-    tr.id = `${msg.chatroom_id}`;
+    tr.id = `chatroom-row-${msg.chatroom_id}`;
 
     const tdTitle = document.createElement('td');
     const spanTitle = document.createElement('span');
