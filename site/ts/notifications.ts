@@ -22,7 +22,7 @@ async function updateNotificationSync(synced: boolean): Promise<ApiResponse> {
     formData.append('notifications_synced', synced.toString());
     formData.append('csrf_token', window.csrfToken);
 
-    const url = window.location.href.includes('notifications')
+    const url = window.location.pathname.includes('/courses/')
         ? buildCourseUrl(['notifications', 'settings', 'sync'])
         : buildUrl(['notifications', 'settings', 'sync']);
 

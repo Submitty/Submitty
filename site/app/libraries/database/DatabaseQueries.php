@@ -744,8 +744,9 @@ SQL;
     }
 
     /**
-     * Get notification settings for a user
-     * @param string $user_id The user ID to get notification settings for
+     * Get notification settings for a user.
+     *
+     * @param string $user_id The user ID
      * @return array<string, bool>|null Null if no settings are found, otherwise an array of notification settings
      */
     public function getNotificationSettings(string $user_id): ?array {
@@ -754,34 +755,25 @@ SQL;
     }
 
     /**
-     * Update notification sync settings for a user
+     * Update notification sync settings for a user.
      *
-     * @param string $user_id
-     * @param bool $syncing
+     * @param string $user_id The user ID
+     * @param bool $syncing Whether the user is syncing notifications
      * @return void
      */
     public function updateNotificationSync(string $user_id, bool $syncing): void {
-        $this->submitty_db->query(
-            "UPDATE users SET notifications_synced = ? WHERE user_id = ?",
-            [$syncing, $user_id]
-        );
+        $this->submitty_db->query("UPDATE users SET notifications_synced = ? WHERE user_id = ?", [$syncing, $user_id]);
     }
 
     /**
-     * Update notification defaults for a user
+     * Update notification defaults reference term and course for a user.
      *
-     * @param string $user_id
-     * @param string|null $defaults
+     * @param string $user_id The user ID
+     * @param string|null $defaults The course holding the default notification settings (term-course) or null to clear defaults
      * @return void
      */
     public function updateNotificationDefaults(string $user_id, ?string $defaults): void {
-        $this->submitty_db->query(
-            "UPDATE users SET notification_defaults = ? WHERE user_id = ?",
-            [
-                $defaults,
-                $user_id
-            ]
-        );
+        $this->submitty_db->query("UPDATE users SET notification_defaults = ? WHERE user_id = ?", [$defaults, $user_id]);
     }
 
     public function getAuthorOfThread($thread_id) {

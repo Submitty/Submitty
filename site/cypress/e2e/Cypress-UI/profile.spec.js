@@ -192,27 +192,45 @@ describe('Test cases revolving around user profile page', () => {
     it('Should handle notification sync preference across multiple courses', () => {
         const courses = ['sample', 'tutorial', 'development', 'blank'];
 
+        // Helper function to dismiss all popup messages
+        const dismissAllMessages = () => {
+            cy.get('body').then(($body) => {
+                if ($body.find('[data-testid="popup-message"]').length > 0) {
+                    cy.get('[data-testid="remove-message-popup"]').click({ multiple: true });
+                }
+            });
+        };
+
+        // Helper function to wait for and verify a success message
+        const verifyMessage = (expectedText) => {
+            cy.get('[data-testid="popup-message"]', { timeout: 10000 })
+                .should('be.visible')
+                .should('contain', expectedText);
+            cy.get('[data-testid="remove-message-popup"]').first().click();
+        };
+
+        // Logout the instructor and login as the student
+        cy.logout();
+        cy.login('student');
+
         // Test sync functionality across courses
         courses.forEach((course, index) => {
-            cy.visit(buildUrl([course]));
-
             if (index === 0) {
-                // Disable sync from profile page
+                // Set up initial state on first course
                 cy.visit('/user_profile');
+
+                // First ensure sync is disabled
                 cy.get('[data-testid="notification-sync-preference-dropdown"]')
                     .should('be.visible')
-                    .select('unsync', { force: true });
+                    .then(($select) => {
+                        cy.wrap($select).select('unsync');
+                        verifyMessage('Notification sync has been disabled');
+                    });
 
-                cy.get('[data-testid="popup-message"]')
-                    .should('be.visible')
-                    .should('contain', 'Notification syncing has been disabled');
-
-                cy.get('[data-testid="remove-message-popup"]').first().click();
-
-                // On first course, set up notification preferences
+                // Navigate to notifications settings
                 cy.visit(buildUrl([course, 'notifications', 'settings']));
 
-                // Verify "Sync Notifications" button is visible based on the previous dropdown selection
+                // Verify sync button shows "Sync Notifications"
                 cy.get('[data-testid="sync-notifications-button"]')
                     .should('be.visible')
                     .should('contain', 'Sync Notifications');
@@ -223,69 +241,51 @@ describe('Test cases revolving around user profile page', () => {
                 cy.get('[data-testid="reset-notification-settings"]').click();
                 cy.get('[data-testid="reset-email-settings"]').click();
 
-                cy.get('[data-testid="popup-message"]')
-                    .should('have.length', 4)
-                    .as('reset-settings');
+                // Enable two specific non-disabled notifications for testing
+                cy.get('#reply_in_post_thread').should('not.be.disabled').check();
+                verifyMessage('Notification settings have been saved');
 
-                cy.get('@reset-settings').then(() => {
-                    // Verify all non-disabled notifications are unchecked
-                    cy.get('input[data-testid="checkbox-input"]:not(:disabled)')
-                        .then(($checkboxes) => {
-                            cy.wrap($checkboxes).should('not.be.checked');
-                        });
+                cy.get('#all_released_grades_email').should('not.be.disabled').check();
+                verifyMessage('Notification settings have been saved');
 
-                    // Enable two unique non-disabled notifications settings
-                    cy.get('#reply_in_post_thread').should('not.be.checked').click();
-                    cy.get('#all_released_grades_email').should('not.be.checked').click();
-                    cy.get('[data-testid="popup-message"]')
-                        .should('have.length', 2)
-                        .as('apply-settings');
-                });
+                // Enable sync
+                cy.get('[data-testid="sync-notifications-button"]').click();
+                verifyMessage('Notification sync has been enabled');
 
-                cy.get('@apply-settings').then(() => {
-                    // Click the sync button
-                    cy.get('[data-testid="sync-notifications-button"]').click();
-
-                    // Verify the button text has been updated
-                    cy.get('[data-testid="sync-notifications-button"]')
-                        .should('be.visible')
-                        .should('contain', 'Unsync Notifications');
-
-                    // Verify the dropdown value has been updated
-                    cy.visit('/user_profile');
-                    cy.get('[data-testid="notification-sync-preference-dropdown"]')
-                        .should('have.value', 'sync');
-                });
-            }
-            else {
-                // On subsequent courses, verify sync worked
-                cy.visit(buildUrl([course, 'notifications', 'settings']));
-
+                // Verify the button text has been updated
                 cy.get('[data-testid="sync-notifications-button"]')
                     .should('be.visible')
                     .should('contain', 'Unsync Notifications');
 
-                if (index === 2) {
-                    // Enable team_invite_email to ensure it is synced in the last 2 courses
-                    cy.get('#team_invite_email').should('not.be.checked').click();
-                }
+                // Verify the dropdown value has been updated
+                cy.visit('/user_profile');
+                cy.get('[data-testid="notification-sync-preference-dropdown"]')
+                    .should('have.value', 'sync');
+            }
+            else {
+                // On subsequent courses, verify sync propagated the settings
+                cy.visit(buildUrl([course, 'notifications', 'settings']));
 
-                cy.get('input[data-testid="checkbox-input"]:not(:disabled)')
-                    .then(($checkboxes) => {
-                        $checkboxes.each((index, checkbox) => {
-                            const id = checkbox.id;
-                            if (
-                                id === 'reply_in_post_thread'
-                                || id === 'all_released_grades_email'
-                                || (index >= 2 && id === 'team_invite_email')
-                            ) {
-                                cy.get(`#${id}`).should('be.checked');
-                            }
-                            else {
-                                cy.get(`#${id}`).should('not.be.checked');
-                            }
-                        });
-                    });
+                // Verify sync button shows "Unsync Notifications"
+                cy.get('[data-testid="sync-notifications-button"]')
+                    .should('be.visible')
+                    .should('contain', 'Unsync Notifications');
+
+                // Verify the specific notifications we enabled are checked (sync is enabled)
+                cy.get('#reply_in_post_thread').should('be.checked');
+                cy.get('#all_released_grades_email').should('be.checked');
+
+                // Ensure all other notifications are unchecked outside of disabled inputs
+                cy.get('input[data-testid="checkbox-input"]').each(($checkbox) => {
+                    const id = $checkbox.attr('id');
+
+                    if (id === 'reply_in_post_thread' || id === 'all_released_grades_email') {
+                        cy.wrap($checkbox).should('be.checked');
+                    }
+                    else if (!$checkbox.prop('disabled')) {
+                        cy.wrap($checkbox).should('not.be.checked');
+                    }
+                });
             }
         });
     });

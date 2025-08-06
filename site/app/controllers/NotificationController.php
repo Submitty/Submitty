@@ -145,7 +145,7 @@ class NotificationController extends AbstractController {
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);
 
-            // Auto-sync settings to other courses, which only applies if user has sync enabled
+            // Auto-sync new settings to other active courses, which only applies if user has syncing enabled
             $this->autoSyncNotificationSettings($new_settings);
 
             return MultiResponse::JsonOnlyResponse(
@@ -169,12 +169,11 @@ class NotificationController extends AbstractController {
         $syncing = isset($_POST['notifications_synced']) && $_POST['notifications_synced'] === 'true';
 
         if ($syncing) {
-            // Force sync across all active courses, regardless of current sync status
             $sync_settings = [];
             $notification_settings = $this->core->getUser()->getNotificationSettings();
 
             foreach ($this->selections as $setting) {
-                // Only persist the valid settings that are actually set or default them to false
+                // Only persist the valid settings that are set, otherwise default them to false
                 if (isset($notification_settings[$setting])) {
                     $sync_settings[$setting] = $notification_settings[$setting];
                 }
@@ -186,16 +185,14 @@ class NotificationController extends AbstractController {
             $error_message = $this->autoSyncNotificationSettings($sync_settings, true);
 
             if ($error_message !== null) {
-                // The only potential error is that the user has no active courses
+                // Implies no active courses to sync to
                 return JsonResponse::getFailResponse($error_message);
             }
         }
 
-        // Update the sync status
         $action = $syncing ? 'enabled' : 'disabled';
         $this->core->getQueries()->updateNotificationSync($user_id, $syncing);
         $this->core->getUser()->setNotificationsSynced($syncing);
-
         return JsonResponse::getSuccessResponse(['message' => 'Notification syncing has been ' . ($action)]);
     }
 
@@ -215,7 +212,7 @@ class NotificationController extends AbstractController {
             $current_term = $this->core->getConfig()->getTerm();
             $current_course = $this->core->getConfig()->getCourse();
             $defaults = $current_term . '-' . $current_course;
-            $message = 'These notification settings have been saved as your default for future courses.';
+            $message = 'Default notification settings have been set for future courses.';
         }
 
         $this->core->getQueries()->updateNotificationDefaults($user_id, $defaults);
@@ -224,17 +221,18 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * Automatically sync notification settings to other courses if user has sync enabled or if force is true
+     * Automatically sync notification settings to other courses if the user has sync enabled or is enabling sync.
+     *
      * @param array<string, bool> $sync_settings The updated notification settings
-     * @param bool $force Whether to force sync even if user has sync disabled
+     * @param bool $enabling Whether the user is enabling sync
      * @return string|null Null if sync is not applied or has been applied successfully, otherwise a message indicating why sync failed
      */
-    private function autoSyncNotificationSettings(array $sync_settings, ?bool $force = false): ?string {
+    private function autoSyncNotificationSettings(array $sync_settings, ?bool $enabling = false): ?string {
         $user = $this->core->getUser();
         $synced = $user->getNotificationsSynced();
 
-        // Only sync if user has sync enabled and we are not forcing sync
-        if (!$synced && !$force) {
+        // Only sync if user has sync enabled or is enabling sync
+        if (!$synced && !$enabling) {
             return null;
         }
 
@@ -242,7 +240,7 @@ class NotificationController extends AbstractController {
         $user_id = $user->getId();
         $courses = $this->core->getQueries()->getCourseForUserId($user_id);
 
-        if ($synced || $force) {
+        if ($synced || $enabling) {
             // Get all active courses for the user
             $courses = $this->core->getQueries()->getCourseForUserId($user_id);
 
@@ -250,7 +248,7 @@ class NotificationController extends AbstractController {
                 return 'You need to be enrolled in active courses to sync notification settings.';
             }
 
-            // Store the core application configuration
+            // Store the core application configuration before connecting to other course databases
             $original_config = clone $this->core->getConfig();
 
             // Sync the notification settings to all active courses
@@ -258,12 +256,12 @@ class NotificationController extends AbstractController {
                 $term = $course->getTerm();
                 $course_name = $course->getTitle();
 
-                // Skip the current course as the updates have already been applied to it
+                // Skip the current course as updates are implicitly applied to it
                 if ($term === $this->core->getConfig()->getTerm() && $course_name === $this->core->getConfig()->getCourse()) {
                     continue;
                 }
 
-                // Connect to the target course
+                // Connect to the target course database
                 $this->core->loadCourseConfig($term, $course_name);
                 $this->core->loadCourseDatabase();
                 $course_db = $this->core->getCourseDB();
@@ -275,7 +273,7 @@ class NotificationController extends AbstractController {
                 $course_db->disconnect();
             }
 
-            // Restore the original core application configuration
+            // Restore the original core application configuration after syncing
             $this->core->setConfig($original_config);
             $this->core->loadCourseDatabase();
         }

@@ -220,7 +220,7 @@
                             class="form-control"
                             aria-label="Change Notification Sync Preference"
                             data-testid="notification-sync-preference-dropdown"
-                            onchange="window.handleProfileSyncChange()">
+                            onchange="handleProfileSyncChange()">
                             <option value="sync" data-testid="sync-notifications-option" {% if user.getNotificationsSynced() %}selected{% endif %}>Sync</option>
                             <option value="unsync" data-testid="unsync-notifications-option" {% if not user.getNotificationsSynced() %}selected{% endif %}>No Sync</option>
                         </select>

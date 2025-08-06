@@ -214,7 +214,7 @@ class User extends AbstractModel implements \JsonSerializable {
     protected $notifications_synced = false;
 
     /** @prop
-     * @var string|null The reference course for default notification settings (format: term-course) */
+     * @var string|null The reference course for default notification settings (term-course) */
     protected $notification_defaults = null;
 
     /** @prop
@@ -314,10 +314,7 @@ class User extends AbstractModel implements \JsonSerializable {
             $this->setRegistrationSubsection($details['registration_subsection']);
         }
 
-        // Initialize notification sync properties
         $this->notifications_synced = isset($details['notifications_synced']) && $details['notifications_synced'] === true;
-
-        // Initialize notification defaults
         $this->notification_defaults = $details['notification_defaults'] ?? null;
 
         // Use registration type data or default to "graded" for students and "staff" for others

@@ -93,48 +93,51 @@ class CourseRegistrationController extends AbstractController {
     }
 
     /**
-     * Apply default notification settings for a newly enrolled user
+     * Apply default notification settings for a newly enrolled user.
      *
-     * @param string $user_id
-     * @param string $term
-     * @param string $course
+     * @param string $user_id The user ID
+     * @param string $term The term
+     * @param string $course The course
      * @return void
      */
     private function applyDefaultNotificationSettings(string $user_id, string $term, string $course): void {
         $notification_defaults = $this->core->getUser()->getNotificationDefaults();
 
         if ($notification_defaults === null) {
+            // User has no default notification settings
             return;
         }
 
-        // Parse the reference course from the defaults string (format: term-course)
+        // Parse the reference course from the defaults string (term-course)
         $parts = explode('-', $notification_defaults, 2);
         if (count($parts) !== 2) {
+            // Invalid default notification settings format, which shouldn't be possible outside of a direct database query
             return;
         }
 
-        $reference_term = $parts[0];
-        $reference_course = $parts[1];
+        $target_term = $parts[0];
+        $target_course = $parts[1];
 
+        // Store the core application configuration before connecting to the target course database
         $original_config = clone $this->core->getConfig();
-        $this->core->loadCourseConfig($reference_term, $reference_course);
+
+        // Get the notification settings from the target course database
+        $this->core->loadCourseConfig($target_term, $target_course);
         $this->core->loadCourseDatabase();
-        $course_db = $this->core->getCourseDB();
+        $target_course_db = $this->core->getCourseDB();
 
-        // Get the notification settings from the reference course
-        $reference_settings = $this->core->getQueries()->getNotificationSettings($user_id);
+        $default_settings = $this->core->getQueries()->getNotificationSettings($user_id);
 
-        if ($reference_settings === null) {
+        if ($default_settings === null) {
+            // No default settings found, which shouldn't be possible outside of a direct database query
             return;
         }
 
-        // Apply the notification settings to the new course
-        $this->core->getQueries()->updateNotificationSettings($reference_settings);
+        // Apply the default notification settings to the target course database and disconnect from it
+        $this->core->getQueries()->updateNotificationSettings($default_settings);
+        $target_course_db->disconnect();
 
-        // Disconnect from the reference course database
-        $course_db->disconnect();
-
-        // Restore the original core application configuration
+        // Restore the original core application configuration after applying the default notification settings
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
     }
