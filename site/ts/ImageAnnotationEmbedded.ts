@@ -465,7 +465,8 @@ function generateAnnotatedFilename(originalFilename: string): string {
     if (nameParts.length > 1) {
         const extension = nameParts.pop()!;
         return `${nameParts.join('.')}_annotated.${extension}`;
-    } else {
+    }
+    else {
         return `${originalFilename}_annotated.png`;
     }
 }
