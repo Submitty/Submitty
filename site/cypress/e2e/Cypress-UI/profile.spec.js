@@ -200,82 +200,93 @@ describe('Test cases revolving around user profile page', () => {
             cy.get('[data-testid="remove-message-popup"]').first().click();
         };
 
-        // Test sync functionality across courses
-        courses.forEach((course, index) => {
-            if (index === 0) {
-                // Set up initial state on first course
-                cy.visit('/user_profile');
+        const verifyNotificationSync = (initialize = true) => {
+            // Test sync functionality across courses
+            courses.forEach((course, index) => {
+                if (initialize && index === 0) {
+                    // Set up initial state on first course
+                    cy.visit('/user_profile');
 
-                // First ensure sync is disabled
-                cy.get('[data-testid="notification-sync-preference-dropdown"]')
-                    .should('be.visible')
-                    .then(($select) => {
-                        if ($select.val() === 'sync') {
-                            // If sync is already enabled, disable it first
-                            cy.wrap($select).select('unsync');
-                            verifyMessage('Notification syncing has been disabled');
+                    // First ensure sync is disabled
+                    cy.get('[data-testid="notification-sync-preference-dropdown"]')
+                        .should('be.visible')
+                        .then(($select) => {
+                            if ($select.val() === 'sync') {
+                                // If sync is already enabled, disable it first
+                                cy.wrap($select).select('unsync');
+                                verifyMessage('Notification syncing has been disabled');
+                            }
+                        });
+
+                    // Navigate to notifications settings
+                    cy.visit(buildUrl([course, 'notifications', 'settings']));
+
+                    // Verify sync button shows "Sync Notifications"
+                    cy.get('[data-testid="sync-notifications-button"]')
+                        .should('be.visible')
+                        .should('contain', 'Sync Notifications');
+
+                    // Ensure only mandatory notifications are subscribed to
+                    cy.get('[data-testid="unsubscribe-all-optional-notifications"]').click();
+                    cy.get('[data-testid="unsubscribe-all-optional-emails"]').click();
+
+                    // Enable two specific non-disabled notifications for testing
+                    cy.get('#reply_in_post_thread').should('not.be.disabled').check();
+                    verifyMessage('Notification settings have been saved');
+
+                    cy.get('#all_released_grades_email').should('not.be.disabled').check();
+                    verifyMessage('Notification settings have been saved');
+
+                    // Enable sync
+                    cy.get('[data-testid="sync-notifications-button"]').click();
+                    verifyMessage('Notification syncing has been enabled');
+
+                    // Verify the button text has been updated
+                    cy.get('[data-testid="sync-notifications-button"]')
+                        .should('be.visible')
+                        .should('contain', 'Unsync Notifications');
+
+                    // Verify the dropdown value has been updated
+                    cy.visit('/user_profile');
+                    cy.get('[data-testid="notification-sync-preference-dropdown"]')
+                        .should('have.value', 'sync');
+                }
+                else {
+                    // On subsequent courses, verify sync propagated the settings
+                    cy.visit(buildUrl([course, 'notifications', 'settings']));
+
+                    // Verify sync button shows "Unsync Notifications"
+                    cy.get('[data-testid="sync-notifications-button"]')
+                        .should('be.visible')
+                        .should('contain', 'Unsync Notifications');
+
+                    // Verify the specific notifications we enabled are checked (sync is enabled)
+                    cy.get('#reply_in_post_thread').should('be.checked');
+                    cy.get('#all_released_grades_email').should('be.checked');
+
+                    // Ensure all other notifications are unchecked outside of disabled inputs
+                    cy.get('input[data-testid="checkbox-input"]').each(($checkbox) => {
+                        const id = $checkbox.attr('id');
+
+                        if (id === 'reply_in_post_thread' || id === 'all_released_grades_email' || (!initialize && id === 'team_member_submission')) {
+                            cy.wrap($checkbox).should('be.checked');
+                        }
+                        else if (!$checkbox.prop('disabled')) {
+                            cy.wrap($checkbox).should('not.be.checked');
                         }
                     });
+                }
+            });
+        };
 
-                // Navigate to notifications settings
-                cy.visit(buildUrl([course, 'notifications', 'settings']));
+        verifyNotificationSync(true);
 
-                // Verify sync button shows "Sync Notifications"
-                cy.get('[data-testid="sync-notifications-button"]')
-                    .should('be.visible')
-                    .should('contain', 'Sync Notifications');
+        // Apply an additional settings to development course to ensure sync is truly propagated
+        cy.visit(buildUrl(['development', 'notifications', 'settings']));
+        cy.get('#team_member_submission').should('not.be.checked').check();
+        verifyMessage('Notification settings have been saved');
 
-                // Ensure only mandatory notifications are subscribed to
-                cy.get('[data-testid="unsubscribe-all-optional-notifications"]').click();
-                cy.get('[data-testid="unsubscribe-all-optional-emails"]').click();
-
-                // Enable two specific non-disabled notifications for testing
-                cy.get('#reply_in_post_thread').should('not.be.disabled').check();
-                verifyMessage('Notification settings have been saved');
-
-                cy.get('#all_released_grades_email').should('not.be.disabled').check();
-                verifyMessage('Notification settings have been saved');
-
-                // Enable sync
-                cy.get('[data-testid="sync-notifications-button"]').click();
-                verifyMessage('Notification syncing has been enabled');
-
-                // Verify the button text has been updated
-                cy.get('[data-testid="sync-notifications-button"]')
-                    .should('be.visible')
-                    .should('contain', 'Unsync Notifications');
-
-                // Verify the dropdown value has been updated
-                cy.visit('/user_profile');
-                cy.get('[data-testid="notification-sync-preference-dropdown"]')
-                    .should('have.value', 'sync');
-            }
-            else {
-                // On subsequent courses, verify sync propagated the settings
-                cy.visit(buildUrl([course, 'notifications', 'settings']));
-
-                // Verify sync button shows "Unsync Notifications"
-                cy.get('[data-testid="sync-notifications-button"]')
-                    .should('be.visible')
-                    .should('contain', 'Unsync Notifications');
-
-                // Verify the specific notifications we enabled are checked (sync is enabled)
-                cy.get('#reply_in_post_thread').should('be.checked');
-                cy.get('#all_released_grades_email').should('be.checked');
-
-                // Ensure all other notifications are unchecked outside of disabled inputs
-                cy.get('input[data-testid="checkbox-input"]').each(($checkbox) => {
-                    const id = $checkbox.attr('id');
-
-                    if (id === 'reply_in_post_thread' || id === 'all_released_grades_email') {
-                        cy.wrap($checkbox).should('be.checked');
-                    }
-                    else if (!$checkbox.prop('disabled')) {
-                        cy.wrap($checkbox).should('not.be.checked');
-                    }
-                });
-            }
-        });
+        verifyNotificationSync(false);
     });
 
     after(() => {
