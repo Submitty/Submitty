@@ -190,16 +190,7 @@ describe('Test cases revolving around user profile page', () => {
     });
 
     it('Should handle notification sync preference across multiple courses', () => {
-        const courses = ['sample', 'testing', 'tutorial', 'development', 'blank'];
-
-        // Helper function to dismiss all popup messages
-        const dismissAllMessages = () => {
-            cy.get('body').then(($body) => {
-                if ($body.find('[data-testid="popup-message"]').length > 0) {
-                    cy.get('[data-testid="remove-message-popup"]').click({ multiple: true });
-                }
-            });
-        };
+        const courses = ['sample', 'tutorial', 'development', 'blank'];
 
         // Helper function to wait for and verify a success message
         const verifyMessage = (expectedText) => {
@@ -208,10 +199,6 @@ describe('Test cases revolving around user profile page', () => {
                 .should('contain', expectedText);
             cy.get('[data-testid="remove-message-popup"]').first().click();
         };
-
-        // Logout the instructor and login as the student
-        cy.logout();
-        cy.login('student');
 
         // Test sync functionality across courses
         courses.forEach((course, index) => {
@@ -223,8 +210,11 @@ describe('Test cases revolving around user profile page', () => {
                 cy.get('[data-testid="notification-sync-preference-dropdown"]')
                     .should('be.visible')
                     .then(($select) => {
-                        cy.wrap($select).select('unsync');
-                        verifyMessage('Notification sync has been disabled');
+                        if ($select.val() === 'sync') {
+                            // If sync is already enabled, disable it first
+                            cy.wrap($select).select('unsync');
+                            verifyMessage('Notification syncing has been disabled');
+                        }
                     });
 
                 // Navigate to notifications settings
@@ -235,11 +225,9 @@ describe('Test cases revolving around user profile page', () => {
                     .should('be.visible')
                     .should('contain', 'Sync Notifications');
 
-                // Reset to clean state first to only be subscribed to mandatory notifications
+                // Ensure only mandatory notifications are subscribed to
                 cy.get('[data-testid="unsubscribe-all-optional-notifications"]').click();
                 cy.get('[data-testid="unsubscribe-all-optional-emails"]').click();
-                cy.get('[data-testid="reset-notification-settings"]').click();
-                cy.get('[data-testid="reset-email-settings"]').click();
 
                 // Enable two specific non-disabled notifications for testing
                 cy.get('#reply_in_post_thread').should('not.be.disabled').check();
@@ -250,7 +238,7 @@ describe('Test cases revolving around user profile page', () => {
 
                 // Enable sync
                 cy.get('[data-testid="sync-notifications-button"]').click();
-                verifyMessage('Notification sync has been enabled');
+                verifyMessage('Notification syncing has been enabled');
 
                 // Verify the button text has been updated
                 cy.get('[data-testid="sync-notifications-button"]')

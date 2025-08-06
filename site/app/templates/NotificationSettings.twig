@@ -32,6 +32,7 @@
                 <div class="button-row">
                     <button type="button"
                         id="sync-notifications-btn"
+                        data-testid="sync-notifications-button"
                         class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="sync-notifications-button"
@@ -44,6 +45,7 @@
                     </button>
                     <button type="button"
                         id="set-defaults-btn"
+                        data-testid="set-defaults-button"
                         class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="set-defaults-button"
@@ -54,6 +56,7 @@
                     data-tooltip="Clear Default Settings - {{ core.getUser().getNotificationDefaults() }}"
                     type="button"
                     id="clear-defaults-btn"
+                    data-testid="clear-defaults-button"
                     class="notification-setting-button btn btn-default"
                     {% if not core.getUser().getNotificationDefaults() %} style="display: none;" {% endif %}
                     tabindex="0"
