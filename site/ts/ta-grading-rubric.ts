@@ -3,7 +3,6 @@ import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 
 declare global {
     interface Window {
-        GRADED_GRADEABLE: GradedGradeable | null;
         reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
         showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
         onAddNewMark(me: HTMLElement): Promise<void>;
@@ -63,7 +62,6 @@ const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {
 const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
 const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
 let GRADED_GRADEABLE: GradedGradeable | null = null;
-window.GRADED_GRADEABLE = GRADED_GRADEABLE;
 type Stats = { section_submitter_count: string; total_submitter_count: string; section_graded_component_count: string; total_graded_component_count: string; section_total_component_count: string; total_total_component_count: string; submitter_ids: string[]; submitter_anon_ids: Record<string, string> };
 type Gradeable = {
     id: string;
@@ -1486,7 +1484,6 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
  * @return {Object}
  */
 function getScoresFromDOM() {
-    console.log(GRADED_GRADEABLE);
     const dataDOMElement = $('#gradeable-scores-id');
     const scores: {
         user_group: number;
@@ -2474,7 +2471,6 @@ function getMarkFromMarkArray(marks: ReturnType<typeof getMarkListFromDOM>, mark
  * @return {void}
  */
 window.reloadGradingRubric = async function (gradeable_id: string, anon_id: string | undefined) {
-    console.log(`Reloading grading rubric for gradeable ${gradeable_id} and anon_id ${anon_id}`);
     let gradeable: Gradeable;
     try {
         gradeable = await ajaxGetGradeableRubric(gradeable_id);
