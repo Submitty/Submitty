@@ -214,23 +214,25 @@
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <label for="notification_defaults_select">Choose default settings from registered courses</label>
-                        <select
-                            id="notification_defaults_select"
-                            class="form-control"
-                            aria-label="Choose Default Notification Settings"
-                            data-testid="notification-defaults-dropdown">
-                            <option value="" data-testid="no-defaults-option" {% if not user.getNotificationDefaults() %}selected{% endif %}>No Defaults</option>
-                            {% for course_key, course_name in courses %}
-                                <option value="{{ course_key }}" data-testid="defaults-option-{{ course_key }}" {% if user.getNotificationDefaults() == course_key %}selected{% endif %}>{{ course_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="flex-row-col" style="margin-top: 10px;">
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button id="view-defaults-btn" class="btn btn-secondary" data-testid="view-notification-defaults" onclick="showNotificationDefaults()">View Settings</button>
-                            <button id="apply-defaults-btn" class="btn btn-primary" data-testid="apply-notification-defaults" onclick="applyNotificationDefaults()">Apply Settings</button>
-                            <button id="clear-defaults-btn" class="btn btn-danger" data-testid="clear-notification-defaults" onclick="clearNotificationDefaults()">Clear Settings</button>
+                        <label for="notification_defaults_select">Choose from registered courses</label>
+                        <div class="flex-row-row" style="flex: 1; justify-content: center;">
+                            <select
+                                id="notification_defaults_select"
+                                class="form-control"
+                                aria-label="Choose Default Notification Settings"
+                                data-testid="notification-defaults-dropdown"
+                                style="width: 100%;"
+                                onchange="handleDefaultsDropdownChange()">
+                                <option value="" data-testid="no-defaults-option" {% if not user.getNotificationDefaults() %}selected{% endif %}>No Defaults</option>
+                                {% for course_key, course_name in courses %}
+                                    <option value="{{ course_key }}" data-testid="defaults-option-{{ course_key }}" {% if user.getNotificationDefaults() == course_key %}selected{% endif %}>{{ course_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="flex-row-col" style="width: 100%; margin-top: 10px; justify-content: space-between; gap: 6px; {% if not user.getNotificationDefaults() %}display: none;{% endif %}" id="notification-defaults-buttons">
+                                <button id="view-defaults-btn" style="flex: 1;" class="btn btn-secondary" data-testid="view-notification-defaults" onclick="showNotificationDefaults()">View</button>
+                                <button id="apply-defaults-btn" style="flex: 1;" class="btn btn-primary" data-testid="apply-notification-defaults" onclick="applyNotificationDefaults()">Apply</button>
+                                <button id="clear-defaults-btn" style="flex: 1;" class="btn btn-danger" data-testid="clear-notification-defaults" onclick="clearNotificationDefaults()">Clear</button>
+                            </div>
                         </div>
                     </div>
                 </div>

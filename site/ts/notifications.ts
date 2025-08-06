@@ -9,6 +9,7 @@ declare global {
         handleSyncClick: () => Promise<void>;
         handleSetDefaultsClick: () => Promise<void>;
         handleClearDefaultsClick: () => Promise<void>;
+        handleDefaultsDropdownChange: () => Promise<void>;
         showNotificationDefaults: () => Promise<void>;
         applyNotificationDefaults: () => Promise<void>;
         clearNotificationDefaults: () => Promise<void>;
@@ -205,6 +206,19 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
     }
 };
 
+window.handleDefaultsDropdownChange = async function handleDefaultsDropdownChange(): Promise<void> {
+    const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
+    if (!dropdown) {
+        return;
+    }
+
+    const value = dropdown.value;
+    const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
+    if (buttonsContainer) {
+        buttonsContainer.style.display = value === '' ? 'none' : 'flex';
+    }
+}
+
 window.showNotificationDefaults = async function showNotificationDefaults(): Promise<void> {
     try {
         const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
@@ -354,7 +368,7 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
             }
 
             // Hide the buttons container
-            const buttonsContainer = document.querySelector('#view-defaults-btn')?.parentElement as HTMLElement;
+            const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
             if (buttonsContainer) {
                 buttonsContainer.style.display = 'none';
             }
