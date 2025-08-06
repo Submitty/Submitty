@@ -140,7 +140,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
      */
     public static function getUrl(Core $core, string $metadata_json): ?string {
         $metadata = json_decode($metadata_json, true);
-        if (!is_array($metadata) || $metadata === []) {
+        if (empty($metadata)) {
             return null;
         }
 
