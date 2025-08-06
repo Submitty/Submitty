@@ -33,6 +33,7 @@ onMounted(() => {
   >
     <template #trigger="{ togglePopup }">
       <button
+        id="settings-btn"
         class="btn btn-primary"
         @click="togglePopup"
       >

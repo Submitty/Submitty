@@ -59,6 +59,7 @@ watch(
   </slot>
   <div
     v-if="visible"
+    :data-testid="id"
     class="popup-form"
   >
     <div

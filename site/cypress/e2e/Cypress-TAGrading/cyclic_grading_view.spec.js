@@ -18,7 +18,7 @@ describe('Cyclic grading View Test', () => {
             cy.get('[data-testid="rubric-title"]').should('contain', 'John Smith');
             cy.get('[data-testid="grading-setting-btn"]').click(); // change
             cy.get('[data-testid="ta-grading-setting-option"]').first().select('Prev/Next Ungraded Student');
-            cy.get('[data-testid="close-button"]').eq(3).click();
+            cy.get('[data-testid="settings-popup"] [data-testid="close-button"]').click();
             cy.get('[data-testid="next-student-navlink"]').click();
             cy.get('[data-testid="rubric-title"]').should('contain', 'Joe Student');
         });
