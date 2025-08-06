@@ -679,7 +679,7 @@ async function popupAnnotatedImage(gradeable_id: string, filename: string, path:
 
         title.textContent = `Annotated Image: ${filename}`;
 
-        // Set CSS styles
+        // Set CSS styles (#11111 is standard-gray-black), keep in mind if refactoring
         style.textContent = `
             body {
                 margin: 0;
