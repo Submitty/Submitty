@@ -194,6 +194,7 @@ class AutogradingConfigController extends AbstractController {
 
         if ($config_dir === null) {
             $this->core->addErrorMessage("No configuration directory provided.");
+            return;
         }
 
         $course = $this->core->getConfig()->getCourse();
@@ -204,6 +205,7 @@ class AutogradingConfigController extends AbstractController {
         $zip = new \ZipArchive();
         if ($zip->open($zip_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             $this->core->addErrorMessage("Failed to create ZIP archive.");
+            return;
         }
 
         $files = new \RecursiveIteratorIterator(
@@ -211,10 +213,21 @@ class AutogradingConfigController extends AbstractController {
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
+        $failed_files = [];
+
         foreach ($files as $file) {
             $file_path = $file->getRealPath();
             $relative_path = substr($file_path, strlen($config_dir) + 1);
-            $zip->addFile($file_path, $relative_path);
+
+            $result = $zip->addFile($file_path, $relative_path);
+            if ($result !== true) {
+                $failed_files[] = $relative_path;
+            }
+        }
+
+        if (count($failed_files) > 0) {
+            $this->core->addErrorMessage("Failed to add the following files to the ZIP:<br>" . implode('<br>', $failed_files));
+            return;
         }
 
         $zip->close();
@@ -222,8 +235,15 @@ class AutogradingConfigController extends AbstractController {
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="' . $zip_filename . '"');
         header('Content-Length: ' . filesize($zip_path));
-        readfile($zip_path);
-        unlink($zip_path);
+        if (readfile($zip_path) === false) {
+            $this->core->addErrorMessage("Failed to read ZIP file for download.");
+            return;
+        }
+
+        if (!unlink($zip_path)) {
+            $this->core->addErrorMessage("Failed to delete temporary ZIP file.");
+            return;
+        }
     }
 
     /**
