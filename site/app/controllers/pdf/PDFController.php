@@ -81,6 +81,9 @@ class PDFController extends AbstractController {
     public function showStudentImg(string $gradeable_id, string $filename, string $path, string $anon_path): JsonResponse {
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse('Could not get gradeable');
+        }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
@@ -142,6 +145,9 @@ class PDFController extends AbstractController {
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not get gradeable');
+        }
         if ($gradeable->isTeamAssignment()) {
             if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
                 $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
@@ -407,14 +413,34 @@ class PDFController extends AbstractController {
             return JsonResponse::getErrorResponse('Creating annotation version folder failed');
         }
 
+        $decoded_annotations = json_decode($annotations, true) !== null ? json_decode($annotations, true) : [];
+        $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
+
+        // Check if annotations have no markers (empty annotations)
+        $has_markers = isset($decoded_annotations['markers']) && is_array($decoded_annotations['markers']) && count($decoded_annotations['markers']) > 0;
+
+        if (!$has_markers) {
+            // No markers found - delete the annotation file if it exists
+            if (file_exists($annotation_file_path)) {
+                if (unlink($annotation_file_path)) {
+                    return JsonResponse::getSuccessResponse('Empty annotation removed successfully!');
+                }
+                else {
+                    return JsonResponse::getErrorResponse('Failed to remove empty annotation file');
+                }
+            }
+            // File doesn't exist and there are no markers - nothing to do
+            return JsonResponse::getSuccessResponse('No annotations to save');
+        }
+
+        // Has markers - save the annotation file
         $annotation_body = [
             'file_path' => $file_path,
             'grader_id' => $grader_id,
-            'annotations' => json_decode($annotations, true) !== null ? json_decode($annotations, true) : []
+            'annotations' => $decoded_annotations
         ];
 
         $annotation_json = json_encode($annotation_body);
-        $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
 
         if (file_put_contents($annotation_file_path, $annotation_json) === false) {
             return JsonResponse::getErrorResponse('Failed to save annotation file');
