@@ -1,4 +1,4 @@
-<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}" data-testid="grading-rubric">
+<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}" data-testid="grading-rubric" data-gradeable_id="{{ gradeable_id }}" data-anon_id="{{ anon_id }}" data-is_ta_grading="{{ is_ta_grading }}" data-is_peer_grader="{{ is_peer_grader }}" data-has_active_version="{{ has_active_version }}" data-version_conflict="{{ version_conflict }}" data-display_version="{{ display_version }}" data-show_verify_all="{{ show_verify_all }}" data-show_clear_conflicts="{{ show_clear_conflicts }}" data-show_silent_edit="{{ show_silent_edit }}">
     <div id="allow_custom_marks" data-gradeable_custom_marks="{{ allow_custom_marks }}"></div>
     <div>
         {% if is_ta_grading %}
