@@ -3077,7 +3077,7 @@ export async function closeComponent(component_id: number, saveChanges = true, e
         await closeComponentGrading(component_id, saveChanges);
         setComponentInProgress(component_id, false);
         if (!edit_mode) {
-            if (!GRADED_GRADEABLE?.peer_gradeable && GRADED_GRADEABLE) {
+            if (GRADED_GRADEABLE && !GRADED_GRADEABLE.peer_gradeable) {
                 await refreshTotalScoreBox();
             }
             else {
