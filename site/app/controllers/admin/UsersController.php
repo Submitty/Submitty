@@ -6,6 +6,7 @@ use app\authentication\DatabaseAuthentication;
 use app\authentication\SamlAuthentication;
 use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
+use app\controllers\course\CourseRegistrationController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
@@ -418,12 +419,14 @@ class UsersController extends AbstractController {
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                CourseRegistrationController::applyDefaultNotificationSettings($this->core, $user->getId());
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
+                CourseRegistrationController::applyDefaultNotificationSettings($this->core, $user->getId());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -903,6 +906,7 @@ class UsersController extends AbstractController {
                             }
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        CourseRegistrationController::applyDefaultNotificationSettings($this->core, $user->getId());
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);

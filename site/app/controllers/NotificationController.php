@@ -178,7 +178,7 @@ class NotificationController extends AbstractController {
                     $sync_settings[$setting] = $notification_settings[$setting];
                 }
                 else {
-                    $sync_settings[$setting] = 'false';
+                    $sync_settings[$setting] = false;
                 }
             }
 

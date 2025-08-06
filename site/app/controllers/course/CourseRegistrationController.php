@@ -4,6 +4,7 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
+use app\libraries\Core;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
@@ -83,10 +84,8 @@ class CourseRegistrationController extends AbstractController {
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
             $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+            self::applyDefaultNotificationSettings($this->core, $user_id);
         }
-
-        // Apply default notification settings if user has them configured
-        $this->applyDefaultNotificationSettings($user_id, $term, $course);
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
@@ -95,13 +94,12 @@ class CourseRegistrationController extends AbstractController {
     /**
      * Apply default notification settings for a newly enrolled user.
      *
+     * @param Core $core The core application configuration
      * @param string $user_id The user ID
-     * @param string $term The term
-     * @param string $course The course
      * @return void
      */
-    private function applyDefaultNotificationSettings(string $user_id, string $term, string $course): void {
-        $notification_defaults = $this->core->getUser()->getNotificationDefaults();
+    public static function applyDefaultNotificationSettings(Core $core, string $user_id): void {
+        $notification_defaults = $core->getUser()->getNotificationDefaults();
 
         if ($notification_defaults === null) {
             // User has no default notification settings
@@ -119,14 +117,14 @@ class CourseRegistrationController extends AbstractController {
         $target_course = $parts[1];
 
         // Store the core application configuration before connecting to the target course database
-        $original_config = clone $this->core->getConfig();
+        $original_config = clone $core->getConfig();
 
         // Get the notification settings from the target course database
-        $this->core->loadCourseConfig($target_term, $target_course);
-        $this->core->loadCourseDatabase();
-        $target_course_db = $this->core->getCourseDB();
+        $core->loadCourseConfig($target_term, $target_course);
+        $core->loadCourseDatabase();
+        $target_course_db = $core->getCourseDB();
 
-        $default_settings = $this->core->getQueries()->getNotificationSettings($user_id);
+        $default_settings = $core->getQueries()->getNotificationSettings($user_id);
 
         if ($default_settings === null) {
             // No default settings found, which shouldn't be possible outside of a direct database query
@@ -134,11 +132,11 @@ class CourseRegistrationController extends AbstractController {
         }
 
         // Apply the default notification settings to the target course database and disconnect from it
-        $this->core->getQueries()->updateNotificationSettings($default_settings);
+        $core->getQueries()->updateNotificationSettings($default_settings);
         $target_course_db->disconnect();
 
         // Restore the original core application configuration after applying the default notification settings
-        $this->core->setConfig($original_config);
-        $this->core->loadCourseDatabase();
+        $core->setConfig($original_config);
+        $core->loadCourseDatabase();
     }
 }

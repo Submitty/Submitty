@@ -720,9 +720,7 @@ SQL;
         $updates = '';
 
         foreach ($results as $key => $value) {
-            if ($value != 'false') {
-                $results[$key] = 'true';
-            }
+            $results[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
             $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true');
             $updates .= $key . ' = ?,';
         }
@@ -751,7 +749,7 @@ SQL;
      */
     public function getNotificationSettings(string $user_id): ?array {
         $this->course_db->query("SELECT * FROM notification_settings WHERE user_id = ?", [$user_id]);
-        return $this->course_db->row();
+        return count($this->course_db->rows()) > 0 ? $this->course_db->rows()[0] : null;
     }
 
     /**

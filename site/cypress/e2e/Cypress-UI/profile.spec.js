@@ -190,7 +190,7 @@ describe('Test cases revolving around user profile page', () => {
     });
 
     it('Should handle notification sync preference across multiple courses', () => {
-        const courses = ['sample', 'tutorial', 'development', 'blank'];
+        const courses = ['sample', 'testing', 'tutorial', 'development', 'blank'];
 
         // Helper function to dismiss all popup messages
         const dismissAllMessages = () => {
