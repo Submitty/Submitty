@@ -132,11 +132,11 @@
                         <div id="customization-options">
                             <p> A manual customization file is available. Please choose the file for rendering Rainbow Grades:</p>
                             <div>
-                                <input type="radio" id="manual_customization" data-testid="manual-customization-option" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
+                                <input type="radio" id="manual_customization" data-testid="manual-customization-option" name="customization" value="manual" {{ uses_manual_customization ? 'checked' : '' }}>
                                 <label for="manual_customization">Manual Customization</label>
                             </div>
                             <div>
-                                <input type="radio" id="gui_customization" data-testid="gui-customization-option" name="customization" value="gui" {{ manual_customization_exists ? '' : 'checked' }}>
+                                <input type="radio" id="gui_customization" data-testid="gui-customization-option" name="customization" value="gui" {{ uses_manual_customization ? '' : 'checked' }}>
                                 <label for="gui_customization">GUI Customization</label>
                             </div>
                         </div>

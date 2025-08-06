@@ -35,6 +35,7 @@ coverage.xml
 /site/report/
 /site/incremental_build/
 /site/cypress/fixtures/copy_of_more_autograding_examples
+/site/cypress/fixtures/copy_of_sample_files
 
 db_update.php
 .setup/data/random_users.txt

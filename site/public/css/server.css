@@ -524,16 +524,6 @@ td > a.active-sort {
     align-items: center;
 }
 
-.inner-message {
-    margin: 0 auto 10px;
-}
-
-.message-close {
-    float: right;
-    margin-right: -20px;
-    cursor: pointer;
-}
-
 .option {
     margin-bottom: 20px;
 }
@@ -1437,6 +1427,10 @@ end of styles used in the admin gradeable page
         1px 1px 0 var(--text-black);
 }
 
+.grader-active {
+    color: var(--standard-vibrant-red);
+}
+
 /* styles for the colors for the electronic grader details page */
 
 /* color for no grader (PEER) */
@@ -1756,11 +1750,6 @@ end of styles used in the admin gradeable page
     margin: 10px 0;
 }
 
-.flex-line {
-    display: flex;
-    align-items: center;
-}
-
 .shadow {
     box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
@@ -1833,12 +1822,6 @@ ol.full-list {
     display: block;
     margin: 1em 0;
     padding-left: 40px;
-}
-
-ul.bare-list,
-ol.bare-list {
-    list-style: none;
-    padding: 0;
 }
 
 .std-margin {

@@ -124,7 +124,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.35.2
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -151,7 +151,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.35.2
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -187,7 +187,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.35.2
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -508,6 +508,7 @@ jobs:
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
+              echo "y"                            # user create account
               echo ""                             # sysadmin email
               echo ""                             # where to report
               echo "1"                            # PamAuth
@@ -678,6 +679,9 @@ jobs:
         run: |
           npm ci
 
+      - name: Switch to Pam auth
+        run: sudo sed -ie "s/Database/Pam/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
       - name: Run accessibility test
         uses: cypress-io/github-action@v6
         with:
@@ -742,6 +746,14 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Run self-account-creation tests.
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
@@ -789,12 +801,18 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Submitty-JSON
+          path: /usr/local/submitty/config/submitty.json
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -810,7 +828,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding-Development", "Autograding-Tutorial"]
     services:
       postgres:
         image: postgres
@@ -831,23 +849,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # If the matrix is currently on Autograding, we should use the development course
+      # If the matrix is currently on Development or Tutorial,
+      # we should use the respective courses
       # and use the no_submissions flag
-      - name: Run setup script with inputs (Autograding)
-        if: ${{ matrix.containers == 'Autograding' }}
+      - name: Run setup script
         uses: ./.github/actions/e2e-Setup-Composite
         with:
-          courses: development
-          flags: --no_submissions
-
-      - name: Copy Autograding Files
-        if: ${{ matrix.containers == 'Autograding' }}
-        run: |
-          cp -R ${{env.SUBMITTY_REPOSITORY}}/more_autograding_examples ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/copy_of_more_autograding_examples
-
-      - name: Run setup script without inputs (Other containers)
-        if: ${{ matrix.containers != 'Autograding' }}
-        uses: ./.github/actions/e2e-Setup-Composite
+          courses: >-
+            ${{ matrix.containers == 'Autograding-Development' && 'development' ||
+                matrix.containers == 'Autograding-Tutorial' && 'tutorial' ||
+                'sample testing archived'
+            }}
+          flags: >-
+            ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
+                '--test_only_grading' }}
 
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules

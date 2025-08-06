@@ -42,7 +42,7 @@ function fetchMessages(chatroomId) {
         success: function (responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach((msg) => {
-                    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
+                    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
                 });
                 const messages_area = document.querySelector('.messages-area');
                 messages_area.scrollTop = messages_area.scrollHeight;
@@ -79,7 +79,7 @@ function sendMessage(chatroomId, userId, displayName, role, content, isAnonymous
     });
 }
 
-function appendMessage(displayName, role, ts, content) {
+function appendMessage(displayName, role, ts, content, msgID) {
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
         display_name = `${displayName} [${role}]`;
@@ -91,12 +91,16 @@ function appendMessage(displayName, role, ts, content) {
     if (role === 'instructor') {
         message.classList.add('admin-message');
     }
+    message.setAttribute('data-testid', 'message-container');
+    message.setAttribute('id', msgID);
 
     const messageHeader = document.createElement('div');
     messageHeader.classList.add('message-header');
+    messageHeader.setAttribute('data-testid', 'message-header');
 
     const senderName = document.createElement('span');
     senderName.classList.add('sender-name');
+    senderName.setAttribute('data-testid', 'sender-name');
     senderName.innerText = display_name;
 
     const timestampSpan = document.createElement('span');
@@ -108,6 +112,7 @@ function appendMessage(displayName, role, ts, content) {
 
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
+    messageContent.setAttribute('data-testid', 'message-content');
     messageContent.innerText = content;
 
     message.appendChild(messageHeader);
@@ -123,7 +128,7 @@ function appendMessage(displayName, role, ts, content) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
 }
 
 function initChatroomSocketClient(chatroomId) {

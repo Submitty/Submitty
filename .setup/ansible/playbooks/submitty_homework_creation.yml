@@ -1,0 +1,18 @@
+---
+- name: Submitty Homework Creation
+  hosts: localhost
+  connection: local
+
+  tasks:
+    # This role is defined in the Submitty Repo under .setup/ansible/roles
+    - name: Create gradeable
+      ansible.builtin.include_role:
+        name: submitty_homework_creation
+
+  vars_prompt:
+    - name: submitty_homework_creation_api_url
+      prompt: Enter the full API url (http://{domain.com}/api/{semester}/{course}/upload)
+      private: no
+    - name: submitty_homework_creation_passed_api_key
+      prompt: Enter your API key
+      private: yes

@@ -7,6 +7,8 @@
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
 #   EXTRA=rpi vagrant up
+#       or
+#   VM_MEMORY=4096 VM_CPUS=4 vagrant up
 #
 #
 # If you want to override the default image used for the virtual machines, you can set the
@@ -25,6 +27,9 @@
 #
 # If you don't want any submissions to be automatically generated for the courses created
 # by vagrant, you'll want to specify NO_SUBMISSIONS flag.
+#
+# You can also customize VM resources using environment variables:
+# VM_MEMORY=4096 VM_CPUS=4 vagrant up
 
 # Don't buffer output.
 $stdout.sync = true
@@ -33,6 +38,10 @@ $stderr.sync = true
 require 'json'
 
 ON_CI = !ENV.fetch('CI', '').empty?
+
+# VM resource configuration
+VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
+VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
 
 def gen_script(machine_name, worker: false, base: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
@@ -79,21 +88,20 @@ base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
-
-def mount_folders(config, mount_options, type = nil)
+def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
   # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type: type
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
 
   optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax IntroQuantumComputing LichenTestData DockerImages DockerImagesRPI)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type:type
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
     end
   }
 end
@@ -101,7 +109,7 @@ end
 def get_workers()
   worker_file = File.join(__dir__, '.vagrant', 'workers.json')
   if File.file?(worker_file)
-    return JSON.parse(File.read(worker_file), symbolize_names: true)
+    return JSON.parse(File.read(worker_file), symbolize_names: true)[:workers]
   else
     return Hash[]
   end
@@ -144,22 +152,44 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  get_workers.map do |worker_name, data|
-    config.vm.define worker_name do |ubuntu|
-      ubuntu.vm.network 'private_network', ip: data[:ip_addr]
-      ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
-      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: base_box)
+  if ARGV[0] == 'workers'
+    if apple_silicon
+      exec("arch", "-arm64", "python3", "vagrant-workers/workers.py", *ARGV[1..])
     end
+    exec("python3", "vagrant-workers/workers.py", *ARGV[1..])
   end
 
-  vm_name = 'ubuntu-22.04'
-  config.vm.define vm_name, primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7001)
-    ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
+  if ENV.fetch('WORKER_MODE', '0') == '1'
+    get_workers.map do |worker_name, data|
+      config.vm.define worker_name do |ubuntu|
+        ubuntu.vm.network 'private_network', ip: data[:ip_addr]
+        ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh' unless data[:ssh_port].nil?
+        ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: true)
+
+        ubuntu.vm.provider "qemu" do |qe, override|
+          qe.ssh_host = data[:ip_addr]
+          qe.ssh_port = 22
+          qe.socket_fd = 3
+          qe.mac_address = data[:mac_addr]
+          mount_folders(override, [], 'smb', ENV.fetch('GATEWAY_IP', '10.0.2.2'))
+        end
+      end
+    end
+  else
+    vm_name = 'ubuntu-22.04'
+    config.vm.define vm_name, primary: true do |ubuntu|
+      ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
+      ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
+      ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
+      ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7001)
+      ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
+      ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
+
+      ubuntu.vm.provider "qemu" do |qe, override|
+        qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
+        mount_folders(override, [], 'smb')
+      end
+    end
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
@@ -176,8 +206,8 @@ Vagrant.configure(2) do |config|
 
     # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
     # other things we do in dev.
-    vb.memory = ON_CI ? 1024 : 2048
-    vb.cpus = ON_CI ? 1 : 2
+    vb.memory = VM_MEMORY
+    vb.cpus = VM_CPUS
 
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
     # of sync timewise with the host for however long the host was asleep. Of course, the VM by default will
@@ -222,8 +252,8 @@ Vagrant.configure(2) do |config|
       end
     end
 
-    prl.memory = 2048
-    prl.cpus = 2
+    prl.memory = VM_MEMORY
+    prl.cpus = VM_CPUS
 
     mount_folders(override, ["share", "nosuid"])
   end
@@ -234,8 +264,8 @@ Vagrant.configure(2) do |config|
         override.vm.box = base_boxes[:arm_bento]
       end
     end
-    vmware.vmx["memsize"] = "2048"
-    vmware.vmx["numvcpus"] = "2"
+    vmware.vmx["memsize"] = VM_MEMORY.to_s
+    vmware.vmx["numvcpus"] = VM_CPUS.to_s
 
     mount_folders(override, [])
   end
@@ -247,8 +277,8 @@ Vagrant.configure(2) do |config|
 
     libvirt.qemu_use_session = true
 
-    libvirt.memory = 2048
-    libvirt.cpus = 2
+    libvirt.memory = VM_MEMORY
+    libvirt.cpus = VM_CPUS
 
     libvirt.forward_ssh_port = true
 
@@ -262,12 +292,8 @@ Vagrant.configure(2) do |config|
       end
     end
 
-    qe.memory = "2G"
-    qe.smp = 2
-
-    qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
-
-    mount_folders(override, [])
+    qe.memory = "#{VM_MEMORY}M"
+    qe.smp = VM_CPUS
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"

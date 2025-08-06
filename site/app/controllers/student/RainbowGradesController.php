@@ -32,9 +32,9 @@ class RainbowGradesController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * This route is used to view the grades of a specific student.
      **/
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
     public function viewStudentGrades(): RedirectResponse|WebResponse {
         if (!isset($_POST["student_id"])) {

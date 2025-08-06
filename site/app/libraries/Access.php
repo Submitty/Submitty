@@ -208,6 +208,7 @@ class Access {
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
+        $this->permissions["path.write.submissions_processed"] = self::DENY_ALL;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
@@ -300,6 +301,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.submission_versions",
                 "path.write" => "path.write.submission_versions"
+            ]
+        ];
+        $this->directories["submissions_processed"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/submissions_processed",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions_processed"
             ]
         ];
         $this->directories["results"] = [
@@ -885,12 +894,10 @@ class Access {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
-                    if ($hidden_files !== null) {
-                        foreach (explode(",", $hidden_files) as $file_regex) {
-                            $file_regex = trim($file_regex);
-                            if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
-                                return false;
-                            }
+                    foreach ($hidden_files as $file_regex) {
+                        $file_regex = trim($file_regex);
+                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
+                            return false;
                         }
                     }
                     break;

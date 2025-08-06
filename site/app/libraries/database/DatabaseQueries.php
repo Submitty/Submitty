@@ -10,6 +10,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
@@ -1853,7 +1854,7 @@ ORDER BY {$orderby}",
     /**
      * Gets the number of bad (late) user submissions associated with this gradeable.
      *
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
@@ -2226,7 +2227,7 @@ ORDER BY merged_data.{$section_key}
     /**
      * Gets the number of bad (late) graded components associated with this gradeable.
      *
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
@@ -4103,7 +4104,7 @@ ORDER BY {$section_key}",
 
     /**
      * Gets the number of bad (late) team submissions associated with this gradeable.
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
@@ -4531,21 +4532,41 @@ SQL;
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
         $this->course_db->query(
             "
-          UPDATE grade_override
-          SET marks=?, comment=?
-          WHERE user_id=?
-            AND g_id=?;",
-            [$marks, $comment, $user_id, $g_id]
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+            ",
+            [$user_id, $g_id, $marks, $comment]
         );
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query(
-                "
-            INSERT INTO grade_override
-            (user_id, g_id, marks, comment)
-            VALUES(?,?,?,?)",
-                [$user_id, $g_id, $marks, $comment]
-            );
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
         }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
     }
 
     /**
@@ -5364,6 +5385,17 @@ AND gc_id IN (
     }
 
     /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Returns notifications for a user
      *
      * @param  string $user_id
@@ -5994,6 +6026,7 @@ AND gc_id IN (
               gamo.*,
               gc.*,
               pgp.*,
+              r.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6006,6 +6039,18 @@ AND gc_id IN (
                 ) AS distinct_submissions
             ) AS notifications_sent
             FROM gradeable g
+              LEFT JOIN (
+                SELECT
+                  g_id,
+                  json_agg(redaction_id) as redaction_id,
+                  json_agg(page) AS redaction_page,
+                  json_agg(x1) AS redaction_x1,
+                  json_agg(y1) AS redaction_y1,
+                  json_agg(x2) AS redaction_x2,
+                  json_agg(y2) AS redaction_y2
+                FROM gradeable_redaction
+                GROUP BY g_id
+              ) AS r ON g.g_id=r.g_id
               LEFT JOIN (
                 SELECT
                   g_id AS eg_g_id,
@@ -6212,6 +6257,39 @@ AND gc_id IN (
 
             // Set the components
             $gradeable->setComponentsFromDatabase($components);
+
+            if (isset($row["redaction_id"])) {
+                // Create the redaction data
+                $redaction_properties = [
+                    'id',
+                    'page',
+                    'x1',
+                    'y1',
+                    'x2',
+                    'y2'
+                ];
+                $unpacked_redaction_data = [];
+                foreach ($redaction_properties as $property) {
+                    $unpacked_redaction_data[$property] = json_decode($row['redaction_' . $property]) ?? [];
+                }
+
+                // Create the redactions
+                $redactions = [];
+                for ($i = 0; $i < count($unpacked_redaction_data['id']); ++$i) {
+                    // Transpose a single redaction at a time
+                    $redaction_data = [];
+                    foreach ($redaction_properties as $property) {
+                        $redaction_data[$property] = $unpacked_redaction_data[$property][$i];
+                    }
+
+                    // Create the redaction instance
+                    $redactions[] = new Redaction($this->core, $redaction_data['page'], $redaction_data['x1'], $redaction_data['y1'], $redaction_data['x2'], $redaction_data['y2']);
+                }
+
+                // Set the redactions
+                $gradeable->setRedactionsFromDatabase($redactions);
+            }
+
 
             return $gradeable;
         };
@@ -6743,9 +6821,9 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isGradeInquiryAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
-                $gradeable->getDiscussionThreadId(),
+                json_encode($gradeable->getDiscussionThreadId()),
                 $gradeable->isDiscussionBased(),
-                $gradeable->getHiddenFiles(),
+                $gradeable->getStringHiddenFiles(),
                 $gradeable->getDependsOn(),
                 $gradeable->getDependsOnPoints()
             ];
@@ -6930,9 +7008,9 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isGradeInquiryAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
-                    $gradeable->getDiscussionThreadId(),
+                    json_encode($gradeable->getDiscussionThreadId()),
                     $gradeable->isDiscussionBased(),
-                    $gradeable->getHiddenFiles(),
+                    $gradeable->getStringHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
                     $gradeable->getId()
@@ -7470,6 +7548,38 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the sent timestamp for an email and clears the error message
+     *
+     * @param string $subject
+     * @return bool
+     */
+    public function updateEmailSent(string $subject): bool {
+        $time = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+        $this->submitty_db->query('UPDATE emails SET sent = ? WHERE subject = ?', [$time, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the error message for an email, where an empty string implies no error
+     *
+     * @param string $subject
+     * @param string $error
+     * @return bool
+     */
+    public function updateEmailError(string $subject, string $error): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
@@ -9490,10 +9600,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
@@ -9573,5 +9684,57 @@ ORDER BY
             [$user_id, $query_id]
         );
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Gets the active graders for a given gradeable.
+     * @return array<array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>
+     */
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array<Redaction> $redactions
+     */
+    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
+        $this->course_db->beginTransaction();
+        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
+
+        if (count($redactions) === 0) {
+            $this->course_db->commit();
+            return;
+        }
+        $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
+        $params = [];
+
+        foreach ($redactions as $redaction) {
+            $params[] = $gradeable->getId();
+            $params[] = $redaction->getPageNumber();
+            $params[] = $redaction->getX1();
+            $params[] = $redaction->getY1();
+            $params[] = $redaction->getX2();
+            $params[] = $redaction->getY2();
+        }
+
+        $this->course_db->query(
+            "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES " . $param_text,
+            $params
+        );
+
+        $this->course_db->commit();
     }
 }
