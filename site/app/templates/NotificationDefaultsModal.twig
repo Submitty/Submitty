@@ -1,0 +1,19 @@
+{% extends "generic/Popup.twig" %}
+
+{% block popup_id %}popup-notification-defaults{% endblock %}
+
+{% block title %}
+    <span data-testid="notification-defaults-modal-title">Default Notification Settings</span>
+{% endblock %}
+
+{% block body %}
+    <div class="form-body" data-testid="notification-defaults-body">
+        <!-- This will be filled by showNotificationDefaults() via AJAX -->
+    </div>
+{% endblock %}
+
+{% block buttons %}
+    <div class="form-buttons">
+        <a class="btn btn-default close-button" data-testid="close-notification-defaults" onclick="$('#popup-notification-defaults').hide(); $('body').css('overflow','auto');">Close</a>
+    </div>
+{% endblock %}

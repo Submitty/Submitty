@@ -8,6 +8,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\models\Notification;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -199,6 +200,63 @@ class NotificationController extends AbstractController {
     /**
      * @return JsonResponse
      */
+    #[Route("/notifications/settings/defaults/view", methods: ["POST"])]
+    public function getNotificationDefaults() {
+        $user_id = $this->core->getUser()->getId();
+        $defaults_string = $_POST['course_key'] ?? null;
+
+        if ($defaults_string === null) {
+            return JsonResponse::getFailResponse('Invalid course key.');
+        }
+
+        // Parse the reference course from the defaults string (term-course)
+        $parts = explode('-', $defaults_string, 2);
+        if (count($parts) !== 2) {
+            return JsonResponse::getFailResponse('Invalid default notification settings format.');
+        }
+
+        $target_term = $parts[0];
+        $target_course = $parts[1];
+
+        // Store the original configuration
+        $original_config = clone $this->core->getConfig();
+
+        try {
+            // Connect to target course database
+            $this->core->loadCourseConfig($target_term, $target_course);
+            $this->core->loadCourseDatabase();
+
+            // Get the notification settings from the target course or fallback to default settings
+            $settings = $this->core->getQueries()->getNotificationSettings($user_id);
+            $missing_settings = $settings === null;
+            // Normalize the settings to include mandatory settings not found in the database
+            $settings = User::constructNotificationSettings($settings ?? []);
+
+            // Remove user_id from the settings array and format for display
+            $formatted_settings = [];
+            unset($settings['user_id']);
+
+            foreach ($settings as $key => $value) {
+                $formatted_settings[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
+            }
+
+            return JsonResponse::getSuccessResponse([
+                'course' => $target_term . ' - ' . $target_course,
+                'settings' => $formatted_settings,
+                'missing_settings' => $missing_settings
+            ]);
+        }
+        finally {
+            // Restore original configuration
+            $this->core->setConfig($original_config);
+            $this->core->loadCourseDatabase();
+        }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/notifications/settings/defaults", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/notifications/settings/defaults", methods: ["POST"])]
     public function updateNotificationDefaults() {
         $user_id = $this->core->getUser()->getId();
@@ -209,9 +267,7 @@ class NotificationController extends AbstractController {
             $message = 'Default notification settings have been cleared.';
         }
         else {
-            $current_term = $this->core->getConfig()->getTerm();
-            $current_course = $this->core->getConfig()->getCourse();
-            $defaults = $current_term . '-' . $current_course;
+            $defaults = $_POST['course_key'] ?? $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse();
             $message = 'Default notification settings have been set for future courses.';
         }
 

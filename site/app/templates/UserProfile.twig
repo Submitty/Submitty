@@ -210,20 +210,28 @@
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
-                    <span>Notification Preference:</span>
+                    <span>Default Notification Settings:</span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
-                        <label for="notification_sync_preference">Choose notification sync preference</label>
+                        <label for="notification_defaults_select">Choose default settings from registered courses</label>
                         <select
-                            id="notification_sync_preference"
+                            id="notification_defaults_select"
                             class="form-control"
-                            aria-label="Change Notification Sync Preference"
-                            data-testid="notification-sync-preference-dropdown"
-                            onchange="handleProfileSyncChange()">
-                            <option value="sync" data-testid="sync-notifications-option" {% if user.getNotificationsSynced() %}selected{% endif %}>Sync</option>
-                            <option value="unsync" data-testid="unsync-notifications-option" {% if not user.getNotificationsSynced() %}selected{% endif %}>No Sync</option>
+                            aria-label="Choose Default Notification Settings"
+                            data-testid="notification-defaults-dropdown">
+                            <option value="" data-testid="no-defaults-option" {% if not user.getNotificationDefaults() %}selected{% endif %}>No Defaults</option>
+                            {% for course_key, course_name in courses %}
+                                <option value="{{ course_key }}" data-testid="defaults-option-{{ course_key }}" {% if user.getNotificationDefaults() == course_key %}selected{% endif %}>{{ course_name }}</option>
+                            {% endfor %}
                         </select>
+                    </div>
+                    <div class="flex-row-col" style="margin-top: 10px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="view-defaults-btn" class="btn btn-secondary" data-testid="view-notification-defaults" onclick="showNotificationDefaults()">View Settings</button>
+                            <button id="apply-defaults-btn" class="btn btn-primary" data-testid="apply-notification-defaults" onclick="applyNotificationDefaults()">Apply Settings</button>
+                            <button id="clear-defaults-btn" class="btn btn-danger" data-testid="clear-notification-defaults" onclick="clearNotificationDefaults()">Clear Settings</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -251,6 +259,7 @@
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}
 {% include 'EditDisplayNameOrderForm.twig' %}
+{% include 'NotificationDefaultsModal.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}

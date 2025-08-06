@@ -749,7 +749,7 @@ SQL;
      */
     public function getNotificationSettings(string $user_id): ?array {
         $this->course_db->query("SELECT * FROM notification_settings WHERE user_id = ?", [$user_id]);
-        return count($this->course_db->rows()) > 0 ? $this->course_db->rows()[0] : null;
+        return count($this->course_db->rows()) > 0 ? $this->course_db->row() : null;
     }
 
     /**

@@ -42,6 +42,13 @@ class UserProfileView extends AbstractView {
         $supported_locales = array_combine($supported_locales, $locale_names);
         $default_locale_name = mb_convert_case(\Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale), MB_CASE_TITLE, 'UTF-8');
 
+        // Get all user courses for notification defaults dropdown
+        $courses = [];
+        $user_courses = $this->core->getQueries()->getAllCoursesForUserId($user->getId());
+        foreach ($user_courses as $course) {
+            $courses[$course->getTerm() . '-' . $course->getTitle()] = $course->getTerm() . ' - ' . $course->getTitle();
+        }
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_given" => $user->getPreferredGivenName() ?? "",
@@ -57,7 +64,8 @@ class UserProfileView extends AbstractView {
             'user_time_zone_with_offset' => $user_time_zone_with_offset,
             'user_utc_offset' => $user_utc_offset,
             'supported_locales' => $supported_locales,
-            'default_locale_name' => $default_locale_name
+            'default_locale_name' => $default_locale_name,
+            'courses' => $courses
         ]);
     }
 }
