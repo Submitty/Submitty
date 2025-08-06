@@ -77,6 +77,50 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $anon_path, null, $annotation_jsons, true, 1, true);
     }
 
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img")]
+    public function showStudentImg(string $gradeable_id, string $filename, string $path, string $anon_path): JsonResponse {
+        $id = $this->core->getUser()->getId();
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable->isTeamAssignment()) {
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+        }
+        $submitter = $this->core->getQueries()->getSubmitterById($id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
+        $annotation_jsons = [];
+        $md5_path = md5($path);
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \FilesystemIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                if (explode('_', $file_info->getFilename())[0] === $md5_path) {
+                    $file_contents = file_get_contents($file_info->getPathname());
+                    $annotation_decoded = json_decode($file_contents, true);
+                    if ($annotation_decoded !== null) {
+                        $grader_id = $annotation_decoded["grader_id"];
+                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
+                    }
+                }
+            }
+        }
+
+        // Construct the image URL for display_file endpoint
+        $image_url = $this->core->buildCourseUrl(['display_file']) .
+            '?dir=submissions_processed' .
+            '&file=' . urlencode($filename) .
+            '&path=' . urlencode($path) .
+            '&ta_grading=true';
+
+        return JsonResponse::getSuccessResponse([
+            'image_url' => $image_url,
+            'filename' => $filename,
+            'annotations' => $annotation_jsons,
+            'gradeable_id' => $gradeable_id,
+            'user_id' => $id
+        ]);
+    }
+
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")]
     public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id = ""): void {
         $filename = html_entity_decode($filename);

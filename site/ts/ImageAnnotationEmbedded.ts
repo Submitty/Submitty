@@ -15,6 +15,9 @@ declare global {
         clearAnnotations(): void;
         downloadImage(): void;
         cleanupAnnotationEditor(): void;
+        quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
+        generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<string | null>;
+        popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
     }
 }
 
@@ -35,6 +38,7 @@ interface AnnotationData {
 }
 
 // Image annotation manager class to encapsulate all state
+// TODO: Clean up what we store here, and evaluate if a global variable like this is even a good approach.
 class AnnotationManager {
     currentAnnotations: AnnotationState | null;
     originalImg: HTMLImageElement | null;
@@ -127,7 +131,9 @@ function addAnnotations(): void {
 
         // Create and show wrapper
         const editorWrapper = createEditorWrapper();
-        editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
+        if (annotationManager.globalAnnotationEditor) {
+            editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
+        }
         document.body.appendChild(editorWrapper);
         editorWrapper.style.display = 'flex';
     }
@@ -175,7 +181,7 @@ function setupAnnotationEditor(): void {
         }
     });
 
-    // Configure editor settings
+    // Configure editor settings. TODO: Are all of these settings needed?
     annotationManager.globalAnnotationEditor.settings.renderOnSave = true;
     annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = true;
     annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = 'image/png';
@@ -183,6 +189,7 @@ function setupAnnotationEditor(): void {
     annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
 }
 
+// TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
 function createEditorWrapper(): HTMLElement {
     const editorWrapper = document.createElement('div');
     editorWrapper.id = 'global-annotation-editor-wrapper';
@@ -308,37 +315,17 @@ function downloadImage(): void {
     }
 
     if (annotationManager.annotatedImageDataUrl && annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
-        // Create download link with the pre-generated annotated image
-        const link: HTMLAnchorElement = document.createElement('a');
-        link.href = annotationManager.annotatedImageDataUrl;
-
-        // Add suffix to filename for annotated version
-        const nameParts: string[] = annotationManager.filename.split('.');
-        let downloadFilename: string;
-        if (nameParts.length > 1) {
-            const extension: string = nameParts.pop()!;
-            downloadFilename = `${nameParts.join('.')}_annotated.${extension}`;
-        }
-        else {
-            downloadFilename = `${annotationManager.filename}_annotated`;
-        }
-
-        link.download = downloadFilename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Download annotated version
+        const downloadFilename = generateAnnotatedFilename(annotationManager.filename);
+        triggerDownload(annotationManager.annotatedImageDataUrl, downloadFilename);
     }
     else {
         // No annotations, download original image
-        const link: HTMLAnchorElement = document.createElement('a');
-        link.href = annotationManager.originalImg.src;
-        link.download = annotationManager.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        triggerDownload(annotationManager.originalImg.src, annotationManager.filename);
     }
 }
 
+// Todo: If we get rid of our global variable, we can also probably refactor this and move some of it to ta-grading.ts
 function cleanupAnnotationEditor(): void {
     // Clear the global annotation editor reference
     annotationManager.globalAnnotationEditor = null;
@@ -472,6 +459,27 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
     }
 }
 
+// Utility function to generate annotated filename
+function generateAnnotatedFilename(originalFilename: string): string {
+    const nameParts = originalFilename.split('.');
+    if (nameParts.length > 1) {
+        const extension = nameParts.pop()!;
+        return `${nameParts.join('.')}_annotated.${extension}`;
+    } else {
+        return `${originalFilename}_annotated.png`;
+    }
+}
+
+// Utility function to trigger download with a data URL
+function triggerDownload(dataUrl: string, filename: string): void {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 /*
 When we want to render multiple annotations on top of each other we can use renderer to create an uneditable image with all of the annotations.
 Implement this when we add options to show other grader's annotations.
@@ -519,6 +527,193 @@ async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<strin
 }
 */
 
+function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): {image_url: string, annotations: Record<string, string>} | null {
+    let result: {image_url: string, annotations: Record<string, string>} | null = null;
+    $.ajax({
+        url: buildCourseUrl(['gradeable', gradeable_id, 'img']),
+        type: 'GET',
+        data: {
+            gradeable_id: gradeable_id,
+            filename: filename,
+            path: path,
+            anon_path: anon_path
+        },
+        dataType: 'json',
+        async: false,
+        success: function (response: any) {
+            if (response.status === 'success') {
+                result = response.data;
+            } else {
+                console.error('Failed to get image data:', response.message || 'Unknown error');
+                result = null;
+            }
+        },
+        error: function (xhr: unknown, status: string, error: string) {
+            console.error('Error fetching image data:', error);
+            result = null;
+        }
+    });
+
+    return result;
+}
+
+// Renders the annotations on the image stored at the filepath and then returns the dataURL.
+// Potentially refactor to have a centralize render function for use everywhere.
+async function generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<string | null> {
+    try {
+        // Fetch image data from the API
+        const imageData = fetchImageData(gradeable_id, filename, path, anon_path);
+        if (!imageData) {
+            console.error('Failed to fetch image data from API');
+            return null;
+        }
+
+        const { image_url, annotations } = imageData;
+
+        // Create a new image element to load the image from the provided URL
+        const img = new Image();
+
+        // Return a promise that resolves when the image is loaded and annotations are rendered
+        return new Promise((resolve, reject) => {
+            img.onload = async () => {
+                try {
+                    // Create a MarkerJS renderer instance
+                    const renderer = new markerjs3.Renderer();
+                    renderer.targetImage = img;
+                    renderer.naturalSize = true;
+
+                    // Get the first annotation entry for now (temporary implementation).
+                    // TODO: Create a selector for which annotated image you want to view.
+                    const firstEntry = Object.entries(annotations)[0];
+                    if (!firstEntry) {
+                        reject(new Error('No annotations found.'));
+                        return;
+                    }
+
+                    const [graderId, annotationsJson] = firstEntry;
+                    if (!annotationsJson || typeof annotationsJson !== 'string' || annotationsJson.trim() === '') {
+                        reject(new Error('No valid annotations found.'));
+                        return;
+                    }
+
+                    try {
+                        const annotationState = JSON.parse(annotationsJson) as AnnotationState;
+                        if (!annotationState.markers || !Array.isArray(annotationState.markers) || annotationState.markers.length === 0) {
+                            reject(new Error('No valid markers found in annotations.'));
+                            return;
+                        }
+
+                        // Generate the annotated image dataURL using the first annotation
+                        const dataUrl = await renderer.rasterize(annotationState);
+                        resolve(dataUrl);
+                    } catch (parseError) {
+                        reject(new Error(`Failed to parse annotations for grader ${graderId}: ${parseError}`));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            };
+
+            img.onerror = () => {
+                reject(new Error(`Failed to load image from URL: ${image_url}`));
+            };
+
+            // Set the image source to the URL provided by the API
+            img.src = image_url;
+        });
+    } catch (error) {
+        console.error('Error in generateDataURL:', error);
+        return null;
+    }
+}
+
+async function quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void> {
+    try {
+        const dataUrl = await generateDataURL(gradeable_id, filename, path, anon_path);
+        
+        if (!dataUrl) {
+            console.error('Failed to generate annotated image data URL');
+            alert('Error: Failed to generate annotated image');
+            return;
+        }
+        
+        // Extract filename from file path
+        const pathParts = path.split('/');
+        const originalFilename = pathParts[pathParts.length - 1] || filename;
+        
+        // Generate annotated filename and trigger download
+        const downloadFilename = generateAnnotatedFilename(originalFilename);
+        triggerDownload(dataUrl, downloadFilename);
+        
+    } catch (error) {
+        console.error('Error in quickDownload:', error);
+        alert(`Error downloading annotated image: ${(error as Error).message}`);
+    }
+}
+
+// Popup function for annotated images. We assemble the popup here because the popup used by Attachments.twig doesn't get the assembled dataUrl.
+// Potentially refactoring to combine these usages could be useful.
+async function popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void> {
+    try {
+        const dataUrl = await generateDataURL(gradeable_id, filename, path, anon_path);
+
+        if (!dataUrl) {
+            console.error('Failed to generate annotated image data URL');
+            alert('Error: Failed to generate annotated image');
+            return;
+        }
+
+        const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        if (!popup) {
+            alert('Popup blocked. Please allow popups for this site.');
+            return;
+        }
+
+
+        const html = popup.document.createElement('html');
+        const head = popup.document.createElement('head');
+        const title = popup.document.createElement('title');
+        const style = popup.document.createElement('style');
+        const body = popup.document.createElement('body');
+        const img = popup.document.createElement('img');
+
+        title.textContent = `Annotated Image: ${filename}`;
+
+        // Set CSS styles
+        style.textContent = `
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: #111111;
+            }
+            img {
+                max-width: 100%;
+                max-height: 100vh;
+                object-fit: contain;
+            }
+        `;
+        img.src = dataUrl;
+        img.alt = `Annotated ${filename}`;
+
+        head.appendChild(title);
+        head.appendChild(style);
+        body.appendChild(img);
+        html.appendChild(head);
+        html.appendChild(body);
+
+        popup.document.documentElement.remove();
+        popup.document.appendChild(html);
+
+    } catch (error) {
+        console.error('Error in popupAnnotatedImage:', error);
+        alert(`Error opening annotated image: ${(error as Error).message}`);
+    }
+}
+
 function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, string>) {
     // Set variables from parameters
     annotationManager.gradeableId = gId;
@@ -560,6 +755,8 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
         }
 
         // Wait for image to load before rendering annotations
+        // TODO: Clean this up, it works but I hate it.
+        // The goal is to make sure that the image is loaded from our source before rendering, because otherwise it renders nothing.
         if (annotationManager.originalImg && (annotationManager.originalImg.complete && annotationManager.originalImg.naturalHeight !== 0) && existingAnnotations) {
             // Image is already loaded
             renderAnnotationsOnImage();
@@ -592,3 +789,6 @@ window.saveAnnotations = saveAnnotations;
 window.clearAnnotations = clearAnnotations;
 window.downloadImage = downloadImage;
 window.cleanupAnnotationEditor = cleanupAnnotationEditor;
+window.quickDownload = quickDownload;
+window.generateDataURL = generateDataURL;
+window.popupAnnotatedImage = popupAnnotatedImage;

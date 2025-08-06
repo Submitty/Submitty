@@ -76,6 +76,33 @@ $( document ).ready(function() {
         </div>
         {% endif %}
 
+        {% if uploaded_imgs|length >= 1 %}
+            <div class = "no-border-box">
+                {% if img_annotation_paths|length > 0 %}
+                    <div class="row">
+                        <div class="no-border-box">
+                            <b>Annotated Feedback</b>
+                        </div>
+                    </div>
+                    {% for file in uploaded_imgs %}
+                        {% if file.name in img_annotation_paths|keys %}
+                            <div class="row" style="flex-wrap: nowrap;">
+                                <div class="no-border-box md-4 file-annotation">
+                                    <p>{{ file.relative_name }}</p>
+                                </div>
+                                <div class="no-border-box md-4">
+                                    <div class="btn-annotation">
+                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="window.popupAnnotatedImage('{{ gradeable_id }}', '{{ file.name }}', '{{ file.path }}', '{{ file.anon_path }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                                        <button class = 'btn btn-default' style="margin-right:20px;" onclick='window.quickDownload("{{ gradeable_id }}", "{{ file.name }}", "{{ file.path }}", "{{ file.anon_path }}")' aria-label="Download the file"> Download  
+                                        <i class="fas fa-download" title="Download the file"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
         {# /Overview #}
         </div>
         {# Overview #}

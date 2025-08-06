@@ -429,6 +429,26 @@ class AutoGradingView extends AbstractView {
                 $uploaded_pdfs[] = $file;
             }
         }
+        $id = $this->core->getUser()->getId();
+        if ($gradeable->isTeamAssignment()) {
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
+        }
+
+        $img_annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $img_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions_processed', $gradeable->getId(), $id, $active_version);
+        $img_files = FileUtils::getAllFiles($img_dir);
+        $uploaded_imgs = [];
+        foreach ($img_files as $file) {
+            if (array_key_exists('path', $file)) {
+                $content_type = mime_content_type($file['path']);
+                if (substr($content_type, 0, 5) === "image") {
+                    $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
+                    $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
+                    $uploaded_imgs[] = $file;
+                }
+            }
+        }
+
 
         $files = null;
         $display_version = 0;
@@ -467,6 +487,24 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
+        // Check for image annotation files
+        $img_annotation_paths = [];
+        foreach ($uploaded_imgs as $image_file) {
+            // Following PDFController pattern - use MD5 of anon_path for matching
+            $image_path_md5 = md5($image_file['path']);
+
+            if (is_dir($img_annotation_dir)) {
+                $dir_iter = new \FilesystemIterator($img_annotation_dir);
+                foreach ($dir_iter as $file_info) {
+                    $annotation_file_parts = explode("_", $file_info->getFilename());
+
+                    if ($annotation_file_parts[0] === $image_path_md5 && file_get_contents($file_info->getPathname()) !== "") {
+                        $img_annotation_paths[$image_file['name']] = $file_info->getPathname();
+                        break;
+                    }
+                }
+            }
+        }
 
         // Update overall comments to have display names
         $grader_info = [];
@@ -501,6 +539,10 @@ class AutoGradingView extends AbstractView {
                 $grader_info[$user_name]["comment"] = $comment;
             }
         }
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
+        $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -529,6 +571,8 @@ class AutoGradingView extends AbstractView {
             "annotated_file_names" =>  $annotated_file_names,
             "annotation_paths" => $annotation_paths,
             "annotated_pdf_paths" => $annotated_pdf_paths,
+            "uploaded_imgs" => $uploaded_imgs,
+            "img_annotation_paths" => $img_annotation_paths,
             "grader_info" => $grader_info
         ]);
     }
