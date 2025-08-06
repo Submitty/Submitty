@@ -98,8 +98,7 @@ export function gotoPrevStudent() {
                     window.location.href = window_location;
                 });
             })
-            .catch((e) => {
-                console.error(e);
+            .catch(() => {
                 if (
                     confirm(
                         'Could not save open component, change student anyway?',
@@ -175,8 +174,7 @@ export function gotoNextStudent() {
                     window.location.href = window_location;
                 });
             })
-            .catch((e) => {
-                console.error(e);
+            .catch(() => {
                 if (
                     confirm(
                         'Could not save open component, change student anyway?',
@@ -190,7 +188,3 @@ export function gotoNextStudent() {
         window.location.href = window_location;
     }
 }
-
-$(() => {
-    void window.reloadGradingRubric($('#grading_rubric')[0].dataset.gradeable_id as string, $('#grading_rubric')[0].dataset.anon_id as string);
-});
