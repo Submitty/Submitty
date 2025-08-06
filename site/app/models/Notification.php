@@ -140,7 +140,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
      */
     public static function getUrl(Core $core, string $metadata_json): ?string {
         $metadata = json_decode($metadata_json, true);
-        if (empty($metadata)) {
+        if (!is_array($metadata) || $metadata === []) {
             return null;
         }
 
@@ -197,6 +197,21 @@ class Notification extends AbstractModel implements \JsonSerializable {
         }
     }
 
+    /**
+     * @return array{
+     * id: int,
+     * component: string,
+     * metadata: string,
+     * content: string,
+     * seen: bool,
+     * elapsed_time: float,
+     * created_at: string,
+     * notify_time: string,
+     * semester: string|null,
+     * course: string|null,
+     * notification_url: string
+     * }
+     */
     public function jsonSerialize(): array {
         $base_url = '';
 
@@ -204,7 +219,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
             $semester = $this->semester;
             $course = $this->course;
 
-            if (!empty($semester) && !empty($course)) {
+            if (($semester !== null && $semester !== '') && ($course !== null && $course !== '')) {
                 $base_url = $this->core->buildUrl(['courses', $semester, $course, 'notifications', $this->getId()]);
             }
             else {

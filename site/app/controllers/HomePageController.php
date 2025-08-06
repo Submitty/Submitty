@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 use app\controllers\SelfRejoinController;
 
