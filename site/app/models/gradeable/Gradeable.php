@@ -2665,7 +2665,7 @@ class Gradeable extends AbstractModel {
         return $this->team_size_max;
     }
 
-    public function getTeamLockDate(): \DateTime {
+    public function getTeamLockDate(): ?\DateTime {
         return $this->team_lock_date;
     }
 
