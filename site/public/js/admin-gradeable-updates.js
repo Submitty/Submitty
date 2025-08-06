@@ -245,7 +245,9 @@ $(document).ready(() => {
             event.returnValue = 1;
         }
     };
-    loadTemplates().then(() => updateRedactionsDisplay());
+    if (is_electronic) {
+        loadTemplates().then(() => updateRedactionsDisplay());
+    }
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
