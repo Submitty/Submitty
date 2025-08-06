@@ -607,11 +607,14 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
                         // Generate the annotated image dataURL using the first annotation
                         const dataUrl = await renderer.rasterize(annotationState);
                         resolve(dataUrl);
-                    } catch (parseError) {
-                        reject(new Error(`Failed to parse annotations for grader ${graderId}: ${parseError}`));
                     }
-                } catch (error) {
-                    reject(error);
+                    catch (parseError) {
+                        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+                        reject(new Error(`Failed to parse annotations for grader ${graderId}: ${errorMessage}`));
+                    }
+                }
+                catch (error) {
+                    reject(error instanceof Error ? error : new Error(String(error)));
                 }
             };
 
@@ -649,7 +652,8 @@ async function quickDownload(gradeable_id: string, filename: string, path: strin
     }
     catch (error) {
         console.error('Error in quickDownload:', error);
-        alert(`Error downloading annotated image: ${(error as Error).message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        alert(`Error downloading annotated image: ${errorMessage}`);
     }
 }
 
