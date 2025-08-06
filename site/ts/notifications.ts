@@ -1,5 +1,8 @@
 import { buildUrl, buildCourseUrl } from './utils/server';
 
+// Global cache for notification settings to avoid redundant API calls
+const notificationSettingsCache: Record<string, NotificationSettingsResponse> = {};
+
 declare global {
     interface Window {
         csrfToken: string;
@@ -28,8 +31,8 @@ type NotificationSettingsResponse = {
 
 interface ApiResponse<T> {
     status: 'success' | 'error' | 'fail';
-    data: T;
-    message?: string;
+    data: T; /* Attached to successful responses */
+    message?: string; /* Attached to non-successful responses */
 }
 
 async function updateNotificationSync(synced: boolean): Promise<ApiResponse<NotificationUpdateResponse>> {
@@ -121,10 +124,7 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
 
         if (response.status === 'success') {
             updateSyncUI(newSyncState);
-
-            if (response.status === 'success') {
-                window.displaySuccessMessage(response.data.message);
-            }
+            window.displaySuccessMessage(response.data.message);
         }
         else {
             button.textContent = originalText;
@@ -206,6 +206,39 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
     }
 };
 
+window.handleProfileSyncChange = async function handleProfileSyncChange(): Promise<void> {
+    const dropdown = document.getElementById('notification_sync_select') as HTMLSelectElement;
+    if (!dropdown) {
+        return;
+    }
+
+    const synced = dropdown.value === 'true';
+    const originalValue = dropdown.getAttribute('data-original-value') || dropdown.value;
+
+    dropdown.disabled = true;
+    dropdown.setAttribute('data-original-value', dropdown.value);
+
+    try {
+        const response = await updateNotificationSync(synced);
+
+        if (response.status === 'success') {
+            window.displaySuccessMessage(response.data.message);
+        }
+        else {
+            dropdown.value = originalValue;
+            window.displayErrorMessage(response.data.message);
+        }
+    }
+    catch (error) {
+        console.error('Profile sync error:', error);
+        dropdown.value = originalValue;
+        window.displayErrorMessage('Failed to update sync preference.');
+    }
+    finally {
+        dropdown.disabled = false;
+    }
+};
+
 window.handleDefaultsDropdownChange = async function handleDefaultsDropdownChange(): Promise<void> {
     const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
     if (!dropdown) {
@@ -213,11 +246,19 @@ window.handleDefaultsDropdownChange = async function handleDefaultsDropdownChang
     }
 
     const value = dropdown.value;
+    const currentDefault = dropdown.dataset.currentDefault || '';
     const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
+    const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
+    const viewButton = document.getElementById('view-defaults-btn') as HTMLButtonElement;
+    const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+
     if (buttonsContainer) {
-        buttonsContainer.style.display = value === '' ? 'none' : 'flex';
+        viewButton.style.display = value === '' ? 'none' : 'block';
+        applyButton.style.display = (value !== '' && value === currentDefault) ? 'none' : 'block';
+        clearButton.style.display = (value !== '' && value === currentDefault) ? 'block' : 'none';
+        buttonsContainer.style.display = value === '' && currentDefault === '' ? 'none' : 'block';
     }
-}
+};
 
 window.showNotificationDefaults = async function showNotificationDefaults(): Promise<void> {
     try {
@@ -226,20 +267,38 @@ window.showNotificationDefaults = async function showNotificationDefaults(): Pro
             return;
         }
 
-        const formData = new FormData();
-        formData.append('course_key', dropdown.value);
-        formData.append('csrf_token', window.csrfToken);
+        const courseKey = dropdown.value;
 
-        const response = await fetch(buildUrl(['notifications', 'settings', 'defaults', 'view']), {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP request failed with status: ${response.status}`);
+        // Check cache first
+        let result: ApiResponse<NotificationSettingsResponse>;
+        if (notificationSettingsCache[courseKey]) {
+            result = {
+                status: 'success',
+                data: notificationSettingsCache[courseKey],
+            };
         }
+        else {
+            // Fetch from server and cache the result
+            const formData = new FormData();
+            formData.append('course_key', courseKey);
+            formData.append('csrf_token', window.csrfToken);
 
-        const result = await response.json() as ApiResponse<NotificationSettingsResponse>;
+            const response = await fetch(buildUrl(['notifications', 'settings', 'defaults', 'view']), {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP request failed with status: ${response.status}`);
+            }
+
+            result = await response.json() as ApiResponse<NotificationSettingsResponse>;
+
+            // Cache successful results
+            if (result.status === 'success') {
+                notificationSettingsCache[courseKey] = result.data;
+            }
+        }
 
         if (result.status === 'success') {
             $('#popup-notification-defaults').show();
@@ -266,17 +325,18 @@ window.showNotificationDefaults = async function showNotificationDefaults(): Pro
             const settingsList = $('<ul>');
             for (const [key, value] of Object.entries(settings)) {
                 if (key === 'all_announcements') {
-                    settingsList.append(`<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Mandatory Notifications</h3>`);
+                    settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Mandatory Notifications</h3>');
                 }
                 else if (key === 'reply_in_post_thread') {
-                    settingsList.append(`<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Optional Notifications</h3>`);
+                    settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Optional Notifications</h3>');
                 }
                 const displayName = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-                const status = value === 'true' ? 'Enabled' : 'Disabled';
-                settingsList.append(`<li><strong>${displayName}</strong> - ${status}</li>`);
+                const statusIcon = value === 'true'
+                    ? '<i class="fas fa-check-circle" style="color: #4CAF50; margin-right: 5px;"></i>'
+                    : '<i class="fas fa-times-circle" style="color: #F44336; margin-right: 5px;"></i>';
+                settingsList.append(`<li style="margin-left: 2px;">${statusIcon}<strong>${displayName}</strong></li>`);
             }
             $('#popup-notification-defaults .form-body').append(settingsList);
-
 
             $('#popup-notification-defaults .close-button').off('click').on('click', () => {
                 $('#popup-notification-defaults').hide();
@@ -324,6 +384,30 @@ window.applyNotificationDefaults = async function applyNotificationDefaults(): P
 
         if (result.status === 'success') {
             window.displaySuccessMessage(result.data.message);
+
+            // Update the current default in the dataset
+            const courseKey = dropdown.value;
+            dropdown.dataset.currentDefault = courseKey;
+
+            if (courseKey !== '') {
+                // Show the clear button only if we're viewing the same course that was set as default
+                const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+                if (clearButton) {
+                    clearButton.style.display = 'block';
+                }
+                // Hide the apply button
+                const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
+                if (applyButton) {
+                    applyButton.style.display = 'none';
+                }
+            }
+            else {
+                // Hide all buttons
+                const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
+                if (buttonsContainer) {
+                    buttonsContainer.style.display = 'none';
+                }
+            }
         }
         else {
             window.displayErrorMessage(result?.message || 'Failed to apply default settings.');
@@ -361,16 +445,23 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
             // Close the modal
             $('#popup-notification-defaults').hide();
             $('body').removeClass('popup-active');
-            // Update the dropdown
+            // Update the dropdown and clear the current default in the dataset
             const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
             if (dropdown) {
                 dropdown.value = '';
+                dropdown.dataset.currentDefault = '';
             }
 
             // Hide the buttons container
             const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
             if (buttonsContainer) {
                 buttonsContainer.style.display = 'none';
+            }
+
+            // Hide the clear button specifically
+            const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+            if (clearButton) {
+                clearButton.style.display = 'none';
             }
         }
         else {
