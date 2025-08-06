@@ -159,8 +159,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
     }
 
     public function hasEmptyMetadata(): bool {
-        $decoded = json_decode($this->getNotifyMetadata(), true);
-        return !is_array($decoded) || $decoded === [];
+        return empty(json_decode($this->getNotifyMetadata()));
     }
 
     /**
