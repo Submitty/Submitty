@@ -527,8 +527,8 @@ async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<strin
 }
 */
 
-function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): {image_url: string, annotations: Record<string, string>} | null {
-    let result: {image_url: string, annotations: Record<string, string>} | null = null;
+function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): { image_url: string; annotations: Record<string, string> } | null {
+    let result: { image_url: string; annotations: Record<string, string> } | null = null;
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'img']),
         type: 'GET',
@@ -536,14 +536,15 @@ function fetchImageData(gradeable_id: string, filename: string, path: string, an
             gradeable_id: gradeable_id,
             filename: filename,
             path: path,
-            anon_path: anon_path
+            anon_path: anon_path,
         },
         dataType: 'json',
         async: false,
-        success: function (response: any) {
+        success: function (response: { status: string; message?: string; data?: { image_url: string; annotations: Record<string, string> } }) {
             if (response.status === 'success') {
-                result = response.data;
-            } else {
+                result = response.data || null;
+            }
+            else {
                 console.error('Failed to get image data:', response.message || 'Unknown error');
                 result = null;
             }
@@ -551,7 +552,7 @@ function fetchImageData(gradeable_id: string, filename: string, path: string, an
         error: function (xhr: unknown, status: string, error: string) {
             console.error('Error fetching image data:', error);
             result = null;
-        }
+        },
     });
 
     return result;
@@ -621,7 +622,8 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
             // Set the image source to the URL provided by the API
             img.src = image_url;
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error in generateDataURL:', error);
         return null;
     }
@@ -630,22 +632,22 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
 async function quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void> {
     try {
         const dataUrl = await generateDataURL(gradeable_id, filename, path, anon_path);
-        
+
         if (!dataUrl) {
             console.error('Failed to generate annotated image data URL');
             alert('Error: Failed to generate annotated image');
             return;
         }
-        
+
         // Extract filename from file path
         const pathParts = path.split('/');
         const originalFilename = pathParts[pathParts.length - 1] || filename;
-        
+
         // Generate annotated filename and trigger download
         const downloadFilename = generateAnnotatedFilename(originalFilename);
         triggerDownload(dataUrl, downloadFilename);
-        
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error in quickDownload:', error);
         alert(`Error downloading annotated image: ${(error as Error).message}`);
     }
@@ -668,7 +670,6 @@ async function popupAnnotatedImage(gradeable_id: string, filename: string, path:
             alert('Popup blocked. Please allow popups for this site.');
             return;
         }
-
 
         const html = popup.document.createElement('html');
         const head = popup.document.createElement('head');
@@ -707,8 +708,8 @@ async function popupAnnotatedImage(gradeable_id: string, filename: string, path:
 
         popup.document.documentElement.remove();
         popup.document.appendChild(html);
-
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error in popupAnnotatedImage:', error);
         alert(`Error opening annotated image: ${(error as Error).message}`);
     }
