@@ -392,11 +392,16 @@ class CreateCourse(AbstractJob):
         with log_file_path.open("w") as output_file:
             # First create the course
             subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
-
+            
+            # Run migrations to ensure all tables are created properly
+            # This is needed because create_course.sh uses --initial which marks migrations as FAKE
+            print("Running up migrations for {}.{}...".format(semester, course), file=output_file)
+            subprocess.run(["sudo", "python3", "/usr/local/submitty/migration/run_migrator.py", "-e", "course", "--course", semester, course, "migrate"], stdout=output_file, stderr=output_file)
+            
             # Add the head instructor to the course
             # The adduser_course.py script will automatically apply notification defaults if they exist
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
-
+            
             # Add the verified admin user to the course if configured
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
