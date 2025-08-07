@@ -1,5 +1,5 @@
 {% if isAdmin %}
-    <tr id="chatroom-row-{{ id|e('html_attr') }}" data-testid=chatroom-item>
+    <tr id="{{ id|e('html_attr') }}" data-testid=chatroom-item>
         <td>
             <a data-testid="edit-chatroom" href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
         </td>
@@ -43,7 +43,7 @@
     </tr>
 {% else %}
     {% if isActive %} <!--students only have access to active chat rooms-->
-        <tr id="chatroom-row-{{ id|e('html_attr') }}" data-testid=chatroom-item>
+        <tr id="{{ id|e('html_attr') }}" data-testid=chatroom-item>
             <td>
                 <span data-testid="chatroom-title" class="display-short" title="{{ title|e('html_attr') }}">
                     {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
