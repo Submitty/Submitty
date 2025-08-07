@@ -14,7 +14,7 @@
     font-family: "Source Sans Pro", sans-serif;
     white-space: normal;
     position: relative;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown h1,

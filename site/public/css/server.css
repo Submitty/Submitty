@@ -464,7 +464,7 @@ td > a.active-sort {
 
 .subtitle {
     font-size: smaller;
-    word-wrap: unset;
+    overflow-wrap: unset;
     white-space: normal;
 }
 
@@ -692,7 +692,7 @@ td > a.active-sort {
 }
 
 .box-title > h4 > code {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .box-title-total > h4 {
@@ -717,7 +717,7 @@ td > a.active-sort {
 }
 
 .box > h4 > code {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     padding-left: 50px;
 }
 

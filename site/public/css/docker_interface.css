@@ -52,7 +52,7 @@
     .docker-images-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        grid-gap: 1rem;
+        gap: 1rem;
     }
 
     .docker-images-container > div {

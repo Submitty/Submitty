@@ -140,7 +140,7 @@
     box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     padding: 7px;
     margin-top: 20px;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     overflow: hidden auto;
 }
 
@@ -159,7 +159,7 @@
 .thread_box {
     padding: 5px;
     overflow-y: auto;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     align-items: stretch;
 }
 
@@ -208,7 +208,7 @@
 }
 
 .categorylistitem-desc span {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .categorylistitem-editdesc input {
@@ -235,7 +235,7 @@
 .create-post-head {
     max-width: 95%;
     display: inline-block;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     margin-top: 10px;
     margin-left: 5px;
     font-size: 1.17em;

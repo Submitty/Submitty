@@ -302,7 +302,7 @@ a.cal-gradeable-status-link:focus {
 div.calendar-submit {
     display: grid;
     grid-template-columns: max-content max-content;
-    grid-gap: 5px;
+    gap: 5px;
 }
 div.calendar-submit label {
     text-align: right;

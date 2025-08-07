@@ -1471,9 +1471,9 @@ tr.is_publish {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
     max-width: 83vw;
-    grid-column-gap: 5px;
+    column-gap: 5px;
     /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
-    grid-row-gap: 5px;
+    row-gap: 5px;
 }
 
 .layout-option-item {
