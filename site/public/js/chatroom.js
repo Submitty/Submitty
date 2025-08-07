@@ -156,14 +156,19 @@ function initChatroomListSocketClient(user_admin, base_url) {
         console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_open':
-                handleChatToggle(msg, user_admin, true, base_url);
+                handleChatStateChange(msg, user_admin, true, base_url);
                 break;
-            case 'chat_close': {
-                handleChatToggle(msg, user_admin, false), base_url;
+            case 'chat_close':
+                handleChatStateChange(msg, user_admin, false, base_url);
                 break;
-            }
+            case 'chat_create': // Not implemented yet (waiting on websocket verification PR)
+                handleChatStateChange(msg, user_admin, false, base_url); // newly created chat starts inactive
+                break;
+            case 'chat_delete': // Not implemented yet (waiting on websocket verification PR)
+                removeChatroomRow(msg.id);
+                break;
             default:
-                console.error(msg);
+                console.error('Unknown message type:', msg);
         }
     };
     window.chatroomListSocketClient.open('chatrooms');
@@ -238,20 +243,23 @@ function showJoinMessage(message) {
     }, 3000);
 }
 
-function handleChatToggle(msg, user_admin, isOpening, base_url) {
+function handleChatStateChange(msg, user_admin, isActive, base_url) {
     const tableBody = document.querySelector('#chatrooms-table tbody');
     if (!tableBody) {
         return;
     }
-    const row = document.getElementById(`chatroom-row-${msg.id}`);
-    if (row) {
-        row.remove();
-    }
-
-    const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isOpening, base_url);
+    removeChatroomRow(msg.id);
+    const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isActive, base_url);
     // This should be safe because the Twig template escapes all passed variables.
     // eslint-disable-next-line no-unsanitized/method
     tableBody.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function removeChatroomRow(chatroomId) {
+    const row = document.getElementById(`${chatroomId}`);
+    if (row) {
+        row.remove();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
