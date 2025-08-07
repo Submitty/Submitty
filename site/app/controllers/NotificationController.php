@@ -306,6 +306,8 @@ class NotificationController extends AbstractController {
 
             // Store the core application configuration before connecting to other course databases
             $original_config = clone $this->core->getConfig();
+            $current_term = $this->core->getConfig()->getTerm();
+            $current_course = $this->core->getConfig()->getCourse();
 
             // Sync the notification settings to all active courses
             foreach ($courses as $course) {
@@ -313,7 +315,7 @@ class NotificationController extends AbstractController {
                 $course_name = $course->getTitle();
 
                 // Skip the current course as updates are implicitly applied to it
-                if ($term === $this->core->getConfig()->getTerm() && $course_name === $this->core->getConfig()->getCourse()) {
+                if ($term === $current_term && $course_name === $current_course) {
                     continue;
                 }
 

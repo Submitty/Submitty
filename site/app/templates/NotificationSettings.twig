@@ -379,7 +379,6 @@
         </div>
     </form>
     <script>
-        // Inject defaults variable for use by notification-settings.ts
-        var defaults = {{ defaults|json_encode|raw }};
+        window.defaults = {{ defaults|json_encode|raw }};
     </script>
 </div>

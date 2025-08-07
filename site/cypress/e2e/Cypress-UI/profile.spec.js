@@ -189,6 +189,11 @@ describe('Test cases revolving around user profile page', () => {
         cy.wrap(userData).should('deep.equal', newUserData);
     });
 
+    it('Should handle applying notification syncing across multiple courses', () => {
+        return;
+        // TODO: Implement this test
+    });
+
     it('Should handle applying notification defaults across multiple courses', () => {
         // TODO: Implement this test
         return;

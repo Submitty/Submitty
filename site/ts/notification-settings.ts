@@ -6,6 +6,7 @@ const notificationSettingsCache: Record<string, NotificationSettingsResponse> = 
 declare global {
     interface Window {
         csrfToken: string;
+        defaults: Record<string, string>;
         displaySuccessMessage: (message: string) => void;
         displayErrorMessage: (message: string) => void;
         handleProfileSyncChange: () => Promise<void>;
@@ -17,7 +18,6 @@ declare global {
         applyNotificationDefaults: () => Promise<void>;
         clearNotificationDefaults: () => Promise<void>;
         captureTabInModal: (modalId: string) => void;
-        defaults: Record<string, string>;
         checkAll: (button: HTMLButtonElement) => void;
         unCheckAll: (button: HTMLButtonElement) => void;
         resetNotification: (button: HTMLButtonElement) => void;
@@ -34,18 +34,12 @@ type NotificationSettingsResponse = {
 
 interface ApiResponse<T> {
     status: 'success' | 'error' | 'fail';
-    data: T; /* Attached to successful responses */
-    message?: string; /* Attached to non-successful responses */
+    data?: T; /* Successful responses */
+    message?: string; /* Non-successful responses */
 }
 
-async function updateNotificationSync(synced: boolean): Promise<ApiResponse<string>> {
-    const formData = new FormData();
-    formData.append('notifications_synced', synced.toString());
+async function submitRequest(url: string, formData: FormData): Promise<ApiResponse<string>> {
     formData.append('csrf_token', window.csrfToken);
-
-    const url = window.location.pathname.includes('/courses/')
-        ? buildCourseUrl(['notifications', 'settings', 'sync'])
-        : buildUrl(['notifications', 'settings', 'sync']);
 
     try {
         const response = await fetch(url, {
@@ -60,50 +54,54 @@ async function updateNotificationSync(synced: boolean): Promise<ApiResponse<stri
         return response.json() as Promise<ApiResponse<string>>;
     }
     catch (error) {
-        console.error('Sync error:', error);
+        console.error('Submit request error:', error);
         return {
             status: 'error',
-            data: 'An error occurred while updating sync settings.',
+            data: 'An error occurred while submitting the request.',
         };
     }
+}
+
+async function updateNotificationSync(synced: boolean): Promise<ApiResponse<string>> {
+    const formData = new FormData();
+    formData.append('notifications_synced', synced.toString());
+
+    const url = window.location.pathname.includes('/courses/')
+        ? buildCourseUrl(['notifications', 'settings', 'sync']) // Course-specific sync routing
+        : buildUrl(['notifications', 'settings', 'sync']); // Global sync routing
+
+    return submitRequest(url, formData);
 }
 
 async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append('notification_defaults', setAsDefault ? 'current' : 'null');
-    formData.append('csrf_token', window.csrfToken);
 
-    try {
-        const response = await fetch(buildCourseUrl(['notifications', 'settings', 'defaults']), {
-            method: 'POST',
-            body: formData,
-        });
+    const url = buildCourseUrl(['notifications', 'settings', 'defaults']);
 
-        if (!response.ok) {
-            throw new Error(`HTTP request failed with status: ${response.status}`);
-        }
-
-        return response.json() as Promise<ApiResponse<string>>;
-    }
-    catch (error) {
-        console.error('Defaults error:', error);
-        return {
-            status: 'error',
-            data: 'An error occurred while updating default settings.',
-        };
-    }
+    return submitRequest(url, formData);
 }
 
-function updateSyncUI(synced: boolean): void {
-    const syncButton = document.getElementById('sync-notifications-btn') as HTMLButtonElement;
-    if (syncButton) {
-        syncButton.textContent = synced ? 'Unsync Notifications' : 'Sync Notifications';
-    }
-}
-
-function updateDefaultsUI(hasDefaults: boolean): void {
+function updateDefaultButtons(clearing = false): void {
+    // TODO: handle the hide set as default button after clicking it to say "clear default"
+    const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
+    const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
     const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-    clearButton.style.display = hasDefaults ? 'block' : 'none';
+
+    if (dropdown) {
+        const selectedDefault = dropdown.value;
+        const currentDefault = dropdown.dataset.currentDefault || '';
+        applyButton.style.display = selectedDefault !== currentDefault ? 'block' : 'none';
+        clearButton.style.display = selectedDefault === currentDefault && selectedDefault !== '' ? 'block' : 'none';
+    }
+    else {
+        // set-defaults-btn
+        const setDefaultsButton = document.getElementById('set-defaults-btn') as HTMLButtonElement;
+        const clearDefaultsButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+        setDefaultsButton.style.display = clearing ? 'block' : 'none';
+        clearDefaultsButton.style.display = clearing ? 'none' : 'block';
+    }
+
 }
 
 window.handleSyncClick = async function handleSyncClick(): Promise<void> {
@@ -124,8 +122,8 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
         const response = await updateNotificationSync(newSyncState);
 
         if (response.status === 'success') {
-            updateSyncUI(newSyncState);
-            window.displaySuccessMessage(response.data);
+            button.textContent = newSyncState ? 'Unsync Notifications' : 'Sync Notifications';
+            window.displaySuccessMessage(response.data || 'Notification sync settings updated successfully.');
         }
         else {
             button.textContent = originalText;
@@ -143,6 +141,7 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
 };
 
 window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise<void> {
+    // TODO: click set defaults in twig template
     const button = document.getElementById('set-defaults-btn') as HTMLButtonElement;
     if (!button) {
         return;
@@ -157,8 +156,8 @@ window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise
     try {
         const response = await updateNotificationDefaults(true);
         if (response.status === 'success') {
-            updateDefaultsUI(true);
-            window.displaySuccessMessage(response.data);
+            updateDefaultButtons();
+            window.displaySuccessMessage(response.data || 'Default notification settings set successfully.');
         }
         else {
             window.displayErrorMessage(response.message || 'Failed to set default settings.');
@@ -188,10 +187,8 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
         const response = await updateNotificationDefaults(false);
 
         if (response.status === 'success') {
-            updateDefaultsUI(false);
-            if (response.data) {
-                window.displaySuccessMessage(response.data);
-            }
+            updateDefaultButtons();
+            window.displaySuccessMessage(response.data || 'Default notification settings cleared successfully.');
         }
         else {
             window.displayErrorMessage(response.message || 'Failed to clear default settings.');
@@ -223,7 +220,7 @@ window.handleProfileSyncChange = async function handleProfileSyncChange(): Promi
         const response = await updateNotificationSync(synced);
 
         if (response.status === 'success') {
-            window.displaySuccessMessage(response.data);
+            window.displaySuccessMessage(response.data || 'Notification sync settings updated successfully.');
         }
         else {
             dropdown.value = originalValue;
@@ -290,11 +287,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
         // If no course selected, just show the empty state
         if (dropdown.value === '') {
             $('#notification-defaults-spinner').hide();
-            $('#notification-defaults-content').show().append(`
-                <div class="text-center">
-                    <p>Please select a course to view notification settings.</p>
-                </div>
-            `);
+            $('#notification-defaults-content').show();
             return;
         }
 
@@ -325,7 +318,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
 
             // Cache successful results
             if (result.status === 'success') {
-                notificationSettingsCache[courseKey] = result.data;
+                notificationSettingsCache[courseKey] = result.data as NotificationSettingsResponse;
             }
         }
 
@@ -336,8 +329,8 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
                 const contentDiv = $('#notification-defaults-content');
                 contentDiv.empty();
 
-                const settings = result.data.settings;
-                const [term, course] = result.data.course.split('-');
+                const settings = result.data?.settings || {};
+                const [term, course] = result.data?.course.split('-') || [];
 
                 contentDiv.append(`
                 <h3 style="margin-bottom: 2px; text-decoration: underline;">Course Information</h3>
@@ -346,7 +339,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
                 <strong>Course</strong> - ${course}
             `);
 
-                if (result.data.missing_settings) {
+                if (result.data?.missing_settings) {
                     contentDiv.append('<p><strong>NOTE: No notification settings found for this course; default settings will be applied.</strong></p>');
                 }
 
@@ -382,6 +375,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
                     clearButton.style.display = 'block';
                 }
 
+                updateDefaultButtons();
                 contentDiv.show();
 
                 $('#popup-notification-defaults .close-button').off('click').on('click', () => {
@@ -416,6 +410,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
 
 window.applyNotificationDefaults = async function applyNotificationDefaults(): Promise<void> {
     const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
+
     if (!dropdown) {
         return;
     }
@@ -446,11 +441,11 @@ window.applyNotificationDefaults = async function applyNotificationDefaults(): P
         const result = await response.json() as ApiResponse<string>;
 
         if (result.status === 'success') {
-            window.displaySuccessMessage(result.data);
-
+            window.displaySuccessMessage(result.data || 'Default notification settings applied successfully.');
             // Update the current default in the dataset
             const courseKey = dropdown.value;
             dropdown.dataset.currentDefault = courseKey;
+            updateDefaultButtons();
 
             // Close the modal
             $('#popup-notification-defaults').hide();
@@ -499,7 +494,7 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
         const result = await response.json() as ApiResponse<string>;
 
         if (result.status === 'success') {
-            window.displaySuccessMessage(result.data);
+            window.displaySuccessMessage(result.data || 'Default notification settings cleared successfully.');
 
             // Close the modal
             $('#popup-notification-defaults').hide();
@@ -510,6 +505,7 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
             if (dropdown) {
                 dropdown.value = '';
                 dropdown.dataset.currentDefault = '';
+                updateDefaultButtons(true);
             }
         }
         else {

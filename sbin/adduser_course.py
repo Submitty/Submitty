@@ -83,7 +83,6 @@ def apply_notification_defaults(connection, user_id, semester, course):
 
         if not default_settings_row:
             # User has a course falling back to default notification settings, so no settings exist in the default course
-            print(f"No notification settings found in default course for user {user_id}", file=sys.stdout)
             return
 
         # Convert the row to a dictionary for easier handling
@@ -129,8 +128,6 @@ def apply_notification_defaults(connection, user_id, semester, course):
 
         current_connection.commit()
         current_connection.close()
-
-        print(f"Applied default notification settings for user {user_id} in course {semester}-{course}")
     except Exception as e:
         print(f"Error applying notification defaults: {str(e)}", file=sys.stderr)
 
