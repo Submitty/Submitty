@@ -67,12 +67,12 @@ const toggleLiveChat = (enableChat) => {
 // For instructor
 const checkChatEnabled = (title) => {
     getChatroom(title).find('[data-testid="disable-chatroom"]').should('be.visible');
-}
+};
 
 // For instructor
 const checkChatDisabled = (title) => {
     getChatroom(title).find('[data-testid="enable-chatroom"]').should('be.visible');
-}
+};
 
 const chatroomExists = (title) => {
     return cy.get('body').then(($body) => {
@@ -427,7 +427,7 @@ describe('Tests for creating, editing and using tests', () => {
                 });
             });
         });
-    })
+    });
 
     it('Should test WebSocket chat message functionality', () => {
         let id = NaN;
