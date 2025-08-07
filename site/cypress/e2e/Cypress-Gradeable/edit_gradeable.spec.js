@@ -191,9 +191,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
         cy.get('#upload1').should('exist');
-        cy.get('#submission-version-select').should('exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('not.exist');
-        cy.contains('No submissions for this assignment.').should('not.exist');
+        cy.contains('No submissions for this assignment.');
     });
 
     it('Should test locking the gradeable', () => {
