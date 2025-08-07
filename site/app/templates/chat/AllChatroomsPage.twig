@@ -25,8 +25,8 @@
                     </tr>
                 </thead>
                 <tbody data-testid="chatroom-list-item">
-                    {% for chatroom in chatrooms %}
-                        {% include "chat/ChatroomRow.twig" with 
+                    {% for chatroom in chatrooms %} <!-- This loads from /app/ -->
+                        {% include "chat/ChatroomRow.twig" with
                         {"id": chatroom.getId(),
                         "description": chatroom.getDescription(),
                         "title": chatroom.getTitle(),
@@ -50,8 +50,8 @@
                     </tr>
                 </thead>
                 <tbody data-testid="chatroom-list-item">
-                    {% for chatroom in chatrooms %}
-                        {% include "chat/ChatroomRow.twig" with 
+                    {% for chatroom in chatrooms %} <!-- This loads from /app/ -->
+                        {% include "chat/ChatroomRow.twig" with
                         { "id": chatroom.getId(),
                         "description": chatroom.getDescription(),
                         "title": chatroom.getTitle(),

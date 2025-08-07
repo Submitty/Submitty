@@ -8,7 +8,7 @@ function loadChatroomTemplate(chatroomId) {
     return new Promise((resolve, reject) => {
         Twig.twig({
             id: 'ChatroomRow',
-            href: '/templates/chat/ChatroomRow.twig',
+            href: '/templates/chat/ChatroomRow.twig', // This loads from public
             allowInlineIncludes: true,
             async: true,
             error: function () {
