@@ -187,7 +187,7 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
         const response = await updateNotificationDefaults(false);
 
         if (response.status === 'success') {
-            updateDefaultButtons();
+            updateDefaultButtons(true);
             window.displaySuccessMessage(response.data || 'Default notification settings cleared successfully.');
         }
         else {
@@ -495,8 +495,8 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
 
         if (result.status === 'success') {
             window.displaySuccessMessage(result.data || 'Default notification settings cleared successfully.');
-
             // Close the modal
+            $('#notification-defaults-content').hide().empty();
             $('#popup-notification-defaults').hide();
             $('body').removeClass('popup-active');
 

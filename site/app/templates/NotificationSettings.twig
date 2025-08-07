@@ -49,6 +49,7 @@
                         class="notification-setting-button btn btn-default"
                         tabindex="0"
                         data-testid="set-defaults-button"
+                        {% if is_default_notification_settings %} style="display: none;" {% endif %}
                         onclick="handleSetDefaultsClick()">
                         Set as Default Settings
                     </button>
