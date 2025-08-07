@@ -24,28 +24,17 @@
                         <th scope="col" style="text-align: right"></th>
                     </tr>
                 </thead>
-                <tbody id="chatroom-list" data-testid="chatroom-list-item">
-                    <!-- Vue will render the rows here -->
+                <tbody data-testid="chatroom-list-item">
+                    {% for chatroom in chatrooms %}
+                        {% include "chat/ChatroomRow.twig" with 
+                        {"id": chatroom.getId(),
+                        "description": chatroom.getDescription(),
+                        "title": chatroom.getTitle(),
+                        "isAllowAnon": chatroom.isAllowAnon(),
+                        "isAdmin": user_admin,
+                        "isActive": chatroom.isActive()} %}
+                    {% endfor %}
                 </tbody>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // Fetch chatroom data from existing JSON script tag
-                        const allData = JSON.parse(document.getElementById('all-chatroom-data').textContent);
-                        const chatrooms = allData.chatrooms;
-                        
-                        // Mount Vue component for each chatroom
-                        const targetSelector = allData.user_admin ? "#chatroom-list" : "#chatroom-list-student";
-                        chatrooms.forEach(chatroom => {
-                            window.submitty.render(
-                                targetSelector,
-                                "component",
-                                "chat/ChatroomRow",
-                                chatroom,
-                                true // append mode
-                            );
-                        });
-                    });
-                </script>
             {% else %} <!--student's view-->
                 <col style="width: 25%">
                 <col style="width: 25%">
@@ -59,8 +48,18 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody id="chatroom-list-student">
-                    <!-- Vue will render the rows here -->
+                <tbody>
+                    {% for chatroom in chatrooms %}
+                        {% include "chat/ChatroomRow.twig" with 
+                        { "id": chatroom.getId(),
+                        "description": chatroom.getDescription(),
+                        "title": chatroom.getTitle(),
+                        "hostName": chatroom.getHostName(),
+                        "isAllowAnon": chatroom.isAllowAnon(),
+                        "isAdmin": user_admin,
+                        "isActive": chatroom.isActive(),
+                        "baseUrl": base_url } %}
+                    {% endfor %}
                 </tbody>
             {% endif %}
         </table>
@@ -68,25 +67,8 @@
 </div>
 <script type="application/json" id="all-chatroom-data">
     {
-        "user_admin": {{ user_admin ? 'true' : 'false' }},
-        "base_url": {{ base_url | json_encode() | raw() }},
-        "chatrooms": [
-            {% for chatroom in chatrooms %}
-            {% if user_admin or chatroom.isActive() %}
-            {
-                "id": {{ chatroom.getId() }},
-                "description": {{ chatroom.getDescription() | json_encode() | raw() }},
-                "title": {{ chatroom.getTitle() | json_encode() | raw() }},
-                "hostName": {{ chatroom.getHostName() | json_encode() | raw() }},
-                "isAllowAnon": {{ chatroom.isAllowAnon() ? 'true' : 'false' }},
-                "isAdmin": {{ user_admin ? 'true' : 'false' }},
-                "isActive": {{ chatroom.isActive() ? 'true' : 'false' }},
-                "baseUrl": {{ base_url | json_encode() | raw() }},
-                "csrfToken": {{ csrf_token | json_encode() | raw() }}
-            }{% if not loop.last %},{% endif %}
-            {% endif %}
-            {% endfor %}
-        ]
+        "user_admin": "{{ user_admin }}",
+        "base_url": "{{ base_url }}"
     }
 </script>
 {% include('chat/CreateChatroomForm.twig') %}
