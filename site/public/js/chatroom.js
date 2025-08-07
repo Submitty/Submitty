@@ -249,8 +249,8 @@ function handleChatToggle(msg, user_admin, isOpening, base_url) {
     }
 
     const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isOpening, base_url);
-    // eslint-disable-next-line no-unsanitized/property
     // This should be safe because the Twig template escapes all passed variables.
+    // eslint-disable-next-line no-unsanitized/method
     tableBody.insertAdjacentHTML('beforeend', rowHtml);
 }
 
