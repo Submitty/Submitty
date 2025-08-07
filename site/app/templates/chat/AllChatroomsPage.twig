@@ -32,7 +32,8 @@
                         "title": chatroom.getTitle(),
                         "isAllowAnon": chatroom.isAllowAnon(),
                         "isAdmin": user_admin,
-                        "isActive": chatroom.isActive()} %}
+                        "isActive": chatroom.isActive(),
+                        "baseUrl": base_url } %}
                     {% endfor %}
                 </tbody>
             {% else %} <!--student's view-->
@@ -48,7 +49,7 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody data-testid="chatroom-list-item">>
                     {% for chatroom in chatrooms %}
                         {% include "chat/ChatroomRow.twig" with 
                         { "id": chatroom.getId(),
