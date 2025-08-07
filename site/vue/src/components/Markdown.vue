@@ -8,9 +8,7 @@ interface Props {
     testId?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    testId: undefined,
-});
+const props = defineProps<Props>();
 
 const markdownToHtml = (markdown: string | null | undefined): string => {
     if (!markdown) {
