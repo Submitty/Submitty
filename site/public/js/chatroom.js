@@ -30,7 +30,7 @@ function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon
         isAllowAnon: isAllowAnon,
         isAdmin: isAdmin,
         isActive: isActive,
-        baseUrl: base_url
+        baseUrl: base_url,
     });
 }
 
@@ -249,14 +249,9 @@ function handleChatToggle(msg, user_admin, isOpening, base_url) {
     }
 
     const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isOpening, base_url);
-
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = rowHtml;
-
-    const rowElement = tempDiv.firstElementChild;
-    if (rowElement) {
-        tableBody.appendChild(rowElement);
-    }
+    // eslint-disable-next-line no-unsanitized/property
+    // This should be safe because the Twig template escapes all passed variables.
+    tableBody.insertAdjacentHTML('beforeend', rowHtml);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
