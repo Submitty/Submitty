@@ -697,7 +697,7 @@ class ElectronicGraderController extends AbstractController {
             $override_cookie = $_COOKIE['include_grade_override'] ?? 'omit';
             $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
             $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
-            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students__' . $gradeable_id] ?? 'omit';
+            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
