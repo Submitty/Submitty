@@ -416,7 +416,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
-chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
+chmod -R a+rw ${NODE_FOLDER}/.vue-global-types
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
@@ -428,7 +428,7 @@ chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
+chmod -R a-rw ${NODE_FOLDER}/.vue-global-types
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
