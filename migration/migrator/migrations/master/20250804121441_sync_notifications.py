@@ -37,6 +37,9 @@ def up(config, database):
         END;
         $$ LANGUAGE plpgsql;
 
+        DROP TRIGGER IF EXISTS course_notification_defaults_update_trigger ON courses;
+        DROP TRIGGER IF EXISTS course_notification_defaults_delete_trigger ON courses;
+
         CREATE TRIGGER course_notification_defaults_update_trigger
             AFTER UPDATE ON courses
             FOR EACH ROW
