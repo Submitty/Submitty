@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Doctrine entity for course users
  * @package app\entities
  */
+#[ORM\Entity]
 #[ORM\Table(name: "courses_users")]
 class CourseUser {
     #[ORM\Column(type: Types::STRING)]
