@@ -194,7 +194,7 @@ class NotificationController extends AbstractController {
         $action = $syncing ? 'enabled' : 'disabled';
         $this->core->getQueries()->updateNotificationSync($user_id, $syncing);
         $this->core->getUser()->setNotificationsSynced($syncing);
-        return JsonResponse::getSuccessResponse(['message' => 'Notification syncing has been ' . ($action)]);
+        return JsonResponse::getSuccessResponse('Notification syncing has been ' . ($action));
     }
 
     /**
@@ -273,7 +273,7 @@ class NotificationController extends AbstractController {
 
         $this->core->getQueries()->updateNotificationDefaults($user_id, $defaults);
         $this->core->getUser()->setNotificationDefaults($defaults);
-        return JsonResponse::getSuccessResponse(['message' => $message]);
+        return JsonResponse::getSuccessResponse($message);
     }
 
     /**

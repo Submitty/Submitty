@@ -13,14 +13,17 @@ declare global {
         handleSetDefaultsClick: () => Promise<void>;
         handleClearDefaultsClick: () => Promise<void>;
         handleDefaultsDropdownChange: () => Promise<void>;
-        showNotificationDefaults: () => Promise<void>;
+        showNotificationDefaults: (autoApply?: boolean) => Promise<void>;
         applyNotificationDefaults: () => Promise<void>;
         clearNotificationDefaults: () => Promise<void>;
         captureTabInModal: (modalId: string) => void;
+        defaults: Record<string, string>;
+        checkAll: (button: HTMLButtonElement) => void;
+        unCheckAll: (button: HTMLButtonElement) => void;
+        resetNotification: (button: HTMLButtonElement) => void;
+        handleNotificationSettingsChange: (form: JQuery<HTMLFormElement>) => Promise<void>;
     }
 }
-
-type NotificationUpdateResponse = { message: string };
 
 type NotificationSettingsResponse = {
     course: string;
@@ -35,7 +38,7 @@ interface ApiResponse<T> {
     message?: string; /* Attached to non-successful responses */
 }
 
-async function updateNotificationSync(synced: boolean): Promise<ApiResponse<NotificationUpdateResponse>> {
+async function updateNotificationSync(synced: boolean): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append('notifications_synced', synced.toString());
     formData.append('csrf_token', window.csrfToken);
@@ -54,20 +57,18 @@ async function updateNotificationSync(synced: boolean): Promise<ApiResponse<Noti
             throw new Error(`HTTP request failed with status: ${response.status}`);
         }
 
-        return response.json() as Promise<ApiResponse<NotificationUpdateResponse>>;
+        return response.json() as Promise<ApiResponse<string>>;
     }
     catch (error) {
         console.error('Sync error:', error);
         return {
             status: 'error',
-            data: {
-                message: 'An error occurred while updating sync settings.',
-            },
+            data: 'An error occurred while updating sync settings.',
         };
     }
 }
 
-async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiResponse<NotificationUpdateResponse>> {
+async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append('notification_defaults', setAsDefault ? 'current' : 'null');
     formData.append('csrf_token', window.csrfToken);
@@ -82,13 +83,13 @@ async function updateNotificationDefaults(setAsDefault: boolean): Promise<ApiRes
             throw new Error(`HTTP request failed with status: ${response.status}`);
         }
 
-        return response.json() as Promise<ApiResponse<NotificationUpdateResponse>>;
+        return response.json() as Promise<ApiResponse<string>>;
     }
     catch (error) {
         console.error('Defaults error:', error);
         return {
             status: 'error',
-            data: { message: 'An error occurred while updating default settings.' },
+            data: 'An error occurred while updating default settings.',
         };
     }
 }
@@ -124,11 +125,11 @@ window.handleSyncClick = async function handleSyncClick(): Promise<void> {
 
         if (response.status === 'success') {
             updateSyncUI(newSyncState);
-            window.displaySuccessMessage(response.data.message);
+            window.displaySuccessMessage(response.data);
         }
         else {
             button.textContent = originalText;
-            window.displayErrorMessage(response.data.message);
+            window.displayErrorMessage(response.message || 'Failed to update sync settings.');
         }
     }
     catch (error) {
@@ -157,10 +158,10 @@ window.handleSetDefaultsClick = async function handleSetDefaultsClick(): Promise
         const response = await updateNotificationDefaults(true);
         if (response.status === 'success') {
             updateDefaultsUI(true);
-            window.displaySuccessMessage(response.data.message);
+            window.displaySuccessMessage(response.data);
         }
         else {
-            window.displayErrorMessage(response.data.message);
+            window.displayErrorMessage(response.message || 'Failed to set default settings.');
         }
     }
     catch (error) {
@@ -189,11 +190,11 @@ window.handleClearDefaultsClick = async function handleClearDefaultsClick(): Pro
         if (response.status === 'success') {
             updateDefaultsUI(false);
             if (response.data) {
-                window.displaySuccessMessage(response.data.message);
+                window.displaySuccessMessage(response.data);
             }
         }
         else {
-            window.displayErrorMessage(response.data.message);
+            window.displayErrorMessage(response.message || 'Failed to clear default settings.');
         }
     }
     catch (error) {
@@ -222,11 +223,11 @@ window.handleProfileSyncChange = async function handleProfileSyncChange(): Promi
         const response = await updateNotificationSync(synced);
 
         if (response.status === 'success') {
-            window.displaySuccessMessage(response.data.message);
+            window.displaySuccessMessage(response.data);
         }
         else {
             dropdown.value = originalValue;
-            window.displayErrorMessage(response.data.message);
+            window.displayErrorMessage(response.message || 'Failed to update sync preference.');
         }
     }
     catch (error) {
@@ -249,25 +250,53 @@ window.handleDefaultsDropdownChange = async function handleDefaultsDropdownChang
     const currentDefault = dropdown.dataset.currentDefault || '';
     const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
     const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
-    const viewButton = document.getElementById('view-defaults-btn') as HTMLButtonElement;
     const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
 
     if (buttonsContainer) {
-        viewButton.style.display = value === '' ? 'none' : 'block';
         applyButton.style.display = (value !== '' && value === currentDefault) ? 'none' : 'block';
         clearButton.style.display = (value !== '' && value === currentDefault) ? 'block' : 'none';
         buttonsContainer.style.display = value === '' && currentDefault === '' ? 'none' : 'block';
+        await window.showNotificationDefaults(true); // Display this new selected course's settings
     }
 };
 
-window.showNotificationDefaults = async function showNotificationDefaults(): Promise<void> {
+window.showNotificationDefaults = async function showNotificationDefaults(autoApply = false): Promise<void> {
     try {
         const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
-        if (!dropdown || dropdown.value === '') {
+        if (!dropdown) {
             return;
         }
 
         const courseKey = dropdown.value;
+        const currentDefault = dropdown.dataset.currentDefault || '';
+        const isCurrentDefault = courseKey === currentDefault;
+
+        // Potentially add a small delay to allow the spinner to be visible for a moment or don't show the spinner at all
+        const timeout = currentDefault === '' || notificationSettingsCache[courseKey] !== undefined ? 0 : 750;
+
+        if (!autoApply) { // Called from outside of the dropdown event listener
+            // Show the modal with spinner first
+            $('#popup-notification-defaults').show();
+            $('body').addClass('popup-active');
+            window.captureTabInModal('popup-notification-defaults');
+        }
+
+        // Show spinner, hide existing content, if any
+        if (timeout > 0) {
+            $('#notification-defaults-spinner').show();
+            $('#notification-defaults-content').hide().empty();
+        }
+
+        // If no course selected, just show the empty state
+        if (dropdown.value === '') {
+            $('#notification-defaults-spinner').hide();
+            $('#notification-defaults-content').show().append(`
+                <div class="text-center">
+                    <p>Please select a course to view notification settings.</p>
+                </div>
+            `);
+            return;
+        }
 
         // Check cache first
         let result: ApiResponse<NotificationSettingsResponse>;
@@ -301,70 +330,104 @@ window.showNotificationDefaults = async function showNotificationDefaults(): Pro
         }
 
         if (result.status === 'success') {
-            $('#popup-notification-defaults').show();
-            $('body').addClass('popup-active');
+            setTimeout(() => {
+                // Hide spinner
+                $('#notification-defaults-spinner').hide();
+                const contentDiv = $('#notification-defaults-content');
+                contentDiv.empty();
 
-            window.captureTabInModal('popup-notification-defaults');
+                const settings = result.data.settings;
+                const [term, course] = result.data.course.split('-');
 
-            $('#popup-notification-defaults .form-body').empty();
-
-            const settings = result.data.settings;
-
-            const [term, course] = result.data.course.split('-');
-            $('#popup-notification-defaults .form-body').append(`
+                contentDiv.append(`
                 <h3 style="margin-bottom: 2px; text-decoration: underline;">Course Information</h3>
                 <strong>Term</strong> - ${term}
                 <br />
                 <strong>Course</strong> - ${course}
             `);
 
-            if (result.data.missing_settings) {
-                $('#popup-notification-defaults .form-body').append('<p><strong>NOTE: No notification settings found for this course; default settings will be applied.</strong></p>');
-            }
-
-            const settingsList = $('<ul>');
-            for (const [key, value] of Object.entries(settings)) {
-                if (key === 'all_announcements') {
-                    settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Mandatory Notifications</h3>');
+                if (result.data.missing_settings) {
+                    contentDiv.append('<p><strong>NOTE: No notification settings found for this course; default settings will be applied.</strong></p>');
                 }
-                else if (key === 'reply_in_post_thread') {
-                    settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Optional Notifications</h3>');
-                }
-                const displayName = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-                const statusIcon = value === 'true'
-                    ? '<i class="fas fa-check-circle" style="color: #4CAF50; margin-right: 5px;"></i>'
-                    : '<i class="fas fa-times-circle" style="color: #F44336; margin-right: 5px;"></i>';
-                settingsList.append(`<li style="margin-left: 2px;">${statusIcon}<strong>${displayName}</strong></li>`);
-            }
-            $('#popup-notification-defaults .form-body').append(settingsList);
 
-            $('#popup-notification-defaults .close-button').off('click').on('click', () => {
-                $('#popup-notification-defaults').hide();
-                $('body').removeClass('popup-active');
-            });
+                const settingsList = $('<ul>');
+                for (const [key, value] of Object.entries(settings)) {
+                    if (key === 'all_announcements') {
+                        settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Mandatory Notifications</h3>');
+                    }
+                    else if (key === 'reply_in_post_thread') {
+                        settingsList.append('<h3 style="margin-top: 10px; margin-bottom: 2px; text-decoration: underline;">Optional Notifications</h3>');
+                    }
+                    const displayName = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+                    const statusIcon = value === 'true'
+                        ? '<i class="fas fa-check-circle" style="color: #4CAF50; margin-right: 5px;"></i>'
+                        : '<i class="fas fa-times-circle" style="color: #F44336; margin-right: 5px;"></i>';
+                    settingsList.append(`<li style="margin-left: 2px;">${statusIcon}<strong>${displayName}</strong></li>`);
+                }
+                contentDiv.append(settingsList);
+
+                // Update action buttons
+                const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
+                const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
+
+                // If the current course is not the default, show the apply button
+                if (!isCurrentDefault && currentDefault !== '') {
+                    applyButton.style.display = 'block';
+                    clearButton.style.display = 'none';
+                }
+
+                // If the current course is the default, show the clear button
+                if (isCurrentDefault && currentDefault !== '') {
+                    applyButton.style.display = 'none';
+                    clearButton.style.display = 'block';
+                }
+
+                contentDiv.show();
+
+                $('#popup-notification-defaults .close-button').off('click').on('click', () => {
+                    $('#popup-notification-defaults').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }, timeout);
         }
         else {
-            window.displayErrorMessage(result?.message || 'Failed to retrieve notification defaults.');
+            // Hide spinner, show error
+            $('#notification-defaults-spinner').hide();
+            $('#notification-defaults-content').show().append(`
+                <div class="alert alert-danger">
+                    ${result.message || 'Failed to retrieve notification defaults.'}
+                </div>
+            `);
+            window.displayErrorMessage(result.message || 'Failed to retrieve notification defaults.');
         }
     }
     catch (error) {
         console.error('Show defaults error:', error);
+        // Hide spinner, show error
+        $('#notification-defaults-spinner').hide();
+        $('#notification-defaults-content').show().append(`
+            <div class="alert alert-danger">
+                Failed to load notification settings. Please try again.
+            </div>
+        `);
         window.displayErrorMessage('Failed to load notification defaults.');
     }
 };
 
 window.applyNotificationDefaults = async function applyNotificationDefaults(): Promise<void> {
-    const button = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
     const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
-    if (!button || !dropdown) {
+    if (!dropdown) {
         return;
     }
 
-    console.log('applyNotificationDefaults', dropdown.value);
+    // Get the button from either the modal or the main page
+    const modalButton = document.getElementById('modal-apply-btn') as HTMLButtonElement;
 
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = 'Applying...';
+    // Disable button and show loading state
+    if (modalButton) {
+        modalButton.disabled = true;
+        modalButton.textContent = 'Applying...';
+    }
 
     try {
         const formData = new FormData();
@@ -380,37 +443,21 @@ window.applyNotificationDefaults = async function applyNotificationDefaults(): P
             throw new Error(`HTTP request failed with status: ${response.status}`);
         }
 
-        const result = await response.json() as ApiResponse<NotificationUpdateResponse>;
+        const result = await response.json() as ApiResponse<string>;
 
         if (result.status === 'success') {
-            window.displaySuccessMessage(result.data.message);
+            window.displaySuccessMessage(result.data);
 
             // Update the current default in the dataset
             const courseKey = dropdown.value;
             dropdown.dataset.currentDefault = courseKey;
 
-            if (courseKey !== '') {
-                // Show the clear button only if we're viewing the same course that was set as default
-                const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-                if (clearButton) {
-                    clearButton.style.display = 'block';
-                }
-                // Hide the apply button
-                const applyButton = document.getElementById('apply-defaults-btn') as HTMLButtonElement;
-                if (applyButton) {
-                    applyButton.style.display = 'none';
-                }
-            }
-            else {
-                // Hide all buttons
-                const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
-                if (buttonsContainer) {
-                    buttonsContainer.style.display = 'none';
-                }
-            }
+            // Close the modal
+            $('#popup-notification-defaults').hide();
+            $('body').removeClass('popup-active');
         }
         else {
-            window.displayErrorMessage(result?.message || 'Failed to apply default settings.');
+            window.displayErrorMessage(result.message || 'Failed to apply default settings.');
         }
     }
     catch (error) {
@@ -418,12 +465,23 @@ window.applyNotificationDefaults = async function applyNotificationDefaults(): P
         window.displayErrorMessage('Failed to apply default settings.');
     }
     finally {
-        button.disabled = false;
-        button.textContent = originalText;
+        if (modalButton) {
+            modalButton.disabled = false;
+            modalButton.textContent = 'Set as Default';
+        }
     }
 };
 
 window.clearNotificationDefaults = async function clearNotificationDefaults(): Promise<void> {
+    // Get the button from the modal
+    const modalButton = document.getElementById('modal-clear-btn') as HTMLButtonElement;
+
+    // Disable button and show loading state
+    if (modalButton) {
+        modalButton.disabled = true;
+        modalButton.textContent = 'Clearing...';
+    }
+
     try {
         const formData = new FormData();
         formData.append('notification_defaults', 'null');
@@ -438,38 +496,103 @@ window.clearNotificationDefaults = async function clearNotificationDefaults(): P
             throw new Error(`HTTP request failed with status: ${response.status}`);
         }
 
-        const result = await response.json() as ApiResponse<NotificationUpdateResponse>;
+        const result = await response.json() as ApiResponse<string>;
 
         if (result.status === 'success') {
-            window.displaySuccessMessage(result.data.message);
+            window.displaySuccessMessage(result.data);
+
             // Close the modal
             $('#popup-notification-defaults').hide();
             $('body').removeClass('popup-active');
+
             // Update the dropdown and clear the current default in the dataset
             const dropdown = document.getElementById('notification_defaults_select') as HTMLSelectElement;
             if (dropdown) {
                 dropdown.value = '';
                 dropdown.dataset.currentDefault = '';
             }
-
-            // Hide the buttons container
-            const buttonsContainer = document.getElementById('notification-defaults-buttons') as HTMLDivElement;
-            if (buttonsContainer) {
-                buttonsContainer.style.display = 'none';
-            }
-
-            // Hide the clear button specifically
-            const clearButton = document.getElementById('clear-defaults-btn') as HTMLButtonElement;
-            if (clearButton) {
-                clearButton.style.display = 'none';
-            }
         }
         else {
-            window.displayErrorMessage(result?.message || 'Failed to clear notification defaults.');
+            window.displayErrorMessage(result.message || 'Failed to clear notification defaults.');
         }
     }
     catch (error) {
         console.error('Clear defaults error:', error);
         window.displayErrorMessage('Failed to clear notification defaults.');
     }
+    finally {
+        if (modalButton) {
+            modalButton.disabled = false;
+            modalButton.textContent = 'Clear Default';
+        }
+    }
 };
+
+// Functions moved from NotificationSettings.twig
+window.checkAll = function checkAll(button: HTMLButtonElement): void {
+    const selector: JQuery<HTMLElement> = $(button).data('selector') as JQuery<HTMLElement>;
+    $(selector).children().prop('checked', true);
+    $('#form_notification_settings').trigger('change');
+};
+
+window.unCheckAll = function unCheckAll(button: HTMLButtonElement): void {
+    const selector: JQuery<HTMLElement> = $(button).data('selector') as JQuery<HTMLElement>;
+    $(selector).children().filter(':not(:disabled)').prop('checked', false);
+    $('#form_notification_settings').trigger('change');
+};
+
+window.resetNotification = function resetNotification(button: HTMLButtonElement): void {
+    // Note: defaults is expected to be defined in the template
+    // This will be handled by the template-injected defaults variable
+    const selector: string = $(button).data('selector') as string;
+
+    if (selector === '.notification-setting-input') {
+        const defaults = window.defaults;
+        for (const d in defaults) {
+            if (Object.prototype.hasOwnProperty.call(defaults, d) && !d.includes('_email')) {
+                $(`input[name='${d}']`).prop('checked', defaults[d]);
+            }
+        }
+    }
+    else if (selector === '.email-setting-input') {
+        const defaults = window.defaults;
+        for (const d in defaults) {
+            if (Object.prototype.hasOwnProperty.call(defaults, d) && d.includes('_email')) {
+                $(`input[name='${d}']`).prop('checked', defaults[d]);
+            }
+        }
+    }
+
+    $('#form_notification_settings').trigger('change');
+};
+
+// Set up form change handler when document is ready
+$(document).ready(() => {
+    $('#form_notification_settings').on('change', function (e) {
+        const form = $(this);
+        const url = form.attr('action') as string;
+        e.preventDefault();
+
+        $.ajax({
+            type: 'POST',
+            data: form.serialize(),
+            url: url,
+            success: function (data: string) {
+                try {
+                    const json = JSON.parse(data) as ApiResponse<string>;
+                    if (json.status === 'fail') {
+                        window.displayErrorMessage(json.message || 'Failed to update notification settings.');
+                    }
+                    else {
+                        window.displaySuccessMessage(json.data || 'Notification settings updated successfully.');
+                    }
+                }
+                catch (err) {
+                    console.error('Error parsing data:', err);
+                    window.displayErrorMessage('Error parsing data. Please try again.');
+                }
+                $('#notification-settings').css('display', 'none');
+            },
+        });
+    });
+});

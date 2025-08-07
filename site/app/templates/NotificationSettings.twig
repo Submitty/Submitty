@@ -379,63 +379,7 @@
         </div>
     </form>
     <script>
-        function checkAll(button) {
-            var selector = $(button).data('selector');
-            $(selector).children().prop('checked',true);
-            $('#form_notification_settings').trigger("change");
-        }
-
-        function unCheckAll(button) {
-            var selector = $(button).data('selector');
-            $(selector).children().filter(':not(:disabled)').prop('checked',false);
-            $('#form_notification_settings').trigger("change");
-        }
-
-        function resetNotification(button) {
-            var defaults = {{ defaults|json_encode|raw }};
-            var selector = $(button).data('selector');
-            if (selector === '.notification-setting-input') {
-                for (d in defaults) {
-                    if (defaults.hasOwnProperty(d) && !d.includes("_email")) {
-                        $("input[name='" + d + "']").prop('checked',defaults[d]);
-                    }
-                }
-            }
-            else if (selector === '.email-setting-input') {
-                for (d in defaults) {
-                    if (defaults.hasOwnProperty(d) && d.includes("_email")) {
-                        $("input[name='" + d + "']").prop('checked',defaults[d]);
-                    }
-                }
-            }
-            $('#form_notification_settings').trigger("change");
-        }
-
-
-
-        $('#form_notification_settings').on("change",function(e) {
-            var f = $(this);
-            var url = f.attr('action');
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                data: f.serialize(),
-                url: url,
-                success: function(data) {
-                    try {
-                        var json = JSON.parse(data);
-                        if(json['status'] == 'fail') {
-                            displayErrorMessage(json['message']);
-                        }
-                        else {
-                            displaySuccessMessage(json['data']);
-                        }
-                    } catch(err) {
-                        displayErrorMessage('Error parsing data. Please try again.');
-                    }
-                    $('#notification-settings').css('display', 'none');
-                }
-            });
-        });
+        // Inject defaults variable for use by notification-settings.ts
+        var defaults = {{ defaults|json_encode|raw }};
     </script>
 </div>

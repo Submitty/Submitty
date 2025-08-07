@@ -173,3 +173,29 @@ footer .footer-separator {
 #loading-bar-percentage {
     margin-left: 10px;
 }
+
+.loader-container {
+    position: relative;
+    min-height: 115px;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #fff;
+    background-color: transparent;
+    border-bottom-color: var(--actionable-blue);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

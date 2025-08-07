@@ -7,13 +7,35 @@
 {% endblock %}
 
 {% block body %}
-    <div class="form-body" data-testid="notification-defaults-body">
-        <!-- This will be filled by showNotificationDefaults() via AJAX -->
+<div class="form-body" data-testid="notification-defaults-body">
+        <div class="flex-row-col">
+            <select
+                id="notification_defaults_select"
+                class="form-control"
+                aria-label="Choose Default Notification Settings"
+                data-testid="notification-defaults-dropdown"
+                data-current-default="{% if user.getNotificationDefaults() %}{{ user.getNotificationDefaults() }}{% else %} {% endif %}"
+                style="width: 100%;"
+                onchange="handleDefaultsDropdownChange()">
+                <option value="" data-testid="no-defaults-option" {% if not user.getNotificationDefaults() %}selected{% endif %}>None</option>
+                {% for course_key, course_name in courses %}
+                    <option value="{{ course_key }}" data-testid="defaults-option-{{ course_key }}" {% if user.getNotificationDefaults() == course_key %}selected{% endif %}>{{ course_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="notification-defaults-spinner" class="text-center loader-container">
+            <span class="loader"></span>
+        </div>
+        <div id="notification-defaults-content" style="display: none;">
+            <!-- This will be filled by showNotificationDefaults() via AJAX -->
+        </div>
     </div>
 {% endblock %}
 
 {% block buttons %}
-    <div class="form-buttons">
-        <a class="btn btn-default close-button" data-testid="close-notification-defaults" onclick="$('#popup-notification-defaults').hide(); $('body').css('overflow','auto');">Close</a>
+    <div id="notification-defaults-buttons" style="display: flex; gap: 10px; float: right;">
+        <a class="btn btn-default close-button" data-testid="close-notification-defaults" onclick="$('#popup-notification-defaults').hide(); $('body').removeClass('popup-active');">Cancel</a>
+        <button id="apply-defaults-btn" class="btn btn-primary" style="display: none;" onclick="applyNotificationDefaults()">Apply</button>
+        <button id="clear-defaults-btn" class="btn btn-danger" style="display: none;" onclick="clearNotificationDefaults()">Clear</button>
     </div>
 {% endblock %}

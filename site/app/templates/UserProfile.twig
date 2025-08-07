@@ -229,27 +229,8 @@
                 <div class="user-info">
                     <div class="flex-row-col" style="margin-bottom: 10px;">
                         <label for="notification_defaults_select">Choose default settings from registered courses</label>
-                        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
-                            <select
-                                id="notification_defaults_select"
-                                class="form-control"
-                                aria-label="Choose Default Notification Settings"
-                                data-testid="notification-defaults-dropdown"
-                                data-current-default="{% if user.getNotificationDefaults() %}{{ user.getNotificationDefaults() }}{% else %} {% endif %}"
-                                style="width: 100%;"
-                                onchange="handleDefaultsDropdownChange()">
-                                <option value="" data-testid="no-defaults-option" {% if not user.getNotificationDefaults() %}selected{% endif %}>[Default] | None</option>
-                                {% for course_key, course_name in courses %}
-                                    <option value="{{ course_key }}" data-testid="defaults-option-{{ course_key }}" {% if user.getNotificationDefaults() == course_key %}selected{% endif %}>{{ course_name }}</option>
-                                {% endfor %}
-                            </select>
-                            <div style="width: 100%; margin-top: 10px; {% if not user.getNotificationDefaults() %}display: none;{% endif %}" id="notification-defaults-buttons">
-                                <div class="button-row" style="display: flex; gap: 6px; justify-content: space-between;">
-                                    <button id="view-defaults-btn" class="btn btn-secondary" style="flex: 1;" data-testid="view-notification-defaults" onclick="showNotificationDefaults()"><i class="fas fa-eye" style="margin-right: 5px;"></i>View</button>
-                                    <button id="apply-defaults-btn" class="btn btn-primary" style="flex: 1; {% if user.getNotificationDefaults() %}display: none;{% endif %}" data-testid="apply-notification-defaults" onclick="applyNotificationDefaults()"><i class="fas fa-save" style="margin-right: 5px; color: white;"></i>Apply</button>
-                                    <button id="clear-defaults-btn" class="btn btn-danger" style="flex: 1;" data-testid="clear-notification-defaults" {% if not user.getNotificationDefaults() %}style="display: none;"{% endif %} onclick="clearNotificationDefaults()"><i class="fas fa-trash-alt" style="margin-right: 5px; color: white;"></i>Clear</button>
-                                </div>
-                            </div>
+                        <div class="flex-row-col" id="notification-defaults-buttons">
+                            <button id="edit-defaults-btn" class="btn btn-primary" data-testid="edit-notification-defaults" onclick="showNotificationDefaults()">Edit Defaults</button>
                         </div>
                     </div>
                 </div>

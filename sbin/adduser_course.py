@@ -10,7 +10,7 @@ import argparse
 import json
 from os import path
 import sys
-from sqlalchemy import create_engine, MetaData, Table, bindparam, and_, insert, select, update
+from sqlalchemy import create_engine, MetaData, Table, bindparam, and_, insert, select, update, text
 
 from submitty_utils import db_utils
 
@@ -35,6 +35,109 @@ def parse_args():
                         help='group the user belongs to 1:Instructor 2:Full Access Grader 3:Limited Access Grader 4:Student')
 
     return parser.parse_args()
+
+
+def apply_notification_defaults(connection, user_id, semester, course):
+    """
+    Apply default notification settings for a user when they are added to a course.
+
+    This function checks if the user has default notification settings defined,
+    and if so, applies them to the newly added course.
+    """
+    # First, check if the user has default notification settings
+    query = text("""
+        SELECT notification_defaults
+        FROM users
+        WHERE user_id = :user_id AND notification_defaults IS NOT NULL
+    """)
+    result = connection.execute(query, {"user_id": user_id}).fetchone()    # If no defaults are set, nothing to do
+    if not result or not result[0]:
+        return
+
+    # Parse the default course reference (term-course)
+    default_course_ref = result[0]
+    try:
+        default_term, default_course = default_course_ref.split('-', 1)
+    except ValueError:
+        print(f"Invalid default course reference: {default_course_ref}", file=sys.stderr)
+        return
+
+    # Connect to the default course database to get notification settings
+    default_db_name = f"submitty_{default_term}_{default_course}"
+    try:
+        default_conn_str = db_utils.generate_connect_string(
+            DATABASE_HOST,
+            DATABASE_PORT,
+            default_db_name,
+            DATABASE_USER,
+            DATABASE_PASS
+        )
+        default_engine = create_engine(default_conn_str)
+        default_connection = default_engine.connect()
+
+        # Get the user's notification settings from the default course
+        query = text("""
+            SELECT *
+            FROM notification_settings
+            WHERE user_id = :user_id
+        """)
+        default_settings = default_connection.execute(query, {"user_id": user_id}).fetchone()
+        default_connection.close()
+
+        if not default_settings:
+            print(f"No notification settings found in default course for user {user_id}", file=sys.stderr)
+            return
+
+        # Connect to the target course database to apply settings
+        target_db_name = f"submitty_{semester}_{course}"
+        target_conn_str = db_utils.generate_connect_string(
+            DATABASE_HOST,
+            DATABASE_PORT,
+            target_db_name,
+            DATABASE_USER,
+            DATABASE_PASS
+        )
+        target_engine = create_engine(target_conn_str)
+        target_connection = target_engine.connect()
+
+        # Convert the row to a dictionary for easier handling
+        columns = default_settings.keys()
+        settings_dict = {col: default_settings[col] for col in columns if col != 'user_id'}
+
+        # Check if the user already has notification settings in the target course
+        query = text("""
+            SELECT COUNT(*)
+            FROM notification_settings
+            WHERE user_id = :user_id
+        """)
+        exists = target_connection.execute(query, {"user_id": user_id}).scalar()
+
+        if exists:
+            # Update existing settings
+            set_clause = ", ".join([f"{col} = :{col}" for col in settings_dict.keys()])
+            query = text(f"""
+                UPDATE notification_settings
+                SET {set_clause}
+                WHERE user_id = :user_id
+            """)
+        else:
+            # Insert new settings
+            columns_str = "user_id, " + ", ".join(settings_dict.keys())
+            values_str = ":user_id, " + ", ".join([f":{col}" for col in settings_dict.keys()])
+            query = text(f"""
+                INSERT INTO notification_settings ({columns_str})
+                VALUES ({values_str})
+            """)
+
+        # Execute the query with all parameters
+        params = {"user_id": user_id, **settings_dict}
+        target_connection.execute(query, params)
+        target_connection.commit()
+        target_connection.close()
+
+        print(f"Applied default notification settings for user {user_id} in course {semester}-{course}")
+    except Exception as e:
+        print(f"Error applying notification defaults: {str(e)}", file=sys.stderr)
 
 
 def main():
@@ -99,6 +202,9 @@ def main():
                 registration_section=registration_section
             )
         )
+
+        # Apply default notification settings for newly added users
+        apply_notification_defaults(connection, user_id, semester, course)
     else:
         query = update(courses_u_table).where(
             courses_u_table.c.user_id == bindparam("b_user_id")
