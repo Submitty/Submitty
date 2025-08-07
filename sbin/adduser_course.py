@@ -53,12 +53,7 @@ def apply_notification_defaults(connection, user_id, semester, course):
         return
 
     # Parse the default course reference (term-course)
-    default_course_ref = result
-    try:
-        default_term, default_course = default_course_ref.split('-', 1)
-    except ValueError:
-        print(f"Invalid default course reference: {default_course_ref}", file=sys.stderr)
-        return
+    default_term, default_course = result.split('-', 1)
 
     try:
         # Connect to the default course database to get notification settings
@@ -74,19 +69,12 @@ def apply_notification_defaults(connection, user_id, semester, course):
         default_connection = default_engine.connect()
         default_metadata = MetaData()
 
-        # Check if notification_settings table exists in the default course
-        try:
-            notification_settings_table = Table(
-                'notification_settings',
-                default_metadata,
-                autoload_with=default_engine
-            )
-        except Exception:
-            print(f"notification_settings table doesn't exist in {default_term}-{default_course}", file=sys.stderr)
-            default_connection.close()
-            return
-
         # Get the user's notification settings from the default course
+        notification_settings_table = Table(
+            'notification_settings',
+            default_metadata,
+            autoload_with=default_engine
+        )
         query = select(notification_settings_table).where(
             notification_settings_table.c.user_id == user_id
         )
@@ -94,60 +82,53 @@ def apply_notification_defaults(connection, user_id, semester, course):
         default_connection.close()
 
         if not default_settings_row:
-            # Should never happen, but just in case
-            print(f"No notification settings found in default course for user {user_id}", file=sys.stderr)
+            # User has a course falling back to default notification settings, so no settings exist in the default course
+            print(f"No notification settings found in default course for user {user_id}", file=sys.stdout)
             return
 
         # Convert the row to a dictionary for easier handling
         settings_dict = {col: default_settings_row[col] for col in default_settings_row.keys() if col != 'user_id'}
 
-        # Connect to the new course database
-        new_db_name = f"submitty_{semester}_{course}"
-        new_conn_str = db_utils.generate_connect_string(
+        # Connect to the current course database to apply the default notification settings
+        current_db_name = f"submitty_{semester}_{course}"
+        current_conn_str = db_utils.generate_connect_string(
             DATABASE_HOST,
             DATABASE_PORT,
-            new_db_name,
+            current_db_name,
             DATABASE_USER,
             DATABASE_PASS
         )
-        new_engine = create_engine(new_conn_str)
-        new_connection = new_engine.connect()
-        new_metadata = MetaData()
+        current_engine = create_engine(current_conn_str)
+        current_connection = current_engine.connect()
+        current_metadata = MetaData()
 
-        # Check if notification_settings table exists in the new course
-        try:
-            notification_settings_table = Table(
-                'notification_settings',
-                new_metadata,
-                autoload_with=new_engine
-            )
-        except Exception:
-            print(f"notification_settings table doesn't exist in {semester}-{course}", file=sys.stderr)
-            new_connection.close()
-            return
-
-        # Check if the user already has notification settings in the new course
+        # Check if notification_settings table exists in the current course
+        notification_settings_table = Table(
+            'notification_settings',
+            current_metadata,
+            autoload_with=current_engine
+        )
         query = select(notification_settings_table.c.user_id).where(
             notification_settings_table.c.user_id == user_id
         )
-        exists = new_connection.execute(query).first() is not None
+        exists = current_connection.execute(query).first() is not None
 
         if exists:
             # Update existing settings using SQLAlchemy update
             stmt = update(notification_settings_table).where(
                 notification_settings_table.c.user_id == user_id
             ).values(**settings_dict)
-            new_connection.execute(stmt)
+            current_connection.execute(stmt)
         else:
             # Insert new settings using SQLAlchemy insert
             stmt = insert(notification_settings_table).values(
                 user_id=user_id,
                 **settings_dict
             )
-            new_connection.execute(stmt)
+            current_connection.execute(stmt)
 
-        new_connection.commit()
-        new_connection.close()
+        current_connection.commit()
+        current_connection.close()
 
         print(f"Applied default notification settings for user {user_id} in course {semester}-{course}")
     except Exception as e:
