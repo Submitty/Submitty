@@ -4,7 +4,7 @@
  * Asynchronously load the chatroom row template
  * @return {Promise}
  */
-function loadChatroomTemplate() {
+function loadChatroomTemplate(chatroomId) {
     return new Promise((resolve, reject) => {
         Twig.twig({
             id: `ChatroomRow`,
