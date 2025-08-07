@@ -1,7 +1,11 @@
 <div class="content shadow" id="login-box">
     <div id="login-guest">
-        {% include "misc/Markdown.twig" with {
-            "content": login_content
+        {% include 'Vue.twig' with {
+            type: "component",
+            name: "Markdown",
+            args: {
+                content: login_content
+            }
         } only %}
     </div>
     <!--
