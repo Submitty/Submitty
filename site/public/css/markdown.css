@@ -94,7 +94,7 @@
     color: var(--standard-light-medium-gray);
 }
 
-.markdown code:not(.inline-code) {
+.markdown pre > code {
     display: block;
     white-space: pre;
     padding: 1em 1em 1em 2em;
