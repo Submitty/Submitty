@@ -57,7 +57,7 @@
         padding: 0;
         margin: -1px;
         overflow: hidden;
-        clip-path: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
         border: 0;
     }
 
