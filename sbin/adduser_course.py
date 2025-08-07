@@ -50,8 +50,8 @@ def apply_notification_defaults(connection, user_id, semester, course):
         FROM users
         WHERE user_id = :user_id AND notification_defaults IS NOT NULL
     """)
-    result = connection.execute(query, {"user_id": user_id}).fetchone()    # If no defaults are set, nothing to do
-    if not result or not result[0]:
+    result = connection.execute(query, {"user_id": user_id}).fetchone()
+    if not result:
         return
 
     # Parse the default course reference (term-course)
@@ -81,36 +81,23 @@ def apply_notification_defaults(connection, user_id, semester, course):
             FROM notification_settings
             WHERE user_id = :user_id
         """)
-        default_settings = default_connection.execute(query, {"user_id": user_id}).fetchone()
+        default_settings = default_connection.execute(query, {"user_id": user_id}).mappings().fetchone()
         default_connection.close()
 
         if not default_settings:
             print(f"No notification settings found in default course for user {user_id}", file=sys.stderr)
             return
 
-        # Connect to the target course database to apply settings
-        target_db_name = f"submitty_{semester}_{course}"
-        target_conn_str = db_utils.generate_connect_string(
-            DATABASE_HOST,
-            DATABASE_PORT,
-            target_db_name,
-            DATABASE_USER,
-            DATABASE_PASS
-        )
-        target_engine = create_engine(target_conn_str)
-        target_connection = target_engine.connect()
-
         # Convert the row to a dictionary for easier handling
-        columns = default_settings.keys()
-        settings_dict = {col: default_settings[col] for col in columns if col != 'user_id'}
+        settings_dict = {col: default_settings[col] for col in default_settings if col != 'user_id'}
 
-        # Check if the user already has notification settings in the target course
+        # Check if the user already has notification settings in the new course
         query = text("""
             SELECT COUNT(*)
             FROM notification_settings
             WHERE user_id = :user_id
         """)
-        exists = target_connection.execute(query, {"user_id": user_id}).scalar()
+        exists = connection.execute(query, {"user_id": user_id}).scalar()
 
         if exists:
             # Update existing settings
@@ -131,9 +118,8 @@ def apply_notification_defaults(connection, user_id, semester, course):
 
         # Execute the query with all parameters
         params = {"user_id": user_id, **settings_dict}
-        target_connection.execute(query, params)
-        target_connection.commit()
-        target_connection.close()
+        connection.execute(query, params)
+        connection.commit()
 
         print(f"Applied default notification settings for user {user_id} in course {semester}-{course}")
     except Exception as e:
