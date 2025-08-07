@@ -7,7 +7,7 @@
 function loadChatroomTemplate(chatroomId) {
     return new Promise((resolve, reject) => {
         Twig.twig({
-            id: `ChatroomRow`,
+            id: 'ChatroomRow',
             href: '/templates/chat/ChatroomRow.twig',
             allowInlineIncludes: true,
             async: true,
@@ -22,7 +22,7 @@ function loadChatroomTemplate(chatroomId) {
 }
 
 function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon, isAdmin, isActive, base_url) {
-    return Twig.twig({ ref: `ChatroomRow` }).render({
+    return Twig.twig({ ref: 'ChatroomRow' }).render({
         id: chatroomId,
         description: description,
         title: title,
@@ -248,8 +248,15 @@ function handleChatToggle(msg, user_admin, isOpening, base_url) {
         row.remove();
     }
 
-    let rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isOpening, base_url);
-    tableBody.insertAdjacentHTML('beforeend', rowHtml);
+    const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isOpening, base_url);
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = rowHtml;
+
+    const rowElement = tempDiv.firstElementChild;
+    if (rowElement) {
+        tableBody.appendChild(rowElement);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

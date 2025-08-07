@@ -49,7 +49,7 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody data-testid="chatroom-list-item">>
+                <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
                         {% include "chat/ChatroomRow.twig" with 
                         { "id": chatroom.getId(),
