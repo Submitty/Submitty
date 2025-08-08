@@ -27,6 +27,8 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $user_id = $this->core->getUser()->getId();
+        $this->courses = $this->core->getQueries()->getCourseForUserId($user_id); // declare here so getCourses and getAllRecentNotifications can use it
     }
 
     /**
@@ -46,7 +48,7 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $unarchived_courses = $this->courses;
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
@@ -111,7 +113,7 @@ class HomePageController extends AbstractController {
      */
     private function getAllRecentNotifications(): array {
         $user_id = $this->core->getUser()->getId();
-        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $courses = $this->courses;
         $results = [];
         $original_config = clone $this->core->getConfig();
 
