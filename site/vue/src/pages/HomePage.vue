@@ -131,7 +131,7 @@ ol.bare-list {
     text-align: left;
     padding: 6px 10px;
     white-space: normal;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 #courses h2 {
     margin: 0;

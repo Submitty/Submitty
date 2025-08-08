@@ -5,10 +5,11 @@ namespace tests\phpstan;
 use app\libraries\FileUtils;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Doctrine\DBAL\DriverManager;
 
 $config = ORMSetup::createAttributeMetadataConfiguration([FileUtils::joinPaths(__DIR__, '..', '..', 'site', 'app', 'entities')], true);
-$conn = [
+$conn = DriverManager::getConnection([
     'driver' => 'pdo_sqlite',
     'serverVersion' => '14.2'
-];
-return EntityManager::create($conn, $config);
+]);
+return new EntityManager($conn, $config);

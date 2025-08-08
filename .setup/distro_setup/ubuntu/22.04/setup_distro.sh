@@ -24,7 +24,7 @@ add-apt-repository -y ppa:ondrej/php
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-apt-get install -qqy python3 python3-dev libpython3.6 python3-pip
+apt-get install -qqy python3 python3-dev libpython3.6 python3-pip python3-venv
 
 ############################
 # NTP: Network Time Protocol

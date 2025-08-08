@@ -941,7 +941,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
-    eg_thread_ids json DEFAULT '{}'::json NOT NULL,
+    eg_thread_ids json DEFAULT '[]'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
     eg_limited_access_blind integer DEFAULT 1,
     eg_peer_blind integer DEFAULT 3,
