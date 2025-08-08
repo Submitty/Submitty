@@ -148,6 +148,7 @@ class PDFController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->getOutput()->renderJsonFail('Could not get gradeable');
+            return;
         }
         if ($gradeable->isTeamAssignment()) {
             if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
@@ -247,13 +248,14 @@ class PDFController extends AbstractController {
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
-        $is_anon = (bool) $_POST['is_anon'] ?? false;
+        // Explicit boolean parsing for is_anon
+        $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = (bool) $is_anon ? "" : $file_path;
-        $anon_path = (bool) $is_anon ? $file_path : "";
+        $real_path = $is_anon ? "" : $file_path;
+        $anon_path = $is_anon ? $file_path : "";
 
-        if ((bool) $is_anon) {
+        if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
             $real_path = $this->getPath($file_path, $id, true);
             if (!file_exists($real_path)) {
@@ -305,21 +307,22 @@ class PDFController extends AbstractController {
 
     #[Route(path: "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/img", methods: ["POST"])]
     public function showGraderImageEmbedded(string $gradeable_id): void {
-
         // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
-        $is_anon = $_POST['is_anon'] ?? false;
+        // Explicit boolean parsing for is_anon
+        $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = (bool) $is_anon ? "" : $file_path;
-        $anon_path = (bool) $is_anon ? $file_path : "";
+        $real_path = $is_anon ? "" : $file_path;
+        $anon_path = $is_anon ? $file_path : "";
 
-        if ((bool) $is_anon) {
+        if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
             $real_path = $this->getPath($file_path, $id, true);
             if (!file_exists($real_path)) {
                 $this->core->getOutput()->renderJsonFail('The image file could not be found');
+                return;
             }
         }
         else {
@@ -329,15 +332,18 @@ class PDFController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->getOutput()->renderJsonFail('Could not get gradeable');
+            return;
         }
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id);
         if ($graded_gradeable === false) {
             $this->core->getOutput()->renderJsonFail('Could not get graded gradeable');
+            return;
         }
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+            return;
         }
 
         // We've already verified that we can grade this assignment.  We just check to see if this a peer grader

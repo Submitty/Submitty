@@ -477,53 +477,6 @@ function triggerDownload(dataUrl: string, filename: string): void {
     document.body.removeChild(link);
 }
 
-/*
-When we want to render multiple annotations on top of each other we can use renderer to create an uneditable image with all of the annotations.
-Implement this when we add options to show other grader's annotations.
-
-function parseAnnotationState(rawData: AnnotationState | string, key?: string): AnnotationState | null {
-    if (typeof rawData === 'string') {
-        try {
-            return JSON.parse(rawData) as AnnotationState;
-        } catch (error) {
-            console.warn(`Failed to parse annotations${key ? ` for key ${key}` : ''}:`, error);
-            return null;
-        }
-    }
-    return rawData;
-}
-
-// Possible refactor would be to renderAnnotationsOnImage using markerjs3 renderer, and combine the two functions.
-async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<string, AnnotationState | string>): Promise<HTMLImageElement>{
-    const renderer = new window.markerjs3.Renderer();
-    const img = document.getElementById('annotatable-image') as HTMLImageElement;
-    renderer.naturalSize = true;
-    renderer.targetImage = img;
-    let combinedAnnotations = Object.create(emptyState);
-    combinedAnnotations.height = renderer.height; // These end up as 0 or undefined no matter what I try, revisit next time we try to implement this.
-    combinedAnnotations.width = renderer.width;
-
-    for (const key of Object.keys(allAnnotations)) {
-        if (key === uId) {
-            continue;
-        }
-
-        const annotationState = parseAnnotationState(allAnnotations[key], key);
-        // Check if annotationState and markers exist
-        if (annotationState && annotationState.markers && Array.isArray(annotationState.markers)) {
-            combinedAnnotations.markers = combinedAnnotations.markers.concat(annotationState.markers);
-        } else {
-            console.warn(`No valid markers found for key ${key}:`, annotationState);
-        }
-    }
-    console.log(combinedAnnotations);
-    const dataUrl = await renderer.rasterize(combinedAnnotations);
-    img.src = dataUrl;
-    document.getElementById('annotatable-image')?.replaceWith(img);
-    return img;
-}
-*/
-
 function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): { image_url: string; annotations: Record<string, string> } | null {
     let result: { image_url: string; annotations: Record<string, string> } | null = null;
     $.ajax({
@@ -730,17 +683,6 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
     $(document).ready(() => {
         // Get the original image element
         const existingAnnotations = JSON.parse(allAnnotations?.[grId] || JSON.stringify(emptyState)) as AnnotationState;
-        /*
-        Replace our image with our combined image/other user annotations.
-        //const existingAnnotations = allAnnotations ? parseAnnotationState(allAnnotations[uId], uId) || emptyState : emptyState;
-        if (allAnnotations && Object.keys(allAnnotations).length > 0) {
-            rasterizeAnnotatedImage(uId, allAnnotations).then((src) => {
-                annotationManager.originalImg = src;
-            });
-        } else {
-            annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
-        }
-        */
         annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
 
         // Handle image load errors
