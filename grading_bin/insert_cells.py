@@ -51,11 +51,11 @@ def insert_cells(instructor_path, student_path, output_path):
             new_cells.append(student_ids[cell.id])
         else:
             # Otherwise, keep the instructor version
-            grade_id = cell.metadata.get('grade_id', 'N/A')
-            if grade_id == 'N/A':
-                print(f"\tWarning: Cell with id '{cell.id}' has no 'grade_id' metadata. Skipping.")
+            submitty_id = cell.metadata.get('submitty_id', 'N/A')
+            if submitty_id == 'N/A':
+                print(f"\tWarning: Cell with id '{cell.id}' has no 'submitty_id' metadata. Skipping.")
                 continue
-            print(f"\tInserting missing checkpoint cell (grade_id: {grade_id}).")
+            print(f"\tInserting missing checkpoint cell (submitty_id: {submitty_id}).")
             new_cells.append(cell)
             inserted_count += 1
 
