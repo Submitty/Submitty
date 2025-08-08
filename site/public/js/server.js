@@ -8,9 +8,9 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup setCalendarMenuValues */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
+   createArray readPrevious disableFullUpdate registerSelect2Widget, setCalendarMenuValues, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
@@ -293,7 +293,12 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
+    const tag = null;
+
+    setCalendarMenuValues('upload-cm-cal-menu', tag, '3');
+
     $('[name="existing-file-list"]', form).text('');
+
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
     showPopup('#upload-course-materials-form');
@@ -377,6 +382,9 @@ function newEditCourseMaterialsFolderForm(tag) {
         }
     }
 
+    // Calendar form
+    setCalendarMenuValues('edit-cm-folder-cal-menu', tag, '2');
+
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
     disableFullUpdate();
@@ -444,6 +452,9 @@ function newEditCourseMaterialsForm(tag) {
             url_label.css('display', 'none');
         }
     }
+
+    // Course Materials In Calendar Script
+    setCalendarMenuValues('edit-cm-file-cal-menu', tag, '1');
 
     editFilePathRecommendations();
     if (is_link === 1) {
