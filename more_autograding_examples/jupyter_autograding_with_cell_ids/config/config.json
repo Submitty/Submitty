@@ -5,10 +5,8 @@
     },
   "autograding_method": "docker",
   "resource_limits" : {
-    "RLIMIT_NPROC" : 32,
-    "RLIMIT_FSIZE" : 20971520 // 20 MB
+    "RLIMIT_NPROC" : 32
   },
-  "max_submission_size" : 10485760, // 10 MB
   "container_options": {
     "container_image": "submitty/jupyter:latest"
   },
@@ -48,7 +46,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell1*.*",
+          "source" : "hello_world_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -57,24 +55,12 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "cell1_stdout.txt",
+          "actual_file": "hello_world_submitted_stdout.txt",
           "expected_string" : "hello world!"
         },
         {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "cell1_stderr.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
-        },
-        {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "cell1_source.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
-        },
-        {
           "method" : "errorIfNotEmpty",
-		      "actual_file" : "cell1.err",
+		      "actual_file" : "hello_world_submitted.err",
 		      "show_actual" : "always",
           "deduction" : 0.0
         }
@@ -85,7 +71,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell2*.*",
+          "source" : "markdown_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -94,12 +80,12 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "cell2.txt",
+          "actual_file": "markdown_submitted.txt",
           "expected_string" : "## 2. Create IPython images with the given \"one.png\" and \"two.png\".\nUse `from IPython.display import Image`"
         },
         {
           "method" : "errorIfNotEmpty",
-		      "actual_file" : "cell2.err",
+		      "actual_file" : "markdown_submitted.err",
 		      "show_actual" : "always",
           "deduction" : 0.0
         }
@@ -110,7 +96,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell3*.*",
+          "source" : "one_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -118,7 +104,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell3.png",
+          "actual_file": "one_submitted.png",
           "expected_file": "one.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
@@ -127,14 +113,8 @@
           "show_expected": "always"
         },
         {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "cell3_source.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
-        },
-        {
           "method" : "errorIfNotEmpty",
-		      "actual_file" : "cell3.err",
+		      "actual_file" : "one_submitted.err",
 		      "show_actual" : "always",
           "deduction" : 0.0
         }
@@ -145,7 +125,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell4*.*",
+          "source" : "two_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -153,7 +133,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell4.png",
+          "actual_file": "two_submitted.png",
           "expected_file": "two.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".3",
@@ -162,14 +142,8 @@
           "show_expected": "always"
         },
         {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "cell4_source.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
-        },
-        {
           "method" : "errorIfNotEmpty",
-		      "actual_file" : "cell4.err",
+		      "actual_file" : "two_submitted.err",
 		      "show_actual" : "always",
           "deduction" : 0.0
         }
@@ -180,7 +154,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell6*.*",
+          "source" : "graph_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -188,7 +162,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell6.png",
+          "actual_file": "graph_submitted.png",
           "expected_file": "graph.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
@@ -197,14 +171,8 @@
           "show_expected": "always"
         },
         {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "cell6_source.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
-        },
-        {
           "method" : "errorIfNotEmpty",
-		      "actual_file" : "cell6.err",
+		      "actual_file" : "graph_submitted.err",
 		      "show_actual" : "always",
           "deduction" : 0.0
         }
