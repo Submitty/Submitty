@@ -79,6 +79,7 @@ class SimpleGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('simple-grading.js');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
 
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
