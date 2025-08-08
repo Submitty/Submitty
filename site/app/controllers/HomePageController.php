@@ -30,8 +30,10 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
-        $user_id = $this->core->getUser()->getId();
-        $this->courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $user = $this->core->getUser();
+        if ($user !== null) {
+            $this->courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        }
     }
 
     /**
