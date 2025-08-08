@@ -1,8 +1,12 @@
 {% if viewer.getQueueMessage() | length > 0 %}
-  {% include "misc/Markdown.twig" with {
-    "content" : viewer.getQueueMessage(),
-    "class" : "content gradeable_message"
-  } only %}
+    {% include 'Vue.twig' with {
+        type: "component",
+        name: "Markdown",
+        args: {
+            content: viewer.getQueueMessage()
+        },
+        class: "content gradeable_message",
+    } only %}
 {% endif %}
 
 <div class="content">
@@ -27,7 +31,7 @@
         {% for queue in viewer.getAllQueues() %}
             {% if queue['open'] != 0 %}
 
-                <label tabindex="0" class="btn filter-buttons"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }};">{{queue['code']}}
+                <label tabindex="0" class="btn filter-buttons"  style="overflow-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }};">{{queue['code']}}
                     <input
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
@@ -45,7 +49,7 @@
         {% for queue in viewer.getAllQueues() %}
             {% if queue['open'] == 0 %}
 
-                <label tabindex="0" class="btn filter-buttons"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }};">{{queue['code']}}
+                <label tabindex="0" class="btn filter-buttons"  style="overflow-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }};">{{queue['code']}}
                     <input
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
