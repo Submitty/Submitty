@@ -11,6 +11,7 @@ use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\GradeInquiry;
+use app\models\gradeable\Submitter;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -1184,7 +1185,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($isDiscussionPanel) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', $graded_gradeable->getGradeable()->getDiscussionThreadId(), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
         }
 
         if ($is_notebook) {
@@ -1397,15 +1398,17 @@ HTML;
         ]);
     }
 
-    public function renderDiscussionForum($threadIds, $submitter, $isTeam = false) {
+    /**
+     * Render the discussion forum panel
+     * @param int[] $threadIds
+     * @param Submitter $submitter
+     * @param bool $isTeam
+     */
+    public function renderDiscussionForum(array $threadIds, Submitter $submitter, bool $isTeam = false) {
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
 
-        //Empty thread input
-        if ($threadIds === "{}") {
-            $threadIds = [];
-        }
         $id = '';
         $submitters = [];
         if ($isTeam) {
@@ -1483,12 +1486,10 @@ HTML;
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    if ($hidden_files !== null) {
-                        foreach (explode(",", $hidden_files) as $file_regex) {
-                            $file_regex = trim($file_regex);
-                            if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
-                                $skipping = true;
-                            }
+                    foreach ($hidden_files as $file_regex) {
+                        $file_regex = trim($file_regex);
+                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
+                            $skipping = true;
                         }
                     }
                     if (!$skipping) {
@@ -1618,22 +1619,24 @@ HTML;
 
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
 
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
-            "gradeable_id" => $gradeable->getId(),
-            "submission_time" => $submission_time,
-            "submitter_id" => $submitter_id,
-            "submitter" => $graded_gradeable->getSubmitter(),
-            "team_assignment" => $gradeable->isTeamAssignment(),
-            "display_version" => $display_version,
-            "highest_version" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-            "active_version" => $active_version,
-            "on_change" => $onChange,
-            "tables" => $tables,
-            "versions" => $version_data,
-            'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
-            "csrf_token" => $this->core->getCsrfToken(),
-            "update_version_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $new_version])
-                . '?' . http_build_query(['ta' => 'true', 'who' => $submitter_id])
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "component",
+            "name" => "StudentInformationPanel",
+            "args" => [
+                "submissionTime" => $submission_time,
+                "submitter" => $graded_gradeable->getSubmitter(),
+                "teamAssignment" => $gradeable->isTeamAssignment(),
+                "displayVersion" => $display_version,
+                "highestVersion" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                "activeVersion" => $active_version,
+                "onChange" => $onChange,
+                "tables" => $tables,
+                "versions" => $version_data,
+                'totalPoints' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
+                "csrfToken" => $this->core->getCsrfToken(),
+                "updateVersionUrl" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $new_version])
+                    . '?' . http_build_query(['ta' => 'true', 'who' => $submitter_id])
+            ]
         ]);
     }
 

@@ -133,6 +133,7 @@
                 <div>
                     <div class="config-folder-view">
                         <div class="main-folder">
+                            <a class="fas fa-download key_to_click file-action-add" tabindex="0" onclick="downloadConfig('{{ selected_autograding_configuration_path }}')"></a>
                             <i class="fas fa-folder-plus file-action-add" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
                             <i class="fas fa-plus file-action-add config-file-icon" onClick="addFile('{{ gradeable.getId() }}', null)"></i>
                             {% set parts = selected_autograding_configuration_path|split('/') %}
@@ -143,6 +144,14 @@
                     </div>
                 </div>
                 <div id="gradeable-config-edit-bar">
+                    <div class="customize-editor-container">
+                        <button type="button" class="customize-editor-button" id="toggle-line-nums" onClick="toggleLineNums()">
+                            <i class="fas fa-list-ol customize-editor-button-icon"></i>
+                        </button>
+                        <button type="button" class="customize-editor-button" onClick="toggleTabLength()">
+                            <i class="fas fa-2 customize-editor-button-icon" id="toggle-tab-length"></i>
+                        </button>
+                    </div>
                     <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
                     <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
                     <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>

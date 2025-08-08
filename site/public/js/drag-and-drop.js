@@ -1386,6 +1386,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
             file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
         }
+        if (!window.isValidFilePath(file_path)) {
+            return;
+        }
         if (window.isValidFileName(file_name)) {
             formData.append('file_path', file_path);
         }
@@ -1397,6 +1400,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
+    }
+    else {
+        if (title !== null) {
+            return;
+        }
     }
 
     if (overwrite !== null) {
@@ -1436,9 +1444,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
-                console.log(data);
+                alert(`Error parsing response from server. Message returned:\n${data}`);
             }
         },
         error: function () {
