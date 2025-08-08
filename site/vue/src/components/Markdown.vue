@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Marked, type TokenizerExtension } from 'marked';
@@ -9,10 +10,7 @@ interface Props {
     testId?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    testId: undefined,
-});
-
+const props = defineProps<Props>();
 const inlineLatex: (TokenizerExtension) = {
     name: 'inlineLatex',
     level: 'inline',
@@ -31,7 +29,6 @@ const inlineLatex: (TokenizerExtension) = {
         };
     },
 };
-
 const markdownToHtml = (markdown: string | null | undefined): string => {
     if (!markdown) {
         return '';

@@ -376,7 +376,6 @@ function toggleHeader() {
         @change="handleChange"
         @input="handleInput"
       />
-      <!-- eslint-disable vue/no-v-html -->
       <div
         v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
