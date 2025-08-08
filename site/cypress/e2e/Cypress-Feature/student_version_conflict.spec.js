@@ -35,9 +35,9 @@ describe('Test revolving around the student side and whether or not they should 
         cy.get('[data-testid="ta-results-box"]').should('have.css', 'backgroundColor', 'rgb(255, 255, 255)');
 
         scores.forEach((score, idx) => {
-        cy.get('[data-testid="score-pill-badge"]').eq(idx + 1)
-            .should('have.text', score)
-            .should('not.have.css', 'backgroundColor', 'rgb(136, 136, 136)');
+            cy.get('[data-testid="score-pill-badge"]').eq(idx + 1)
+                .should('have.text', score)
+                .should('not.have.css', 'backgroundColor', 'rgb(136, 136, 136)');
         });
 
         // change back submission version
