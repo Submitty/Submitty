@@ -408,7 +408,7 @@ chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 mkdir -p "${NODE_FOLDER}/.vue-global-types"
-chown -R ${PHP_USER}:${PHP_USER} "${NODE_FOLDER}/.vue-global-types"
+chown -R "${PHP_USER}:${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
