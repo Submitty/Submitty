@@ -246,7 +246,7 @@ class PDFController extends AbstractController {
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
-        $is_anon = $_POST['is_anon'] ?? false;
+        $is_anon = (bool) $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
         $real_path = (bool) $is_anon ? "" : $file_path;
