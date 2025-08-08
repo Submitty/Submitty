@@ -1,17 +1,20 @@
+/**
+ * Visits a gradeable and wait for JS to load so we can see if the clear all files button is enabled.
+ * @param {string} gradeableName the name of the gradeable we are visiting
+ */
 function visitGradeable(gradeableName) {
     const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
-    // wait for client JS to load - reduces flakyness
-    cy.get('[data-testid="gradeable-time-remaining-text"]').should('contain.text', 'days');
+    // wait 10 seconds for client JS to load - reduces flakyness
+    cy.get('[data-testid="gradeable-time-remaining-text"]', { timeout: 10000 }).should('contain.text', 'days');
 }
 
 /**
- * A number versionNumber means that we are switching to a specific version
- * A null versionNumber means that we are returning the current version
+ * Switches to the specified version of a gradeable, or finds the current version if versionNumber is null.
  * @param {string} gradeableName the name of the gradeable we are switching to
- * @param {number|null} versionNumber
+ * @param {number|null} versionNumber the version number we are switching to, or null to find the current version
  */
-export function switchOrFindVersion(gradeableName, versionNumber) {
+function switchOrFindVersion(gradeableName, versionNumber) {
     visitGradeable(gradeableName);
     return cy.get('[data-testid="content-main"]').then(($content) => {
         if ($content.find('[data-testid="no-submissions-box"]').length > 0) {
@@ -32,7 +35,7 @@ export function switchOrFindVersion(gradeableName, versionNumber) {
  * Sets up the gradeable in a state where we can submit a new submission
  * @param {string} gradeableName the name of the gradeable we are submitting to
  */
-export function newSubmission(gradeableName) {
+function newSubmission(gradeableName) {
     visitGradeable(gradeableName);
     // If the clear button exists, we should click it and clear all files so we can submit new ones
     cy.get('[data-testid="clear-all-files-button"]').then(($btn) => {
@@ -43,13 +46,12 @@ export function newSubmission(gradeableName) {
 };
 
 /**
- * Uploads a file and compares the results with expected scores.
- * Requires newSubmission to be called first
+ * Requires newSubmission to be called first; uploads files to the specified bucket.
  * @param {string} fileUploadName the fixture to upload
  * @param {number} bucket the bucket to submit to. Default gradeables has buckets starting from 1
  * @param {boolean} firstFile checks the bucket for no files if it is the first file being uploaded
  */
-export function submitFiles(fileUploadName, bucket, firstFile = false) {
+function submitFiles(fileUploadName, bucket, firstFile = false) {
     if (firstFile) {
         cy.get(`[data-testid="file-upload-table-${bucket}"] > tr`).should('not.exist');
     }
@@ -57,23 +59,23 @@ export function submitFiles(fileUploadName, bucket, firstFile = false) {
 };
 
 /**
- * Hits the gradeable submit button
- * Requires newSubmission to be called first
+ * Requires newSubmission to be called first; clicks the gradeable submit button and checks the version
  * @param {number} versionNumber the version number we are on
  */
-export function submitGradeable(versionNumber) {
+function submitGradeable(versionNumber) {
     cy.get('[data-testid="submit-gradeable"]').click();
     cy.get('[data-testid="submission-version-select"]').find('option:selected').should('contain.text', `Version #${versionNumber}`);
     cy.get('[data-testid="popup-message"]').should('contain.text', `Successfully uploaded version ${versionNumber}`);
 };
 
 /**
+ * Checks non hidden test results
  * @param {string} gradeableName the name of the gradeable we are checking
  * @param {number} versionNumber version number that we should check the grades against
  * @param {(number|'?')[]} expectedScores the expected score for the submission
  * @param {(number|'?')[]} fullScores the max scores for the gradeables
  */
-export function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, fullScores) {
+function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, fullScores) {
     switchOrFindVersion(gradeableName, versionNumber);
     expect(expectedScores.length).to.eq(fullScores.length);
     // after 20 submissions we start having penalties
@@ -90,8 +92,78 @@ export function checkNonHiddenResults(gradeableName, versionNumber, expectedScor
 
     cy.get('[data-testid="results-box"]').each(($el, index) => {
         if (expectedScores[index] === '?' || fullScores[index] === '?') {
+            cy.wrap($el).find('[data-testid="score-pill-badge"]').invoke('text').should('match', /\d+ \/ [1-9]\d*/);
             return;
         }
         cy.wrap($el).find('[data-testid="score-pill-badge"]').should('contain.text', `${expectedScores[index]} / ${fullScores[index]}`);
     });
 };
+
+/**
+ * Constructs the file path for the submission files based on the course, gradeable name, and file path.
+ * @param {string} gradeable the name of the gradeable
+ * @param {string} filePath the path to the file within the gradeable
+ * @returns {string} the full path to the file
+ */
+const constructFileName = (gradeable, filePath) => {
+    const course = Cypress.env('course');
+    if (course === 'development') {
+        return `copy_of_more_autograding_examples/${gradeable}/submissions/${filePath}`;
+    }
+    return `copy_of_tutorial/examples/${gradeable}/submissions/${filePath}`;
+};
+
+/**
+ * Submits multiple submissions for a gradeable.
+ * @param {string} gradeable the name of the gradeable
+ * @param {Array} submissions an array of JSON objects that contains submissionFiles and expected scores
+ */
+function submitSubmissions(gradeable, submissions) {
+    return switchOrFindVersion(gradeable, null).then((startingVersion) => {
+        cy.wrap(startingVersion).as(`${gradeable}_starting_version`);
+
+        cy.wrap(submissions).each((submission, index) => {
+            newSubmission(gradeable);
+
+            // Loop through each bucket and submit the files
+            Object.entries(submission.submissionFiles).forEach(([bucket, files]) => {
+                files.forEach((file, idx) => {
+                    const filePath = constructFileName(gradeable, file);
+                    // first file should be true, all other files are false
+                    submitFiles(filePath, Number(bucket), idx === 0);
+                });
+            });
+
+            cy.get(`@${gradeable}_starting_version`).then((start) => {
+                submitGradeable(start + index + 1);
+            });
+        });
+    });
+}
+
+/**
+ * Checks the submissions for a gradeable.
+ * @param {string} gradeable the name of the gradeable
+ * @param {Array} submissions an array of JSON objects that contains submissionFiles and expected scores
+ */
+function checkSubmissions(gradeable, submissions) {
+    cy.get(`@${gradeable}_starting_version`).then((start) => {
+        cy.wrap(submissions).each((submission, index) => {
+            const version = start + index + 1;
+            checkNonHiddenResults(gradeable, version, submission.expected, submission.full);
+        });
+    });
+}
+
+/**
+ * Runs the tests for a list of gradeables.
+ * @param {Array} gradeables an array of gradeable objects with name and submissions
+ */
+export function runTests(gradeables) {
+    gradeables.forEach((gradeable, index) => {
+        submitSubmissions(gradeable.name, gradeable.submissions);
+    });
+    gradeables.forEach((gradeable) => {
+        checkSubmissions(gradeable.name, gradeable.submissions);
+    });
+}
