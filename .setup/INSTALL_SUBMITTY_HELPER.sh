@@ -144,7 +144,7 @@ echo -e "Install python_submitty_utils"
 rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
-pip3 install .
+pip3 install --break-system-packages .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
 # This gets run here in case we make any python package changes.

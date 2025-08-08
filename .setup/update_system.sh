@@ -37,10 +37,10 @@ apt-get install cloc --yes
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
+pip3 install --break-system-packages -r ${CURRENT_DIR}/pip/system_requirements.txt
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
-    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt -r ${CURRENT_DIR}/pip/dev_requirements.txt
+    pip3 install --break-system-packages -r ${CURRENT_DIR}/pip/vagrant_requirements.txt -r ${CURRENT_DIR}/pip/dev_requirements.txt
 fi
 
 echo "Done."
