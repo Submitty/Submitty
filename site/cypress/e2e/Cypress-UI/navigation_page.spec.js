@@ -65,16 +65,16 @@ describe('tests navigation buttons for each level of access', () => {
             [red, red, white, blue],
         );
         checkButtons('grading_homework',
-            [null, 'VIEW SUBMISSION', 'GRADE', 'RELEASE GRADES NOW'],
-            [null, white, blue, blue],
+            [null, 'OVERDUE SUBMISSION', 'GRADE', 'RELEASE GRADES NOW'],
+            [null, red, blue, blue],
         );
         checkButtons('grading_lab',
             [null, null, 'GRADE', 'RELEASE GRADES NOW'],
             [null, null, white, blue],
         );
         checkButtons('grades_released_homework_autota',
-            [null, 'VIEW GRADE', 'REGRADE', null],
-            [null, white, white, null],
+            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
+            [null, red, white, null],
         );
         checkButtons('grades_released_homework',
             [null, 'VIEW GRADE', 'REGRADE', null],
@@ -124,8 +124,8 @@ describe('tests navigation buttons for each level of access', () => {
             [null, green, white, null],
         );
         checkButtons('grades_released_homework',
-            [null, 'VIEW GRADE', 'REGRADE', null],
-            [null, white, white, null],
+            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
+            [null, red, white, null],
         );
         checkButtons('grades_released_lab',
             [null, null, 'REGRADE', null],
@@ -156,8 +156,8 @@ describe('tests navigation buttons for each level of access', () => {
             [white, white, null, null],
         );
         checkButtons('grading_homework',
-            [null, 'VIEW SUBMISSION', null, null],
-            [null, white, null, null],
+            [null, 'OVERDUE SUBMISSION', null, null],
+            [null, red, null, null],
         );
         checkButtons('grading_lab', null, null);
         checkButtons('grades_released_homework_autota',
@@ -165,7 +165,7 @@ describe('tests navigation buttons for each level of access', () => {
             [null, green, null, null],
         );
         checkButtons('grades_released_homework',
-            [null, 'VERSION CONFLICT', null, null],
+            [null, 'OVERDUE SUBMISSION', null, null],
             [null, red, null, null],
         );
         checkButtons('grades_released_lab', null, null);
