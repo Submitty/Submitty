@@ -25,7 +25,7 @@ a.popout-item > .fas:hover {
     margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    grid-gap: 2px;
+    gap: 2px;
 }
 
 .reg-section-item {
