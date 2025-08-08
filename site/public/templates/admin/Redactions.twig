@@ -1,0 +1,20 @@
+<div>
+    <a target="_blank" href="https://submitty.org/instructor/assignment_preparation/bulk_pdf_upload#page-redactions-for-anonymized-grading">JSON format for Page Redactions</a>
+    <p>Upload new redactions JSON file:</p>
+    <input type="file" name="redactions_json" id="redactions_json" accept=".json" onchange="updateRedactionSettings()" />
+    {% if redactions|length > 0 %}
+      <button type="button" id="remove_redactions" onclick="removeRedactions()" class="btn btn-danger">Remove Redactions</button>
+      <p>Redactions</p>
+      <ul style="padding-left: 20px; padding-bottom: 5px;">
+        {% for redaction in redactions %}
+            <li> Page {{ redaction.page_number }} </li>
+            <ul style="padding-left: 10px;">
+                <li>X1: {{ redaction.coordinates[0] }}</li>
+                <li>Y1: {{ redaction.coordinates[1] }}</li>
+                <li>X2: {{ redaction.coordinates[2] }}</li>
+                <li>Y2: {{ redaction.coordinates[3] }}</li>
+            </ul>
+        {% endfor %}
+      </ul>
+    {% endif %}
+</div>
