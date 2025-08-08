@@ -20,15 +20,18 @@ use app\controllers\SelfRejoinController;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+    /** @var array<Course> */
+    private array $courses = [];
+
     /**
      * HomePageController constructor.
      *
-     * @param Core $core
+     * @param Core $core Core Submitty application object
      */
     public function __construct(Core $core) {
         parent::__construct($core);
         $user_id = $this->core->getUser()->getId();
-        $this->courses = $this->core->getQueries()->getCourseForUserId($user_id); // declare here so getCourses and getAllRecentNotifications can use it
+        $this->courses = $this->core->getQueries()->getCourseForUserId($user_id);
     }
 
     /**
