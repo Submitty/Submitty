@@ -113,7 +113,7 @@ class PDFController extends AbstractController {
             '?dir=submissions_processed' .
             '&file=' . urlencode($filename) .
             '&path=' . urlencode($path) .
-            '&ta_grading=true' . 
+            '&ta_grading=true' .
             '&view_annotated_file=true';
 
         return JsonResponse::getSuccessResponse([

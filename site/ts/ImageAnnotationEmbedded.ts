@@ -3,10 +3,6 @@ import { buildCourseUrl } from './utils/server';
 import type { AnnotationState, MarkerView } from '@markerjs/markerjs3';
 import type { AnnotationEditor } from '@markerjs/markerjs-ui';
 
-// Type declarations for external libraries
-const markerjs3 = window.markerjs3;
-const markerjsUI = window.markerjsUI;
-const $ = window.$;
 declare global {
     interface Window {
         initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, AnnotationState | string>): void;
@@ -105,7 +101,7 @@ function addAnnotations(): void {
 
     try {
         // Check if markerjsUI is available
-        if (typeof markerjsUI === 'undefined' || !markerjsUI.AnnotationEditor) {
+        if (typeof window.markerjsUI === 'undefined' || !window.markerjsUI.AnnotationEditor) {
             console.error('markerjsUI AnnotationEditor is not loaded');
             $('#annotation-status').text('Error: MarkerJS-UI library not loaded').css('color', 'red');
             return;
@@ -121,7 +117,7 @@ function addAnnotations(): void {
         }
 
         // Create fresh annotation editor
-        annotationManager.globalAnnotationEditor = new markerjsUI.AnnotationEditor();
+        annotationManager.globalAnnotationEditor = new window.markerjsUI.AnnotationEditor();
 
         // Set up event listeners
         setupAnnotationEditor();
@@ -395,7 +391,7 @@ function renderAnnotationsOnImage(): void {
             annotationManager.originalImg.dataset.originalHeight = annotationManager.originalImg.style.height || '';
         }
         // Create MarkerView instance
-        const markerView = new markerjs3.MarkerView();
+        const markerView = new window.markerjs3.MarkerView();
         markerView.id = 'annotation-marker-view';
         markerView.className = annotationManager.originalImg.className; // Copy original classes
         markerView.targetImage = annotationManager.originalImg;
@@ -445,7 +441,7 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
 
     try {
         // Create a Renderer instance to generate the annotated image
-        const renderer = new markerjs3.Renderer();
+        const renderer = new window.markerjs3.Renderer();
         renderer.targetImage = annotationManager.originalImg;
 
         // Generate the annotated image dataURL using the current annotations
@@ -499,7 +495,7 @@ function parseAnnotationState(rawData: AnnotationState | string, key?: string): 
 
 // Possible refactor would be to renderAnnotationsOnImage using markerjs3 renderer, and combine the two functions.
 async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<string, AnnotationState | string>): Promise<HTMLImageElement>{
-    const renderer = new markerjs3.Renderer();
+    const renderer = new window.markerjs3.Renderer();
     const img = document.getElementById('annotatable-image') as HTMLImageElement;
     renderer.naturalSize = true;
     renderer.targetImage = img;
@@ -580,7 +576,7 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
             img.onload = async () => {
                 try {
                     // Create a MarkerJS renderer instance
-                    const renderer = new markerjs3.Renderer();
+                    const renderer = new window.markerjs3.Renderer();
                     renderer.targetImage = img;
                     renderer.naturalSize = true;
 
