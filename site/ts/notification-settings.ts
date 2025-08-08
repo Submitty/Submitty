@@ -332,6 +332,7 @@ window.showNotificationDefaults = async function showNotificationDefaults(autoAp
                 const settings = result.data?.settings || {};
                 const [term, course] = result.data?.course.split('-') || [];
 
+                // TODO: All these DOM manipulations should be done safely with innerText or refactor into a Vue component
                 contentDiv.append(`
                 <h3 style="margin-bottom: 2px; text-decoration: underline;">Course Information</h3>
                 <strong>Term</strong> - ${term}

@@ -10,6 +10,9 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
+    # TODO: potential refactor reference term-course into term_course
+    # TODO: notification-defaults is over-engineered ~ we should either always query for the latest course if synced or always update the latest course updates
+        # TODO: notification_settings could also move into master database where NULL course is synced and non-null course is course specific (new column)
     database.execute(
         """
         ALTER TABLE users ADD COLUMN notifications_synced BOOLEAN DEFAULT FALSE NOT NULL;

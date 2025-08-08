@@ -12,6 +12,8 @@
             {% else %}
                 {% set header = "Notification Settings" %}
             {% endif %}
+            {% comment %} TODO: 2 buttons only (Sync/Unsync & Reset) and remove respective tests in notifications.spec.js {% endcomment %}
+            {% comment %} TODO: In terms of select/deselect all, we could add shift/ctrl click event listeners to toggle entire row / column (or add row/column based checkbox) {% endcomment %}
             <div class="header">
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
