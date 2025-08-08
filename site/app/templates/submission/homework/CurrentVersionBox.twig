@@ -10,8 +10,16 @@
         {% if can_see_all_versions == true %}
             <div id="version-cont">
                 <h3 class='label' id="submission_header">Select Submission Version:</h3>
-                {% include 'grading/VersionChoice.twig' with({
-                    'on_change': "versionChange('" ~ view_version_url ~ "', this)"
+                {% include 'Vue.twig' with({
+                    'type': 'component',
+                    'name': 'VersionChoice',
+                    'args': {
+                        'viewVersionUrl': view_version_url,
+                        'versions': versions,
+                        'activeVersion': active_version,
+                        'displayVersion': display_version,
+                        'totalPoints': total_points,
+                    }
                 }) %}
 
                 {# If viewing the active version, show cancel button, otherwise so button to switch active #}

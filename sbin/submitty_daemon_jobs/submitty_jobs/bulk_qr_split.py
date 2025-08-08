@@ -7,7 +7,6 @@ import traceback
 import numpy
 from . import write_to_log as logger
 from . import submitty_ocr as scanner
-from . import generate_pdf_images
 
 # try importing required modules
 try:
@@ -103,14 +102,12 @@ def main(args):
                     logger.write_to_json(json_file, output)
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
-                    generate_pdf_images.main(prev_file, [])
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
                     output[prev_file]['page_count'] = page_count
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
-                    generate_pdf_images.main(prev_file, [])
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfWriter()
@@ -170,7 +167,6 @@ def main(args):
 
         with open(prev_file, 'wb') as out:
             pdf_writer.write(out)
-        generate_pdf_images.main(prev_file, [])
         # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)
     except Exception:

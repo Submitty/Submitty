@@ -1,0 +1,182 @@
+{
+  "autograding" : {
+        "submission_to_runner" : [  "*.ipynb", "*.png" ],
+        "work_to_details" : [ "**/*.ipynb", "**/*.png", "**/*.txt", "**/*.err" ]
+    },
+  "autograding_method": "docker",
+  "resource_limits" : {
+    "RLIMIT_NPROC" : 32
+  },
+  "container_options": {
+    "container_image": "submitty/jupyter:latest"
+  },
+  "allow_system_calls": [
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "COMMUNICATIONS_AND_NETWORKING_KILL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_RARE",
+    "PROCESS_CONTROL_ADVANCED",
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_MEMORY_ADVANCED",
+    "PROCESS_CONTROL_SYNCHRONIZATION",
+    "PROCESS_CONTROL_SCHEDULING",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "UNKNOWN"
+  ],
+  "testcases": [
+    {
+      "title": "Executes successfully",
+      // Although wildcard is used, the grader will only expect one notebook file. Use if filename cannot be determined.
+      "command": "jupyter_notebook_grader -i *.ipynb -o executed.ipynb",
+      "points": 1,
+      "validation": [
+        {
+          "method": "fileExists",
+          "actual_file": "executed.ipynb",
+          "show_actual" : "always",
+          "show_message" : "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "hello_world_submitted*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "STDOUT",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "hello_world_submitted_stdout.txt",
+          "expected_string" : "hello world!"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "hello_world_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "markdown_submitted*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Markdown",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "markdown_submitted.txt",
+          "expected_string" : "## 2. Create IPython images with the given \"one.png\" and \"two.png\".\nUse `from IPython.display import Image`"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "markdown_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "one_submitted*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "One",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "one_submitted.png",
+          "expected_file": "one.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".1",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "one_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "two_submitted*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Two",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "two_submitted.png",
+          "expected_file": "two.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".3",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "two_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "graph_submitted*.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Graph",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "graph_submitted.png",
+          "expected_file": "graph.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".1",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "graph_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    }
+  ]
+}
