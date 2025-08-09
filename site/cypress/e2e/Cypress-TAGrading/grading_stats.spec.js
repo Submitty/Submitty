@@ -46,31 +46,31 @@ describe('Test cases for grading stats', () => {
             cy.get('#grader-info').as('right-chunk-grader-info');
             cy.get('@left-chunk-stats').should('not.contain', 'verified');
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 61 / 105 (58.1%)');
-            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 27 / 61 (44.3%)');
+            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 28 / 61 (45.9%)');
             cy.get('@left-chunk-stats').should('contain', 'Section 3: 1 / 5 (20.0% graded)');
-            cy.get('@right-chunk-stats').should('contain', 'Average: 8.74 / 12 (73%)');
-            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 27 - avg 1.00 - stddev 0.87)');
+            cy.get('@right-chunk-stats').should('contain', 'Average: 8.57 / 12 (71%)');
+            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 28 - avg 1.04 - stddev 0.88)');
             // Include Bad Submissions only
             ApplyFilter(true, false);
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted: 77 / 105 (73.3%)');
-            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 33 / 77 (42.9%)');
+            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 34 / 77 (44.2%)');
             cy.get('@left-chunk-stats').should('contain', 'Section 3: 2 / 8 (25.0% graded)');
-            cy.get('@right-chunk-stats').should('contain', 'Average: 8.94 / 12 (75%)');
-            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 33 - avg 1.06 - stddev 0.89)');
+            cy.get('@right-chunk-stats').should('contain', 'Average: 8.79 / 12 (73%)');
+            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 34 - avg 1.09 - stddev 0.90)');
             // Omit Bad submissions and Include Null Section
             ApplyFilter(true, true);
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 89 / 143 (62.2%)');
-            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 39 / 89 (43.8%)');
+            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 40 / 89 (44.9%)');
             cy.get('@left-chunk-stats').should('contain', 'Section NULL: 12 / 28 (42.9% graded)');
-            cy.get('@right-chunk-stats').should('contain', 'Average: 8.58 / 12 (72%)');
-            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 39 - avg 0.90 - stddev 0.88)');
+            cy.get('@right-chunk-stats').should('contain', 'Average: 8.46 / 12 (71%)');
+            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 40 - avg 0.93 - stddev 0.88)');
             // Include Bad Submission with the Null section filter included
             ApplyFilter(true, false);
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted: 107 / 143 (74.8%)');
-            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 47 / 107 (43.9%)');
+            cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 48 / 107 (44.9%)');
             cy.get('@left-chunk-stats').should('contain', 'Section NULL: 14 / 30 (46.7% graded)');
-            cy.get('@right-chunk-stats').should('contain', 'Average: 8.71 / 12 (73%)');
-            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 47 - avg 0.91 - stddev 0.90)');
+            cy.get('@right-chunk-stats').should('contain', 'Average: 8.61 / 12 (72%)');
+            cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 48 - avg 0.94 - stddev 0.90)');
             // Default, omit both filter
             ApplyFilter(true, true);
         });
@@ -107,7 +107,7 @@ describe('Test cases for grading stats', () => {
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted on time: 102 / 143 (71.3%)');
             cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 102 / 102 (100.0%)');
             cy.get('@left-chunk-stats').should('contain', 'Section NULL: 30 / 30 (100.0% graded)');
-            cy.get('@left-chunk-stats').should('contain', 'Number of students who have viewed their grade: 71 / 102 (69.6%)');
+            cy.get('@left-chunk-stats').should('contain', 'Number of students who have viewed their grade: 70 / 102 (68.6%)');
             cy.get('@right-chunk-stats').should('contain', 'Average: 5.13 / 10 (51%)');
             cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 102 - avg 3.09 - stddev 2.14)');
             // Include Bad Submission with the Null section filter included
@@ -115,7 +115,7 @@ describe('Test cases for grading stats', () => {
             cy.get('@left-chunk-stats').should('contain', 'Students who have submitted: 102 / 143 (71.3%)');
             cy.get('@left-chunk-stats').should('contain', 'Current percentage of TA grading done: 102 / 102 (100.0%)');
             cy.get('@left-chunk-stats').should('contain', 'Section NULL: 30 / 30 (100.0% graded)');
-            cy.get('@left-chunk-stats').should('contain', 'Number of students who have viewed their grade: 71 / 102 (69.6%)');
+            cy.get('@left-chunk-stats').should('contain', 'Number of students who have viewed their grade: 70 / 102 (68.6%)');
             cy.get('@right-chunk-stats').should('contain', 'Average: 5.13 / 10 (51%)');
             cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 102 - avg 3.09 - stddev 2.14)');
             // Default, omit both filter
