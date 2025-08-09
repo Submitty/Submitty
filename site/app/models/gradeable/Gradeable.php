@@ -264,8 +264,11 @@ class Gradeable extends AbstractModel {
      * @var ?int will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
     /** @prop
-     * @var int total gradeable notifications sent */
-    protected $notifications_sent = 0;
+     * @var int total gradeable score notifications sent */
+    protected $score_notifications_sent = 0;
+    /** @prop
+     * @var bool if gradeable release notifications have been sent*/
+    protected $release_notifications_sent = false;
 
     /**
      * Gradeable constructor.
@@ -346,7 +349,8 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
-            $this->setNotificationsSent($details['notifications_sent'] ?? 0);
+            $this->setScoreNotificationsSent($details['score_notifications_sent'] ?? 0);
+            $this->setReleaseNotificationsSent($details['release_notifications_sent'] ?? false);
             if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
                 $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }
@@ -2934,13 +2938,22 @@ class Gradeable extends AbstractModel {
         $this->modified = true;
     }
 
-    public function setNotificationsSent(int $notifications_sent): void {
-        $this->notifications_sent = $notifications_sent;
+    public function setScoreNotificationsSent(int $score_notifications_sent): void {
+        $this->score_notifications_sent = $score_notifications_sent;
         $this->modified = true;
     }
 
-    public function getNotificationsSent(): int {
-        return $this->notifications_sent;
+    public function getScoreNotificationsSent(): int {
+        return $this->score_notifications_sent;
+    }
+
+    public function setReleaseNotificationsSent(bool $release_notifications_sent): void {
+        $this->release_notifications_sent = $release_notifications_sent;
+        $this->modified = true;
+    }
+
+    public function getReleaseNotificationsSent(): bool {
+        return $this->release_notifications_sent;
     }
 
     /**
