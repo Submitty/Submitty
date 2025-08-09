@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
+import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
+import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
 type Rank = {
@@ -17,6 +19,7 @@ type Course = {
 
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
+    notifications: Notification[];
 }
 
 type SemesterCourses = {
@@ -60,65 +63,102 @@ const buildCourseUrl = (course: Course) => {
 
 <template>
   <div
-    id="courses"
-    class="content"
-    data-testid="courses-list"
+    class="home-content grid-container"
   >
-    <template
-      v-for="(ranks, course_type, index) in statuses"
-      :key="course_type"
+    <div
+      id="courses"
+      class="div1 shadow"
+      data-testid="courses-list"
     >
-      <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
-        <br v-if="index > 0" />
-        <br v-if="index > 0" />
+      <template
+        v-for="(ranks, course_type, index) in statuses"
+        :key="course_type"
+      >
+        <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
+          <br v-if="index > 0" />
+          <br v-if="index > 0" />
 
-        <h1 data-testid="courses-header">
-          {{ getCourseTypeHeader(course_type) }}
-        </h1>
-
-        <div
-          v-for="rank in ranks"
-          :key="rank.title"
-        >
-          <h2 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
-            As {{ rank.title }}
-          </h2>
+          <h1
+            class="courses-header"
+            data-testid="courses-header"
+          >
+            {{ getCourseTypeHeader(course_type) }}
+          </h1>
 
           <div
-            v-for="(courses, semester) in groupCoursesBySemester(rank.courses)"
-            :key="semester"
+            v-for="rank in ranks"
+            :key="rank.title"
           >
-            <h3>{{ semester }}</h3>
-            <ul class="bare-list course-list">
-              <li
-                v-for="course in courses"
-                :key="`${course.semester}_${course.title}`"
-              >
-                <a
-                  :id="`${course.semester}_${course.title}`"
-                  class="btn btn-primary btn-block btn-course"
-                  :href="buildCourseUrl(course)"
-                  :data-testid="`${course.title}-button`"
+            <h3 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
+              As {{ rank.title }}
+            </h3>
+
+            <div
+              v-for="(courses, semester) in groupCoursesBySemester(rank.courses)"
+              :key="semester"
+            >
+              <ul class="bare-list course-list">
+                <li
+                  v-for="course in courses"
+                  :key="`${course.semester}_${course.title}`"
                 >
-                  {{ course.display_semester }} &nbsp; &nbsp;
-                  {{ course.title.toUpperCase() }} &nbsp; &nbsp;
-                  <template v-if="course.display_name">
-                    {{ course.display_name }} &nbsp; &nbsp;
-                  </template>
-                  <template v-if="course.registration_section !== null">
-                    (Section {{ course.registration_section }})
-                  </template>
-                </a>
-              </li>
-            </ul>
+                  <a
+                    :id="`${course.semester}_${course.title}`"
+                    class="btn btn-primary btn-block btn-course"
+                    :href="buildCourseUrl(course)"
+                    :data-testid="`${course.title}-button`"
+                  >
+                    {{ course.display_semester }} &nbsp; &nbsp;
+                    {{ course.title.toUpperCase() }} &nbsp; &nbsp;
+                    <template v-if="course.display_name">
+                      {{ course.display_name }} &nbsp; &nbsp;
+                    </template>
+                    <template v-if="course.registration_section !== null">
+                      (Section {{ course.registration_section }})
+                    </template>
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </template>
+      </template>
+    </div>
+    <AllNotificationsDisplay :notifications="notifications" />
   </div>
 </template>
 
 <style scoped>
+.home-content {
+    padding: 20px;
+    margin: 10px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: auto;
+    align-items: start;
+    grid-gap: 30px;
+}
+
+@media (max-width: 540px) {
+    .home-content {
+        padding: 0px
+    }
+    .grid-container {
+        grid-gap: 15px;
+    }
+}
+
+.courses-header {
+    margin-bottom: 5px !important; /* Override submitty-vue.css */
+}
+.div1 {
+  grid-column: 1;
+  padding: 20px;
+  background-color: var(--default-white);
+}
 .course-list li {
     margin: 3px 0;
 }
