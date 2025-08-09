@@ -64,6 +64,16 @@ const toggleLiveChat = (enableChat) => {
     });
 };
 
+// For instructor
+const checkChatEnabled = (title) => {
+    getChatroom(title).find('[data-testid="disable-chatroom"]').should('be.visible');
+};
+
+// For instructor
+const checkChatDisabled = (title) => {
+    getChatroom(title).find('[data-testid="enable-chatroom"]').should('be.visible');
+};
+
 const chatroomExists = (title) => {
     return cy.get('body').then(($body) => {
         if ($body.find('[data-testid="chatroom-item"]').length === 0) {
@@ -386,7 +396,40 @@ describe('Tests for creating, editing and using tests', () => {
         });
     });
 
-    it('Should test WebSocket functionality', () => {
+    it('Should test for websocket chat enable and disable', () => {
+        createChatroom(title1, description1, true);
+        let id = NaN;
+        getChatroom(title1).then(($chatroom) => {
+            id = Number($chatroom.attr('id'));
+            expect(id).to.be.a('number');
+        }).then(() => {
+            getApiKey('instructor', 'instructor').then((key) => {
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/toggleActiveStatus`,
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then(() => {
+                    checkChatEnabled(title1);
+                });
+            });
+        }).then(() => {
+            getApiKey('instructor', 'instructor').then((key) => {
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/toggleActiveStatus`,
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then(() => {
+                    checkChatDisabled(title1);
+                });
+            });
+        });
+    });
+
+    it('Should test WebSocket chat message functionality', () => {
         let id = NaN;
         createChatroom(title1, description1, true);
         startChatSession(title1);

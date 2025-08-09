@@ -169,6 +169,7 @@ class ChatroomController extends AbstractController {
     }
 
     #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function toggleChatroomActiveStatus(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -179,22 +180,17 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        if (!$chatroom->isActive()) {
-            $msg_array = [];
-            $msg_array['type'] = 'chat_open';
-            $msg_array['id'] = $chatroom->getId();
-            $msg_array['title'] = $chatroom->getTitle();
-            $msg_array['description'] = $chatroom->getDescription();
-            $msg_array['allow_anon'] = $chatroom->isAllowAnon();
-            $msg_array['host_name'] = $chatroom->getHostName();
-            $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
-            $msg_array['socket'] = "chatrooms";
-        }
-        else {
-            $msg_array = [];
+        $msg_array = [];
+        $msg_array['type'] = 'chat_open';
+        $msg_array['id'] = $chatroom->getId();
+        $msg_array['title'] = $chatroom->getTitle();
+        $msg_array['description'] = $chatroom->getDescription();
+        $msg_array['allow_anon'] = $chatroom->isAllowAnon();
+        $msg_array['host_name'] = $chatroom->getHostName();
+        $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
+        $msg_array['socket'] = "chatrooms";
+        if ($chatroom->isActive()) {
             $msg_array['type'] = 'chat_close';
-            $msg_array['id'] = $chatroom->getId();
-            $msg_array['socket'] = "chatrooms";
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
             $indiv_msg_array['type'] = 'chat_close';
