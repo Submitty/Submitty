@@ -173,13 +173,13 @@ def construct_notifications(term, course, pending, notification_type):
                 f"{gradeable['max_late_days']} allowed"
             )
         else:
-            email_subject = notification_content = f"Grade Released: {gradeable['title']}"
+            email_subject = notification_content = f"Grade Available for {gradeable['title']}"
             email_body = (
-                f"Your grade is now available for \"{gradeable['title']}\" in course "
+                f"Your grade is now available for {gradeable['title']} in course "
                 f"{get_full_course_name(term, course)}."
             )
 
-        email_body += f"\n\nClick here for more info: {gradeable_url}"
+        email_body += f"\n\nClick here for the details: {gradeable_url}"
 
         if gradeable["site_enabled"] is True:
             site.append({
