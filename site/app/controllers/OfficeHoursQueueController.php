@@ -12,6 +12,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\socket\Client;
 use app\libraries\Logger;
+use app\libraries\Utils;
 use WebSocket;
 
 #[Enabled(feature: "queue")]
@@ -699,7 +700,13 @@ class OfficeHoursQueueController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        $params = [
+            'page' => 'office_hours_queue',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);

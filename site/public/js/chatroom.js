@@ -94,13 +94,12 @@ function appendMessage(displayName, role, ts, content, msgID) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
@@ -113,19 +112,20 @@ function initChatroomSocketClient(chatroomId) {
                 console.error(msg);
         }
     };
-    window.socketClient.open(`chatroom_${chatroomId}`);
+    window.socketClient.open('chatrooms', {
+        chatroom_id: chatroomId,
+    });
 }
 
 function initChatroomListSocketClient() {
-    window.chatroomListSocketClient = new WebSocketClient();
-    window.chatroomListSocketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'chat_open':
                 handleChatOpen(msg);
                 break;
             case 'chat_close': {
-                const row = document.getElementById(`chatroom-row-${msg.id}`);
+                const row = document.getElementById(`chatroom-row-${msg.chatroom_id}`);
                 if (row) {
                     row.remove();
                 }
@@ -135,7 +135,7 @@ function initChatroomListSocketClient() {
                 console.error(msg);
         }
     };
-    window.chatroomListSocketClient.open('chatrooms');
+    window.socketClient.open('chatrooms');
 }
 
 function newChatroomForm() {
@@ -212,11 +212,11 @@ function handleChatOpen(msg) {
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`chatroom-row-${msg.id}`)) {
+    if (document.getElementById(`chatroom-row-${msg.chatroom_id}`)) {
         return;
     }
     const tr = document.createElement('tr');
-    tr.id = `chatroom-row-${msg.id}`;
+    tr.id = `chatroom-row-${msg.chatroom_id}`;
 
     const tdTitle = document.createElement('td');
     const spanTitle = document.createElement('span');
@@ -240,7 +240,7 @@ function handleChatOpen(msg) {
 
     const tdLinks = document.createElement('td');
     const joinLink = document.createElement('a');
-    joinLink.href = `${msg.base_url}/${msg.id}`;
+    joinLink.href = `${msg.base_url}/${msg.chatroom_id}`;
     joinLink.className = 'btn btn-primary';
     joinLink.textContent = 'Join';
     tdLinks.appendChild(joinLink);
@@ -253,7 +253,7 @@ function handleChatOpen(msg) {
         tdLinks.appendChild(document.createTextNode(' '));
 
         const anonJoinLink = document.createElement('a');
-        anonJoinLink.href = `${msg.base_url}/${msg.id}/anonymous`;
+        anonJoinLink.href = `${msg.base_url}/${msg.chatroom_id}/anonymous`;
         anonJoinLink.className = 'btn btn-default';
         anonJoinLink.textContent = 'Join As Anon.';
         tdLinks.appendChild(anonJoinLink);
