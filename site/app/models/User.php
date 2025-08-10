@@ -772,6 +772,8 @@ class User extends AbstractModel implements \JsonSerializable {
 
         $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
+        $notification_settings['all_gradeable_releases'] = $details['all_gradeable_releases'] ?? true;
+        $notification_settings['all_gradeable_releases_email'] = $details['all_gradeable_releases_email'] ?? false;
 
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
