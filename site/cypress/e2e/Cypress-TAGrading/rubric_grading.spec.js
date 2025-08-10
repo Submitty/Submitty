@@ -19,7 +19,7 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Minor errors in Read Me')
             .and('contain', 'Major errors in Read Me or Read Me missing');
         cy.get('body').type('{0}');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '- / 2');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-64"]')
             .should('contain', 'Full Credit')

@@ -1,7 +1,7 @@
 describe('Test revolving around the student side and whether or not they should see a version conflict', () => {
     const scores = [];
     it('Student should have a version conflict', () => {
-        cy.login('joness');
+        cy.login('student');
         cy.visit(['sample', 'gradeable', 'grades_released_homework']);
 
         cy.get('[data-testid="version-conflict-version-box"]').should('contain', 'Note: The version you have selected to be graded is not the version graded by the instructor/TAs.');
@@ -18,7 +18,7 @@ describe('Test revolving around the student side and whether or not they should 
         });
 
         cy.get('[data-testid="ta-grade-results"]').each(($el) => {
-            cy.wrap($el).should('contain', 'For Version #2');
+            cy.wrap($el).should('contain', 'For Version #3');
         });
     });
 
@@ -27,7 +27,7 @@ describe('Test revolving around the student side and whether or not they should 
 
         // change submission version
         cy.visit(['sample', 'gradeable', 'grades_released_homework']);
-        cy.get('#submission-version-select').select('2');
+        cy.get('#submission-version-select').select('3');
         cy.get('#version_change').click();
 
         cy.visit(['sample', 'gradeable', 'grades_released_homework']);
