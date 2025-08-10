@@ -56,6 +56,11 @@ class SessionManagerTester extends BaseUnitTest {
                 $this->browser_info
             ])
             ->getMock();
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('getReference')
+            ->with(Session::class, $session->getSessionId())
+            ->willReturn($session);
         $repo->expects($this->once())
             ->method('getActiveSessionById')
             ->with('id')
