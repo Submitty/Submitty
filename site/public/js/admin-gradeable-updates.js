@@ -1146,7 +1146,7 @@ function cancelGradeableConfigEdit() {
     isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
-    document.querySelectorAll('.key_to_click').forEach(link => {
+    document.querySelectorAll('.key_to_click').forEach((link) => {
         link.classList.remove('selected');
     });
 
@@ -1405,7 +1405,7 @@ function updateEditorIcons() {
 
 function markLastClicked(el) {
     // Remove highlight from all
-    document.querySelectorAll('.key_to_click').forEach(link => {
+    document.querySelectorAll('.key_to_click').forEach((link) => {
         link.classList.remove('selected');
     });
     // Highlight the clicked one

@@ -43,7 +43,7 @@ select {
 }
 
 .perm-container {
-    margin-top: 10px
+    margin-top: 10px;
 }
 
 .legend-header {
@@ -470,6 +470,7 @@ body::-webkit-scrollbar-track {
     margin-left: 0.5em;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .key_to_click.selected {
     color: var(--standard-mediumorchid);
     font-weight: bold;
@@ -536,14 +537,20 @@ body::-webkit-scrollbar-track {
 /* Since we are working with CodeMirror and using a new instance each time we change files,
 we need the underlying text area to have the same styling to ensure the transition is smooth. */
 
-.CodeMirror, .CodeMirror-lines {
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror,
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror-lines {
     padding: 0;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 pre.CodeMirror-line {
-    padding: 0px 8px !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 8px !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror-linenumbers {
     margin-right: 4px;
 }
@@ -566,7 +573,6 @@ pre.CodeMirror-line {
     margin-bottom: 0.75em;
     resize: vertical;
     font-size: 14px;
-    vertical-align: middle;
     line-height: normal;
     padding: 4px 8px;
 }
