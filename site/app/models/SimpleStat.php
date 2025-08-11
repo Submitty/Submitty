@@ -56,7 +56,7 @@ class SimpleStat extends AbstractModel {
         if (isset($details['gc_id'])) {
             $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
             $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
-            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students__' . $details['g_id']] ?? 'omit';
+            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];

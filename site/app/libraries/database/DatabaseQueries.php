@@ -1819,13 +1819,16 @@ WHERE term=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getTotalUserCountByGradingSections($sections, $section_key) {
+    public function getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students) {
         $return = [];
         $params = [];
         $where = "";
         if (count($sections) > 0) {
             $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = $sections;
+        }
+        if (!$include_withdrawn_students) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " registration_type != 'withdrawn'";
         }
         if ($section_key === 'registration_section') {
             $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
@@ -1915,7 +1918,7 @@ ORDER BY {$orderby}",
         return $return;
     }
 
-    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
+    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key, $include_withdrawn_students) {
         $return = [];
         $params = [$g_id];
         $where = "";
@@ -1925,6 +1928,9 @@ ORDER BY {$orderby}",
             $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
+        }
+        if (!$include_withdrawn_students) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " registration_type != 'withdrawn'";
         }
         if ($section_key === 'registration_section') {
             $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
@@ -2100,7 +2106,7 @@ ORDER BY {$orderby}",
      * Second half of query will count all user submissions that have been overriden
      * These counts are added and returned.
      */
-    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2115,6 +2121,10 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
+        }
+        // if we omit withdrawn students and not on a team gradeable
+        if (!$include_withdrawn_students && !$is_team) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " {$u_or_t}.registration_type != 'withdrawn'";
         }
         // Because go.team_id does not exist right now, only perform override calculations for non-team assignments
         $go_create = "";
@@ -2231,9 +2241,10 @@ ORDER BY merged_data.{$section_key}
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
+     * @param  boolean $include_withdrawn_students true if withdrawn students should be included
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
      */
-    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, $include_withdrawn_students) {
         //getBadTeamSubmissionsByGradingSection
         //getBadUserSubmissionsByGradingSection
          $u_or_t = "u";
@@ -2250,6 +2261,9 @@ ORDER BY merged_data.{$section_key}
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
+        }
+        if (!$include_withdrawn_students && !$is_team) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " {$u_or_t}.registration_type != 'withdrawn'";
         }
         $this->course_db->query(
             "

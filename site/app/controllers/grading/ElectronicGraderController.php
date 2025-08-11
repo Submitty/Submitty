@@ -601,13 +601,16 @@ class ElectronicGraderController extends AbstractController {
         $graders_of_inquiries = [];
         $verified_components = [];
 
+        $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
+        $include_withdrawn_students = $withdrawn_students_cookie === 'include' ? true : false;
+
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         $grade_inquiries = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         $graders_of_inquiries = $this->core->getQueries()->getGraderofGradeInquiry($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($isPeerGradeable) {
-            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
+            $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key, $include_withdrawn_students);
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
@@ -625,7 +628,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         if ($peer) {
-            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+            $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
             $peer_array = $this->core->getQueries()->getPeerAssignment($gradeable_id, $this->core->getUser()->getId());
             $peers_to_grade = count($peer_array);
             $num_components = count($gradeable->getPeerComponents());
@@ -677,7 +680,7 @@ class ElectronicGraderController extends AbstractController {
             $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
         }
         else {
-            $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
+            $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key, $include_withdrawn_students);
             $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
         }
 
@@ -689,7 +692,7 @@ class ElectronicGraderController extends AbstractController {
                 $individual_viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections);
             }
             else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
                 $no_team_users = [];
                 $team_users = [];
                 $individual_viewed_grade = 0;
@@ -697,9 +700,8 @@ class ElectronicGraderController extends AbstractController {
             $override_cookie = $_COOKIE['include_grade_override'] ?? 'omit';
             $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
             $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
-            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
-            $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
+            $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
@@ -1843,6 +1845,7 @@ class ElectronicGraderController extends AbstractController {
         $total_submitted = 0;
         $non_late_total_submitted = 0;
         $non_late_graded = 0;
+        $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
@@ -1862,21 +1865,21 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
             if ($team) {
-                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team));
+                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team, $include_withdrawn_students));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key));
                 $total_submitted = array_sum($this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, $section_key));
                 $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
                 $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
-                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
                 $non_late_graded = $graded - array_sum($late_graded);
             }
             else {
-                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team));
-                $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key));
-                $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key));
+                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team, $include_withdrawn_students));
+                $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students));
+                $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key, $include_withdrawn_students));
                 $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
                 $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
-                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
 
                 $non_late_graded = $graded - array_sum($late_graded);
             }
@@ -1896,11 +1899,11 @@ class ElectronicGraderController extends AbstractController {
             }
             else {
                 $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($gradeable_id, $sections, $section_key);
-                $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, $section_key));
+                $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, $section_key, $include_withdrawn_students));
             }
-            $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $non_late_total_submitted = $total_submitted - array_sum($late_submitted);
-            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team, $include_withdrawn_students));
             $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
@@ -3624,6 +3627,7 @@ class ElectronicGraderController extends AbstractController {
      * @param bool      $full_stats
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
+        $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
         $sections = [];
         if ($full_stats) {
@@ -3643,8 +3647,8 @@ class ElectronicGraderController extends AbstractController {
         if (count($sections) > 0) {
             $total_users = ($gradeable->isTeamAssignment()) ?
                 $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
-                $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-            $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment());
+                $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
+            $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
         }
 
         foreach ($graded_components as $key => $value) {

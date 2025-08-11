@@ -7174,6 +7174,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradedComponentsCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradedComponentsCountByGradingSections\(\) has parameter \$is_team with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -8128,6 +8134,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedUserCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedUserCountByGradingSections\(\) has parameter \$section_key with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -8142,6 +8154,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalUserCountByGradingSections\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalUserCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -11917,6 +11935,18 @@ parameters:
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 9
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getBadUserSubmissionsByGradingSection\(\) invoked with 4 parameters, 3 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedTeamCountByGradingSections\(\) invoked with 4 parameters, 3 required\.$#'
+			identifier: arguments.count
+			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
