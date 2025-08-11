@@ -68,6 +68,8 @@ parser.add_argument('--worker', action='store_true', default=False, help='Config
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
+parser.add_argument('--ci', action='store_true', default=False,
+                    help="Submitty is on Github Actions CI. This is a CI flag and should not be used in production!")
 
 args = parser.parse_args()
 
@@ -558,30 +560,46 @@ if not args.worker:
             json.dump(worker_dict, workers_file, indent=4)
 
     if not os.path.isfile(CONTAINERS_JSON):
-        container_dict = {
-            "default":  [
-                          "submitty/autograding-default:latest",
-                          "submitty/python:latest",
-                          "submitty/clang:latest",
-                          "submitty/gcc:latest",
-                          "submitty/rust:latest",
-                          "submitty/java:latest",
-                          "submitty/pdflatex:latest",
-                          "submitty/jupyter:latest"
-                        ],
-            "python":   [
-                          "submitty/autograding-default:latest",
-                          "submitty/python:latest"
-                        ],
-            "cpp":      [
-                          "submitty/autograding-default:latest",
-                          "submitty/clang:latest",
-                          "submitty/gcc:latest"
-                        ],
-            "notebook": [
-                          "submitty/autograding-default:latest"
-                        ]
-        }
+        if args.ci:
+            container_dict = {
+                "default":  [
+                            "submitty/autograding-default:latest",
+                            ],
+                "python":   [
+                            "submitty/autograding-default:latest",
+                            ],
+                "cpp":      [
+                            "submitty/autograding-default:latest",
+                            ],
+                "notebook": [
+                            "submitty/autograding-default:latest"
+                            ]
+            }
+        else:
+            container_dict = {
+                "default":  [
+                            "submitty/autograding-default:latest",
+                            "submitty/python:latest",
+                            "submitty/clang:latest",
+                            "submitty/gcc:latest",
+                            "submitty/rust:latest",
+                            "submitty/java:latest",
+                            "submitty/pdflatex:latest",
+                            "submitty/jupyter:latest"
+                            ],
+                "python":   [
+                            "submitty/autograding-default:latest",
+                            "submitty/python:latest"
+                            ],
+                "cpp":      [
+                            "submitty/autograding-default:latest",
+                            "submitty/clang:latest",
+                            "submitty/gcc:latest"
+                            ],
+                "notebook": [
+                            "submitty/autograding-default:latest"
+                            ]
+            }
 
         with open(CONTAINERS_JSON, 'w') as container_file:
             json.dump(container_dict, container_file, indent=4)
