@@ -7174,12 +7174,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradedComponentsCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradedComponentsCountByGradingSections\(\) has parameter \$is_team with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -8129,12 +8123,6 @@ parameters:
 
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedUserCountByGradingSections\(\) has parameter \$g_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedUserCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
