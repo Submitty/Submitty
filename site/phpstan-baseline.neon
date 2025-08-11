@@ -8146,12 +8146,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalUserCountByGradingSections\(\) has parameter \$include_withdrawn_students with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalUserCountByGradingSections\(\) has parameter \$section_key with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1

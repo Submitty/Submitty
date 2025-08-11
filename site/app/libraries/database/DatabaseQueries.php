@@ -1819,7 +1819,7 @@ WHERE term=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students) {
+    public function getTotalUserCountByGradingSections($sections, $section_key, bool $include_withdrawn_students) {
         $return = [];
         $params = [];
         $where = "";
