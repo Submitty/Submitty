@@ -2352,7 +2352,7 @@ ORDER BY merged_data.{$section_key}
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, string $withdrawn_students) {
+    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2379,9 +2379,9 @@ ORDER BY merged_data.{$section_key}
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
-        // check if we want to include withdrawn students in the average
+        // check if we want to exclude withdrawn students in the average
         // only applies to user gradeables
-        if ($withdrawn_students !== 'include' && $u_or_t === 'u') {
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
             $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
 
@@ -2439,7 +2439,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, string $withdrawn_students) {
+    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2464,9 +2464,9 @@ ORDER BY gc_order
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
-        // check if we want to include withdrawn students in the average
+        // check if we want to exclude withdrawn students in the average
         // only applies to user gradeables
-        if ($withdrawn_students !== 'include' && $u_or_t === 'u') {
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
             $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
         $return = [];
@@ -2519,7 +2519,7 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, string $withdrawn_students) {
+    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2544,7 +2544,7 @@ ORDER BY gc_order
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
-        if ($withdrawn_students !== 'include' && $u_or_t === 'u') {
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
             $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
 
@@ -2622,7 +2622,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section, string $withdrawn_students) {
+    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2680,9 +2680,9 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $params[] = $g_id;
         }
 
-        // Check if we want to include withdrawn students in the average
+        // Check if we want to exclude withdrawn students in the average
         // only applies to user gradeables
-        if ($withdrawn_students !== 'include' && $u_or_t === 'u') {
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
             $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
 

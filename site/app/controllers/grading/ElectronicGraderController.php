@@ -601,8 +601,7 @@ class ElectronicGraderController extends AbstractController {
         $graders_of_inquiries = [];
         $verified_components = [];
 
-        $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
-        $include_withdrawn_students = $withdrawn_students_cookie === 'include';
+        $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
@@ -702,9 +701,9 @@ class ElectronicGraderController extends AbstractController {
             $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
-            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
-            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
-            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie, $withdrawn_students_cookie);
+            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
+            $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
+            $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $manual_average = new SimpleStat($this->core, [
                 'avg_score' => $overall_average['manual_avg_score'],
                 'std_dev' => $overall_average['manual_std_dev'],
@@ -998,7 +997,6 @@ class ElectronicGraderController extends AbstractController {
             ));
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
-        $withdrawn_students_cookie = isset($_COOKIE['include_withdrawn_students']) && $_COOKIE['include_withdrawn_students'] === 'omit';
 
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
         $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
@@ -1120,7 +1118,7 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $withdrawn_students_cookie, $grading_details_columns, $activeGraders);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -3627,7 +3625,6 @@ class ElectronicGraderController extends AbstractController {
      * @param bool      $full_stats
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
-        $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
         $sections = [];
         if ($full_stats) {
@@ -3640,6 +3637,7 @@ class ElectronicGraderController extends AbstractController {
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
         }
 
+        $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
         $total_users       = [];
         $graded_components = [];
