@@ -1918,7 +1918,7 @@ ORDER BY {$orderby}",
         return $return;
     }
 
-    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key, $include_withdrawn_students) {
+    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key, bool $include_withdrawn_students) {
         $return = [];
         $params = [$g_id];
         $where = "";
