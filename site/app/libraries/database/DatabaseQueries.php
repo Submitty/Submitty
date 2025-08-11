@@ -5242,6 +5242,7 @@ AND gc_id IN (
             'team_member_submission',
             'self_notification',
             'all_released_grades',
+            'all_gradeable_releases',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -5252,7 +5253,8 @@ AND gc_id IN (
             'team_member_submission_email',
             'self_registration_email',
             'self_notification_email',
-            'all_released_grades_email'
+            'all_released_grades_email',
+            'all_gradeable_releases_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -5815,12 +5817,12 @@ AND gc_id IN (
     }
 
     /**
-     * Get pending gradeable notifications for a given gradeable id
+     * Get pending gradeable score notifications for a given gradeable id
      *
      * @param string $g_id the gradeable id to get notifications for
      * @return int
      */
-    public function getPendingGradeableNotifications($g_id): int {
+    public function getPendingGradeableScoreNotifications($g_id): int {
         /*
         TODO: This query is a variation of a similar query found within `/sbin/send_notification.py`.
         ElectronicGraderController.showStatus() and ElectronicGraderView.statusPage() should be refactored
@@ -5899,7 +5901,7 @@ AND gc_id IN (
         return count($this->course_db->rows());
     }
 
-    public function resetGradeableNotifications(Gradeable $gradeable): void {
+    public function resetGradeableScoreNotifications(Gradeable $gradeable): void {
         $this->course_db->query("
             UPDATE electronic_gradeable_version
             SET g_notification_sent = FALSE
@@ -6037,7 +6039,7 @@ AND gc_id IN (
                     WHERE g_id = g.g_id AND g_notification_sent IS TRUE
                     GROUP BY user_id, team_id
                 ) AS distinct_submissions
-            ) AS notifications_sent
+            ) AS score_notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -6086,7 +6088,8 @@ AND gc_id IN (
                   eg_precision AS precision,
                   eg_hidden_files as hidden_files,
                   eg_depends_on as depends_on,
-                  eg_depends_on_points as depends_on_points
+                  eg_depends_on_points as depends_on_points,
+                  eg_release_notifications_sent as release_notifications_sent
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
                 LEFT JOIN (
@@ -7013,6 +7016,8 @@ AND gc_id IN (
                     $gradeable->getStringHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
+                    // Reset the release notification state if the submission open date has changed to a future date
+                    $gradeable->getReleaseNotificationsSent() ? $gradeable->isSubmissionOpen() : false,
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -7050,7 +7055,8 @@ AND gc_id IN (
                       eg_has_discussion=?,
                       eg_hidden_files=?,
                       eg_depends_on=?,
-                      eg_depends_on_points=?
+                      eg_depends_on_points=?,
+                      eg_release_notifications_sent=?
                     WHERE g_id=?",
                     $params
                 );
@@ -9044,12 +9050,12 @@ WHERE current_state IN
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
-                 ns.self_notification, ns.all_released_grades,
+                 ns.self_notification, ns.all_released_grades, ns.all_gradeable_releases,
                  ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
-                 ns.self_notification_email, ns.all_released_grades_email,
+                 ns.self_notification_email, ns.all_released_grades_email, ns.all_gradeable_releases_email,
                  sr.grading_registration_sections
 
             FROM users u

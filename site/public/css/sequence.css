@@ -4,7 +4,7 @@
 }
 
 text.actor {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .actor-line {
@@ -25,7 +25,7 @@ text.actor {
 
 /* stylelint-disable-next-line selector-class-pattern */
 .labelText {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .note {
@@ -35,5 +35,5 @@ text.actor {
 
 /* stylelint-disable-next-line selector-class-pattern */
 .noteText {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }

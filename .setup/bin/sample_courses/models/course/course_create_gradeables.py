@@ -358,8 +358,8 @@ class Course_create_gradeables:
                                     if status == 0 or random.random() < 0.4:
                                         score = 0
                                     else:
-                                        max_value_score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
-                                        uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                        max_value_score = random.randint(int(component.lower_clamp * 2), int(component.max_value * 2)) / 2
+                                        uppser_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
                                         score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                     self.conn.execute(
@@ -404,7 +404,7 @@ class Course_create_gradeables:
                             elif gradeable.type == 1:
                                 score = generate_probability_space({0.2: 0, 0.1: 0.5}, 1)
                             else:
-                                score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(
                                 insert(self.gradeable_component_data).values(

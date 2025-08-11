@@ -391,6 +391,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     #vue
     mkdir ${VENDOR_FOLDER}/vue
     cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
+    #katex
+    mkdir -p ${VENDOR_FOLDER}/katex/fonts
+    cp ${NODE_FOLDER}/katex/dist/katex.min.css ${VENDOR_FOLDER}/katex
+    cp ${NODE_FOLDER}/katex/dist/fonts/*.woff2 ${VENDOR_FOLDER}/katex/fonts
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -408,7 +412,7 @@ chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 mkdir -p "${NODE_FOLDER}/.vue-global-types"
-chgrp "${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
+chown -R "${PHP_USER}:${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
@@ -416,7 +420,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
-chmod -R g+w ${NODE_FOLDER}/.vue-global-types
+chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
@@ -428,7 +432,7 @@ chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-chmod -R g-w ${NODE_FOLDER}/.vue-global-types
+chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
