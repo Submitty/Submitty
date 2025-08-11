@@ -602,7 +602,7 @@ class ElectronicGraderController extends AbstractController {
         $verified_components = [];
 
         $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students'] ?? 'omit';
-        $include_withdrawn_students = $withdrawn_students_cookie === 'include' ? true : false;
+        $include_withdrawn_students = $withdrawn_students_cookie === 'include';
 
         // Assure late day cache is calculated
         $this->core->getQueries()->generateLateDayCacheForUsers();
