@@ -426,12 +426,12 @@ class UsersController extends AbstractController {
             $em->persist($course_user);
             $em->flush();
             $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
+            $this->core->addSuccessMessage("Added user {$user->getId()} to course $course");
             if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
                 }
-                $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
