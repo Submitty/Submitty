@@ -1831,7 +1831,6 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the percent of grading complete for the provided user for this gradeable
-     * Automatically excludes any withdrawn users
      * @param User $grader
      * @param bool $include_null_section
      * @param bool $include_bad_submissions
@@ -1870,7 +1869,7 @@ class Gradeable extends AbstractModel {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
-                $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key, $include_withdrawn_students);
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
             }
@@ -1878,7 +1877,7 @@ class Gradeable extends AbstractModel {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
                 $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key, $include_withdrawn_students);
-                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key, $include_withdrawn_students);
+                $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
             }
         }

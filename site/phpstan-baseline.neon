@@ -11926,18 +11926,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getBadUserSubmissionsByGradingSection\(\) invoked with 4 parameters, 3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTotalSubmittedTeamCountByGradingSections\(\) invoked with 4 parameters, 3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
