@@ -31,6 +31,7 @@ function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon
         isAdmin: isAdmin,
         isActive: isActive,
         baseUrl: base_url,
+        csrf_token: csrfToken,
     });
 }
 
