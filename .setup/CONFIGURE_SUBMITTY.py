@@ -564,9 +564,11 @@ if not args.worker:
             container_dict = {
                 "default":  [
                             "submitty/autograding-default:latest",
+                            "submitty/python:latest"
                             ],
                 "python":   [
                             "submitty/autograding-default:latest",
+                            "submitty/python:latest",
                             ],
                 "cpp":      [
                             "submitty/autograding-default:latest",
