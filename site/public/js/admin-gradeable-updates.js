@@ -1038,7 +1038,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // When the text editor opens, the user shouldn't have to manually scroll to see the contents
 function scrollToBottom() {
-    window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 820, left: 0, behavior: 'smooth' });
 }
 
 function updateGradeableEditor(g_id, file_path) {
@@ -1095,7 +1095,7 @@ function loadGradeableEditor(g_id, file_path) {
                 scrollToBottom();
             }
             catch {
-                displayErrorMessage('Error parsing data. Please try again');
+                displayErrorMessage('Error parsing data. File type not supported in the editor.');
             }
         },
     });
@@ -1146,6 +1146,9 @@ function cancelGradeableConfigEdit() {
     isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
 
     closeCodeMirrorInstance();
 }
@@ -1398,4 +1401,13 @@ function updateEditorIcons() {
     const tabLength = localStorage.getItem('setTabLength') || '2';
     tabLengthIcon.classList.remove('fa-2', 'fa-4');
     tabLengthIcon.classList.add(`fa-${tabLength}`);
+}
+
+function markLastClicked(el) {
+    // Remove highlight from all
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
+    // Highlight the clicked one
+    el.classList.add('selected');
 }

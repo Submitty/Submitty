@@ -42,6 +42,14 @@ select {
     min-width: 60px;
 }
 
+.perm-container {
+    margin-top: 10px;
+}
+
+.legend-header {
+    font-weight: 600;
+}
+
 .question-icon {
     display: block;
     float: left;
@@ -183,11 +191,6 @@ input[type="checkbox"] {
     vertical-align: middle;
 }
 
-.settings {
-    padding: 8px;
-    border-radius: 4px;
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #electronic_file {
     padding-left: 20px;
@@ -240,6 +243,11 @@ table#grader-history td {
 
 #repository {
     margin-top: 20px;
+}
+
+.select-config-container {
+    margin-top: 7px;
+    margin-bottom: 30px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -350,12 +358,17 @@ form.dropdown {
 
 .notebook-builder-info {
     margin-top: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
 }
 
 .notebook-builder-info div {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.notebook-btn {
+    width: 98px;
+    margin-right: 12px;
 }
 
 .select-label-itempool {
@@ -457,6 +470,12 @@ body::-webkit-scrollbar-track {
     margin-left: 0.5em;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
+.key_to_click.selected {
+    color: var(--standard-mediumorchid);
+    font-weight: bold;
+}
+
 .select-config-box {
     display: none;
 }
@@ -484,7 +503,6 @@ body::-webkit-scrollbar-track {
     display: flex;
     flex-grow: 1;
     justify-content: flex-end;
-    margin-bottom: 2px;
 }
 
 .customize-editor-button {
@@ -516,6 +534,27 @@ body::-webkit-scrollbar-track {
     background: var(--standard-plum-purple);
 }
 
+/* Since we are working with CodeMirror and using a new instance each time we change files,
+we need the underlying text area to have the same styling to ensure the transition is smooth. */
+
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror,
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror-lines {
+    padding: 0;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+pre.CodeMirror-line {
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 8px !important;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror-linenumbers {
+    margin-right: 4px;
+}
+
 /* stylelint-disable-next-line selector-class-pattern */
 #gradeable-config-edit-bar .CodeMirror {
     /* The below instances of !important are identical to those used in gradeable-notebook.css.
@@ -533,6 +572,20 @@ body::-webkit-scrollbar-track {
     margin-top: 0.75em;
     margin-bottom: 0.75em;
     resize: vertical;
+    font-size: 14px;
+    line-height: normal;
+    padding: 4px 8px;
+}
+
+.underlying-textarea {
+    height: 500px;
+    margin-bottom: 0.75em;
+    margin-top: 0.75em;
+    font-size: 14px;
+    line-height: normal;
+    padding: 4px 16px;
+    background-color: var(--standard-input-background);
+    border: 1px solid var(--standard-light-gray);
 }
 
 #gradeable-config-edit-bar {
