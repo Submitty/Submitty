@@ -1260,8 +1260,6 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal-init.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
@@ -1322,6 +1320,7 @@ HTML;
             "next_student_url" => $next_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getUser()->getGroup() < 4,
+            'full_settings_access' => $this->core->getUser()->getGroup() <= 2,
             'grade_inquiry_pending' => $graded_gradeable->hasActiveGradeInquiry(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
@@ -1841,11 +1840,6 @@ HTML;
     public function popupMarkConflicts() {
         return $this->core->getOutput()->renderTwigTemplate('grading/electronic/MarkConflictPopup.twig');
     }
-
-    public function popupSettings() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
-    }
-
 
     public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id, bool $is_timed, int $allowed_minutes): string {
         return $this->core->getOutput()->renderTwigTemplate(
