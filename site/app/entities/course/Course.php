@@ -1,45 +1,43 @@
 <?php
 
-declare(strict_types=1);
-
 namespace app\entities;
 
-use DateTime;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
+use app\libraries\Core;
+use app\libraries\FileUtils;
 
 /**
- * Class Session
- * @package app\entities
- * @method string getTerm()
- * @method string getTermName()
- * @method string getTitle()
- * @method string getDisplayName()
- * @method int getUserGroup()
+ * Class Course
+ * Holds basic information about courses. Used on homepage.
  */
-#[ORM\Entity(repositoryClass: CourseEntityRepository::class)]
-#[ORM\Table(name: "courses")]
+#[ORM\Entity]
+#[ORM\Table(name: "course")]
 class Course {
     /** @prop
      * @var string $term the term's code in which the course is taking place. */
+    #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
     protected $term;
+
     /** @prop
      * @var string $term_name the name of the term. aka "Long Term". */
     #[ORM\Column(type: Types::STRING)]
     protected $term_name;
+
     /** @prop
      * @var string $title the proper title of the course. */
     #[ORM\Column(type: Types::STRING)]
     protected $title;
+
     /** @prop
      * @var string $display_name the display name of the course. */
     #[ORM\Column(type: Types::STRING)]
     protected $display_name;
+
     /** @prop
      * @var int $user_group used to rank courses in homepage view. */
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::INTEGER)]
     protected $user_group;
+
     /** @prop
      * @var string $registration_section for homepage view */
     #[ORM\Column(type: Types::STRING)]
@@ -50,10 +48,9 @@ class Course {
 
     /**
      * Course constructor.
-     * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details) {
+    public function __construct($details) {
         $this->term = $details['term'];
         $this->term_name = $details['term_name'];
         $this->title = $details['course'];
@@ -62,9 +59,9 @@ class Course {
         $this->registration_section = $details['registration_section'] ?? null;
     }
 
-    public function loadDisplayName() {
+    public function loadDisplayName(string $submitty_path) {
         $course_json_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyPath(),
+            $submitty_path,
             "courses",
             $this->term,
             $this->title,

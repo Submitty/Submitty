@@ -44,10 +44,13 @@ class HomePageController extends AbstractController {
         if (is_null($user_id) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
             $user_id = $user->getId();
         }
+        $em = $this->core->getSubmittyEntityManager();
+        /** @var CourseEntityRepository $repo */
+        $course_repository = $em->getRepository(CourseEntity::class);
 
-        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
-        $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
-        $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
+        $unarchived_courses = $course_repository::getCoursesForUserId($user_id);
+        $archived_courses = $course_repository::getCoursesForUserId($user_id, true);
+        $dropped_courses = $course_repository::getCoursesForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
