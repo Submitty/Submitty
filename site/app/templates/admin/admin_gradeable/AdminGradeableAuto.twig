@@ -293,7 +293,7 @@
         {% for name, file in files %}
             {% if file.files is defined %}
                 {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
-                <div style="margin-left:{{ indent * 15 }}px margin-bottom: 4px;">
+                <div style="margin-left:{{ indent * 15 }}px;">
                     <i class="fas fa-plus file-action-add" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
                     <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
                     <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span>
@@ -308,13 +308,13 @@
             {% if file.files is not defined %}
                 {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
                 {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
-                    <div style="margin-left:{{ indent * 38 }}px; margin-top: 5px;">
+                    <div style="margin-left:{{ indent * 23 }}px; margin-top: 3px;">
                             <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
                         <span class="fas fa-file config-file-icon"></span>
                         <a class="key_to_click" onclick="markLastClicked(this); updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
                     </div>
                 {% else %}
-                    <div style="margin-left:{{ indent * 61 }}px;">
+                    <div style="margin-left:{{ indent * 46 }}px;">
                         <span class="fas fa-file config-file-icon"></span>
                         <a class="key_to_click" onclick="markLastClicked(this); updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
                     </div>
