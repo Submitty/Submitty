@@ -1776,13 +1776,16 @@ WHERE term=? AND course=? AND user_id=?",
         return $return;
     }
 
-    public function getTotalUserCountByGradingSections($sections, $section_key) {
+    public function getTotalUserCountByGradingSections($sections, $section_key, bool $include_withdrawn_students) {
         $return = [];
         $params = [];
         $where = "";
         if (count($sections) > 0) {
             $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = $sections;
+        }
+        if (!$include_withdrawn_students) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " registration_type != 'withdrawn'";
         }
         if ($section_key === 'registration_section') {
             $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
@@ -1872,7 +1875,7 @@ ORDER BY {$orderby}",
         return $return;
     }
 
-    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
+    public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key, bool $include_withdrawn_students) {
         $return = [];
         $params = [$g_id];
         $where = "";
@@ -1882,6 +1885,9 @@ ORDER BY {$orderby}",
             $placeholders = $this->createParameterList(count($sections_keys));
             $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
             $params = array_merge($params, $sections_keys);
+        }
+        if (!$include_withdrawn_students) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " registration_type != 'withdrawn'";
         }
         if ($section_key === 'registration_section') {
             $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
@@ -2057,7 +2063,7 @@ ORDER BY {$orderby}",
      * Second half of query will count all user submissions that have been overriden
      * These counts are added and returned.
      */
-    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2072,6 +2078,10 @@ ORDER BY {$orderby}",
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
+        }
+        // if we omit withdrawn students and not on a team gradeable
+        if (!$include_withdrawn_students && !$is_team) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " {$u_or_t}.registration_type != 'withdrawn'";
         }
         // Because go.team_id does not exist right now, only perform override calculations for non-team assignments
         $go_create = "";
@@ -2188,9 +2198,10 @@ ORDER BY merged_data.{$section_key}
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
+     * @param  boolean $include_withdrawn_students true if withdrawn students should be included
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
      */
-    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, $include_withdrawn_students) {
         //getBadTeamSubmissionsByGradingSection
         //getBadUserSubmissionsByGradingSection
          $u_or_t = "u";
@@ -2207,6 +2218,9 @@ ORDER BY merged_data.{$section_key}
         if (count($sections) > 0) {
             $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
             $params = array_merge($params, $sections);
+        }
+        if (!$include_withdrawn_students && !$is_team) {
+            $where .= ($where === "" ? "WHERE" : " AND") . " {$u_or_t}.registration_type != 'withdrawn'";
         }
         $this->course_db->query(
             "
@@ -2295,12 +2309,13 @@ ORDER BY merged_data.{$section_key}
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
+        $withdrawn_students_condition = "";
         $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2320,6 +2335,11 @@ ORDER BY merged_data.{$section_key}
                 WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
+        }
+        // check if we want to exclude withdrawn students in the average
+        // only applies to user gradeables
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
 
         $return = [];
@@ -2349,6 +2369,7 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
       SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
       FROM {$users_or_teams} AS {$u_or_t}
       WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+      {$withdrawn_students_condition}
     ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     INNER JOIN(
       SELECT egv.{$user_or_team_id}, egv.active_version
@@ -2375,12 +2396,13 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
+        $withdrawn_students_condition = "";
         $params = [$gc_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2398,6 +2420,11 @@ ORDER BY gc_order
                 WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
+        }
+        // check if we want to exclude withdrawn students in the average
+        // only applies to user gradeables
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
         $return = [];
         $this->course_db->query("
@@ -2426,6 +2453,7 @@ SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, roun
       SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
       FROM {$users_or_teams} AS {$u_or_t}
       WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+      {$withdrawn_students_condition}
     ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     INNER JOIN(
       SELECT egv.{$user_or_team_id}, egv.active_version
@@ -2448,13 +2476,14 @@ ORDER BY gc_order
         return $return;
     }
 
-    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageAutogradedScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $bad_submissions_condition = '';
         $null_section_condition = '';
+        $withdrawn_students_condition = '';
         $params = [$g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2472,6 +2501,9 @@ ORDER BY gc_order
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
+        }
 
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
@@ -2486,7 +2518,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
       ) AS egv
       ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
       {$bad_submissions_condition}
-      WHERE egd.g_version=egv.active_version AND egd.g_id=? {$null_section_condition}
+      WHERE egd.g_version=egv.active_version AND egd.g_id=? {$null_section_condition} {$withdrawn_students_condition}
    )g
 ) as individual;
           ", $params);
@@ -2547,7 +2579,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section) {
+    public function getAverageForGradeable(string $g_id, string $section_key, bool $is_team, string $override, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
 
         $u_or_t = "u";
         $users_or_teams = "users";
@@ -2556,6 +2588,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         $include = '';
         $null_section_condition = '';
         $bad_submissions_condition = '';
+        $withdrawn_students_condition = '';
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2604,6 +2637,12 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $params[] = $g_id;
         }
 
+        // Check if we want to exclude withdrawn students in the average
+        // only applies to user gradeables
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
+        }
+
         $this->course_db->query(
             "
 SELECT round(AVG(g_score),2) AS manual_avg_score, round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS manual_std_dev, round(stddev_pop(g_score + autograding),2) AS std_dev, MAX(g_score) AS manual_max_score, round(AVG(max),2) AS max, COUNT(*) FROM(
@@ -2633,7 +2672,7 @@ SELECT round(AVG(g_score),2) AS manual_avg_score, round((AVG(g_score) + AVG(auto
         ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
         INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
         {$bad_submissions_condition}
-        WHERE gc.g_id=? {$null_section_condition}
+        WHERE gc.g_id=? {$null_section_condition} {$withdrawn_students_condition}
         " . $exclude . "
       )AS parts_of_comp
     )AS comp
