@@ -5394,6 +5394,47 @@ AND gc_id IN (
         return $results;
     }
 
+    /**
+     * Get 10 most recent Notification objects in a course
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course_name
+     * @param object $course_db
+     * @return array<int, Notification>
+     */
+    public function getRecentUserNotifications($user_id, $semester, $course_name, $course_db) {
+        $query = "
+            SELECT id, component, metadata, content,
+                (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
+                (EXTRACT(EPOCH FROM current_timestamp) - EXTRACT(EPOCH FROM created_at)) AS elapsed_time,
+                created_at
+            FROM notifications
+            WHERE to_user_id = ?
+            ORDER BY created_at DESC
+            LIMIT 10;
+        ";
+        $course_db->query($query, [$user_id]);
+        $rows = $this->course_db->rows();
+        $results = [];
+        foreach ($rows as $row) {
+            $results[] = Notification::createViewOnlyNotification(
+                $this->core,
+                [
+                    'id' => $row['id'],
+                    'component' => $row['component'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at'],
+                    'semester' => $semester,
+                    'course' => $course_name,
+                ]
+            );
+        }
+        return $results;
+    }
+
     public function getNotificationInfoById($user_id, $notification_id) {
         $this->course_db->query("SELECT metadata FROM notifications WHERE to_user_id = ? and id = ?", [$user_id, $notification_id]);
         return $this->course_db->row();

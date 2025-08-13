@@ -10,6 +10,7 @@ use app\entities\Term;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 use app\controllers\SelfRejoinController;
 
@@ -20,13 +21,20 @@ use app\controllers\SelfRejoinController;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+    /** @var array<Course> */
+    private array $courses = [];
+
     /**
      * HomePageController constructor.
      *
-     * @param Core $core
+     * @param Core $core Core Submitty application object
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $user = $this->core->getUser();
+        if ($user !== null) {
+            $this->courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        }
     }
 
     /**
@@ -46,7 +54,7 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $unarchived_courses = $this->courses;
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
@@ -106,6 +114,32 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * Returns recent notifications for a user
+     * @return array<int, Notification>
+     */
+    private function getAllRecentNotifications(): array {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $semester = $course->getTerm();
+            $course_name = $course->getTitle();
+            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseDatabase();
+            $course_db = $this->core->getCourseDB();
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
+        }
+
+        usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        return $results;
+    }
+
+    /**
      * Display the HomePageView to the student.
      *
      * @return MultiResponse
@@ -113,7 +147,7 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-
+        $notifications = $this->getAllRecentNotifications();
         return new MultiResponse(
             null,
             new WebResponse(
@@ -123,7 +157,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
-                $courses["data"]["self_registration_courses"]
+                $courses["data"]["self_registration_courses"],
+                $notifications
             )
         );
     }
