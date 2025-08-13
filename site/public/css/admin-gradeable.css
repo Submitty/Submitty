@@ -428,7 +428,7 @@ body::-webkit-scrollbar-track {
 }
 
 .main-folder {
-    padding-bottom: 0.5em;
+    margin-bottom: 0.80em;
 }
 
 .main-folder-contents {
@@ -466,7 +466,7 @@ body::-webkit-scrollbar-track {
 
 .config-folder-view {
     list-style-type: none;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.80em;
     margin-left: 0.5em;
 }
 
