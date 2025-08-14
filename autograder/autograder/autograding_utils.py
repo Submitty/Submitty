@@ -576,7 +576,8 @@ def archive_autograding_results(
                                  grading_finished_longstring,
                                  int(gradingtime),
                                  grade_result,
-                                 queue_obj.get("revision", None))
+                                 queue_obj.get("revision", None),
+                                 queue_obj.get("regrade_by", None))
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
             f.write("FINISHED GRADING!\n")
