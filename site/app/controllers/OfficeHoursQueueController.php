@@ -22,6 +22,7 @@ class OfficeHoursQueueController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["GET"])]
     public function showQueue($full_history = false) {
+        $this->core->authorizeWebSocketToken(['page' => 'office_hours_queue']);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',

@@ -72,8 +72,6 @@ class GlobalView extends AbstractView {
             ];
         }
 
-        // Authorize the default WebSocket pages for the given course, if applicable
-        $this->core->authorizeWebSocketToken();
         $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [

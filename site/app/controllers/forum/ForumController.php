@@ -1166,6 +1166,7 @@ class ForumController extends AbstractController {
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
@@ -1199,6 +1200,7 @@ class ForumController extends AbstractController {
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
         if ($thread->isMergedThread()) {
             // Redirect merged thread to parent
             $this->core->addSuccessMessage("The requested thread was merged into this thread.");

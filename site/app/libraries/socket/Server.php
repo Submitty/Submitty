@@ -126,17 +126,6 @@ class Server implements MessageComponentInterface {
             }
 
             // Create the full page identifier for authorization checks
-            $page = $params['page'];
-
-            if (
-                $page === 'discussion_forum'
-                || $page === 'office_hours_queue'
-                || ($page === 'chatrooms' && !isset($params['chatroom_id']))
-            ) {
-                // These pages are not stored as unique authorized pages as they're available to all authenticated users
-                $params['page'] = 'defaults';
-            }
-
             $authorized_page = Utils::buildWebSocketPageIdentifier($params);
 
             if ($authorized_page === null) {
@@ -146,19 +135,15 @@ class Server implements MessageComponentInterface {
                 return false;
             }
 
-            // Create the full page identifier for the true page connection
-            $params['page'] = $page;
-            $page_identifier = Utils::buildWebSocketPageIdentifier($params);
-
             // Set up the connection
             $this->setSocketClient($user_id, $conn);
-            if (!array_key_exists($page_identifier, $this->clients)) {
-                $this->clients[$page_identifier] = new \SplObjectStorage();
+            if (!array_key_exists($authorized_page, $this->clients)) {
+                $this->clients[$authorized_page] = new \SplObjectStorage();
             }
-            $this->clients[$page_identifier]->attach($conn);
-            $this->setSocketClientPage($page_identifier, $conn);
+            $this->clients[$authorized_page]->attach($conn);
+            $this->setSocketClientPage($authorized_page, $conn);
 
-            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $page_identifier . "'");
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $authorized_page . "'");
             return true;
         }
         catch (\Exception $exc) {

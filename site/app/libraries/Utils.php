@@ -439,7 +439,6 @@ class Utils {
         $prefix = $params['term'] . '-' . $params['course'] . '-';
 
         switch ($page) {
-            case 'defaults':
             case 'discussion_forum':
             case 'office_hours_queue':
                 return $prefix . $page;

@@ -7,9 +7,18 @@
 
 import { verifyWebSocketStatus } from '../../support/utils';
 
-const visitPoll = (title, text) => {
-    cy.contains(title).siblings(':nth-child(3)').contains(text).click();
-    return cy.url().should('match', /\/polls\/\d+$/).then(() => verifyWebSocketStatus());
+const visitPoll = (title, text, wsEnabled = false) => {
+    // 3rd child represents the student view, 7th/8th child represents the instructor view depending on the 'date released' visibility
+    cy.contains(title).siblings(':nth-child(3), :nth-child(7), :nth-child(8)').contains(text).click();
+
+    return cy.url().should('match', /\/polls\/\d+$/).then(() => {
+        if (wsEnabled) {
+            return verifyWebSocketStatus();
+        }
+        else {
+            return cy.window().then((win) => expect(win?.socketClient).to.be.undefined);
+        }
+    });
 };
 
 describe('Test cases revolving around polls functionality', () => {
@@ -294,10 +303,12 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().click();
+        visitPoll('Poll Cypress Test', 'View Poll', true);
 
         // Waiting for duration to reach 0, so poll ends.
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(5000);
+        cy.visit(['sample', 'polls']);
 
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
@@ -326,7 +337,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        visitPoll('Poll Cypress Test', 'Answer');
+        visitPoll('Poll Cypress Test', 'Answer', true);
         cy.get('[data-testid="timer"]').should('be.visible');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('not.be.disabled');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.checked');
@@ -343,7 +354,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 2');
 
         // try switching the answer and verify it got saved
-        visitPoll('Poll Cypress Test', 'Answer');
+        visitPoll('Poll Cypress Test', 'Answer', true);
         cy.get('.poll-content > tbody > tr:nth-child(3) > td:nth-child(1) > input').should('be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('not.be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').check(); // Answer 3
@@ -396,7 +407,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        visitPoll('Poll Cypress Test', 'Answer');
+        visitPoll('Poll Cypress Test', 'Answer', true);
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(2)').contains('No response');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('not.be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(2) > td:nth-child(2)').contains('Answer 0');
@@ -427,7 +438,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        visitPoll('Poll Cypress Test', 'Edit Answer');
+        visitPoll('Poll Cypress Test', 'Edit Answer', true);
         cy.get('#toggle-info-button').should('not.exist');
         cy.get('#toggle-histogram-button').should('not.exist');
         cy.get('#poll-histogram').should('not.exist');
@@ -639,12 +650,13 @@ describe('Test cases revolving around polls functionality', () => {
         // Open the poll
         cy.visit(['sample', 'polls']);
         cy.contains('Custom Poll Today').siblings(':nth-child(5)').children().click();
+        visitPoll('Custom Poll Today', 'View Poll', true);
 
         // Login as student to answer with custom response that can be chosen by others
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        visitPoll('Custom Poll Today', 'Answer');
+        visitPoll('Custom Poll Today', 'Answer', true);
         cy.get('[data-testid="custom-response-text"]').type('Student Custom Response');
         cy.get('[data-testid="custom-response-submit"]').should('not.be.disabled').click();
 
@@ -654,7 +666,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="answer-1"]').should('not.exist');
 
         cy.visit(['sample', 'polls']);
-        visitPoll('Custom Poll Today', 'Answer');
+        visitPoll('Custom Poll Today', 'Answer', true);
 
         // Create new option for other students to select
         cy.get('[data-testid="custom-response-text"]').type('Second Custom Response');
@@ -664,7 +676,7 @@ describe('Test cases revolving around polls functionality', () => {
         // Login as other student
         cy.login('adamsg');
         cy.visit(['sample', 'polls']);
-        visitPoll('Custom Poll Today', 'Answer');
+        visitPoll('Custom Poll Today', 'Answer', true);
 
         // Ensure response is present with no delete option for other student
         cy.contains('p', 'Second Custom Response').should('be.visible');
@@ -678,7 +690,7 @@ describe('Test cases revolving around polls functionality', () => {
         // Login as original poster, but removal of custom option is not possible as other student has chosen it
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        visitPoll('Custom Poll Today', 'Edit Answer');
+        visitPoll('Custom Poll Today', 'Edit Answer', true);
         cy.get('[data-testid="custom-response-delete"]').should('be.visible').click();
         cy.contains('Cannot delete response option that has already been submitted as an answer by another individual').should('exist');
         cy.contains('p', 'Second Custom Response').should('be.visible');

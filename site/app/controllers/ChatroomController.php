@@ -67,6 +67,7 @@ class ChatroomController extends AbstractController {
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatrooms = $repo->findBy(['is_deleted' => 'FALSE'], ['id' => 'ASC']);
+        $this->core->authorizeWebSocketToken(['page' => 'chatrooms']);
 
         return new WebResponse(
             'Chatroom',

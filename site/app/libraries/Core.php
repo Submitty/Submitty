@@ -944,7 +944,7 @@ class Core {
     /**
      * Authorize a WebSocket token, which assumes the authorization checks have already been performed.
      *
-     * @param array<string, mixed> $params Optional parameters to format the full page identifier.
+     * @param array<string, mixed> $params Optional parameters to format the full page identifier, which must include 'page'.
      * @return string|null WebSocket authorization token string or null if generation fails.
      */
     public function authorizeWebSocketToken(?array $params = []): ?string {
@@ -953,7 +953,7 @@ class Core {
         }
 
         // Append the term and course to the query params for the full page identifier
-        $params['page'] = $params['page'] ?? 'defaults';
+        $params['page'] = $params['page'];
         $params['term'] = $this->config->getTerm();
         $params['course'] = $this->config->getCourse();
         $page = Utils::buildWebSocketPageIdentifier($params);
