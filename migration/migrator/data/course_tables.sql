@@ -941,7 +941,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
-    eg_thread_ids json DEFAULT '{}'::json NOT NULL,
+    eg_thread_ids json DEFAULT '[]'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
     eg_limited_access_blind integer DEFAULT 1,
     eg_peer_blind integer DEFAULT 3,
@@ -953,6 +953,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
+    eg_release_notifications_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
@@ -1601,7 +1602,9 @@ CREATE TABLE public.notification_settings (
     self_notification_email boolean DEFAULT false NOT NULL,
     self_registration_email boolean DEFAULT true NOT NULL,
     all_released_grades boolean DEFAULT true NOT NULL,
-    all_released_grades_email boolean DEFAULT true NOT NULL
+    all_released_grades_email boolean DEFAULT true NOT NULL,
+    all_gradeable_releases boolean DEFAULT true NOT NULL,
+    all_gradeable_releases_email boolean DEFAULT false NOT NULL
 );
 
 
@@ -2915,6 +2918,13 @@ CREATE INDEX grading_registration_user_id_index ON public.grading_registration U
 --
 
 CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
+
+
+--
+-- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
 
 
 --

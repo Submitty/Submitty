@@ -264,8 +264,11 @@ class Gradeable extends AbstractModel {
      * @var ?int will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
     /** @prop
-     * @var int total gradeable notifications sent */
-    protected $notifications_sent = 0;
+     * @var int total gradeable score notifications sent */
+    protected $score_notifications_sent = 0;
+    /** @prop
+     * @var bool if gradeable release notifications have been sent*/
+    protected $release_notifications_sent = false;
 
     /**
      * Gradeable constructor.
@@ -346,7 +349,8 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
-            $this->setNotificationsSent($details['notifications_sent'] ?? 0);
+            $this->setScoreNotificationsSent($details['score_notifications_sent'] ?? 0);
+            $this->setReleaseNotificationsSent($details['release_notifications_sent'] ?? false);
             if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
                 $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }
@@ -1832,7 +1836,7 @@ class Gradeable extends AbstractModel {
      * @param bool $include_bad_submissions
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
      */
-    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
+    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section, bool $include_withdrawn_students) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
@@ -1864,17 +1868,17 @@ class Gradeable extends AbstractModel {
         if (count($sections) > 0) {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
-                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
-                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
             }
             else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
-                $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key, $include_withdrawn_students);
                 $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
-                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
             }
         }
 
@@ -2934,13 +2938,22 @@ class Gradeable extends AbstractModel {
         $this->modified = true;
     }
 
-    public function setNotificationsSent(int $notifications_sent): void {
-        $this->notifications_sent = $notifications_sent;
+    public function setScoreNotificationsSent(int $score_notifications_sent): void {
+        $this->score_notifications_sent = $score_notifications_sent;
         $this->modified = true;
     }
 
-    public function getNotificationsSent(): int {
-        return $this->notifications_sent;
+    public function getScoreNotificationsSent(): int {
+        return $this->score_notifications_sent;
+    }
+
+    public function setReleaseNotificationsSent(bool $release_notifications_sent): void {
+        $this->release_notifications_sent = $release_notifications_sent;
+        $this->modified = true;
+    }
+
+    public function getReleaseNotificationsSent(): bool {
+        return $this->release_notifications_sent;
     }
 
     /**
