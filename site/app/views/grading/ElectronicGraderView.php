@@ -1052,6 +1052,13 @@ HTML;
             "color" => "",
             "message" => ""
         ];
+        // if this is a withdrawn student, we should display it first
+        if (!$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn") {
+            $error_message = [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Withdrawn Student"
+            ];
+        }
         if ($graded_gradeable->hasOverriddenGrades()) {
             $error_message = [
                 "color" => "var(--standard-vibrant-yellow)", // canary yellow
@@ -1672,6 +1679,8 @@ HTML;
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
+        $is_withdrawn_student = !$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn";
+
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1692,7 +1701,8 @@ HTML;
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
-                "is_peer_grader" => $is_peer_grader
+                "is_peer_grader" => $is_peer_grader,
+                "is_withdrawn_student" => $is_withdrawn_student
             ]);
     }
 
