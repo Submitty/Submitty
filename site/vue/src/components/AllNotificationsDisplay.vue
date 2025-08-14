@@ -39,42 +39,44 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
-const hasUnseen = computed(() => props.notifications.some(n => !n.seen));
+const hasUnseen = computed(() => props.notifications.some((n) => !n.seen));
 
 function markSingleSeen(course: string, id: number) {
     $.ajax({
-      url: buildUrl(['home', 'mark_seen']),
-      type: 'POST',
-      data: {
-          action: 'single',
-          course: course,
-          notification_id: id,
-          csrf_token: window.csrfToken,
-      },
-      success: function (res: string) {
-        location.reload();
-      },
-      error: function (err) {
-          console.error(err);
-      },
+        url: buildUrl(['home', 'mark_seen']),
+        type: 'POST',
+        data: {
+            action: 'single',
+            course: course,
+            notification_id: id,
+            csrf_token: window.csrfToken,
+        },
+        success: function () {
+            location.reload();
+        },
+        error: function (err) {
+            console.error(err);
+        },
     });
 }
 
 function markAllSeen() {
-    if (!hasUnseen.value) return;
+    if (!hasUnseen.value) {
+      return;
+    }
     $.ajax({
-      url: buildUrl(['home', 'mark_seen']),
-      type: 'POST',
-      data: {
-          action: 'all',
-          csrf_token: window.csrfToken,
-      },
-      success: function (res: string) {
-        location.reload();
-      },
-      error: function (err) {
-          console.error(err);
-      },
+        url: buildUrl(['home', 'mark_seen']),
+        type: 'POST',
+        data: {
+            action: 'all',
+            csrf_token: window.csrfToken,
+        },
+        success: function () {
+            location.reload();
+        },
+        error: function (err) {
+            console.error(err);
+        },
     });
 }
 </script>
@@ -95,8 +97,9 @@ function markAllSeen() {
         <a
           v-if="notifications.length !== 0"
           class="btn btn-primary"
-          @click="markAllSeen()">
-            Mark all as seen
+          @click="markAllSeen()"
+        >
+          Mark all as seen
         </a>
       </div>
     </div>
@@ -138,17 +141,17 @@ function markAllSeen() {
             {{ n.course }} - {{ n.notify_time }}
           </div>
         </div>
-            <a
-              class="notification-seen black-btn"
-              v-if="!n.seen"
-              href="#"
-              role="button"
-              title="Mark as seen"
-              aria-label="Mark as seen"
-              @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-              @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-            >
-            <i class="far fa-envelope-open"></i>
+        <a
+          v-if="!n.seen"
+          class="notification-seen black-btn"
+          href="#"
+          role="button"
+          title="Mark as seen"
+          aria-label="Mark as seen"
+          @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+          @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+        >
+          <i class="far fa-envelope-open" />
         </a>
       </a>
     </div>

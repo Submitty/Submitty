@@ -125,7 +125,7 @@ class HomePageController extends AbstractController {
                 $course_title = $_POST['course'];
                 $notification_id = $_POST['notification_id'];
                 foreach ($courses as $course) {
-                    if($course->getTitle() === $course_title) {
+                    if ($course->getTitle() === $course_title) {
                         $semester = $course->getTerm();
                         $this->core->loadCourseConfig($semester, $course_title);
                         $this->core->loadCourseDatabase();
