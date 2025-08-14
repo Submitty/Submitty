@@ -38,7 +38,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None,
+                None
             )
 
             expected = []
@@ -57,7 +57,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'autograde_result': 'Automatic grading total: 25 / 30',
                 'autograde_total': 25,
                 'autograde_max_possible': 30,
-                'revision': 1,
+                'revision': 1
             }))
 
             with history_file.open() as open_file:
@@ -82,7 +82,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 30 / 30",
                 2,
-                None,
+                None
             )
 
             expected.append(OrderedDict({
@@ -99,7 +99,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'autograde_result': 'Automatic grading total: 30 / 30',
                 'autograde_total': 30,
                 'autograde_max_possible': 30,
-                'revision': 2,
+                'revision': 2
             }))
 
             with history_file.open() as open_file:
@@ -133,7 +133,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None,
+                None
             )
 
             expected = []
@@ -152,7 +152,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'autograde_result': 'Automatic grading total: 25 / 30',
                 'autograde_total': 25,
                 'autograde_max_possible': 30,
-                'revision': 1,
+                'revision': 1
             }))
 
             with history_file.open() as open_file:
@@ -190,7 +190,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None,
+                None
             )
 
             expected = []
@@ -209,7 +209,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'autograde_result': 'Automatic grading total: 25 / 30',
                 'autograde_total': 25,
                 'autograde_max_possible': 30,
-                'revision': 1,
+                'revision': 1
             }))
 
             with history_file.open() as open_file:
