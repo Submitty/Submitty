@@ -31,7 +31,7 @@ describe('Test cases revolving around grade inquiries', () => {
         setGradeInquiriesForGradeable(gradeableId, gradeInquiryDeadlineDate);
         cy.get('[data-testid="grade-inquiry-dates-warning"]').should('not.be.visible');
         cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
-        cy.get('[data-testid="grade-button"]').eq(2).click();
+        cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
         cy.get('[data-testid="component-tab-36"]').click();
