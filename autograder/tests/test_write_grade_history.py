@@ -11,6 +11,7 @@ from autograder import autograding_utils
 
 class TestWriteGradeHistory(unittest.TestCase):
     """Unittest TestCase."""
+    maxDiff = None
 
     def test_write_history(self):
         """
@@ -38,7 +39,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None
+                None,
             )
 
             expected = []
@@ -82,7 +83,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 30 / 30",
                 2,
-                None
+                None,
             )
 
             expected.append(OrderedDict({
@@ -133,7 +134,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None
+                None,
             )
 
             expected = []
@@ -190,7 +191,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 23,
                 "Automatic grading total: 25 / 30",
                 1,
-                None
+                None,
             )
 
             expected = []
@@ -242,7 +243,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'assignment_deadline': '2019-05-23 23:59:59-0400',
                 'submission_time': '2019-05-23 20:47:12-0400',
                 'queue_time': '2019-05-23 20:47:12-0400',
-                'batch_regrade': True, # all regrades have batch_regrade as true
+                'batch_regrade': True,# all regrades have batch_regrade as true
                 'first_access_time': '2019-05-23 23:59:49-0400',
                 'access_duration': 10,
                 'grading_began': '2019-05-23 20:47:32-0400',
