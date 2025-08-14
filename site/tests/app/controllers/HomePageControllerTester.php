@@ -9,7 +9,7 @@ use app\models\User;
 use app\entities\Term;
 use tests\BaseUnitTest;
 use app\entities\CourseUser;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\Persistence\EntityRepository;
 use DateTime;
 
 class HomePageControllerTester extends BaseUnitTest {
@@ -63,7 +63,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
         $em = $core->getSubmittyEntityManager();
 
-        $repo = $this->createMock(ObjectRepository::class);
+        $repo = $this->createMock(EntityRepository::class);
 
         $repo->method('findOneBy')->willReturn(
             new CourseUser(
