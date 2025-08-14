@@ -11,7 +11,6 @@ from autograder import autograding_utils
 
 class TestWriteGradeHistory(unittest.TestCase):
     """Unittest TestCase."""
-    maxDiff = None
 
     def test_write_history(self):
         """
