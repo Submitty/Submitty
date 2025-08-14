@@ -229,7 +229,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:49-0400",  # first access
                 10,  # access_duration
                 "2019-05-23 20:47:12-0400",
-                True, # regrade
+                "BATCH", # regrades are all batch
                 "2019-05-23 20:47:32-0400",
                 20,
                 "2019-05-23 20:47:55-0400",
