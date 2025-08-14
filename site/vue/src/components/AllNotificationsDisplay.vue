@@ -62,7 +62,7 @@ function markSingleSeen(course: string, id: number) {
 
 function markAllSeen() {
     if (!hasUnseen.value) {
-      return;
+        return;
     }
     $.ajax({
         url: buildUrl(['home', 'mark_seen']),
