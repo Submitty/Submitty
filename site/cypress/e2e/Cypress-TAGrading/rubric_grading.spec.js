@@ -97,7 +97,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Adela Wisozk');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '- / 5');
+        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('body').type('{downArrow}');
         cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
