@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
+import { buildUrl } from '../../../ts/utils/server';
 
 const props = defineProps<{
     notifications: Notification[];
@@ -37,6 +38,45 @@ const filteredNotifications = computed(() =>
 const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
+
+const hasUnseen = computed(() => props.notifications.some(n => !n.seen));
+
+function markSingleSeen(course: string, id: number) {
+    $.ajax({
+      url: buildUrl(['home', 'mark_seen']),
+      type: 'POST',
+      data: {
+          action: 'single',
+          course: course,
+          notification_id: id,
+          csrf_token: window.csrfToken,
+      },
+      success: function (res: string) {
+        location.reload();
+      },
+      error: function (err) {
+          console.error(err);
+      },
+    });
+}
+
+function markAllSeen() {
+    if (!hasUnseen.value) return;
+    $.ajax({
+      url: buildUrl(['home', 'mark_seen']),
+      type: 'POST',
+      data: {
+          action: 'all',
+          csrf_token: window.csrfToken,
+      },
+      success: function (res: string) {
+        location.reload();
+      },
+      error: function (err) {
+          console.error(err);
+      },
+    });
+}
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -44,18 +84,21 @@ const visibleNotifications = computed(() =>
       <h1 class="notifications-header">
         Notifications
       </h1>
-      <button
-        v-if="notifications.length !== 0"
-        class="btn btn-default"
-        @click="toggleUnseenOnly"
-      >
-        {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
-      </button>
-      <!-- FUTURE FEATURE: mark all notifications on the home page as seen
-            <a class="btn btn-primary">
-                Mark all as seen
-            </a>
-        -->
+      <div class="notifications-actions">
+        <button
+          v-if="notifications.length !== 0"
+          class="btn btn-default"
+          @click="toggleUnseenOnly"
+        >
+          {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
+        </button>
+        <a
+          v-if="notifications.length !== 0"
+          class="btn btn-primary"
+          @click="markAllSeen()">
+            Mark all as seen
+        </a>
+      </div>
     </div>
     <p
       v-if="notifications.length === 0"
@@ -95,11 +138,18 @@ const visibleNotifications = computed(() =>
             {{ n.course }} - {{ n.notify_time }}
           </div>
         </div>
-        <!-- FUTURE FEATURE: individual mark as seen
-                      <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
-                          <i class="far fa-envelope-open"></i>
-                      </a>
-                  -->
+            <a
+              class="notification-seen black-btn"
+              v-if="!n.seen"
+              href="#"
+              role="button"
+              title="Mark as seen"
+              aria-label="Mark as seen"
+              @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+              @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+            >
+            <i class="far fa-envelope-open"></i>
+        </a>
       </a>
     </div>
   </div>
@@ -115,7 +165,7 @@ const visibleNotifications = computed(() =>
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .notifications-header {
@@ -132,6 +182,12 @@ const visibleNotifications = computed(() =>
     display: table;
     width: 100%;
     border-collapse: collapse;
+}
+
+.notifications-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .notification {
