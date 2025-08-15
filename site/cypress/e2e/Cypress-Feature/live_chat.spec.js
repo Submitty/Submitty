@@ -241,7 +241,7 @@ const clearChat = (title) => {
             getChatroom(title).find('[data-testid="clear-chatroom"]').first().click();
         }
     });
-}
+};
 
 const visitLiveChat = (user) => {
     cy.logout();
@@ -516,16 +516,16 @@ describe('Tests for creating, editing and using tests', () => {
                 sendChatMessage(chatMsg1, name1, instructorMsg1Id);
                 sendChatMessage(chatMsg3, name1, instructorMsg2Id);
                 getApiKey('instructor', 'instructor').then((key) => {
-                cy.request({
-                    method: 'POST',
-                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/clear`,
-                    headers: {
-                        Authorization: key,
-                    },
-                }).then(() => {
-                    cy.get('[data-testid="message-container"]').should('not.exist');
+                    cy.request({
+                        method: 'POST',
+                        url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/clear`,
+                        headers: {
+                            Authorization: key,
+                        },
+                    }).then(() => {
+                        cy.get('[data-testid="message-container"]').should('not.exist');
+                    });
                 });
-            });
             });
         });
     });

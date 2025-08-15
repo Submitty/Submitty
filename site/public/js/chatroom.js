@@ -144,11 +144,13 @@ function initChatroomSocketClient(chatroomId) {
                 window.alert('Chatroom has been closed by the instructor.');
                 window.location.href = buildCourseUrl(['chat']);
                 break;
-            case 'message_delete':
+            case 'message_delete': {
                 const msgElement = document.getElementById(msg.id);
                 if (msgElement) {
                     msgElement.remove();
                 }
+                break;
+            }
             default:
                 console.error(msg);
         }
