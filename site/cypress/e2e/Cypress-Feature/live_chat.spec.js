@@ -411,7 +411,6 @@ describe('Tests for creating, editing and using tests', () => {
         });
     });
 
-
     it('Should test clearing live chats', () => {
         createChatroom(title1, description1, true);
         startChatSession(title1);
