@@ -134,19 +134,21 @@ function markAllSeen() {
       id="recent-notifications"
     >
       <div v-for="n in visibleNotifications" class="notification" :class="{ unseen: !n.seen }">
-          <i
-            v-if="n.component === 'forum'"
-            class="fas fa-comments notification-type"
-            title="Forum"
-          />
-          <div class="notification-content">
-            <a class="notification-text" :key="n.id" :href="n.notification_url">
-              {{ n.content }}
-            </a>
-            <div class="notification-time">
-              {{ n.course }} - {{ n.notify_time }}
+          <a class="notification" :key="n.id" :href="n.notification_url">
+            <i
+              v-if="n.component === 'forum'"
+              class="fas fa-comments notification-type"
+              title="Forum"
+            />
+            <div class="notification-content">
+              <span>
+                {{ n.content }}
+              </span>
+              <div class="notification-time">
+                {{ n.course }} - {{ n.notify_time }}
+              </div>
             </div>
-          </div>
+          </a>
           <a
             v-if="!n.seen"
             class="notification-seen black-btn"
@@ -208,18 +210,14 @@ function markAllSeen() {
     padding-right: 20px;
 }
 
-.notification-text {
-  font-weight: 600;
-  color: var(--text-black);
-  text-decoration: none;
-}
-
-.notification-text:hover {
-  text-decoration: underline;
-}
-
 .notification:hover {
+    cursor: pointer;
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
+}
+
+a.notification {
+    color: var(--text-black);
+    text-decoration: none;
 }
 
 .notification.unseen {
