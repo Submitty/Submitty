@@ -8,6 +8,8 @@ use app\models\Course;
 use app\models\User;
 use app\entities\Term;
 use tests\BaseUnitTest;
+use app\entities\CourseUser;
+use Doctrine\ORM\EntityRepository;
 use DateTime;
 
 class HomePageControllerTester extends BaseUnitTest {
@@ -59,7 +61,24 @@ class HomePageControllerTester extends BaseUnitTest {
             ['instructor', false, true, []]
         ];
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
+        $em = $core->getSubmittyEntityManager();
+
+        $repo = $this->createMock(EntityRepository::class);
+
+        $repo->method('findOneBy')->willReturn(
+            new CourseUser(
+                'f24',
+                'course1',
+                'student',
+                1,
+                '1',
+                '1',
+                false
+            )
+        );
+
+        $em->method('getRepository')->willReturn($repo);
+
         $controller = new HomePageController($core);
         $response = $controller->getCourses()->json_response->json['data'];
         $this->assertEqualsCanonicalizing(
@@ -77,7 +96,6 @@ class HomePageControllerTester extends BaseUnitTest {
 
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'other_student');
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
         $controller = new HomePageController($core);
         $response = $controller->getCourses()->json_response->json['data'];
         $this->assertEqualsCanonicalizing(
@@ -107,7 +125,6 @@ class HomePageControllerTester extends BaseUnitTest {
 
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'instructor');
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
         $instruc_map = [
             ['instructor', 'course_instructor', 'f24', true]
         ];
