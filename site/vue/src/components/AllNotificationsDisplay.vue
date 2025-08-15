@@ -42,6 +42,27 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
+function goToCourseNotifications(course: string) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = buildUrl(['home', 'go_to_course_notifications']);
+
+    const courseInput = document.createElement('input');
+    courseInput.type = 'hidden';
+    courseInput.name = 'course';
+    courseInput.value = course;
+    form.appendChild(courseInput);
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = window.csrfToken;
+    form.appendChild(csrfInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
 function markSingleSeen(course: string, id: number) {
     $.ajax({
         url: buildUrl(['home', 'mark_seen']),
@@ -140,23 +161,30 @@ function markAllSeen() {
         class="notification"
         :class="{ unseen: !n.seen }"
       >
-        <a
-          :href="n.notification_url"
-        >
-          <i
-            v-if="n.component === 'forum'"
-            class="fas fa-comments notification-type"
-            title="Forum"
-          />
-          <div class="notification-content">
-            <span>
-              {{ n.content }}
-            </span>
-            <div class="notification-time">
-              {{ n.course }} - {{ n.notify_time }}
-            </div>
+        <i
+          v-if="n.component === 'forum'"
+          class="fas fa-comments notification-type"
+          title="Forum"
+        />
+        <i
+          v-else-if="n.component === 'grading'"
+          class="fas fa-star notification-type"
+          title="Gradeable"
+        />
+        <div class="notification-content">
+          <a
+            :href="n.notification_url"
+            class="notification-text"
+          >
+            {{ n.content }}
+          </a>
+          <div class="notification-time">
+            <span
+              class="course-notification-link"
+              @click="goToCourseNotifications(n.course)"
+            > {{ n.course }} </span> - {{ n.notify_time }}
           </div>
-        </a>
+        </div>
         <a
           v-if="!n.seen"
           class="notification-seen"
@@ -219,12 +247,29 @@ function markAllSeen() {
   padding-right: 20px;
 }
 
+.notification-text {
+  font-weight: 600;
+  color: var(--text-black);
+  text-decoration: none;
+}
+
+.notification-text:hover {
+  text-decoration: underline;
+}
+
+.course-notification-link {
+  cursor: pointer;
+}
+
+.course-notification-link:hover {
+  text-decoration: underline;
+}
+
 .notification:last-of-type {
     border-bottom: none;
 }
 
 .notification:hover {
-    cursor: pointer;
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
