@@ -8,6 +8,7 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\TokenManager;
 use app\models\Config;
 use app\models\User;
 use app\entities\Session;
@@ -844,6 +845,7 @@ class Core {
     public function isWebLoggedIn(): bool {
         $logged_in = false;
         $cookie_key = 'submitty_session';
+        $websocket_cookie_key = 'submitty_websocket_token';
         if (isset($_COOKIE[$cookie_key])) {
             try {
                 $token = TokenManager::parseSessionToken(
@@ -855,6 +857,7 @@ class Core {
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
+                    Utils::setCookie($websocket_cookie_key, "", time() - 3600);
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
@@ -874,6 +877,7 @@ class Core {
             catch (\InvalidArgumentException $exc) {
                 // Invalid cookie data, delete it
                 Utils::setCookie($cookie_key, "", time() - 3600);
+                Utils::setCookie($websocket_cookie_key, "", time() - 3600);
             }
         }
         return $logged_in;
@@ -935,5 +939,68 @@ class Core {
             return $files;
         }
         return null;
+    }
+
+    /**
+     * Authorize a WebSocket token, which assumes the authorization checks have already been performed.
+     *
+     * @param array<string, mixed> $params Optional parameters to format the full page identifier, which must include 'page'.
+     * @return string|null WebSocket authorization token string or null if generation fails.
+     */
+    public function authorizeWebSocketToken(?array $params = []): ?string {
+        if (!$this->config->isCourseLoaded() || !$this->userLoaded()) {
+            return null;
+        }
+
+        // Append the term and course to the query params for the full page identifier
+        $params['page'] = $params['page'];
+        $params['term'] = $this->config->getTerm();
+        $params['course'] = $this->config->getCourse();
+        $page = Utils::buildWebSocketPageIdentifier($params);
+
+        $user_id = $this->user->getId();
+        $existing_authorized_pages = [];
+        $cookie_key = 'submitty_websocket_token';
+        $existing_token = $_COOKIE[$cookie_key] ?? null;
+
+        if ($existing_token !== null) {
+            try {
+                $refresh = false;
+                $token = TokenManager::parseWebSocketToken($existing_token);
+
+                $token_user_id = $token->claims()->get('sub');
+                $token_authorized_pages = $token->claims()->get('authorized_pages');
+
+                if (!array_key_exists($page, $token_authorized_pages) || time() > intval($token_authorized_pages[$page])) {
+                    // Refresh for missing or expired pages
+                    $refresh = true;
+                }
+
+                if ($token_user_id === $user_id) {
+                    if (!$refresh) {
+                        // No refresh required for non-expired token containing the authorized page
+                        return $existing_token;
+                    }
+                    else {
+                        // Persist existing authorized pages for reuse, where expired pages will be filtered out
+                        $existing_authorized_pages = $token_authorized_pages;
+                    }
+                }
+            }
+            catch (\Exception $e) {
+                // Invalid cookie data, delete it
+                Utils::setCookie($cookie_key, "", time() - 3600);
+            }
+        }
+
+        try {
+            $token = TokenManager::generateWebSocketToken($user_id, $page, $existing_authorized_pages);
+            $expire_time = $token->claims()->get('expire_time');
+            Utils::setCookie($cookie_key, $token->toString(), $expire_time);
+            return $token->toString();
+        }
+        catch (\Exception $e) {
+            return null;
+        }
     }
 }

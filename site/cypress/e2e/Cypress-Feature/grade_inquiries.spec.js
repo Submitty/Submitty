@@ -1,3 +1,5 @@
+import { verifyWebSocketStatus } from '../../support/utils';
+
 const gradeableId = 'grades_released_homework';
 const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
 const beforeGradeInquiryStartDate = '1970-01-01 00:00:00';
@@ -41,6 +43,9 @@ describe('Test cases revolving around grade inquiries', () => {
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
         cy.reload();
         cy.get('[data-testid^="reply-text-area-"]').first().should('have.value', 'Submitty');
+        cy.url().should('not.match', /\/gradeable\/\d+\/grading\/details$/).then(() => {
+            verifyWebSocketStatus();
+        });
     });
 
     it('Should test if users can see grade inquiry panel/containers', () => {
@@ -62,6 +67,9 @@ describe('Test cases revolving around grade inquiries', () => {
             cy.get('[data-testid="reply-text-area-36"]').type('Submitty');
             cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
             cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
+            cy.url().should('not.match', /\/gradeable\/\d+\/grading\/details$/).then(() => {
+                verifyWebSocketStatus();
+            });
 
             // need to clear local storage to refresh grader's responsibility page
             cy.clearLocalStorage();
@@ -71,6 +79,7 @@ describe('Test cases revolving around grade inquiries', () => {
         cy.login('beahaf');
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST');
+        verifyWebSocketStatus();
     });
     it('should test cases regarding abnormal grade inquiry dates', () => {
         cy.login();

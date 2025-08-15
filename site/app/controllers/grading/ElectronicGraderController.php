@@ -1939,6 +1939,14 @@ class ElectronicGraderController extends AbstractController {
         $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
         $show_verify_all = $show_verify_all && $can_verify;
 
+        if ($can_inquiry) {
+            $this->core->authorizeWebSocketToken([
+                'page' => 'grade_inquiry',
+                'gradeable_id' => $gradeable_id,
+                'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            ]);
+        }
+
         $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
 
         $display_version = intval($gradeable_version ?? '0');
