@@ -53,11 +53,12 @@ function markSingleSeen(course: string, id: number) {
             csrf_token: window.csrfToken,
         },
         success: function () {
-          console.log(id);
-          const target = localNotifications.find((n) => n.id === id);
-          if (target) {
-            target.seen = true;
-          }
+            const target = localNotifications.find(
+                (n) => n.id === id && n.course === course,
+            );
+            if (target) {
+                target.seen = true;
+            }
         },
         error: function (err) {
             console.error(err);
@@ -133,34 +134,41 @@ function markAllSeen() {
       v-else
       id="recent-notifications"
     >
-      <div v-for="n in visibleNotifications" class="notification" :class="{ unseen: !n.seen }">
-          <a :key="n.id" :href="n.notification_url">
-            <i
-              v-if="n.component === 'forum'"
-              class="fas fa-comments notification-type"
-              title="Forum"
-            />
-            <div class="notification-content">
-              <span>
-                {{ n.content }}
-              </span>
-              <div class="notification-time">
-                {{ n.course }} - {{ n.notify_time }}
-              </div>
+      <div
+        v-for="n in visibleNotifications"
+        :key="n.id"
+        class="notification"
+        :class="{ unseen: !n.seen }"
+      >
+        <a
+          :href="n.notification_url"
+        >
+          <i
+            v-if="n.component === 'forum'"
+            class="fas fa-comments notification-type"
+            title="Forum"
+          />
+          <div class="notification-content">
+            <span>
+              {{ n.content }}
+            </span>
+            <div class="notification-time">
+              {{ n.course }} - {{ n.notify_time }}
             </div>
-          </a>
-          <a
-            v-if="!n.seen"
-            class="notification-seen"
-            href="#"
-            role="button"
-            title="Mark as seen"
-            aria-label="Mark as seen"
-            @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-            @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-          >
-            <i class="far fa-envelope-open notification-seen-icon"/>
-          </a>
+          </div>
+        </a>
+        <a
+          v-if="!n.seen"
+          class="notification-seen"
+          href="#"
+          role="button"
+          title="Mark as seen"
+          aria-label="Mark as seen"
+          @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+          @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+        >
+          <i class="far fa-envelope-open notification-seen-icon" />
+        </a>
       </div>
     </div>
   </div>
