@@ -121,39 +121,33 @@ function markAllSeen() {
       v-else
       id="recent-notifications"
     >
-      <a
-        v-for="n in visibleNotifications"
-        :key="n.id"
-        class="notification"
-        :class="{ unseen: !n.seen }"
-        :href="n.notification_url"
-      >
-        <i
-          v-if="n.component === 'forum'"
-          class="fas fa-comments notification-type"
-          title="Forum"
-        />
-        <div class="notification-content">
-          <span>
-            {{ n.content }}
-          </span>
-          <div class="notification-time">
-            {{ n.course }} - {{ n.notify_time }}
+      <div v-for="n in visibleNotifications" class="notification" :class="{ unseen: !n.seen }">
+          <i
+            v-if="n.component === 'forum'"
+            class="fas fa-comments notification-type"
+            title="Forum"
+          />
+          <div class="notification-content">
+            <a class="notification-text" :key="n.id" :href="n.notification_url">
+              {{ n.content }}
+            </a>
+            <div class="notification-time">
+              {{ n.course }} - {{ n.notify_time }}
+            </div>
           </div>
-        </div>
-        <a
-          v-if="!n.seen"
-          class="notification-seen black-btn"
-          href="#"
-          role="button"
-          title="Mark as seen"
-          aria-label="Mark as seen"
-          @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-          @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-        >
-          <i class="far fa-envelope-open" />
-        </a>
-      </a>
+          <a
+            v-if="!n.seen"
+            class="notification-seen black-btn"
+            href="#"
+            role="button"
+            title="Mark as seen"
+            aria-label="Mark as seen"
+            @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+            @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+          >
+            <i class="far fa-envelope-open" />
+          </a>
+      </div>
     </div>
   </div>
 </template>
@@ -202,18 +196,22 @@ function markAllSeen() {
     padding-right: 20px;
 }
 
+.notification-text {
+  font-weight: 600;
+  color: var(--text-black);
+  text-decoration: none;
+}
+
+.notification-text:hover {
+  text-decoration: underline;
+}
+
 .notification:hover {
-    cursor: pointer;
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
 .notification.unseen {
     background-color: var(--viewed-content);
-}
-
-a.notification {
-    color: var(--text-black);
-    text-decoration: none;
 }
 
 a.notification:last-of-type {
@@ -250,6 +248,7 @@ a.notification:last-of-type {
     text-align: center;
     flex: 0 0 auto;
     padding: 10px 16px;
+    margin-left: auto;
 }
 
 a.show-more {
