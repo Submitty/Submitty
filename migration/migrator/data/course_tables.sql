@@ -750,7 +750,8 @@ CREATE TABLE public.chatroom_messages (
     display_name character varying,
     role character varying,
     content text NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL
 );
 
 
@@ -2918,13 +2919,6 @@ CREATE INDEX grading_registration_user_id_index ON public.grading_registration U
 --
 
 CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g_id, user_id) WHERE (team_id IS NULL);
-
-
---
--- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
 
 
 --

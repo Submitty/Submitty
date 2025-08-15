@@ -47,7 +47,7 @@ class ChatroomController extends AbstractController {
         }
     }
 
-    private function deleteMessage(int $chatroom_id, Message $message): JsonResponse {
+    private function deleteMessage(string $chatroom_id, Message $message): JsonResponse {
         $id = $message->getId();
         $message->deleteMessage();
         $msg_array = [];
@@ -291,5 +291,4 @@ class ChatroomController extends AbstractController {
         $em->flush();
         return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
     }
-    
 }
