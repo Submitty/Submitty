@@ -1,4 +1,39 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient */
+/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig */
+
+/**
+ * Asynchronously load the chatroom row template
+ * @return {Promise}
+ */
+function loadChatroomTemplate(chatroomId) {
+    return new Promise((resolve, reject) => {
+        Twig.twig({
+            id: 'ChatroomRow',
+            href: '/templates/chat/ChatroomRow.twig', // This loads from public
+            allowInlineIncludes: true,
+            async: true,
+            error: function () {
+                reject();
+            },
+            load: function () {
+                resolve();
+            },
+        });
+    });
+}
+
+function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon, isAdmin, isActive, base_url) {
+    return Twig.twig({ ref: 'ChatroomRow' }).render({
+        id: chatroomId,
+        description: description,
+        title: title,
+        hostName: hostName,
+        isAllowAnon: isAllowAnon,
+        isAdmin: isAdmin,
+        isActive: isActive,
+        baseUrl: base_url,
+        csrf_token: csrfToken,
+    });
+}
 
 function fetchMessages(chatroomId) {
     $.ajax({
@@ -117,22 +152,21 @@ function initChatroomSocketClient(chatroomId) {
     });
 }
 
-function initChatroomListSocketClient() {
+function initChatroomListSocketClient(user_admin, base_url) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
+        const opening = msg.type === 'chat_open';
         switch (msg.type) {
             case 'chat_open':
-                handleChatOpen(msg);
+            case 'chat_close':
+            case 'chat_create':
+                handleChatStateChange(msg, user_admin, opening, base_url);
                 break;
-            case 'chat_close': {
-                const row = document.getElementById(`chatroom-row-${msg.chatroom_id}`);
-                if (row) {
-                    row.remove();
-                }
+            case 'chat_delete':
+                removeChatroomRow(msg.chatroom_id);
                 break;
-            }
             default:
-                console.error(msg);
+                console.error('Unknown message type:', msg);
         }
     };
     window.socketClient.open('chatrooms');
@@ -190,7 +224,7 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     }
 }
 
-function toggle_chatroom(chatroomId, active) {
+function toggleChatroom(chatroomId, active) {
     const form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
     if (!active || confirm('This will close the chatroom. Are you sure?')) {
         form.submit();
@@ -207,60 +241,24 @@ function showJoinMessage(message) {
     }, 3000);
 }
 
-function handleChatOpen(msg) {
+function handleChatStateChange(msg, user_admin, isActive, base_url) {
     const tableBody = document.querySelector('#chatrooms-table tbody');
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`chatroom-row-${msg.chatroom_id}`)) {
-        return;
+
+    removeChatroomRow(msg.chatroom_id);
+    const rowHtml = renderChatroomRow(msg.chatroom_id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isActive, base_url);
+    // This should be safe because the Twig template escapes all passed variables.
+    // eslint-disable-next-line no-unsanitized/method
+    tableBody.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function removeChatroomRow(chatroomId) {
+    const row = document.getElementById(`${chatroomId}`);
+    if (row) {
+        row.remove();
     }
-    const tr = document.createElement('tr');
-    tr.id = `chatroom-row-${msg.chatroom_id}`;
-
-    const tdTitle = document.createElement('td');
-    const spanTitle = document.createElement('span');
-    spanTitle.className = 'display-short';
-    spanTitle.title = msg.title;
-    spanTitle.textContent = msg.title.length > 30 ? `${msg.title.slice(0, 30)}...` : msg.title;
-    tdTitle.appendChild(spanTitle);
-    tr.appendChild(tdTitle);
-
-    const tdHostName = document.createElement('td');
-    tdHostName.textContent = msg.host_name;
-    tr.appendChild(tdHostName);
-
-    const tdDescription = document.createElement('td');
-    const spanDescription = document.createElement('span');
-    spanDescription.className = 'display-short';
-    spanDescription.title = msg.description;
-    spanDescription.textContent = msg.description.length > 45 ? `${msg.description.slice(0, 45)}...` : msg.description;
-    tdDescription.appendChild(spanDescription);
-    tr.appendChild(tdDescription);
-
-    const tdLinks = document.createElement('td');
-    const joinLink = document.createElement('a');
-    joinLink.href = `${msg.base_url}/${msg.chatroom_id}`;
-    joinLink.className = 'btn btn-primary';
-    joinLink.textContent = 'Join';
-    tdLinks.appendChild(joinLink);
-
-    if (msg.allow_anon) {
-        tdLinks.appendChild(document.createTextNode(' '));
-        const iTag = document.createElement('i');
-        iTag.textContent = 'or';
-        tdLinks.appendChild(iTag);
-        tdLinks.appendChild(document.createTextNode(' '));
-
-        const anonJoinLink = document.createElement('a');
-        anonJoinLink.href = `${msg.base_url}/${msg.chatroom_id}/anonymous`;
-        anonJoinLink.className = 'btn btn-default';
-        anonJoinLink.textContent = 'Join As Anon.';
-        tdLinks.appendChild(anonJoinLink);
-    }
-    tr.appendChild(tdLinks);
-
-    tableBody.appendChild(tr);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -300,7 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     const chatroomsTable = document.getElementById('chatrooms-table');
-    if (chatroomsTable) {
-        initChatroomListSocketClient();
+    const allChatroomData = document.getElementById('all-chatroom-data');
+    if (chatroomsTable && allChatroomData) {
+        loadChatroomTemplate();
+        const pageData = JSON.parse(allChatroomData.textContent);
+        const { user_admin, base_url } = pageData;
+        initChatroomListSocketClient(user_admin, base_url);
     }
 });

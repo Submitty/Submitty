@@ -12,7 +12,7 @@
     border: 1px solid gray;
     margin: 0 0.2rem 0.1rem;
     margin-right: 0;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .leaderboard-nav.normal-btn {
