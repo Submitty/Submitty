@@ -155,12 +155,12 @@ function initChatroomSocketClient(chatroomId) {
 function initChatroomListSocketClient(user_admin, base_url) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        const opening = msg.type === 'chat_open';
+        const isActive = msg.type === 'chat_open';
         switch (msg.type) {
             case 'chat_open':
             case 'chat_close':
             case 'chat_create':
-                handleChatStateChange(msg, user_admin, opening, base_url);
+                handleChatStateChange(msg, user_admin, isActive, base_url);
                 break;
             case 'chat_delete':
                 removeChatroomRow(msg.chatroom_id);
