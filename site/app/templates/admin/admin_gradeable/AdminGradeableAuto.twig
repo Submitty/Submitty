@@ -4,9 +4,9 @@
     <div class="option-title">
         What are students allowed to do?
     </div>
-    <div>
+    <div class="perm-container">
         <fieldset>
-            <legend>View the gradeable on the course home page?</legend>
+            <legend class="legend-header">View the gradeable on the course home page?</legend>
             <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                     {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
             <input type="radio" id="no_student_view" name="student_view" value="false"
@@ -20,12 +20,13 @@
         </fieldset>
     </div>
 
-    <div id="student_download_view">
+    <div id="student_download_view" class="perm-container">
         <div>
-            <fieldset><legend>View and download submitted files? 
-            {% if gradeable.isBulkUpload() %}
-            <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span></legend>
-            {% endif %}
+            <fieldset><legend class="legend-header">View and download submitted files? 
+                {% if gradeable.isBulkUpload() %}
+                    <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span>
+                {% endif %}
+            </legend>
             <input type="radio" id="yes_student_download" name="student_download" value="true"
                     {{ gradeable.canStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
             <input type="radio" id="no_student_download" name="student_download" value="false"
@@ -33,9 +34,9 @@
         </div>
     </div>
 
-    <div id="student_submit_view">
+    <div id="student_submit_view" class="perm-container">
         <div>
-            <fieldset><legend>Make new submissions and access all prior versions?</legend>
+            <fieldset><legend class="legend-header">Make new submissions and access all prior versions?</legend>
             <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                     {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
             <input type="radio" id="no_student_submit" name="student_submit" value="false"
@@ -71,10 +72,9 @@
 
     <div class="option-title">Choose an autograding configuration:</div>
             <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
-                "Course Autograding Config Directory"<i style="font-style:normal;" class="fa-question-circle"></i></a>
+                Course Autograding Config Directory<i style="font-style:normal;" class="fa-question-circle"></i></a>
                 from the Course Settings Page. </p>
-            <p> Manually type the full path to a configuration file, or select from the list below. </p>
-    <p> The dropdown list has all existing configurations that contain the current text.</p>
+            <p> Type the path or choose from the filtered dropdown. </p>
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
@@ -85,7 +85,7 @@
         {% endif %}
     </div>
 
-    <div class="settings">
+    <div class="select-config-container">
         <div>
             <div class="drop-down" id="config-drop-down">
                 <select name="autograding_config_path" id="autograding_config_selector">
@@ -99,20 +99,8 @@
         <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
     </div>
 
-    <div class="notebook-builder-info">
-        <div class="option-title">Notebook Builder:</div>
-        <div>
-            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}" data-testid="start-new-notebook">Start New</a>
-            <span>Start a new configuration with notebook builder.</span>
-        </div>
-        <div class="notebook-builder-edit-button-div">
-            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}" data-testid="edit-existing-notebook">Edit Existing</a>
-            <span>Edit the currently selected configuration with notebook builder.</span>
-        </div>
-    </div>
-
     <div class="raw-config-info">
-    <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
+        <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
         <div class="option-title raw-config-info-header">
             <span>Edit Uploaded Configuration:</span>
             <p class="not-available-message" id="editor-not-available">
@@ -145,18 +133,37 @@
                 </div>
                 <div id="gradeable-config-edit-bar">
                     <div class="customize-editor-container">
-                        <button type="button" class="customize-editor-button" id="toggle-line-nums" onClick="toggleLineNums()">
+                        <button type="button"
+                                class="customize-editor-button"
+                                id="toggle-line-nums"
+                                onClick="toggleLineNums()"
+                                title="Toggle line numbers">
                             <i class="fas fa-list-ol customize-editor-button-icon"></i>
                         </button>
-                        <button type="button" class="customize-editor-button" onClick="toggleTabLength()">
+                        <button type="button"
+                                class="customize-editor-button"
+                                onClick="toggleTabLength()"
+                                title="Toggle tab length">
                             <i class="fas fa-2 customize-editor-button-icon" id="toggle-tab-length"></i>
                         </button>
                     </div>
-                    <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
+                    <textarea id="gradeable-config-edit" class="underlying-textarea" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
                     <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
                     <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="notebook-builder-info">
+        <div class="option-title">Notebook Builder:</div>
+        <div>
+            <a class="btn btn-primary notebook-btn" href="{{ notebook_builder_url ~ '/new' }}" data-testid="start-new-notebook">Start New</a>
+            <span>Start a new configuration with notebook builder.</span>
+        </div>
+        <div class="notebook-builder-edit-button-div">
+            <a class="btn btn-primary notebook-btn" href="{{ notebook_builder_url ~ '/edit' }}" data-testid="edit-existing-notebook">Edit Existing</a>
+            <span>Edit the currently selected configuration with notebook builder.</span>
         </div>
     </div>
 
@@ -298,7 +305,7 @@
                         <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
                     {% endif %}
                     <span class="fas fa-file config-file-icon"></span>
-                    <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+                    <a class="key_to_click" onclick="markLastClicked(this); updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
                 {% endif %}
             </div>
         {% endfor %}
