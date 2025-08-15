@@ -6,7 +6,9 @@ use app\controllers\HomePageController;
 use app\libraries\Core;
 use app\models\Course;
 use app\models\User;
+use app\entities\Term;
 use tests\BaseUnitTest;
+use DateTime;
 
 class HomePageControllerTester extends BaseUnitTest {
     public function createCore(array $config_values, string $user_id): Core {
@@ -28,6 +30,19 @@ class HomePageControllerTester extends BaseUnitTest {
 
     public function testGetCourses() {
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'student');
+        $em = $core->getSubmittyEntityManager();
+        $term = new Term(
+            'f24',
+            'Fall 2024',
+            DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')),
+            DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s'))
+        );
+        $em->persist($term);
+        $em->flush();
+        // Set start day to today for dropped
+        $em->method('find')
+            ->with(Term::Class, 'f24')
+            ->willReturn($term);
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');
@@ -158,6 +173,6 @@ class HomePageControllerTester extends BaseUnitTest {
         $controller = new HomePageController($core);
         $response = $controller->showHomepage();
         $this->assertEquals('showHomePage', $response->web_response->view_function);
-        $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], []], $response->web_response->parameters);
+        $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], [], []], $response->web_response->parameters);
     }
 }
