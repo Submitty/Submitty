@@ -9,7 +9,6 @@ use app\models\User;
 use app\entities\Term;
 use tests\BaseUnitTest;
 use app\entities\CourseUser;
-use Doctrine\Persistence\EntityRepository;
 use DateTime;
 
 class HomePageControllerTester extends BaseUnitTest {
