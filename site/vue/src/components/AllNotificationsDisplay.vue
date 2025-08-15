@@ -2,10 +2,13 @@
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import { buildUrl } from '../../../ts/utils/server';
+import { reactive } from 'vue';
 
 const props = defineProps<{
     notifications: Notification[];
 }>();
+
+const localNotifications = reactive([...props.notifications]);
 
 const showUnseenOnly = ref(true);
 
@@ -31,15 +34,13 @@ const visibleCount = 10;
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
-        ? props.notifications.filter((n) => !n.seen)
-        : props.notifications,
+        ? localNotifications.filter((n) => !n.seen)
+        : localNotifications,
 );
 
 const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
-
-const hasUnseen = computed(() => props.notifications.some((n) => !n.seen));
 
 function markSingleSeen(course: string, id: number) {
     $.ajax({
@@ -52,13 +53,21 @@ function markSingleSeen(course: string, id: number) {
             csrf_token: window.csrfToken,
         },
         success: function () {
-            location.reload();
+          console.log(id);
+          const target = localNotifications.find((n) => n.id === id);
+          if (target) {
+            target.seen = true;
+          }
         },
         error: function (err) {
             console.error(err);
         },
     });
 }
+
+/* FUTURE: Bulk mark as seen
+
+const hasUnseen = computed(() => localNotifications.some((n) => !n.seen));
 
 function markAllSeen() {
     if (!hasUnseen.value) {
@@ -79,6 +88,7 @@ function markAllSeen() {
         },
     });
 }
+*/
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -94,6 +104,7 @@ function markAllSeen() {
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
+        <!-- FUTURE: Bulk mark as seen
         <a
           v-if="notifications.length !== 0"
           class="btn btn-primary"
@@ -101,6 +112,7 @@ function markAllSeen() {
         >
           Mark all as seen
         </a>
+      -->
       </div>
     </div>
     <p
@@ -249,10 +261,5 @@ a.notification:last-of-type {
     flex: 0 0 auto;
     padding: 10px 16px;
     margin-left: auto;
-}
-
-a.show-more {
-    display: inline-block;
-    margin-top: 10px;
 }
 </style>

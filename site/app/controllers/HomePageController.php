@@ -135,7 +135,7 @@ class HomePageController extends AbstractController {
                 }
                 $this->core->setConfig($original_config);
                 return;
-
+            /*
             case 'all':
                 foreach ($courses as $course) {
                     $semester = $course->getTerm();
@@ -146,6 +146,7 @@ class HomePageController extends AbstractController {
                 }
                 $this->core->setConfig($original_config);
                 return;
+            */
         }
     }
 
