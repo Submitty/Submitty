@@ -134,7 +134,7 @@ function markAllSeen() {
       id="recent-notifications"
     >
       <div v-for="n in visibleNotifications" class="notification" :class="{ unseen: !n.seen }">
-          <a class="notification" :key="n.id" :href="n.notification_url">
+          <a :key="n.id" :href="n.notification_url">
             <i
               v-if="n.component === 'forum'"
               class="fas fa-comments notification-type"
@@ -151,7 +151,7 @@ function markAllSeen() {
           </a>
           <a
             v-if="!n.seen"
-            class="notification-seen black-btn"
+            class="notification-seen"
             href="#"
             role="button"
             title="Mark as seen"
@@ -159,7 +159,7 @@ function markAllSeen() {
             @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
             @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
           >
-            <i class="far fa-envelope-open" />
+            <i class="far fa-envelope-open notification-seen-icon"/>
           </a>
       </div>
     </div>
@@ -202,12 +202,17 @@ function markAllSeen() {
 }
 
 .notification {
-    display: flex;
-    border-bottom: 1px solid var(--standard-light-gray);
-    padding: 9px 0;
-    align-items: center;
-    padding-left: 20px;
-    padding-right: 20px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--standard-light-gray);
+  padding: 9px 0;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.notification:last-of-type {
+    border-bottom: none;
 }
 
 .notification:hover {
@@ -215,17 +220,13 @@ function markAllSeen() {
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
-a.notification {
-    color: var(--text-black);
-    text-decoration: none;
+.notification a {
+  color: var(--text-black);
+  text-decoration: none;
 }
 
 .notification.unseen {
     background-color: var(--viewed-content);
-}
-
-a.notification:last-of-type {
-    border-bottom: none;
 }
 
 .notification > * {
@@ -259,5 +260,20 @@ a.notification:last-of-type {
     flex: 0 0 auto;
     padding: 10px 16px;
     margin-left: auto;
+    color: var(--text-black);
+}
+
+.notification-seen:hover {
+    border-radius: 1rem;
+    background-color: var(--default-white);
+}
+
+[data-theme="dark"]
+.notification-seen:hover {
+    background-color: var(--standard-hover-light-gray);
+}
+
+.notification-seen-icon {
+  color: var(--text-black) !important; /* Override default style, keep color the same and just update background */
 }
 </style>
