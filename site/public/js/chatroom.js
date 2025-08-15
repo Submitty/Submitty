@@ -144,6 +144,11 @@ function initChatroomSocketClient(chatroomId) {
                 window.alert('Chatroom has been closed by the instructor.');
                 window.location.href = buildCourseUrl(['chat']);
                 break;
+            case 'message_delete':
+                const msgElement = document.getElementById(msg.id);
+                if (msgElement) {
+                    msgElement.remove();
+                }
             default:
                 console.error(msg);
         }
@@ -260,6 +265,35 @@ function removeChatroomRow(chatroomId) {
     const row = document.getElementById(`${chatroomId}`);
     if (row) {
         row.remove();
+    }
+}
+
+function clearChatroom(chatroomId) {
+    if (confirm('This will clear all messages in the chatroom. Are you sure?')) {
+        $.ajax({
+            url: buildCourseUrl(['chat', chatroomId, 'clear']),
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken,
+            },
+            success: function (response) {
+                try {
+                    const msg = JSON.parse(response);
+                    if (msg.status !== 'success') {
+                        console.error(msg);
+                        displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                    window.alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            },
+        });
     }
 }
 

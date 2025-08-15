@@ -42,6 +42,11 @@
                 <a data-testid="anon-chat-join-btn" href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
             {% endif %}
         </td>
+        <td>
+            <button data-testid="clear-chatroom" class="btn btn-danger" onclick="clearChatroom('{{ id|e('js') }}')">
+                Clear
+            </button>
+        </td>
     </tr>
 {% else %}
     {% if isActive %} <!--students only have access to active chat rooms-->
