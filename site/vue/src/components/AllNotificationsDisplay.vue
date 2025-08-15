@@ -140,14 +140,14 @@ function markAllSeen() {
         class="notification"
         :class="{ unseen: !n.seen }"
       >
+        <i
+          v-if="n.component === 'forum'"
+          class="fas fa-comments notification-type"
+          title="Forum"
+        />
         <a
           :href="n.notification_url"
         >
-          <i
-            v-if="n.component === 'forum'"
-            class="fas fa-comments notification-type"
-            title="Forum"
-          />
           <div class="notification-content">
             <span>
               {{ n.content }}
