@@ -11,8 +11,11 @@ function sidebarContains(title, extension, header = title) {
     cy.visit(extension);
 
     let selector = '#main > .content';
-    if (title === 'SQL Toolbox' || title === 'My Courses') {
+    if (title === 'SQL Toolbox') {
         selector = '#main > div[data-v-app] > .content';
+    }
+    else if (title === 'My Courses') {
+        selector = '.home-content';
     }
     cy.get(selector).should('contain', header);
     cy.get(selector).should('not.contain', 'Server Error');

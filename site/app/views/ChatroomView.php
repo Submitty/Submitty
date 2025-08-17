@@ -5,6 +5,7 @@ namespace app\views;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\entities\chat\Chatroom;
+use app\libraries\FileUtils;
 
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
@@ -45,6 +46,7 @@ class ChatroomView extends AbstractView {
      * @param Chatroom[] $chatrooms Array of Chatroom objets
      */
     public function showAllChatrooms(array $chatrooms): string {
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         return $this->core->getOutput()->renderTwigTemplate("chat/AllChatroomsPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',

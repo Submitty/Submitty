@@ -306,11 +306,12 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
-        $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $gradeable_id = $gradeable->getId();
+        $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
-            "gradeable_id" => $gradeable->getId(),
+            "gradeable_id" => $gradeable_id,
             "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable_title" => $gradeable->getTitle(),
@@ -365,16 +366,17 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "grade_inquiries" => $grade_inquiries,
             "graders_of_inquiries" => $graders_of_inquiries,
-            "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
-            "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
+            "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'download_zip']),
+            "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'bulk_stats']),
             "details_url" => $details_url,
-            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade']),
             "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
             "include_grade_override" => $_COOKIE['include_grade_override'] ?? 'omit',
             "include_bad_submissions" => $_COOKIE['include_bad_submissions'] ?? 'omit',
             "include_null_section" => $_COOKIE['include_null_section'] ?? 'omit',
+            "include_withdrawn_students" => ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -504,7 +506,6 @@ HTML;
      * @param array<string, bool> $overrides
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
-     * @param bool $filter_withdrawn_student
      * @param array<string,bool> $grading_details_columns
      * @param array<string,array<number,array{
      *      gc_id: number,
@@ -515,7 +516,7 @@ HTML;
      * }>> $active_graders
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, bool $filter_withdrawn_student, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -928,7 +929,6 @@ HTML;
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
             "inquiry_status" => $inquiry_status,
-            "filter_withdrawn_student" => $filter_withdrawn_student,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
@@ -1052,6 +1052,13 @@ HTML;
             "color" => "",
             "message" => ""
         ];
+        // if this is a withdrawn student, we should display it first
+        if (!$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn") {
+            $error_message = [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Withdrawn Student"
+            ];
+        }
         if ($graded_gradeable->hasOverriddenGrades()) {
             $error_message = [
                 "color" => "var(--standard-vibrant-yellow)", // canary yellow
@@ -1672,6 +1679,8 @@ HTML;
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
+        $is_withdrawn_student = !$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn";
+
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1692,7 +1701,8 @@ HTML;
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
-                "is_peer_grader" => $is_peer_grader
+                "is_peer_grader" => $is_peer_grader,
+                "is_withdrawn_student" => $is_withdrawn_student
             ]);
     }
 
