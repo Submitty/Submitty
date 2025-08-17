@@ -428,12 +428,4 @@ class HomePageController extends AbstractController {
             $this->core->getCsrfToken()
         );
     }
-
-    /**
-     */
-    #[Route("/test", methods: ["GET"])]
-    public function test() {
-        $this->core->getOutput()->renderTwigOutput('Test.twig', [
-        ]);
-    }
 }
