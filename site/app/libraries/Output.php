@@ -165,7 +165,7 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
-        $this->twig->addFunction(new \Twig\TwigFunction('uniqid', function() {
+        $this->twig->addFunction(new \Twig\TwigFunction('uniqid', function () {
             // more entropy
             return str_replace('.', '-', uniqid('', true));
         }));
