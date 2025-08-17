@@ -1,4 +1,5 @@
 {# make sure edits are made in both site/public/templates/misc/Vue.twig and site/app/templates/Vue.twig #}
+{% set id = uniqid() %}
 <div
     class="{{ class is defined ? class }}"
     style="{{ style is defined ? style : '' }}"
