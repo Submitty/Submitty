@@ -167,7 +167,7 @@ HTML;
         }
         $this->twig->addFunction(new \Twig\TwigFunction('uniqid', function() {
             // more entropy
-            return uniqid('', true);
+            return str_replace('.', '-', uniqid('', true));
         }));
 
         $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
