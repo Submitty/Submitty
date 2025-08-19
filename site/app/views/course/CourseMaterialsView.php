@@ -19,6 +19,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalJs("course-materials.js");
 
         $base_course_material_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials');
         $directories = [];
@@ -161,6 +162,7 @@ class CourseMaterialsView extends AbstractView {
         $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
 
         $folder_paths = $this->compileAllFolderPaths($final_structure);
+        $calendar_info = $this->setCourseMaterialMetadata($final_structure);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
@@ -179,9 +181,38 @@ class CourseMaterialsView extends AbstractView {
             "folder_ids" => $folder_ids,
             "links" => $links,
             "folder_paths" => $folder_paths,
+            "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
+            "current_gradeable" => null,
+            "calendar_info" => $calendar_info,
             "beginning_of_time_date" => $beginning_of_time_date,
             "file_upload_limit_mb" => $file_upload_limit_mb
         ]);
+    }
+
+    private function setCourseMaterialMetadata(array &$course_materials, string $full_path = ""): array {
+        $metadata = [];
+
+        foreach ($course_materials as $name => $course_material) {
+            $current_path = $full_path === '' ? '/' . $name : $full_path . '/' . $name;
+
+            if (is_array($course_material)) {
+                $metadata[$current_path] = [
+                    'associatedDate' => 'none',
+                    'isOnCalendar' => 'none',
+                    'gradeable' => 'none'
+                ];
+
+                $metadata = array_merge($metadata, $this->setCourseMaterialMetadata($course_material, $current_path));
+            }
+            else {
+                $metadata[$current_path] = [
+                    'associatedDate' => $course_material->getCalendarDate() ? $course_material->getCalendarDate()->format("Y-m-d") : 'none',
+                    'isOnCalendar' => $course_material->isOnCalendar() ? 'true' : 'none',
+                    'gradeable' => $course_material->getGradeable() ?? 'none'
+                ];
+            }
+        }
+        return $metadata;
     }
 
     private function removeEmptyFolders(array &$course_materials): bool {
