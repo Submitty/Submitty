@@ -116,7 +116,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $min_expired_time = $current_time + 5 * 60 - 1;
         $max_expired_time = $current_time + 5 * 60 + 1;
 
-        $authorized_page = 'f25-sample-defaults';
+        $authorized_page = 'f25-sample-discussion_forum';
         $token = TokenManager::generateWebSocketToken('test_user', $authorized_page);
 
         $this->assertEquals('test_user', $token->claims()->get('sub'));
@@ -137,9 +137,9 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $future_time = time() + 5 * 60;
         $expired_time = time() - 5 * 60;
 
-        $authorized_page = 'f25-tutorial-defaults';
+        $authorized_page = 'f25-tutorial-discussion_forum';
         $existing_authorized_pages = [
-            'f25-sample-defaults' => $future_time,
+            'f25-sample-office_hours_queue' => $future_time,
             'f25-sample-chatrooms-1' => $future_time,
             'f25-sample-chatrooms-2' => $expired_time
         ];
@@ -154,11 +154,11 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $this->assertArrayNotHasKey('f25-sample-chatrooms-2', $parsed_token->claims()->get('authorized_pages'));
 
         // Old pages should persist with the same expiration time
-        $this->assertEquals($future_time, $parsed_token->claims()->get('authorized_pages')['f25-sample-defaults']);
+        $this->assertEquals($future_time, $parsed_token->claims()->get('authorized_pages')['f25-sample-office_hours_queue']);
         $this->assertEquals($future_time, $parsed_token->claims()->get('authorized_pages')['f25-sample-chatrooms-1']);
 
         // New authorized page should have a future expiration time
-        $this->assertGreaterThanOrEqual($future_time, $parsed_token->claims()->get('authorized_pages')['f25-tutorial-defaults']);
+        $this->assertGreaterThanOrEqual($future_time, $parsed_token->claims()->get('authorized_pages')['f25-tutorial-discussion_forum']);
     }
 
     public function testWebsocketTokenInvalidSignature() {
