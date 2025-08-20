@@ -226,7 +226,7 @@ class ChatroomController extends AbstractController {
 
         $formattedMessages = array_map(function ($message) {
             return [
-            'id' => $message->getId(),
+                'id' => $message->getId(),
                 'content' => $message->getContent(),
                 'timestamp' => $message->getTimestamp()->format('Y-m-d H:i:s'),
                 'user_id' => $message->getUserId(),
@@ -307,7 +307,6 @@ class ChatroomController extends AbstractController {
             $msg_array['id'] = $message_id;
             $this->sendSocketMessage($msg_array);
         }
-
         return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
     }
 }

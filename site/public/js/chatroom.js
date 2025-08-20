@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig */
+/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig, displaySuccessMessage */
 
 /**
  * Asynchronously load the chatroom row template
@@ -284,6 +284,8 @@ function clearChatroom(chatroomId) {
                     if (msg.status !== 'success') {
                         console.error(msg);
                         displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
+                    } else {
+                        displaySuccessMessage(`Cleared chatroom (id: ${chatroomId}) sucessfully`);
                     }
                 }
                 catch (err) {
