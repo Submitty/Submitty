@@ -174,8 +174,7 @@ class MiscController extends AbstractController {
         }
         else {
             // Check access through Access library
-            $owns_annotated_file = filter_var($view_annotated_file, FILTER_VALIDATE_BOOL) && $dir === 'submissions_processed' && strpos($path, $this->core->getUser()->getId()) !== false;
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path]) && !$owns_annotated_file) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "view_annotated_file" => $view_annotated_file])) {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
