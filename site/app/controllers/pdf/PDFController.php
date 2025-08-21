@@ -15,6 +15,39 @@ class PDFController extends AbstractController {
     }
 
     /**
+     * Load annotation JSON data for a given file path from the annotation directory
+     * @param string $annotation_dir The directory containing annotation files
+     * @param string $file_path The file path to generate MD5 hash for matching
+     * @param array|null $latest_timestamp Reference to track latest modification time (optional)
+     * @return array Array of annotation JSONs keyed by grader_id
+     */
+    private function loadAnnotationJsons(string $annotation_dir, string $file_path, &$latest_timestamp = null): array {
+        $annotation_jsons = [];
+        $file_path_md5 = md5($file_path);
+        
+        if (is_dir($annotation_dir)) {
+            $dir_iter = new \FilesystemIterator($annotation_dir);
+            foreach ($dir_iter as $annotation_file) {
+                if (explode('_', $annotation_file->getFilename())[0] === $file_path_md5) {
+                    $file_contents = file_get_contents($annotation_file->getPathname());
+                    $annotation_decoded = json_decode($file_contents, true);
+                    if ($annotation_decoded !== null) {
+                        $grader_id = $annotation_decoded["grader_id"];
+                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
+                        
+                        // Track latest timestamp if requested
+                        if ($latest_timestamp !== null && $latest_timestamp < $annotation_file->getMTime()) {
+                            $latest_timestamp = $annotation_file->getMTime();
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $annotation_jsons;
+    }
+
+    /**
      * returns the path contains the anonymous id given the gradeable id if $real is false
      * returns the path for the submitted file given the user id if $real is true
      */
@@ -58,21 +91,7 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
-        $md5_path = md5($anon_path);
-        if (is_dir($annotation_path)) {
-            $dir_iter = new \FilesystemIterator($annotation_path);
-            foreach ($dir_iter as $file_info) {
-                if (explode('_', $file_info->getFilename())[0] === $md5_path) {
-                    $file_contents = file_get_contents($file_info->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path);
 
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $anon_path, null, $annotation_jsons, true, 1, true);
     }
@@ -92,21 +111,7 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
-        $md5_path = md5($path);
-        if (is_dir($annotation_path)) {
-            $dir_iter = new \FilesystemIterator($annotation_path);
-            foreach ($dir_iter as $file_info) {
-                if (explode('_', $file_info->getFilename())[0] === $md5_path) {
-                    $file_contents = file_get_contents($file_info->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $path);
 
         // Construct the image URL for display_file endpoint
         $image_url = $this->core->buildCourseUrl(['display_file']) .
@@ -159,26 +164,9 @@ class PDFController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
 
         $latest_timestamp = filemtime($real_path);
-        $md5_path = md5($anon_path);
-        if (is_dir($annotation_path)) {
-            $dir_iter = new \FilesystemIterator($annotation_path);
-            foreach ($dir_iter as $file_info) {
-                if (explode('_', $file_info->getFilename())[0] === $md5_path) {
-                    $file_contents = file_get_contents($file_info->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                        if ($latest_timestamp < $file_info->getMTime()) {
-                            $latest_timestamp = $file_info->getMTime();
-                        }
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path, $latest_timestamp);
 
         $rerender_annotated_pdf = !(file_exists($annotation_path) && $latest_timestamp <= filemtime($annotation_path));
 
@@ -286,21 +274,7 @@ class PDFController extends AbstractController {
 
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
-        $file_path_md5 = md5($file_path);
-        if (is_dir($annotation_dir)) {
-            $dir_iter = new \FilesystemIterator($annotation_dir);
-            foreach ($dir_iter as $annotation_file) {
-                if (explode('_', $annotation_file->getFilename())[0] === $file_path_md5) {
-                    $file_contents = file_get_contents($annotation_file->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
     }
@@ -352,21 +326,7 @@ class PDFController extends AbstractController {
 
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
-        $file_path_md5 = md5($file_path);
-        if (is_dir($annotation_dir)) {
-            $dir_iter = new \FilesystemIterator($annotation_dir);
-            foreach ($dir_iter as $annotation_file) {
-                if (explode('_', $annotation_file->getFilename())[0] === $file_path_md5) {
-                    $file_contents = file_get_contents($annotation_file->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
         $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, false, $is_peer_grader);
     }
