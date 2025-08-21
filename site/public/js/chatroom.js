@@ -284,7 +284,8 @@ function clearChatroom(chatroomId) {
                     if (msg.status !== 'success') {
                         console.error(msg);
                         displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
-                    } else {
+                    }
+                    else {
                         displaySuccessMessage(`Cleared chatroom (id: ${chatroomId}) sucessfully`);
                     }
                 }
