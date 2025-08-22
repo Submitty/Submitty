@@ -1526,7 +1526,8 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
             dateutils.write_submitty_date(grading_finished),
             int(grading_time),
             autograde_result_msg,
-            queue_obj.get('revision', None)
+            queue_obj.get('revision', None),
+            queue_obj.get('regrade_by', None)
         )
 
         results_zip_path = os.path.join(base_dir, 'results.zip')
