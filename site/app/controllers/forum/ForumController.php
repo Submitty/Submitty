@@ -1166,6 +1166,7 @@ class ForumController extends AbstractController {
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
@@ -1199,6 +1200,7 @@ class ForumController extends AbstractController {
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
         if ($thread->isMergedThread()) {
             // Redirect merged thread to parent
             $this->core->addSuccessMessage("The requested thread was merged into this thread.");
@@ -1510,7 +1512,13 @@ class ForumController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-discussion_forum";
+        $params = [
+            'page' => 'discussion_forum',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
