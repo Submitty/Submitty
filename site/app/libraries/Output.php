@@ -165,6 +165,10 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
+        $this->twig->addFunction(new \Twig\TwigFunction('uniqid', function () {
+            // more entropy
+            return str_replace('.', '-', uniqid('', true));
+        }));
 
         $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
         $converter = new CommonMarkConverter($config);
