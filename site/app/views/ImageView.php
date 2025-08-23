@@ -36,30 +36,23 @@ class ImageView extends AbstractView {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
-        try {
-            $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
-                'gradeable_id' => $gradeable_id,
-                'user_id' => $user_id,
-                'grader_id' => $this->core->getUser()->getId(),
-                'filename' => $file_name,
-                'file_path' => $file_path,
-                'annotation_jsons' => $annotation_jsons,
-                'student_popup' => $is_student,
-                'can_download' => !$is_peer_grader,
-                'display_file_url' => $display_file_url,
-                'directory' => $this->getDirectoryFromPath($file_path),
-                'localcss' => $localcss,
-                'localjs' => $localjs,
-                'csrfToken' => $this->core->getCsrfToken(),
-                'anon_path' => $anon_path,
-                'download_path' => $download_path
-            ]);
-        }
-        catch (\Exception $e) {
-            $this->core->addErrorMessage("Error rendering twig template: " . $e->getMessage());
-            $this->core->addErrorMessage("Stack trace: " . $e->getTraceAsString());
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
+        $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
+            'gradeable_id' => $gradeable_id,
+            'user_id' => $user_id,
+            'grader_id' => $this->core->getUser()->getId(),
+            'filename' => $file_name,
+            'file_path' => $file_path,
+            'annotation_jsons' => $annotation_jsons,
+            'student_popup' => $is_student,
+            'can_download' => !$is_peer_grader,
+            'display_file_url' => $display_file_url,
+            'directory' => $this->getDirectoryFromPath($file_path),
+            'localcss' => $localcss,
+            'localjs' => $localjs,
+            'csrfToken' => $this->core->getCsrfToken(),
+            'anon_path' => $anon_path,
+            'download_path' => $download_path
+        ]);
     }
 
     /**
