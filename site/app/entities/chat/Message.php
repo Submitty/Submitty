@@ -35,6 +35,9 @@ class Message {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     private DateTime $timestamp;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $is_deleted;
+
     public function __construct(string $userId, string $displayName, string $role, string $text, Chatroom $chatroom) {
         $this->setUserId($userId);
         $this->setDisplayName($displayName);
@@ -42,6 +45,7 @@ class Message {
         $this->setTimestamp(new \DateTime("now"));
         $this->setContent($text);
         $this->setChatroom($chatroom);
+        $this->is_deleted = false;
     }
 
     public function getId(): int {
@@ -94,5 +98,9 @@ class Message {
 
     public function setChatroom(Chatroom $chatroom): void {
         $this->chatroom = $chatroom;
+    }
+
+    public function deleteMessage(): void {
+        $this->is_deleted = true;
     }
 }
