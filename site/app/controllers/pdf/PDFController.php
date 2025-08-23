@@ -24,7 +24,7 @@ class PDFController extends AbstractController {
     private function loadAnnotationJsons(string $annotation_dir, string $file_path, &$latest_timestamp = null): array {
         $annotation_jsons = [];
         $file_path_md5 = md5($file_path);
-        
+
         if (is_dir($annotation_dir)) {
             $dir_iter = new \FilesystemIterator($annotation_dir);
             foreach ($dir_iter as $annotation_file) {
@@ -34,7 +34,7 @@ class PDFController extends AbstractController {
                     if ($annotation_decoded !== null) {
                         $grader_id = $annotation_decoded["grader_id"];
                         $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-                        
+
                         // Track latest timestamp if requested
                         if ($latest_timestamp !== null && $latest_timestamp < $annotation_file->getMTime()) {
                             $latest_timestamp = $annotation_file->getMTime();
@@ -43,7 +43,7 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        
+
         return $annotation_jsons;
     }
 
