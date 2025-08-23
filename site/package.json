@@ -27,6 +27,8 @@
     "@codemirror/view": "6.38.1",
     "@fortawesome/fontawesome-free": "7.0.0",
     "@highlightjs/cdn-assets": "11.11.1",
+    "@markerjs/markerjs-ui": "^1.0.0",
+    "@markerjs/markerjs3": "^3.7.1",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
     "codemirror": "5.65.19",
