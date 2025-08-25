@@ -463,6 +463,11 @@ if [ ${WORKER} == 0 ]; then
     # Install nginx to serve websocket connections
     sudo apt-get install -qqy nginx-full
 
+    # Make sure reverse lookup of ::1 resolves to localhost
+    if [ "$(nslookup ::1 | awk '/name/{print $4; exit}')" != "localhost." ]; then
+        sed -i "1i::1 localhost" /etc/hosts
+    fi
+
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
     if [ ${VAGRANT} == 1 ]; then
