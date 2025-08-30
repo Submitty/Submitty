@@ -118,7 +118,6 @@
     var is_team_assignment = "{{ team_assignment }}" === "1";
     //autofill data
     $(function(){
-        $("#messages").empty();
         if(sessionStorage.getItem("expected_count")){
             document.getElementById("expected-pages-input").value = sessionStorage.getItem("expected_count");
         }
@@ -127,10 +126,6 @@
             source: students_full
         });
         highlightPageCount();
-    });
-
-    window.addEventListener('onbeforeunload', function(e) {
-        $("#messages").empty();
     });
 
     //gets the raw value entered in the expected page box

@@ -1,4 +1,5 @@
 import { isPermissionAllowed } from 'cypress-browser-permissions';
+import { verifyWebSocketStatus } from '../../support/utils';
 
 const queueName = 'Cypress Office Hour Queue 1';
 const queueName_random = 'Cypress Office Hour Queue Random';
@@ -107,6 +108,7 @@ const switchUser = (account) => {
     cy.logout();
     cy.login(account);
     cy.visit(['sample', 'office_hours_queue']);
+    verifyWebSocketStatus();
 };
 
 const studentJoinQueue = (queueName, queueCode) => {
