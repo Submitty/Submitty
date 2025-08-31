@@ -51,9 +51,12 @@ class MachineUpdateThread(threading.Thread):
         print(f"Starting thread for machine: {get_machine_by_ip(self.stats['address'])}. Full output will print when all threads complete.")
         self.success = update_machine(self.machine,self.stats,self.args, self)
         if self.success == False:
+            
             self.add_message(print_red(f"FAILURE TO UPDATE MACHINE {get_machine_by_ip(self.stats['address'])}"))
             raise SystemExit("ERROR: FAILURE TO UPDATE ONE OR MORE MACHINES")
         else:
+
+            
             self.add_message(print_green(f"SUCCESS UPDATING MACHINE {get_machine_by_ip(self.stats['address'])}"))
     def add_message(self, text):
         self.msg += text + "\n"
