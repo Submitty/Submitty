@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - lint-optimize
   pull_request:
   workflow_dispatch:
 env:
