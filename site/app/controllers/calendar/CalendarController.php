@@ -36,7 +36,7 @@ class CalendarController extends AbstractController {
 
         $calendar_messages = [];
         $global_calendar_messages = [];
-        $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        $courses = $this -> core -> getQueries() -> getCourseForUserId($user->getId());
         $filtered_courses = [];
 
         //If there aren't any courses, don't filter
