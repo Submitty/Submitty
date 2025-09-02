@@ -494,7 +494,7 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/search", methods: ["POST"])]
     public function search() {
-        $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
+        $results = $this->core->getQueries()->searchThreads($_POST['search-content']);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
