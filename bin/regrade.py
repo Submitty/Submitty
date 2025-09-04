@@ -18,6 +18,7 @@ from pathlib import Path
 import time
 import datetime
 import pause
+import getpass
 
 from submitty_utils import dateutils
 
@@ -57,6 +58,7 @@ def is_active_version(directory):
 # For the specified interval, walks over the log file and creates
 # queue files for these submissions.
 def replay(starttime,endtime):
+    sudo_user = os.getenv("SUDO_USER") or getpass.getuser()
     replay_starttime=datetime.datetime.now()
     print (replay_starttime,"replay start: ",starttime)
 
@@ -115,7 +117,8 @@ def replay(starttime,endtime):
                     "required_capabilities": "default",
                     "queue_time": queue_time,
                     "regrade": True,
-                    "max_possible_grading_time" : -1 }
+                    "max_possible_grading_time" : -1,
+                    "regrade_by": sudo_user }
             file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
@@ -129,6 +132,8 @@ def main():
     data_dir = os.path.join(SUBMITTY_DATA_DIR, "courses")
     data_dirs = data_dir.split(os.sep)
     grade_queue = []
+    # try to find who ran the command
+    sudo_user = os.getenv("SUDO_USER") or getpass.getuser()
     if not args.times is None:
         starttime = dateutils.read_submitty_date(args.times[0])
         endtime = dateutils.read_submitty_date(args.times[1])
@@ -244,7 +249,8 @@ def main():
                        "required_capabilities" : required_capabilities,
                        "queue_time":queue_time,
                        "regrade":True,
-                       "max_possible_grading_time" : max_grading_time}
+                       "max_possible_grading_time" : max_grading_time,
+                       "regrade_by": sudo_user }
 
                 if is_vcs_checkout:
                     obj['revision'] = revision

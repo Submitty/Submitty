@@ -1061,6 +1061,7 @@ class SubmissionController extends AbstractController {
                     "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
+                    'regrade_by' => $this->core->getUser()->getId(),
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
                     "term" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
