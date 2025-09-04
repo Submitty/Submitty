@@ -588,11 +588,11 @@ describe('Should test Search functionality', () => {
     });
     it('Should find posts containing \'Homework 1\'', () => {
         cy.get('#search-content').type('Homework 1');
-        cy.get('#search_block > [type="submit"]').click();
-        cy.get('[data-testid="search-result-table"').should('exist');
-        cy.get('[data-testid="search-result-table"').should('not.be.empty');
-        cy.get('[data-testid="search-result-table"').contains('Homework 1 not running');
-        cy.get('[data-testid="search-result-table"').contains('Homework 1 print clarification');
-        cy.get('[data-testid="search-result-table"').contains('Homework 1 has been posted on the course website.');
+        cy.get('[data-testid="search-submit"]').click();
+        cy.get('[data-testid="search-result-table"]').should('exist');
+        cy.get('[data-testid="search-result-table"]').should('not.be.empty');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 not running');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 print clarification');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 has been posted on the course website.');
     });
 });
