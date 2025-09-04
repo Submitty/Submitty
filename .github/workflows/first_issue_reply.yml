@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check for existing bot comments
         id: check-comments

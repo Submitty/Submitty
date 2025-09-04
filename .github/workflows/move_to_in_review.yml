@@ -28,7 +28,7 @@ jobs:
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Move PR to In Review
         if: ${{ ! github.event.pull_request.draft }}

@@ -30,7 +30,7 @@ jobs:
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Move draft to Work in Progress
         if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}
