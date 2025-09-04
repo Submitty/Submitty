@@ -587,7 +587,7 @@ describe('Should test Search functionality', () => {
         cy.visit(['sample', 'forum']);
     });
     it('Should find posts containing \'Homework 1\'', () => {
-        cy.get('#search-content').type('Homework 1');
+        cy.get('[data-testid="search-content-input"]').type('Homework 1');
         cy.get('[data-testid="search-submit"]').click();
         cy.get('[data-testid="search-result-table"]').should('exist');
         cy.get('[data-testid="search-result-table"]').should('not.be.empty');
