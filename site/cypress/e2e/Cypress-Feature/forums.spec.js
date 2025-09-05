@@ -580,3 +580,19 @@ describe('Should test WebSocket functionality', () => {
         });
     });
 });
+
+describe('Should test Search functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+    });
+    it('Should find posts containing \'Homework 1\'', () => {
+        cy.get('[data-testid="search-content-input"]').type('Homework 1');
+        cy.get('[data-testid="search-submit"]').click();
+        cy.get('[data-testid="search-result-table"]').should('exist');
+        cy.get('[data-testid="search-result-table"]').should('not.be.empty');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 not running');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 print clarification');
+        cy.get('[data-testid="search-result-table"]').contains('Homework 1 has been posted on the course website.');
+    });
+});
