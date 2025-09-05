@@ -63,6 +63,19 @@ class ChatroomController extends AbstractController {
         }
     }
 
+    // Use this for deleting singular messages.
+    /*
+    private function deleteMessage(string $chatroom_id, Message $message): JsonResponse {
+        $id = $message->getId();
+        $message->deleteMessage();
+        $msg_array = [];
+        $msg_array['type'] = 'message_delete';
+        $msg_array['socket'] = "chatroom_$chatroom_id";
+        $msg_array['id'] = $id;
+        $this->sendSocketMessage($msg_array);
+        return JsonResponse::getSuccessResponse("deleted message $id");
+    }*/
+
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
@@ -232,7 +245,7 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function fetchMessages(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
-        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id], ['timestamp' => 'ASC']);
+        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id, 'is_deleted' => false], ['timestamp' => 'ASC']);
 
         $formattedMessages = array_map(function ($message) {
             return [
@@ -290,5 +303,33 @@ class ChatroomController extends AbstractController {
         $msg_array['message_id'] = $message->getId();
         $this->sendSocketMessage($msg_array, true);
         return JsonResponse::getSuccessResponse($message);
+    }
+
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    public function clearMessages(string $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+
+        // Get message IDs for socket notifications before bulk deletion
+        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id, 'is_deleted' => false], ['timestamp' => 'ASC']);
+        $message_ids = array_map(function ($message) {
+            return $message->getId();
+        },
+        $messages);
+
+        // Bulk update to mark all messages as deleted - optimized to avoid N+1 queries
+        $em->createQuery('UPDATE app\entities\chat\Message m SET m.is_deleted = true WHERE m.chatroom = :chatroom_id AND m.is_deleted = false')
+           ->setParameter('chatroom_id', $chatroom_id)
+           ->execute();
+
+        // Send socket messages for each deleted message ID
+        foreach ($message_ids as $message_id) {
+            $msg_array = [];
+            $msg_array['type'] = 'message_delete';
+            $msg_array['socket'] = "chatroom_$chatroom_id";
+            $msg_array['id'] = $message_id;
+            $this->sendSocketMessage($msg_array);
+        }
+        return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
     }
 }
