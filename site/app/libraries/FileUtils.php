@@ -713,7 +713,7 @@ class FileUtils {
         }
 
         // Check owner
-        if ($expected_owner) {
+        if (!is_null($expected_owner)) {
             $owner_id = fileowner($path);
             $owner_name = posix_getpwuid($owner_id)['name'];
             if ($owner_name !== $expected_owner) {
@@ -722,11 +722,11 @@ class FileUtils {
         }
 
         // Check group
-        if ($expected_group && $current_user) {
+        if (!is_null($expected_group) && !is_null($current_user)) {
             $group_id = filegroup($path);
             $group = posix_getgrgid($group_id);
             $group_name = $group['name'];
-            if (!in_array($current_user, $group['members'])) {
+            if (!in_array($current_user, $group['members'], true)) {
                 $results[] = "Current user '{$current_user}' is not in the group '{$group_name}' that owns '{$path}'.";
             }
             if ($group_name !== $expected_group) {
