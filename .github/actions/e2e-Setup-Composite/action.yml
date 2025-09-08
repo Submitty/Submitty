@@ -35,12 +35,12 @@ runs:
         rm -rf "$AGENT_TOOLSDIRECTORY"
         sudo apt-get clean
       shell: bash
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: SUBMITTY_CPY/
     - name: Copy Repo
       run: |
-        # have to copy first, absolute paths not supported by actions/checkout@v4
+        # have to copy first, absolute paths not supported by actions/checkout@v5
           sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
