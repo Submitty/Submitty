@@ -1,4 +1,4 @@
-import { getApiKey, getCurrentSemester } from '../../support/utils';
+import { getApiKey, getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
@@ -62,6 +62,16 @@ const toggleLiveChat = (enableChat) => {
             cy.wrap($checkbox).click();
         }
     });
+};
+
+// For instructor
+const checkChatEnabled = (title) => {
+    getChatroom(title).find('[data-testid="disable-chatroom"]').should('be.visible');
+};
+
+// For instructor
+const checkChatDisabled = (title) => {
+    getChatroom(title).find('[data-testid="enable-chatroom"]').should('be.visible');
 };
 
 const chatroomExists = (title) => {
@@ -210,12 +220,20 @@ const leaveChat = (title) => {
 };
 
 const enterChat = (title, anonymous = false) => {
+    let url = '';
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();
+        url = /\/chat\/\d+\/anonymous$/;
     }
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
+        url = /\/chat\/\d+$/;
     }
+
+    cy.url().should('match', url).then(() => {
+        cy.get('[data-testid="chat-title"]').should('contain.text', title);
+        verifyWebSocketStatus();
+    });
 };
 
 const visitLiveChat = (user) => {
@@ -256,6 +274,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.login('instructor');
         toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
+            verifyWebSocketStatus();
             deleteChatroom(title1);
             deleteChatroom(title2);
         });
@@ -386,7 +405,40 @@ describe('Tests for creating, editing and using tests', () => {
         });
     });
 
-    it('Should test WebSocket functionality', () => {
+    it('Should test for websocket chat enable and disable', () => {
+        createChatroom(title1, description1, true);
+        let id = NaN;
+        getChatroom(title1).then(($chatroom) => {
+            id = Number($chatroom.attr('id'));
+            expect(id).to.be.a('number');
+        }).then(() => {
+            getApiKey('instructor', 'instructor').then((key) => {
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/toggleActiveStatus`,
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then(() => {
+                    checkChatEnabled(title1);
+                });
+            });
+        }).then(() => {
+            getApiKey('instructor', 'instructor').then((key) => {
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/toggleActiveStatus`,
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then(() => {
+                    checkChatDisabled(title1);
+                });
+            });
+        });
+    });
+
+    it('Should test WebSocket chat message functionality', () => {
         let id = NaN;
         createChatroom(title1, description1, true);
         startChatSession(title1);

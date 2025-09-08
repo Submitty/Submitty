@@ -19,9 +19,9 @@
 			<form id="search_block" method="post" action="{{ search_url }}">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search-content" id="search-content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				<div class="search-actions">
-					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
+					<button type="submit" name="search" title="Submit search" class="btn btn-primary" data-testid="search-submit">
 						Search
 					</button>
 
