@@ -1618,9 +1618,12 @@ end of styles used in the admin gradeable page
     max-height: 300px;
 }
 
+#details-legend {
+    padding: 0.75rem;
+}
+
 #details-legend > li {
     list-style: none;
-    padding-left: 15px;
     font-size: 0.75em;
 }
 

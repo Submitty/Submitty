@@ -67,14 +67,10 @@
 
 #details-legend {
     width: 100%;
-    padding: 6px 6px 6px 0;
+    padding: 6px;
     justify-self: flex-end;
     border: 1px solid var(--standard-medium-gray);
     border-radius: 4px;
-}
-
-#details-legend li i {
-    margin-right: 6px;
 }
 
 .row-wrapper {
