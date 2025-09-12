@@ -42,11 +42,11 @@
 
                 <img src="{{ image_data is defined ? attribute(image_data, cell.image) : cell.image }}"
 
-                {% if cell.width > 0 %}
+                {% if cell.width is defined and cell.width > 0 %}
                     width="{{ cell.width }}"
                 {% endif %}
 
-                {% if cell.height > 0 %}
+                {% if cell.height is defined and cell.height > 0 %}
                     height="{{ cell.height }}"
                 {% endif %}
 
@@ -164,7 +164,7 @@
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend>
-                            {% if cell.label %}
+                            {% if cell.label is defined %}
                                 {% include 'Vue.twig' with {
                                     type: "component",
                                     name: "Markdown",
