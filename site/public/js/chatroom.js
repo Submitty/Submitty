@@ -270,7 +270,7 @@ function removeChatroomRow(chatroomId) {
     }
 }
 
-function clearChatroom(chatroomId) {
+function clearChatroom(chatroomId, chatroomTitle) {
     if (confirm('This will clear all messages in the chatroom. Are you sure?')) {
         $.ajax({
             url: buildCourseUrl(['chat', chatroomId, 'clear']),
@@ -286,7 +286,7 @@ function clearChatroom(chatroomId) {
                         displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
                     }
                     else {
-                        displaySuccessMessage(`Cleared chatroom (id: ${chatroomId}) sucessfully`);
+                        displaySuccessMessage(`Cleared ${chatroomTitle} sucessfully`);
                     }
                 }
                 catch (err) {
