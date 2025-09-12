@@ -4948,12 +4948,6 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, string\|null given\.$#'
-			identifier: if.condNotBoolean
-			count: 2
-			path: app/libraries/FileUtils.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
