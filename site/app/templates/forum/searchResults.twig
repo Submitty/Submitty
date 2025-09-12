@@ -19,7 +19,7 @@
                 <td style="width:10%">Timestamp</td>
             </tr>
             </thead>
-            <tbody>
+            <tbody data-testid="search-result-table">
                 {% for thread in threads %}
                     <tr class="info hoverable cursor-pointer key_to_click" tabindex="0" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
                         <td colspan="10" class="text-center"><h4>{{ thread.thread_title }}</h4></td>
