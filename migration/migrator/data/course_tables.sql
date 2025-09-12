@@ -750,7 +750,8 @@ CREATE TABLE public.chatroom_messages (
     display_name character varying,
     role character varying,
     content text NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL
 );
 
 
