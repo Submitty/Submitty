@@ -171,6 +171,11 @@ function markAllSeen() {
           class="fas fa-star notification-type"
           title="Gradeable"
         />
+        <i
+          v-else-if="n.component === 'team'"
+          class="fas fa-users notification-type"
+          title="Team Action"
+        />
         <div class="notification-content">
           <a
             :href="n.notification_url"
