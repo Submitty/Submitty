@@ -47,7 +47,6 @@ function markSeen(course: string, id: number) {
         url: buildUrl(['home', 'mark_seen']),
         type: 'POST',
         data: {
-            action: 'single',
             course: course,
             notification_id: id,
             csrf_token: window.csrfToken,
