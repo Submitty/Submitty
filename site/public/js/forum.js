@@ -2295,9 +2295,15 @@ function saveFilterState() {
 }
 
 function setFilterState(state) {
-    setCategoryValues(state['categories']);
-    setThreadStatusValues(state['thread-status']);
-    $('#search-content').val(state['search-content']);
+    if ('categories' in state) {
+        setCategoryValues(state['categories']);
+    }
+    if ('thread-status' in state) {
+        setThreadStatusValues(state['thread-status']);
+    }
+    if ('search-content' in state) {
+        $('#search-content').val(state['search-content']);
+    }
     updateClearFilterButton();
     updateThreads(true, null);
 }

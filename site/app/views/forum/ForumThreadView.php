@@ -7,7 +7,6 @@ use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
-use app\models\User;
 use app\entities\forum\Thread;
 use app\entities\forum\Post;
 

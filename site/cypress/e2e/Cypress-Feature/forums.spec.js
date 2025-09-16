@@ -595,7 +595,7 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Python Tutorials').should('not.exist');
         cy.get('#thread_list').contains('Course syllabus').should('not.exist');
 
-        cy.go("back");
+        cy.go('back');
         cy.get('#thread_list').contains('Homework 1 not running');
         cy.get('#thread_list').contains('Homework 1 print clarification');
         cy.get('#thread_list').contains('Homework 1 has been posted on the course website.');
