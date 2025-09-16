@@ -2271,7 +2271,7 @@ function loadFilterHandlers() {
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('');
         updateClearFilterButton();
-        updateThreads(true,saveFilterState);
+        updateThreads(true, saveFilterState);
         return true;
     });
 
