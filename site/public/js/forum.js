@@ -984,11 +984,11 @@ function readCategoryValues() {
 
 function setCategoryValues(cat_ids) {
     $('#thread_category button').each(function () {
-        if ($(this).data('cat_id') in cat_ids) {
-            $(this).data('btn-selected', 'true');
+        if (cat_ids.includes($(this).data('cat_id'))) {
+            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
         }
         else {
-            $(this).data('btn-selected', 'false');
+            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
         }
     });
 }
@@ -1005,11 +1005,11 @@ function readThreadStatusValues() {
 
 function setThreadStatusValues(sel_ids) {
     $('#thread_status_select button').each(function () {
-        if ($(this).data('sel_id') in sel_ids) {
-            $(this).data('btn-selected', 'true');
+        if (sel_ids.includes($(this).data('sel_id'))) {
+            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
         }
         else {
-            $(this).data('btn-selected', 'false');
+            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
         }
     });
 }
@@ -2268,6 +2268,13 @@ function loadFilterHandlers() {
         return true;
     });
 
+    $('#search-clear').on('mousedown', (e) => {
+        $('#search-content').val('');
+        updateClearFilterButton();
+        updateThreads(true,saveFilterState);
+        return true;
+    });
+
     $('#unread').change((e) => {
         e.preventDefault();
         updateThreads(true, saveFilterState);
@@ -2295,6 +2302,9 @@ function saveFilterState() {
 }
 
 function setFilterState(state) {
+    if (state === null) {
+        return;
+    }
     if ('categories' in state) {
         setCategoryValues(state['categories']);
     }
