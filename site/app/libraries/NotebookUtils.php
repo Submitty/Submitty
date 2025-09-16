@@ -50,7 +50,7 @@ class NotebookUtils {
         // Process each cell in the notebook
         foreach ($filedata['cells'] as $cell) {
             // Skip empty cells
-            if (!isset($cell['source']) || count($cell['source']) === 0) {
+            if (!isset($cell['source']) || (is_array($cell['source']) && count($cell['source']) === 0) || (is_string($cell['source']) && trim($cell['source']) === '')) {
                 continue;
             }
 

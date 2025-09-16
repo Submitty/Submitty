@@ -1,4 +1,4 @@
-import { getApiKey, getCurrentSemester } from '../../support/utils';
+import { getApiKey, getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
@@ -220,12 +220,35 @@ const leaveChat = (title) => {
 };
 
 const enterChat = (title, anonymous = false) => {
+    let url = '';
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();
+        url = /\/chat\/\d+\/anonymous$/;
     }
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
+        url = /\/chat\/\d+$/;
     }
+
+    cy.url().should('match', url).then(() => {
+        cy.get('[data-testid="chat-title"]').should('contain.text', title);
+        verifyWebSocketStatus();
+    });
+};
+
+const clearChat = (title) => {
+    chatroomExists(title).then((exists) => {
+        if (exists) {
+            cy.window().then((win) => {
+                cy.stub(win, 'confirm').callsFake((confirmText) => {
+                    expect(confirmText).to.contain('This will clear all messages in the chatroom. Are you sure?');
+                    return true;
+                });
+            });
+
+            getChatroom(title).find('[data-testid="clear-chatroom"]').first().click();
+        }
+    });
 };
 
 const visitLiveChat = (user) => {
@@ -266,6 +289,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.login('instructor');
         toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
+            verifyWebSocketStatus();
             deleteChatroom(title1);
             deleteChatroom(title2);
         });
@@ -396,6 +420,26 @@ describe('Tests for creating, editing and using tests', () => {
         });
     });
 
+    it('Should test clearing live chats', () => {
+        createChatroom(title1, description1, true);
+        startChatSession(title1);
+        enterChat(title1);
+        generateBaseMessageID().then((baseId) => {
+            const instructorMsg1Id = baseId + 1;
+            const instructorMsg2Id = baseId + 2;
+            const studentMsg1Id = baseId + 3;
+            const studentMsg2Id = baseId + 4;
+            sendChatMessage(chatMsg1, name1, instructorMsg1Id);
+            sendChatMessage(chatMsg3, name1, instructorMsg2Id);
+            visitLiveChat('student');
+            enterChat(title1);
+            sendChatMessage(chatMsg2, name2, studentMsg1Id);
+            sendChatMessage(chatMsg4, name2, studentMsg2Id);
+            visitLiveChat('instructor');
+            clearChat(title1);
+        });
+    });
+
     it('Should test for websocket chat enable and disable', () => {
         createChatroom(title1, description1, true);
         let id = NaN;
@@ -462,6 +506,35 @@ describe('Tests for creating, editing and using tests', () => {
                     });
                 });
                 deleteChatroom(title1);
+            });
+        });
+    });
+
+    it('Should test WebSocket live chat clearing', () => {
+        let id = NaN;
+        createChatroom(title1, description1, true);
+        startChatSession(title1);
+        getChatroom(title1).then(($chatroom) => {
+            id = Number($chatroom.attr('id'));
+            expect(id).to.be.a('number');
+            cy.visit(['sample', 'chat', id]);
+        }).then(() => {
+            generateBaseMessageID().then((baseId) => {
+                const instructorMsg1Id = baseId + 1;
+                const instructorMsg2Id = baseId + 2;
+                sendChatMessage(chatMsg1, name1, instructorMsg1Id);
+                sendChatMessage(chatMsg3, name1, instructorMsg2Id);
+                getApiKey('instructor', 'instructor').then((key) => {
+                    cy.request({
+                        method: 'POST',
+                        url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/clear`,
+                        headers: {
+                            Authorization: key,
+                        },
+                    }).then(() => {
+                        cy.get('[data-testid="message-container"]').should('not.exist');
+                    });
+                });
             });
         });
     });

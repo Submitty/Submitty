@@ -90,15 +90,25 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .simple-full-credit {
-    background-color: var(--simple-full-credit-dark-blue);
+    color: var(--simple-full-credit-dark-blue);
 }
 
 .simple-half-credit {
-    background-color: var(--simple-half-credit-light-blue);
+    color: var(--simple-half-credit-light-blue);
 }
 
 .simple-save-error {
     color: var(--simple-save-error-red);
+}
+
+.simple-no-credit,
+.simple-full-credit,
+.simple-half-credit,
+.simple-save-error {
+    min-width: 3.5rem;
+    margin-right: 1.25rem;
+    display: inline-block;
+    text-align: center;
 }
 
 /* styling for fields that aren't icons */
@@ -117,10 +127,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .simple-icon {
     transform: scaleX(3);
     width: 20px;
-    margin-left: 20px;
 }
 
 #details-legend li {
-    margin-right: 6px;
     font-size: 0.9em;
 }
