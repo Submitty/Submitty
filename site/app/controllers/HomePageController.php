@@ -115,39 +115,22 @@ class HomePageController extends AbstractController {
 
     #[Route("/home/mark_seen", methods: ["POST"])]
     public function markNotificationsAsSeen(): void {
-        $action = $_POST['action'];
         $user_id = $this->core->getUser()->getId();
         $courses = $this->courses;
         $original_config = clone $this->core->getConfig();
-
-        switch ($action) {
-            case 'single':
-                $course_title = $_POST['course'];
-                $notification_id = $_POST['notification_id'];
-                foreach ($courses as $course) {
-                    if ($course->getTitle() === $course_title) {
-                        $semester = $course->getTerm();
-                        $this->core->loadCourseConfig($semester, $course_title);
-                        $this->core->loadCourseDatabase();
-                        $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
-                        break;
-                    }
-                }
-                $this->core->setConfig($original_config);
-                return;
-            /*
-            case 'all':
-                foreach ($courses as $course) {
-                    $semester = $course->getTerm();
-                    $course_name = $course->getTitle();
-                    $this->core->loadCourseConfig($semester, $course_name);
-                    $this->core->loadCourseDatabase();
-                    $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
-                }
-                $this->core->setConfig($original_config);
-                return;
-            */
+        $course_title = $_POST['course'];
+        $notification_id = $_POST['notification_id'];
+        foreach ($courses as $course) {
+            if ($course->getTitle() === $course_title) {
+                $semester = $course->getTerm();
+                $this->core->loadCourseConfig($semester, $course_title);
+                $this->core->loadCourseDatabase();
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
+                break;
+            }
         }
+        $this->core->setConfig($original_config);
+        return;
     }
 
     /**

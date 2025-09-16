@@ -42,7 +42,7 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
-function markSingleSeen(course: string, id: number) {
+function markSeen(course: string, id: number) {
     $.ajax({
         url: buildUrl(['home', 'mark_seen']),
         type: 'POST',
@@ -65,31 +65,6 @@ function markSingleSeen(course: string, id: number) {
         },
     });
 }
-
-/* FUTURE: Bulk mark as seen
-
-const hasUnseen = computed(() => localNotifications.some((n) => !n.seen));
-
-function markAllSeen() {
-    if (!hasUnseen.value) {
-        return;
-    }
-    $.ajax({
-        url: buildUrl(['home', 'mark_seen']),
-        type: 'POST',
-        data: {
-            action: 'all',
-            csrf_token: window.csrfToken,
-        },
-        success: function () {
-            location.reload();
-        },
-        error: function (err) {
-            console.error(err);
-        },
-    });
-}
-*/
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -105,15 +80,6 @@ function markAllSeen() {
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
-        <!-- FUTURE: Bulk mark as seen
-        <a
-          v-if="notifications.length !== 0"
-          class="btn btn-primary"
-          @click="markAllSeen()"
-        >
-          Mark all as seen
-        </a>
-      -->
       </div>
     </div>
     <p
@@ -164,8 +130,8 @@ function markAllSeen() {
           role="button"
           title="Mark as seen"
           aria-label="Mark as seen"
-          @click.stop.prevent="markSingleSeen(n.course, Number(n.id))"
-          @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
+          @click.stop.prevent="markSeen(n.course, Number(n.id))"
+          @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
         >
           <i class="far fa-envelope-open notification-seen-icon" />
         </a>
