@@ -482,7 +482,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failure to rename filepath.");
                 }
                 $course_material->setPath($new_path);
-                
+
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
                 }
