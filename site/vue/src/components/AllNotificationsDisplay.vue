@@ -42,6 +42,11 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
+  function goToNotification(url: string) {
+    if (!url) return;
+    window.location.href = url;
+  }
+
 function goToCourseNotifications(course: string) {
     const form = document.createElement('form');
     form.method = 'POST';
@@ -157,6 +162,10 @@ function markAllSeen() {
     >
       <div
         v-for="n in visibleNotifications"
+        role="link"
+        tabindex="0"
+        @click="goToNotification(n.notification_url)"
+        @keydown.enter="goToNotification(n.notification_url)"
         :key="n.id"
         class="notification"
         :class="{ unseen: !n.seen }"
@@ -177,20 +186,20 @@ function markAllSeen() {
           title="Team Action"
         />
         <div class="notification-content">
-          <a
-            :href="n.notification_url"
+          <p
             class="notification-text"
           >
             {{ n.content }}
-          </a>
+          </p>
           <div class="notification-time">
             <span
               class="course-notification-link"
-              @click="goToCourseNotifications(n.course)"
+              @click.stop="goToCourseNotifications(n.course)"
+              title="Go to notifications"
             > {{ n.course }} </span> - {{ n.notify_time }}
           </div>
         </div>
-        <a
+        <button
           v-if="!n.seen"
           class="notification-seen"
           href="#"
@@ -201,7 +210,7 @@ function markAllSeen() {
           @keydown.enter.stop.prevent="markSingleSeen(n.course, Number(n.id))"
         >
           <i class="far fa-envelope-open notification-seen-icon" />
-        </a>
+      </button>
       </div>
     </div>
   </div>
@@ -250,16 +259,13 @@ function markAllSeen() {
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
+  cursor: pointer;
 }
 
 .notification-text {
   font-weight: 600;
   color: var(--text-black);
   text-decoration: none;
-}
-
-.notification-text:hover {
-  text-decoration: underline;
 }
 
 .course-notification-link {
@@ -314,6 +320,8 @@ function markAllSeen() {
 }
 
 .notification-seen {
+    all: unset;
+    cursor: pointer;
     text-align: center;
     flex: 0 0 auto;
     padding: 10px 16px;
