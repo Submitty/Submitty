@@ -31,7 +31,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
@@ -45,7 +45,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -70,7 +70,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -95,7 +95,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -123,7 +123,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@2.35.4
         with:
           php-version: ${{ env.PHP_VER }}
@@ -150,7 +150,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@2.35.4
         with:
           php-version: ${{ env.PHP_VER }}
@@ -186,7 +186,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@2.35.4
         with:
           php-version: ${{ env.PHP_VER }}
@@ -219,7 +219,7 @@ jobs:
     name: Python Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -241,7 +241,7 @@ jobs:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -326,7 +326,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -337,7 +337,7 @@ jobs:
     name: Shell Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -350,13 +350,13 @@ jobs:
 
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           path: MAIN
 
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: PR
 
@@ -433,7 +433,7 @@ jobs:
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: branch/GIT_CHECKOUT/Submitty
           fetch-depth: 0
@@ -444,7 +444,7 @@ jobs:
                        -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
 
       - name: Checkout main Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.MBASE || 'main' }}
           path: main/GIT_CHECKOUT/Submitty
@@ -663,7 +663,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -847,7 +847,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # If the matrix is currently on Development or Tutorial,
       # we should use the respective courses
@@ -927,7 +927,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
@@ -936,7 +936,7 @@ jobs:
     name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup SSH
         shell: bash
         run: |

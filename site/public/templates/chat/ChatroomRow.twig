@@ -38,9 +38,13 @@
         <td>
             <a href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
             {% if isAllowAnon %}
-                <i> or </i>
                 <a data-testid="anon-chat-join-btn" href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
             {% endif %}
+        </td>
+        <td>
+            <button data-testid="clear-chatroom" class="btn btn-danger" onclick="clearChatroom('{{ id|e('js') }}', '{{ title|e('js') }}')">
+                Clear
+            </button>
         </td>
     </tr>
 {% else %}
