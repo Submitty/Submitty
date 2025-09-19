@@ -124,7 +124,7 @@ class HomePageController extends AbstractController {
                 $semester = $course->getTerm();
                 $this->core->loadCourseConfig($semester, $course_title);
                 $this->core->loadCourseDatabase();
-                markNotificationAsSeen($notification_id);
+                Notification::markNotificationAsSeen($notification_id);
                 break;
             }
         }
