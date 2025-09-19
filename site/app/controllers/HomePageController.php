@@ -116,6 +116,7 @@ class HomePageController extends AbstractController {
     #[Route("/home/mark_seen", methods: ["POST"])]
     public function markNotificationsAsSeen(): void {
         $courses = $this->courses;
+        $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
         $course_title = $_POST['course'];
         $notification_id = $_POST['notification_id'];
@@ -124,7 +125,7 @@ class HomePageController extends AbstractController {
                 $semester = $course->getTerm();
                 $this->core->loadCourseConfig($semester, $course_title);
                 $this->core->loadCourseDatabase();
-                Notification::markNotificationAsSeen($notification_id);
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
                 break;
             }
         }
