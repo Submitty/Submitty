@@ -15,7 +15,7 @@ interface Props {
     noMaxlength?: boolean; // If true, sets maxlength to 524288
     placeholder?: string;
     previewDivId?: string | null;
-    renderHeader?: boolean;
+    renderMarkdown?: boolean;
     showToggle?: boolean;
     rootClass?: string;
     textareaMaxlength?: string | number;
@@ -27,8 +27,8 @@ interface Props {
     textareaOnChange?: string;
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
-    renderMarkdown?: boolean;
     toggleButtonId?: string;
+    handleMarkdownToggle?: string[];
 }
 
 const props = defineProps<Props>();
@@ -215,10 +215,15 @@ onMounted(() => {
         setMode('preview');
     }
 });
-const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
+
+let showHeader = props.renderMarkdown;
 function toggleHeader() {
-    showHeader.value = !showHeader.value;
-    window.Cookies.set('markdown_enabled', showHeader.value ? '1' : '0', { path: '/', expires: 365 });
+  if (props.handleMarkdownToggle) {
+    const args = [...props.handleMarkdownToggle];
+    const fn = args.shift();
+    const result = window[fn as keyof Window](...args);
+    showHeader = result == 1;
+  }
 }
 </script>
 
@@ -254,7 +259,7 @@ function toggleHeader() {
     class="markdown-area fill-available"
   >
     <div
-      v-if="props.renderHeader || showHeader"
+      v-if="showHeader"
       :id="markdownHeaderId ?? undefined"
       class="markdown-area-header"
       :data-mode="mode"
