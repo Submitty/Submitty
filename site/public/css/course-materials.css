@@ -35,8 +35,7 @@ a.popout-item > .fas:hover {
 
 .course-materials-header-container{
     display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+    flex-flow: row wrap;
 }
 .course-materials-header{
     flex-grow:1;
