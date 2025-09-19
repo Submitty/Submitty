@@ -6,26 +6,24 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
-    
-    <div class="action-buttons" style="float: right; margin-bottom: 20px;">
-        <a onclick="markAllViewed()" id="deleteButton" class="btn btn-primary key_to_click">Mark All as Viewed</a>
+    <div class="course-materials-header-container">
+        <h1 class="course-materials-header">Course Materials</h1>            
+        <div class="action-buttons" style="float: right; margin-bottom: 20px;">
+            <a onclick="markAllViewed()" id="deleteButton" class="btn btn-primary key_to_click">Mark All as Viewed</a>
+            {# button to open all of the subfolders and cookie it#}            
+            <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
+            {% if user_group == 1 %}
+                {# button to set the release dates of all files in the page/course materials #}
+                <a
+                        onclick='openSetAllRelease()'
+                        class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
+                        tabindex="0">Set All Release Dates</a>
+                <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
+            {% endif %}
+        </div>
     </div>
-    
-
-    <div class="action-buttons" style="float: right; margin-bottom: 20px;">
-        {# button to open all of the subfolders and cookie it#}            
-        <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
-        {% if user_group == 1 %}
-            {# button to set the release dates of all files in the page/course materials #}
-            <a
-                    onclick='openSetAllRelease()'
-                    class="btn btn-primary key_to_click {% if not materials_exist %}disabled{% endif %}"
-                    tabindex="0">Set All Release Dates</a>
-            <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
-        {% endif %}
-    </div>
-    <h1>Course Materials</h1>
     {% if user_group==1 %}
+    <div class="course-materials-key">
         <ul style="justify-self: center" id="details-legend" class="table-bordered">
             <li>
                 <i class="fas fa-circle grader-NULL"></i>
@@ -44,6 +42,7 @@
                 Released
             </li>
         </ul>
+    </div>
     {% endif %}
     <div class="inner-container" id="file-container">
         {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, "", base_course_material_path, directory_priorities, 
