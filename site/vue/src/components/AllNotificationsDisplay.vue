@@ -42,10 +42,12 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
-  function goToNotification(url: string) {
-    if (!url) return;
+function goToNotification(url: string) {
+    if (!url) {
+      return;
+    }
     window.location.href = url;
-  }
+}
 
 function goToCourseNotifications(course: string) {
     const form = document.createElement('form');
@@ -130,10 +132,10 @@ function markSeen(course: string, id: number) {
         role="link"
         tabindex="0"
         @click="goToNotification(n.notification_url)"
-        @keydown.enter="goToNotification(n.notification_url)"
         :key="n.id"
         class="notification"
         :class="{ unseen: !n.seen }"
+        @keydown.enter="goToNotification(n.notification_url)"
       >
         <i
           v-if="n.component === 'forum'"
@@ -159,8 +161,8 @@ function markSeen(course: string, id: number) {
           <div class="notification-time">
             <span
               class="course-notification-link"
-              @click.stop="goToCourseNotifications(n.course)"
               title="Go to notifications"
+              @click.stop="goToCourseNotifications(n.course)"
             > {{ n.course }} </span> - {{ n.notify_time }}
           </div>
         </div>
@@ -175,7 +177,7 @@ function markSeen(course: string, id: number) {
           @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
         >
           <i class="far fa-envelope-open notification-seen-icon" />
-      </button>
+        </button>
       </div>
     </div>
   </div>
