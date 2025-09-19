@@ -129,7 +129,6 @@ class HomePageController extends AbstractController {
             }
         }
         $this->core->setConfig($original_config);
-        return;
     }
 
     /**
