@@ -379,55 +379,58 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-            $requested_path = $_POST['file_path'];
+            $requested_path = $_POST['file_path'] ?? '';
+            
             if (strpos($requested_path, '/') === 0) {
                 return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
             }
-            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+            if (strpos($requested_path, '.') !== false) {
+                return JsonResponse::getErrorResponse("Directory paths cannot contain '.' character.");
+            }
+            $target_directory = FileUtils::joinPaths($upload_path, $requested_path);
 
             if (isset($_POST['title'])) {
                 $file_name = $_POST['title'];
-                $directory = dirname($new_path);
-                $new_path = FileUtils::joinPaths($directory, $file_name);
+                
+                if (empty($file_name)) {
+                    return JsonResponse::getErrorResponse("Filename cannot be empty.");
+                }
+                $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
+            } else {
+                $file_name = basename($path);
+                $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
             }
-            else {
-                $file_name = basename($new_path);
-            }
-            if ($path !== $new_path) {
-                if (!FileUtils::ValidPath($new_path)) {
+
+            if ($path !== $new_file_path) {
+                if (!FileUtils::ValidPath($new_file_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
-                if (dirname($new_path) === $path) {
+                if (dirname($new_file_path) === $path) {
                     return JsonResponse::getErrorResponse("Cannot move a file into a directory with the same name as the file.");
                 }
 
-                if (($overflow = strlen($new_path) - self::MAX_PATH_LENGTH) > 0) {
+                if (($overflow = strlen($new_file_path) - self::MAX_PATH_LENGTH) > 0) {
                     return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
+                // Ensure target directory exists
+                if (!is_dir($target_directory)) {
+                    if (!FileUtils::createDir($target_directory, true)) {
+                        return JsonResponse::getErrorResponse("Failed to create target directory");
+                    }
+                }
                 $requested_path = explode("/", $requested_path);
-                if (count($requested_path) > 1) {
-                    $requested_path_directories = $requested_path;
-                    array_pop($requested_path_directories);
-                    $requested_path_directories = implode("/", $requested_path_directories);
-                    $full_dir_path = explode("/", $new_path);
+                
+                if (count($requested_path) > 0 && !empty($requested_path[0])) {
+                    $requested_path_string = implode("/", $requested_path);
+                    $full_dir_path = explode("/", $new_file_path);
                     array_pop($full_dir_path);
                     $full_dir_path = implode("/", $full_dir_path);
 
-
-
-                    //ADD IN NEW DIRECTORIES IF IT DOESN'T EXIST
-
-
-                    if (!FileUtils::createDir($full_dir_path, true)) {
-                        return JsonResponse::getErrorResponse("Invalid requested path");
-                    }
-
-
+                    // Add new directory to database if new.
                     $dirs_to_make = [];
-                    $this->addDirs($requested_path_directories, $upload_path, $dirs_to_make);
-
+                    $this->addDirs($requested_path_string, $upload_path, $dirs_to_make);
 
                     if ($dirs_to_make != null) {
                         $new_paths = [];
@@ -467,9 +470,9 @@ class CourseMaterialsController extends AbstractController {
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
                 }
-
-                $dir = dirname($new_path);
+                $dir = dirname($new_file_path);
                 $clash_resolution = $this->resolveClashingMaterials($dir, [$file_name], $overwrite);
+                
                 if ($clash_resolution !== true) {
                     return JsonResponse::getErrorResponse(
                         'Name clash',
@@ -477,13 +480,21 @@ class CourseMaterialsController extends AbstractController {
                     );
                 }
 
-                if (!rename($course_material->getPath(), $new_path)) {
+                if (!rename($course_material->getPath(), $new_file_path)) {
                     return JsonResponse::getErrorResponse("Failure to rename filepath.");
                 }
-
-                $course_material->setPath($new_path);
+                $course_material->setPath($new_file_path);
+                
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
+                }
+
+                // Clean up empty directories after moving the file
+                try {
+                    $this->cleanupEmptyDirectoriesAfterDeletion($path);
+                } catch (\Exception $e) {
+                    // Log the error but do not fail the operation
+                    $this->core->addErrorMessage("Warning: Failed to cleanup empty directories: " . $e->getMessage());
                 }
             }
         }
@@ -515,6 +526,9 @@ class CourseMaterialsController extends AbstractController {
         $path = $this->getRequestedPath($upload_path, $_POST['requested_path']);
         if ($path === null) {
             return JsonResponse::getErrorResponse("Invalid requested path");
+        }
+        if (strpos($path, '.') !== false) {
+            return JsonResponse::getErrorResponse("Directory paths cannot contain '.' character.");
         }
         $details['path'][0] = $path;
         $requested_path = $details['path'][0];
