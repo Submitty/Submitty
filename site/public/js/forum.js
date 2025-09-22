@@ -877,16 +877,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
             $('.cat-buttons input').prop('checked', false);
-            if (json.markdown === true) {
-                $('#markdown_input_').val('1');
-                $('#markdown_toggle_').addClass('markdown-active');
-                $('#markdown_buttons_').show();
-            }
-            else {
-                $('#markdown_input_').val('0');
-                $('#markdown_toggle_').removeClass('markdown-active');
-                $('#markdown_buttons_').hide();
-            }
+            $('#edit-user-post [id^="markdown_input_"]').val(json.markdown === true ? '1' : '0');
+            $('#edit-user-post .markdown-area').click();
             $('#img-table-loc').append(json.img_table);
             $('.display-attachment-name').each(function () {
                 $(this).text(decodeURIComponent($(this).text()));

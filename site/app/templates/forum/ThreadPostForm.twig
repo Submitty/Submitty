@@ -87,20 +87,18 @@
             "args": {
                 "markdownAreaId" : "reply_box_" ~ post_box_id,
                 "toggleButtonId" : "markdown_toggle_" ~ post_box_id,
+                "markdownStatusId" : "markdown_input_" ~ post_box_id,
                 "markdownAreaName" : "thread_post_content",
                 "markdownAreaValue" : "",
                 "class" : "post_content_reply thread_post_content",
                 "placeholder" : post_content_placeholder,
                 "previewDivId" : "preview_box_" ~ post_box_id,
-                "renderMarkdown" : render_markdown is defined and render_markdown ? render_markdown : false,
-                "showToggle" : true,
                 "markdownHeaderId" : "markdown_header_" ~ post_box_id,
                 "minHeight" : min_height,
                 "required" :  false,
                 "textareaMaxlength" : post_content_limit is defined ? post_content_limit : null,
                 "textareaOnkeydown" : "submitNearestForm(event,$(this))",
-                "textareaOnPaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")",
-                "handleMarkdownToggle" : ["toggleRenderMarkdownForInput", "markdown_input_" ~ post_box_id]
+                "textareaOnPaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
             }
         } only %}
     </div>
@@ -298,11 +296,5 @@
 
             addFile(image, part);
         }
-    }
-
-    function toggleRenderMarkdownForInput(input_id) {
-        const input = document.getElementById(input_id);
-        input.value = input.value == '1' ? '0' : '1';
-        return +input.value;
     }
 </script>
