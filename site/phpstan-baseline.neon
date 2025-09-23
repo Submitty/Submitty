@@ -1969,12 +1969,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 5
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
 			count: 2
