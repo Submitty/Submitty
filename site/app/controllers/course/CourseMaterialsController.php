@@ -392,7 +392,7 @@ class CourseMaterialsController extends AbstractController {
             if (isset($_POST['title'])) {
                 $file_name = $_POST['title'];
 
-                if ($file_name === '' || $file_name === null) {
+                if ($file_name === '') {
                     return JsonResponse::getErrorResponse("Filename cannot be empty.");
                 }
                 $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
