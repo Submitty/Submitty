@@ -380,7 +380,7 @@ class CourseMaterialsController extends AbstractController {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'] ?? '';
-            
+
             if (strpos($requested_path, '/') === 0) {
                 return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
             }
@@ -391,12 +391,13 @@ class CourseMaterialsController extends AbstractController {
 
             if (isset($_POST['title'])) {
                 $file_name = $_POST['title'];
-                
+
                 if (empty($file_name)) {
                     return JsonResponse::getErrorResponse("Filename cannot be empty.");
                 }
                 $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
-            } else {
+            }
+            else {
                 $file_name = basename($path);
                 $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
             }
@@ -421,7 +422,7 @@ class CourseMaterialsController extends AbstractController {
                     }
                 }
                 $requested_path = explode("/", $requested_path);
-                
+
                 if (count($requested_path) > 0 && !empty($requested_path[0])) {
                     $requested_path_string = implode("/", $requested_path);
                     $full_dir_path = explode("/", $new_file_path);
@@ -472,7 +473,7 @@ class CourseMaterialsController extends AbstractController {
                 }
                 $dir = dirname($new_file_path);
                 $clash_resolution = $this->resolveClashingMaterials($dir, [$file_name], $overwrite);
-                
+
                 if ($clash_resolution !== true) {
                     return JsonResponse::getErrorResponse(
                         'Name clash',
@@ -484,7 +485,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Failure to rename filepath.");
                 }
                 $course_material->setPath($new_file_path);
-                
+
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
                 }
@@ -492,7 +493,8 @@ class CourseMaterialsController extends AbstractController {
                 // Clean up empty directories after moving the file
                 try {
                     $this->cleanupEmptyDirectoriesAfterDeletion($path);
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     // Log the error but do not fail the operation
                     $this->core->addErrorMessage("Warning: Failed to cleanup empty directories: " . $e->getMessage());
                 }

@@ -1387,7 +1387,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             return;
         }
         // Add placeholder to give form of a file path for validation (only for non-empty paths)
-        if (file_path !== '' && !window.isValidFilePath(file_path + '/placeholder')) {
+        if (file_path !== '' && !window.isValidFilePath(`${file_path}/placeholder`)) {
             return;
         }
         formData.append('file_path', file_path);

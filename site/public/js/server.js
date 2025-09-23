@@ -451,19 +451,21 @@ function newEditCourseMaterialsForm(tag) {
     const pathElement = $('#new-file-name');
     let valueToSet;
     // Extract directory path from full path for both files and links
-    let lastSlashIndex = file_path.lastIndexOf('/');
-    
+    const lastSlashIndex = file_path.lastIndexOf('/');
+
     if (lastSlashIndex === -1) {
         // Material is in root directory
         valueToSet = '';
-    } else {
+    }
+    else {
         // Extract directory path relative to course_materials
-        let fullDirPath = file_path.substring(0, lastSlashIndex);
-        let courseMaterialsIndex = fullDirPath.indexOf('course_materials/');
-        
+        const fullDirPath = file_path.substring(0, lastSlashIndex);
+        const courseMaterialsIndex = fullDirPath.indexOf('course_materials/');
+
         if (courseMaterialsIndex !== -1) {
             valueToSet = fullDirPath.substring(courseMaterialsIndex + 17);
-        } else {
+        }
+        else {
             valueToSet = '';
         }
     }
@@ -472,13 +474,14 @@ function newEditCourseMaterialsForm(tag) {
         if (pathElement.next('.select2-container').length > 0) {
             // Select2 is initialized, set the value
             pathElement.val(valueToSet).trigger('change');
-        } else {
+        }
+        else {
             // Not ready yet, try again
             setTimeout(waitForSelect2, 50);
         }
     };
 
-    setTimeout(waitForSelect2, 100);    
+    setTimeout(waitForSelect2, 100);
     $('#material-edit-form', form).attr('data-id', id);
     $('#edit-picker', form).attr('value', release_time);
     $('#edit-sort', form).attr('value', dir);
