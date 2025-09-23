@@ -392,7 +392,7 @@ class CourseMaterialsController extends AbstractController {
             if (isset($_POST['title'])) {
                 $file_name = $_POST['title'];
 
-                if (empty($file_name)) {
+                if ($file_name === '' || $file_name === null) {
                     return JsonResponse::getErrorResponse("Filename cannot be empty.");
                 }
                 $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
@@ -423,7 +423,7 @@ class CourseMaterialsController extends AbstractController {
                 }
                 $requested_path = explode("/", $requested_path);
 
-                if (count($requested_path) > 0 && !empty($requested_path[0])) {
+                if (count($requested_path) > 0 && $requested_path[0] !== '') {
                     $requested_path_string = implode("/", $requested_path);
                     $full_dir_path = explode("/", $new_file_path);
                     array_pop($full_dir_path);
@@ -570,7 +570,7 @@ class CourseMaterialsController extends AbstractController {
         if (isset($title) && isset($url_url)) {
             $details['type'][0] = CourseMaterial::LINK;
             $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-            if (!empty($requested_path)) {
+            if ($requested_path !== '') {
                 $final_path = FileUtils::joinPaths($final_path, $requested_path);
                 if (!FileUtils::createDir($final_path)) {
                     return JsonResponse::getErrorResponse("Failed to make path.");
@@ -600,7 +600,7 @@ class CourseMaterialsController extends AbstractController {
                 $uploaded_files[1] = $_FILES["files1"];
             }
 
-            if (empty($uploaded_files) && !(isset($url_url) && isset($title))) {
+            if (count($uploaded_files) === 0 && !(isset($url_url) && isset($title))) {
                 return JsonResponse::getErrorResponse("No files were submitted.");
             }
 
@@ -629,7 +629,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
             // create nested path
-            if ($requested_path !== '' && $requested_path !== null) {
+            if ($requested_path !== '') {
                 $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
                 if (!FileUtils::createDir($upload_nested_path, true)) {
                     return JsonResponse::getErrorResponse("Failed to make image path.");
@@ -904,7 +904,7 @@ class CourseMaterialsController extends AbstractController {
                 $sections = explode(",", $post_data['sections']);
 
                 // If no sections are selected
-                if (count($sections) === 0 || $sections[0] === '' || $sections[0] === null) {
+                if (count($sections) === 0 || $sections[0] === '') {
                     $result['success'] = false;
                     $result['error'] = "Select at least one section";
                     return $result;
