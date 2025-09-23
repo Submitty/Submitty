@@ -306,7 +306,7 @@ class CourseMaterialsController extends AbstractController {
         $courseMaterials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
 
-        if ($courseMaterial === null || empty($courseMaterials)) {
+        if ($courseMaterial === null || count($courseMaterials) === 0) {
             $has_error = true;
         }
         else {
@@ -629,7 +629,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
             // create nested path
-            if (!empty($requested_path)) {
+            if ($requested_path !== '' && $requested_path !== null) {
                 $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
                 if (!FileUtils::createDir($upload_nested_path, true)) {
                     return JsonResponse::getErrorResponse("Failed to make image path.");
@@ -904,7 +904,7 @@ class CourseMaterialsController extends AbstractController {
                 $sections = explode(",", $post_data['sections']);
 
                 // If no sections are selected
-                if (empty($sections[0])) {
+                if (count($sections) === 0 || $sections[0] === '' || $sections[0] === null) {
                     $result['success'] = false;
                     $result['error'] = "Select at least one section";
                     return $result;
