@@ -300,6 +300,21 @@ function clearChatroom(chatroomId, chatroomTitle) {
     }
 }
 
+function shuffleAnonName(roomId) {
+    fetch(`/chat/${roomId}/regenerateAnonName`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.querySelector('#anon-name-display').textContent = data.newName;
+    })
+    .catch(err => console.error('Error shuffling name:', err));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
