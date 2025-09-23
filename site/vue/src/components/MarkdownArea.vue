@@ -217,23 +217,23 @@ onMounted(() => {
 
 const showHeader = ref(!!props.renderHeader);
 function toggleMarkdown() {
-  if (props.markdownStatusId) {
-    const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
-    if (markdownStatusElement) {
-      markdownStatusElement.value = +markdownStatusElement.value ? '0' : '1';
-      syncMarkdownToggle();
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            markdownStatusElement.value = +markdownStatusElement.value ? '0' : '1';
+            syncMarkdownToggle();
+        }
     }
-  }
 }
 
 function syncMarkdownToggle() {
-  if (props.markdownStatusId) {
-    const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
-    if (markdownStatusElement) {
-      const status = markdownStatusElement.value == '1';
-      showHeader.value = status;
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            const status = markdownStatusElement.value === '1';
+            showHeader.value = status;
+        }
     }
-  }
 }
 </script>
 
