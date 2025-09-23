@@ -1375,23 +1375,22 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('link_url', link_url);
     }
 
-    if (file_path !== null && file_path !== '') {
+    if (file_path !== null) {
         if (file_path.startsWith('/')) {
             alert('The file path cannot start with the root directory “/”, use a relative path.');
             return;
         }
-        const file_name = file_path.split('/').pop();
-        if (link_url !== null) {
-            const lastSlashIndex = file_path.lastIndexOf('/');
-            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
-            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
-        }
-        if (!window.isValidFilePath(file_path)) {
+        // For editing, file_path is the directory path, not the full file path
+        // Validate that it doesn't contain invalid characters for directories
+        if (file_path.includes('..')) {
+            alert('Directory path cannot contain ".."');
             return;
         }
-        if (window.isValidFileName(file_name)) {
-            formData.append('file_path', file_path);
+        // Add placeholder to give form of a file path for validation (only for non-empty paths)
+        if (file_path !== '' && !window.isValidFilePath(`${file_path}/placeholder`)) {
+            return;
         }
+        formData.append('file_path', file_path);
     }
 
     if (title !== null && window.isValidFileName(title)) {
@@ -1403,6 +1402,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
     else {
         if (title !== null) {
+            alert('Invalid filename');
             return;
         }
     }
