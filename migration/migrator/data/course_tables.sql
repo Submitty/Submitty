@@ -828,6 +828,9 @@ CREATE TABLE public.course_materials (
     uploaded_date timestamp with time zone,
     last_edit_by character varying(255) DEFAULT NULL::character varying,
     last_edit_date timestamp with time zone,
+    on_calendar boolean DEFAULT false,
+    gradeable character varying(255) DEFAULT 'none'::character varying,
+    calendar_date timestamp with time zone,
     CONSTRAINT check_dates CHECK (((uploaded_date IS NULL) OR (last_edit_date IS NULL) OR (uploaded_date <= last_edit_date)))
 );
 

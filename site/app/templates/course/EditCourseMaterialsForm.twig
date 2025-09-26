@@ -79,6 +79,16 @@
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
+    <hr>
+
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-file-cal-menu',
+        "div_id": '1',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+        "beginning_of_time_date" : beginning_of_time_date
+    } only %}
+
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
@@ -103,6 +113,26 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
+
+                let container = document.getElementById('1');
+                let calendarMenu = {
+                    calendar_display: 'none',
+                    associated_date: 'none',
+                    gradeable_chosen: 'none'
+                };
+
+                if (container) {
+                    let showMenu = container.querySelector('#show-menu');
+                    if (showMenu) {
+                        calendarMenu.calendar_display = showMenu.value;
+                        if (showMenu.value === 'date') {
+                            calendarMenu.associated_date = container.querySelector('#associated-date')?.value || 'none';
+                        } else if (showMenu.value === 'gradeable') {
+                            calendarMenu.gradeable_chosen = container.querySelector('#gradeable-select')?.value || 'none';
+                        }
+                    }
+                }
+
                 let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");
                 let url_url_val = url_url.disabled ? null : url_url.value;
@@ -112,7 +142,7 @@
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, title, overwrite, file_path);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, title, overwrite, file_path, calendarMenu);
         };
 
         const edit_fp = flatpickr('.edit-picker', {
