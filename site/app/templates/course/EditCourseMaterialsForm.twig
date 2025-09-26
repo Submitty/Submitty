@@ -5,20 +5,14 @@
     {{ add_twig_module_js('courseMaterials/upload.js') }}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <label id="file-path-label">
-            <span><strong>File Path / URL </strong></span>
-            <span id="edit-location-drop-down">
-                <select id="new-file-name">
-                    <option value="">.</option>
-                    {% for folder_path in folder_paths %}
-                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
-                    {% endfor %}
-                </select>
-            </span>
+            <span><strong>Folder Path</strong></span>
+            <input type="text" id="edit-folder-path" class="full-width" placeholder="Enter folder path" />
         </label>
+        <input type="hidden" id="file_path" name="file_path" />
 
-        <label id="edit-title-label">
+        <label id="edit-filename-label">
             <span><strong>File Name </strong></span>
-            <input type="text" id="edit-title" class="full-width" onchange="editFilePathRecommendations()" />
+            <input type="text" id="edit-filename" class="full-width" placeholder="Enter file name" />
         </label>
 
         <fieldset id="edit_sections">
@@ -103,10 +97,10 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                let title = document.getElementById("edit-title").value;
+                let title = document.getElementById("edit-filename").value;
                 let url_url = document.getElementById("edit-url-url");
                 let url_url_val = url_url.disabled ? null : url_url.value;
-                let file_path = document.getElementById("new-file-name").value;
+                let file_path = document.getElementById("file_path").value;
                 let overwrite = false;
                 let overwrite_elem = $('#overwrite-submit');
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
@@ -168,6 +162,16 @@
     $('.form-body').on('scroll', function() {
         edit_fp._positionCalendar();
     });
+
+    function updateFullPath() {
+    const folder = document.getElementById("edit-folder-path").value.trim();
+    const filename = document.getElementById("edit-filename").value.trim();
+    document.getElementById("file_path").value = folder ? folder + "/" + filename : filename;
+    }
+
+    document.getElementById("edit-folder-path").addEventListener("input", updateFullPath);
+    document.getElementById("edit-filename").addEventListener("input", updateFullPath);
+
     </script>
 {% endblock %}
 {% block close_click_action %}closePopup('{{ block('popup_id') }}'); window.location.reload();{% endblock %}
