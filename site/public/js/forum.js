@@ -2268,6 +2268,12 @@ function loadFilterHandlers() {
         return true;
     });
 
+    $('#search-content').on('keydown', (e) => {
+        if (e.key === 'Enter') {
+            $('#search-submit').trigger('mousedown');
+        }
+    });
+
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('');
         updateClearFilterButton();
