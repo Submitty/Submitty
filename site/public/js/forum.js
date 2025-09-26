@@ -864,6 +864,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const editUserPrompt = document.getElementById('edit_user_prompt');
             editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
+            contentBox.dispatchEvent(new Event('input', { bubbles: true }));
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
             if (change_anon) {
@@ -878,7 +879,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             captureTabInModal('edit-user-post');
             $('.cat-buttons input').prop('checked', false);
             $('#edit-user-post [id^="markdown_input_"]').val(json.markdown === true ? '1' : '0');
-            $('#edit-user-post #reply_box_1')[0].dispatchEvent(new Event('input', {bubbles: true}));
+            $('#edit-user-post .markdown-area').click();
             $('#img-table-loc').append(json.img_table);
             $('.display-attachment-name').each(function () {
                 $(this).text(decodeURIComponent($(this).text()));
