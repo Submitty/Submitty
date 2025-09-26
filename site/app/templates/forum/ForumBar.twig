@@ -18,9 +18,9 @@
 			{% if thread_exists %}
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="search" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				<div class="search-actions">
-					<button name="cancel" title="Clear search" id="search-clear" class="btn btn-outline-secondary">X</button>
+					<i name="cancel" title="Clear search" id="search-clear" class="fa-solid fa-circle-xmark"></i>
 					<button name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
 						Search
 					</button>

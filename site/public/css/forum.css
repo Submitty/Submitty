@@ -26,6 +26,10 @@
     min-height: 30px;
 }
 
+.search-actions {
+    margin-left: 5px;
+}
+
 .forum-bar .toolbar {
     display: flex;
     flex-wrap: wrap;
