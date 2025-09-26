@@ -439,20 +439,27 @@ function newEditCourseMaterialsForm(tag) {
         url.val(link_url);
     }
     else {
-        titleVal.val(file_path.substring(file_path.lastIndexOf('/') + 1));
+    const folder = file_path.substring(0, file_path.lastIndexOf('/'));
+    const filename = file_path.substring(file_path.lastIndexOf('/') + 1);
+
+    $('#edit-folder-path').val(folder);
+    $('#edit-filename').val(filename);
+
+    $('#file_path').val(folder ? folder + "/" + filename : filename);
+
         if (url_label.css('display') !== 'none') {
             url_label.css('display', 'none');
         }
     }
 
-    editFilePathRecommendations();
-    if (is_link === 1) {
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf('course_materials/') + 17).replace('link-', '')));
-    }
-    else {
-        path.val(file_path.substring(1));
-    }
-    registerSelect2Widget('new-file-name', 'material-edit-form');
+    //editFilePathRecommendations();
+    // if (is_link === 1) {
+    //     path.val(decodeURIComponent(file_path.substring(file_path.indexOf('course_materials/') + 17).replace('link-', '')));
+    // }
+    // else {
+    //     path.val(file_path.substring(1));
+    // }
+    // registerSelect2Widget('new-file-name', 'material-edit-form');
 
     $('#material-edit-form', form).attr('data-id', id);
     $('#edit-picker', form).attr('value', release_time);
