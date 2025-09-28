@@ -39,7 +39,7 @@ class Chatroom {
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     private ?\DateTime $session_started_at = null;
-
+    
     /**
      * @var Collection<Message>
      */
@@ -121,17 +121,39 @@ class Chatroom {
     }
 
     public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+        $adjectives = [ "Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift","Witty","Bold","Curious","Happy","Friendly","Energetic","Thoughtful","Wise","Playful","Alert"];
+        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird","Tiger","Lion","Bear","Fox","Wolf","Panther","Leopard","Rabbit","Otter","Koala","Penguin","Dolphin"];
+        $secret_phrase = "submitty-anon-chat-secret-phrase";
         $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
+        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at . '-' . $secret_phrase;
         $adj_hash = crc32($seed_string);
         $noun_hash = crc32(strrev($seed_string));
         $adj_index = abs($adj_hash) % count($adjectives);
         $noun_index = abs($noun_hash) % count($nouns);
         $adj  = $adjectives[$adj_index];
         $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+        $base_name = "Anonymous {$adj} {$noun}";
+        $base_name = "Anonymous {$adjectives[$adj_index]} {$nouns[$noun_index]}";
+        $user_name_map = [];
+
+        //looks at the usernames of each chat prior and if the user has the same name yet different Id adds the suffix to their name
+        foreach ($this->messages as $msg) {
+            $user_name_map[$msg->getUserId()] = $msg->getDisplayName();
+        }
+        //allows swapping between anonymous and non-anonymous names (otherwise would keep 1 style of name)
+        if (isset($user_name_map[$user_id]) && str_starts_with($user_name_map[$user_id], "Anonymous")) {
+            return $user_name_map[$user_id];
+        }
+        $existing_names = array_values($user_name_map);
+
+        $anon_name = $base_name;
+        $suffix = 2;
+
+        while (in_array($anon_name, $existing_names, true)) {
+            $anon_name = $base_name . " #{$suffix}";
+            $suffix++;
+        }
+        return $anon_name;
     }
 
     public function getSessionStartedAt(): ?\DateTime {
