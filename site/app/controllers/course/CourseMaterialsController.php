@@ -476,15 +476,17 @@ class CourseMaterialsController extends AbstractController {
                         $clash_resolution
                     );
                 }
+                $old_path = $course_material->getPath();
 
-                if (!rename($course_material->getPath(), $new_path)) {
+                if (!rename($old_path, $new_path)) {
                     return JsonResponse::getErrorResponse("Failure to rename filepath.");
                 }
-
                 $course_material->setPath($new_path);
+
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
                 }
+                $this->cleanupEmptyDirectoriesAfterDeletion($old_path);
             }
         }
 
