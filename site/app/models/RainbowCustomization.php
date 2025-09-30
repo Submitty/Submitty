@@ -408,6 +408,10 @@ class RainbowCustomization extends AbstractModel {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
 
+    public function getExtraCredit(): bool {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getExtraCredit() : false;
+    }
+
 
     /**
      * Get display benchmarks
@@ -655,6 +659,10 @@ class RainbowCustomization extends AbstractModel {
             foreach ($form_json->omit_section_from_stats as $omit_section) {
                 $this->RCJSON->addOmittedSection($omit_section);
             }
+        }
+
+        if (isset($form_json->extra_credit)) {
+            $this->RCJSON->setExtraCredit($form_json->extra_credit);
         }
 
         if (isset($form_json->gradeables)) {

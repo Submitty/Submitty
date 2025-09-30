@@ -677,6 +677,7 @@ function buildJSON() {
         final_cutoff: getFinalCutoffPercent(),
         section: getSection(),
         omit_section_from_stats: getOmittedSections(),
+        extra_credit: $('#extra_credit_checkbox').is(':checked'),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -809,6 +810,9 @@ $(document).ready(() => {
         saveChanges();
     });
     $('input[name*=\'omit_section\']').change(() => {
+        saveChanges();
+    });
+    $('#extra_credit_checkbox').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
@@ -1088,23 +1092,45 @@ $(document).ready(() => {
 });
 
 $(document).ready(() => {
-    $('#pencilIcon').click((event) => {
-        event.stopPropagation();
-        const checkboxControls = $('#checkboxControls');
-        const dropLowestDiv = $('#dropLowestDiv');
-
-        checkboxControls.css('display') === 'none'
-            ? checkboxControls.show()
-            : checkboxControls.hide() && dropLowestDiv.hide();
-    });
     $('#drop_lowest_checkbox').change(function (event) {
         event.stopPropagation();
-        const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
         const isChecked = $(this).is(':checked');
-
+        
+        if (!isChecked) {
+            // Check if any bucket has remove_lowest > 0 before allowing uncheck
+            let hasRemoveLowest = false;
+            
+            $('input[id^="config-remove_lowest-"]').each(function() {
+                if (parseInt($(this).val()) > 0) {
+                    hasRemoveLowest = true;
+                    return false;
+                }
+            });
+            
+            if (hasRemoveLowest) {
+                alert('"Remove lowest" cannot be disabled when one or more buckets have remove-lowest values.');
+                $(this).prop('checked', true);
+                return;
+            }
+        }
+        const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
+        
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
+    });
+
+    // Initialize remove lowest toggle based on loaded values.
+    $('input[id^="config-remove_lowest-"]').each(function() {
+        if (parseInt($(this).val()) > 0) {
+            $('#drop_lowest_checkbox').prop('checked', true);
+            const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
+            
+            dropLowestDivs.each((index, dropLowestDiv) => {
+                $(dropLowestDiv).css('display', 'block');
+            });
+            return false;
+        }
     });
 
     { // Manage performance warnings table
@@ -1151,47 +1177,22 @@ $(document).ready(() => {
         });
     });
 
-    // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
-    const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
-    const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
-    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
-        if ($(perGradeablePercentsCheckboxDOMElement).is(':checked')) {
-            enablePerGradeablePercents.prop('checked', true);
-            return false; // Break loop
-        }
-    });
-
     // Control visibility of per gradeable percent checkboxes
+    const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
     const perGradeablePercentsLabels = $('label[id^="per-gradeable-percents-label-"]');
     const perGradeablePercentsReset = $('button[id^="per-gradeable-percents-reset-"]');
-    const isChecked = enablePerGradeablePercents.is(':checked');
+    
+    // Always show per gradeable percent controls
     perGradeablePercentsCheckboxes.each((index, checkbox) => {
-        $(checkbox).toggle(isChecked);
+        $(checkbox).show();
     });
     perGradeablePercentsLabels.each((index, label) => {
-        $(label).toggle(isChecked);
+        $(label).show();
     });
     perGradeablePercentsReset.each((index, button) => {
-        if (isChecked === false) { // Only hide, otherwise element will be out of place
-            $(button).hide();
-        }
+        $(button).show();
     });
-    enablePerGradeablePercents.change(function (event) {
-        event.stopPropagation();
-        const isChecked = $(this).is(':checked');
-        perGradeablePercentsCheckboxes.each((index, checkbox) => {
-            $(checkbox).toggle(isChecked);
-        });
-        perGradeablePercentsLabels.each((index, label) => {
-            $(label).toggle(isChecked);
-        });
-        perGradeablePercentsReset.each((index, button) => {
-            if (isChecked === false) { // Only hide, otherwise element will be out of place
-                $(button).hide();
-            }
-        });
-    });
-
+    
     // Control visibility of per gradeable percent input boxes
     perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
         const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
@@ -1211,6 +1212,23 @@ $(document).ready(() => {
         perGradeablePercentsCheckbox.change(function (event) {
             event.stopPropagation();
             const isChecked = $(this).is(':checked');
+            
+            if (!isChecked) {
+                // Check if all percents are equal before allowing uncheck
+                const percents = [];
+                
+                percentsInputsInBucket.find('input').each(function() {
+                    percents.push(parseFloat($(this).val()));
+                });
+                const firstPercent = percents[0];
+                const allEqual = percents.every(p => p === firstPercent);
+                
+                if (!allEqual) {
+                    alert('"Per Gradeable Percents" cannot be disabled when not all assignments have equal weights.');
+                    $(this).prop('checked', true);
+                    return;
+                }
+            }
             percentsInputsInBucket.each((index, percentInput) => {
                 $(percentInput).toggle(isChecked);
             });
