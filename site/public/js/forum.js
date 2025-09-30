@@ -2223,7 +2223,7 @@ function clearForumFilter() {
     if (checkUnread()) {
         $('#filter_unread_btn').click();
     }
-    $('#search-content').val('');
+    $('#search-content').val('').trigger('change');
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
@@ -2273,9 +2273,14 @@ function loadFilterHandlers() {
             $('#search-submit').trigger('mousedown');
         }
     });
+    
+    $('#search-content').on('input', (e) => {
+        $('#search-clear').toggle($('#search-content').val() !== '');
+    });
+
 
     $('#search-clear').on('mousedown', (e) => {
-        $('#search-content').val('');
+        $('#search-content').val('').trigger('change');
         updateClearFilterButton();
         updateThreads(true, saveFilterState);
         return true;

@@ -16,9 +16,10 @@
 	<div class="toolbar">
 		<div class="toolbar-left">
 			{% if thread_exists %}
+			<form action="javascript:void(0);">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" />
 				<div class="search-actions">
 					<i title="Clear search" id="search-clear" class="fa-solid fa-circle-xmark"></i>
 					<button name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
@@ -42,6 +43,7 @@
 					{% endfor %}
 					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
 				</div>
+			</form>
 			{% endif %}
 		</div>
 		<div class="toolbar-right">
@@ -156,8 +158,8 @@
 	}
 
 	$( document ).ready(function() {
-		$('#search-content').val(Cookies.get('search_query'))
 		loadFilterHandlers();
+		$('#search-content').val(Cookies.get('search_query')).trigger('change');
 		updateThreads(true, saveFilterState);
 
 		$('#num_filtered').text({{ display_thread_count }});
