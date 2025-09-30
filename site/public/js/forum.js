@@ -1319,7 +1319,10 @@ function replyPost(post_id) {
     }
     else {
         hideReplies();
+        // Clear existing contents of the reply box, and update markdown state
+        $(`#${post_id}-reply [id^="reply_box_"]`).val('');
         $(`#${post_id}-reply`).css('display', 'block');
+        $(`#${post_id}-reply .markdown-area`).click();
     }
 }
 
