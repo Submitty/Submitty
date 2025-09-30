@@ -40,7 +40,7 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					<a id="clear_filter_button" class="text-decoration-none key_to_click clear-filter-button" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
 				</div>
 			{% endif %}
 		</div>
@@ -158,7 +158,7 @@
 	$( document ).ready(function() {
 		$('#search-content').val(Cookies.get('search_query'))
 		loadFilterHandlers();
-		saveFilterState();
+		updateThreads(true, saveFilterState);
 
 		$('#num_filtered').text({{ display_thread_count }});
 
