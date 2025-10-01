@@ -1008,10 +1008,8 @@ SQL;
 
     /**
      * @param User   $user
-     * @param string $semester
-     * @param string $course
      */
-    public function updateUserInCourse(User $user, string $semester, string $course): void {
+    public function updateUserInCourse(User $user): void {
         $params = [
             $user->getRotatingSection(),
             $user->getRegistrationSubsection(),
@@ -1069,6 +1067,7 @@ UPDATE courses_users SET user_group=?, registration_section=?, manual_registrati
 WHERE term=? AND course=? AND user_id=?",
                 $params
             );
+
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
             $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());

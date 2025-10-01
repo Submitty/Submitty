@@ -1915,18 +1915,6 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: '#^Parameter \#2 \$semester of method app\\libraries\\database\\DatabaseQueries\:\:updateUserInCourse\(\) expects string, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: '#^Parameter \#3 \$course of method app\\libraries\\database\\DatabaseQueries\:\:updateUserInCourse\(\) expects string, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: '#^Parameter \#3 \$value of function curl_setopt expects bool, int given\.$#'
 			identifier: argument.type
 			count: 1

@@ -413,19 +413,10 @@ class UsersController extends AbstractController {
         else {
             $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
             $em = $this->core->getSubmittyEntityManager();
-            $course_user = new CourseUser(
-                $semester,
-                $course,
-                $user->getId(),
-                $user->getGroup(),
-                $user->getRegistrationSection(),
-                $user->getRegistrationType(),
-                $user->isManualRegistration(),
-                ""
-            );
+            $course_user = new CourseUser($user);
             $em->persist($course_user);
             $em->flush();
-            $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
+            $this->core->getQueries()->updateUserInCourse($user);
             $this->core->addSuccessMessage("Added user {$user->getId()} to course $course");
             if ($submitty_user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
@@ -916,19 +907,10 @@ class UsersController extends AbstractController {
                             }
                         }
                         $em = $this->core->getSubmittyEntityManager();
-                        $course_user = new CourseUser(
-                            $semester,
-                            $course,
-                            $user->getId(),
-                            $user->getGroup(),
-                            $user->getRegistrationSection(),
-                            $user->getRegistrationType(),
-                            $user->isManualRegistration(),
-                            ""
-                        );
+                        $course_user = new CourseUser($user);
                         $em->persist($course_user);
                         $em->flush();
-                        $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
+                        $this->core->getQueries()->updateUserInCourse($user);
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);

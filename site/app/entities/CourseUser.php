@@ -37,17 +37,16 @@ class CourseUser {
     protected bool $manual_registration;
 
     #[ORM\Column(type: Types::STRING)]
-    protected string $previous_registration_section;
+    protected string $previous_registration_section = '';
 
-    public function __construct(string $term, string $course, string $user_id, int $user_group, string $registration_section, string $registration_type, bool $manual_registration, string $previous_registration_section = "") {
+    public function __construct(string $term, string $course, User $user) {
         $this->term = $term;
         $this->course = $course;
-        $this->user_id = $user_id;
-        $this->user_group = $user_group;
-        $this->registration_section = $registration_section;
-        $this->registration_type = $registration_type;
-        $this->manual_registration = $manual_registration;
-        $this->previous_registration_section = $previous_registration_section;
+        $this->user_id = $user->getId();
+        $this->user_group = $user->getGroup();
+        $this->registration_section = $user->getRegistrationSection();
+        $this->registration_type = $user->getRegistrationType();
+        $this->manual_registration = $user->isManualRegistration();
     }
 
     public function setUserGroup(int $user_group): void {
