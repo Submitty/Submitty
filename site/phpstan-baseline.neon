@@ -2463,13 +2463,13 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 25
+			count: 24
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 18
+			count: 17
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
