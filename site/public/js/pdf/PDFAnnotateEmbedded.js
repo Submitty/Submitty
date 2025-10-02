@@ -5,8 +5,8 @@ window.RENDER_OPTIONS = {
     documentId: '',
     userId: '',
     pdfDocument: null,
-    scale: parseFloat(localStorage.getItem('scale')) || 1,
-    rotate: parseInt(localStorage.getItem('rotate')) || 0,
+    scale: parseFloat(localStorage.getItem('pdf-scale')) || 1,
+    rotate: parseInt(localStorage.getItem('pdf-rotate')) || 0,
     studentPopup: false,
 };
 
@@ -283,7 +283,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     fd.append('csrf_token', csrfToken);
                     fd.append('pdf', pdfToSave);
                     let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotated_pdfs']);
-                    //localStorage.setItem('rotate', rotateVal);
+                    //localStorage.setItem('pdf-rotate', rotateVal);
                     //render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
                     $.ajax({
                         type: 'POST',
