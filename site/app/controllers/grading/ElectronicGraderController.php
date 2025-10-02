@@ -76,13 +76,9 @@ class ElectronicGraderController extends AbstractController {
 
         // Iterate through all the Scores
         foreach ($overall_scores as $ov) {
-            if ($ov->getTaGradedGradeable() == null) {
-                continue;
-            }
-
             // If Autograded, add the points to the array of autograded scores
-            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0 && $ov->getTaGradedGradeable() != null) {
-                if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
+            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0) {
+                if ($ov->getAutoGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
                     if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
                         if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
                             $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
