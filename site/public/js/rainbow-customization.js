@@ -1095,18 +1095,18 @@ $(document).ready(() => {
     $('#drop_lowest_checkbox').change(function (event) {
         event.stopPropagation();
         const isChecked = $(this).is(':checked');
-        
+
         if (!isChecked) {
             // Check if any bucket has remove_lowest > 0 before allowing uncheck
             let hasRemoveLowest = false;
-            
-            $('input[id^="config-remove_lowest-"]').each(function() {
+
+            $('input[id^="config-remove_lowest-"]').each(function () {
                 if (parseInt($(this).val()) > 0) {
                     hasRemoveLowest = true;
                     return false;
                 }
             });
-            
+
             if (hasRemoveLowest) {
                 alert('"Remove lowest" cannot be disabled when one or more buckets have remove-lowest values.');
                 $(this).prop('checked', true);
@@ -1114,18 +1114,18 @@ $(document).ready(() => {
             }
         }
         const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
-        
+
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
     });
 
     // Initialize remove lowest toggle based on loaded values.
-    $('input[id^="config-remove_lowest-"]').each(function() {
+    $('input[id^="config-remove_lowest-"]').each(function () {
         if (parseInt($(this).val()) > 0) {
             $('#drop_lowest_checkbox').prop('checked', true);
             const dropLowestDivs = $('div[id^="dropLowestDiv-"]');
-            
+
             dropLowestDivs.each((index, dropLowestDiv) => {
                 $(dropLowestDiv).css('display', 'block');
             });
@@ -1192,7 +1192,6 @@ $(document).ready(() => {
     perGradeablePercentsReset.each((index, button) => {
         $(button).show();
     });
-    
     // Control visibility of per gradeable percent input boxes
     perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
         const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
@@ -1212,17 +1211,17 @@ $(document).ready(() => {
         perGradeablePercentsCheckbox.change(function (event) {
             event.stopPropagation();
             const isChecked = $(this).is(':checked');
-            
+
             if (!isChecked) {
                 // Check if all percents are equal before allowing uncheck
                 const percents = [];
-                
-                percentsInputsInBucket.find('input').each(function() {
+
+                percentsInputsInBucket.find('input').each(function () {
                     percents.push(parseFloat($(this).val()));
                 });
                 const firstPercent = percents[0];
-                const allEqual = percents.every(p => p === firstPercent);
-                
+                const allEqual = percents.every((p) => p === firstPercent);
+
                 if (!allEqual) {
                     alert('"Per Gradeable Percents" cannot be disabled when not all assignments have equal weights.');
                     $(this).prop('checked', true);
