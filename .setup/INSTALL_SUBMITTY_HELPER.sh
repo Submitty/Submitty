@@ -869,8 +869,10 @@ else
     echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
-    sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
-    echo -e -n "Done updating workers and installing docker images\n\n"
+    if [[ -z "$NO_PULL_DOCKER" ]]; then
+        sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
+        echo -e -n "Done updating workers and installing docker images\n\n"
+    fi
 
     if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
         echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
@@ -884,6 +886,8 @@ else
     # Dispatch daemon job to update OS info
     chown "root:${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
     chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
-    "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
+    if [[ -z "$NO_PULL_DOCKER" ]]; then
+        "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
+    fi
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateSystemInfo
 fi
