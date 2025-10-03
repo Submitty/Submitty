@@ -89,22 +89,25 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+.simple-key-full-credit,
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
 }
 
+.simple-key-half-credit,
 .simple-half-credit {
     color: var(--simple-half-credit-light-blue);
 }
 
+.simple-key-save-error,
 .simple-save-error {
     color: var(--simple-save-error-red);
 }
 
-.simple-no-credit,
-.simple-full-credit,
-.simple-half-credit,
-.simple-save-error {
+.simple-key-no-credit,
+.simple-key-full-credit,
+.simple-key-half-credit,
+.simple-key-save-error {
     min-width: 3.5rem;
     margin-right: 1.25rem;
     display: inline-block;
