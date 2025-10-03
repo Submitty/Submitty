@@ -38,7 +38,7 @@
     "js-cookie": "3.0.5",
     "jspdf": "^3.0.2",
     "katex": "^0.16.22",
-    "luxon": "3.7.1",
+    "luxon": "3.7.2",
     "pdfjs-dist": "5.4.54",
     "mermaid": "11.10.1",
     "plotly.js-dist": "3.1.0",
