@@ -42,34 +42,6 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
-function goToNotification(url: string) {
-    if (!url) {
-      return;
-    }
-    window.location.href = url;
-}
-
-function goToCourseNotifications(course: string) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = buildUrl(['home', 'go_to_course_notifications']);
-
-    const courseInput = document.createElement('input');
-    courseInput.type = 'hidden';
-    courseInput.name = 'course';
-    courseInput.value = course;
-    form.appendChild(courseInput);
-
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrf_token';
-    csrfInput.value = window.csrfToken;
-    form.appendChild(csrfInput);
-
-    document.body.appendChild(form);
-    form.submit();
-}
-
 function markSeen(course: string, id: number) {
     $.ajax({
         url: buildUrl(['home', 'mark_seen']),
@@ -135,38 +107,25 @@ function markSeen(course: string, id: number) {
         :key="n.id"
         class="notification"
         :class="{ unseen: !n.seen }"
-        @keydown.enter="goToNotification(n.notification_url)"
       >
         <i
           v-if="n.component === 'forum'"
           class="fas fa-comments notification-type"
           title="Forum"
         />
-        <i
-          v-else-if="n.component === 'grading'"
-          class="fas fa-star notification-type"
-          title="Gradeable"
-        />
-        <i
-          v-else-if="n.component === 'team'"
-          class="fas fa-users notification-type"
-          title="Team Action"
-        />
-        <div class="notification-content">
-          <p
-            class="notification-text"
-          >
-            {{ n.content }}
-          </p>
-          <div class="notification-time">
-            <span
-              class="course-notification-link"
-              title="Go to notifications"
-              @click.stop="goToCourseNotifications(n.course)"
-            > {{ n.course }} </span> - {{ n.notify_time }}
+        <a
+          :href="n.notification_url"
+        >
+          <div class="notification-content">
+            <span>
+              {{ n.content }}
+            </span>
+            <div class="notification-time">
+              {{ n.course }} - {{ n.notify_time }}
+            </div>
           </div>
-        </div>
-        <button
+        </a>
+        <a
           v-if="!n.seen"
           class="notification-seen"
           href="#"
@@ -177,7 +136,7 @@ function markSeen(course: string, id: number) {
           @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
         >
           <i class="far fa-envelope-open notification-seen-icon" />
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -226,7 +185,10 @@ function markSeen(course: string, id: number) {
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
-  cursor: pointer;
+}
+
+.notification:last-of-type {
+    border-bottom: none;
 }
 
 .notification-text {
@@ -235,16 +197,13 @@ function markSeen(course: string, id: number) {
   text-decoration: none;
 }
 
-.course-notification-link {
-  cursor: pointer;
+.notification a {
+  color: var(--text-black);
+  text-decoration: none;
 }
 
-.course-notification-link:hover {
-  text-decoration: underline;
-}
-
-.notification:last-of-type {
-    border-bottom: none;
+.notification.unseen {
+    background-color: var(--viewed-content);
 }
 
 .notification:hover {

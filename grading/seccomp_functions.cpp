@@ -354,6 +354,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
       if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
         my_category = my_category.substr(27,my_category.size()-27);
         std::cout << " typo in system call category name " << my_category << std::endl;
+        std::cout << " please remove 'ALLOW_SYSTEM_CALL_CATEGORY_' from category name " << std::endl;
         assert(0);
       }
       // make sure categories is valid

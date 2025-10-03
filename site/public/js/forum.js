@@ -864,6 +864,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const editUserPrompt = document.getElementById('edit_user_prompt');
             editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
+            contentBox.dispatchEvent(new Event('input', { bubbles: true }));
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
             if (change_anon) {
@@ -877,16 +878,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
             $('.cat-buttons input').prop('checked', false);
-            if (json.markdown === true) {
-                $('#markdown_input_').val('1');
-                $('#markdown_toggle_').addClass('markdown-active');
-                $('#markdown_buttons_').show();
-            }
-            else {
-                $('#markdown_input_').val('0');
-                $('#markdown_toggle_').removeClass('markdown-active');
-                $('#markdown_buttons_').hide();
-            }
+            $('#edit-user-post [id^="markdown_input_"]').val(json.markdown === true ? '1' : '0');
+            $('#edit-user-post .markdown-area').click();
             $('#img-table-loc').append(json.img_table);
             $('.display-attachment-name').each(function () {
                 $(this).text(decodeURIComponent($(this).text()));
@@ -1326,7 +1319,10 @@ function replyPost(post_id) {
     }
     else {
         hideReplies();
+        // Clear existing contents of the reply box, and update markdown state
+        $(`#${post_id}-reply [id^="reply_box_"]`).val('');
         $(`#${post_id}-reply`).css('display', 'block');
+        $(`#${post_id}-reply .markdown-area`).click();
     }
 }
 

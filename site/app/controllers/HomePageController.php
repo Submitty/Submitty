@@ -113,27 +113,10 @@ class HomePageController extends AbstractController {
         );
     }
 
-    #[Route("/home/go_to_course_notifications", methods: ["POST"])]
-    public function goToCourseNotifications(): void {
-        $courses = $this->courses;
-        $course_title = $_POST['course'];
-        foreach ($courses as $course) {
-            if ($course->getTitle() === $course_title) {
-                $semester = $course->getTerm();
-                $this->core->loadCourseConfig($semester, $course_title);
-                $this->core->loadCourseDatabase();
-                $url = $this->core->buildCourseUrl(['notifications']);
-                $this->core->redirect($url);
-                return;
-            }
-        }
-        $this->core->addErrorMessage("Course not found.");
-        $this->core->redirect($this->core->buildUrl(['home']));
-    }
-
     #[Route("/home/mark_seen", methods: ["POST"])]
     public function markNotificationsAsSeen(): void {
         $courses = $this->courses;
+        $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
         $course_title = $_POST['course'];
         $notification_id = $_POST['notification_id'];
@@ -142,13 +125,12 @@ class HomePageController extends AbstractController {
                 $semester = $course->getTerm();
                 $this->core->loadCourseConfig($semester, $course_title);
                 $this->core->loadCourseDatabase();
-                markNotificationAsSeen($notification_id);
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
                 break;
             }
         }
         $this->core->setConfig($original_config);
-        return;
-}
+    }
 
     /**
      * Returns recent notifications for a user
