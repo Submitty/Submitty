@@ -17,7 +17,7 @@ python-pam==2.0.2
 ruamel.yaml==0.18.15
 psycopg2-binary==2.9.10
 sqlalchemy==2.0.42
-psutil==7.0.0
+psutil==7.1.0
 python-dateutil==2.9.0.post0
 watchdog==6.0.0
 xlsx2csv==0.8.4
