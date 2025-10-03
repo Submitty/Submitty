@@ -328,7 +328,7 @@ class ChatroomController extends AbstractController {
             $msg_array['type'] = 'message_delete';
             $msg_array['socket'] = "chatroom_$chatroom_id";
             $msg_array['id'] = $message_id;
-            $this->sendSocketMessage($msg_array);
+            $this->sendSocketMessage($msg_array, true);
         }
         return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
     }
