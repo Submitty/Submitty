@@ -2895,32 +2895,34 @@ function scrollToPage(page_num: number) {
     if (lastLoadedFile.charAt(0) === '.') {
         lastLoadedFile = lastLoadedFile.substring(1);
     }
-    const lastLoadedFilePageNum = parseInt(lastLoadedFile.split('_')[2].split('.')[0]);
-    if (activeView && page_num === lastLoadedFilePageNum) {
-        return;
-    }
-    let maxPage = -1;
-    let maxPageName = '';
-    let maxPageLoc = '';
-    for (let i = 0; i < files.length; i++) {
-        const filename = files[i].innerText.trim();
-        const filenameNoPeriod = filename.charAt(0) === '.' ? filename.substring(1) : filename;
-        if (filenameNoPeriod.startsWith('upload_page_')) {
-            const currPageNum = parseInt(filename.split('_')[2].split('.')[0]);
-            if (page_num === currPageNum) {
-                void viewFileFullPanel(filename, files[i].getAttribute('file-url')!);
-                return;
-            }
-            else if (currPageNum > maxPage) {
-                maxPage = currPageNum;
-                maxPageName = filename;
-                maxPageLoc = files[i].getAttribute('file-url')!;
+    if (!lastLoadedFile.includes('pdf')) {
+        const lastLoadedFilePageNum = parseInt(lastLoadedFile.split('_')[2].split('.')[0]);
+        if (activeView && page_num === lastLoadedFilePageNum) {
+            return;
+        }
+        let maxPage = -1;
+        let maxPageName = '';
+        let maxPageLoc = '';
+        for (let i = 0; i < files.length; i++) {
+            const filename = files[i].innerText.trim();
+            const filenameNoPeriod = filename.charAt(0) === '.' ? filename.substring(1) : filename;
+            if (filenameNoPeriod.startsWith('upload_page_')) {
+                const currPageNum = parseInt(filename.split('_')[2].split('.')[0]);
+                if (page_num === currPageNum) {
+                    void viewFileFullPanel(filename, files[i].getAttribute('file-url')!);
+                    return;
+                }
+                else if (currPageNum > maxPage) {
+                    maxPage = currPageNum;
+                    maxPageName = filename;
+                    maxPageLoc = files[i].getAttribute('file-url')!;
+                }
             }
         }
-    }
-    if (maxPage !== -1) {
-        void viewFileFullPanel(maxPageName, maxPageLoc);
-        return;
+        if (maxPage !== -1) {
+            void viewFileFullPanel(maxPageName, maxPageLoc);
+            return;
+        }
     }
     for (let i = 0; i < files.length; i++) {
         if (files[i].innerText.trim() === 'upload.pdf') {
