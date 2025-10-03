@@ -1181,7 +1181,7 @@ $(document).ready(() => {
     const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
     const perGradeablePercentsLabels = $('label[id^="per-gradeable-percents-label-"]');
     const perGradeablePercentsReset = $('button[id^="per-gradeable-percents-reset-"]');
-    
+
     // Always show per gradeable percent controls
     perGradeablePercentsCheckboxes.each((index, checkbox) => {
         $(checkbox).show();
