@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
+import { buildUrl } from '../../../ts/utils/server';
+import { reactive } from 'vue';
 
 const props = defineProps<{
     notifications: Notification[];
 }>();
+
+const localNotifications = reactive([...props.notifications]);
 
 const showUnseenOnly = ref(true);
 
@@ -30,13 +34,36 @@ const visibleCount = 10;
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
-        ? props.notifications.filter((n) => !n.seen)
-        : props.notifications,
+        ? localNotifications.filter((n) => !n.seen)
+        : localNotifications,
 );
 
 const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
+
+function markSeen(course: string, id: number) {
+    $.ajax({
+        url: buildUrl(['home', 'mark_seen']),
+        type: 'POST',
+        data: {
+            course: course,
+            notification_id: id,
+            csrf_token: window.csrfToken,
+        },
+        success: function () {
+            const target = localNotifications.find(
+                (n) => n.id === id && n.course === course,
+            );
+            if (target) {
+                target.seen = true;
+            }
+        },
+        error: function (err) {
+            console.error(err);
+        },
+    });
+}
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -44,18 +71,15 @@ const visibleNotifications = computed(() =>
       <h1 class="notifications-header">
         Notifications
       </h1>
-      <button
-        v-if="notifications.length !== 0"
-        class="btn btn-default"
-        @click="toggleUnseenOnly"
-      >
-        {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
-      </button>
-      <!-- FUTURE FEATURE: mark all notifications on the home page as seen
-            <a class="btn btn-primary">
-                Mark all as seen
-            </a>
-        -->
+      <div class="notifications-actions">
+        <button
+          v-if="notifications.length !== 0"
+          class="btn btn-default"
+          @click="toggleUnseenOnly"
+        >
+          {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
+        </button>
+      </div>
     </div>
     <p
       v-if="notifications.length === 0"
@@ -75,32 +99,42 @@ const visibleNotifications = computed(() =>
       v-else
       id="recent-notifications"
     >
-      <a
+      <div
         v-for="n in visibleNotifications"
         :key="n.id"
         class="notification"
         :class="{ unseen: !n.seen }"
-        :href="n.notification_url"
       >
         <i
           v-if="n.component === 'forum'"
           class="fas fa-comments notification-type"
           title="Forum"
         />
-        <div class="notification-content">
-          <span>
-            {{ n.content }}
-          </span>
-          <div class="notification-time">
-            {{ n.course }} - {{ n.notify_time }}
+        <a
+          :href="n.notification_url"
+        >
+          <div class="notification-content">
+            <span>
+              {{ n.content }}
+            </span>
+            <div class="notification-time">
+              {{ n.course }} - {{ n.notify_time }}
+            </div>
           </div>
-        </div>
-        <!-- FUTURE FEATURE: individual mark as seen
-                      <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
-                          <i class="far fa-envelope-open"></i>
-                      </a>
-                  -->
-      </a>
+        </a>
+        <a
+          v-if="!n.seen"
+          class="notification-seen"
+          href="#"
+          role="button"
+          title="Mark as seen"
+          aria-label="Mark as seen"
+          @click.stop.prevent="markSeen(n.course, Number(n.id))"
+          @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
+        >
+          <i class="far fa-envelope-open notification-seen-icon" />
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -115,7 +149,7 @@ const visibleNotifications = computed(() =>
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .notifications-header {
@@ -134,13 +168,24 @@ const visibleNotifications = computed(() =>
     border-collapse: collapse;
 }
 
+.notifications-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .notification {
-    display: flex;
-    border-bottom: 1px solid var(--standard-light-gray);
-    padding: 9px 0;
-    align-items: center;
-    padding-left: 20px;
-    padding-right: 20px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--standard-light-gray);
+  padding: 9px 0;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.notification:last-of-type {
+    border-bottom: none;
 }
 
 .notification:hover {
@@ -148,17 +193,13 @@ const visibleNotifications = computed(() =>
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
+.notification a {
+  color: var(--text-black);
+  text-decoration: none;
+}
+
 .notification.unseen {
     background-color: var(--viewed-content);
-}
-
-a.notification {
-    color: var(--text-black);
-    text-decoration: none;
-}
-
-a.notification:last-of-type {
-    border-bottom: none;
 }
 
 .notification > * {
@@ -191,10 +232,21 @@ a.notification:last-of-type {
     text-align: center;
     flex: 0 0 auto;
     padding: 10px 16px;
+    margin-left: auto;
+    color: var(--text-black);
 }
 
-a.show-more {
-    display: inline-block;
-    margin-top: 10px;
+.notification-seen:hover {
+    border-radius: 1rem;
+    background-color: var(--default-white);
+}
+
+[data-theme="dark"]
+.notification-seen:hover {
+    background-color: var(--standard-hover-light-gray);
+}
+
+.notification-seen-icon {
+  color: var(--text-black) !important; /* Override default style, keep color the same and just update background */
 }
 </style>
