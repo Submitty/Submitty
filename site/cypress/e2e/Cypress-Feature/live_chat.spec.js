@@ -532,7 +532,7 @@ describe('Tests for creating, editing and using tests', () => {
                             Authorization: key,
                         },
                     }).then(() => {
-                        cy.get('[data-testid="message-container"]', { timeout: 10000 }).should('not.exist');
+                        cy.get('[data-testid="message-container"]').should('not.exist');
                     });
                 });
             });
