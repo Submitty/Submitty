@@ -113,6 +113,24 @@ class HomePageController extends AbstractController {
         );
     }
 
+    #[Route("/home/go_to_course_notifications", methods: ["POST"])]
+    public function goToCourseNotifications(): void {
+        $courses = $this->courses;
+        $course_title = $_POST['course'];
+        foreach ($courses as $course) {
+            if ($course->getTitle() === $course_title) {
+                $semester = $course->getTerm();
+                $this->core->loadCourseConfig($semester, $course_title);
+                $this->core->loadCourseDatabase();
+                $url = $this->core->buildCourseUrl(['notifications']);
+                $this->core->redirect($url);
+                return;
+            }
+        }
+        $this->core->addErrorMessage("Course not found.");
+        $this->core->redirect($this->core->buildUrl(['home']));
+    }
+
     #[Route("/home/mark_seen", methods: ["POST"])]
     public function markNotificationsAsSeen(): void {
         $courses = $this->courses;

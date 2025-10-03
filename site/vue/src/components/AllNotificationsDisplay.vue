@@ -42,6 +42,31 @@ const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
 
+function goToNotification(url: string) {
+    if (!url) {
+        return;
+    }
+    window.location.href = url;
+}
+
+function goToCourseNotifications(course: string) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = buildUrl(['home', 'go_to_course_notifications']);
+    const courseInput = document.createElement('input');
+    courseInput.type = 'hidden';
+    courseInput.name = 'course';
+    courseInput.value = course;
+    form.appendChild(courseInput);
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = window.csrfToken;
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
 function markSeen(course: string, id: number) {
     $.ajax({
         url: buildUrl(['home', 'mark_seen']),
@@ -96,45 +121,52 @@ function markSeen(course: string, id: number) {
       No unseen notifications.
     </p>
     <div
-      v-else
-      id="recent-notifications"
+      v-for="n in visibleNotifications"
+      :key="n.id"
+      role="link"
+      tabindex="0"
+      class="notification"
+      :class="{ unseen: !n.seen }"
+      @click="goToNotification(n.notification_url)"
     >
-      <div
-        v-for="n in visibleNotifications"
-        :key="n.id"
-        class="notification"
-        :class="{ unseen: !n.seen }"
-      >
-        <i
-          v-if="n.component === 'forum'"
-          class="fas fa-comments notification-type"
-          title="Forum"
-        />
-        <a
-          :href="n.notification_url"
-        >
-          <div class="notification-content">
-            <span>
-              {{ n.content }}
-            </span>
-            <div class="notification-time">
-              {{ n.course }} - {{ n.notify_time }}
-            </div>
-          </div>
-        </a>
-        <a
-          v-if="!n.seen"
-          class="notification-seen"
-          href="#"
-          role="button"
-          title="Mark as seen"
-          aria-label="Mark as seen"
-          @click.stop.prevent="markSeen(n.course, Number(n.id))"
-          @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
-        >
-          <i class="far fa-envelope-open notification-seen-icon" />
-        </a>
+      <i
+        v-if="n.component === 'forum'"
+        class="fas fa-comments notification-type"
+        title="Forum"
+      />
+      <i
+        v-else-if="n.component === 'grading'"
+        class="fas fa-star notification-type"
+        title="Gradeable"
+      />
+      <i
+        v-else-if="n.component === 'team'"
+        class="fas fa-users notification-type"
+        title="Team Action"
+      />
+
+      <div class="notification-content">
+        <p class="notification-text">{{ n.content }}</p>
+        <div class="notification-time">
+          <span
+            class="course-notification-link"
+            title="Go to notifications"
+            @click.stop="goToCourseNotifications(n.course)"
+          > {{ n.course }} </span> - {{ n.notify_time }}
+        </div>
       </div>
+      <a
+        v-if="!n.seen"
+        class="notification-seen"
+        href="#"
+        role="button"
+        title="Mark as seen"
+        aria-label="Mark as seen"
+        @click.stop.prevent="markSeen(n.course, Number(n.id))"
+        @keydown.enter.stop.prevent="markSeen(n.course, Number(n.id))"
+      >
+        <i class="far fa-envelope-open notification-seen-icon" />
+      </a>
     </div>
   </div>
 </template>
@@ -182,20 +214,42 @@ function markSeen(course: string, id: number) {
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
+  cursor: pointer;
 }
 
 .notification:last-of-type {
     border-bottom: none;
 }
 
+.notification-text {
+  font-weight: 600;
+  color: var(--text-black);
+  text-decoration: none;
+}
+
+.notification a {
+  color: var(--text-black);
+  text-decoration: none;
+}
+
+.notification.unseen {
+    background-color: var(--viewed-content);
+}
+
 .notification:hover {
-    cursor: pointer;
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
 .notification a {
   color: var(--text-black);
   text-decoration: none;
+}
+
+.course-notification-link {
+  cursor: pointer;
+}
+.course-notification-link:hover {
+  text-decoration: underline;
 }
 
 .notification.unseen {
@@ -229,6 +283,8 @@ function markSeen(course: string, id: number) {
 }
 
 .notification-seen {
+    all: unset;
+    cursor: pointer;
     text-align: center;
     flex: 0 0 auto;
     padding: 10px 16px;
