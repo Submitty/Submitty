@@ -9,31 +9,31 @@
         <div class="markers-container">
             <ul id="details-legend">
                 <li>
-                    <i class="fas fa-circle grader-NULL"></i>
+                    <i class="grading-example-circle grader-NULL"></i>
                     Ungraded component
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-3"></i>
+                    <i class="grading-example-circle grader-3"></i>
                     Component graded by a limited access grader
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-4"></i>
+                    <i class="grading-example-circle grader-4"></i>
                     Peer component graded by a student
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-1"></i>
+                    <i class="grading-example-circle grader-1"></i>
                     Component graded by a full access grader
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-verified"></i>
+                    <i class="grading-example-circle grader-verified"></i>
                     Limited access grader verified
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-double"></i>
+                    <i class="grading-example-circle grader-double"></i>
                     Component double-graded by a full access grader or instructor
                 </li>
                 <li>
-                    <i class="fas fa-circle grader-active"></i>
+                    <i class="grading-example-circle grader-active grader-NULL"></i>
                     Component actively being graded
                 </li>
             </ul>
@@ -420,23 +420,24 @@
                     {% set user_id = graded_gradeable.getSubmitter().getId() %}
                     {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
                     {% set component_graders = user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] is defined ? user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] : {} %}
-
+                    {% set class_list = ['grading-circle'] %}
+                    {% set title = graded_gradeable.getGradeable().getComponents()[index].getTitle() %}
                     {% if component_graders is not empty %}
-                        <i title="Currently being graded by: {{ component_graders | map(grader => grader.grader_id) | join(', ') }}" class="fas fa-circle grader-active"></i>
-                    {%  elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
-                        <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                        {% set class_list = class_list | merge(['grader-active']) %}
+                        {% set title = title ~ " (Currently being graded by: " ~ (component_graders | map(grader => grader.grader_id) | join(', ')) ~ ")" %}
+                    {% endif %}
+                    {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
+                        {% set class_list = class_list | merge(['grader-NULL']) %}
                     {% else %}
                         {% if info.graded_groups[index] =="peer-null"   %}
                             {# Indicates Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] == 4   %}
-                            {# Indicates Graded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                            {% set class_list = class_list | merge(['grader-NULL']) %}
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                            {% set class_list = class_list | merge(['grader-' ~ info.graded_groups[index]]) %}
                         {% endif %}
                     {% endif %}
+                    <div title="{{ title }}" class="{{ class_list | join(' ') }}"></div>
             {% endif %}
             {# Peer View for Stoplights #}
             {% if core.getUser().getGroup() == 4 %}
