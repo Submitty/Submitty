@@ -1,3 +1,7 @@
+.content-overflow {
+    overflow: visible;
+}
+
 .float-right {
     float: right;
 }
