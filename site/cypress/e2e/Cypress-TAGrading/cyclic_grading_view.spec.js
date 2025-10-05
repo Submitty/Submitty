@@ -11,7 +11,7 @@ describe('Cyclic grading View Test', () => {
                 cy.get('[data-testid="agree-popup-btn"]').click();
             }
             cy.get('[data-testid="view-sections"]').click();
-            cy.get('[data-testid="grade-button"]').eq(12).click();
+            cy.get('[data-testid="grade-button"]').eq(13).click();
             cy.get('[data-testid="student-info-btn"]').click();
             cy.get('[data-testid="rubric-title"]').should('contain', 'Joe Student');
             cy.get('[data-testid="prev-student-navlink"]').click();
@@ -20,7 +20,7 @@ describe('Cyclic grading View Test', () => {
             cy.get('[data-testid="ta-grading-setting-option"]').first().select('Prev/Next Ungraded Student');
             cy.get('[data-testid="close-button"]').eq(3).click();
             cy.get('[data-testid="next-student-navlink"]').click();
-            cy.get('[data-testid="rubric-title"]').should('contain', 'Joe Student');
+            cy.get('[data-testid="rubric-title"]').should('contain', 'Adela Wisozk');
         });
     });
     ['ta', 'instructor'].forEach((user) => {
@@ -41,13 +41,13 @@ describe('Cyclic grading View Test', () => {
             cy.get('[data-testid="grading-setting-btn"]').children().should('exist');
             cy.get('[data-testid="grading-scroll-message"]').should('exist');
             cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);
-            cy.get('#page_1_nav').should('contain', 'Ben Bitdiddle');
-            cy.get('#page_2_nav').should('contain', 'Dannie Farrell');
-            cy.get('#page_3_nav').should('contain', 'Adan Fisher');
-            cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Ben Bitdiddle').and('contain', 'Dannie Farrell').and('contain', 'Adan Fisher');
+            cy.get('#page_1_nav').should('contain', 'Foster Beahan');
+            cy.get('#page_2_nav').should('contain', 'Ben Bitdiddle');
+            cy.get('#page_3_nav').should('contain', 'Dannie Farrell');
+            cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Foster Beahan').and('contain', 'Ben Bitdiddle').and('contain', 'Dannie Farrell');
             cy.get('[data-testid="next-student-navlink"]').click();
             cy.get('[data-testid="tab-bar-wrapper"]').children().its('length').should('eq', 3);
-            cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Eunice Hamill ').and('contain', 'Edison King').and('contain', 'Justice Kuhic');
+            cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Adan Fisher').and('contain', 'Eunice Hamill').and('contain', 'Edison King');
         });
     });
 });
