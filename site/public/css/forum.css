@@ -973,3 +973,7 @@
     display: block;
     font-size: 14px;
 }
+
+#search-clear {
+    cursor: pointer;
+}

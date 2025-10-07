@@ -2273,11 +2273,10 @@ function loadFilterHandlers() {
             $('#search-submit').trigger('mousedown');
         }
     });
-    
+
     $('#search-content').on('input', (e) => {
         $('#search-clear').toggle($('#search-content').val() !== '');
     });
-
 
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('').trigger('change');
