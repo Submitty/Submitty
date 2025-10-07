@@ -11,11 +11,18 @@ const props = defineProps<Props>();
 
 <template>
   <div
-    class="content"
+    class="notifications-content"
   >
-    <NotificationsDisplay :notifications="notifications" />
+    <NotificationsDisplay
+        :notifications="notifications"
+        :course=true
+    />
   </div>
 </template>
 
 <style scoped>
+.notifications-content {
+    margin: 10px;
+    padding: 10px;
+}
 </style>

@@ -6,6 +6,7 @@ import { reactive } from 'vue';
 
 const props = defineProps<{
     notifications: Notification[];
+    course: boolean;
 }>();
 
 const localNotifications = reactive([...props.notifications]);
@@ -104,6 +105,18 @@ function markSeen(course: string, id: number) {
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
+        <button
+          v-if="notifications.length !== 0 && course"
+          class="btn"
+        >
+          Mark as seen
+        </button>
+        <button
+          v-if="course"
+          class="btn"
+        >
+          Settings
+        </button>
       </div>
     </div>
     <p
@@ -152,7 +165,7 @@ function markSeen(course: string, id: number) {
             class="course-notification-link"
             title="Go to notifications"
             @click.stop="goToCourseNotifications(n.course)"
-          > {{ n.course }} </span> - {{ n.notify_time }}
+          > {{ n.course }} </span><span> - </span>{{ n.notify_time }}
         </div>
       </div>
       <a
@@ -174,14 +187,14 @@ function markSeen(course: string, id: number) {
 .notification-panel {
     background-color: var(--default-white);
     height: auto;
-    padding: 20px
+    padding: 20px;
 }
 
 .notifications-header-container {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .notifications-header {
