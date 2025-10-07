@@ -118,19 +118,14 @@ Cypress.Commands.add('checkLogoutInAfterEach', () => {
  * @param {int} wait
  */
 Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    return cy.wait(wait).then(() => {
-        return cy.reload().then(() => {
-            return condition().then((result) => {
-                if (timeout <= 0) {
-                    throw new Error('Timed out waiting for condition');
-                }
-                if (result) {
-                    return result;
-                }
-                // eslint-disable-next-line no-restricted-syntax
-                return cy.waitAndReloadUntil(condition, timeout - wait, wait);
-            });
-        });
+    return condition().then((result) => {
+        if (timeout <= 0) {
+            throw new Error('Timed out waiting for condition');
+        }
+        if (result) {
+            return result;
+        }
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        return cy.wait(wait).reload().waitAndReloadUntil(condition, timeout - wait, wait);
     });
 });
