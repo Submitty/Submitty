@@ -14,10 +14,7 @@
 
     // needed for /usr/bin/mv
     "allow_system_calls" : [
-        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
-        "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
-        "PROCESS_CONTROL_ADVANCED",
-        "PROCESS_CONTROL_NEW_PROCESS_THREAD"
+        "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS"
     ],
 
     "autograding" : {
