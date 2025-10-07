@@ -10,14 +10,18 @@ class NotificationView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->enableMobileViewport();
-        $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
-            'course' => $current_course,
-            'show_all' => $show_all,
-            'notifications' => $notifications,
-            'notification_saves' => $notification_saves,
-            'notifications_url' => $this->core->buildCourseUrl(['notifications']),
-            'mark_all_as_seen_url' => $this->core->buildCourseUrl(['notifications', 'seen']),
-            'notification_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings'])
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "page",
+            "name" => "CourseNotifications",
+            "args" => [
+                "course" => $current_course,
+                "show_all" => $show_all,
+                "notifications" => $notifications,
+                "notification_saves" => $notification_saves,
+                "notifications_url" => $this->core->buildCourseUrl(['notifications']),
+                "mark_all_as_seen_url" => $this->core->buildCourseUrl(['notifications', 'seen']),
+                "notification_settings_url" => $this->core->buildCourseUrl(['notifications', 'settings'])
+            ]
         ]);
     }
 

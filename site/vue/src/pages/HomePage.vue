@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
-import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
+import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
@@ -124,7 +124,7 @@ const buildCourseUrl = (course: Course) => {
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay :notifications="notifications" />
+    <NotificationsDisplay :notifications="notifications" />
   </div>
 </template>
 
