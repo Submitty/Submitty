@@ -1028,6 +1028,69 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+        // Add pencil icon toggle for Category/Gradeable Configuration
+        // Whether config items are visible
+        let configVisible = false;
+
+        // Initially hide config items
+        $('#extra_credit_checkbox').parent().hide();
+        $('#drop_lowest_checkbox').parent().hide();
+        $('div[id^="dropLowestDiv-"]').hide();
+        $('input[id^="per-gradeable-percents-checkbox-"]').hide();
+        $('label[id^="per-gradeable-percents-label-"]').hide();
+        $('button[id^="per-gradeable-percents-reset-"]').hide();
+        $('div[id^="gradeable-percents-div-"]').hide();
+        $('i[id^="per-gradeable-percents-warning-"]').hide();
+
+        $('#config-pencil').click(() => {
+            configVisible = !configVisible;
+
+            if (configVisible) {
+                $('#config-pencil i').removeClass('fa-pencil-alt').addClass('fa-cog');
+                // Show Extra Credit
+                $('#extra_credit_checkbox').parent().show();
+                // Show Remove Lowest
+                $('#drop_lowest_checkbox').parent().show();
+                if ($('#drop_lowest_checkbox').is(':checked')) {
+                    $('div[id^="dropLowestDiv-"]').show();
+                }
+                // Show Per Gradeable Percents controls
+                $('input[id^="per-gradeable-percents-checkbox-"]').show();
+                $('label[id^="per-gradeable-percents-label-"]').show();
+                $('button[id^="per-gradeable-percents-reset-"]').show();
+                // Show percents inputs if checkboxes are checked
+                $('input[id^="per-gradeable-percents-checkbox-"]').each(function() {
+                    const bucket = this.id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
+                    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+                    const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
+                    const isChecked = $(this).is(':checked');
+                    
+                    percentsInputsInBucket.each((index, percentInput) => {
+                        $(percentInput).toggle(isChecked);
+                    });
+                    resetButtonInBucket.each((index, resetButton) => {
+                        $(resetButton).toggle(isChecked);
+                    });
+                    // Show warning if applicable
+                    if (isChecked) {
+                        ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
+                    }
+                });
+            } else {
+                $('#config-pencil i').removeClass('fa-cog').addClass('fa-pencil-alt');
+                // Hide Extra Credit
+                $('#extra_credit_checkbox').parent().hide();
+                // Hide Remove Lowest
+                $('#drop_lowest_checkbox').parent().hide();
+                $('div[id^="dropLowestDiv-"]').hide();
+                // Hide Per Gradeable Percents controls
+                $('input[id^="per-gradeable-percents-checkbox-"]').hide();
+                $('label[id^="per-gradeable-percents-label-"]').hide();
+                $('button[id^="per-gradeable-percents-reset-"]').hide();
+                $('div[id^="gradeable-percents-div-"]').hide();
+                $('i[id^="per-gradeable-percents-warning-"]').hide();
+            }
+        });
     });
 });
 
@@ -1242,71 +1305,5 @@ $(document).ready(() => {
     // Bind click listener to grade summaries button
     $('#grade-summaries-button').click(() => {
         $('#grade-summaries-last-run').text('Running...');
-    });
-});
-
-// Add pencil icon toggle for Category/Gradeable Configuration
-$(document).ready(() => {
-    // Whether config items are visible
-    let configVisible = false;
-
-    // Initially hide config items
-    $('#extra_credit_checkbox').parent().hide();
-    $('#drop_lowest_checkbox').parent().hide();
-    $('div[id^="dropLowestDiv-"]').hide();
-    $('input[id^="per-gradeable-percents-checkbox-"]').hide();
-    $('label[id^="per-gradeable-percents-label-"]').hide();
-    $('button[id^="per-gradeable-percents-reset-"]').hide();
-    $('div[id^="gradeable-percents-div-"]').hide();
-    $('i[id^="per-gradeable-percents-warning-"]').hide();
-
-    $('#config-pencil').click(() => {
-        configVisible = !configVisible;
-
-        if (configVisible) {
-            $('#config-pencil').removeClass('fa-pencil-alt').addClass('fa-pencil');
-            // Show Extra Credit
-            $('#extra_credit_checkbox').parent().show();
-            // Show Remove Lowest
-            $('#drop_lowest_checkbox').parent().show();
-            if ($('#drop_lowest_checkbox').is(':checked')) {
-                $('div[id^="dropLowestDiv-"]').show();
-            }
-            // Show Per Gradeable Percents controls
-            $('input[id^="per-gradeable-percents-checkbox-"]').show();
-            $('label[id^="per-gradeable-percents-label-"]').show();
-            $('button[id^="per-gradeable-percents-reset-"]').show();
-            // Show percents inputs if checkboxes are checked
-            $('input[id^="per-gradeable-percents-checkbox-"]').each(function() {
-                const bucket = this.id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
-                const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
-                const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
-                const isChecked = $(this).is(':checked');
-                
-                percentsInputsInBucket.each((index, percentInput) => {
-                    $(percentInput).toggle(isChecked);
-                });
-                resetButtonInBucket.each((index, resetButton) => {
-                    $(resetButton).toggle(isChecked);
-                });
-                // Show warning if applicable
-                if (isChecked) {
-                    ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
-                }
-            });
-        } else {
-            $('#config-pencil').removeClass('fa-pencil').addClass('fa-pencil-alt');
-            // Hide Extra Credit
-            $('#extra_credit_checkbox').parent().hide();
-            // Hide Remove Lowest
-            $('#drop_lowest_checkbox').parent().hide();
-            $('div[id^="dropLowestDiv-"]').hide();
-            // Hide Per Gradeable Percents controls
-            $('input[id^="per-gradeable-percents-checkbox-"]').hide();
-            $('label[id^="per-gradeable-percents-label-"]').hide();
-            $('button[id^="per-gradeable-percents-reset-"]').hide();
-            $('div[id^="gradeable-percents-div-"]').hide();
-            $('i[id^="per-gradeable-percents-warning-"]').hide();
-        }
     });
 });
