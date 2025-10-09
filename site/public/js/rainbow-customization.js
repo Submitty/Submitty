@@ -1059,12 +1059,12 @@ $(document).ready(() => {
                 $('label[id^="per-gradeable-percents-label-"]').show();
                 $('button[id^="per-gradeable-percents-reset-"]').show();
                 // Show percents inputs if checkboxes are checked
-                $('input[id^="per-gradeable-percents-checkbox-"]').each(function() {
+                $('input[id^="per-gradeable-percents-checkbox-"]').each(function () {
                     const bucket = this.id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
                     const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
                     const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
                     const isChecked = $(this).is(':checked');
-                    
+
                     percentsInputsInBucket.each((index, percentInput) => {
                         $(percentInput).toggle(isChecked);
                     });
@@ -1076,7 +1076,8 @@ $(document).ready(() => {
                         ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
                     }
                 });
-            } else {
+            }
+            else {
                 $('#config-pencil i').removeClass('fa-cog').addClass('fa-pencil-alt');
                 // Hide Extra Credit
                 $('#extra_credit_checkbox').parent().hide();
