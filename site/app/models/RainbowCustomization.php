@@ -177,15 +177,21 @@ class RainbowCustomization extends AbstractModel {
                 else {
                     continue;
                 }
+                // Create a map from id to percent for this bucket
+                $percent_map = [];
 
-                //loop through all gradeables in bucket and compare them
-                $j_index = 0;
-                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
-                        $c_gradeable['override_percent'] = true;
-                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'percent')) {
+                        $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
                     }
-                    $j_index++;
+                }
+
+                // Assign percents to customization_data gradeables by matching ids
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($percent_map[$c_gradeable['id']])) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
+                    }
                 }
             }
         }

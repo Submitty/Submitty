@@ -280,7 +280,7 @@ function getGradeableBuckets() {
                 gradeable.max = parseFloat(children[0].dataset.maxScore);
 
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
-                if ($(children[1]).is(':visible')) {
+                if ($(`#per-gradeable-percents-checkbox-${type}`).is(':checked')) {
                     gradeable.percent = parseFloat(children[1].value) / 100.0;
                 }
 
