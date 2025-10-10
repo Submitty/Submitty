@@ -146,7 +146,9 @@ function markSeen(course: string, id: number) {
       />
 
       <div class="notification-content">
-        <p class="notification-text">{{ n.content }}</p>
+        <p class="notification-text">
+          {{ n.content }}
+        </p>
         <div class="notification-time">
           <span
             class="course-notification-link"
