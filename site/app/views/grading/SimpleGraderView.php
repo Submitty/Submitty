@@ -73,8 +73,6 @@ class SimpleGraderView extends AbstractView {
         $component_ids = json_encode($comp_ids);
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('simple-grading.js');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
@@ -99,7 +97,8 @@ class SimpleGraderView extends AbstractView {
             "user_id" => $this->core->getUser()->getId(),
             "anon_ids" => $anon_ids,
             'show_grader' => isset($_COOKIE['show_grader']) ? ($_COOKIE['show_grader'] === 'true') : false,
-            'show_dates' => isset($_COOKIE['show_dates']) ? ($_COOKIE['show_dates'] === 'true') : false
+            'show_dates' => isset($_COOKIE['show_dates']) ? ($_COOKIE['show_dates'] === 'true') : false,
+            'full_settings_access' => $this->core->getUser()->getGroup() <= 2
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
@@ -107,8 +106,6 @@ class SimpleGraderView extends AbstractView {
             "components_numeric" => $components_numeric,
             "sections" => $sections
         ]);
-
-        $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
 
         return $return;
     }
