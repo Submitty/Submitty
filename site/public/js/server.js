@@ -1751,7 +1751,7 @@ function popOutSubmittedFile(html_file, url_file) {
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
     }
-    window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(file_path, '_blank');
     return false;
 }
 
