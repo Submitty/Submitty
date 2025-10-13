@@ -160,7 +160,8 @@
 	$( document ).ready(function() {
 		loadFilterHandlers();
 		$('#search-content').val(Cookies.get('search_query')).trigger('change');
-		updateThreads(true, saveFilterState);
+		updateThreads(true, null);
+		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
