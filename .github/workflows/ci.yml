@@ -992,6 +992,12 @@ jobs:
         with:
           name: install-log
           path: /usr/local/submitty/install.log
+      
+      - name: Run systemctl status and journal
+        shell: bash
+        run: |
+          systemctl status submitty_autograding_worker.service
+          journalctl -xeu submitty_autograding_worker.service
 
       - uses: actions/upload-artifact@v4
         if: failure()
