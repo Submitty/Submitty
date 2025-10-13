@@ -994,6 +994,7 @@ jobs:
           path: /usr/local/submitty/install.log
       
       - name: Run systemctl status and journal
+        if: failure()
         shell: bash
         run: |
           systemctl status submitty_autograding_worker.service
