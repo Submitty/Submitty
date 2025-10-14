@@ -196,7 +196,13 @@
                     </ol>
                 </div>
                 <div id="gradeable_config" data-testid="gradeable-config" class="gradeable-configuration">
-                    <h2 id="config-pencil" style="cursor: pointer;">Category/Gradeable Configuration <i class="fas fa-pencil-alt"></i></h2>
+                    <div class="switch-container">
+                        <h2 class="switch-label">Show Category/Gradeable Configuration</h2>
+                        <label class="switch" aria-label="Toggle Category/Gradeable Configuration">
+                            <input type="checkbox" id="config-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                     <div id="checkboxControls">
                         <input id="extra_credit_checkbox" type="checkbox" name="extra_credit" {{ extra_credit ? 'checked' : '' }}>
                         <label for="extra_credit_checkbox">Extra Credit</label><br>

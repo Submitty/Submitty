@@ -1028,7 +1028,7 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
-        // Add pencil icon toggle for Category/Gradeable Configuration
+        // Add toggle for Category/Gradeable Configuration
         // Whether config items are visible
         let configVisible = false;
 
@@ -1042,11 +1042,10 @@ $(document).ready(() => {
         $('div[id^="gradeable-percents-div-"]').hide();
         $('i[id^="per-gradeable-percents-warning-"]').hide();
 
-        $('#config-pencil').click(() => {
+        $('#config-toggle').change(() => {
             configVisible = !configVisible;
 
             if (configVisible) {
-                $('#config-pencil i').removeClass('fa-pencil-alt').addClass('fa-cog');
                 // Show Extra Credit
                 $('#extra_credit_checkbox').parent().show();
                 // Show Remove Lowest
@@ -1078,7 +1077,6 @@ $(document).ready(() => {
                 });
             }
             else {
-                $('#config-pencil i').removeClass('fa-cog').addClass('fa-pencil-alt');
                 // Hide Extra Credit
                 $('#extra_credit_checkbox').parent().hide();
                 // Hide Remove Lowest
