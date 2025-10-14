@@ -133,7 +133,7 @@ describe('Test sidebars', () => {
         // assert that we dont begin with any custom sidebar elements
         sidebarElements.forEach((element) => {
             cy.get(`[data-testid="${element}-delete-button"]`).should('not.exist');
-            cy.get(`[data-testid="${element}-upload-input"]`).attachFile(`copy_of_sample_files/site_theme/${element}`);
+            cy.get(`[data-testid="${element}-upload-input"]`).selectFile(`cypress/fixtures/copy_of_sample_files/site_theme/${element}`);
             cy.get(`[data-testid="${element}-upload-button"]`).click();
         });
 

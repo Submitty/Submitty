@@ -27,6 +27,10 @@
                 <div class="notification">
                     {% if notification.getComponent() == "forum" %}
                         <i class="fas fa-comments notification-type" title="Forum"></i>
+                    {% elseif notification.getComponent() == "grading" %}
+                        <i class="fas fa-star notification-type" title="Gradeable"></i>
+                    {% elseif notification.getComponent() == "team" %}
+                        <i class="fas fa-users notification-type" title="Team Action"></i>
                     {% else %}
                         <div>&NegativeMediumSpace;</div>
                     {% endif %}
