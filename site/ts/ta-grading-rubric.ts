@@ -2889,13 +2889,13 @@ async function openComponentGrading(component_id: number) {
  * @return {void}
  */
 function scrollToPage(page_num: number) {
-    const files = $('.openable-element-submissions');
+    const files = $('.openable-element-submissions, .openable-element-submissions_processed');
     const activeView = $('#file-view').is(':visible');
     let lastLoadedFile = activeView ? $('#grading_file_name').text().trim() : localStorage.getItem('ta-grading-files-full-view-last-opened') ?? 'upload.pdf';
     if (lastLoadedFile.charAt(0) === '.') {
         lastLoadedFile = lastLoadedFile.substring(1);
     }
-    if (lastLoadedFile.startsWith('upload_page_')) {
+    if (!lastLoadedFile.includes('pdf')) {
         const lastLoadedFilePageNum = parseInt(lastLoadedFile.split('_')[2].split('.')[0]);
         if (activeView && page_num === lastLoadedFilePageNum) {
             return;
