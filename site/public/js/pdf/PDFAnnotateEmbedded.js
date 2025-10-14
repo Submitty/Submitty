@@ -380,11 +380,13 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     $('a[value=\'zoomcustom\']').text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
                     viewer.innerHTML = '';
                     NUM_PAGES = pdf.numPages;
+
+                    const renderPagePromises = [];
                     for (let i = 0; i < NUM_PAGES; i++) {
                         const page = createPage(i + 1);
                         viewer.appendChild(page);
                         const page_id = i + 1;
-                        renderPage(page_id, window.RENDER_OPTIONS).then(() => {
+                        renderPagePromises.push(renderPage(page_id, window.RENDER_OPTIONS).then(() => {
                             // eslint-disable-next-line eqeqeq
                             if (i == page_num) {
                                 // scroll to page on load
@@ -393,8 +395,87 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                     $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
                                 }
                             }
-                        });
+                        }));
                     }
+
+                    Promise.all(renderPagePromises).then(() => {
+                        $('.pdfViewer .page').each(function() {
+                            $(this).css('width', `calc(${$(this).css('width')} * var(--pdf-scale))`);
+                            $(this).css('height', `calc(${$(this).css('height')} * var(--pdf-scale))`);
+                        });
+
+                        let scale = window.RENDER_OPTIONS.scale;
+                        let zoomTimeout = null;
+
+                        function handleWheel(e) {
+                            if (!e.ctrlKey && !e.metaKey) return;
+                            e.preventDefault();
+
+                            const k = 0.0065;
+                            const factor = Math.exp(-k * e.deltaY);
+                            const newScale = Math.min(5, Math.max(1, scale * factor));
+
+                            const viewer = $('#viewer');
+                            const scroller = $('#submission_browser');
+                            let page = $('#viewer > .page:hover');
+
+                            if (!page.length) {
+                                const pages = $('#viewer > .page');
+                                for (const p of pages) {
+                                    const bounds = p[0].getBoundingClientRect();
+                                    if (e.clientY > bounds.top && e.clientY < bounds.bottom) {
+                                        page = p;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (page.length) {
+                                const pageBounds = page[0].getBoundingClientRect();
+                                viewer.css('--pdf-scale', newScale / window.RENDER_OPTIONS.scale);
+                                const newPageBounds = page[0].getBoundingClientRect();
+
+                                const xoff = (e.clientX - pageBounds.left) / pageBounds.width;
+                                const yoff = (e.clientY - pageBounds.top) / pageBounds.height;
+
+                                const newXoff = (e.clientX - newPageBounds.left) / newPageBounds.width;
+                                const newYoff = (e.clientY - newPageBounds.top) / newPageBounds.height;
+
+                                scroller[0].scrollLeft -= (newXoff - xoff) * newPageBounds.width;
+                                scroller[0].scrollTop -= (newYoff - yoff) * newPageBounds.height;
+                            } else {
+                                viewer.css('--pdf-scale', newScale / window.RENDER_OPTIONS.scale);
+                            }
+
+                            scale = newScale;
+
+                            clearTimeout(zoomTimeout);
+                            zoomTimeout = setTimeout(rescale, 100);
+                        }
+
+                        function rescale() {
+                            const viewer = $('#viewer');
+                            window.RENDER_OPTIONS.scale = scale;
+                            localStorage.setItem('pdf-scale', scale);
+                            const pdf = window.RENDER_OPTIONS.pdfDocument;
+                            const NUM_PAGES = pdf.numPages;
+                            const renderPagePromises = [];
+                            for (let i = 1; i <= NUM_PAGES; i++) {
+                                renderPagePromises.push(renderPage(i, window.RENDER_OPTIONS));
+                            }
+                            viewer.css('--pdf-scale', 1);
+
+                            Promise.all(renderPagePromises).then(() => {
+                                $('.pdfViewer .page').each(function() {
+                                    $(this).css('width', `calc(${this.offsetWidth}px * var(--pdf-scale))`);
+                                    $(this).css('height', `calc(${this.offsetHeight}px * var(--pdf-scale))`);
+                                });
+                            });
+                        }
+
+                        $('#file-content')[0].removeEventListener('wheel', handleWheel);
+                        $('#file-content')[0].addEventListener('wheel', handleWheel, { passive: false });
+                    });
                 });
             },
         });
