@@ -1,7 +1,7 @@
 {% block content %}
     <div id="rg-system-message" class="system-message warning performance-warning">
         <span id="rg-system-message-text">
-        Warning: Rainbow Grades nightly builds are {{ is_nightly_enabled ? 'enabled' : 'disabled' }}.
+        Rainbow Grades nightly builds are currently {{ is_nightly_enabled ? 'enabled' : 'not enabled' }}.
         </span>
         <i class="fa fa-times performance-warning-close" onclick="document.getElementById('rg-system-message').style.display='none'"></i>
     </div>
