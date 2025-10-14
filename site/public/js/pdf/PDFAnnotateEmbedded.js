@@ -8,6 +8,8 @@ window.RENDER_OPTIONS = {
     scale: parseFloat(localStorage.getItem('pdf-scale')) || 1,
     rotate: parseInt(localStorage.getItem('pdf-rotate')) || 0,
     studentPopup: false,
+    minScale: 1,
+    maxScale: 5
 };
 
 window.GENERAL_INFORMATION = {
@@ -407,24 +409,26 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                         let scale = window.RENDER_OPTIONS.scale;
                         let zoomTimeout = null;
 
+                        $('#file-zoom-display').text(Math.round(scale * 100) + '%');
+
                         function handleWheel(e) {
                             if (!e.ctrlKey && !e.metaKey) return;
                             e.preventDefault();
 
                             const k = 0.0065;
                             const factor = Math.exp(-k * e.deltaY);
-                            const newScale = Math.min(5, Math.max(1, scale * factor));
+                            const newScale = Math.min(window.RENDER_OPTIONS.maxScale, Math.max(window.RENDER_OPTIONS.minScale, scale * factor));
 
                             const viewer = $('#viewer');
                             const scroller = $('#submission_browser');
                             let page = $('#viewer > .page:hover');
 
                             if (!page.length) {
-                                const pages = $('#viewer > .page');
+                                const pages = [...$('#viewer > .page')];
                                 for (const p of pages) {
-                                    const bounds = p[0].getBoundingClientRect();
+                                    const bounds = p.getBoundingClientRect();
                                     if (e.clientY > bounds.top && e.clientY < bounds.bottom) {
-                                        page = p;
+                                        page = $(p);
                                         break;
                                     }
                                 }
@@ -448,29 +452,14 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             }
 
                             scale = newScale;
+                            $('#file-zoom-display').text(Math.round(scale * 100) + '%');
 
                             clearTimeout(zoomTimeout);
                             zoomTimeout = setTimeout(rescale, 100);
                         }
 
                         function rescale() {
-                            const viewer = $('#viewer');
-                            window.RENDER_OPTIONS.scale = scale;
-                            localStorage.setItem('pdf-scale', scale);
-                            const pdf = window.RENDER_OPTIONS.pdfDocument;
-                            const NUM_PAGES = pdf.numPages;
-                            const renderPagePromises = [];
-                            for (let i = 1; i <= NUM_PAGES; i++) {
-                                renderPagePromises.push(renderPage(i, window.RENDER_OPTIONS));
-                            }
-                            viewer.css('--pdf-scale', 1);
-
-                            Promise.all(renderPagePromises).then(() => {
-                                $('.pdfViewer .page').each(function() {
-                                    $(this).css('width', `calc(${this.offsetWidth}px * var(--pdf-scale))`);
-                                    $(this).css('height', `calc(${this.offsetHeight}px * var(--pdf-scale))`);
-                                });
-                            });
+                            rescalePDF(scale);
                         }
 
                         $('#file-content')[0].removeEventListener('wheel', handleWheel);
@@ -686,4 +675,35 @@ function repairPDF() {
 
 function saveFile() {
     $('#save-pdf-btn').click();
+}
+
+function rescalePDF(scale) {
+    if (scale < window.RENDER_OPTIONS.minScale || scale > window.RENDER_OPTIONS.maxScale) return;
+
+    const viewer = $('#viewer');
+    window.RENDER_OPTIONS.scale = scale;
+    localStorage.setItem('pdf-scale', scale);
+    const pdf = window.RENDER_OPTIONS.pdfDocument;
+    const NUM_PAGES = pdf.numPages;
+    const renderPagePromises = [];
+    for (let i = 1; i <= NUM_PAGES; i++) {
+        renderPagePromises.push(renderPage(i, window.RENDER_OPTIONS));
+    }
+    viewer.css('--pdf-scale', 1);
+    $('#file-zoom-display').text(Math.round(scale * 100) + '%');
+
+    Promise.all(renderPagePromises).then(() => {
+        $('.pdfViewer .page').each(function() {
+            $(this).css('width', `calc(${this.offsetWidth}px * var(--pdf-scale))`);
+            $(this).css('height', `calc(${this.offsetHeight}px * var(--pdf-scale))`);
+        });
+    });
+}
+
+{
+    let timeout = null;
+    window.triggerPDFScale = (delta) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => rescalePDF(window.RENDER_OPTIONS.scale + delta), 100);
+    }
 }

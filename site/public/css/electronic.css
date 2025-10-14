@@ -1437,6 +1437,19 @@ tr.is_publish {
     width: 100%;
 }
 
+#file-zoom-controls {
+    display: inline-block;
+    margin-left: 24px;
+    position: relative;
+    bottom: 3px;
+}
+
+#file-zoom-controls button {
+    box-shadow: none;
+    border: none;
+    background: none;
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #changeCodeStyle {
     display: inline-block;
