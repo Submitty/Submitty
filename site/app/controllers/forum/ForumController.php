@@ -706,12 +706,12 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/posts/modify", methods: ["POST"])]
     public function alterPost(): array {
-        $post_id = filter_input(INPUT_POST, "edit_post_id", FILTER_VALIDATE_INT);
-        $thread_id = filter_input(INPUT_POST, "edit_thread_id", FILTER_VALIDATE_INT);
-        if ($thread_id === false) {
+        $post_id = filter_input(INPUT_POST, "edit_post_id", FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $thread_id = filter_input(INPUT_POST, "edit_thread_id", FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (is_null($thread_id)) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
         }
-        if ($post_id === false) {
+        if (is_null($post_id)) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
         $order = $_COOKIE['forum_display_option'] ?? 'tree';
@@ -793,12 +793,12 @@ class ForumController extends AbstractController {
     #[Route("courses/{_semester}/{_course}/forum/posts/delete", methods: ["POST"])]
     public function deleteOrRestorePost(): array {
         $full_course_name = $this->core->getFullCourseName();
-        $post_id = filter_input(INPUT_POST, "post_id", FILTER_VALIDATE_INT);
-        $thread_id = filter_input(INPUT_POST, "thread_id", FILTER_VALIDATE_INT);
-        if (is_null($thread_id) || $thread_id === false) {
+        $post_id = filter_input(INPUT_POST, "post_id", FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $thread_id = filter_input(INPUT_POST, "thread_id", FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (is_null($thread_id)) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
         }
-        if (is_null($post_id) || $post_id === false) {
+        if (is_null($post_id)) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
@@ -979,15 +979,15 @@ class ForumController extends AbstractController {
     private function editThread(Thread $thread): bool {
         // Ensure authentication before call
         $user = $this->core->getUser();
-        $title = filter_input(INPUT_POST, "title", FILTER_UNSAFE_RAW);
-        $status = filter_input(INPUT_POST, "thread_status", FILTER_VALIDATE_INT);
+        $title = filter_input(INPUT_POST, "title", FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE);
+        $status = filter_input(INPUT_POST, "thread_status", FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         $categories_ids  = [];
         if (isset($_POST['cat'])) {
             foreach ($_POST['cat'] as $category_id) {
                 $categories_ids[] = (int) $category_id;
             }
         }
-        if ($title === false || $status === false || !$this->isValidCategories($categories_ids)) {
+        if (is_null($title) || is_null($status) || !$this->isValidCategories($categories_ids)) {
             return false;
         }
         $thread->setTitle($title);
@@ -996,16 +996,16 @@ class ForumController extends AbstractController {
         $thread->setCategories(new ArrayCollection($categories));
 
         if ($user->accessAdmin()) {
-            $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
-            if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
+            $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE);
+            if (!is_null($lock_thread_date_input) && $lock_thread_date_input !== "") {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
                 $thread->setLockDate(null);
             }
 
-            $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW);
-            if ($expiration_input !== false) {
+            $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE);
+            if (!is_null($expiration_input)) {
                 $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
             }
             else {
@@ -1026,8 +1026,8 @@ class ForumController extends AbstractController {
             $initial_post = $post->saveNewVersion($post->getAuthor());
         }
         // Ensure authentication before call
-        $content = filter_input(INPUT_POST, "thread_post_content", FILTER_UNSAFE_RAW);
-        if ($content === false || $content === "") {
+        $content = filter_input(INPUT_POST, "thread_post_content", FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE);
+        if (is_null($content) || $content === "") {
             return false;
         }
         if (strlen($content) > ForumUtils::FORUM_CHAR_POST_LIMIT) {
