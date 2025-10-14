@@ -1424,7 +1424,7 @@ end of styles used in the admin gradeable page
 }
 
 .grader-active {
-    border: 1px solid var(--standard-vibrant-red);
+    border: 2px solid var(--standard-vibrant-red);
 }
 
 .grading-circle {
