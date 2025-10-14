@@ -689,6 +689,11 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            $course_json = $this->core->getConfig()->getCourseJson() ?? [];
+            $course_details = $course_json['course_details'] ?? [];
+            $nightly_from_course_json = !empty($course_details['auto_rainbow_grades']);
+            $is_nightly_enabled = $nightly_from_course_json;
+            $is_archived = !empty($course_details['archived']);
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
@@ -727,6 +732,8 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
+                'is_nightly_enabled' => $is_nightly_enabled,
+                'is_archived' => $is_archived,
             ]);
         }
 
