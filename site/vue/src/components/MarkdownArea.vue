@@ -5,6 +5,7 @@ import Markdown from './Markdown.vue';
 interface Props {
     markdownAreaId: string;
     markdownAreaValue: string;
+    markdownStatusId?: string;
     class?: string;
     dataPreviousComment?: string;
     initializePreview?: boolean;
@@ -16,7 +17,6 @@ interface Props {
     placeholder?: string;
     previewDivId?: string | null;
     renderHeader?: boolean;
-    showToggle?: boolean;
     rootClass?: string;
     textareaMaxlength?: string | number;
     required?: boolean;
@@ -27,7 +27,6 @@ interface Props {
     textareaOnChange?: string;
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
-    renderMarkdown?: boolean;
     toggleButtonId?: string;
 }
 
@@ -215,28 +214,42 @@ onMounted(() => {
         setMode('preview');
     }
 });
-const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
-function toggleHeader() {
-    showHeader.value = !showHeader.value;
-    window.Cookies.set('markdown_enabled', showHeader.value ? '1' : '0', { path: '/', expires: 365 });
+
+const showHeader = ref(!!props.renderHeader);
+function toggleMarkdown() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            markdownStatusElement.value = +markdownStatusElement.value ? '0' : '1';
+            syncMarkdownToggle();
+        }
+    }
+}
+
+function syncMarkdownToggle() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            const status = markdownStatusElement.value === '1';
+            showHeader.value = status;
+        }
+    }
 }
 </script>
 
 <template>
   <div
-    v-if="showToggle"
+    v-if="markdownStatusId"
     class="button-row"
   >
     <div
       :id="toggleButtonId"
       role="button"
       class="markdown-toggle key_to_click"
-      :class="[
-        showHeader ? 'markdown-active' : 'markdown-inactive'
-      ]"
+      :class="{ 'markdown-active': showHeader, 'markdown-inactive': !showHeader }"
       tabindex="0"
       title="Render markdown"
-      @click="toggleHeader"
+      @click="toggleMarkdown"
     >
       <i class="fab fa-markdown fa-2x" />
     </div>
@@ -252,9 +265,10 @@ function toggleHeader() {
   <div
     :class="[rootClass]"
     class="markdown-area fill-available"
+    @click="syncMarkdownToggle"
   >
     <div
-      v-if="props.renderHeader || showHeader"
+      v-if="showHeader"
       :id="markdownHeaderId ?? undefined"
       class="markdown-area-header"
       :data-mode="mode"

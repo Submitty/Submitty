@@ -46,7 +46,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -71,7 +71,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -96,7 +96,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -124,7 +124,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.4
+      - uses: shivammathur/setup-php@2.35.5
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -151,7 +151,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.4
+      - uses: shivammathur/setup-php@2.35.5
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -187,7 +187,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.4
+      - uses: shivammathur/setup-php@2.35.5
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -220,7 +220,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
@@ -242,7 +242,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
@@ -959,7 +959,7 @@ jobs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules

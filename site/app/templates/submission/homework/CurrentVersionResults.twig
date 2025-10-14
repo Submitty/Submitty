@@ -48,7 +48,7 @@
                                         <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
                                             <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
                                     {% endif %}
-                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions_processed")' aria-label="Download {{file.relative_name}}"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 </div>
                             {% endif %}

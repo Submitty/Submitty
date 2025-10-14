@@ -1,6 +1,13 @@
 {% import _self as self %}
+{% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
 <div class="electronic_file">
-
+<label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
+    <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+<select name="min_grading_group" id="minimum_grading_group_autograding" data-testid="minimum_grading_group_autograding" class="int_val" style="width:180px;">
+    {% for num, role in grading_groups %}
+        <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+    {% endfor %}
+</select>
     <div class="option-title">
         What are students allowed to do?
     </div>

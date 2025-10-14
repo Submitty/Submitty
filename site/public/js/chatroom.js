@@ -144,7 +144,7 @@ function initChatroomSocketClient(chatroomId) {
                 window.location.href = buildCourseUrl(['chat']);
                 break;
             case 'message_delete': {
-                const msgElement = document.getElementById(msg.id);
+                const msgElement = document.getElementById(msg.message_id);
                 if (msgElement) {
                     msgElement.remove();
                 }
