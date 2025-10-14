@@ -1,19 +1,10 @@
 {% block content %}
-    {% if is_archived %}
-        <div id="rg-system-message" class="system-message info performance-warning">
-            <span id="rg-system-message-text">
-            This course is archived. Nightly builds are ignored.
-            </span>
-            <i class="fa fa-times performance-warning-close" onclick="document.getElementById('rg-system-message').style.display='none'"></i>
-        </div>
-        {% else %}
-        <div id="rg-system-message" class="system-message warning performance-warning">
-            <span id="rg-system-message-text">
-            Warning: Rainbow Grades nightly builds are {{ is_nightly_enabled ? 'enabled' : 'disabled' }}.
-            </span>
-            <i class="fa fa-times performance-warning-close" onclick="document.getElementById('rg-system-message').style.display='none'"></i>
-        </div>
-    {% endif %}
+    <div id="rg-system-message" class="system-message warning performance-warning">
+        <span id="rg-system-message-text">
+        Warning: Rainbow Grades nightly builds are {{ is_nightly_enabled ? 'enabled' : 'disabled' }}.
+        </span>
+        <i class="fa fa-times performance-warning-close" onclick="document.getElementById('rg-system-message').style.display='none'"></i>
+    </div>
 {% endblock %}
 <div class="content">
     <div id="rg_web_ui_loading">
