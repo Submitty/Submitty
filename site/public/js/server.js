@@ -1726,6 +1726,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
 function popOutSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
+
     if (url_file.includes('submissions_processed')) {
         directory = 'submissions_processed';
     }
@@ -1751,7 +1752,16 @@ function popOutSubmittedFile(html_file, url_file) {
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
     }
-    window.open(file_path, '_blank');
+
+    // Check the context (submission_browser exists) of the page to determine how to open the file
+    if ($('#submission_browser').length > 0) {
+        // Grading context -> open in pop up
+        window.open(file_path, 'popup', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    }
+    else {
+        // Student context -> open in new tab
+        window.open(file_path, '_blank');
+    }
     return false;
 }
 
