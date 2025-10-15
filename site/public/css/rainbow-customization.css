@@ -383,3 +383,18 @@ div:has(.override)
     border: none;
     margin-right: 10px;
 }
+
+#rg-system-message.info {
+    background-color: green;
+    color: white;
+    border: 1px solid white;
+}
+
+#rg-system-message.warning {
+    background-color: #ffb007;
+    color: rgb(136, 77, 9);
+}
+
+.rg-small-text {
+    font-size: 0.85em; 
+}

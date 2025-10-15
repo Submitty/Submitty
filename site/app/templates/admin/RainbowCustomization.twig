@@ -1,12 +1,18 @@
-{% block content %}
-    <div id="rg-system-message" class="system-message warning performance-warning">
-        <span id="rg-system-message-text">
-        Rainbow Grades nightly builds are currently {{ is_nightly_enabled ? 'enabled' : 'not enabled' }}.
-        </span>
-        <i class="fa fa-times performance-warning-close" onclick="document.getElementById('rg-system-message').style.display='none'"></i>
-    </div>
-{% endblock %}
 <div class="content">
+    {% block content %}
+    <div class="system-message {{ is_nightly_enabled ? 'info' : 'warning' }}" id="rg-system-message">
+        <span id="rg-system-message-text">
+            Rainbow Grades Nightly Builds are currently {{ is_nightly_enabled ? 'enabled' : 'not enabled' }}.
+            {% if not is_nightly_enabled %}
+                <br>
+                <span class="rg-small-text">
+                    To enable nightly builds, follow the steps found 
+                    <a href="https://submitty.org/sysadmin/configuration/rainbow_grades" target="_blank">here</a>.
+                </span>
+            {% endif %}
+        </span>
+    </div>
+    {% endblock %}
     <div id="rg_web_ui_loading">
         <p>Loading...</p>
     </div>
