@@ -86,6 +86,15 @@ set -e
 
 ################################################################################################################
 ################################################################################################################
+# UPDATE SYSTEM DEPENDENCIES
+
+echo -e "Updating system dependencies"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+
+source /usr/local/submitty/venv/bin/activate
+
+################################################################################################################
+################################################################################################################
 # RUN THE SYSTEM AND DATABASE MIGRATIONS
 
 if [ "${IS_WORKER}" == 0 ]; then
@@ -144,14 +153,14 @@ echo -e "Install python_submitty_utils"
 rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
-pip3 install .
+(umask 022 && /usr/local/submitty/venv/bin/pip3 install .)
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
 # affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
 # This gets run here in case we make any python package changes.
-find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+find /usr/local/submitty/venv/lib/python3*/site-packages -type d -exec chmod 755 {} +
+find /usr/local/submitty/venv/lib/python3*/site-packages -type f -exec chmod 755 {} +
+find /usr/local/submitty/venv/lib/python3*/site-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/submitty/venv/lib/python3*/site-packages -type f -name '*.pth' -exec chmod 644 {} +
 
 popd > /dev/null
 
@@ -350,9 +359,9 @@ pushd /tmp > /dev/null
 echo "Updating DrMemory..."
 
 rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+#wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+#tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+#rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -625,7 +634,7 @@ done
 if [ "${IS_WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u "${DAEMON_USER}" python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
+    sudo -H -u "${DAEMON_USER}" /usr/local/submitty/venv/bin/python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
     echo -e "done"
 fi
 
@@ -676,6 +685,10 @@ for i in "${ALL_DAEMONS[@]}"; do
     chown -R "${DAEMON_USER}:${DAEMON_GROUP}"                "/etc/systemd/system/${i}.service"
     chmod 444                                                "/etc/systemd/system/${i}.service"
 done
+
+if [ "${IS_VAGRANT}" == 1 ]; then
+    rsync -rtz  "${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service" "/etc/systemd/system/nullsmtpd.service"
+fi
 
 # delete the autograding tmp directories
 rm -rf /var/local/submitty/autograding_tmp
@@ -869,7 +882,7 @@ else
     echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
-    sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
+    sudo -H -u "${DAEMON_USER}" /usr/local/submitty/venv/bin/python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
     echo -e -n "Done updating workers and installing docker images\n\n"
 
     if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
