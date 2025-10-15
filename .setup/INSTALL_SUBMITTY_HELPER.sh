@@ -359,9 +359,9 @@ pushd /tmp > /dev/null
 echo "Updating DrMemory..."
 
 rm -rf /tmp/DrMemory*
-#wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-#tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-#rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
