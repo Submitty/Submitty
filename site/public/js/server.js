@@ -1756,7 +1756,7 @@ function popOutSubmittedFile(html_file, url_file) {
     // Check the context (submission_browser exists) of the page to determine how to open the file
     if ($('#submission_browser').length > 0) {
         // Grading context -> open in pop up
-        window.open(file_path, 'popup', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
     }
     else {
         // Student context -> open in new tab
