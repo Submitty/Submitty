@@ -370,7 +370,7 @@ function syncMarkdownToggle() {
         class="screen-reader"
       >{{ markdownAreaId }}</label>
       <textarea
-        v-if="mode === 'edit'"
+        v-show="mode === 'edit'"
         :id="markdownAreaId"
         ref="textareaRef"
         v-model="content"
