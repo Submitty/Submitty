@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/submitty/venv/bin/python3
 
 """
  This script will convert a given xlsx (excel) file to csv format using
