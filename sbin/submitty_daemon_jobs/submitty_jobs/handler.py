@@ -160,20 +160,24 @@ def killStaleDaemonJobs():
     previous runs.
     """
     logMessage("Checking for stale submitty_daemon_jobs.py processes")
-    # all pids for python3 processes
-    python_pids = list(map(int, subprocess.check_output(["pidof", "-c", 'python3']).split()))
-    # all pids for processes with "submitty_daemon_jobs.py" argument
-    main_py_pids = list(map(int, subprocess.check_output(["pgrep", "-f",
+    try:
+        # all pids for python3 processes
+        python_pids = list(map(int, subprocess.check_output(["pidof", "-c", 'python3']).split()))
+        # all pids for processes with "submitty_daemon_jobs.py" argument
+        main_py_pids = list(map(int, subprocess.check_output(["pgrep", "-f",
                                                           "submitty_daemon_jobs.py"]).split()))
-    python_main_py_pid = set(python_pids).intersection(main_py_pids)
-    myself = os.getpid()
-    for i in python_main_py_pid:
-        if i == myself:
-            # don't kill myself
-            continue
-        p = psutil.Process(i)
-        p.terminate()
-        logMessage(f"Stale submitty_daemon_jobs.py process {i} was killed")
+        python_main_py_pid = set(python_pids).intersection(main_py_pids)
+        myself = os.getpid()
+        for i in python_main_py_pid:
+            if i == myself:
+                # don't kill myself
+                continue
+            p = psutil.Process(i)
+            p.terminate()
+            logMessage(f"Stale submitty_daemon_jobs.py process {i} was killed")
+    except subprocess.CalledProcessError:
+        # pidof or pgrep did not find any matching processes
+        pass
 
 
 def main():
