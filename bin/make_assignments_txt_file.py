@@ -79,7 +79,7 @@ def main():
                         outfile.write("build_homework  "+config_path+"  "+semester+"  "+course+"  "+g_id+"\n")
                     processed.append(g_id)
                     # make sure the command line build exits on the first failure
-                    outfile.write("if [ $? -eq 1 ]; then exit 1; fi\n")
+                    # outfile.write("if [ $? -eq 1 ]; then exit 1; fi\n")
                 else:
                     # print("SKIPPING " + g_id)
                     continue
