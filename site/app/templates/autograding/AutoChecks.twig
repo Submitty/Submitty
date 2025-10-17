@@ -79,7 +79,7 @@
             {{ element.title }}
             {% if element.show_popup %}
               {% if element.type == "notebook" %}
-                  <span onclick='popOutSubmittedFile("{{ check.filename|url_encode }}", "{{ element.filepath|url_encode }}")' aria-label="Open the file in a new tab">
+                  <span onclick='openSubmittedFile("{{ check.filename|url_encode }}", "{{ element.filepath|url_encode }}")' aria-label="Open the file in a new tab">
                       <i class="fas fa-external-link-alt" style="cursor: pointer;"></i>
                   </span>
               {% else %}

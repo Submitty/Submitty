@@ -274,7 +274,7 @@
                                     <a class='openAllFilesubmissions openable-element-submissions key_to_click' file-url="{{ file.path|url_encode }}" onclick='openFrame({% if is_grader_view %}"{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", "{{ id }}", false{% else %}"{{ file.path|url_encode|e('js') }}", "{{ id }}", "{{ file.name|url_encode|e('js') }}", true{% endif %}); {% if is_grader_view %}updateCookies();{% endif %}'>
                                         <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                                         {{ file.name }}</a> &nbsp;
-                                    <a id = 'open_file_{{ file.name|url_encode }}' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab" class="key_to_click" tabindex="0"><i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></a>
+                                    <a id = 'open_file_{{ file.name|url_encode }}' onclick='openSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab" class="key_to_click" tabindex="0"><i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></a>
                                     {% if is_grader_view %}
                                     <a onclick='viewFileFullPanel("{{ file.name|url_encode|e('js') }}", "{{ file.path|url_encode|e('js') }}", 0, "notebook")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
                                     {% endif %}
