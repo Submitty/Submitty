@@ -179,18 +179,14 @@ function build_homework {
     fi
 
     # if this script is run by root, then run the set allowed minutes script
-    if [[ "$UID" -eq "0" ]] ; then
-        # Add allowed minutes in database from config if exists
-        python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
-        set_minutes="$?"
+    # Add allowed minutes in database from config if exists
+    python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
+    set_minutes="$?"
 
-        if (("$set_minutes" != 0)); then
-            echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
-            popd > /dev/null
-            return 1
-        fi
-    else
-        echo -e "\nNOTE:  To set the autograding config allowed minutes, the build_homework_function script must be run as sudo."
+    if (("$set_minutes" != 0)); then
+        echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
+        popd > /dev/null
+        return 1
     fi
 
     # Call configure.out (which has its main in /grading/main_configure.cpp)
