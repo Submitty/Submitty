@@ -732,7 +732,7 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
-                'is_nightly_enabled' => $is_nightly_enabled,  
+                'is_nightly_enabled' => $is_nightly_enabled,
             ]);
         }
 
