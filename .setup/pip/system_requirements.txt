@@ -16,7 +16,7 @@ requests==2.32.5
 python-pam==2.0.2
 ruamel.yaml==0.18.15
 psycopg2-binary==2.9.10
-sqlalchemy==2.0.42
+sqlalchemy==2.0.44
 psutil==7.1.0
 python-dateutil==2.9.0.post0
 watchdog==6.0.0
