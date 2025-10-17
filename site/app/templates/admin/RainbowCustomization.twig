@@ -196,19 +196,19 @@
                     </ol>
                 </div>
                 <div id="gradeable_config" data-testid="gradeable-config" class="gradeable-configuration">
-                    <h2>Category/Gradeable Configuration:
-                        <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
-                    </h2>
-                    <div id="checkboxControls" style="display: none;">
-                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
-                        <label for="extra_credit_checkbox">Extra credit</label><br>
+                    <div class="switch-container">
+                        <h2 class="switch-label">Show Category/Gradeable Configuration</h2>
+                        <label class="switch" aria-label="Toggle Category/Gradeable Configuration">
+                            <input type="checkbox" id="config-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="checkboxControls">
+                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit" {{ extra_credit ? 'checked' : '' }}>
+                        <label for="extra_credit_checkbox">Extra Credit</label><br>
 
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
-                        <label for="drop_lowest_checkbox">Remove lowest</label><br>
-
-                        <input id="enable-per-gradeable-percents" type="checkbox" name="enable-per-gradeable-percents">
-                        <label for="enable-per-gradeable-percents">Enable/Edit Per Gradeable Percents:</label>
-                        <i>For each bucket, you may grade by percent instead of by points.</i><br>
+                        <label for="drop_lowest_checkbox">Remove Lowest</label><br>
                     </div>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
@@ -228,7 +228,7 @@
 
                                     {% set per_gradeable_percents_checked = false %}
                                     {% for gradeable in gradeables %}
-                                        {% if gradeable["override_percent"] %}
+                                        {% if gradeable["percent"] is defined %}
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}

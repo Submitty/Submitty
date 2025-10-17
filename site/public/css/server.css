@@ -2033,6 +2033,7 @@ Start of slider switch
 .switch-label {
     font-size: 14px;
     font-family: Arial, sans-serif;
+    margin: 0;
     margin-right: 10px;
 }
 
