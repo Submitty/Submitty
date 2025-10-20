@@ -384,15 +384,23 @@ div:has(.override)
     margin-right: 10px;
 }
 
+.nightly-status-enabled {
+    color: var(--good-green);
+}
+
+.nightly-status-disabled {
+    color: var(--alert-warning-yellow);
+}
+
 #rg-system-message.info {
-    background-color: green;
-    color: white;
-    border: 1px solid white;
+    background-color: var(--good-green);
+    color: var(--default-white);
+    border: 1px solid var(--default-white);
 }
 
 #rg-system-message.warning {
-    background-color: #ffb007;
-    color: sienna;
+    background-color: var(--alert-warning-yellow);
+    color: var(--warning-brown);
 }
 
 .rg-small-text {
