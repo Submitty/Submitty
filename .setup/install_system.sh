@@ -761,8 +761,8 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 
 # (re)start the submitty grading scheduler daemon
-systemctl restart submitty_autograding_worker
 systemctl status submitty_autograding_worker.service
+systemctl restart submitty_autograding_worker
 if [ ${WORKER} == 0 ]; then
     systemctl restart submitty_autograding_shipper
     systemctl restart submitty_daemon_jobs_handler
