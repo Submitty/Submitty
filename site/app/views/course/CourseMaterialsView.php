@@ -287,8 +287,8 @@ class CourseMaterialsView extends AbstractView {
      * Recurses through folders and compiles an array of all the paths to folders.
      * Helper recursive function.
      *
-     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
-     * @param array<int|string, int|string>  $folder_paths - List we append
+     * @param array<string, CourseMaterial|array<string, CourseMaterial>> $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array<string>  $folder_paths - List we append
      * @param string $full_path - Current path we are examining files in.
      */
     private function compileAllFolderPathsR(
