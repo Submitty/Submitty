@@ -98,7 +98,7 @@
                         data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
                         data-is-link="{{ course_material.isLink }}" data-title="{{ title_name }}"
                         data-link-url="{{ url_url }}"
-                        data-path = "{{ path }}"
+                        data-path = "{{ course_material.getPath() }}"
                     >
                         <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>
                     </a>
