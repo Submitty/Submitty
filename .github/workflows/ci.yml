@@ -997,7 +997,8 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          journalctl -xeu submitty_autograding_worker.service
+          journalctl -xeu submitty_autograding_worker.service;
+          du -h
 
       - uses: actions/upload-artifact@v4
         if: failure()
