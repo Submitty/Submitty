@@ -197,7 +197,7 @@ def launch_workers(config, my_name, my_stats):
         config.logger.log_message(
             f"ERROR: Disk usage {disk_usage_percentage} exceeds the threshold"
         )
-        raise SystemExit("ERROR: Disk usage exceeds the threshold")
+        raise SystemExit(f"ERROR: Disk usage {disk_usage_percentage} exceeds the threshold")
 
     if disk_usage_percentage >= DISK_USAGE_WARNING_THRESHOLD:
         config.logger.log_message(
