@@ -126,11 +126,12 @@ const buildCourseUrl = (course: Course) => {
       </template>
     </div>
     <div
-      class="notifications-display"
+      class="notification-panel"
     >
       <NotificationsDisplay
         :notifications="notifications"
         :course=false
+        :visibleCount=10
       />
     </div>
   </div>
@@ -183,5 +184,11 @@ ol.bare-list {
 }
 #courses h2 {
     margin: 0;
+}
+
+.notification-panel {
+    background-color: var(--default-white);
+    height: auto;
+    padding: 20px;
 }
 </style>

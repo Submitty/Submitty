@@ -1,18 +1,25 @@
+<!--
+This is the vue component for course notifications. Most of the logic 
+has conditionals based on the course boolean to determine functionality.
+-->
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import { buildUrl } from '../../../ts/utils/server';
+import { buildCourseUrl } from '../../../ts/utils/server';
 import { reactive } from 'vue';
 
 const props = defineProps<{
     notifications: Notification[];
     course: boolean;
+    visibleCount: number;
 }>();
 
 const localNotifications = reactive([...props.notifications]);
-
 const showUnseenOnly = ref(true);
 
+// Store preference for both home page and course
 onMounted(() => {
     const pref = localStorage.getItem('notification-preference');
     if (pref === 'unseen') {
@@ -31,17 +38,12 @@ function toggleUnseenOnly() {
     );
 }
 
-const visibleCount = 10;
-
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.filter((n) => !n.seen)
         : localNotifications,
 );
 
-const visibleNotifications = computed(() =>
-    filteredNotifications.value.slice(0, visibleCount),
-);
 
 function goToNotification(url: string) {
     if (!url) {
@@ -49,6 +51,14 @@ function goToNotification(url: string) {
     }
     window.location.href = url;
 }
+
+const visibleNotifications = computed(() => {
+  // If -1, show all
+  if (props.visibleCount === -1) {
+    return filteredNotifications.value;
+  }
+  return filteredNotifications.value.slice(0, props.visibleCount);
+});
 
 function goToCourseNotifications(course: string) {
     const form = document.createElement('form');
@@ -69,8 +79,15 @@ function goToCourseNotifications(course: string) {
 }
 
 function markSeen(course: string, id: number) {
+    let url;
+    if(props.course) {
+      url = buildCourseUrl(['notifications', 'mark_seen']);
+    }
+    else {
+      url = buildUrl(['home', 'mark_seen']);
+    }
     $.ajax({
-        url: buildUrl(['home', 'mark_seen']),
+        url,
         type: 'POST',
         data: {
             course: course,
@@ -92,7 +109,7 @@ function markSeen(course: string, id: number) {
 }
 </script>
 <template>
-  <div class="notification-panel shadow">
+  <div class="shadow">
     <div class="notifications-header-container">
       <h1 class="notifications-header">
         Notifications
@@ -107,13 +124,13 @@ function markSeen(course: string, id: number) {
         </button>
         <button
           v-if="notifications.length !== 0 && course"
-          class="btn"
+          class="btn btn-primary"
         >
           Mark as seen
         </button>
         <button
           v-if="course"
-          class="btn"
+          class="btn btn-primary"
         >
           Settings
         </button>
@@ -162,10 +179,17 @@ function markSeen(course: string, id: number) {
         <p class="notification-text">{{ n.content }}</p>
         <div class="notification-time">
           <span
+            v-if="!props.course"
             class="course-notification-link"
             title="Go to notifications"
             @click.stop="goToCourseNotifications(n.course)"
-          > {{ n.course }} </span><span> - </span>{{ n.notify_time }}
+          >
+            {{ n.course }}
+          </span>
+          <span
+            v-if="!props.course">
+             - 
+            </span> {{ n.notify_time }}
         </div>
       </div>
       <a
@@ -184,12 +208,6 @@ function markSeen(course: string, id: number) {
   </div>
 </template>
 <style scoped>
-.notification-panel {
-    background-color: var(--default-white);
-    height: auto;
-    padding: 20px;
-}
-
 .notifications-header-container {
   display: flex;
   flex-wrap: wrap;

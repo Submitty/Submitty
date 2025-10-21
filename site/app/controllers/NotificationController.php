@@ -94,15 +94,12 @@ class NotificationController extends AbstractController {
 
     /**
      * @param string $nid
-     *
-     * @return MultiResponse
      */
-    #[Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements: ["nid" => "[1-9]\d*"])]
-    public function markNotificationAsSeen($nid) {
-        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), intval($nid));
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
-        );
+    #[Route("/courses/{_semester}/{_course}/notifications/mark_seen", methods: ["POST"])]
+    public function markNotificationAsSeen(): JsonResponse {
+        $nid = intval($_POST['notification_id'] ?? 0);
+        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(),$nid);
+        return JsonResponse::getSuccessResponse(['notification_id' => $nid]);
     }
 
     /**
