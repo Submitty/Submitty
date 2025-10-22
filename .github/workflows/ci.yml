@@ -945,7 +945,13 @@ jobs:
           cat /home/runner/.ssh/id_rsa.pub >> /home/runner/.ssh/authorized_keys
           ssh -T localhost
           sudo systemctl start postgresql
-
+      - name: Try deleting unused folders
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
       - name: Run ansible script
         shell: bash
         run: |
