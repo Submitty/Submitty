@@ -117,6 +117,8 @@ img {
     resize: horizontal;
     min-width: 150px;
     max-width: 50em;
+    /* Allow horizontal scrolling when content overflows the max-width */
+    overflow: auto;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -124,6 +126,8 @@ img {
     resize: vertical;
     min-height: 30px;
     max-height: 80vh;
+    /* Allow vertical scrolling when content overflows the max-height */
+    overflow: auto;
 }
 
 /* Fixes Safari spacing issue */
