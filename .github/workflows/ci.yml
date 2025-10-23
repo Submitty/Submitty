@@ -946,6 +946,13 @@ jobs:
           ssh -T localhost
           sudo systemctl start postgresql
 
+      - name: Delete unused folders
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Run ansible script
         shell: bash
         run: |
