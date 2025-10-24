@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1eff86ed5bdf456dcf0268bc24b4a50a",
+    "content-hash": "30ae96fe80b15513af9e52179d4fdd6e",
     "packages": [
         {
             "name": "brick/math",
@@ -6339,16 +6339,16 @@
         },
         {
             "name": "phpstan/phpstan-doctrine",
-            "version": "2.0.4",
+            "version": "2.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-doctrine.git",
-                "reference": "6271e66ce37545bd2edcddbe6bcbdd3b665ab7b8"
+                "reference": "5eaf37b87288474051469aee9f937fc9d862f330"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/6271e66ce37545bd2edcddbe6bcbdd3b665ab7b8",
-                "reference": "6271e66ce37545bd2edcddbe6bcbdd3b665ab7b8",
+                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/5eaf37b87288474051469aee9f937fc9d862f330",
+                "reference": "5eaf37b87288474051469aee9f937fc9d862f330",
                 "shasum": ""
             },
             "require": {
@@ -6382,7 +6382,8 @@
                 "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/phpunit": "^9.6.20",
                 "ramsey/uuid": "^4.2",
-                "symfony/cache": "^5.4"
+                "symfony/cache": "^5.4",
+                "symfony/uid": "^5.4 || ^6.4 || ^7.3"
             },
             "type": "phpstan-extension",
             "extra": {
@@ -6405,9 +6406,9 @@
             "description": "Doctrine extensions for PHPStan",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-doctrine/issues",
-                "source": "https://github.com/phpstan/phpstan-doctrine/tree/2.0.4"
+                "source": "https://github.com/phpstan/phpstan-doctrine/tree/2.0.10"
             },
-            "time": "2025-07-17T11:57:55+00:00"
+            "time": "2025-10-06T10:01:02+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
