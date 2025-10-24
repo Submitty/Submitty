@@ -683,7 +683,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
             $this->core->getOutput()->addInternalCss('grade-report.css');
-            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Configuration');
             $this->core->getOutput()->addSelect2WidgetCSSAndJs();
             $students = $this->core->getQueries()->getAllUsers();
             $student_full = Utils::getAutoFillData($students);
