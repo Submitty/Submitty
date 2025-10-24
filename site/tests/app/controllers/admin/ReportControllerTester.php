@@ -124,6 +124,7 @@ class ReportControllerTester extends BaseUnitTest {
                     'value' => 10
                 ]
             ],
+            'extra_credit' => false
         ];
     }
 
