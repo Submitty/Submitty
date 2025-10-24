@@ -95,11 +95,11 @@ class Component extends AbstractModel {
         $this->setTaComment($details['ta_comment']);
         $this->setStudentComment($details['student_comment']);
         $this->setPoints($details);
-        $this->setText($details['text']);
-        $this->setPeerComponent($details['peer_component'] ?? false);
+        $this->setText(Utils::getBooleanValue($details['text']));
+        $this->setPeerComponent(Utils::getBooleanValue($details['peer_component'] ?? false));
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
-        $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
+        $this->setIsItempoolLinked(Utils::getBooleanValue($details['is_itempool_linked'] ?? false));
         $this->setItempool($details['itempool'] ?? "");
         $this->any_grades = ($details['any_grades'] ?? false) === true;
         $this->modified = false;
