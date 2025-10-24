@@ -64,6 +64,7 @@ class HomePageView extends AbstractView {
             "args" => [
                 "statuses" => $statuses,
                 "notifications" => $notifications,
+                "userId" => $user->getId(),
             ]
         ]);
     }
