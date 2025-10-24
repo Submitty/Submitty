@@ -12,7 +12,7 @@ class NotificationView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
             "type" => "page",
-            "name" => "CourseNotifications",
+            "name" => "CourseNotificationsPage",
             "args" => [
                 "course" => $current_course,
                 "show_all" => $show_all,

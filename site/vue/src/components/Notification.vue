@@ -2,7 +2,10 @@
 import type { Notification } from '@/types/Notification';
 import { buildUrl } from '../../../ts/utils/server';
 
-defineProps<{ notification: Notification }>();
+defineProps<{ 
+  notification: Notification,
+  course: boolean
+}>();
 
 const emit = defineEmits<{
     'dynamic-update': [payload: { id: number; course: string }];
