@@ -123,15 +123,17 @@ class Chatroom {
     public function calcAnonName(string $user_id): string {
         $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
         $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
+
+        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId();
+        $hash = hash('sha256', $seed_string);
+        $adj_index  = hexdec(substr($hash, 0, 8)) % count($adjectives);
+        $noun_index = hexdec(substr($hash, 8, 8)) % count($nouns);
+        $suffix     = hexdec(substr($hash, 16, 4)) % 10000;
+
         $adj  = $adjectives[$adj_index];
         $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+
+        return "Anonymous {$adj} {$noun} #{$suffix}";
     }
 
     public function getSessionStartedAt(): ?\DateTime {
