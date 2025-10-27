@@ -1419,28 +1419,34 @@ end of styles used in the admin gradeable page
 /* color for no grader */
 /* stylelint-disable-next-line selector-class-pattern */
 .grader-NULL {
-    color: var(--default-white);
-    text-shadow:
-        -1px -1px 0 var(--text-black),
-        1px -1px 0 var(--text-black),
-        -1px 1px 0 var(--text-black),
-        1px 1px 0 var(--text-black);
+    background-color: var(--default-white);
+    border: 1px solid var(--text-black);
 }
 
 .grader-active {
-    color: var(--standard-vibrant-red);
+    border: 2px solid var(--standard-vibrant-red);
+}
+
+.grading-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.grading-example-circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%; /* Makes the element a circle */
+    display: inline-block;
 }
 
 /* styles for the colors for the electronic grader details page */
 
 /* color for no grader (PEER) */
 .grader-peer-null {
-    color: var(--default-white);
-    text-shadow:
-        -1px -1px 0 var(--text-black),
-        1px -1px 0 var(--text-black),
-        -1px 1px 0 var(--text-black),
-        1px 1px 0 var(--text-black);
+    background-color: var(--default-white);
+    border: 1px solid var(--text-black);
 }
 
 /* color for limited access graders who were verifed */
@@ -1451,28 +1457,22 @@ end of styles used in the admin gradeable page
         var(--standard-vibrant-yellow) 50%,
         var(--standard-vibrant-green) 50%
     );
-    background-clip: text;
-    color: transparent;
-    border-radius: 50%;
-
-    /* chrome & safari */
-    -webkit-text-fill-color: transparent;
 }
 
 /* color for student/peer grading */
 .grader-4 {
-    color: var(--standard-plum-purple); /* purple */
+    background-color: var(--standard-plum-purple); /* purple */
 }
 
 /* color for a limited access grader */
 .grader-3 {
-    color: var(--important-post); /* yellow */
+    background-color: var(--important-post); /* yellow */
 }
 
 /* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
-    color: var(--standard-vibrant-green); /* green */
+    background-color: var(--standard-vibrant-green); /* green */
 }
 
 .hide-highlights {
@@ -1481,7 +1481,7 @@ end of styles used in the admin gradeable page
 
 /* color for double graded */
 .grader-double {
-    color: var(--standard-vibrant-dark-blue); /* dark blue */
+    background-color: var(--standard-vibrant-dark-blue); /* dark blue */
 }
 
 .grader-grade-inquiry {
