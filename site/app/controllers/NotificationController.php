@@ -97,7 +97,7 @@ class NotificationController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/notifications/mark_seen", methods: ["POST"])]
     public function markNotificationAsSeen(): JsonResponse {
         $nid = intval($_POST['notification_id'] ?? 0);
-        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(),$nid);
+        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
         return JsonResponse::getSuccessResponse(['notification_id' => $nid]);
     }
 

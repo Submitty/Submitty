@@ -12,9 +12,9 @@ defineProps<{
     class="content"
   >
     <NotificationsDisplay
-        :notifications="notifications"
-        :course=true
-        :visibleCount=-1
+      :notifications="notifications"
+      :course="true"
+      :visible-count="-1"
     />
   </div>
 </template>

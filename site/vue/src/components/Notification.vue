@@ -2,9 +2,9 @@
 import type { Notification } from '@/types/Notification';
 import { buildUrl, buildCourseUrl } from '../../../ts/utils/server';
 
-const props = defineProps<{ 
-  notification: Notification,
-  course: boolean
+const props = defineProps<{
+    notification: Notification;
+    course: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 
 function goToNotification() {
     if (props.course && props.notification.url) {
-        console.log('Course URL: ' , props.notification.url);
+        console.log('Course URL: ', props.notification.url);
         window.location.href = props.notification.url;
     }
     else if (!props.course && props.notification.url) {
@@ -42,39 +42,39 @@ function goToCourseNotifications(course: string) {
 function markSeen(course: string, id: number) {
     // Course Page
     if (props.course) {
-      $.ajax({
-          url: buildCourseUrl(['notifications', 'mark_seen']),
-          type: 'POST',
-          data: {
-              course: course,
-              notification_id: id,
-              csrf_token: window.csrfToken,
-          },
-          success: function () {
-              emit('dynamic-update', { id, course });
-          },
-          error: function (err) {
-              console.error(err);
-          },
-      });
+        $.ajax({
+            url: buildCourseUrl(['notifications', 'mark_seen']),
+            type: 'POST',
+            data: {
+                course: course,
+                notification_id: id,
+                csrf_token: window.csrfToken,
+            },
+            success: function () {
+                emit('dynamic-update', { id, course });
+            },
+            error: function (err) {
+                console.error(err);
+            },
+        });
     }
     // Home Page
     else {
-      $.ajax({
-          url: buildUrl(['home', 'mark_seen']),
-          type: 'POST',
-          data: {
-              course: course,
-              notification_id: id,
-              csrf_token: window.csrfToken,
-          },
-          success: function () {
-              emit('dynamic-update', { id, course });
-          },
-          error: function (err) {
-              console.error(err);
-          },
-      });
+        $.ajax({
+            url: buildUrl(['home', 'mark_seen']),
+            type: 'POST',
+            data: {
+                course: course,
+                notification_id: id,
+                csrf_token: window.csrfToken,
+            },
+            success: function () {
+                emit('dynamic-update', { id, course });
+            },
+            error: function (err) {
+                console.error(err);
+            },
+        });
     }
 }
 </script>

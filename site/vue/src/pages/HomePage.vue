@@ -130,8 +130,8 @@ const buildCourseUrl = (course: Course) => {
     >
       <NotificationsDisplay
         :notifications="notifications"
-        :course=false
-        :visibleCount=10
+        :course="false"
+        :visible-count="10"
       />
     </div>
   </div>

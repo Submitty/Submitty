@@ -1,5 +1,5 @@
 <!--
-This is the vue component for course notifications. Most of the logic 
+This is the vue component for course notifications. Most of the logic
 has conditionals based on the course boolean to determine functionality.
 -->
 
@@ -39,11 +39,10 @@ function toggleUnseenOnly() {
 }
 
 const visibleNotifications = computed(() =>
-  props.visibleCount === -1
-    ? filteredNotifications.value
-    : filteredNotifications.value.slice(0, props.visibleCount)
+    props.visibleCount === -1
+        ? filteredNotifications.value
+        : filteredNotifications.value.slice(0, props.visibleCount),
 );
-
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
@@ -62,25 +61,25 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
 
 // Courses only
 function markAllAsSeen() {
-  if (props.course) {
-    $.ajax({
-        url: buildCourseUrl(['notifications', 'seen']),
-        type: 'POST',
-        data: {
-            csrf_token: window.csrfToken,
-        },
-        success: function () {
-          for (const n of localNotifications.value) {
-            if (!n.seen) {
-              n.seen = true;
-            }
-          }
-        },
-        error: function (err) {
-            console.error(err);
-        },
-    });
-  }
+    if (props.course) {
+        $.ajax({
+            url: buildCourseUrl(['notifications', 'seen']),
+            type: 'POST',
+            data: {
+                csrf_token: window.csrfToken,
+            },
+            success: function () {
+                for (const n of localNotifications.value) {
+                    if (!n.seen) {
+                        n.seen = true;
+                    }
+                }
+            },
+            error: function (err) {
+                console.error(err);
+            },
+        });
+    }
 }
 </script>
 <template>
@@ -106,11 +105,11 @@ function markAllAsSeen() {
         </button>
         <a
           v-if="course"
-          class="btn btn-primary"
+          class="btn btn-primary notification-settings-btn"
           :href="buildCourseUrl(['notifications', 'settings'])"
         >
           Settings
-      </a>
+        </a>
       </div>
     </div>
     <p
@@ -137,7 +136,7 @@ function markAllAsSeen() {
     >
       <SingleNotification
         :notification="n"
-        :course=course
+        :course="course"
         @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
       />
     </div>
@@ -171,5 +170,9 @@ function markAllAsSeen() {
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+}
+
+.notification-settings-btn {
+  font-family: arial, sans-serif;
 }
 </style>
