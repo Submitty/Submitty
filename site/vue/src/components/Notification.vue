@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Notification } from '@/types/Notification';
-import { buildUrl } from '../../../ts/utils/server';
+import { buildUrl, buildCourseUrl } from '../../../ts/utils/server';
 
-defineProps<{ 
+const props = defineProps<{ 
   notification: Notification,
   course: boolean
 }>();
@@ -11,11 +11,14 @@ const emit = defineEmits<{
     'dynamic-update': [payload: { id: number; course: string }];
 }>();
 
-function goToNotification(url: string) {
-    if (!url) {
-        return;
+function goToNotification() {
+    if (props.course && props.notification.url) {
+        console.log('Course URL: ' , props.notification.url);
+        window.location.href = props.notification.url;
     }
-    window.location.href = url;
+    else if (!props.course && props.notification.url) {
+        window.location.href = props.notification.url;
+    }
 }
 
 function goToCourseNotifications(course: string) {
@@ -37,21 +40,42 @@ function goToCourseNotifications(course: string) {
 }
 
 function markSeen(course: string, id: number) {
-    $.ajax({
-        url: buildUrl(['home', 'mark_seen']),
-        type: 'POST',
-        data: {
-            course: course,
-            notification_id: id,
-            csrf_token: window.csrfToken,
-        },
-        success: function () {
-            emit('dynamic-update', { id, course });
-        },
-        error: function (err) {
-            console.error(err);
-        },
-    });
+    // Course Page
+    if (props.course) {
+      $.ajax({
+          url: buildCourseUrl(['notifications', 'mark_seen']),
+          type: 'POST',
+          data: {
+              course: course,
+              notification_id: id,
+              csrf_token: window.csrfToken,
+          },
+          success: function () {
+              emit('dynamic-update', { id, course });
+          },
+          error: function (err) {
+              console.error(err);
+          },
+      });
+    }
+    // Home Page
+    else {
+      $.ajax({
+          url: buildUrl(['home', 'mark_seen']),
+          type: 'POST',
+          data: {
+              course: course,
+              notification_id: id,
+              csrf_token: window.csrfToken,
+          },
+          success: function () {
+              emit('dynamic-update', { id, course });
+          },
+          error: function (err) {
+              console.error(err);
+          },
+      });
+    }
 }
 </script>
 <template>
@@ -61,7 +85,7 @@ function markSeen(course: string, id: number) {
     tabindex="0"
     class="notification"
     :class="{ unseen: !notification.seen }"
-    @click="goToNotification(notification.notification_url)"
+    @click="goToNotification()"
   >
     <i
       v-if="notification.component === 'forum'"
@@ -89,7 +113,7 @@ function markSeen(course: string, id: number) {
           class="course-notification-link"
           title="Go to notifications"
           @click.stop="goToCourseNotifications(notification.course)"
-        > {{ notification.course }} - </span>{{ notification.notify_time }}
+        >{{ notification.course }}</span><span v-if="!course"> - </span>{{ notification.notify_time }}
       </div>
     </div>
     <a

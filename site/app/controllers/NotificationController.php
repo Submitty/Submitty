@@ -58,16 +58,14 @@ class NotificationController extends AbstractController {
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications")]
-    public function showNotifications(?string $show_all = null) {
-        $show_all = !empty($show_all);
-        $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
+    public function showNotifications() {
+        $all_notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), true);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotifications',
                 $this->core->getConfig()->getCourse(),
-                $show_all,
-                $notifications,
+                $all_notifications,
                 $this->core->getUser()->getNotificationSettings()
             )
         );
@@ -94,6 +92,7 @@ class NotificationController extends AbstractController {
 
     /**
      * @param string $nid
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/mark_seen", methods: ["POST"])]
     public function markNotificationAsSeen(): JsonResponse {
@@ -103,14 +102,12 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/seen")]
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
-        );
+        return JsonResponse::getSuccessResponse(['success' => true]);
     }
 
     /**

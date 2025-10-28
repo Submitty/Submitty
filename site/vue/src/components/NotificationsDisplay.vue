@@ -7,6 +7,7 @@ has conditionals based on the course boolean to determine functionality.
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
+import { buildCourseUrl } from '../../../ts/utils/server';
 
 const props = defineProps<{
     notifications: Notification[];
@@ -50,14 +51,6 @@ const filteredNotifications = computed(() =>
         : localNotifications.value,
 );
 
-
-function goToNotification(url: string) {
-    if (!url) {
-        return;
-    }
-    window.location.href = url;
-}
-
 function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     const target = localNotifications.value.find(
         (n) => n.id === id && n.course === course,
@@ -65,6 +58,29 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     if (target) {
         target.seen = true;
     }
+}
+
+// Courses only
+function markAllAsSeen() {
+  if (props.course) {
+    $.ajax({
+        url: buildCourseUrl(['notifications', 'seen']),
+        type: 'POST',
+        data: {
+            csrf_token: window.csrfToken,
+        },
+        success: function () {
+          for (const n of localNotifications.value) {
+            if (!n.seen) {
+              n.seen = true;
+            }
+          }
+        },
+        error: function (err) {
+            console.error(err);
+        },
+    });
+  }
 }
 </script>
 <template>
@@ -75,7 +91,7 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
       </h1>
       <div class="notifications-actions">
         <button
-          v-if="localNotifications.length !== 0"
+          v-if="notifications.length !== 0"
           class="btn btn-default"
           @click="toggleUnseenOnly"
         >
@@ -84,15 +100,17 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
         <button
           v-if="notifications.length !== 0 && course"
           class="btn btn-primary"
+          @click="markAllAsSeen"
         >
           Mark as seen
         </button>
-        <button
+        <a
           v-if="course"
           class="btn btn-primary"
+          :href="buildCourseUrl(['notifications', 'settings'])"
         >
           Settings
-        </button>
+      </a>
       </div>
     </div>
     <p
@@ -116,7 +134,6 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
       tabindex="0"
       class="notification"
       :class="{ unseen: !n.seen }"
-      @click="goToNotification(n.notification_url)"
     >
       <SingleNotification
         :notification="n"
