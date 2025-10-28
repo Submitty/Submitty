@@ -104,9 +104,10 @@ function markAllAsSeen() {
           Mark as seen
         </button>
         <a
-          v-if="course"
+          v-if="props.course"
           class="btn btn-primary notification-settings-btn"
           :href="buildCourseUrl(['notifications', 'settings'])"
+          data-testid="notification-settings-button"
         >
           Settings
         </a>
@@ -136,7 +137,7 @@ function markAllAsSeen() {
     >
       <SingleNotification
         :notification="n"
-        :course="course"
+        :course="props.course"
         @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
       />
     </div>

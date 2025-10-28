@@ -224,7 +224,6 @@ class Notification extends AbstractModel implements \JsonSerializable {
             }
             else {
                 $base_url = $this->core->buildCourseUrl(['notifications', $this->getId()]);
-
             }
         }
         else {

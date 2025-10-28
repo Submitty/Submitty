@@ -14,12 +14,8 @@ class NotificationView extends AbstractView {
             "type" => "page",
             "name" => "CourseNotificationsPage",
             "args" => [
-                "course" => $current_course,
                 "notifications" => $all_notifications,
-                "notification_saves" => $notification_saves,
                 "notifications_url" => $this->core->buildCourseUrl(['notifications']),
-                "mark_all_as_seen_url" => $this->core->buildCourseUrl(['notifications', 'seen']),
-                "notification_settings_url" => $this->core->buildCourseUrl(['notifications', 'settings'])
             ]
         ]);
     }
