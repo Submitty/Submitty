@@ -54,7 +54,6 @@ class NotificationController extends AbstractController {
         }
     }
     /**
-     * @param string|null $show_all
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications")]
@@ -75,7 +74,7 @@ class NotificationController extends AbstractController {
      * @param string $nid
      * @param string|null $seen
      *
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
     public function openNotification($nid, $seen) {
@@ -85,13 +84,10 @@ class NotificationController extends AbstractController {
             $thread_id = Notification::getThreadIdIfExists($metadata);
             $this->core->getQueries()->markNotificationAsSeen($user_id, intval($nid), $thread_id);
         }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse(Notification::getUrl($this->core, $metadata))
-        );
+        return JsonResponse::getSuccessResponse(['success' => true]);
     }
 
     /**
-     * @param string $nid
      * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/mark_seen", methods: ["POST"])]
