@@ -9,6 +9,7 @@
  */
 const DECIMAL_PRECISION = 3;
 
+const TEMPLATE_VERSION = '20251024';
 // eslint-disable-next-line no-var
 var itempool_items = {};
 
@@ -23,17 +24,19 @@ function loadTemplates() {
         return Promise.resolve();
     }
     loadedTemplates = true;
+
+    
     const templates = [
         { id: 'GradingGradeable', href: '/templates/grading/GradingGradeable.twig' },
         { id: 'PeerGradeable', href: '/templates/grading/PeerGradeable.twig' },
         { id: 'EditGradeable', href: '/templates/grading/EditGradeable.twig' },
         { id: 'Gradeable', href: '/templates/grading/Gradeable.twig' },
-        { id: 'GradingComponent', href: '/templates/grading/GradingComponent.twig' },
-        { id: 'GradingComponentHeader', href: '/templates/grading/GradingComponentHeader.twig' },
+        { id: 'GradingComponent', href: `/templates/grading/GradingComponent.twig?v=${TEMPLATE_VERSION}` },
+        { id: 'GradingComponentHeader', href: `/templates/grading/GradingComponentHeader.twig?v=${TEMPLATE_VERSION}` },
         { id: 'EditComponent', href: '/templates/grading/EditComponent.twig' },
         { id: 'EditComponentHeader', href: '/templates/grading/EditComponentHeader.twig' },
         { id: 'Component', href: '/templates/grading/Component.twig' },
-        { id: 'Mark', href: '/templates/grading/Mark.twig' },
+        { id: 'Mark', href: `/templates/grading/Mark.twig?v=${TEMPLATE_VERSION}` },
         { id: 'OverallComment', href: '/templates/grading/OverallComment.twig' },
         { id: 'TotalScoreBox', href: '/templates/grading/TotalScoreBox.twig' },
         { id: 'TotalPeerScoreBox', href: '/templates/grading/TotalPeerScoreBox.twig' },
