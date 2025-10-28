@@ -126,7 +126,7 @@ const buildCourseUrl = (course: Course) => {
       </template>
     </div>
     <div
-      class="notification-panel"
+      class="notification-panel shadow"
     >
       <NotificationsDisplay
         :notifications="notifications"

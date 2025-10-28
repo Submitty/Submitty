@@ -84,7 +84,7 @@ function markAllAsSeen() {
 }
 </script>
 <template>
-  <div class="shadow">
+  <div>
     <div class="notifications-header-container">
       <h1 class="notifications-header">
         Notifications
