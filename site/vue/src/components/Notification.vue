@@ -85,10 +85,11 @@ function markSeen(course: string, id: number) {
       </p>
       <div class="notification-time">
         <span
+          v-if="!course"
           class="course-notification-link"
           title="Go to notifications"
           @click.stop="goToCourseNotifications(notification.course)"
-        > {{ notification.course }} </span> - {{ notification.notify_time }}
+        > {{ notification.course }} - </span>{{ notification.notify_time }}
       </div>
     </div>
     <a
@@ -108,13 +109,16 @@ function markSeen(course: string, id: number) {
 <style scoped>
 .notification {
   display: flex;
+  flex-direction: row;
   gap: 6px;
   border-bottom: 1px solid var(--standard-light-gray);
-  padding: 9px 0;
+  padding: 9px 20px;
   align-items: center;
-  padding-left: 20px;
-  padding-right: 20px;
   cursor: pointer;
+}
+
+.notification-content {
+    flex: 1;
 }
 
 .notification-text {
@@ -159,10 +163,6 @@ function markSeen(course: string, id: number) {
 
 .notification-type {
     margin-right: 1em;
-}
-
-.notification-content {
-    flex: 1;
 }
 
 .notification-time {
