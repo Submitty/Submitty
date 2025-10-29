@@ -6,7 +6,11 @@ use app\controllers\admin\ConfigurationController;
 use app\models\User;
 
 class NotificationView extends AbstractView {
-    public function showNotifications($current_course, $all_notifications, $notification_saves) {
+        public function showNotifications(
+            string $current_course,
+            array $all_notifications,
+            array $notification_saves
+        ): string {
         $this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->enableMobileViewport();
