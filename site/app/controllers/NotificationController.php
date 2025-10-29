@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -74,7 +75,7 @@ class NotificationController extends AbstractController {
      * @param string $nid
      * @param string|null $seen
      *
-     * @return JsonResponse
+     * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
     public function openNotification($nid, $seen) {
@@ -84,7 +85,9 @@ class NotificationController extends AbstractController {
             $thread_id = Notification::getThreadIdIfExists($metadata);
             $this->core->getQueries()->markNotificationAsSeen($user_id, intval($nid), $thread_id);
         }
-        return JsonResponse::getSuccessResponse(['success' => true]);
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse(Notification::getUrl($this->core, $metadata))
+        );
     }
 
     /**
