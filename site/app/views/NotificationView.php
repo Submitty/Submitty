@@ -5,13 +5,13 @@ namespace app\views;
 use app\controllers\admin\ConfigurationController;
 use app\models\User;
 
-/**
- * @param string $current_course
- * @param Notification[] $all_notifications
- * @param array<string, mixed> $notification_saves
- * @return string
- */
 class NotificationView extends AbstractView {
+    /**
+     * @param string $current_course
+     * @param Notification[] $all_notifications
+     * @param array<string, mixed> $notification_saves
+     * @return string
+     */
     public function showNotifications(string $current_course, array $all_notifications, array $notification_saves): string {
         $this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');
