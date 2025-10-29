@@ -385,11 +385,11 @@ div:has(.override)
 }
 
 .nightly-status-enabled {
-    color: var(--good-green);
+    color: var(--standard-dark-green);
 }
 
 .nightly-status-disabled {
-    color: var(--alert-warning-yellow);
+    color: var(--standard-bronze);
 }
 
 #rg-system-message.info {
