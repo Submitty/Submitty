@@ -52,6 +52,7 @@ class NotificationController extends AbstractController {
             $this->selections = array_merge($this->selections, self::EMAIL_SELECTIONS);
         }
     }
+
     /**
      * @return MultiResponse
      */

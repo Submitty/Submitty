@@ -130,8 +130,6 @@ function markAllAsSeen() {
     <div
       v-for="n in visibleNotifications"
       :key="n.id"
-      role="link"
-      tabindex="0"
       class="notification"
       :class="{ unseen: !n.seen }"
     >
