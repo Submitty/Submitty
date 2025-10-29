@@ -15,17 +15,34 @@ const inlineLatex: (TokenizerExtension) = {
     name: 'inlineLatex',
     level: 'inline',
     start(src: string) {
-        return src.match(/\$|\\\(/)?.index ?? -1;
+        // Match any math delimiter
+        return src.match(/\$\$|\\\[|\$|\\\(/)?.index ?? -1;
     },
     tokenizer(src: string) {
-        const codeSpan = /^(?:\$([^$]+?)\$|\\\(([^)]+?)\\\))/.exec(src);
+        // Match display and inline math
+        const codeSpan = /^(?:\$\$([^$]+?)\$\$|\\\[([^\]]+?)\\\]|\$([^$]+?)\$|\\\(([^)]+?)\\\))/ .exec(src);
         if (!codeSpan) {
             return;
+        }
+        let math = '';
+        let displayMode = false;
+        if (codeSpan[1] !== undefined) {
+            math = codeSpan[1];
+            displayMode = true;
+        } else if (codeSpan[2] !== undefined) {
+            math = codeSpan[2];
+            displayMode = true;
+        } else if (codeSpan[3] !== undefined) {
+            math = codeSpan[3];
+            displayMode = false;
+        } else if (codeSpan[4] !== undefined) {
+            math = codeSpan[4];
+            displayMode = false;
         }
         return {
             type: 'html',
             raw: codeSpan[0],
-            text: renderToString(codeSpan[1] || codeSpan[2]),
+            text: renderToString(math, { displayMode }),
         };
     },
 };
