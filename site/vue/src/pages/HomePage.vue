@@ -3,7 +3,6 @@ import { defineProps, ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
-import Cookies from 'js-cookie';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
 type Rank = {
@@ -39,15 +38,15 @@ const hasArchivedCourses = computed(() => {
 const toggleArchivedCourses = () => {
     archivedCoursesVisible.value = !archivedCoursesVisible.value;
     // Toggle archived course visibility indefinitely, scoped to user
-    Cookies.set(`archived_courses_visible_${props.userId}`, archivedCoursesVisible.value.toString(), { expires: Infinity, path: '/' });
+    localStorage.setItem(`archived_courses_visible_${props.userId}`, archivedCoursesVisible.value.toString());
 };
 
 onMounted(() => {
-    const cookieValue = Cookies.get(`archived_courses_visible_${props.userId}`);
+    const storedValue = localStorage.getItem(`archived_courses_visible_${props.userId}`);
 
-    // Default to visible if no cookie is set
-    if (cookieValue !== undefined) {
-        archivedCoursesVisible.value = cookieValue === 'true';
+    // Default to visible if no value is stored
+    if (storedValue !== null) {
+        archivedCoursesVisible.value = storedValue === 'true';
     }
 });
 
@@ -109,7 +108,7 @@ const buildCourseUrl = (course: Course) => {
             <button
               v-if="course_type === 'archived_courses' && hasArchivedCourses"
               type="button"
-              class="btn btn-sm btn-outline-secondary archived-toggle-btn"
+              class="btn btn-default"
               @click="toggleArchivedCourses"
             >
               {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
@@ -191,11 +190,6 @@ const buildCourseUrl = (course: Course) => {
     align-items: center;
 }
 
-.archived-toggle-btn {
-    margin-left: 10px;
-    font-size: 0.875rem;
-    padding: 2px 8px;
-}
 .div1 {
   grid-column: 1;
   padding: 20px;
