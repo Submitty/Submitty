@@ -1,9 +1,18 @@
 {
-	"required_capabilities": "python",
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+    
+    "autograding": {
+        //"submission_to_compilation": ["**/*.py"],  // todo: confirm these can be deleted
+        //"compilation_to_runner": ["**/a.out"],
+        "work_to_details" : ["**/*.txt"]
+    },
 
-  "autograding" : {
-    "work_to_details" : ["**/*.txt"]
-  },
+
+
   "testcases" : [
     {
       // Student-visible testcase name.

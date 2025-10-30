@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 a,
 a:hover,
 a:link,
@@ -5,7 +6,6 @@ a:visited {
     cursor: pointer;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -14,7 +14,6 @@ a > i.fa:hover {
     color: #2627ee;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -23,7 +22,6 @@ a > i.fas:hover {
     color: #2627ee;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 a,
 a:visited,
 a:link,
@@ -40,7 +38,7 @@ a:active {
     color: #991313;
 }
 
-/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-disable no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -52,9 +50,9 @@ a.btn-primary > i.fa,
 a.btn-danger > i.fa {
     color: var(--text-white);
 }
-/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-enable no-duplicate-selectors  */
 
-/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-disable no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -66,9 +64,9 @@ a.btn-primary > i.fas,
 a.btn-danger > i.fas {
     color: var(--text-white);
 }
-/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-enable no-duplicate-selectors  */
 
-/* stylelint-disable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-disable no-duplicate-selectors  */
 a.btn-success,
 a.btn-primary,
 a.btn-danger,
@@ -80,9 +78,8 @@ a.btn-primary > i.far,
 a.btn-danger > i.far {
     color: var(--text-white);
 }
-/* stylelint-enable no-descending-specificity, no-duplicate-selectors  */
+/* stylelint-enable no-duplicate-selectors  */
 
-/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.fa.btn-default,
 a.fa,
@@ -90,7 +87,6 @@ a > i.fa {
     color: var(--text-black);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.fas.btn-default,
 a.fas,
@@ -98,7 +94,6 @@ a > i.fas {
     color: var(--text-black);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 a.btn-default,
 a.far.btn-default,
 a.far,
@@ -110,21 +105,27 @@ a.btn {
     text-decoration: none;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
 .black-btn,
 .black-btn > i.fas {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--text-black) !important;
 }
 
 .black-btn:hover,
 .black-btn > i.fas:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #405e90 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #405e90 !important;
 }
 
 .black-btn:active,
 .black-btn > i.fas:active {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #991313 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #991313 !important;
 }
+/* stylelint-enable no-descending-specificity */

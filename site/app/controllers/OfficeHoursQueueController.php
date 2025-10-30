@@ -12,19 +12,17 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\socket\Client;
 use app\libraries\Logger;
+use app\libraries\Utils;
 use WebSocket;
 
-/**
- * Class OfficeHoursQueueController
- *
- * @Enabled("queue")
- */
+#[Enabled(feature: "queue")]
 class OfficeHoursQueueController extends AbstractController {
     /**
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["GET"])]
     public function showQueue($full_history = false) {
+        $this->core->authorizeWebSocketToken(['page' => 'office_hours_queue']);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',
@@ -36,9 +34,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["POST"])]
     public function openQueue() {
         if (empty($_POST['code'])) {
@@ -280,9 +278,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods: ["POST"])]
     public function restorePerson($queue_code) {
         if (empty($_POST['entry_id'])) {
@@ -307,9 +305,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods: ["POST"])]
     public function startHelpPerson($queue_code) {
         if (empty($_POST['user_id'])) {
@@ -375,9 +373,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/empty", methods: ["POST"])]
     public function emptyQueue($queue_code) {
         if (empty($queue_code)) {
@@ -397,9 +395,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/toggle", methods: ["POST"])]
     public function toggleQueue($queue_code) {
         if (empty($queue_code)) {
@@ -425,9 +423,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/deleteQueue", methods: ["POST"])]
     public function deleteQueue($queue_code) {
         if (empty($queue_code)) {
@@ -447,9 +445,9 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods: ["POST"])]
     public function changeToken($queue_code) {
         if (empty($queue_code)) {
@@ -480,9 +478,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_regex", methods: ["POST"])]
     public function changeRegex($queue_code) {
         if (empty($queue_code)) {
@@ -503,9 +501,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return RedirectResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_contact_information", methods: ["POST"])]
     public function changeContactInformation($queue_code) {
         if (!isset($queue_code)) {
@@ -521,9 +519,9 @@ class OfficeHoursQueueController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return RedirectResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/send_queue_message", methods: ["POST"])]
     public function sendQueueMessage(): RedirectResponse {
         if (empty($_POST['code'])) {
@@ -619,9 +617,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods: ["POST"])]
     public function updateAnnouncement() {
         if (!isset($_POST['queue_announcement_message'])) {
@@ -681,9 +679,7 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods: ["GET"])]
     public function showQueueStudentStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -705,7 +701,13 @@ class OfficeHoursQueueController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        $params = [
+            'page' => 'office_hours_queue',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
@@ -715,9 +717,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/queue/student_search", methods: ["POST"])]
     public function studentSearch(): JsonResponse {
         $user_id = $_POST['student_id'];

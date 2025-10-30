@@ -2,7 +2,7 @@
     <header>
         <h1>Course Settings</h1>
         <div class="btn-wrapper">
-            <a href="{{ theme_url }}" class="btn btn-default">Customize Website Theme</a>
+            <a href="{{ theme_url }}" class="btn btn-default" data-testid="customize-website-theme-button">Customize Website Theme</a>
         </div>
     </header>
     <div id="config">
@@ -42,15 +42,17 @@
             <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "create-thread-message",
-            "class" : "config-row",
-            "markdown_area_name" : "forum_create_thread_message",
-            "markdown_area_value" : fields['forum_create_thread_message'],
-            "preview_div_id" : "create-thread-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with { "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "create-thread-message",
+                "class" : "config-row",
+                "markdownAreaName" : "forum_create_thread_message",
+                "markdownAreaValue" : fields['forum_create_thread_message'],
+                "previewDivId" : "create-thread-message-preview",
+                "renderHeader" : true
+            }
         } only %}
-
         <h2>Office Hours Queue</h2>
         <hr>
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
@@ -70,15 +72,18 @@
                 If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
             </span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "queue-message",
-            "class" : "config-row",
-            "markdown_area_name" : "queue_message",
-            "markdown_area_value" : fields['queue_message'],
-            "preview_div_id" : "queue-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with {
+            "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "queue-message",
+                "class" : "config-row",
+                "markdownAreaName" : "queue_message",
+                "markdownAreaValue" : fields['queue_message'],
+                "previewDivId" : "queue-message-preview",
+                "renderHeader" : true
+            }
         } only %}
-
 
         <h2>Online Polls</h2>
         <hr>
@@ -88,6 +93,17 @@
                 <span class="option-title">Enable Online Polls</span>
                 <br>
                 <span class="option-alt">Choose whether to enable online polling for this course.</span>
+            </label>
+        </div>
+
+        <h2>Live Chat</h2>
+        <hr>
+        <div id="chat_enabled_wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="chat_enabled" id="chat-enabled" value="true" {{ fields['chat_enabled'] ? 'checked': '' }} />
+            <label for="chat-enabled">
+                <span class="option-title">Enable Live Chat</span>
+                <br>
+                <span class="option-alt">Choose whether to enable Live Chatroom for this course.</span>
             </label>
         </div>
         
@@ -101,13 +117,17 @@
                 What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "upload-message",
-            "class" : "config-row",
-            "markdown_area_name" : "upload_message",
-            "markdown_area_value" : fields['upload_message'],
-            "preview_div_id" : "upload-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with {
+            "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "upload-message",
+                "class" : "config-row",
+                "markdownAreaName" : "upload_message",
+                "markdownAreaValue" : fields['upload_message'],
+                "previewDivId" : "upload-message-preview",
+                "renderHeader" : true
+            }
         } only %}
 
         <label for="private-repository" class="config-row">
@@ -240,14 +260,22 @@
         {% if submitty_admin_user['verified'] %}
             {% if submitty_admin_user['in_course'] %}
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" data-testid="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
-                        <span class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</span>
-                        <br>
-                        <span class="option-alt">
-                            With a valid customization.json Rainbow Grades configuration,<br>
+                        <span class="option-title block">Automatic Nightly Processing for Rainbow Grades Generation</span>
+                        <span class="option-alt block">
+                            With a valid customization.json Rainbow Grades configuration,
                             a Submitty cron job will update Rainbow Grades every night at approximately 2am.
+                            The job will not run if this course is archived.
                         </span>
+                        <span class="red-message block" id="customization-exists-warning" data-testid="customization-exists-warning" data-value={{ not rainbowCustomizationExists ? "true" : "false" }} style="display: {{ fields['auto_rainbow_grades'] and not rainbowCustomizationExists ? 'block' : 'none' }};">
+                            WARNING: Automatic rainbow grades generation will not occur until you have supplied a
+                            customization.json file.  To have one generated for you, you may use the Grades Configuration tab.
+                            You may also manually create the file and upload it to your course's rainbow_grades directory.
+                        </span>
+                        <script>
+                            window.customizationExists = {{ rainbowCustomizationExists ? 'true' : 'false' }};
+                        </script>
                     </label>
                 </div>
             {% else %}
@@ -258,11 +286,11 @@
             </div>
             {% endif %}
         {% else %}
-        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
-        <div class="option-alt">
-          NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
-          Please ask your system administrator to configure this option on your server.<br><br>
-        </div>
+            <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+            <div class="option-alt">
+              NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
+              Please ask your system administrator to configure this option on your server.<br><br>
+            </div>
         {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
             <span class="option-title">Display Room Seating Guide</span>
@@ -317,7 +345,7 @@
                         id="all-self-registration"
                         data-testid="all-self-registration"
                         value="true"
-                        {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                        {{ fields['self_registration_type'] == all_self_register ? 'checked' : '' }}
                         onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
                     />
                     <div>
@@ -333,6 +361,9 @@
                         <br/>
                         <span class="option-title">Default Section</span>
                         <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
+                            {% if fields['default_section'] is null %}
+                                <option value="" selected> NULL </option>
+                            {% endif %}
                             {% for section in fields['registration_sections'] %}
                                 <option 
                                     value="{{ section['sections_registration_id'] }}" 

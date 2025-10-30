@@ -11,6 +11,7 @@ from sample_courses.utils.create_or_generate import (
 )
 from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
+from sqlalchemy import insert
 
 
 class Mark(object):
@@ -22,13 +23,14 @@ class Mark(object):
         self.key = None
 
     def create(self, gc_id, conn, table) -> None:
-        ins = table.insert().values(
+        ins = insert(table).values(
             gc_id=gc_id,
             gcm_points=self.points,
             gcm_note=self.note,
             gcm_order=self.order,
         )
         res = conn.execute(ins)
+        conn.commit()
         self.key = res.inserted_primary_key[0]
 
 

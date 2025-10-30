@@ -1,9 +1,0 @@
-#toolbox-textarea {
-    width: 100%;
-    min-height: 300px;
-    resize: vertical;
-}
-
-#query-results {
-    overflow-x: auto;
-}

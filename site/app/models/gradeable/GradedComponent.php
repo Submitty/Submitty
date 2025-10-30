@@ -30,7 +30,7 @@ class GradedComponent extends AbstractModel {
     /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
     private $ta_graded_gradeable = null;
     /** @prop
-     * @var string Id of the component this grade is attached to */
+     * @var int Id of the component this grade is attached to */
     protected $component_id = 0;
 
     /** @var bool If the component is peer */

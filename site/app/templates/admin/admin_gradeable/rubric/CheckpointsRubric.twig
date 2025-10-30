@@ -1,86 +1,141 @@
-<div class="multi-field-wrapper-checkpoints">
-    {# This is a layout table #}
-    <table class="table-striped checkpoints-table table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA; max-width:50% !important;">
-        <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-        <!-- Layout Headings -->
-        <tr class="rubric-layout-header">
-            <td class="layout_th_cell"> Label </th>
-            <td class="layout_th_cell"> Extra Credit? </th>
-        </tr>
-        <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="rubric-layout-body multi-field" id="mult-field-0" style="display:none;">
-            <td>
-                <input style="width: 200px" name="checkpoint_label_0" aria-label="checkpoint 0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
-            </td>
-            <td>
-                <input type="checkbox" name="checkpoint_extra_0" aria-label="is checkpoint 0 counted as extra credit?" class="checkpoint_extra extra" value="true" />
-            </td>
-        </tr>
-    </table>
-    <button type="button" id="add-checkpoint_field">Add Checkpoint</button>
-    <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="display:none;">Remove Last Checkpoint</button>
+<div id="gradeable_rubric">
+    <label for="numeric_num-items">Number of checkpoint items</label> 
+    <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore"/>
+    &emsp;&emsp;
+    <label for="numeric_num_text_items">Number of text items</label> 
+    <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <br /> <br />
+
+    <div class="multi-field-wrapper-checkpoints">
+        <h5>Checkpoint Items</h5>
+        <table class="table-striped checkpoints-table table table-bordered">
+            <thead>
+                <tr>
+                    <th> Label </th>
+                    <th> Extra Credit? </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="multi-field" id="mult-field-0" style="display:none;">
+                    <td>
+                        <input style="width: 200px" name="checkpoint_label_0" aria-label="checkpoint 0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
+                    </td>
+                    <td>
+                        <input type="checkbox" name="checkpoint_extra_0" aria-label="is checkpoint 0 counted as extra credit?" class="checkpoint_extra extra" value="true" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <br />
+
+    <div class="multi-field-wrapper-text">
+        <h5>Text Items</h5>
+        <table class="table-striped text-table table table-bordered">
+            <thead>
+                <tr>
+                    <th> Label </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="multi-field" id="mult-field-0" style="display:none;">
+                    <td>
+                        <input style="width: 200px" name="text_label_0" aria-label="label for text item 0" type="text" class="text_label" value="0"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <br />
-<!--Do you want a box for an (optional) message from the TA to the student?
-<input type="radio" name="checkpoint_opt_ta_messg" value="true" /> Yes
-<input type="radio" name="checkpoint_opt_ta_messg" value="false" /> No-->
 
 <script>
+$(document).ready(function() {
+    let numCheckpoints = 0; // Initialize checkpoint and text items count
+    let numText = 0;
+    const MAX_TEXT_ITEMS = 5; // Max text items
 
-    $(document).ready(function() {
-        let numCheckpoints = 0;
+    function addCheckpoint(label, extra_credit) {
+        var wrapper = $('.checkpoints-table tbody');
+        numCheckpoints++;
+        var newRow = $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints);
+        newRow.find('.checkpoint_label').val(label).focus();
+        newRow.find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints).attr('aria-label', 'checkpoint ' + numCheckpoints);
+        newRow.find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).prop('checked', extra_credit).attr('aria-label', 'extra credit for checkpoint ' + numCheckpoints);
+        newRow.show();
+    }
 
-        function addCheckpoint(label, extra_credit) {
-            // Add a new checkpoint to the page
-            addCheckpointToPage(label, extra_credit);
+    function addText(label) {
+        var wrapper = $('.text-table tbody');
+        numText++;
+        $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
+        $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).attr('aria-label', 'label for text item ' + numText);
+        $('#mult-field-' + numText, wrapper).show();
+    }
 
-            // When adding a checkpoint, save the rubric
-            saveRubric(false);
+    // How many checkpoint items? field change
+    $('#numeric_num-items').on('change', function() {
+        var requestedCheckpoints = parseInt(this.value) || 0;
+        if (requestedCheckpoints < 1) {
+            displayErrorMessage('There must be at least one checkpoint.');
+            requestedCheckpoints = 1;
+            $(this).val(1);
         }
 
-        function addCheckpointToPage(label, extra_credit) {
-            var wrapper = $('.checkpoints-table');
-            ++numCheckpoints;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints).attr('aria-label', 'checkpoint ' + numCheckpoints).change(() => saveRubric(false));
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).attr('checked', extra_credit).attr('aria-label', 'is checkpoint ' + numCheckpoints + ' counted as extra credit?').change(() => saveRubric(false));
-            $('#remove-checkpoint_field').show();
-            $('#mult-field-' + numCheckpoints, wrapper).show();
+        if (requestedCheckpoints < 0) {
+            requestedCheckpoints = 0;
         }
 
-        function removeCheckpoint() {
-            if (numCheckpoints > 0) {
-                $('#mult-field-' + numCheckpoints, '.checkpoints-table').remove();
-                if (--numCheckpoints === 1) {
-                    $('#remove-checkpoint_field').hide();
-                }
-
-                // When removing a checkpoint, save the rubric
-                saveRubric(false);
-            }
+        while (numCheckpoints < requestedCheckpoints) {
+            addCheckpoint('Checkpoint ' + (numCheckpoints + 1), false);
+        }
+        while (numCheckpoints > requestedCheckpoints) {
+            $('#mult-field-' + numCheckpoints, '.checkpoints-table').remove();
+            --numCheckpoints;
         }
 
-        $('.multi-field-wrapper-checkpoints').each(function () {
-            $("#add-checkpoint_field", $(this)).click(function (e) {
-                addCheckpoint('Checkpoint ' + (numCheckpoints + 1), false);
-            });
-            $('#remove-checkpoint_field').click(function () {
-                removeCheckpoint();
-            });
-        });
+        saveRubric(false);
+    });
 
-        $('#remove-checkpoint_field').hide();
 
-        // Add the existing checkpoints
-        if ($('#radio_checkpoints').is(':checked')){
-            let components = {{ gradeable_components_enc|raw }};
-            $.each(components, function(i,elem){
-                var extra_credit = false;
-                if (elem.max_value === 0) extra_credit = true;
-                addCheckpointToPage(elem.title, extra_credit);
-            });
-            $('#checkpoints').show();
-            $('#grading_questions').show();
+// Handle "How many text items?" field change with limit of 5
+    $('#numeric_num_text_items').on('change', function() {
+        var requestedText = parseInt(this.value) || 0;
+
+        // Check if requested text items exceed the limit
+        if (requestedText > MAX_TEXT_ITEMS) {
+            alert("You can only add a maximum of " + MAX_TEXT_ITEMS + " text items.");
+            $(this).val(MAX_TEXT_ITEMS);
+            requestedText = MAX_TEXT_ITEMS;
+        }
+
+        if (requestedText < 0) {
+            requestedText = 0;
+        }
+
+        while (numText < requestedText) {
+            addText('');  // Empty label for text items
+        }
+        while (numText > requestedText) {
+            $('#mult-field-' + numText, '.text-table').remove();
+            --numText;
+        }
+
+        saveRubric(false);
+    });
+
+    let components = {{ gradeable_components_enc|raw }};
+    $.each(components, function(i, elem) {
+        if (elem.text === false) {
+            let is_extra_credit = elem.max_value == 0;
+            addCheckpoint(elem.title, is_extra_credit);
+        } else {
+            addText(elem.title);
         }
     });
+
+    $('#numeric_num-items').val(numCheckpoints );
+    $('#numeric_num_text_items').val({{ num_text_components }});
+});
 </script>

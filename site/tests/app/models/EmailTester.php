@@ -10,7 +10,6 @@ use app\models\Email;
 use app\models\User;
 
 class EmailTester extends \PHPUnit\Framework\TestCase {
-    private $footer = "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     /** @var Core */
     private $core;
 
@@ -18,6 +17,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $this->core = new Core();
         $config = new Config($this->core);
         $config->setCourse('csci1100');
+        $config->setBaseUrl('http://localhost');
+        $config->setTerm('f21');
         $user = new User($this->core, [
             'user_id' => 'test',
             'user_givenname' => 'Tester',
@@ -45,8 +46,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame('email body' . $this->footer, $email->getBody());
+        $this->assertSame('some email', $email->getSubject());
+        $this->assertSame('email body', $email->getBody());
     }
 
     public function testRelevantUrl(): void {
@@ -58,11 +59,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nClick here for more info: http://example.com" . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame('some email', $email->getSubject());
+        $this->assertSame("email body\n\nClick here for more info: http://example.com", $email->getBody());
     }
 
     public function testAuthor(): void {
@@ -74,11 +72,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nAuthor: Test P." . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame('some email', $email->getSubject());
+        $this->assertSame("email body\n\nAuthor: Test P.", $email->getBody());
     }
 
     public function testAuthorAnonymous(): void {
@@ -91,11 +86,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body" . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame('some email', $email->getSubject());
+        $this->assertSame("email body", $email->getBody());
     }
 
     public function testAllDetails(): void {
@@ -108,10 +100,38 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame(
-            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com" . $this->footer,
+            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com",
             $email->getBody()
         );
+    }
+
+    public function testNotificationSettingsLink(): void {
+        $email = new Email($this->core, [
+            'to_user_id' => 'person',
+            'subject' => 'some email',
+            'body' => 'email body',
+        ]);
+
+        $this->assertSame('email body', $email->getBody());
+    }
+
+    public function testNotificationSettingsWithoutLink(): void {
+        $this->core = new Core();
+        $config = new Config($this->core);
+        $config->setCourse(null);
+        $config->setBaseUrl('http://localhost');
+        $config->setTerm(null);
+        $this->core->setConfig($config);
+
+        $email_missing = new Email($this->core, [
+            'to_user_id' => 'person',
+            'subject' => 'some email',
+            'body' => 'email body',
+        ]);
+
+        $this->assertSame('some email', $email_missing->getSubject());
+        $this->assertSame('email body', $email_missing->getBody());
     }
 }

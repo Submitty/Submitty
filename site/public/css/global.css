@@ -100,14 +100,6 @@ nav a > i.f {
     font-weight: bold;
 }
 
-.inner-message {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 !important;
-    padding: 8px 14px !important;
-}
-
 #wrapper {
     display: flex;
     flex-grow: 1;
@@ -128,6 +120,7 @@ footer {
 
 /* stylelint-disable-next-line no-descending-specificity */
 footer a {
+    /* stylelint-disable-next-line declaration-no-important */
     text-decoration: none !important;
 }
 
@@ -166,17 +159,8 @@ footer .footer-separator {
 
     /* specificity less than no @media since :not stated (for speed) */
     #breadcrumbs > * {
+        /* stylelint-disable-next-line declaration-no-important */
         display: block !important;
-    }
-
-    #messages {
-        z-index: 999;
-        position: fixed;
-        top: 40px;
-        left: 50%;
-        width: 30%;
-        min-width: 450px;
-        transform: translateX(-50%);
     }
 }
 

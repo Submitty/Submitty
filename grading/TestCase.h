@@ -133,6 +133,7 @@ public:
     return (*itr)[i];
   }
   const nlohmann::json get_test_case_limits() const;
+  const nlohmann::json& get_test_case_config() const { return _json; }
 
   bool ShowExecuteLogfile(const std::string &execute_logfile) const;
 

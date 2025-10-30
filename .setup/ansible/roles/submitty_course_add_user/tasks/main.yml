@@ -19,9 +19,10 @@
   ansible.builtin.command:
     cmd: ./adduser_course.py "{{ submitty_course_add_user_username }}"
       "{{ submitty_course_add_user_term }}" "{{ submitty_course_add_user_course }}"
-      "{{ submitty_course_add_user_user_group }}"
+      "{{ submitty_course_add_user_registration_section }}"
+      --user_group "{{ submitty_course_add_user_user_group }}"
     chdir: /usr/local/submitty/sbin/
-  register: add_user_result
+  register: submitty_course_add_user_result
   become: true
   become_user: root
-  changed_when: "'User added' in add_user_result.stdout"
+  changed_when: "'User added' in submitty_course_add_user_result.stdout"

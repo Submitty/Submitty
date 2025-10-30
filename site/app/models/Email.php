@@ -10,6 +10,8 @@ use app\libraries\Core;
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
  * @method void     setUserId($uid)
+ * @method void     setEmailAddress(string $email_address)
+ * @method void     setToName(string $to_name)
 
  * @method string   getSubject()
  * @method string   getBody()
@@ -60,7 +62,7 @@ class Email extends AbstractModel {
             $this->setEmailAddress($details["email_address"]);
             $this->setToName($details["to_name"]);
         }
-        $this->setSubject($this->formatSubject($details["subject"]));
+        $this->setSubject($details["subject"]);
         $this->setBody($this->formatBody(
             $details["body"],
             $details['relevant_url'] ?? null,
@@ -68,13 +70,6 @@ class Email extends AbstractModel {
         ));
     }
 
-    //inject course label into subject
-    private function formatSubject(string $subject): string {
-        $course = $this->core->getConfig()->getCourse();
-        return "[Submitty $course]: " . $subject;
-    }
-
-    //inject a "do not reply" note in the footer of the body
     //also adds author and a relevant url if one exists
     private function formatBody(string $body, ?string $relevant_url, bool $author): string {
         $extra = [];
@@ -85,9 +80,6 @@ class Email extends AbstractModel {
             $extra[] = "Click here for more info: " . $relevant_url;
         }
 
-        if (count($extra) > 0) {
-            $body .= "\n\n" . implode("\n", $extra);
-        }
-        return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+        return $body . (count($extra) > 0 ? "\n\n" . implode("\n", $extra) : "");
     }
 }

@@ -9,12 +9,14 @@ use app\libraries\routers\WebRouter;
 use Symfony\Component\HttpFoundation\Request;
 
 class AccessControlTester extends BaseUnitTest {
-    private $semester = 'test_semester';
+    private static $semester = 'test_semester';
 
-    private $course = 'test_course';
+    private static $course = 'test_course';
 
-    public function data() {
-        $course_prefix = "/courses/{$this->semester}/{$this->course}";
+    public static function data() {
+        $s = self::$semester;
+        $c = self::$course;
+        $course_prefix = "/courses/{$s}/{$c}";
         return [
             [$course_prefix . '/gradeable/open_homework/update', "GET", [], User::GROUP_INSTRUCTOR],
         ];
@@ -65,8 +67,8 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_admin' => true,
-                        'semester' => $this->semester,
-                        'course' => $this->course,
+                        'semester' => self::$semester,
+                        'course' => self::$course,
                         'logged_in' => $logged_in
                     ],
                     [],
@@ -78,8 +80,8 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_full_grading' => true,
-                        'semester' => $this->semester,
-                        'course' => $this->course,
+                        'semester' => self::$semester,
+                        'course' => self::$course,
                         'logged_in' => $logged_in
                     ],
                     [],
@@ -91,8 +93,8 @@ class AccessControlTester extends BaseUnitTest {
                 $core = $this->createMockCore(
                     [
                         'access_grading' => true,
-                        'semester' => $this->semester,
-                        'course' => $this->course,
+                        'semester' => self::$semester,
+                        'course' => self::$course,
                         'logged_in' => $logged_in
                     ],
                     [],
@@ -104,8 +106,8 @@ class AccessControlTester extends BaseUnitTest {
             default:
                 $core = $this->createMockCore(
                     [
-                        'semester' => $this->semester,
-                        'course' => $this->course,
+                        'semester' => self::$semester,
+                        'course' => self::$course,
                         'logged_in' => $logged_in
                     ],
                     [],
@@ -117,26 +119,20 @@ class AccessControlTester extends BaseUnitTest {
         return $core;
     }
 
-    public function testInvalidProperty() {
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage('Unknown property "foo" on annotation "app\libraries\routers\AccessControl"');
-        new AccessControl(['foo' => 1]);
-    }
-
     public function testInvalidRoleConstructor() {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
-        new AccessControl(['role' => 'INVALID_ROLE']);
+        new AccessControl(role: 'INVALID_ROLE');
     }
 
     public function testInvalidRoleMethod() {
-        $access = new AccessControl([]);
+        $access = new AccessControl();
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
         $access->setRole('INVALID_ROLE');
     }
 
-    public function accessRoleProvider() {
+    public static function accessRoleProvider() {
         return [["INSTRUCTOR"], ["FULL_ACCESS_GRADER"], ["LIMITED_ACCESS_GRADER"], ["STUDENT"]];
     }
 
@@ -144,7 +140,7 @@ class AccessControlTester extends BaseUnitTest {
      * @dataProvider accessRoleProvider
      */
     public function testAccessControlConstructor($role) {
-        $access = new AccessControl(['role' => $role, 'permission' => 'grading.simple']);
+        $access = new AccessControl(role: $role, permission: 'grading.simple');
         $this->assertEquals($role, $access->getRole());
         $this->assertEquals('grading.simple', $access->getPermission());
     }
@@ -153,7 +149,7 @@ class AccessControlTester extends BaseUnitTest {
      * @dataProvider accessRoleProvider
      */
     public function testAccessControlSet($role) {
-        $access = new AccessControl([]);
+        $access = new AccessControl();
         $this->assertNull($access->getRole());
         $this->assertNull($access->getPermission());
         $access->setRole($role);

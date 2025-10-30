@@ -12,9 +12,7 @@ use app\views\ErrorView;
 use app\views\superuser\SamlManagerView;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
+#[AccessControl(level: "SUPERUSER")]
 class SamlManagerController extends AbstractController {
     /**
      * @return SamlAuthentication|false

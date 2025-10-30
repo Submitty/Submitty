@@ -98,7 +98,7 @@ describe('Test cases involving late day cache updates', () => {
         it('should not allow access', () => {
             cy.visit(['sample', 'bulk_late_days']);
             cy.login('student');
-            cy.get('.content').should('contain', "You don't have access to this page");
+            cy.get('.content').should('contain', 'You don\'t have access to this page');
         });
     });
 

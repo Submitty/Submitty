@@ -13,5 +13,5 @@ form {
 }
 
 #new-api-token {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }

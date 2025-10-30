@@ -45,6 +45,7 @@
 
     .mobile-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
 
@@ -56,7 +57,7 @@
         padding: 0;
         margin: -1px;
         overflow: hidden;
-        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
         border: 0;
     }
 
@@ -96,6 +97,7 @@
     }
 
     .mobile-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 

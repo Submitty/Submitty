@@ -1,14 +1,19 @@
-### Please check if the PR fulfills these requirements:
+### Why is this Change Important & Necessary?
+<!-- Include any GitHub issue that is fixed/closed using "Fixes #<number>" or "Closes #<number>" syntax.  
+Alternately write "Partially addresses #<number>" or "Related to #<number>" as appropriate. -->
 
-* [ ] Tests for the changes have been added/updated (if possible)
-* [ ] Documentation has been updated/added if relevant
-* [ ] Screenshots are attached to Github PR if visual/UI changes were made
+### What is the New Behavior?
+<!-- Include before & after screenshots/videos if the user interface has changed. -->
 
-### What is the current behavior?
-<!-- List issue if it fixes/closes/implements one using the "Fixes #<number>" or "Closes #<number>" syntax -->
+### What steps should a reviewer take to reproduce or test the bug or new feature?
 
-### What is the new behavior?
+### Automated Testing & Documentation
+<!-- Is this feature sufficiently tested by unit tests and end-to-end tests?  
+If this PR does not add/update the necessary automated tests, write a new GitHub issue and link it below.  
+Is this feature sufficiently documented on submitty.org?
+Link related PRs or new GitHub issue to update documentation. -->
 
-### Other information?
-<!-- Is this a breaking change? -->
-<!-- How did you test -->
+### Other information
+<!-- Is this a breaking change?  
+Does this PR include migrations to update existing installations?  
+Are there security concerns with this PR? -->

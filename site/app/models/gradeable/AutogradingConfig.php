@@ -35,6 +35,9 @@ use app\models\notebook\Notebook;
  * @method LeaderboardConfig[] getLeaderboards()
  * @method bool getDisplayTestcaseRuntimeMemory()
  * @method void setDisplayTestcaseRuntimeMemory()
+ * @method array getNotebookConfig()
+ * @method bool getOnePartOnly()
+ * @method string getGradeableMessage()
  */
 class AutogradingConfig extends AbstractModel {
     /** @prop

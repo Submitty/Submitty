@@ -1,6 +1,7 @@
 /* exported loadPage */
 const page_window = 5;
 function loadPage(page, load_page_url) {
+    $('.page-btn').removeClass('selected');
     $(`#${page}`).addClass('selected');
     $(`#${page}`).attr('disabled', 'disabled');
     $('.page-btn').each(function () {
@@ -16,6 +17,7 @@ function loadPage(page, load_page_url) {
             $(this).show();
         }
     });
+    // eslint-disable-next-line no-restricted-syntax
     $('#email-statuses').html('<div class="loading-animation"></div>');
     $.ajax({
         type: 'GET',
@@ -26,6 +28,7 @@ function loadPage(page, load_page_url) {
             page: page,
         },
         success: function (data) {
+            // eslint-disable-next-line no-restricted-syntax
             $('#email-statuses').html(data);
             $('.page-btn').each(function () {
                 const id = parseInt($(this).attr('id'));

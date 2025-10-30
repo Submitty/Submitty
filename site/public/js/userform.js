@@ -144,10 +144,10 @@ function demoteGraderForm(user_id, givenname, familyname) {
 }
 
 function userFormChange() {
-    const user_elem = $("select[name='user_group']")[0];
+    const user_elem = $('select[name=\'user_group\']')[0];
     const is_student = user_elem.options[user_elem.selectedIndex].text === 'Student';
 
-    const regis_elem = $("select[name='registered_section']")[0];
+    const regis_elem = $('select[name=\'registered_section\']')[0];
     const is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === 'Not Registered';
 
     if (is_student && is_no_regis) {
@@ -301,7 +301,7 @@ function completeUserFormInformation(user) {
         $(`[name="user_group"] option[value="${user['user_group']}"]`, form).prop('selected', true);
         $('[name="manual_registration"]', form).prop('checked', user['manual_registration']);
     }
-    $("[name='grading_registration_section[]']").prop('checked', false);
+    $('[name=\'grading_registration_section[]\']').prop('checked', false);
     if (user['grading_registration_sections'] !== null && user['grading_registration_sections'] !== undefined) {
         user['grading_registration_sections'].forEach((val) => {
             $(`#grs_${val}`).prop('checked', true);

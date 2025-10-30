@@ -63,7 +63,7 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.visit('authentication/login');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
             loginViaUI('pearsr');
-            cy.get('#courses > h1').contains('My Courses');
+            cy.get('#courses > div > h1').contains('My Courses');
             cy.visit(['sample']);
             cy.get('.content').contains('You don\'t have access to this course.');
         });

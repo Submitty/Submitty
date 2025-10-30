@@ -3,7 +3,6 @@
 *
 * @param {String} current_tag - tag Submitty is currently running on
 */
-// eslint-disable-next-line no-unused-vars
 async function getReleases(current_tag) {
     try {
         const response = await fetch('https://api.github.com/repos/Submitty/Submitty/releases');
@@ -105,12 +104,15 @@ function updateReleaseNotes(data, current_tag) {
             });
 
             // set info about state of submitty
+            // eslint-disable-next-line no-restricted-syntax
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#text').html('<i>Submitty is up to date!</i>');
             }
             else {
                 const important_message = $('.update-important').length > 0 ? `<strong class="important-text"><em>THERE ${$('.update-important').length === 1 ? 'IS' : 'ARE'} ${$('.update-important').length} SECURITY/SYSADMIN UPDATES</em></strong>` : '';
+                // eslint-disable-next-line no-restricted-syntax
                 $('#text').html(`<a href="${latest['html_url']}" target="_blank">A new version of Submitty is available</a><br>
                                 Submitty is ${releases_behind} releases behind.<br>
                                 ${important_message}`);
@@ -131,7 +133,6 @@ function updateReleaseNotes(data, current_tag) {
  * will be expanded, even those that are already expanded.
  * @param {HTMLElement} toggleAllButton
  */
-// eslint-disable-next-line no-unused-vars
 function toggleAllReleases(toggleAllButton) {
     // in this case, collapsed class controls what action the button should take
     //  if toggleAllButton has collapsed - will collapse all
@@ -145,10 +146,10 @@ function toggleAllReleases(toggleAllButton) {
     // toggle collapsed class and switch button text accordingly
     $(toggleAllButton).toggleClass('collapsed');
     if ($(toggleAllButton).hasClass('collapsed')) {
-        $(toggleAllButton).html('Collapse All');
+        $(toggleAllButton).text('Collapse All');
     }
     else {
-        $(toggleAllButton).html('Expand All');
+        $(toggleAllButton).text('Expand All');
     }
 }
 
@@ -157,7 +158,6 @@ function toggleAllReleases(toggleAllButton) {
  * @param {HTMLElement} button HTMLElement of the button that was clicked to trigger this function
  * @param {Event} event Event context of the click event that triggered this function
  */
-// eslint-disable-next-line no-unused-vars
 function toggleRelease(button, event) {
     const release = $(button).closest('.box');
     $(button).toggleClass('collapsed');
@@ -174,7 +174,7 @@ function toggleRelease(button, event) {
             $(button).addClass('btn-primary');
             $(button).removeClass('btn-default');
         }
-        $(button).html('Expand');
+        $(button).text('Expand');
     }
     // EXPAND
     else {
@@ -184,7 +184,7 @@ function toggleRelease(button, event) {
         release.removeClass('update-important');
         $(button).removeClass('btn-primary');
         $(button).addClass('btn-default');
-        $(button).html('Collapse');
+        $(button).text('Collapse');
     }
     // stop bubbling of event
     event.stopPropagation();
@@ -235,6 +235,7 @@ function clearFilter() {
     // remove leftover highlighting from release items
     $('.release-item').each((i, list_item) => {
         const no_filter = removeFilterFromHTML($(list_item).html());
+        // eslint-disable-next-line no-restricted-syntax
         $(list_item).html(no_filter);
     });
 
@@ -249,7 +250,6 @@ function clearFilter() {
  * @param {string} filter The substring to filter by
  *
  */
-// eslint-disable-next-line no-unused-vars
 function filterReleaseNotes(filter) {
     // handle special case of empty filter to save time
     if (filter === '') {
@@ -282,6 +282,7 @@ function filterReleaseNotes(filter) {
                 $(section).find('.release-item').each((k, release_item) => {
                     // remove old filter highlighting
                     const no_filter = removeFilterFromHTML($(release_item).html());
+                    // eslint-disable-next-line no-restricted-syntax
                     $(release_item).html(no_filter);
 
                     // initially hide release item
@@ -301,6 +302,7 @@ function filterReleaseNotes(filter) {
                         // replace all instances of the filter text that is not inside an html tag's attributes
                         // with a span wrapper for styling
                         const matches = $(release_item).html().replace(new RegExp(`${filter}(?=[^<>]+<)`, 'gi'), '<span class="release-filtered">$&</span>');
+                        // eslint-disable-next-line no-restricted-syntax
                         $(release_item).html(matches);
                     }
                 });

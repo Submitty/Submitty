@@ -17,8 +17,8 @@ use app\exceptions\IOException;
  * @method array getImagePaths()
  * @method array getFileSubmissions()
  * @method array getItemPool()
+ * @method string getGradeableId()
  */
-
 class Notebook extends AbstractModel {
     /** @prop
      * @var array parsed notebook from the config */

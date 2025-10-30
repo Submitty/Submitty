@@ -24,8 +24,12 @@
             {% if cell.type == "markdown" %}
 
                 {# Render markdown #}
-                {% include "misc/Markdown.twig" with {
-                    "content" : cell.markdown_data
+                {% include "Vue.twig" with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        "content" : cell.markdown_data
+                    }
                 } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
@@ -38,11 +42,11 @@
 
                 <img src="{{ image_data is defined ? attribute(image_data, cell.image) : cell.image }}"
 
-                {% if cell.width > 0 %}
+                {% if cell.width is defined and cell.width > 0 %}
                     width="{{ cell.width }}"
                 {% endif %}
 
-                {% if cell.height > 0 %}
+                {% if cell.height is defined and cell.height > 0 %}
                     height="{{ cell.height }}"
                 {% endif %}
 
@@ -65,8 +69,12 @@
                     {% set content_label = "Write your " ~ write_your ~ " below:" %}
                 {% endif %}
 
-                {% include "misc/Markdown.twig" with {
-                    "content" : content_label
+                {% include "Vue.twig" with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        "content" : content_label
+                    }
                 } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
@@ -128,12 +136,16 @@
                     {# Populate codebox and set state of buttons initially #}
                     {% if highest_version == 0 %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                        {% if not is_grader_view %}
+                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                        {% endif %}
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                        {% if not is_grader_view %}
+                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
+                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                        {% endif %}
                     {% endif %}
                 </script>
                 {% set num_codeboxes = num_codeboxes + 1 %}
@@ -152,9 +164,13 @@
                           {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.version_submission }}"{% endif %}>
                     {% if cell.allow_multiple == true %}
                         <legend>
-                            {% if cell.label %}
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.label
+                            {% if cell.label is defined %}
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.label
+                                    }
                                 } only %}
                             {% else %}
                                 You may select many:
@@ -174,14 +190,18 @@
                                            disabled = "disabled"
                                        {% endif %}
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {{ cell.choices[idx].description | markdown_to_html }}
                             </label>
                         {% endfor %}
                     {% else %}
                         <legend class="markdown">
                             {% if cell.label is defined %}
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.label
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.label
+                                    }
                                 } only %}
                             {% else %}
                                 Select one:
@@ -198,8 +218,12 @@
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress({{ viewing_inactive_version or is_grader_view }});"
                                 />
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.choices[idx].description
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.choices[idx].description
+                                    }
                                 } only %}
                             </label>
                         {% endfor %}

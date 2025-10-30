@@ -42,6 +42,10 @@
                 {{ not is_pdf_page_student ? 'checked' : '' }} /> <label for="no_pdf_page_student">Instructor (specify the starting page number for each problem/item/component below)</label><br>
         <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
                 {{ is_pdf_page_student ? 'checked' : '' }} /> <label for="yes_pdf_page_student">Student (student will be asked for page numbers at submission time)</label>
+        {% if gradeable.isBulkUpload() %}
+        <br>
+        <div id="redactions_container"></div>
+        {% endif %}
     </fieldset>
 
     <div>
@@ -54,21 +58,34 @@
 
 <script>
     $(document).ready(function() {
+        {% if gradeable.getRedactions()|length == 0 %}
+            $('#remove_redactions').hide();
+        {% endif %}
         if ($('#no_custom_marks').is(':checked')) {
             $("#custom_marks_warning").show();
         }
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
-                $('body').on('DOMSubtreeModified', '.component-container', function() {
-                    let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
-                    if (yesPeer) {
-                        $('#page_4_nav').show();
-                        $('#page_4_nav').removeClass("hidden-no-peers");
-                    } else {
-                        $('#page_4_nav').hide();
-                        $('#page_4_nav').addClass("hidden-no-peers");
-                    }
-                });
+                const componentContainer = document.querySelector('.component-container');
+                if (componentContainer) {
+                    const observer = new MutationObserver(() => {
+                        let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
+                        if (yesPeer) {
+                            $('#page_4_nav').show();
+                            $('#page_4_nav').removeClass("hidden-no-peers");
+                        } else {
+                            $('#page_4_nav').hide();
+                            $('#page_4_nav').addClass("hidden-no-peers");
+                        }
+                    });
+
+                    observer.observe(componentContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            }).catch((error) => {
+                console.error('Failed to call reloadInstructorEditRubric', error);
             });
         });
         //toggle warning message if custom marks have already been used and the settings are changed

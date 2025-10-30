@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\views\ErrorView;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -19,6 +20,18 @@ class LeaderboardController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
 
+        if (
+            !$this->core->getUser()->accessGrading()
+            && (
+                !$gradeable->isSubmissionOpen()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
+                && !$gradeable->isTaGradeReleased()
+            )
+        ) {
+            return new WebResponse(ErrorView::class, "noGradeable", $gradeable_id);
+        }
+
         $leaderboards = [];
 
         $autogradingConfig = $gradeable->getAutogradingConfig();
@@ -29,7 +42,7 @@ class LeaderboardController extends AbstractController {
         }
 
         $leaderboards = $autogradingConfig->getLeaderboards();
-        if (!$leaderboards) {
+        if (count($leaderboards) === 0) {
             $this->core->addErrorMessage("No leaderboards exist for this gradeable");
             return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }

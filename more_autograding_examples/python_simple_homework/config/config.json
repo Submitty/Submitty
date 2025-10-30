@@ -1,6 +1,10 @@
 {
-	"required_capabilities": "python",
-
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+    
     "testcases" : [
         {
             "title" : "Lab 1 Checkpoint 1",

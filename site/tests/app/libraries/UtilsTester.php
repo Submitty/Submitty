@@ -5,8 +5,9 @@ namespace tests\app\libraries;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\User;
+use tests\BaseUnitTest;
 
-class UtilsTester extends \PHPUnit\Framework\TestCase {
+class UtilsTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
     public function testPad1() {
@@ -35,6 +36,32 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(32, strlen($second));
     }
 
+    public function testValidPassword() {
+        $good_password = 'GoodPassword#123';
+        $this->assertTrue(Utils::isValidPassword($good_password));
+        $bad_password_length = 'Bad#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_length));
+        $bad_password_numbers = 'BadPasswordWithoutNumbers@';
+        $this->assertFalse(Utils::isValidPassword($bad_password_numbers));
+        $bad_password_special = 'BadPasswordWithoutSpecialCharacter123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_special));
+        $bad_password_capital = 'badpasswordwithoutcapital#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_capital));
+        $bad_password_lowercase = 'BADPASSWORDWITHOUTLOWERCASE#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_lowercase));
+    }
+
+    public function testAcceptedEmail() {
+        $core = $this->createMockCore(['accepted_emails' => ['gmail.com']]);
+        $reqs = $core->getConfig()->getAcceptedEmails();
+        $good_email_gmail = 'goodemail@gmail.com';
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_gmail));
+        $bad_email_extension = 'goodemail@notanextension.edu';
+        $this->assertFalse(Utils::isAcceptedEmail($reqs, $bad_email_extension));
+        $accepts_multiple_at_signs = 'good@email@testing@gmail.com';
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $accepts_multiple_at_signs));
+    }
+
     public function testGenerateRandomString2() {
         $this->assertEquals(16, strlen(Utils::generateRandomString(8)));
     }
@@ -44,7 +71,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
     }
 
-    public function elementDataProvider() {
+    public static function elementDataProvider() {
         return [
             [[], null, null],
             [[1], 1, 1],
@@ -150,7 +177,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         }
     }
 
-    public function imageDataProvider() {
+    public static function imageDataProvider() {
         return [
             ['test', false],
             ['test.txt', false],
@@ -167,7 +194,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($is_image, Utils::isImage($name));
     }
 
-    public function uploadedImageProvider() {
+    public static function uploadedImageProvider() {
         return [
             [__TEST_DATA__ . '/images/test_image.png', true],
             [__TEST_DATA__ . '/images/test_image.jpg', true],
@@ -220,7 +247,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse(Utils::checkUploadedImageFile('invalid'));
     }
 
-    public function comparableNullableGtProvider() {
+    public static function comparableNullableGtProvider() {
         return [
             [null, null, false],
             [null, 1, false],
@@ -238,7 +265,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::compareNullableGt($left, $right));
     }
 
-    public function safeCalcPercentProvider() {
+    public static function safeCalcPercentProvider() {
         return [
             [100, 5, false, 20],
             [-100, 5, false, -20],
@@ -430,6 +457,30 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::getAutoFillData($users));
     }
 
+    public static function booleanProvider() {
+        return [
+            ['true', true],
+            ['on', true],
+            ['1', true],
+            ['false', false],
+            ['random_string', false],
+            ['0', false],
+            [true, true],
+            [false, false],
+            [123, true],
+            [1, true],
+            [0, false]
+        ];
+    }
+
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testConvertBooleans(mixed $variable, bool $boolean): void {
+        // Strict assertion to assert actual boolean value is returned, not possibly equal other values, such as an integer or a string.
+        $this->assertSame($boolean, Utils::getBooleanValue($variable));
+    }
+
     public function testGetAutoFillDataVersion() {
         $details = [];
         $details[] = [
@@ -589,7 +640,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::getAutoFillData($users, $versions));
     }
 
-    public function returnBytesProvider() {
+    public static function returnBytesProvider() {
         return [
             ['10B', 10],
             ['1M', 1048576],
@@ -608,7 +659,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::returnBytes($byte_string));
     }
 
-    public function formatBytesProvider() {
+    public static function formatBytesProvider() {
         return [
             ['b', 0, '0B'],
             ['b', 100, '100B'],
@@ -629,7 +680,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
     }
 
-    public function formatBytesRoundingProvider() {
+    public static function formatBytesRoundingProvider() {
         return [
             ['b', 0, '0B'],
             ['b', 1000, '1000B'],

@@ -1,3 +1,5 @@
+import { buildUrl } from '../../support/utils';
+
 describe('Test cases for checking the clear version conflicts button in the TA grading interface', () => {
     it('Clear conflict button should appear only when there is a version conflict, and work', () => {
         cy.login('instructor');
@@ -29,7 +31,17 @@ describe('Test cases for checking the clear version conflicts button in the TA g
 
         // reset state
         cy.window().then(async (win) => {
-            await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2, win.getAllComponentsFromDOM().map((x) => x.id));
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
+                form: true,
+                body: {
+                    anon_id: 'K8jI3q4qpdCc1jw',
+                    graded_version: 2,
+                    component_ids: [64, 65, 66, 67],
+                    csrf_token: win.csrfToken,
+                },
+            });
         });
 
         cy.reload();
@@ -64,9 +76,17 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         });
 
         // reset state
-        cy.get('@test-component').children().eq(0).then((el) => {
-            cy.window().then(async (win) => {
-                await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2, [win.getComponentIdFromDOMElement(el[0])]);
+        cy.window().then(async (win) => {
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
+                form: true,
+                body: {
+                    anon_id: 'K8jI3q4qpdCc1jw',
+                    graded_version: 2,
+                    component_ids: [64],
+                    csrf_token: win.csrfToken,
+                },
             });
         });
 

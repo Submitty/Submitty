@@ -31,7 +31,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
@@ -45,8 +45,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -59,7 +59,9 @@ jobs:
       - run: npm ci
       - name: Run stylelint
         run: npm run css-stylelint
-
+      - name: Run Prettier Format
+        run: npm run prettier:fix
+      - run: git diff --exit-code
 
   js-lint:
     name: JavaScript Lint
@@ -68,8 +70,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -93,8 +95,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -114,6 +116,32 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  twig-lint:
+    name: Twig Lint
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@2.35.5
+        with:
+          php-version: ${{ env.PHP_VER }}
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Lint Twig Templates
+        run: php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
 
   php-lint:
     name: PHP Lint
@@ -122,8 +150,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@2.35.5
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -158,8 +186,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@2.35.5
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -191,8 +219,8 @@ jobs:
     name: Python Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
@@ -213,8 +241,8 @@ jobs:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
@@ -298,7 +326,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -309,7 +337,7 @@ jobs:
     name: Shell Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -322,13 +350,13 @@ jobs:
 
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           path: MAIN
 
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: PR
 
@@ -379,6 +407,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -388,6 +417,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -403,7 +433,7 @@ jobs:
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: branch/GIT_CHECKOUT/Submitty
           fetch-depth: 0
@@ -414,7 +444,7 @@ jobs:
                        -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
 
       - name: Checkout main Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.MBASE || 'main' }}
           path: main/GIT_CHECKOUT/Submitty
@@ -474,9 +504,11 @@ jobs:
               echo "submitty_dbuser"              # course db pass
               echo ""                             # timezone
               echo ""                             # default locale
+              echo ""                             # default course materials file upload limit
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
+              echo "y"                            # user create account
               echo ""                             # sysadmin email
               echo ""                             # where to report
               echo "1"                            # PamAuth
@@ -620,6 +652,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -630,7 +663,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
@@ -645,6 +678,9 @@ jobs:
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
           npm ci
+
+      - name: Switch to Pam auth
+        run: sudo sed -ie "s/Database/Pam/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run accessibility test
         uses: cypress-io/github-action@v6
@@ -710,6 +746,14 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Run self-account-creation tests.
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
@@ -757,12 +801,18 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Submitty-JSON
+          path: /usr/local/submitty/config/submitty.json
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -778,7 +828,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding-Development", "Autograding-Tutorial"]
     services:
       postgres:
         image: postgres
@@ -786,6 +836,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -796,8 +847,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-      - uses: ./.github/actions/e2e-Setup-Composite
+        uses: actions/checkout@v5
+
+      # If the matrix is currently on Development or Tutorial,
+      # we should use the respective courses
+      # and use the no_submissions flag
+      - name: Run setup script
+        uses: ./.github/actions/e2e-Setup-Composite
+        with:
+          courses: >-
+            ${{ matrix.containers == 'Autograding-Development' && 'development' ||
+                matrix.containers == 'Autograding-Tutorial' && 'tutorial' ||
+                'sample testing archived'
+            }}
+          flags: >-
+            ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
+                '--test_only_grading' }}
+
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v4
@@ -850,6 +916,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -860,17 +927,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
-
-  ansible-install:
+  ansible-ci:
     name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup SSH
         shell: bash
         run: |
@@ -880,15 +946,68 @@ jobs:
           ssh -T localhost
           sudo systemctl start postgresql
 
+      - name: Delete unused folders
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Run ansible script
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
+
+      - name: Set perms
+        shell: bash
+        run: |
+          sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+          sudo chmod -R a+rwx /tmp/
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+
+      - name: Install node dependencies
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: |
+          npm ci
+
       - name: Validate image
-        run: curl --show-error --fail --include http://localhost/authentication/login
+        run: |
+          curl --show-error --fail --include http://localhost/authentication/login
+
+      - name: Run Ansible cypress test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: install-log
           path: /usr/local/submitty/install.log
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-Ansible-Screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-Ansible-Videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos

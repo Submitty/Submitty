@@ -1,0 +1,186 @@
+// @ts-check
+
+import eslint from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
+import jest from 'eslint-plugin-jest';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+// eslint-pluging-cypress/flat doesnt have ts definitions yet
+import cypress from 'eslint-plugin-cypress/flat';
+import vuelint from 'eslint-plugin-vue';
+import noUnsanitized from 'eslint-plugin-no-unsanitized';
+import vueParser from 'vue-eslint-parser';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// ES modules don't have __dirname, so we need to create it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default tseslint.config(
+    {
+        name: 'Files to include',
+        files: ['**/*.{js,ts,mts}'],
+    },
+    {
+        // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
+        ignores: [
+            'node_modules/**',
+            'public/mjs/**',
+            '**/vendor/**',
+        ],
+    },
+    {
+        name: 'Base options for all files',
+        extends: [eslint.configs.recommended],
+        plugins: {
+            'no-unsanitized': noUnsanitized,
+        },
+        languageOptions: {
+            globals: {
+                ...globals.jquery,
+                ...globals.browser,
+                ...globals.es2020,
+                Cookies: 'readonly',
+            },
+            parserOptions: {
+                ecmaVersion: 2020,
+                sourceType: 'module',
+            },
+        },
+        rules: {
+            // twig and eslint do not play well together, would be nice to re-enable this rule
+            'no-unused-vars': 'off',
+
+            'eqeqeq': ['error', 'always'],
+            'curly': ['error'],
+            'default-param-last': ['error'],
+            'no-var': ['error'],
+            'prefer-arrow-callback': ['error'],
+            'prefer-const': ['error'],
+            'prefer-template': ['error'],
+            'no-restricted-syntax': [
+                'error',
+                {
+                    message:
+                        'Direct use of `document.cookie` is not allowed. Consider using `Cookies.get` or `Cookies.set`.',
+                    selector:
+                        'MemberExpression[object.name="document"][property.name="cookie"]',
+                },
+                {
+                    selector: 'CallExpression[arguments.length>0][callee.property.name="html"] > MemberExpression[object.callee.name="$"]',
+                    message: 'Do not use $(...).html(). Use safer DOM manipulation methods instead.',
+                },
+            ],
+            'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
+            'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
+        },
+    },
+
+    {
+        name: 'Style rules for all files',
+        extends: [
+            // @ts-expect-error (TS compiler expects `stylistic.default.configs`, which is not valid based on the source code type definitions)
+            stylistic.configs.customize({
+                braceStyle: 'stroustrup',
+                indent: 4,
+                semi: true,
+                arrowParens: true,
+            }),
+        ],
+        rules: {
+            'linebreak-style': ['error', 'unix'],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'semi-style': ['error'],
+        },
+    },
+
+    {
+        name: 'Files in top directory are commonJS and not modules',
+        files: ['*.{js,ts}'],
+        languageOptions: {
+            sourceType: 'commonjs',
+            globals: globals.node,
+        },
+    },
+    {
+        name: 'Options for typescript files',
+        files: ['**/*.ts'],
+        extends: [...tseslint.configs.recommended],
+    },
+    {
+        name: 'Options for typescript files in ts, which have their own tsconfig',
+        files: ['ts/**/*.ts'],
+        extends: [...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parserOptions: {
+                project: true,
+                tsconfigRootDir: __dirname,
+            },
+        },
+    },
+    {
+        name: 'Options for Vue files',
+        files: ['vue/**/*.{js,ts,vue}'],
+        // vuelint doesnt have ts types yet
+        extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parser: vueParser,
+            globals: globals.browser,
+            parserOptions: {
+                parser: '@typescript-eslint/parser',
+                project: 'tsconfig.app.json',
+                extraFileExtensions: ['.vue'],
+                tsconfigRootDir: `${__dirname}/vue`,
+            },
+        },
+        rules: {
+            'vue/multi-word-component-names': ['off'],
+            'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+            'vue/block-order': ['error', { order: ['script:not([setup])', 'script[setup]', 'template', 'style'] }],
+            'vue/component-api-style': ['error', ['script-setup']],
+            'vue/define-emits-declaration': ['error', 'type-literal'],
+            'vue/define-macros-order': ['error',
+                {
+                    order: ['defineOptions', 'defineModel', 'defineProps', 'defineEmits', 'defineSlots'],
+                    defineExposeLast: true,
+                },
+            ],
+            'vue/define-props-declaration': ['error', 'type-based'],
+            'vue/html-self-closing': ['error', { html: { void: 'any' } }],
+            'vue/no-boolean-default': ['error', 'no-default'],
+            'vue/no-ref-object-reactivity-loss': ['warn'],
+            'vue/no-required-prop-with-default': ['error', { autofix: true }],
+            'vue/no-useless-mustaches': ['error'],
+            'vue/prefer-separate-static-class': ['error'],
+            'vue/require-typed-object-prop': ['error'],
+            'vue/require-typed-ref': ['error'],
+            'vue/valid-define-options': ['error'],
+        },
+    },
+    {
+        name: 'Options for cypress files',
+        files: ['cypress/**/*.{js,ts}'],
+        extends: [cypress.configs.recommended],
+        languageOptions: {
+            globals: globals.nodeBuiltin,
+        },
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: '[type=CallExpression][callee.object.name=cy][callee.property.name=waitAndReloadUntil]',
+                    message: 'Do not wait for arbitrary time periods',
+                },
+            ],
+        },
+    },
+    {
+        name: 'Options for jest files',
+        files: ['tests/**/*.{js,ts}'],
+        extends: [jest.configs['flat/recommended']],
+        languageOptions: {
+            globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
+        },
+    },
+);

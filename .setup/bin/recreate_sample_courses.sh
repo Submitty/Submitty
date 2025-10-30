@@ -3,21 +3,22 @@
 # Automated regeneration of sample course data
 
 ########################################################################
-EXTRA=
+FLAG=
+COURSES=
 
-while :; do
-    case $1 in
+for arg in "$@"; do
+    case "$arg" in
         --no_submissions)
-            EXTRA="--no_submissions"
+            FLAG="--no_submissions"
             ;;
         --test_only_grading)
-            EXTRA="--test_only_grading"
+            FLAG="--test_only_grading"
             ;;
-        *) # No more options, so break out of the loop.
-            break
+        *)
+            # interpret everything else as a course name
+            COURSES+="$arg "
+            ;;
     esac
-
-    shift
 done
 
 # If any command fails, we need to bail
@@ -39,7 +40,7 @@ fi
 cd ../../
 
 python3 ./.setup/bin/partial_reset.py
-python3 ./.setup/bin/setup_sample_courses.py ${EXTRA}
+python3 ./.setup/bin/setup_sample_courses.py ${FLAG} ${COURSES}
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 service php${PHP_VERSION}-fpm restart

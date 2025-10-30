@@ -5,6 +5,13 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 
+/**
+ * @method string getId()
+ * @method string getLateDayExceptions()
+ * @method string getDisplayedGivenName()
+ * @method string getDisplayedFamilyName()
+ * @method string getReasonForException()
+ */
 class SimpleLateUser extends AbstractModel {
     /** @prop
      * @var bool Is this user actually loaded (else you cannot access the other member variables) */
@@ -18,7 +25,7 @@ class SimpleLateUser extends AbstractModel {
     protected $legal_given_name;
     /** @prop
      * @var string The preferred given name of the user if exists */
-    protected $preferred_given_name = "";
+    protected $preferred_given_name;
     /** @prop
      * @var  string The name to be displayed by the system (either preferred given name or legal given name) */
     protected $displayed_given_name;
@@ -57,7 +64,7 @@ class SimpleLateUser extends AbstractModel {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->legal_given_name = $details['user_givenname'];
-        if (isset($details['user_preferred_givenname']) && $details['user_preferred_givenname'] !== "") {
+        if (isset($details['user_preferred_givenname'])) {
             $this->preferred_given_name = $details['user_preferred_givenname'];
             $this->displayed_given_name = $details['user_preferred_givenname'];
         }
@@ -66,7 +73,7 @@ class SimpleLateUser extends AbstractModel {
         }
 
         $this->legal_family_name = $details['user_familyname'];
-        if (isset($details['user_preferred_familyname']) && $details['user_preferred_familyname'] !== "") {
+        if (isset($details['user_preferred_familyname'])) {
             $this->preferred_family_name = $details['user_preferred_familyname'];
             $this->displayed_family_name = $details['user_preferred_familyname'];
         }

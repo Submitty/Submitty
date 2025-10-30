@@ -1,9 +1,13 @@
 {
-	"required_capabilities": "et-cetera",
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
 
     "autograding" : {
         "submission_to_runner" : [ "*.txt", "*.png" ],
-	       "work_to_details" : ["**/*.png"]
+	"work_to_details" : ["**/*.png"]
     },
     "max_submission_size" : 2000000,
     "testcases" : [    

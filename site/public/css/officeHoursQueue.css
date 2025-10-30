@@ -46,7 +46,9 @@ th {
 }
 
 .fully-transparent {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--default-black) !important;
 }
 
@@ -57,8 +59,6 @@ th {
 .filter-buttons:hover,
 .filter-buttons:focus {
     opacity: 0.8;
-    /* stylelint-disable-next-line function-no-unknown */
-    filter: alpha(opacity=80);
 }
 
 .queue-message {
@@ -74,6 +74,7 @@ th {
 @media only screen and (max-width: 479px) {
     /* Put this on elements you dont need on mobile */
     .mobile-hide {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 
@@ -96,6 +97,7 @@ th {
 /* Put this on elements you dont need on desktop */
 @media only screen and (min-width: 480px) {
     .desktop-hide {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 }

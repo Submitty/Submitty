@@ -1,17 +1,63 @@
 {
-  "display": [
-    "grade_summary",
-    "grade_details"
-  ],
-  "gradeables": [{
-    "type": "test",
-    "count": 5,
-    "remove_lowest": 0,
-    "percent": 1,
-    "ids": [{
-      "max": 5,
-      "release_date": "1972-01-01 23:59:59-0500",
-      "id": "grades_released_test"
-    }]
-  }]
+    "section": {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "10": "10"
+    },
+    "display_benchmark": [
+        "average",
+        "stddev",
+        "perfect",
+        "lowest_a-",
+        "lowest_b-",
+        "lowest_c-",
+        "lowest_d"
+    ],
+    "messages": [],
+    "display": [
+        "grade_summary",
+        "grade_details"
+    ],
+    "benchmark_percent": {
+        "lowest_a-": 0.9,
+        "lowest_b-": 0.8,
+        "lowest_c-": 0.7,
+        "lowest_d": 0.6
+    },
+    "final_cutoff": {
+        "A": 93,
+        "A-": 90,
+        "B+": 87,
+        "B": 83,
+        "B-": 80,
+        "C+": 77,
+        "C": 73,
+        "C-": 70,
+        "D+": 67,
+        "D": 60
+    },
+    "gradeables": [
+        {
+            "type": "exam",
+            "count": 1,
+            "remove_lowest": 0,
+            "percent": 1,
+            "ids": [
+                {
+                    "max": 10,
+                    "release_date": "2024-08-22 13:38:52-0400",
+                    "id": "numeric"
+                }
+            ]
+        }
+    ],
+    "plagiarism": [],
+    "manual_grade": []
 }

@@ -7,7 +7,7 @@ namespace tests\app\libraries\database;
 use app\libraries\database\QueryIdentifier;
 
 class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
-    public function dataProvider(): array {
+    public static function dataProvider(): array {
         return [
             ['SELECT * FROM foo', QueryIdentifier::SELECT],
             ['DELETE FROM thread_categories where thread_id=?', QueryIdentifier::DELETE],
@@ -76,7 +76,7 @@ SQL;
           $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));
     }
 
-    public function invalidQueriesDataProvider(): array {
+    public static function invalidQueriesDataProvider(): array {
         return [
             ['invalid query'],
             // trailing comma on CTE

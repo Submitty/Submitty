@@ -1,17 +1,12 @@
 {
-	"required_capabilities": "cpp",
-
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/gcc:latest"
+    },
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
-
-    "allow_system_calls" : [
-        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
-        "PROCESS_CONTROL_SCHEDULING",
-        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
-        "FILE_MANAGEMENT_RARE",
-        "PROCESS_CONTROL_ADVANCED"
-    ],
 
     "assignment_message" :
 	"Note that during manual grading, points may be deducted from the autograded portion if homework specifications are not met.",
@@ -22,7 +17,7 @@
 	    "title" : "Compilation",
 	    "command" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
 	    "details" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
-	    "executable_name" : "a.out",
+            "executable_name" : "a.out",
 	    "points" : 5
 	},
 

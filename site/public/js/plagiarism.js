@@ -6,7 +6,6 @@
  * @param {string} config_id
  * @param {array} user_1_list
  */
-// eslint-disable-next-line no-unused-vars
 function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_list) {
     // eslint-disable-next-line no-undef
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');

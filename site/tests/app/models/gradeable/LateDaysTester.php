@@ -5,7 +5,6 @@ namespace tests\app\models\gradeable;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Gradeable;
@@ -52,17 +51,13 @@ class LateDaysTester extends BaseUnitTest {
     }
 
     private function mockCore(int $default_late_days, array $updates, array $cache = []) {
-        $core = $this->createMockModel(Core::class);
-        $core->method('getDateTimeNow')->willReturn(new \DateTime());
+        $core = $this->createMockCore([], [], [
+            'getLateDayUpdates' => $updates,
+            'getLateDayCacheForUser' => $cache
+        ]);
 
-        $config = $this->createMockModel(Config::class);
-        $config->method('getDefaultStudentLateDays')->willReturn($default_late_days);
-        $core->method('getConfig')->willReturn($config);
+        $core->getConfig()->method('getDefaultStudentLateDays')->willReturn($default_late_days);
 
-        $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
-        $queries->method('getLateDayUpdates')->willReturn($updates);
-        $queries->method('getLateDayCacheForUser')->willReturn($cache);
-        $core->method('getQueries')->willReturn($queries);
         return $core;
     }
 

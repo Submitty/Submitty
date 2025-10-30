@@ -1,5 +1,10 @@
 {
-	"required_capabilities": "notebook",
+    "required_capabilities": "notebook",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
+
     "assignment_message" : "# A Notebook with File Submission",
     "autograding" : {
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],

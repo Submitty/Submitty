@@ -36,7 +36,7 @@ import os
 import os.path
 import random
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, Table, MetaData, insert
 
 from sample_courses import (
     args, SUBMITTY_INSTALL_DIR,
@@ -141,35 +141,39 @@ def main() -> None:
     submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
                                     .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
     submitty_conn = submitty_engine.connect()
-    submitty_metadata = MetaData(bind=submitty_engine)
-    user_table = Table('users', submitty_metadata, autoload=True)
+    submitty_metadata = MetaData()
+    user_table = Table('users', submitty_metadata, autoload_with=submitty_engine)
     for user_id in sorted(users.keys()):
         user = users[user_id]
-        submitty_conn.execute(user_table.insert(),
-                              user_id=user.id,
-                              user_numeric_id=user.numeric_id,
-                              user_password=get_php_db_password(user.password),
-                              user_givenname=user.givenname,
-                              user_preferred_givenname=user.preferred_givenname,
-                              user_familyname=user.familyname,
-                              user_preferred_familyname=user.preferred_familyname,
-                              user_email=user.email,
-                              user_access_level=user.access_level,
-                              user_pronouns=user.pronouns,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
+        submitty_conn.execute(insert(user_table).values(
+            user_id=user.id,
+            user_numeric_id=user.numeric_id,
+            user_password=get_php_db_password(user.password),
+            user_givenname=user.givenname,
+            user_preferred_givenname=user.preferred_givenname,
+            user_familyname=user.familyname,
+            user_preferred_familyname=user.preferred_familyname,
+            user_email=user.email,
+            user_access_level=user.access_level,
+            user_pronouns=user.pronouns,
+            last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z")
+        ))
+    submitty_conn.commit()
 
     for user in extra_students:
-        submitty_conn.execute(user_table.insert(),
-                              user_id=user.id,
-                              user_numeric_id=user.numeric_id,
-                              user_password=get_php_db_password(user.password),
-                              user_givenname=user.givenname,
-                              user_preferred_givenname=user.preferred_givenname,
-                              user_familyname=user.familyname,
-                              user_preferred_familyname=user.preferred_familyname,
-                              user_email=user.email,
-                              user_pronouns=user.pronouns,
-                              last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
+        submitty_conn.execute(insert(user_table).values(
+            user_id=user.id,
+            user_numeric_id=user.numeric_id,
+            user_password=get_php_db_password(user.password),
+            user_givenname=user.givenname,
+            user_preferred_givenname=user.preferred_givenname,
+            user_familyname=user.familyname,
+            user_preferred_familyname=user.preferred_familyname,
+            user_email=user.email,
+            user_pronouns=user.pronouns,
+            last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z")
+        ))
+    submitty_conn.commit()
 
     # INSERT term into terms table, based on today's date.
     today = datetime.today()
@@ -185,13 +189,14 @@ def main() -> None:
         term_start = "07/01/" + year
         term_end = "12/23/" + year
 
-    terms_table = Table("terms", submitty_metadata, autoload=True)
-    submitty_conn.execute(terms_table.insert(),
-                          term_id=term_id,
-                          name=term_name,
-                          start_date=term_start,
-                          end_date=term_end)
-
+    terms_table = Table("terms", submitty_metadata, autoload_with=submitty_engine)
+    submitty_conn.execute(insert(terms_table).values(
+        term_id=term_id,
+        name=term_name,
+        start_date=term_start,
+        end_date=term_end
+    ))
+    submitty_conn.commit()
     submitty_conn.close()
 
     for course_id in sorted(courses.keys()):

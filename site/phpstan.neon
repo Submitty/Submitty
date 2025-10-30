@@ -18,7 +18,6 @@ parameters:
     level: 6
     doctrine:
         objectManagerLoader: tests/phpstan/DoctrineExtensionTester.php
-    checkGenericClassInNonGenericObjectType: false
     treatPhpDocTypesAsCertain: false
 
 services:

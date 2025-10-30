@@ -1,23 +1,29 @@
 import { createApp } from 'vue';
-import Unknown from './pages/Unknown.vue';
+import Unknown from './components/Unknown.vue';
 
 const exports = {
-    async render(target: string, page: string, args: Record<string, unknown> = {}) {
-        const root_component = await (async () => {
+    async render(
+        target: string | Element,
+        type: 'component' | 'page',
+        name: string,
+        args: Record<string, unknown> = {},
+    ) {
+        const app = await (async () => {
             try {
-                return (await import(`./pages/${page}.vue`) as { default: Parameters<typeof createApp>[0] }).default;
+                // https://vite.dev/guide/features.html#glob-import
+                const modules = import.meta.glob(['./components/**/*.vue', './pages/*.vue'], { import: 'default' });
+                const path = `./${type}s/${name}.vue`;
+                if (!(path in modules)) {
+                    throw new Error(`Module ${path} not found`);
+                }
+                const mod = await modules[path]();
+                return createApp(mod as Parameters<typeof createApp>[0], args);
             }
             catch (e) {
-                console.error(`Could not render vue page ${page}:`, e);
-                return Unknown;
+                console.error(`Could not find vue ${type} ${name}:`, e);
+                return createApp(Unknown, { type, name });
             }
         })();
-
-        const app = createApp(root_component, { page });
-
-        for (const [key, value] of Object.entries(args)) {
-            app.provide(key, value);
-        }
 
         app.mount(target);
     },

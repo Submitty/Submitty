@@ -1,9 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
 import { postRequest, getRequest } from './utils';
 
+type ApiTokenResponse = { status: string; data: { token: string } };
+
 describe('Test cases revolving around the API', () => {
     it('should authenticate a user', async () => {
-        const response = await postRequest('/api/token', {
+        const response: ApiTokenResponse = await postRequest('/api/token', {
             user_id: 'instructor',
             password: 'instructor',
         });
@@ -18,7 +20,7 @@ describe('Test cases revolving around the API', () => {
         ['no password', { user_id: 'instructor' }],
         ['no user_id', { password: 'instructor' }],
     ])('should require a user_id and password - %s', async (_, postBody) => {
-        const response = await postRequest('/api/token', postBody);
+        const response: ApiTokenResponse = await postRequest('/api/token', postBody);
         expect(response).toHaveProperty('status', 'fail');
         expect(response).toHaveProperty('message', 'Cannot leave user id or password blank');
     });
@@ -28,10 +30,10 @@ describe('Test cases revolving around the API', () => {
             user_id: 'instructor',
             password: 'instructor',
         };
-        const oldResponse = await postRequest('/api/token', postBody);
+        const oldResponse: ApiTokenResponse = await postRequest('/api/token', postBody);
         expect(oldResponse).toHaveProperty('status', 'success');
         await postRequest('/api/token/invalidate', postBody);
-        const response = await postRequest('/api/token', postBody);
+        const response: ApiTokenResponse = await postRequest('/api/token', postBody);
         expect(response).toHaveProperty('status', 'success');
         expect(response.data.token).not.toEqual(oldResponse.data.token);
         const coursesResponse = await getRequest('/api/courses', oldResponse.data.token);

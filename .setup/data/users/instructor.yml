@@ -17,3 +17,5 @@ courses:
     user_group: 1
   archived:
     user_group: 1
+  tutorial:
+    user_group: 1

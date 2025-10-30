@@ -1,8 +1,16 @@
-<script> 
-    $('document').ready(() => {
-        window.submitty.render('[data-vuemount]', "{{ page }}",  {{ args | json_encode() | raw() }});
-    })
-</script>
-<div class="content" data-vuemount>
-    <noscript>You need Javascript enabled to see this page.</noscript>
+{# make sure edits are made in both site/public/templates/misc/Vue.twig and site/app/templates/Vue.twig #}
+{% set id = uniqid() %}
+<div
+    id="vue-{{ id }}"
+    class="{{ class is defined ? class }}"
+    style="{{ style is defined ? style : '' }}"
+>
 </div>
+<script>
+    window.submitty.render(
+        "#vue-{{ id }}",
+        "{{ type }}",
+        "{{ name }}",
+        {{ args | default({}) | json_encode() | raw() }}
+    );
+</script>

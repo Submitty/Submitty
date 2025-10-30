@@ -1,11 +1,6 @@
 {
-	"required_capabilities": "python",
-
+    "required_capabilities": "python",
     "autograding_method" : "docker",
-    "container_options" : {
-      //States that a given testcase uses a router by default. (Default value is true)
-      "use_router" : false
-    },
     "resource_limits" : {
         // Allow the submission to run for 5 CPU seconds.
         "RLIMIT_CPU" : 5
@@ -16,7 +11,7 @@
             "containers" : [
                 {
                     "container_name" : "container0",
-                    "container_image": "ubuntu:custom",
+                    "container_image": "submitty/python:latest",
                     "commands" : ["python3 *.py"]
                 }
             ],

@@ -25,7 +25,7 @@ a.popout-item > .fas:hover {
     margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    grid-gap: 2px;
+    gap: 2px;
 }
 
 .reg-section-item {
@@ -33,11 +33,26 @@ a.popout-item > .fas:hover {
     flex-wrap: nowrap;
 }
 
+.course-materials-header-container {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.course-materials-header {
+    flex-grow: 1;
+}
+
+.course-materials-key {
+    display: flex;
+    margin-bottom: 16px;
+}
+
 .action-buttons > a {
     margin: 4px;
 }
 
 .partial-checkbox:checked {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-medium-gray) !important;
 }
 

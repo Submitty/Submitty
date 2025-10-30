@@ -2,16 +2,18 @@
 
 {% block popup_id %}popup-post-likes{% endblock %}
 
-{% block title %}Users Who Liked This Post{% endblock %}
+{% block title %}
+    <span data-testid="modal-title">Users Who Liked This Post</span>
+{% endblock %}
 
 {% block body %}
-    <div class="form-body">
+    <div class="form-body" data-testid="upduck-list-body">
         <!-- This will be filled by showUpduckUsers() via AJAX -->
     </div>
 {% endblock %}
 
 {% block buttons %}
     <div class="form-buttons">
-        <a class="btn btn-default close-button" onclick="$('#popup-post-likes').hide(); $('body').css('overflow','auto');">Close</a>
+        <a class="btn btn-default close-button" data-testid="close-upduck-list" onclick="$('#popup-post-likes').hide(); $('body').css('overflow','auto');">Close</a>
     </div>
 {% endblock %}

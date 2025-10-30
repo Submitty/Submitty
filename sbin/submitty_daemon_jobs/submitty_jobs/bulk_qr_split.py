@@ -126,11 +126,6 @@ def main(args):
                 id_index += 1
                 page_count = 1
                 prev_file = output_filename
-
-                # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
-
             else:
                 # the first pdf page doesn't have a qr code
                 if i == 0:
@@ -156,10 +151,6 @@ def main(args):
                 # add pages to current split_pdf
                 page_count += 1
                 pdf_writer.add_page(pdfPages.pages[i])
-                # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
-
             i += 1
 
         buff += "Finished splitting into {} files\n".format(id_index)

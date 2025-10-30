@@ -11,6 +11,8 @@ import hashlib
 import os
 import os.path
 import random
+
+from sqlalchemy import insert
 from submitty_utils import dateutils
 
 # if you need to modify any global variables, change this to import file as name
@@ -55,6 +57,8 @@ class Gradeable(object):
         self.min_grading_group = 3
         self.grading_rotating = []
         self.submissions = []
+        self.depends_on = None
+        self.depends_on_points = None
         self.max_random_submissions = None
         self.max_individual_submissions = 3
         self.team_assignment = False
@@ -162,29 +166,36 @@ class Gradeable(object):
         if "grading_rotating" in gradeable:
             self.grading_rotating = gradeable["grading_rotating"]
 
-        self.ta_view_date = dateutils.parse_datetime(gradeable["g_ta_view_start_date"])
-        self.grade_start_date = dateutils.parse_datetime(
-            gradeable["g_grade_start_date"]
+        # these dates corresponds with the manually set dates
+        time_start = "1900-01-01"
+        time_end = "9998-01-01"
+        self.ta_view_date = dateutils.parse_datetime(
+            gradeable["g_ta_view_start_date"] if "g_ta_view_start_date" in gradeable else time_start
         )
-        self.grade_due_date = dateutils.parse_datetime(gradeable["g_grade_due_date"])
+        self.grade_start_date = dateutils.parse_datetime(
+            gradeable["g_grade_start_date"] if "g_grade_start_date" in gradeable else time_end
+        )
+        self.grade_due_date = dateutils.parse_datetime(
+            gradeable["g_grade_due_date"] if "g_grade_due_date" in gradeable else time_end
+        )
         self.grade_released_date = dateutils.parse_datetime(
-            gradeable["g_grade_released_date"]
+            gradeable["g_grade_released_date"] if "g_grade_released_date" in gradeable else time_end
         )
         if self.type == 0:
             self.submission_open_date = dateutils.parse_datetime(
-                gradeable["eg_submission_open_date"]
+                gradeable["eg_submission_open_date"] if "eg_submission_open_date" in gradeable else time_start
             )
             self.submission_due_date = dateutils.parse_datetime(
-                gradeable["eg_submission_due_date"]
+                gradeable["eg_submission_due_date"] if "eg_submission_due_date" in gradeable else time_end
             )
             self.team_lock_date = dateutils.parse_datetime(
-                gradeable["eg_submission_due_date"]
+                gradeable["eg_team_lock_date"] if "eg_team_lock_date" in gradeable else self.submission_due_date
             )
             self.grade_inquiry_start_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_start_date"]
+                gradeable["eg_grade_inquiry_start_date"] if "eg_grade_inquiry_start_date" in gradeable else time_end
             )
             self.grade_inquiry_due_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_due_date"]
+                gradeable["eg_grade_inquiry_due_date"] if "eg_grade_inquiry_due_date" in gradeable else time_end
             )
             self.student_view = True
             self.student_view_after_grades = False
@@ -216,10 +227,10 @@ class Gradeable(object):
                 self.team_assignment = gradeable["eg_team_assignment"] is True
             if "eg_max_team_size" in gradeable:
                 self.max_team_size = gradeable["eg_max_team_size"]
-            if "eg_team_lock_date" in gradeable:
-                self.team_lock_date = dateutils.parse_datetime(
-                    gradeable["eg_team_lock_date"]
-                )
+            if "eg_depends_on" in gradeable:
+                self.depends_on = gradeable["eg_depends_on"]
+            if "eg_depends_on_points" in gradeable:
+                self.depends_on_points = gradeable["eg_depends_on_points"]
             if "eg_annotated_pdf" in gradeable:
                 self.annotated_pdf = gradeable["eg_annotated_pdf"] is True
                 self.annotation_path = os.path.join(
@@ -248,17 +259,17 @@ class Gradeable(object):
                     self.config_path = tutorial_path
                 else:
                     self.config_path = None
-            assert self.ta_view_date < self.submission_open_date
+            assert self.ta_view_date <= self.submission_open_date
             assert self.has_due_date is False or (
-                self.submission_open_date < self.submission_due_date
+                self.submission_open_date <= self.submission_due_date
             )
             assert self.has_due_date is False or (
-                self.submission_due_date < self.grade_start_date
+                self.submission_due_date <= self.grade_start_date
             )
             assert self.has_release_date is False or (
                 self.grade_released_date <= self.grade_inquiry_start_date
             )
-            assert self.grade_inquiry_start_date < self.grade_inquiry_due_date
+            assert self.grade_inquiry_start_date <= self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(
@@ -288,8 +299,8 @@ class Gradeable(object):
                     )
                     # Ensure we're not sensitive to directory traversal order
                     self.annotations.sort()
-        assert self.ta_view_date < self.grade_start_date
-        assert self.grade_start_date < self.grade_due_date
+        assert self.ta_view_date <= self.grade_start_date
+        assert self.grade_start_date <= self.grade_due_date
         assert (
             self.has_release_date is False
             or self.grade_due_date <= self.grade_released_date
@@ -323,30 +334,33 @@ class Gradeable(object):
         mark_table,
     ) -> None:
         conn.execute(
-            gradeable_table.insert(),
-            g_id=self.id,
-            g_title=self.title,
-            g_instructions_url=self.instructions_url,
-            g_overall_ta_instructions=self.overall_ta_instructions,
-            g_gradeable_type=self.type,
-            g_grader_assignment_method=self.grader_assignment_method,
-            g_ta_view_start_date=self.ta_view_date,
-            g_grade_start_date=self.grade_start_date,
-            g_grade_due_date=self.grade_due_date,
-            g_grade_released_date=self.grade_released_date,
-            g_syllabus_bucket=self.syllabus_bucket,
-            g_allow_custom_marks=self.allow_custom_marks,
-            g_min_grading_group=self.min_grading_group,
-            g_closed_date=None,
+            insert(gradeable_table).values(
+                g_id=self.id,
+                g_title=self.title,
+                g_instructions_url=self.instructions_url,
+                g_overall_ta_instructions=self.overall_ta_instructions,
+                g_gradeable_type=self.type,
+                g_grader_assignment_method=self.grader_assignment_method,
+                g_ta_view_start_date=self.ta_view_date,
+                g_grade_start_date=self.grade_start_date,
+                g_grade_due_date=self.grade_due_date,
+                g_grade_released_date=self.grade_released_date,
+                g_syllabus_bucket=self.syllabus_bucket,
+                g_allow_custom_marks=self.allow_custom_marks,
+                g_min_grading_group=self.min_grading_group,
+            )
         )
+        conn.commit()
 
         for rotate in self.grading_rotating:
             conn.execute(
-                reg_table.insert(),
-                g_id=self.id,
-                user_id=rotate["user_id"],
-                sections_rotating=rotate["section_rotating_id"],
+                insert(reg_table).values(
+                    g_id=self.id,
+                    user_id=rotate["user_id"],
+                    sections_rotating=rotate["section_rotating_id"],
+                )
             )
+        conn.commit()
 
         if self.peer_grading is True:
             with open(
@@ -359,37 +373,41 @@ class Gradeable(object):
                 length = len(graders)
                 for i in range(length):
                     conn.execute(
-                        peer_assign.insert(),
-                        g_id=self.id,
-                        grader_id=graders[i],
-                        user_id=students[i],
+                        insert(peer_assign).values(
+                            g_id=self.id,
+                            grader_id=graders[i],
+                            user_id=students[i],
+                        )
                     )
-
+                conn.commit()
         if self.type == 0:
             conn.execute(
-                electronic_table.insert(),
-                g_id=self.id,
-                eg_submission_open_date=self.submission_open_date,
-                eg_submission_due_date=self.submission_due_date,
-                eg_is_repository=self.is_repository,
-                eg_using_subdirectory=self.using_subdirectory,
-                eg_vcs_subdirectory=self.subdirectory,
-                eg_vcs_partial_path=self.vcs_partial_path,
-                eg_team_assignment=self.team_assignment,
-                eg_max_team_size=self.max_team_size,
-                eg_team_lock_date=self.team_lock_date,
-                eg_use_ta_grading=self.use_ta_grading,
-                eg_student_view=self.student_view,
-                eg_student_view_after_grades=self.student_view_after_grades,
-                eg_student_download=self.student_download,
-                eg_student_submit=self.student_submit,
-                eg_config_path=self.config_path,
-                eg_late_days=self.late_days,
-                eg_precision=self.precision,
-                eg_peer_grading=self.peer_grading,
-                eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
-                eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
+                insert(electronic_table).values(
+                    g_id=self.id,
+                    eg_submission_open_date=self.submission_open_date,
+                    eg_submission_due_date=self.submission_due_date,
+                    eg_is_repository=self.is_repository,
+                    eg_using_subdirectory=self.using_subdirectory,
+                    eg_vcs_subdirectory=self.subdirectory,
+                    eg_vcs_partial_path=self.vcs_partial_path,
+                    eg_team_assignment=self.team_assignment,
+                    eg_max_team_size=self.max_team_size,
+                    eg_team_lock_date=self.team_lock_date,
+                    eg_use_ta_grading=self.use_ta_grading,
+                    eg_student_view=self.student_view,
+                    eg_student_view_after_grades=self.student_view_after_grades,
+                    eg_student_download=self.student_download,
+                    eg_student_submit=self.student_submit,
+                    eg_config_path=self.config_path,
+                    eg_late_days=self.late_days,
+                    eg_precision=self.precision,
+                    eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
+                    eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
+                    eg_depends_on=self.depends_on,
+                    eg_depends_on_points=self.depends_on_points
+                )
             )
+            conn.commit()
 
         for component in self.components:
             component.create(self.id, conn, component_table, mark_table)
@@ -453,9 +471,15 @@ class Gradeable(object):
         elif self.type == 1:
             form_json["checkpoint_label"] = []
             form_json["checkpoint_extra"] = []
-            for i in range(len(self.components)):
-                component = self.components[i]
-                form_json["checkpoint_label"].append(component.title)
+            form_json["num_text_items"] = 0
+            form_json["text_label"] = []
+            form_json["num_checkpoint_items"] = 0
+            for component in self.components:
+                if component.is_text:
+                    form_json["num_text_items"] += 1
+                    form_json["text_label"].append(component.title)
+                else:
+                    form_json["checkpoint_label"].append(component.title)
         else:
             form_json["num_numeric_items"] = 0
             form_json["numeric_labels"] = []

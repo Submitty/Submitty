@@ -8,7 +8,9 @@
     padding: 5px 10px;
 }
 
-#late-day-table td::before { content: attr(data-before-content); }
+#late-day-table td::before {
+    content: attr(data-before-content);
+}
 
 @media (min-width: 831px) {
     #late-day-table {
@@ -24,6 +26,7 @@
     }
 
     #late-day-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 }

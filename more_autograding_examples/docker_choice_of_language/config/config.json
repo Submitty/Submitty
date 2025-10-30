@@ -6,6 +6,13 @@
 
     "one_part_only": true,
 
+    // needed for rust
+    "allow_system_calls" : [
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING"
+    ],
     "autograding": {
         "submission_to_compilation": ["**/*.rs", "**/*.c", "**/*.h", "**/*.cpp", "**/*.hpp"]
     },
@@ -13,6 +20,7 @@
         {
             "type": "Compilation",
             "title": "Rust Compilation",
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
             "containers": [
                 {
                     // Rust will use dynamic linking by default, and libraries may not be available in a different image.
@@ -30,7 +38,7 @@
             "containers": [
                 {
                     "commands": "/usr/bin/gcc part2/*.c -o a.out",
-                    "container_image": "submitty/autograding-default:latest"
+                    "container_image": "submitty/gcc:latest"
                 }
             ],
             "extra_credit": true,
@@ -42,8 +50,8 @@
             "title": "C++ Compilation",
             "containers": [
                 {
-                    "commands": "/usr/bin/g++ part3/*.cpp -o a.out",
-                    "container_image": "submitty/autograding-default:latest"
+                    "commands": "/usr/bin/clang++ part3/*.cpp -o a.out",
+                    "container_image": "submitty/clang:latest"
                 }
             ],
             "extra_credit": true,

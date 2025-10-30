@@ -15,7 +15,7 @@ class BannerImageRepository extends EntityRepository {
     public function getValidBannerImages(): array {
         $currentDate = new \DateTime();
 
-        return $this->_em->createQuery('
+        return $this->getEntityManager()->createQuery('
             SELECT b
             FROM app\entities\banner\BannerImage b
             WHERE

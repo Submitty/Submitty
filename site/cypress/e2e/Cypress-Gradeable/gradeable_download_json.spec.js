@@ -1,4 +1,5 @@
 import { getCurrentSemester } from '../../support/utils';
+import { rubric } from '../../support/api_testing_json';
 
 function getKey(user_id, password) {
     return cy.request({
@@ -64,15 +65,41 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
             expect(test_json.team_gradeable).to.exist;
-            expect(test_json.team_gradeable.team_max_size).to.eql(3);
+            expect(test_json.team_gradeable.team_size_max).to.eql(3);
             expect(test_json.team_gradeable.inherit_from).to.eql('');
             expect(test_json.vcs).to.not.exist;
+            expect(test_json.rubric).to.eql(rubric);
         });
     });
 
     it('API should return the same values', () => {
         getKey('instructor', 'instructor').then((key) => {
             // Gradeable already exists
+            cy.request({
+                method: 'GET',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/open_team_homework/download`,
+                headers: {
+                    Authorization: key,
+                },
+                // Needs body to return a JSON object instead of string
+                body: {
+                },
+            }).then((response) => {
+                expect(response.body.data.title).to.eql('Open Team Homework');
+                expect(response.body.data.type).to.eql('Electronic File');
+                expect(response.body.data.id).to.eql('open_team_homework');
+                expect(response.body.data.instructions_url).to.eql('');
+                expect(response.body.data.syllabus_bucket).to.eql('homework');
+                expect(response.body.data.bulk_upload).to.eql(false);
+                expect(response.body.data.ta_grading).to.eql(true);
+                expect(response.body.data.grade_inquiries).to.eql(true);
+                expect(response.body.data.team_gradeable).to.exist;
+                expect(response.body.data.team_gradeable.team_size_max).to.eql(3);
+                expect(response.body.data.team_gradeable.inherit_from).to.eql('');
+                expect(response.body.data.vcs).to.not.exist;
+                expect(response.body.data.rubric).to.eql(rubric);
+            });
+
             cy.request({
                 method: 'GET',
                 url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/bulk_upload_test/download`,

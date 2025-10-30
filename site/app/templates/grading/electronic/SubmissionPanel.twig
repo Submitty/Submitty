@@ -45,6 +45,7 @@
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}
+                {{ _self.display_files(submissions_processed, "sp", 0, "submissions_processed", blind_grader) }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ _self.display_files(checkout, "c", 0, "checkout") }}
                 {% endif %}
@@ -66,7 +67,6 @@
             "save_status_id": "save_status",
             "file_content_id": "file-content",
             "image_rotate_bar_id": "image-rotate-icons-bar",
-            "show_pdf_bar": true
         } %}
     </div>
 </div>

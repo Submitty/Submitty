@@ -12,7 +12,7 @@ class VcsAuthTokenRepository extends EntityRepository {
      * @return VcsAuthToken[]
      */
     public function getAllByUser(string $user_id, bool $expired = false): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb->select('g')
             ->from('\app\entities\VcsAuthToken', 'g');
         if (!$expired) {

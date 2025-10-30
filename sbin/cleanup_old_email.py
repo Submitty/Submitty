@@ -19,11 +19,11 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     query = """SELECT count(*) FROM emails;"""
     result = db.execute(text(query))
-    print(f"total email count: {result.fetchone()[0]}")
+    print(f"total email count: {result.scalar() or 0}")
 
     query = """SELECT count(*) FROM emails where error != '';"""
     result = db.execute(text(query))
-    error_count = result.fetchone()[0]
+    error_count = result.scalar() or 0
     print(f"error email count: {error_count}")
 
     if error_count > 0:
@@ -31,7 +31,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     query = """SELECT count(*) FROM emails where sent is NULL AND error = '';"""
     result = db.execute(text(query))
-    unsent_count = result.fetchone()[0]
+    unsent_count = result.scalar() or 0
     print(f"unsent email count: {unsent_count}")
 
     if unsent_count > 0:
@@ -41,8 +41,8 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
-    result = db.execute(text(query), format=last_week)
-    before = result.fetchone()[0]
+    result = db.execute(text(query), {"format": last_week})
+    before = result.scalar() or 0
     print(f"email to delete before count: {before}")
 
     if before == 0:
@@ -51,12 +51,13 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
 
     query = """delete from emails WHERE ctid in (select ctid from emails
     where sent is not NULL AND sent < :format AND error = '' LIMIT :foo);"""
-    result = db.execute(text(query), format=last_week, foo=str(maximum_to_delete))
+    result = db.execute(text(query), {"format": last_week, "foo": str(maximum_to_delete)})
+    db.commit()
 
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
-    result = db.execute(text(query), format=last_week)
-    after = result.fetchone()[0]
+    result = db.execute(text(query), {"format": last_week})
+    after = result.scalar() or 0
     print(f"email to delete after count: {after}")
 
     print(f"deleted email count {before-after}\n")

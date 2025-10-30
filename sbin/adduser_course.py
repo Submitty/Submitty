@@ -10,7 +10,7 @@ import argparse
 import json
 from os import path
 import sys
-from sqlalchemy import create_engine, MetaData, Table, bindparam, and_
+from sqlalchemy import create_engine, MetaData, Table, bindparam, and_, insert, select, update
 
 from submitty_utils import db_utils
 
@@ -55,29 +55,29 @@ def main():
 
     engine = create_engine(conn_str)
     connection = engine.connect()
-    metadata = MetaData(bind=engine)
-    users_table = Table('users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select, user_id=user_id).fetchone()
+    metadata = MetaData()
+    users_table = Table('users', metadata, autoload_with=engine)
+    select_query = select(users_table).where(users_table.c.user_id == bindparam('user_id'))
+    user = connection.execute(select_query, {"user_id": user_id}).fetchone()
     if user is None:
         print("User does not exist.", file=sys.stderr)
         return False
 
-    courses_table = Table('courses', metadata, autoload=True)
+    courses_table = Table('courses', metadata, autoload_with=engine)
     if registration_section and not registration_section.isdigit():
         registration_section = None
-    select = courses_table.select().where(and_(
+    select_query = select(courses_table).where(and_(
         courses_table.c.term == bindparam('term'),
         courses_table.c.course == bindparam('course')
     ))
-    row = connection.execute(select, term=semester, course=course).fetchone()
+    row = connection.execute(select_query, {"term": semester, "course": course}).fetchone()
     # course does not exist, so just skip this argument
     if row is None:
         print("Course does not exist.", file=sys.stderr)
         return False
 
-    courses_u_table = Table('courses_users', metadata, autoload=True)
-    select = courses_u_table.select().where(and_(
+    courses_u_table = Table('courses_users', metadata, autoload_with=engine)
+    select_query = select(courses_u_table).where(and_(
         and_(
             courses_u_table.c.term == bindparam('term'),
             courses_u_table.c.course == bindparam('course')
@@ -85,31 +85,30 @@ def main():
         courses_u_table.c.user_id == bindparam('user_id')
     ))
     row = connection.execute(
-        select,
-        term=semester,
-        course=course,
-        user_id=user_id
+        select_query,
+        {"term": semester, "course": course, "user_id": user_id}
     ).fetchone()
     # does this user have a row in courses_users for this semester and course?
     if row is None:
-        query = courses_u_table.insert()
         connection.execute(
-            query,
-            user_id=user_id,
-            term=semester,
-            course=course,
-            user_group=user_group,
-            registration_section=registration_section
+            insert(courses_u_table).values(
+                user_id=user_id,
+                term=semester,
+                course=course,
+                user_group=user_group,
+                registration_section=registration_section
+            )
         )
     else:
-        query = courses_u_table.update(values={
-            courses_u_table.c.registration_section: bindparam('registration_section')
-        }).where(courses_u_table.c.user_id == bindparam('b_user_id'))
+        query = update(courses_u_table).where(
+            courses_u_table.c.user_id == bindparam("b_user_id")
+        ).values(registration_section=bindparam("registration_section"))
+
         connection.execute(
             query,
-            b_user_id=user_id,
-            registration_section=registration_section
+            {"b_user_id": user_id, "registration_section": registration_section}
         )
+    connection.commit()
 
 
 if __name__ == '__main__':

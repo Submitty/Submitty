@@ -1,8 +1,8 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
+            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, escapeSpecialChars */
 
 /*
 References:
@@ -34,10 +34,8 @@ let MAX_NUM_OF_FILES;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
-// eslint-disable-next-line no-unused-vars
 let num_clipboard_files = 0;
-
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
@@ -141,7 +139,7 @@ function progress(e) {
         progressBar.max = e.total;
         progressBar.value = e.loaded;
         const perc = (e.loaded * 100) / e.total;
-        $('#loading-bar-percentage').html(`${perc.toFixed(2)} %`);
+        $('#loading-bar-percentage').text(`${perc.toFixed(2)} %`);
     }
 }
 
@@ -189,7 +187,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['banner', 'upload']),
+        url: buildUrl(['community_event', 'upload']),
         data: formData,
         processData: false,
         contentType: false,
@@ -199,7 +197,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -211,7 +209,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
@@ -416,8 +414,8 @@ function addLabel(filename, filesize, part, previous) {
     const fileTrashElement = document.createElement('td');
     fileTrashElement.setAttribute('class', 'file-trash');
 
-    fileDataElement.innerHTML = filename;
-    fileTrashElement.innerHTML = `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
+    fileDataElement.innerText = filename;
+    fileTrashElement.innerHTML = `${escapeSpecialChars(filesize.toString())}KB  <i aria-label='Press enter to remove file ${escapeSpecialChars(filename.toString())}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -495,6 +493,10 @@ function isValidSubmission() {
         return true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(window, 'is_vcs')) {
+        return true;
+    }
+
     return false;
 }
 
@@ -536,22 +538,11 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 // @param index used for id
 // function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    // let the id be the date to prevent closing the wrong message
-    const d = new Date();
-    const t = String(d.getTime());
-
-    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"`;
-    const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
-    const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
-    const response = (json['status'] === 'success' ? json['data'] : json['message']);
-
-    const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
-    $('#messages').append(message);
-
     if (json['status'] === 'success') {
-        setTimeout(() => {
-            removeMessagePopup(t);
-        }, 5000);
+        displayMessage(json['data'], 'success');
+    }
+    else {
+        displayMessage(json['message'], 'error');
     }
 }
 
@@ -767,7 +758,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     if (!use_qr_codes) {
         // eslint-disable-next-line eqeqeq
         if (num_pages == '') {
-            alert("You didn't enter the # of page(s)!");
+            alert('You didn\'t enter the # of page(s)!');
             $('#submit').prop('disabled', false);
             return;
         }
@@ -789,7 +780,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
@@ -898,7 +889,7 @@ function gatherInputAnswersByType(type) {
 }
 
 /**
- * @param versions_used
+ * @param version_to_regrade
  * @param versions_allowed
  * @param csrf_token
  * @param gradeable_id
@@ -914,14 +905,16 @@ function gatherInputAnswersByType(type) {
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', versions_used);
+    if (version_to_regrade) {
+        formData.append('version_to_regrade', version_to_regrade);
+    }
     formData.append('regrade_all_students', regrade_all_students);
     formData.append('regrade_all_students_all', regrade_all_students_all);
     $.ajax({
@@ -940,7 +933,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                     window.location.reload();
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
@@ -1035,15 +1028,14 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1123,12 +1115,12 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                     if (data['message'] === 'You do not have access to that page.') {
                         window.location.href = return_url;
                     }
-                    // eslint-disable-next-line valid-typeof
+                    // eslint-disable-next-line valid-typeof, no-constant-binary-expression
                     else if (typeof data['code'] !== undefined && data['code'] === 302) {
                         window.location.href = data['data'];
                     }
                     else {
-                        alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                        displayMessage(data['message'], 'error');
                     }
                 }
             }
@@ -1158,7 +1150,7 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
@@ -1191,7 +1183,7 @@ function handleDownloadImages(csrf_token) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
@@ -1252,7 +1244,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1366,7 +1358,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (sections_lock === true && numSections === 0) {
-        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        alert('Restrict to at least one section or select \'No\' button where asked about whether you want to restrict this material/folder to some sections.');
         return;
     }
 
@@ -1383,16 +1375,22 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('link_url', link_url);
     }
 
-    if (file_path !== null && file_path !== '') {
-        const file_name = file_path.split('/').pop();
-        if (link_url !== null) {
-            const lastSlashIndex = file_path.lastIndexOf('/');
-            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
-            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
+    if (file_path !== null) {
+        if (file_path.startsWith('/')) {
+            alert('The file path cannot start with the root directory “/”, use a relative path.');
+            return;
         }
-        if (window.isValidFileName(file_name)) {
-            formData.append('file_path', file_path);
+        // For editing, file_path is the directory path, not the full file path
+        // Validate that it doesn't contain invalid characters for directories
+        if (file_path.includes('..')) {
+            alert('Directory path cannot contain ".."');
+            return;
         }
+        // Add placeholder to give form of a file path for validation (only for non-empty paths)
+        if (file_path !== '' && !window.isValidFilePath(`${file_path}/placeholder`)) {
+            return;
+        }
+        formData.append('file_path', file_path);
     }
 
     if (title !== null && window.isValidFileName(title)) {
@@ -1401,6 +1399,12 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
+    }
+    else {
+        if (title !== null) {
+            alert('Invalid filename');
+            return;
+        }
     }
 
     if (overwrite !== null) {
@@ -1440,9 +1444,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
-                console.log(data);
+                alert(`Error parsing response from server. Message returned:\n${data}`);
             }
         },
         error: function () {

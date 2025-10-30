@@ -63,6 +63,7 @@ class GlobalController extends AbstractController {
         $duck_img = $this->getDuckImage($now);
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
 
         return $this->core->getOutput()->renderTemplate(
             'Global',
@@ -77,7 +78,8 @@ class GlobalController extends AbstractController {
             $duck_img,
             $page_name,
             $content_only,
-            $bannerImages
+            $bannerImages,
+            $performance_warning
         );
     }
 
@@ -179,6 +181,15 @@ class GlobalController extends AbstractController {
                 "title" => "Submini Polls",
                 "id" => "nav-sidebar-polls",
                 "icon" => "fa-question-circle"
+            ]);
+        }
+
+        if ($this->core->getConfig()->isChatEnabled()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['chat']),
+                "title" => "Live Chat",
+                "id" => "nav-sidebar-chat",
+                "icon" => "fa-regular fa-keyboard"
             ]);
         }
 
@@ -356,7 +367,7 @@ class GlobalController extends AbstractController {
         // --------------------------------------------------------------------------
 
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
-        if ($display_rainbow_grades_summary) {
+        if ($display_rainbow_grades_summary || $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grades']),
                 "title" => "Rainbow Grades",
@@ -437,7 +448,8 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['community_events']),
                 "title" => "Community Events",
-                "icon" => "fa-paper-plane"
+                "icon" => "fa-palette",
+                "id" => "nav-sidebar-events"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
@@ -653,6 +665,10 @@ class GlobalController extends AbstractController {
             case 4:
                 // April
                 $aprilImages = [];
+                if ($day === 1) {
+                    //April Fool's day Duck
+                    $aprilImages[] = 'moorthy_duck/01-april.svg';
+                }
                 // Eid-al-Fitr 2025
                 if ($day <= 2) {
                     $aprilImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
@@ -797,10 +813,8 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
-        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
-
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
     }
 
     private function routeEquals(string $a, string $b) {
@@ -826,8 +840,12 @@ class GlobalController extends AbstractController {
 
         //Query strings can be in (basically) arbitrary order. Make sure they at least
         // have the same parts though
-        $query_a = array_filter(explode("&", $query_a));
-        $query_b = array_filter(explode("&", $query_b));
+        $query_a = array_filter(explode("&", $query_a), function ($value) {
+            return strlen($value) > 0;
+        });
+        $query_b = array_filter(explode("&", $query_b), function ($value) {
+            return strlen($value) > 0;
+        });
 
         $query_a = array_filter($query_a, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);

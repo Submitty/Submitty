@@ -1,4 +1,3 @@
-
 """
 This module is used for inserting/updating autograding information into the DB.
 Generally, the site should be inserting an empty row into the DB for the autograding
@@ -9,7 +8,7 @@ import json
 import os
 
 from submitty_utils import dateutils
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete, update
 from . import grade_item
 
 
@@ -63,15 +62,17 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
-    autograding_metrics = Table('autograding_metrics', metadata, autoload=True)
+    metadata = MetaData()
+    autograding_metrics = Table('autograding_metrics', metadata, autoload_with=engine)
     db.execute(
         delete(autograding_metrics)
         .where(autograding_metrics.c.user_id == bindparam('u_id'))
         .where(autograding_metrics.c.team_id == bindparam('t_id'))
         .where(autograding_metrics.c.g_id == bindparam('g_id'))
         .where(autograding_metrics.c.g_version == bindparam('g_v')),
-        u_id=user_id,  t_id=team_id, g_id=gradeable_id, g_v=version)
+        {'u_id': user_id, 't_id': team_id, 'g_id': gradeable_id, 'g_v': version}
+    )
+    db.commit()
 
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
@@ -107,6 +108,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                     hidden=testcases[i]["hidden"],
                 )
             )
+            db.commit()
 
     submission_time = results['submission_time']
 
@@ -120,7 +122,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         non_hidden_non_ec += nonhidden_diff
         # hidden_non_ec += hidden_diff
 
-    data_table = Table('electronic_gradeable_data', metadata, autoload=True)
+    data_table = Table('electronic_gradeable_data', metadata, autoload_with=engine)
 
     """
     The data row should have been inserted by PHP when the student uploads the submission, requiring
@@ -129,86 +131,95 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     will need to handle the active version afterwards.
     """   # noqa: B018
     if is_team is True:
-        result = db.execute(select([func.count()]).select_from(data_table)
+        result = db.execute(select(func.count()).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
                             .where(data_table.c.team_id == bindparam('team_id'))
                             .where(data_table.c.g_version == bindparam('g_version')),
-                            g_id=gradeable_id,  team_id=team_id, g_version=version)
+                            {'g_id': gradeable_id, 'team_id': team_id, 'g_version': version})
         row = result.fetchone()
         result.close()
-        query_type = data_table.insert()
+        query_type = insert(data_table)
         if row[0] > 0:
-            query_type = data_table\
-                .update(
-                    values={
-                        data_table.c.autograding_non_hidden_non_extra_credit:
-                            bindparam("autograding_non_hidden_non_extra_credit"),
-                        data_table.c.autograding_non_hidden_extra_credit:
-                            bindparam("autograding_non_hidden_extra_credit"),
-                        data_table.c.autograding_hidden_non_extra_credit:
-                            bindparam("autograding_hidden_non_extra_credit"),
-                        data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit"),
-                        data_table.c.autograding_complete:
-                            bindparam("autograding_complete")
-                    })\
-                .where(data_table.c.g_id == bindparam('u_g_id'))\
-                .where(data_table.c.team_id == bindparam('u_team_id'))\
+            query_type = (
+                update(data_table)
+                .values(
+                    autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),
+                    autograding_non_hidden_extra_credit=bindparam("autograding_non_hidden_extra_credit"),
+                    autograding_hidden_non_extra_credit=bindparam("autograding_hidden_non_extra_credit"),
+                    autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
+                    autograding_complete=bindparam("autograding_complete"),
+                    submission_time=bindparam("submission_time")
+                )
+                .where(data_table.c.g_id == bindparam('u_g_id'))
+                .where(data_table.c.team_id == bindparam('u_team_id'))
                 .where(data_table.c.g_version == bindparam('u_g_version'))
+            )
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
-        db.execute(query_type,
-                   g_id=gradeable_id, u_g_id=gradeable_id,
-                   team_id=team_id, u_team_id=team_id,
-                   g_version=version, u_g_version=version,
-                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
-                   autograding_non_hidden_extra_credit=non_hidden_ec,
-                   autograding_hidden_non_extra_credit=hidden_non_ec,
-                   autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time,
-                   autograding_complete=True)
+        db.execute(
+            query_type,
+            {
+                "g_id": gradeable_id,
+                "u_g_id": gradeable_id,
+                "team_id": team_id,
+                "u_team_id": team_id,
+                "g_version": version,
+                "u_g_version": version,
+                "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
+                "autograding_non_hidden_extra_credit": non_hidden_ec,
+                "autograding_hidden_non_extra_credit": hidden_non_ec,
+                "autograding_hidden_extra_credit": hidden_ec,
+                "submission_time": submission_time,
+                "autograding_complete": True
+            }
+        )
 
     else:
-        result = db.execute(select([func.count()]).select_from(data_table)
-                            .where(data_table.c.g_id == bindparam('g_id'))
-                            .where(data_table.c.user_id == bindparam('user_id'))
-                            .where(data_table.c.g_version == bindparam('g_version')),
-                            g_id=gradeable_id, user_id=user_id, g_version=version)
-        row = result.fetchone()
+        result = db.execute(
+            select(func.count()).select_from(data_table)
+            .where(data_table.c.g_id == bindparam('g_id'))
+            .where(data_table.c.user_id == bindparam('user_id'))
+            .where(data_table.c.g_version == bindparam('g_version')),
+            {"g_id": gradeable_id, "user_id": user_id, "g_version": version}
+        )
+        count = result.scalar() or 0
         result.close()
-        query_type = data_table.insert()
-        if row[0] > 0:
-            query_type = data_table\
-                .update(
-                    values={
-                        data_table.c.autograding_non_hidden_non_extra_credit:
-                            bindparam("autograding_non_hidden_non_extra_credit"),
-                        data_table.c.autograding_non_hidden_extra_credit:
-                            bindparam("autograding_non_hidden_extra_credit"),
-                        data_table.c.autograding_hidden_non_extra_credit:
-                            bindparam("autograding_hidden_non_extra_credit"),
-                        data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit"),
-                        data_table.c.autograding_complete:
-                            bindparam("autograding_complete")
-                    })\
+        query_type = insert(data_table)
+        if count > 0:
+            query_type = update(data_table)\
+                .values(
+                        autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),
+                        autograding_non_hidden_extra_credit=bindparam("autograding_non_hidden_extra_credit"),
+                        autograding_hidden_non_extra_credit=bindparam("autograding_hidden_non_extra_credit"),
+                        autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
+                        autograding_complete=bindparam("autograding_complete")
+                )\
                 .where(data_table.c.g_id == bindparam('u_g_id'))\
                 .where(data_table.c.user_id == bindparam('u_user_id'))\
                 .where(data_table.c.g_version == bindparam('u_g_version'))
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
-        db.execute(query_type,
-                   g_id=gradeable_id, u_g_id=gradeable_id,
-                   user_id=user_id, u_user_id=user_id,
-                   g_version=version, u_g_version=version,
-                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
-                   autograding_non_hidden_extra_credit=non_hidden_ec,
-                   autograding_hidden_non_extra_credit=hidden_non_ec,
-                   autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time,
-                   autograding_complete=True)
+        db.execute(
+            query_type,
+            {
+                "g_id": gradeable_id,
+                "u_g_id": gradeable_id,
+                "user_id": user_id,
+                "u_user_id": user_id,
+                "g_version": version,
+                "u_g_version": version,
+                "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
+                "autograding_non_hidden_extra_credit": non_hidden_ec,
+                "autograding_hidden_non_extra_credit": hidden_non_ec,
+                "autograding_hidden_extra_credit": hidden_ec,
+                "submission_time": submission_time,
+                "autograding_complete": True
+            }
+        )
+
+    db.commit()
     db.close()
     engine.dispose()
 
@@ -301,6 +312,5 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             result_json = json.load(result_file)
             # a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
-            result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
-                .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
+            result_details['submission_time'] = a.strftime('%Y-%m-%d %H:%M:%S%z')
     return result_details

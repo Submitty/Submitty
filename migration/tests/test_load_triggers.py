@@ -82,7 +82,7 @@ class TestLoadTriggers(unittest.TestCase):
         for show_output in (True, False):
             num_courses = random.randint(3, 9)
             mock_instances = [Mock() for _ in range(0, num_courses+2)]
-            mock_instances[0].execute.return_value.all.return_value = [
+            mock_instances[0].execute.return_value.mappings.return_value.all.return_value = [
                 {'term': 's{}'.format(i), 'course': 'c{}'.format(i)}
                 for i in range(0, num_courses)
             ]
@@ -197,7 +197,7 @@ class TestLoadTriggers(unittest.TestCase):
 
         for show_output in (True, False):
             masterdb = Mock()
-            masterdb.execute.return_value.all.return_value = [
+            masterdb.execute.return_value.mappings.return_value.all.return_value = [
                 {
                     'term': 'my_semester_1',
                     'course': 'my_course_1'

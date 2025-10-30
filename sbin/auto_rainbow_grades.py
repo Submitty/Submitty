@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 """
-Automatically generate rainbow grades.
+Automatically generate rainbow grades. The source should be either "submitty_gui"
+or "submitty_daemon". If the source is "submitty_gui", then the script will only
+generate grade summaries for the course. If the source is "submitty_daemon", then the
+script will submit the build process for courses using GUI customization, constructing
+the most up-to-date customization file prior to generating grade summaries.
 
-usage: python3 auto_rainbow_grades.py <semester> <course>
+usage: python3 auto_rainbow_grades.py <semester> <course> <source>
 """
 
 # Imports
@@ -18,8 +22,8 @@ from pathlib import Path
 import getpass
 
 # Verify correct number of command line arguments
-if len(sys.argv) != 3:
-    raise Exception('You must pass 2 command line arguments')
+if len(sys.argv) != 4:
+    raise Exception('You must pass 3 command line arguments - semester, course, and source')
 
 # Get path to current file directory
 current_dir = os.path.dirname(__file__)
@@ -54,6 +58,11 @@ if data['daemon_user'] != getpass.getuser():
 # Configure variables
 semester = sys.argv[1]
 course = sys.argv[2]
+source = sys.argv[3]
+
+if source not in ["submitty_gui", "submitty_daemon"]:
+    raise Exception('ERROR: Source must be either "submitty_gui" or "submitty_daemon"')
+
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
 courses_path = os.path.join(data_dir, 'courses')
@@ -167,7 +176,8 @@ else:
     cmd = [
         '{}/sbin/generate_grade_summaries.py'.format(install_dir),
         semester,
-        course
+        course,
+        source
     ]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the

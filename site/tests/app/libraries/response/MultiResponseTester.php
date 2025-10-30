@@ -34,7 +34,7 @@ class MultiResponseTester extends TestCase {
     You don't have access to this page. <br /><br />
     Reason: <b>You&nbsp;don't&nbsp;have&nbsp;access&nbsp;to&nbsp;this&nbsp;page.</b><br /><br />
     Please contact system administrators if you believe this is a mistake.<br />
-    Click <a href="http://example.com">here</a> to back to homepage and see your courses list.
+    Click <a href="http://example.com">here</a> to go back to the homepage and see your courses list.
 </div>
 
 EOD;

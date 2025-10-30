@@ -10,14 +10,14 @@ class GlobalView extends AbstractView {
      * @param array<array<string>> $audio
      * @param array<BannerImage> $eventBannerImages
      */
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages, bool $performance_warning) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
-            foreach ($_SESSION['messages'][$type] as $key => $error) {
+            foreach ($_SESSION['messages'][$type] as $key => $message) {
                 $messages[] = [
                     "type" => $type,
                     "key" => $key,
-                    "error" => $error
+                    "message" => $message
                 ];
 
                 unset($_SESSION['messages'][$type][$key]);
@@ -85,6 +85,7 @@ class GlobalView extends AbstractView {
             "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
+            "course_path" => parse_url($this->core->buildCourseUrl(), PHP_URL_PATH),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
@@ -102,11 +103,14 @@ class GlobalView extends AbstractView {
             "imageDataArray" => $images_data_array,
             "errorImageData" => $error_image_data,
             "html_lang" => $html_lang,
-            "server_time" => time()
+            "server_time" => time(),
+            "performance_warning" => $performance_warning,
+            "submitty_queries" => $this->core->getSubmittyQueries(),
+            "course_queries" => $this->core->getCourseQueries(),
         ]);
     }
 
-    public function footer($runtime, $wrapper_urls, $footer_links, $content_only, bool $performance_warning) {
+    public function footer($runtime, $wrapper_urls, $footer_links, $content_only) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
@@ -119,7 +123,6 @@ class GlobalView extends AbstractView {
             "footer_links" => $footer_links,
             "module_js" => $this->output->getModuleJs(),
             "content_only" => $content_only,
-            "performance_warning" => $performance_warning
         ]);
     }
 }

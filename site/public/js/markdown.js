@@ -43,7 +43,7 @@ $(document).ready(() => {
             desiredHeight += 5;
             textarea.style.height = `${desiredHeight}px`;
         }
-        textarea.style.overflowY = 'hidden';
+        textarea.style.overflowY = 'auto';
     };
 
     targetTextarea.on('input', function () {

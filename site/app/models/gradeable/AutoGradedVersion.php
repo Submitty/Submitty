@@ -72,6 +72,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     private $files = null;
     /** @prop
+     * @var array<string,string>[] An array of all the processed submission files  */
+    private $submissions_processed_files = null;
+    /** @prop
      * @var array[] An array of all the autograded results files  */
     private $results_files = null;
     /** @prop
@@ -181,6 +184,69 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
+        }
+    }
+    public function dockerErrorFileExists(): bool {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable_id = $gradeable->getId();
+        $gradeable_version = $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $filepath = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "results",
+            $gradeable_id,
+            $submitter_id,
+            $gradeable_version,
+            "logs",
+            "docker_error.json"
+        );
+
+        return file_exists($filepath);
+    }
+    /**
+     * @return array<mixed>|null An array with specific keys and values, or null if the file doesn't exist
+     */
+    public function getDockerErrorFileData(): array|null {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable_id = $gradeable->getId();
+        $gradeable_version = $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $filepath = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "results",
+            $gradeable_id,
+            $submitter_id,
+            $gradeable_version,
+            "logs",
+            "docker_error.json"
+        );
+        if (file_exists($filepath)) {
+            $json_content = file_get_contents($filepath);
+
+            return json_decode($json_content, true);
+        }
+        return null;
+    }
+
+    /**
+     * Loads information about processed submission files
+     */
+    private function loadProcessedSubmissionFiles(): void {
+        $this->submissions_processed_files = [];
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $config = $gradeable->getAutogradingConfig();
+
+        $submissions_processed_path = FileUtils::joinPaths($course_path, 'submissions_processed', $gradeable->getId(), $submitter_id, $this->version);
+
+        $submissions_processed_files = FileUtils::getAllFiles($submissions_processed_path, [], true);
+        foreach ($submissions_processed_files as $file => $details) {
+            $this->submissions_processed_files[$file] = $details;
         }
     }
 
@@ -344,6 +410,17 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadSubmissionFiles();
         }
         return ['submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []];
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all processed submission files
+     * @return array<string,string>[]
+     */
+    public function getProcessedFiles(): array {
+        if ($this->submissions_processed_files === null) {
+            $this->loadProcessedSubmissionFiles();
+        }
+        return $this->submissions_processed_files;
     }
 
     /**

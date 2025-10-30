@@ -1,18 +1,15 @@
-/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
+/* global pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
-
-if (PDFAnnotate.default) {
-    // eslint-disable-next-line no-global-assign
-    PDFAnnotate = PDFAnnotate.default;
-}
 
 window.RENDER_OPTIONS = {
     documentId: '',
     userId: '',
     pdfDocument: null,
-    scale: parseFloat(localStorage.getItem('scale')) || 1,
-    rotate: parseInt(localStorage.getItem('rotate')) || 0,
+    scale: parseFloat(localStorage.getItem('pdf-scale')) || 1,
+    rotate: parseInt(localStorage.getItem('pdf-rotate')) || 0,
     studentPopup: false,
+    minScale: 1,
+    maxScale: 5,
 };
 
 window.GENERAL_INFORMATION = {
@@ -23,7 +20,153 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
+function createPage(pageNumber) {
+    const PAGE_TEMPLATE = `
+  <div style="visibility: hidden;" class="page" data-loaded="false">
+    <div class="canvasWrapper">
+      <canvas></canvas>
+    </div>
+  </div>
+`;
+    const temp = document.createElement('div');
+
+    temp.innerHTML = PAGE_TEMPLATE;
+
+    const page = temp.children[0];
+    const canvas = page.querySelector('canvas');
+
+    page.setAttribute('id', `pageContainer${pageNumber}`);
+    page.setAttribute('data-page-number', pageNumber);
+
+    canvas.mozOpaque = true;
+    canvas.setAttribute('id', `page${pageNumber}`);
+
+    return page;
+}
+
+function scalePage(pageNumber, viewport, context) {
+    const page = document.getElementById(`pageContainer${pageNumber}`);
+    const canvas = page.querySelector('.canvasWrapper canvas');
+    const outputScale = getOutputScale(context);
+    const transform = !outputScale.scaled ? null : [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
+    const sfx = approximateFraction(outputScale.sx);
+    const sfy = approximateFraction(outputScale.sy);
+
+    // Adjust width/height for scale
+    page.style.visibility = '';
+    canvas.width = roundToDivide(viewport.width * outputScale.sx, sfx[0]);
+    canvas.height = roundToDivide(viewport.height * outputScale.sy, sfy[0]);
+    canvas.style.width = `${roundToDivide(viewport.width, sfx[1])}px`;
+    canvas.style.height = `${roundToDivide(viewport.height, sfx[1])}px`;
+    page.style.width = `${viewport.width}px`;
+    page.style.height = `${viewport.height}px`;
+
+    return transform;
+}
+
+/**
+ * Approximates a float number as a fraction using Farey sequence (max order of 8).
+ *
+ * @param {Number} x Positive float number
+ * @return {Array} Estimated fraction: the first array item is a numerator,
+ *                 the second one is a denominator.
+ */
+function approximateFraction(x) {
+    // Fast path for int numbers or their inversions.
+    if (Math.floor(x) === x) {
+        return [x, 1];
+    }
+
+    const xinv = 1 / x;
+    const limit = 8;
+    if (xinv > limit) {
+        return [1, limit];
+    }
+    else if (Math.floor(xinv) === xinv) {
+        return [1, xinv];
+    }
+
+    const x_ = x > 1 ? xinv : x;
+
+    // a/b and c/d are neighbours in Farey sequence.
+    let a = 0;
+    let b = 1;
+    let c = 1;
+    let d = 1;
+
+    // Limit search to order 8.
+    while (true) {
+    // Generating next term in sequence (order of q).
+        const p = a + c;
+        const q = b + d;
+        if (q > limit) {
+            break;
+        }
+        if (x_ <= p / q) {
+            c = p;
+            d = q;
+        }
+        else {
+            a = p;
+            b = q;
+        }
+    }
+
+    // Select closest of neighbours to x.
+    if (x_ - a / b < c / d - x_) {
+        return x_ === x ? [a, b] : [b, a];
+    }
+    else {
+        return x_ === x ? [c, d] : [d, c];
+    }
+}
+
+function getOutputScale(ctx) {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const backingStoreRatio = ctx.webkitBackingStorePixelRatio
+        || ctx.mozBackingStorePixelRatio
+        || ctx.msBackingStorePixelRatio
+        || ctx.oBackingStorePixelRatio
+        || ctx.backingStorePixelRatio || 1;
+    const pixelRatio = devicePixelRatio / backingStoreRatio;
+    return {
+        sx: pixelRatio,
+        sy: pixelRatio,
+        scaled: pixelRatio !== 1,
+    };
+}
+
+function roundToDivide(x, div) {
+    const r = x % div;
+    return r === 0 ? x : Math.round(x - r + div);
+}
+
+function renderPage(pageNumber, renderOptions) {
+    const {
+        documentId,
+        pdfDocument,
+        scale,
+        rotate,
+    } = renderOptions;
+
+    // Load the page and annotations
+    return pdfDocument.getPage(pageNumber).then((pdfPage) => {
+        const page = document.getElementById(`pageContainer${pageNumber}`);
+        const canvas = page.querySelector('.canvasWrapper canvas');
+        const canvasContext = canvas.getContext('2d', { alpha: false });
+        const totalRotation = (rotate + pdfPage.rotate) % 360;
+        const viewport = pdfPage.getViewport({ scale: scale, rotation: totalRotation });
+        const transform = scalePage(pageNumber, viewport, canvasContext);
+
+        // Render the page
+        return pdfPage.render({ canvasContext, viewport, transform }).promise.then(() => {
+            // Indicate that the page was loaded
+            page.setAttribute('data-loaded', 'true');
+
+            return pdfPage;
+        });
+    });
+}
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -49,7 +192,7 @@ function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, 
     download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
 }
 
-// eslint-disable-next-line default-param-last, no-unused-vars
+// eslint-disable-next-line default-param-last
 function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
@@ -77,7 +220,6 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                 csrf_token: csrfToken,
             },
             success: (data) => {
-                PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(window.GENERAL_INFORMATION.grader_id));
                 let pdfData;
                 try {
                     pdfData = JSON.parse(data)['data'];
@@ -127,37 +269,13 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
             };
 
             page.render(renderContext).promise.then(() => {
-                PDFAnnotate.getAnnotations(file_name, num).then((annotationsPage) => {
-                    const annotations = annotationsPage.annotations;
-                    for (let an = 0; an < annotations.length; an++) {
-                        const annotation = annotations[an];
-                        if (annotation.type === 'drawing') {
-                            ctx.lineWidth = annotation.width * scale;
-                            ctx.strokeStyle = annotation.color;
-                            ctx.beginPath();
-                            for (let line = 1; line < annotation.lines.length; line++) {
-                                ctx.moveTo(annotation.lines[line - 1][0] * scale, annotation.lines[line - 1][1] * scale);
-                                ctx.lineTo(annotation.lines[line][0] * scale, annotation.lines[line][1] * scale);
-                                ctx.stroke();
-                            }
-                        }
-
-                        if (annotation.type === 'textbox') {
-                            ctx.font = `${annotation.size * scale}px sans-serif`;
-                            ctx.fillStyle = annotation.color;
-                            const text = annotation.content;
-                            if (text !== null) {
-                                ctx.fillText(text, annotation.x * scale, annotation.y * scale);
-                            }
-                        }
-                    }
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                    const width = doc.internal.pageSize.getWidth();
-                    const height = doc.internal.pageSize.getHeight();
-                    doc.addImage(imgData, 'JPEG', 0, 0, width, height);
-                    renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                    // TODO: Get the saving and loading from annotated_pdfs working
-                    /* console.log("CHECK2");
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                const width = doc.internal.pageSize.getWidth();
+                const height = doc.internal.pageSize.getHeight();
+                doc.addImage(imgData, 'JPEG', 0, 0, width, height);
+                renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
+                // TODO: Get the saving and loading from annotated_pdfs working
+                /* console.log("CHECK2");
                     var fd = new FormData();
                     var pdfToSave = btoa(doc.output());
                     let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
@@ -167,7 +285,7 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                     fd.append('csrf_token', csrfToken);
                     fd.append('pdf', pdfToSave);
                     let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotated_pdfs']);
-                    //localStorage.setItem('rotate', rotateVal);
+                    //localStorage.setItem('pdf-rotate', rotateVal);
                     //render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
                     $.ajax({
                         type: 'POST',
@@ -190,7 +308,6 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                             alert("Something went wrong, please contact a administrator.");
                         }
                     }); */
-                });
             });
         });
     }
@@ -229,13 +346,17 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 csrf_token: csrfToken,
             },
             success: (data) => {
-                PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(window.GENERAL_INFORMATION.grader_id));
                 // documentId = file_name;
 
                 let pdfData;
                 try {
-                    pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
+                    pdfData = JSON.parse(data);
+                    // Checking if the response is a failure due to large file size
+                    if (pdfData.status === 'fail') {
+                        $('#pdf-error-message').text(pdfData.message).show();
+                        return;
+                    }
+                    pdfData = atob(pdfData['data']);
                 }
                 catch (err) {
                     console.log(err);
@@ -258,14 +379,16 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             e.preventDefault();
                         }
                     });
-                    $("a[value='zoomcustom']").text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
+                    $('a[value=\'zoomcustom\']').text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
                     viewer.innerHTML = '';
                     NUM_PAGES = pdf.numPages;
+
+                    const renderPagePromises = [];
                     for (let i = 0; i < NUM_PAGES; i++) {
-                        const page = PDFAnnotate.UI.createPage(i + 1);
+                        const page = createPage(i + 1);
                         viewer.appendChild(page);
                         const page_id = i + 1;
-                        PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(() => {
+                        renderPagePromises.push(renderPage(page_id, window.RENDER_OPTIONS).then(() => {
                             // eslint-disable-next-line eqeqeq
                             if (i == page_num) {
                                 // scroll to page on load
@@ -274,30 +397,77 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                     $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
                                 }
                             }
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
-                                const selected = $('.tool-selected');
-                                if (selected.length !== 0 && $(selected[0]).attr('value') !== 'cursor') {
-                                    $('#save_status').text('Changes not saved');
-                                    $('#save_status').css('color', 'red');
-                                    $('#save-pdf-btn').removeClass('btn-default');
-                                    $('#save-pdf-btn').addClass('btn-primary');
-                                }
-                            });
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('mouseenter', () => {
-                                const selected = $($('.tool-selected')[0]).attr('value');
-                                if (selected === 'pen') {
-                                    PDFAnnotate.UI.enablePen();
-                                }
-                            });
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('mouseleave', () => {
-                                // disable pen when mouse leaves the pdf page to allow for selecting inputs (like pen size)
-                                const selected = $($('.tool-selected')[0]).attr('value');
-                                if (selected === 'pen') {
-                                    PDFAnnotate.UI.disablePen();
-                                }
-                            });
-                        });
+                        }));
                     }
+
+                    Promise.all(renderPagePromises).then(() => {
+                        $('.pdfViewer .page').each(function () {
+                            $(this).css('width', `calc(${$(this).css('width')} * var(--pdf-scale))`);
+                            $(this).css('height', `calc(${$(this).css('height')} * var(--pdf-scale))`);
+                        });
+
+                        let scale = window.RENDER_OPTIONS.scale;
+                        let zoomTimeout = null;
+
+                        $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
+
+                        function handleWheel(e) {
+                            if (!e.ctrlKey && !e.metaKey) {
+                                return;
+                            }
+                            e.preventDefault();
+
+                            const k = 0.0065;
+                            const factor = Math.exp(-k * e.deltaY);
+                            const newScale = Math.min(window.RENDER_OPTIONS.maxScale, Math.max(window.RENDER_OPTIONS.minScale, scale * factor));
+
+                            const viewer = $('#viewer');
+                            const scroller = $('#submission_browser');
+                            let page = $('#viewer > .page:hover');
+
+                            if (!page.length) {
+                                const pages = [...$('#viewer > .page')];
+                                for (const p of pages) {
+                                    const bounds = p.getBoundingClientRect();
+                                    if (e.clientY > bounds.top && e.clientY < bounds.bottom) {
+                                        page = $(p);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (page.length) {
+                                const pageBounds = page[0].getBoundingClientRect();
+                                viewer.css('--pdf-scale', newScale / window.RENDER_OPTIONS.scale);
+                                const newPageBounds = page[0].getBoundingClientRect();
+
+                                const xoff = (e.clientX - pageBounds.left) / pageBounds.width;
+                                const yoff = (e.clientY - pageBounds.top) / pageBounds.height;
+
+                                const newXoff = (e.clientX - newPageBounds.left) / newPageBounds.width;
+                                const newYoff = (e.clientY - newPageBounds.top) / newPageBounds.height;
+
+                                scroller[0].scrollLeft -= (newXoff - xoff) * newPageBounds.width;
+                                scroller[0].scrollTop -= (newYoff - yoff) * newPageBounds.height;
+                            }
+                            else {
+                                viewer.css('--pdf-scale', newScale / window.RENDER_OPTIONS.scale);
+                            }
+
+                            scale = newScale;
+                            $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
+
+                            clearTimeout(zoomTimeout);
+                            zoomTimeout = setTimeout(rescale, 100);
+                        }
+
+                        function rescale() {
+                            rescalePDF(scale);
+                        }
+
+                        $('#file-content')[0].removeEventListener('wheel', handleWheel);
+                        $('#file-content')[0].addEventListener('wheel', handleWheel, { passive: false });
+                    });
                 });
             },
         });
@@ -321,17 +491,6 @@ $(window).on('unload', () => {
     }
 });
 **/
-
-function loadPDFToolbar() {
-    const init_pen_size = document.getElementById('pen_size_selector').value;
-    const init_color = document.getElementById('color_selector').style.backgroundColor;
-    localStorage.setItem('pen/size', init_pen_size);
-    localStorage.setItem('main_color', init_color);
-    PDFAnnotate.UI.setPen(init_pen_size, init_color);
-    const init_text_size = document.getElementById('text_size_selector').value;
-    localStorage.setItem('text/size', init_text_size);
-    PDFAnnotate.UI.setText(init_text_size, init_color);
-}
 
 function loadAllAnnotations(annotations, file_name) {
     for (const grader in annotations) {
@@ -519,4 +678,37 @@ function repairPDF() {
 
 function saveFile() {
     $('#save-pdf-btn').click();
+}
+
+function rescalePDF(scale) {
+    if (scale < window.RENDER_OPTIONS.minScale || scale > window.RENDER_OPTIONS.maxScale) {
+        return;
+    }
+
+    const viewer = $('#viewer');
+    window.RENDER_OPTIONS.scale = scale;
+    localStorage.setItem('pdf-scale', scale);
+    const pdf = window.RENDER_OPTIONS.pdfDocument;
+    const NUM_PAGES = pdf.numPages;
+    const renderPagePromises = [];
+    for (let i = 1; i <= NUM_PAGES; i++) {
+        renderPagePromises.push(renderPage(i, window.RENDER_OPTIONS));
+    }
+    viewer.css('--pdf-scale', 1);
+    $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
+
+    Promise.all(renderPagePromises).then(() => {
+        $('.pdfViewer .page').each(function () {
+            $(this).css('width', `calc(${this.offsetWidth}px * var(--pdf-scale))`);
+            $(this).css('height', `calc(${this.offsetHeight}px * var(--pdf-scale))`);
+        });
+    });
+}
+
+{
+    let timeout = null;
+    window.triggerPDFScale = (delta) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => rescalePDF(window.RENDER_OPTIONS.scale + delta), 100);
+    };
 }

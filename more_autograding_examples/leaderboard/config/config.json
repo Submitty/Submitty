@@ -1,15 +1,20 @@
 {
-  "required_capabilities": "cpp",
-  "grading_parameters": {
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/clang:latest"
+    },
+    
+    "grading_parameters": {
         "TOTAL_POINTS" : 11,
         "AUTO_POINTS" : 11,
         "TA_POINTS" : 0,
         "EXTRA_CREDIT_POINTS" : 0
-  },
+    },
 
-  "display_testcase_runtime_memory" : true,
-
-  "testcases" : [
+    "display_testcase_runtime_memory" : true,
+    
+    "testcases" : [
       {
           "type" : "Compilation",
           "title" : "Compilation",

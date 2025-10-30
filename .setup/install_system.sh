@@ -182,6 +182,7 @@ alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SU
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
+alias refresh_vagrant_workers='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/refresh_vagrant_workers.py'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
@@ -223,7 +224,7 @@ DB_COURSE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
 #################################################################
 # STACK SETUP
@@ -329,18 +330,6 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}" -s /bin/bash
-    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
-        echo -e "attempting to create ssh key for submitty_daemon..."
-        su submitty_daemon -c "cd ~/"
-        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
-        su submitty_daemon -c "echo 'successfully created ssh key'"
-
-        while read -r IP
-        do
-            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
-        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
-        echo "DONE"
-    fi
 fi
 
 # The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
@@ -633,7 +622,7 @@ fi
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh "config=${SUBMITTY_INSTALL_DIR}/config"
 
 if [ $? -eq 1 ]; then
     echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
@@ -658,8 +647,8 @@ if [ ! -d "${clangsrc}" ]; then
 
     mkdir -p ${clangsrc}
 
-    # clone the clang sources, circa Nov. 2018
-    git clone --depth 1 --branch llvmorg-7.1.0 https://github.com/llvm/llvm-project.git ${clangsrc}/source
+    # clone the clang sources, circa Jan. 2023
+    git clone --depth 1 --branch llvmorg-13.0.1 https://github.com/llvm/llvm-project.git ${clangsrc}/source
     cp -R ${clangsrc}/source/llvm ${clangsrc}/llvm
     cp -R ${clangsrc}/source/clang ${clangsrc}/llvm/tools
     cp -R ${clangsrc}/source/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/
@@ -705,6 +694,7 @@ ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
 en_US
+100
 ${SUBMISSION_URL}
 
 
@@ -860,7 +850,8 @@ ${proxy}
 fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
-su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_USER}
+
+su -c 'docker pull submitty/libreoffice-writer:latest' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES

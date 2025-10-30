@@ -7,8 +7,8 @@
                     &copy; {{ "now"|date("Y") }}
                     <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
                     <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}" target="_blank" title = "{{ latest_tag }} {{ latest_commit }}" class="black-btn">{{ latest_tag }}</a>
-                    <span class="footer-separator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub" class="black-btn"><i class="fab fa-github fa-lg"></i></a>
-                    <span class="footer-separator">|</span> <a href="https://rcos.io" target="_blank" class="black-btn">An RCOS project</a>
+                    <span class="footer-separator">|</span> <a href="https://github.com/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub" class="black-btn"><i class="fab fa-github fa-lg"></i></a>
+                    <span class="footer-separator">|</span> <a href="https://new.rcos.io" target="_blank" class="black-btn">An RCOS project</a>
 
                     {% for link in footer_links %}
                         <span class="footer-separator">|</span>
@@ -33,18 +33,6 @@
             {% endif %}
         </div> {# /#submitty-body #}
     {% if is_debug %}
-        {% if performance_warning %}
-            <script>
-                $(document).ready(() => {
-                    $('#performance-warning-system-message-text').text('Developer Warning: Excessive or duplicate database queries observed: ' +
-                        '{{ submitty_queries|length + course_queries|length }} queries executed. Click "Show Page Details" at the bottom of the page for more info.');
-                    $('#performance-warning-system-message').css('display', 'flex');
-                });
-                $('#close-performance-warning-system-message').click(() => {
-                    $('#performance-warning-system-message').css('display', 'none');
-                });
-            </script>
-        {% endif %}
         <div id='page-info'>
             Runtime: {{ runtime }}<br /><br />
             <h2>Site Details</h2>

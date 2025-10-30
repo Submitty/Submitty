@@ -38,8 +38,16 @@ input[type="text"]:invalid {
 
 select {
     margin-top: 7px;
-    width: available;
+    width: 100%;
     min-width: 60px;
+}
+
+.perm-container {
+    margin-top: 10px;
+}
+
+.legend-header {
+    font-weight: 600;
 }
 
 .question-icon {
@@ -79,7 +87,55 @@ select {
 .tab-bar-wrapper {
     border-bottom: 1px solid var(--standard-medium-gray);
     display: flex;
-    height: 35px;
+    min-height: 35px;
+}
+
+.gradeable-status-body {
+    margin-top: 10px;
+}
+
+.bucket-size-container,
+.scatterplot-type-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 10px 0;
+}
+
+.scatterplot-type-container {
+    gap: 8px;
+    margin: 0 0 10px;
+}
+
+.scatterplot-type-container * {
+    width: 100%;
+}
+
+.scatterplot-statistics {
+    margin-top: 10px;
+}
+
+.bucket-size-input {
+    width: auto;
+}
+
+.bucket-size-submit-button {
+    width: 75px;
+    height: 30px;
+    cursor: pointer;
+    padding: 0 10px;
+    caret-color: transparent;
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: var(--actionable-blue) !important;
+}
+
+.missing-data-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 35px;
 }
 
 .peer-button {
@@ -109,6 +165,7 @@ a.nav-bar.normal-btn:hover {
 a.nav-bar.disabled-btn {
     color: var(--standard-medium-dark-gray);
     cursor: default;
+    /* stylelint-disable-next-line declaration-no-important */
     border: none !important;
     pointer-events: none;
 }
@@ -132,11 +189,6 @@ input[type="radio"],
 input[type="checkbox"] {
     margin-top: -1px;
     vertical-align: middle;
-}
-
-.settings {
-    padding: 8px;
-    border-radius: 4px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -172,10 +224,17 @@ table#grader-history td {
 
 #checkpoint-numeric-gradeables-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #late-days-message {
     font-style: italic;
+    font-weight: bold;
+}
+
+#gradeable-notifications-message {
+    font-style: italic;
+    font-weight: bold;
 }
 
 #timezone-container {
@@ -184,6 +243,11 @@ table#grader-history td {
 
 #repository {
     margin-top: 20px;
+}
+
+.select-config-container {
+    margin-top: 7px;
+    margin-bottom: 30px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -213,10 +277,10 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container, #subdirectory-settings-container {
+#team-settings-container,
+#subdirectory-settings-container {
     margin-top: 10px;
 }
-
 
 #rebuild-status-panel {
     display: inline-block;
@@ -294,12 +358,17 @@ form.dropdown {
 
 .notebook-builder-info {
     margin-top: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
 }
 
 .notebook-builder-info div {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.notebook-btn {
+    width: 98px;
+    margin-right: 12px;
 }
 
 .select-label-itempool {
@@ -324,4 +393,232 @@ body::-webkit-scrollbar-track {
 #custom_marks_warning {
     color: var(--standard-vibrant-red);
     font-style: italic;
+}
+
+.raw-config-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.raw-config-info-header {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#gradeable-config-structure {
+    display: none;
+}
+
+.not-available-message {
+    display: none;
+    color: var(--standard-vibrant-red);
+    margin: 0;
+}
+
+.config-editor-about {
+    padding-bottom: 20px;
+    width: 50%;
+}
+
+.main-folder {
+    margin-bottom: 1em;
+}
+
+.main-folder-contents {
+    margin-left: 23px;
+}
+
+.config-about-add {
+    color: var(--standard-vibrant-green);
+}
+
+.config-about-icon {
+    margin: 0 3px;
+}
+
+.config-about-warning {
+    color: var(--standard-vibrant-red);
+}
+
+.config-contents-display {
+    display: none;
+}
+
+.config-editor-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 16px;
+}
+
+.select-files-btn {
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.config-folder-view {
+    list-style-type: none;
+    margin-bottom: 1em;
+    margin-left: 0.5em;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.key_to_click.selected {
+    color: var(--standard-mediumorchid);
+    font-weight: bold;
+}
+
+.select-config-box {
+    display: none;
+}
+
+.file-action-add {
+    font-weight: bold;
+    color: var(--standard-vibrant-green);
+}
+
+.file-action-delete {
+    color: var(--standard-medium-dark-gray);
+}
+
+.file-action-folder:hover,
+.file-action-delete:hover,
+.file-action-add:hover {
+    transform: scale(1.1);
+}
+
+.config-file-icon {
+    margin-right: 6px;
+}
+
+.customize-editor-container {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+.customize-editor-button {
+    margin-left: 6px;
+    width: 25px;
+    height: 25px;
+    outline: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: var(--btn-default-white);
+    border-radius: 4px;
+    border-width: 2px;
+    color: var(--text-black);
+    cursor: pointer;
+}
+
+.customize-editor-button-icon {
+    pointer-events: none;
+}
+
+.line-nums-selected {
+    background-color: var(--standard-light-blue);
+}
+
+[data-theme="dark"] .line-nums-selected {
+    background: var(--standard-plum-purple);
+}
+
+/* Since we are working with CodeMirror and using a new instance each time we change files,
+we need the underlying text area to have the same styling to ensure the transition is smooth. */
+
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror,
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror-lines {
+    padding: 0;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+pre.CodeMirror-line {
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 8px !important;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.CodeMirror-linenumbers {
+    margin-right: 4px;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+#gradeable-config-edit-bar .CodeMirror {
+    /* The below instances of !important are identical to those used in gradeable-notebook.css.
+    It appears to be the only way to override the CodeMirror styling */
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: var(--standard-input-background) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border: 1px solid var(--standard-light-gray) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--text-black) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    vertical-align: middle !important;
+    min-height: 500px;
+    overflow: hidden;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+    resize: vertical;
+    font-size: 14px;
+    line-height: normal;
+    padding: 4px 8px;
+}
+
+.underlying-textarea {
+    height: 500px;
+    margin-bottom: 0.75em;
+    margin-top: 0.75em;
+    font-size: 14px;
+    line-height: normal;
+    padding: 4px 16px;
+    background-color: var(--standard-input-background);
+    border: 1px solid var(--standard-light-gray);
+}
+
+#gradeable-config-edit-bar {
+    display: none;
+}
+
+.warning-banner {
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
+
+.date-warning {
+    display: none;
+}
+
+.numerics-table,
+.checkpoints-table {
+    max-width: 50%;
+}
+
+.text-table {
+    max-width: 25%;
+}
+
+.statistic-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-top: 5px;
+    gap: 5px 15px;
 }

@@ -962,13 +962,15 @@ std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> dispatch::getCustomValidatorMe
   return std::make_pair(status, message);
 }
 
-TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username, int autocheck_number) {
+TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config,
+                                   const std::string& username, int autocheck_number) {
 
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
   std::vector<nlohmann::json> dispatcher_actions;
   std::string execute_logfile = "/dev/null";
   nlohmann::json test_case_limits = tc.get_test_case_limits();
+  const nlohmann::json& test_case_config = tc.get_test_case_limits();
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
   std::string validator_stdout_filename = "validation_stdout.json";
@@ -995,7 +997,8 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   command = command + " 1>" + validator_stdout_filename + " 2>" + validator_error_filename;
   int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
-                    assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT",
+                    assignment_limits, whole_config, test_case_config,
+                    windowed, "NOT_A_WINDOWED_ASSIGNMENT",
                     tc.has_timestamped_stdout());
   std::remove(input_file_name.c_str());
 

@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\User;
@@ -162,7 +163,8 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput(
                 'Error',
                 'unbuiltGradeable',
-                $gradeable->getTitle()
+                $gradeable,
+                "submissions"
             );
             $error = true;
         }
@@ -186,6 +188,13 @@ class SubmissionController extends AbstractController {
                 $show_hidden = (!$gradeable->isTaGrading() || $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
                 // can this user access grade inquiries for this graded_gradeable
                 $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+                if ($can_inquiry) {
+                    $this->core->authorizeWebSocketToken([
+                        'page' => 'grade_inquiry',
+                        'gradeable_id' => $gradeable->getId(),
+                        'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+                    ]);
+                }
             }
 
             // If we get here, then we can safely construct the old model w/o checks
@@ -264,11 +273,15 @@ class SubmissionController extends AbstractController {
         //filter out empty, null strings
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //If no user id's were submitted, give a graceful error.
@@ -308,7 +321,9 @@ class SubmissionController extends AbstractController {
                     $teams[] = $tmp->getId();
                 }
             }
-            $teams = array_unique(array_filter($teams));
+            $teams = array_unique(array_filter($teams, function ($team) {
+                return $team !== '';
+            }));
             $inconsistent_teams = count($teams) > 1;
         }
 
@@ -340,9 +355,8 @@ class SubmissionController extends AbstractController {
      * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
      * size entered and places in the uploads/split_pdf folder.
      * Its error checking has overlap with ajaxUploadSubmission.
-     *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods: ["POST"])]
     public function ajaxBulkUpload($gradeable_id) {
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
@@ -460,7 +474,8 @@ class SubmissionController extends AbstractController {
                     "use_ocr"   => $use_ocr
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . $uploaded_file["name"][$i] . ".json");
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT))) {
@@ -486,13 +501,20 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json");
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
                 $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?" . http_build_query(
+                    [
+                        'pdf_path' => $pdf_full_path,
+                        'num_page' => $num_pages,
+                        'file_name' => $job_data['filename']
+                    ]
+                ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
                 curl_close($ch);
@@ -522,9 +544,9 @@ class SubmissionController extends AbstractController {
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      * Has overlap with ajaxUploadSubmission
      *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      * @return boolean
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods: ["POST"])]
     public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
         // check for whether the item should be merged with previous submission
@@ -550,11 +572,15 @@ class SubmissionController extends AbstractController {
 
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
@@ -715,10 +741,6 @@ class SubmissionController extends AbstractController {
         //do the same thing for images
         $i = 1;
         foreach ($image_files as $image) {
-            // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
-                return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
-            }
             if (!@unlink($image)) {
                 return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
             }
@@ -821,6 +843,29 @@ class SubmissionController extends AbstractController {
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
+        $generate_images_data = [
+            "job" => "GeneratePdfImages",
+            "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
+            "redactions" => array_map(
+                function (Redaction $redaction) {
+                    return [
+                        'page_number' => $redaction->getPageNumber(),
+                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
+                    ];
+                },
+                $gradeable->getRedactions()
+            ),
+            "output_dir" => str_replace("submissions", "submissions_processed", $version_path),
+        ];
+
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $generate_images_job  = FileUtils::joinPaths($daemon_job_queue_path, "generate_images_" . $who_id . "_" . $new_version . ".json");
+
+        //add new job to queue
+        if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
+            $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            return $this->uploadResult("Failed to write GeneratePdfImages job", false);
+        }
 
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
@@ -829,9 +874,9 @@ class SubmissionController extends AbstractController {
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      * @return boolean
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods: ["POST"])]
     public function ajaxDeleteSplitItem($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -885,9 +930,9 @@ class SubmissionController extends AbstractController {
     }
     /**
      * function for counting the number of submissions to be regraded
-     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods: ["POST"])]
     public function ajaxCountRegrade(): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
@@ -915,9 +960,9 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for regrading submissions
-     * @AccessControl(role="INSTRUCTOR")
      * @return array
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods: ["POST"])]
     public function ajaxRegrade($gradeable_id): array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -991,14 +1036,17 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 if ($regrade_all_students_all === 'true' || $regrade_all === 'true') {
-                    $active_version = $i;
+                    $version = $i;
                 }
                 else {
-                    $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    $version = intval($_POST['version_to_regrade'] ?? 0);
+                    if ($version < 1 || $version > $g->getAutoGradedGradeable()->getHighestVersion()) {
+                        $version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    }
                 }
                 //create file name
                 $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
-                    $gradeable_id, $who_id, $active_version];
+                    $gradeable_id, $who_id, $version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
@@ -1013,12 +1061,13 @@ class SubmissionController extends AbstractController {
                     "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
                     "queue_time" => $this->core->getDateTimeNow()->format("Y-m-d H:i:sO"),
                     'regrade' => true,
+                    'regrade_by' => $this->core->getUser()->getId(),
                     "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
                     "term" => $this->core->getConfig()->getTerm(),
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
-                    "version" => $active_version,
+                    "version" => $version,
                     "who" => $who_id
                 ];
                 //add file to directory which will trigger autograding
@@ -1061,7 +1110,6 @@ class SubmissionController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $user_id,
-            $gradeable->isTeamAssignment()
         );
 
         if ($graded_gradeable === null) {
@@ -1475,7 +1523,15 @@ class SubmissionController extends AbstractController {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = true;
-                            $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $reported_size = FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $file_size += $reported_size;
+                            # Check size on each zip to ensure validation will not decompress a zip file that is too large
+                            if ($file_size > $max_size) {
+                                return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
+                            }
+                            if (!FileUtils::validateZipFileSize($uploaded_files[$i]["tmp_name"][$j])) {
+                                return $this->uploadResult("Corrupted ZIP file for " . $uploaded_files[$i]["name"][$j] . ".", false);
+                            }
                         }
                         else {
                             if (FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
@@ -1673,6 +1729,58 @@ class SubmissionController extends AbstractController {
         }
 
 
+        $has_docx = false;
+        if ($vcs_checkout === false) {
+            for ($i = 1; $i <= $num_parts; $i++) {
+                if (isset($uploaded_files[$i])) {
+                    for ($j = 0; $j < $count[$i]; $j++) {
+                        if (strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "docx") {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+
+                // Check for docx files in extracted directories
+                if (isset($part_path[$i]) && is_dir($part_path[$i])) {
+                    $extracted_files = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($part_path[$i])
+                    );
+                    foreach ($extracted_files as $file) {
+                        if ($file->isFile() && strtolower($file->getExtension()) === 'docx') {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($has_docx) {
+            // Add to queue to convert Word documents to PDF files for viewing
+            $docx_queue_data = [
+                "job" => "DocxToPDF",
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "user" => $user_id,
+                "version" => $new_version
+            ];
+
+            $docx_queue_file_helper = implode("__", ["docx_to_pdf", $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
+            $gradeable->getId(), $who_id, $new_version]);
+            $docx_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "daemon_job_queue",
+                $docx_queue_file_helper
+            );
+
+            if (@file_put_contents($docx_queue_file, FileUtils::encodeJson($docx_queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for pdf generation queue.", false);
+            }
+        }
+
+
         $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
@@ -1842,6 +1950,7 @@ class SubmissionController extends AbstractController {
                     file_put_contents($settings_file, FileUtils::encodeJson($settings));
                 }
             }
+            return $this->core->getOutput()->renderResultMessage($message, $success, false);
         }
         return $this->core->getOutput()->renderResultMessage($message, $success);
     }
@@ -1995,19 +2104,40 @@ class SubmissionController extends AbstractController {
         );
     }
 
+
+    /**
+     * Check if the unbuilt gradeable has been built yet
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
+    public function checkBuildRefresh(string $gradeable_id): JsonResponse {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return JsonResponse::getFailResponse("No gradeable with that id.");
+        }
+
+        return JsonResponse::getSuccessResponse($gradeable->hasAutogradingConfig());
+    }
+
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
-    public function checkRefresh($gradeable_id, $gradeable_version) {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
+    public function checkRefresh($gradeable_id, $gradeable_version): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+
+        // If we are an instructor, we can set the user_id to see regraded submissions
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
+            $anon_id = $_GET['anon_id'];
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        }
+
         $user_id = $submitter_id;
         $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
@@ -2044,21 +2174,10 @@ class SubmissionController extends AbstractController {
                 $team_id
             );
 
-        if ($has_results) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-        }
-        else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
-        }
-        $this->core->getOutput()->renderString($refresh_string);
-        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
+        return JsonResponse::getSuccessResponse($has_results);
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")]
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();

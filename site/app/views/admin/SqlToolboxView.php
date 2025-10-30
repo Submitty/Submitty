@@ -7,16 +7,21 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class SqlToolboxView extends AbstractView {
-    public function showToolbox(array $tables): string {
-        $this->output->addInternalModuleJs('sql-toolbox.js');
-
-        $this->output->addInternalCss('sql-toolbox.css');
+    /**
+     * @param array<string> $sql_structure_data
+     * @param array<string> $user_queries
+     */
+    public function showToolbox(array $sql_structure_data, array $user_queries): string {
         $this->output->addInternalCss('table.css');
-
         $this->output->addBreadcrumb('SQL Toolbox');
 
-        return $this->output->renderTwigTemplate("admin/SqlToolbox.twig", [
-            "tables" => $tables
+        return $this->output->renderTwigTemplate("Vue.twig", [
+            "type" => "page",
+            "name" => "SqlToolboxPage",
+            "args" => [
+                "sqlStructureData" => $sql_structure_data,
+                "userQueriesList" => $user_queries
+            ]
         ]);
     }
 }

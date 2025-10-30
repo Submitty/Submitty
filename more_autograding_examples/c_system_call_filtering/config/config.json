@@ -1,0 +1,110 @@
+{
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/gcc:latest"
+    },
+    "allow_system_calls" : [
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD"
+    ],
+    "testcases" : [
+	{
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
+	    "type" : "Compilation",
+	    "title" : "Compilation",
+	    "command" : "/usr/bin/gcc -Wall -Wextra -o a.out *.c",
+	    "details" : "/usr/bin/gcc -Wall -Wextra -o a.out *.c",
+            "executable_name" : "a.out",
+	    "points" : 1
+	},
+
+	{
+	    "title" : "just the basics",
+	    "command" : [
+		"./a.out"
+	    ],
+	    "details" : "./a.out",
+	    "points" : 10,
+	    "validation" : [
+		{
+		    "method" : "diff",
+                    "expected_string" : "hello world\ngoodbye\n",
+		    "actual_file" : "STDOUT.txt",
+		    "show_actual" : "always",
+                    "deduction" : 1.0
+		},
+	        {
+		    "method" : "errorIfNotEmpty",
+		    "actual_file" : "STDERR.txt",
+		    "show_actual" : "always",
+                    "deduction" : 0.0
+		}
+	    ]
+	},
+
+        {
+            "allow_system_calls" : [
+                "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+                "PROCESS_CONTROL_ADVANCED",
+                "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+                "PROCESS_CONTROL_SCHEDULING"
+            ],
+            
+	    "title" : "allowing process_control_scheduling",
+	    "command" : [
+		"./a.out"
+	    ],
+	    "details" : "./a.out",
+	    "points" : 8,
+	    "validation" : [
+		{
+		    "method" : "diff",
+                    "expected_string" : "hello world\ngoodbye\n",
+		    "actual_file" : "STDOUT.txt",
+		    "show_actual" : "always",
+                    "deduction" : 1.0
+		},
+	        {
+		    "method" : "errorIfNotEmpty",
+		    "actual_file" : "STDERR.txt",
+		    "show_actual" : "always",
+                    "deduction" : 0.0
+		}
+	    ]
+	},
+        
+        {
+            "allow_system_calls" : [
+                "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+                "PROCESS_CONTROL_ADVANCED",
+                "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+                "PROCESS_CONTROL_SCHEDULING",
+                "DEVICE_MANAGEMENT_ADVANCED"
+            ],
+            
+	    "title" : "allow process_control_scheduling AND device_management_advanced",
+	    "command" : [
+		"./a.out"
+	    ],
+	    "details" : "./a.out",
+	    "points" : 6,
+	    "validation" : [
+		{
+		    "method" : "diff",
+                    "expected_string" : "hello world\ngoodbye\n",
+		    "actual_file" : "STDOUT.txt",
+		    "show_actual" : "always",
+                    "deduction" : 1.0
+		},
+	        {
+		    "method" : "errorIfNotEmpty",
+		    "actual_file" : "STDERR.txt",
+		    "show_actual" : "always",
+                    "deduction" : 0.0
+		}
+	    ]
+	}
+    ]
+}

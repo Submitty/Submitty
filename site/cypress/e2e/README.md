@@ -1,4 +1,4 @@
-# Cypress has been split up into five groups that run separately.
+# Cypress has been split up into six groups that run separately.
 
 cypress-system is where all the tests that require system changes to occur before the tests can be run, that being the autograding tests, different login tests, etc.
 This is also where the accessibility test has been placed, to free space for other tests in the Admin folder.
@@ -11,7 +11,10 @@ Cypress-Gradeable is all the tests that ARE directly related to creating, editin
 
 Cypress-UI is all the tests that primarily focus on ensuring the correct UI is displayed to users.
 
+Cypress-Autograding-Development is all the tests that has to do with autograding and the Development course.
 
-The spec files in these folders can be moved around at a later date if necessary. If the names of the folders need to change, you have to edit the name of the containers matrix in the submitty_ci.yml Github Actions file in the .github/workflows folder. 
+Cypress-Autograding-Tutorial is all the tests that has to do with autograding and the Tutorial course.
 
-If you wish to rename Cypress-UI to Cypres-UserInterface, for example, in the submitty_ci.yml, replace "UI" with "UserInterface", and this will update the CI to find the new folders. 
+The spec files in these folders can be moved around at a later date if necessary. If the names of the folders need to change, you have to edit the name of the containers matrix in the ci.yml Github Actions file in the .github/workflows folder. 
+
+If you wish to rename Cypress-UI to Cypres-UserInterface, for example, in the ci.yml, replace "UI" with "UserInterface", and this will update the CI to find the new folders. 

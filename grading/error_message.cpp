@@ -52,7 +52,11 @@ std::string RetrieveSignalErrorMessage(int what_signal) {
     } else if (what_signal == SIGPOLL   /*           Term  Pollable event (Sys V). Synonym for SIGIO  */) {
     } else if (what_signal == SIGPROF   /* 27,27,29  Term  Profiling timer expired  */) {
     } else if (what_signal == SIGSYS    /* 12,31,12  Core  Bad argument to routine (SVr4)  */) {
-        message = "********************************\nDETECTED BAD SYSTEM CALL\n***********************************\nERROR: DETECTED BAD SYSTEM CALL";
+        message =
+          std::string("********************************************************************\n")+
+          std::string("* DETECTED USE OF DISALLOWED SYSTEM CALL                           *\n")+
+          std::string("* http://submitty.org/instructor/autograding/system_call_filtering *\n")+
+          std::string("********************************************************************\n");
     } else if (what_signal == SIGTRAP   /*  5        Core  Trace/breakpoint trap  */) {
     } else if (what_signal == SIGURG    /* 16,23,21  Ign   Urgent condition on socket (4.2BSD)  */) {
     } else if (what_signal == SIGVTALRM /* 26,26,28  Term  Virtual alarm clock (4.2BSD)  */) {

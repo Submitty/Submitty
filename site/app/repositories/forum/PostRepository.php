@@ -10,7 +10,7 @@ use Doctrine\ORM\Query\Expr;
 
 class PostRepository extends EntityRepository {
     public function getPostWithHistory(int $post_id): ?Post {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('post')
             ->addSelect('history')
             ->addSelect('attachments')
@@ -28,7 +28,7 @@ class PostRepository extends EntityRepository {
     }
 
     public function getPostDetail(int $post_id): ?Post {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('post')
             ->from(Post::class, 'post')
             ->addSelect('history')

@@ -1,0 +1,32 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-chatroom-form{% endblock %}
+{% block title %}Edit Chatroom{% endblock %}
+{% block body %}
+    <form id="chatroom-edit-form" method="post">
+        <div class="flex-col flex-col-space">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <label for="chatroom-title-input" id="chatroom-title-label">
+                Chatroom Title:
+            </label>
+            <input type="text" name="title" id="chatroom-title-input" placeholder="Enter name here..." data-testid="chatroom-name-edit"/>
+            <label for="chatroom-description-input" id="chatroom-description-label">
+                Description:
+            </label>
+            <input type="text" name="description" id="chatroom-description-input" placeholder="Enter description here..." data-testid="chatroom-description-edit">
+            <label for="chatroom-allow-anon" id="allow-anon-label">
+                Allow people to join anonymously?
+                <input type="checkbox" name="allow-anon" id="chatroom-anon-allow" data-testid="edit-anon">
+            </label>
+        </div>
+    </form>
+    <script>
+        function edit_room() {
+            let form = document.getElementById("chatroom-edit-form");
+            form.submit();
+        }
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input type="submit" class="btn btn-primary" onclick="edit_room()" data-testid="submit-chat-edit">
+{% endblock %}

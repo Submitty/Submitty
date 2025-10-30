@@ -6,7 +6,6 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
-use Doctrine\Common\Annotations\PsrCachedReader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
@@ -15,7 +14,6 @@ use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -28,9 +26,6 @@ class WebRouter {
 
     /** @var Request  */
     protected $request;
-
-    /** @var PsrCachedReader */
-    protected $reader;
 
     /** @var array */
     protected $parameters;
@@ -47,15 +42,6 @@ class WebRouter {
 
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
         $cache = new FilesystemAdapter("", 0, $cache_path);
-
-        $access_control_cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'access_control');
-        $ac_cache = new FilesystemAdapter("", 0, $access_control_cache_path);
-
-        $this->reader = new PsrCachedReader(
-            new AnnotationReader(),
-            $ac_cache,
-            $this->core->getConfig()->isDebug()
-        );
 
         // This will fetch the cache for routes. If it doesn't find it then it will
         // compile them, set the cache, and set compiledRoutes to that.
@@ -76,7 +62,7 @@ class WebRouter {
      */
     private function getCompiledRoutes(): array {
         $fileLocator = new FileLocator();
-        $annotationLoader = new AnnotatedRouteLoader($this->reader);
+        $annotationLoader = new AnnotatedRouteLoader();
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         return (new CompiledUrlMatcherDumper($collection))->getCompiledRoutes();
@@ -390,29 +376,26 @@ class WebRouter {
 
     /**
      * Check if the call passes access control defined
-     * in @AccessControl() annotation.
+     * in #[AccessControl()] attribute.
      *
      * @return bool
      * @throws \ReflectionException
      */
     private function accessCheck() {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $access_control = $this->reader->getMethodAnnotation(
-            new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']),
-            AccessControl::class
-        );
+        $method = new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']);
+        $attributes = $method->getAttributes(AccessControl::class);
 
-        if (is_null($access_control)) {
+        if (count($attributes) === 0) {
             /** @noinspection PhpUnhandledExceptionInspection */
-            $access_control = $this->reader->getClassAnnotation(
-                new \ReflectionClass($this->parameters['_controller']),
-                AccessControl::class
-            );
+            $class = new \ReflectionClass($this->parameters['_controller']);
+            $attributes = $class->getAttributes(AccessControl::class);
         }
 
-        if (is_null($access_control)) {
+        if (count($attributes) === 0) {
             return true;
         }
+
+        $access_control = $attributes[0]->newInstance();
 
         $user = $this->core->getUser();
         $access = true;
@@ -459,31 +442,25 @@ class WebRouter {
     }
 
     private function checkFeatureFlag() {
-        $feature_flag = $this->reader->getMethodAnnotation(
-            new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']),
-            FeatureFlag::class
-        );
+        $method = new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']);
+        $feature_flag = $method->getAttributes(FeatureFlag::class);
 
-        if (is_null($feature_flag)) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $feature_flag = $this->reader->getClassAnnotation(
-                new \ReflectionClass($this->parameters['_controller']),
-                FeatureFlag::class
-            );
+        if (count($feature_flag) === 0) {
+            $class = new \ReflectionClass($this->parameters['_controller']);
+            $feature_flag = $class->getAttributes(FeatureFlag::class);
         }
 
-        if (is_null($feature_flag)) {
+        if (count($feature_flag) === 0) {
             return true;
         }
 
-        return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
+        return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag[0]->newInstance()->getFlag());
     }
 
     private function getEnabled(): ?Enabled {
-        return $this->reader->getClassAnnotation(
-            new \ReflectionClass($this->parameters['_controller']),
-            Enabled::class
-        );
+        $class = new \ReflectionClass($this->parameters['_controller']);
+        $enabled = $class->getAttributes(Enabled::class);
+        return count($enabled) > 0 ? $enabled[0]->newInstance() : null;
     }
 
     private function checkEnabled(Enabled $enabled): bool {

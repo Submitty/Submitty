@@ -8,6 +8,10 @@
     "assignment_message" : "You are allowed 3 no penalty submissions.  You will lose 1 point for each 2 submissions beyond these non-penalty submissions.  The maximum penalty is -5 points.",
 
     "required_capabilities" : "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/clang:latest"
+    },
 
     "testcases" : [
 

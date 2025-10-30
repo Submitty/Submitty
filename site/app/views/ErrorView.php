@@ -2,6 +2,9 @@
 
 namespace app\views;
 
+use app\controllers\admin\ConfigurationController;
+use app\models\gradeable\Gradeable;
+
 class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {
         return $this->core->getOutput()->renderTwigTemplate("error/ExceptionPage.twig", [
@@ -36,7 +39,7 @@ class ErrorView extends AbstractView {
      * @param string $readd_url URL to the rejoin course function.
      * @return string The Twig HTML for this page.
      */
-    public function noAccessCourse(bool $can_rejoin_course, string $readd_url, int $self_registration_type): string {
+    public function noAccessCourse(bool $can_rejoin_course, string $readd_url, int $self_registration_type, ?string $default_section_id): string {
         return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
             "course_name" => $this->core->getDisplayedCourseName(),
             "semester" => $this->core->getFullSemester(),
@@ -48,13 +51,18 @@ class ErrorView extends AbstractView {
             "register_url" => $this->core->buildCourseUrl(['register']),
             "user" => $this->core->getUser(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "self_registration_type" => $self_registration_type
+            "self_registration_type" => $self_registration_type,
+            "all_self_register" => ConfigurationController::ALL_SELF_REGISTER,
+            "default_section_id" => $default_section_id
         ]);
     }
 
-    public function unbuiltGradeable($gradeable_title) {
+    public function unbuiltGradeable(Gradeable $gradeable, string $action) {
+        $check_refresh_unbuilt_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'check_refresh']);
         return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'title' => $gradeable_title
+            'title' => $gradeable->getTitle(),
+            'action' => $action,
+            'check_refresh_unbuilt_url' => $check_refresh_unbuilt_url
         ]);
     }
 

@@ -33,6 +33,9 @@ class AutoGradingView extends AbstractView {
         $any_visible_hidden = false;
         $num_visible_testcases = 0;
 
+        $docker_error = $version_instance->dockerErrorFileExists();
+        $docker_error_data = $docker_error ? $version_instance->getDockerErrorFileData() : null;
+
         // This variable should be false if autograding results
         // (files/database values) exist, but true if the assignment
         // is in the queue or something went wrong with autograding
@@ -91,15 +94,19 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        $queueData = [ 'in_queue' => false ];
+        $queueData = [
+            'in_queue' => false,
+            'check_refresh_submission_url' => $this->core->buildCourseUrl([ 'gradeable', $gradeable->getId(), $version_instance->getVersion(), 'check_refresh' ]),
+            'in_progress_grading' => $version_instance->isGrading()
+        ];
 
         if ($version_instance->isQueued()) {
             $queueData['in_queue'] = true;
             $queueData['queue_pos'] = $version_instance->getQueuePosition();
             $queueData['queue_total'] = $this->core->getGradingQueue()->getQueueCount();
-            $queueData['check_refresh_submission_url'] = $this->core->buildCourseUrl([ 'gradeable', $gradeable->getId(), $version_instance->getVersion(), 'check_refresh' ]);
         }
 
+        $this->core->getOutput()->addInternalCss('autograding-results-box.css');
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", array_merge($queueData, [
             'gradeable_id' => $gradeable->getId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
@@ -117,7 +124,9 @@ class AutoGradingView extends AbstractView {
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion(),
             'is_ta_grading' => $gradeable->isTaGrading(),
-            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails()
+            'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
+            'docker_error' => $docker_error,
+            'docker_error_data' => $docker_error_data,
         ]));
     }
 
@@ -143,7 +152,7 @@ class AutoGradingView extends AbstractView {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
-            if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf") {
+            if (str_ends_with($file_path, '.pdf')) {
                 $public = $autocheck->getPublic();
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
@@ -188,6 +197,21 @@ class AutoGradingView extends AbstractView {
                             "title" => $actual_title,
                             "show_popup" => $this->autoShouldDisplayPopup($actual_display),
                             "src" => file_get_contents($diff_viewer->getActualFilename())
+                        ];
+                    }
+                    elseif (str_ends_with($file_name, '.ipynb')) {
+                        $public = $autocheck->getPublic();
+                        $display_url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                            "dir" => $public ? "results_public" : "results",
+                            "file" => $file_name,
+                            "path" => urlencode($file_path)
+                        ]);
+                        $check["actual"] = [
+                            "type" => "notebook",
+                            "title" => $actual_title,
+                            "show_popup" => $this->autoShouldDisplayPopup($actual_display),
+                            "src" => $display_url,
+                            "filepath" => $file_path,
                         ];
                     }
                     else {
@@ -506,6 +530,7 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
             'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
+            'is_grade_inquiry_valid' => $gradeable->isGradeInquirySettingsValid(),
             'grade_inquiry_available' => $grade_inquiry_available,
             'grade_inquiry_message' => $this->core->getConfig()->getGradeInquiryMessage(),
             'num_decimals' => $num_decimals,

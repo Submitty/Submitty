@@ -52,6 +52,7 @@ textarea.config-row {
 }
 
 #seating-only-label input[type="checkbox"] {
+    /* stylelint-disable-next-line declaration-no-important */
     margin: 5px !important;
 }
 

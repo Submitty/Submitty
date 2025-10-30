@@ -76,7 +76,7 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles, bool $is_self_register) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -196,7 +196,8 @@ class NavigationView extends AbstractView {
                     "edit_buttons" => $this->getAllEditButtons($gradeable),
                     "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $buttons,
-                    "has_build_error" => $gradeable->anyBuildErrors()
+                    "has_build_error" => $gradeable->anyBuildErrors(),
+                    "is_student_view" => $gradeable->isStudentView()
                 ];
 
                 if (count($buttons) > $max_buttons) {
@@ -213,11 +214,15 @@ class NavigationView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalJs("collapsible-panels.js");
+        $this->core->getOutput()->addInternalJs("registration.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
             "course_name" => $this->core->getConfig()->getCourseName(),
             "course_id" => $this->core->getConfig()->getCourse(),
+            "is_self_register" => $is_self_register,
+            "unregister_url" => $this->core->buildCourseUrl(['unregister']),
+            "csrf_token" => $this->core->getCsrfToken(),
             "sections" => $render_sections,
             "max_buttons" => $max_buttons,
             "message_file_details" => $message_file_details,
@@ -227,7 +232,8 @@ class NavigationView extends AbstractView {
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config,
-            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')
+            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            "rainbow_grades_summary" => $this->core->getConfig()->displayRainbowGradesSummary()
         ]);
     }
 
@@ -679,13 +685,11 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
-                $cookie_string = "include_bad_submissions__" . $gradeable->getId();
-                $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+                $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
+                $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
+                $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
 
-                $cookie_string = "include_null_section__" . $gradeable->getId();
-                $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
-
-                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
+                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -734,13 +738,11 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->isTaGrading()) {
-                    $cookie_string = "include_bad_submissions__" . $gradeable->getId();
-                    $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+                    $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
+                    $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
+                    $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
 
-                    $cookie_string = "include_null_section__" . $gradeable->getId();
-                    $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
-
-                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
+                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE
