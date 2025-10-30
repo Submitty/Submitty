@@ -227,6 +227,8 @@ function renderGradingComponent(grader_id, component, graded_component, graders,
         if (is_student) {
             component.ta_comment = '';
         }
+        //Fix: Show only selected or display-to-all" marks.
+        component.marks = component.marks.filter(mark => mark.selected || mark.grader_show_to_all);
         // TODO: i don't think this is async
         resolve(Twig.twig({ ref: 'GradingComponent' }).render({
             component: component,
