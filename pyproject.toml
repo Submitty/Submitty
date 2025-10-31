@@ -1,6 +1,5 @@
 [tool.ruff]
 line-length = 100
-extend-ignore = ["E203", "E501"]
 exclude = [
     ".git",
     ".setup/bin/code_watcher.py",
@@ -171,23 +170,30 @@ exclude = [
     "sample_files/sample_CSV/verify.py"
 ]
 
+[tool.ruff.lint]
 # Enable all default rulesets (E, F, W, etc)
 select = ["ALL"]
 
-# Disable specific rules (by code) if you want to match your [MESSAGES CONTROL] disables.
+# Additional rule suppressions (e.g., Black compatibility and long lines)
+extend-ignore = ["E203", "E501"]
+
+# Project-specific ignores; also ignore COM812, D203, D213 to resolve warnings/conflicts
 ignore = [
     "PLR0913",  # too-many-arguments
     "PLR0914",  # too-many-locals
     # "PLR0903",  # too-few-public-methods
-    "D100",    # missing-module-docstring
-    "D104",    # missing-method-docstring
-    "PLW1514",   # unspecified-encoding
-    "D103",    # missing-function-docstring
-    "I001",    # wrong-import-order
+    "D100",     # missing-module-docstring
+    "D104",     # missing-method-docstring
+    "PLW1514",  # unspecified-encoding
+    "D103",     # missing-function-docstring
+    "I001",     # wrong-import-order
     "PLR0912",  # too-many-branches
+    "COM812",   # may conflict with formatter
+    "D203",     # incompatible with D211
+    "D213",     # incompatible with D212
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 ".github/workflows/pr_title_tester.py" = ["E501", "W605"]
 "sbin/submitty_daemon_jobs/submitty_jobs/jobs.py" = ["E501"]
 "autograder/autograder/autograding_utils.py" = ["E501", "F841"]
