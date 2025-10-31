@@ -20,7 +20,7 @@ const inlineLatex: (TokenizerExtension) = {
     },
     tokenizer(src: string) {
         // Match display and inline math
-        const codeSpan = /^(?:\$\$([^$]+?)\$\$|\\\[([^\]]+?)\\\]|\$([^$]+?)\$|\\\(([^)]+?)\\\))/ .exec(src);
+        const codeSpan = /^(?:\$\$([^$]+?)\$\$|\\\[([^\]]+?)\\\]|\$([^$]+?)\$|\\\(([^)]+?)\\\))/.exec(src);
         if (!codeSpan) {
             return;
         }
@@ -29,13 +29,16 @@ const inlineLatex: (TokenizerExtension) = {
         if (codeSpan[1] !== undefined) {
             math = codeSpan[1];
             displayMode = true;
-        } else if (codeSpan[2] !== undefined) {
+        }
+        else if (codeSpan[2] !== undefined) {
             math = codeSpan[2];
             displayMode = true;
-        } else if (codeSpan[3] !== undefined) {
+        }
+        else if (codeSpan[3] !== undefined) {
             math = codeSpan[3];
             displayMode = false;
-        } else if (codeSpan[4] !== undefined) {
+        }
+        else if (codeSpan[4] !== undefined) {
             math = codeSpan[4];
             displayMode = false;
         }
