@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\controllers\admin\ConfigurationController;
+use app\models\Notification;
 use app\models\User;
 
 class NotificationView extends AbstractView {

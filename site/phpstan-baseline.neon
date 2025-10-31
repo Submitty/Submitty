@@ -618,7 +618,7 @@ parameters:
 				should not be used, just return RedirectResponse directly$#
 			'''
 			identifier: staticMethod.deprecated
-			count: 3
+			count: 1
 			path: app/controllers/NotificationController.php
 
 		-
@@ -628,12 +628,6 @@ parameters:
 			'''
 			identifier: staticMethod.deprecated
 			count: 2
-			path: app/controllers/NotificationController.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
 			path: app/controllers/NotificationController.php
 
 		-
@@ -13900,12 +13894,6 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotificationSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
 			message: '#^Method app\\views\\NotificationView\:\:showNotificationSettings\(\) has parameter \$notification_saves with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -13914,30 +13902,6 @@ parameters:
 		-
 			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has parameter \$current_course with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has parameter \$notification_saves with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has parameter \$notifications with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has parameter \$show_all with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/views/NotificationView.php
 
