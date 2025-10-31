@@ -13894,14 +13894,14 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotificationSettings\(\) has parameter \$notification_saves with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method app\\views\\NotificationView\:\:showNotificationSettings\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: app/views/NotificationView.php
 
 		-
-			message: '#^Method app\\views\\NotificationView\:\:showNotifications\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method app\\views\\NotificationView\:\:showNotificationSettings\(\) has parameter \$notification_saves with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: app/views/NotificationView.php
 
