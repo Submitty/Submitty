@@ -13,7 +13,7 @@ with open('.shellcheckignore', 'r') as ignore_file:
         else:
             ignored_files.add(Path('.') / line)
 
-all_shell_scripts=set(Path('.').rglob('*.sh'))
+all_shell_scripts = set(Path('.').rglob('*.sh'))
 
 shell_scripts_to_check = [str(x) for x in all_shell_scripts.difference(ignored_files)]
 
