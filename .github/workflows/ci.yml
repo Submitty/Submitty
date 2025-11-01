@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - lint-optimize
   pull_request:
   workflow_dispatch:
 env:
@@ -39,7 +38,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-              ${{ runner.os }}-cache-node-modules-
+            ${{ runner.os }}-cache-node-modules-
       - run: npm ci
       - run: npm run test
       - name: Upload Coverage
@@ -71,7 +70,7 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-              ${{ runner.os }}-composer-
+            ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist --dev
       - name: Run php unit tests
@@ -97,7 +96,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
           restore-keys: |
-              ${{ runner.os }}-${{ github.job }}-pip-
+            ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: |
           python3 -m pip install -r .setup/pip/system_requirements.txt
@@ -185,7 +184,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-                ${{ runner.os }}-cache-node-modules-
+            ${{ runner.os }}-cache-node-modules-
       - run: npm ci
       - name: Run stylelint
         run: npm run css-stylelint
@@ -211,7 +210,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-                ${{ runner.os }}-cache-node-modules-
+            ${{ runner.os }}-cache-node-modules-
       - run: npm ci
       - name: Run eslint
         run: npm run eslint
@@ -266,19 +265,19 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-              ${{ runner.os }}-composer-
+            ${{ runner.os }}-composer-
       - name: Install dependencies
         run: composer install --prefer-dist --dev
       - name: Check syntax
         run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
       - name: Lint PHP code
         run: |
-            php vendor/bin/phpcs --version
-            php vendor/bin/phpcs
+          php vendor/bin/phpcs --version
+          php vendor/bin/phpcs
       - name: Static analysis
         run: |
-            php vendor/bin/phpstan --version
-            php vendor/bin/phpstan analyze app public/index.php socket/index.php
+          php vendor/bin/phpstan --version
+          php vendor/bin/phpstan analyze app public/index.php socket/index.php
   python-lint:
     name: Python Lint
     runs-on: ubuntu-22.04
@@ -295,7 +294,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
           restore-keys: |
-              ${{ runner.os }}-${{ github.job }}-pip-
+            ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
       - name: Run pre-commit
