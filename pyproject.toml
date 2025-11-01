@@ -181,7 +181,6 @@ extend-ignore = ["E203", "E501"]
 ignore = [
     "PLR0913",  # too-many-arguments
     "PLR0914",  # too-many-locals
-    # "PLR0903",  # too-few-public-methods
     "D100",     # missing-module-docstring
     "D104",     # missing-method-docstring
     "PLW1514",  # unspecified-encoding
@@ -192,6 +191,10 @@ ignore = [
     "D203",     # incompatible with D211
     "D213",     # incompatible with D212
 ]
+
+# ignore all type based rulesets
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
 
 [tool.ruff.lint.per-file-ignores]
 ".github/workflows/pr_title_tester.py" = ["E501", "W605"]
