@@ -383,3 +383,8 @@ div:has(.override)
     border: none;
     margin-right: 10px;
 }
+
+.last-run-warning {
+    color: var(--standard-bronze);
+    margin-left: 8px;
+} 
