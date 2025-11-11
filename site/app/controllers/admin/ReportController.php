@@ -38,6 +38,67 @@ class ReportController extends AbstractController {
 
     private $all_overrides = [];
 
+    /**
+     * NEW METHOD: Detect if Rainbow Grades was generated manually
+     */
+    private function isRainbowGradesManual(): bool {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        
+        // Check both possible locations for rainbow grades
+        $build_locations = [
+            $course_path . '/rainbow_grades/build',
+            $course_path . '/reports/build'
+        ];
+        
+        $output_locations = [
+            $course_path . '/rainbow_grades/output',
+            $course_path . '/reports/summary_html'
+        ];
+        
+        $latest_build = 0;
+        $latest_html = 0;
+        
+        // Find latest build file timestamp
+        foreach ($build_locations as $build_dir) {
+            if (is_dir($build_dir)) {
+                $timestamp = $this->getLatestFileTimestamp($build_dir);
+                $latest_build = max($latest_build, $timestamp);
+            }
+        }
+        
+        // Find latest HTML file timestamp
+        foreach ($output_locations as $output_dir) {
+            if (is_dir($output_dir)) {
+                $timestamp = $this->getLatestFileTimestamp($output_dir, '*.html');
+                $latest_html = max($latest_html, $timestamp);
+            }
+        }
+        
+        // Manual if HTML files exist but are newer than build files
+        return $latest_html > 0 && $latest_html > $latest_build;
+    }
+    
+    /**
+     * NEW METHOD: Get latest file modification timestamp in directory
+     */
+    private function getLatestFileTimestamp(string $directory, string $pattern = '*'): int {
+        if (!is_dir($directory)) {
+            return 0;
+        }
+        
+        $files = glob($directory . '/' . $pattern);
+        $latest = 0;
+        
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                $timestamp = filemtime($file);
+                $latest = max($latest, $timestamp);
+            }
+        }
+        
+        return $latest;
+    }
+
     #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -657,6 +718,7 @@ class ReportController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
     #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
+    
     public function generateCustomization(): JsonResponse|null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -691,6 +753,7 @@ class ReportController extends AbstractController {
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                'is_rainbow_grades_manual' => $this->isRainbowGradesManual(), // ADD THIS LINE
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
                 'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
                 'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),

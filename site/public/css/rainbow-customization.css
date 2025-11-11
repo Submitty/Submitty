@@ -366,6 +366,22 @@ div:has(.override)
     display: none;
 }
 
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.alert-body ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.alert-body p {
+    margin: 4px 0;
+}
+
 .gradeable-points {
     flex: 1;
     text-align: center;
