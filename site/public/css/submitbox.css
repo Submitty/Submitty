@@ -200,3 +200,14 @@
         width: 100%;
     }
 }
+
+/* Image file clickable styles for annotator */
+.image-file {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.image-file:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
