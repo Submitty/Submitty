@@ -151,10 +151,10 @@ class CourseMaterialsController extends AbstractController {
             // Directory-boundary check (path + '/') to avoid prefix collisions
             // to only remove DB entries that are the directory itself or descendants
             $normalized_path = rtrim($path, '/') . '/';
-          
+
             foreach ($all_files as $file) {
                 $file_dir = pathinfo($file->getPath(), PATHINFO_DIRNAME);
-            
+
                 if ($file->getPath() === $path || str_starts_with($file_dir . '/', $normalized_path)) {
                     $this->core->getCourseEntityManager()->remove($file);
                 }
@@ -281,7 +281,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($courseMaterials as $cm) {
                 // Directory-boundary matching to avoid prefix collisions
                 $normalized_main = rtrim($courseMaterial->getPath(), '/') . '/';
-                
+
                 if (str_starts_with($cm->getPath(), $normalized_main) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
@@ -965,7 +965,7 @@ class CourseMaterialsController extends AbstractController {
         if (pathinfo($deleted_path, PATHINFO_DIRNAME) !== $base_path) {
             $empty_folders = [];
             FileUtils::getTopEmptyDir($deleted_path, $base_path, $empty_folders);
-            
+
             if (count($empty_folders) > 0) {
                 $empty_path = $empty_folders[0];
                 FileUtils::recursiveRmdir($empty_path);
@@ -973,7 +973,7 @@ class CourseMaterialsController extends AbstractController {
                 // Remove database entries for the empty folders
                 $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
                 $normalized_empty = rtrim($empty_path, '/') . '/';
-                
+
                 foreach ($all_files as $file) {
                     // Ensure only exact or descendant paths are removed (avoid prefix collisions)
                     if ($file->getPath() === $empty_path || str_starts_with($file->getPath(), $normalized_empty)) {
