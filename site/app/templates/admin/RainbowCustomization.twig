@@ -1,4 +1,13 @@
 <div class="content">
+    {# ADD THIS WARNING BANNER AT THE VERY TOP #}
+    {% if is_rainbow_grades_manual %}
+        <div class="alert alert-warning" role="alert" style="margin-bottom: 20px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Manual Generation Detected:</strong> Rainbow Grades were generated on a personal device. 
+            For automatic server-side generation and proper functionality, use the "Generate Grade Summaries" or "Build" buttons below.
+        </div>
+    {% endif %}
+
     <div id="rg_web_ui_loading">
         <p>Loading...</p>
     </div>
