@@ -105,7 +105,7 @@ class CourseRegistrationController extends AbstractController {
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
-            $course_user = new CourseUser($user);
+            $course_user = new CourseUser($term, $course, $user);
             $em->persist($course_user);
             $em->flush();
             $this->core->getQueries()->updateUserInCourse($user);

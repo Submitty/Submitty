@@ -69,11 +69,7 @@ class HomePageControllerTester extends BaseUnitTest {
             new CourseUser(
                 'f24',
                 'course1',
-                'student',
-                1,
-                '1',
-                '1',
-                false
+                $core->getUser()
             )
         );
 

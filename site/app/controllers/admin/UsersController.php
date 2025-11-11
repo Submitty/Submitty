@@ -413,7 +413,7 @@ class UsersController extends AbstractController {
         else {
             $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
             $em = $this->core->getSubmittyEntityManager();
-            $course_user = new CourseUser($user);
+            $course_user = new CourseUser($semester, $course, $user);
             $em->persist($course_user);
             $em->flush();
             $this->core->getQueries()->updateUserInCourse($user);
@@ -907,7 +907,7 @@ class UsersController extends AbstractController {
                             }
                         }
                         $em = $this->core->getSubmittyEntityManager();
-                        $course_user = new CourseUser($user);
+                        $course_user = new CourseUser($semester, $course, $user);
                         $em->persist($course_user);
                         $em->flush();
                         $this->core->getQueries()->updateUserInCourse($user);
