@@ -20,7 +20,7 @@
     "@codemirror/language": "6.11.3",
     "@codemirror/language-data": "6.5.2",
     "@codemirror/legacy-modes": "6.5.2",
-    "@codemirror/lint": "6.8.5",
+    "@codemirror/lint": "6.9.2",
     "@codemirror/search": "6.5.11",
     "@codemirror/state": "6.5.2",
     "@codemirror/theme-one-dark": "6.1.3",
