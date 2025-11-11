@@ -148,8 +148,14 @@ class CourseMaterialsController extends AbstractController {
 
         if ($cm->getType() === DIR) {
             $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+            // Directory-boundary check (path + '/') to avoid prefix collisions
+            // to only remove DB entries that are the directory itself or descendants
+            $normalized_path = rtrim($path, '/') . '/';
+          
             foreach ($all_files as $file) {
-                if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
+                $file_dir = pathinfo($file->getPath(), PATHINFO_DIRNAME);
+            
+                if ($file->getPath() === $path || str_starts_with($file_dir . '/', $normalized_path)) {
                     $this->core->getCourseEntityManager()->remove($file);
                 }
             }
@@ -273,7 +279,10 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (str_starts_with(pathinfo($cm->getPath(), PATHINFO_DIRNAME), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                // Directory-boundary matching to avoid prefix collisions
+                $normalized_main = rtrim($courseMaterial->getPath(), '/') . '/';
+                
+                if (str_starts_with($cm->getPath(), $normalized_main) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -325,7 +334,9 @@ class CourseMaterialsController extends AbstractController {
 
         foreach ($course_materials as $course_material) {
             $course_material_path = $course_material->getPath();
-            $is_descendant = str_starts_with($course_material_path, $main_path . '/');
+            // Normalize the main path to ensure an exact directory boundary when checking descendants
+            $normalized_main = rtrim($main_path, '/') . '/';
+            $is_descendant = str_starts_with($course_material_path, $normalized_main);
 
             if ($is_descendant) {
                 $this->handleSectionLock($course_material, $_POST);
@@ -954,14 +965,18 @@ class CourseMaterialsController extends AbstractController {
         if (pathinfo($deleted_path, PATHINFO_DIRNAME) !== $base_path) {
             $empty_folders = [];
             FileUtils::getTopEmptyDir($deleted_path, $base_path, $empty_folders);
+            
             if (count($empty_folders) > 0) {
                 $empty_path = $empty_folders[0];
                 FileUtils::recursiveRmdir($empty_path);
 
                 // Remove database entries for the empty folders
                 $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+                $normalized_empty = rtrim($empty_path, '/') . '/';
+                
                 foreach ($all_files as $file) {
-                    if (str_starts_with($file->getPath(), $empty_path)) {
+                    // Ensure only exact or descendant paths are removed (avoid prefix collisions)
+                    if ($file->getPath() === $empty_path || str_starts_with($file->getPath(), $normalized_empty)) {
                         $this->core->getCourseEntityManager()->remove($file);
                     }
                 }
