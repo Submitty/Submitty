@@ -703,8 +703,8 @@ class ReportController extends AbstractController {
                     $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
                     $days_since_run = $now->diff($last_run_date)->days;
                     $show_warning = $days_since_run >= 7;
-        }
-    }
+                }
+            }
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [

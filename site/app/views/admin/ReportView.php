@@ -19,7 +19,7 @@ class ReportView extends AbstractView {
         ]);
     }
 
-    public function showFullGradebook($grade_file, string $grade_summaries_last_run,bool $show_warning = false, ?int $days_since_run = null) {
+    public function showFullGradebook($grade_file, string $grade_summaries_last_run, bool $show_warning = false, ?int $days_since_run = null) {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');
 
