@@ -73,15 +73,6 @@
     gap: 0.5rem;
 }
 
-.clear-filter-button {
-    flex: 0 1 auto;
-    flex-wrap: wrap;
-    min-width: 100px;
-    visibility: hidden;
-    margin-left: 0.5rem;
-    color: var(--actionable-blue);
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {
@@ -981,4 +972,8 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+#search-clear {
+    cursor: pointer;
 }
