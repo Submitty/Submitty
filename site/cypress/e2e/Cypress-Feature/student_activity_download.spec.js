@@ -1,5 +1,5 @@
 const header = '"Registration Section","User ID","Given Name","Family Name","Gradeable Access Date","Gradeable Submission Date","Forum View Date","Forum Post Date","Number of Poll Responses","Office Hours Queue Date","Course Materials Access Date"';
-const row1 = '1,adamsg,Gretchen,Adams,,"9996-12-30 23:59:59-05",,,2,,';
+const row1 = '1,adamsg,Gretchen,Adams,,"9996-12-30 11:59:59-05",,,1,,';
 
 describe('Tests cases revolving around student activity download', () => {
     it('Should download file, and have some correct values', () => {
