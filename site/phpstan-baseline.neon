@@ -1969,12 +1969,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 5
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
 			count: 2
@@ -2335,12 +2329,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			message: '#^Method app\\controllers\\forum\\ForumController\:\:search\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
 			message: '#^Method app\\controllers\\forum\\ForumController\:\:showCategories\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2463,13 +2451,13 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 25
+			count: 24
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 18
+			count: 17
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -4945,12 +4933,6 @@ parameters:
 			message: '#^Method app\\libraries\\FileUtils\:\:validateUploadedFiles\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, string\|null given\.$#'
-			identifier: if.condNotBoolean
-			count: 2
 			path: app/libraries/FileUtils.php
 
 		-
@@ -8658,18 +8640,6 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:saveTaGradedGradeable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:searchThreads\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:searchThreads\(\) has parameter \$searchQuery with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -14472,7 +14442,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 11
+			count: 10
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -14586,18 +14556,6 @@ parameters:
 		-
 			message: '#^Method app\\views\\forum\\ForumThreadView\:\:getUnreadThreadStatus\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: '#^Method app\\views\\forum\\ForumThreadView\:\:searchResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: '#^Method app\\views\\forum\\ForumThreadView\:\:searchResult\(\) has parameter \$threads with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 

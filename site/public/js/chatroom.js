@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig */
+/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig, displaySuccessMessage */
 
 /**
  * Asynchronously load the chatroom row template
@@ -129,13 +129,12 @@ function appendMessage(displayName, role, ts, content, msgID) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
@@ -144,35 +143,40 @@ function initChatroomSocketClient(chatroomId) {
                 window.alert('Chatroom has been closed by the instructor.');
                 window.location.href = buildCourseUrl(['chat']);
                 break;
+            case 'message_delete': {
+                const msgElement = document.getElementById(msg.message_id);
+                if (msgElement) {
+                    msgElement.remove();
+                }
+                break;
+            }
             default:
                 console.error(msg);
         }
     };
-    window.socketClient.open(`chatroom_${chatroomId}`);
+    window.socketClient.open('chatrooms', {
+        chatroom_id: chatroomId,
+    });
 }
 
 function initChatroomListSocketClient(user_admin, base_url) {
-    window.chatroomListSocketClient = new WebSocketClient();
-    window.chatroomListSocketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        const isActive = msg.type === 'chat_open';
         switch (msg.type) {
             case 'chat_open':
-                handleChatStateChange(msg, user_admin, true, base_url);
-                break;
             case 'chat_close':
-                handleChatStateChange(msg, user_admin, false, base_url);
+            case 'chat_create':
+                handleChatStateChange(msg, user_admin, isActive, base_url);
                 break;
-            case 'chat_create': // Not implemented yet (waiting on websocket verification PR)
-                handleChatStateChange(msg, user_admin, false, base_url); // newly created chat starts inactive
-                break;
-            case 'chat_delete': // Not implemented yet (waiting on websocket verification PR)
-                removeChatroomRow(msg.id);
+            case 'chat_delete':
+                removeChatroomRow(msg.chatroom_id);
                 break;
             default:
                 console.error('Unknown message type:', msg);
         }
     };
-    window.chatroomListSocketClient.open('chatrooms');
+    window.socketClient.open('chatrooms');
 }
 
 function newChatroomForm() {
@@ -249,8 +253,9 @@ function handleChatStateChange(msg, user_admin, isActive, base_url) {
     if (!tableBody) {
         return;
     }
-    removeChatroomRow(msg.id);
-    const rowHtml = renderChatroomRow(msg.id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isActive, base_url);
+
+    removeChatroomRow(msg.chatroom_id);
+    const rowHtml = renderChatroomRow(msg.chatroom_id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isActive, base_url);
     // This should be safe because the Twig template escapes all passed variables.
     // eslint-disable-next-line no-unsanitized/method
     tableBody.insertAdjacentHTML('beforeend', rowHtml);
@@ -260,6 +265,38 @@ function removeChatroomRow(chatroomId) {
     const row = document.getElementById(`${chatroomId}`);
     if (row) {
         row.remove();
+    }
+}
+
+function clearChatroom(chatroomId, chatroomTitle) {
+    if (confirm('This will clear all messages in the chatroom. Are you sure?')) {
+        $.ajax({
+            url: buildCourseUrl(['chat', chatroomId, 'clear']),
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken,
+            },
+            success: function (response) {
+                try {
+                    const msg = JSON.parse(response);
+                    if (msg.status !== 'success') {
+                        console.error(msg);
+                        displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
+                    }
+                    else {
+                        displaySuccessMessage(`Cleared ${chatroomTitle} sucessfully`);
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                    window.alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            },
+        });
     }
 }
 

@@ -1,5 +1,5 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars */
+    displayErrorMessage, escapeSpecialChars updateThreads */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -864,6 +864,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const editUserPrompt = document.getElementById('edit_user_prompt');
             editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
+            contentBox.dispatchEvent(new Event('input', { bubbles: true }));
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
             if (change_anon) {
@@ -877,16 +878,8 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
             $('.cat-buttons input').prop('checked', false);
-            if (json.markdown === true) {
-                $('#markdown_input_').val('1');
-                $('#markdown_toggle_').addClass('markdown-active');
-                $('#markdown_buttons_').show();
-            }
-            else {
-                $('#markdown_input_').val('0');
-                $('#markdown_toggle_').removeClass('markdown-active');
-                $('#markdown_buttons_').hide();
-            }
+            $('#edit-user-post [id^="markdown_input_"]').val(json.markdown === true ? '1' : '0');
+            $('#edit-user-post .markdown-area').click();
             $('#img-table-loc').append(json.img_table);
             $('.display-attachment-name').each(function () {
                 $(this).text(decodeURIComponent($(this).text()));
@@ -982,6 +975,17 @@ function readCategoryValues() {
     return categories_value;
 }
 
+function setCategoryValues(cat_ids) {
+    $('#thread_category button').each(function () {
+        if (cat_ids.includes($(this).data('cat_id'))) {
+            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
+        }
+        else {
+            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        }
+    });
+}
+
 function readThreadStatusValues() {
     const thread_status_value = [];
     $('#thread_status_select button').each(function () {
@@ -990,6 +994,17 @@ function readThreadStatusValues() {
         }
     });
     return thread_status_value;
+}
+
+function setThreadStatusValues(sel_ids) {
+    $('#thread_status_select button').each(function () {
+        if (sel_ids.includes($(this).data('sel_id'))) {
+            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
+        }
+        else {
+            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        }
+    });
 }
 
 function dynamicScrollLoadPage(element, atEnd) {
@@ -1183,13 +1198,23 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     let thread_status_value = readThreadStatusValues();
 
     const unread_select_value = $('#unread').is(':checked');
+    const search_query = $('#search-content').val();
     // eslint-disable-next-line eqeqeq
     categories_value = (categories_value == null) ? '' : categories_value.join('|');
     // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null) ? '' : thread_status_value.join('|');
+
+    // Check if no changes since last update
+    if (categories_value === Cookies.get(`${course}_forum_categories`)
+        && thread_status_value === Cookies.get('forum_thread_status')
+        && search_query === Cookies.get('search_query')) {
+        return;
+    }
+
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
+    Cookies.set('search_query', search_query, { path: '/' });
     const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
@@ -1326,7 +1351,10 @@ function replyPost(post_id) {
     }
     else {
         hideReplies();
+        // Clear existing contents of the reply box, and update markdown state
+        $(`#${post_id}-reply [id^="reply_box_"]`).val('');
         $(`#${post_id}-reply`).css('display', 'block');
+        $(`#${post_id}-reply .markdown-area`).click();
     }
 }
 
@@ -2155,9 +2183,6 @@ function openInWindow(img) {
     window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
-// eslint-disable-next-line no-var
-var filters_applied = [];
-
 // Taken from https://stackoverflow.com/a/1988361/2650341
 
 if (!Array.prototype.inArray) {
@@ -2194,22 +2219,29 @@ function clearForumFilter() {
     if (checkUnread()) {
         $('#filter_unread_btn').click();
     }
-    window.filters_applied = [];
+    $('#search-content').val('').trigger('change');
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
 
-    // eslint-disable-next-line no-undef
-    updateThreads(true, null);
     return false;
 }
 
+function updateClearFilterButton() {
+    if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0) {
+        clearForumFilter();
+    }
+    else {
+        $('#clear_filter_button').css('visibility', 'visible');
+    }
+}
+
 function loadFilterHandlers() {
-    $('#filter_unread_btn').mousedown(function (e) {
+    $('#filter_unread_btn').on('mousedown', function (e) {
         $(this).toggleClass('filter-inactive filter-active');
     });
 
-    $('#thread_category button, #thread_status_select button').mousedown(function (e) {
+    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
         e.preventDefault();
         const current_selection = $(this).data('btn-selected');
 
@@ -2220,30 +2252,76 @@ function loadFilterHandlers() {
             $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
         }
 
-        const filter_text = $(this).text();
+        updateClearFilterButton();
+        updateThreads(true, saveFilterState);
+        return true;
+    });
 
-        window.filters_applied.toggleElement(filter_text, (e) => {
-            return e === filter_text;
-        });
+    $('#search-submit').on('mousedown', (e) => {
+        e.preventDefault();
+        updateClearFilterButton();
+        updateThreads(true, saveFilterState);
+        return true;
+    });
 
-        if (window.filters_applied.length === 0) {
-            clearForumFilter();
+    $('#search-content').on('keydown', (e) => {
+        if (e.key === 'Enter') {
+            $('#search-submit').trigger('mousedown');
         }
-        else {
-            $('#clear_filter_button').css('visibility', 'visible');
-        }
-        // eslint-disable-next-line no-undef
-        updateThreads(true, null);
+    });
+
+    $('#search-content').on('input', (e) => {
+        $('#search-clear').toggle($('#search-content').val() !== '');
+    });
+
+    $('#search-clear').on('mousedown', (e) => {
+        $('#search-content').val('').trigger('change');
+        updateClearFilterButton();
+        updateThreads(true, saveFilterState);
         return true;
     });
 
     $('#unread').change((e) => {
         e.preventDefault();
-        // eslint-disable-next-line no-undef
-        updateThreads(true, null);
+        updateThreads(true, saveFilterState);
         checkUnread();
         return true;
     });
+
+    window.onpopstate = function (e) {
+        setFilterState(e.state);
+    };
+
+    updateClearFilterButton();
+}
+
+function getFilterState() {
+    return {
+        'categories': readCategoryValues(),
+        'thread-status': readThreadStatusValues(),
+        'search-content': $('#search-content').val(),
+    };
+}
+
+function saveFilterState() {
+    history.pushState(getFilterState(), '');
+}
+
+function setFilterState(state) {
+    if (state === null) {
+        return;
+    }
+    if ('categories' in state) {
+        setCategoryValues(state['categories']);
+    }
+    if ('thread-status' in state) {
+        setThreadStatusValues(state['thread-status']);
+    }
+    if ('search-content' in state) {
+        $('#search-content').val(state['search-content']);
+    }
+    updateClearFilterButton();
+    updateThreads(true, null);
 }
 
 function thread_post_handler() {

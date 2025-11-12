@@ -55,6 +55,10 @@ class ForumController extends AbstractController {
         return $unread_threads;
     }
 
+    private function searchQuery(): string {
+        return $_COOKIE["search_query"] ?? "";
+    }
+
     private function getSavedCategoryIds($currentCourse, $category_ids) {
         if (empty($category_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             $category_ids = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
@@ -490,12 +494,6 @@ class ForumController extends AbstractController {
         $this->core->getQueries()->setAnnounced($_POST['id']);
         $this->core->getQueries()->updateResolveState($_POST['id'], 0);
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
-    }
-
-    #[Route("/courses/{_semester}/{_course}/forum/search", methods: ["POST"])]
-    public function search() {
-        $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
     #[AccessControl(permission: "forum.publish")]
@@ -1117,13 +1115,24 @@ class ForumController extends AbstractController {
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
+        $search_query = $this->searchQuery();
         $scroll_down = filter_var($_POST['scroll_down'] ?? "true", FILTER_VALIDATE_BOOLEAN);
 
         $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
         $thread_status = $this->getSavedThreadStatus($thread_status);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number, $scroll_down);
+        $threads = $repo->getAllThreads(
+            $categories_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number,
+            $scroll_down
+        );
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1165,11 +1174,22 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number
+        );
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread, $block_number);
     }
 
@@ -1182,6 +1202,7 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $option = 'tree';
@@ -1199,6 +1220,7 @@ class ForumController extends AbstractController {
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
+        $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
         if ($thread->isMergedThread()) {
             // Redirect merged thread to parent
             $this->core->addSuccessMessage("The requested thread was merged into this thread.");
@@ -1212,7 +1234,16 @@ class ForumController extends AbstractController {
         $merge_thread_options = $repo->getMergeThreadOptions($thread);
 
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $user,
+            $block_number
+        );
         if (!empty($_REQUEST["ajax"])) {
             $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
         }
@@ -1510,7 +1541,13 @@ class ForumController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-discussion_forum";
+        $params = [
+            'page' => 'discussion_forum',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);

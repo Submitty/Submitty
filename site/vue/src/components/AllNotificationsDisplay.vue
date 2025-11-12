@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
+import SingleNotification from '@/components/Notification.vue';
 
 const props = defineProps<{
     notifications: Notification[];
 }>();
+
+const localNotifications = ref<Notification[]>([...props.notifications]);
 
 const showUnseenOnly = ref(true);
 
@@ -30,13 +33,29 @@ const visibleCount = 10;
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
-        ? props.notifications.filter((n) => !n.seen)
-        : props.notifications,
+        ? localNotifications.value.filter((n) => !n.seen)
+        : localNotifications.value,
 );
 
 const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
+
+function goToNotification(url: string) {
+    if (!url) {
+        return;
+    }
+    window.location.href = url;
+}
+
+function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
+    const target = localNotifications.value.find(
+        (n) => n.id === id && n.course === course,
+    );
+    if (target) {
+        target.seen = true;
+    }
+}
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -44,63 +63,43 @@ const visibleNotifications = computed(() =>
       <h1 class="notifications-header">
         Notifications
       </h1>
-      <button
-        v-if="notifications.length !== 0"
-        class="btn btn-default"
-        @click="toggleUnseenOnly"
-      >
-        {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
-      </button>
-      <!-- FUTURE FEATURE: mark all notifications on the home page as seen
-            <a class="btn btn-primary">
-                Mark all as seen
-            </a>
-        -->
+      <div class="notifications-actions">
+        <button
+          v-if="localNotifications.length !== 0"
+          class="btn btn-default"
+          @click="toggleUnseenOnly"
+        >
+          {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
+        </button>
+      </div>
     </div>
     <p
-      v-if="notifications.length === 0"
+      v-if="localNotifications.length === 0"
       id="no-recent-notifications"
       class="no-recent"
     >
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0 && notifications.length > 0"
+      v-if="filteredNotifications.length === 0 && localNotifications.length > 0"
       id="no-recent-notifications"
       class="no-recent"
     >
       No unseen notifications.
     </p>
     <div
-      v-else
-      id="recent-notifications"
+      v-for="n in visibleNotifications"
+      :key="n.id"
+      role="link"
+      tabindex="0"
+      class="notification"
+      :class="{ unseen: !n.seen }"
+      @click="goToNotification(n.notification_url)"
     >
-      <a
-        v-for="n in visibleNotifications"
-        :key="n.id"
-        class="notification"
-        :class="{ unseen: !n.seen }"
-        :href="n.notification_url"
-      >
-        <i
-          v-if="n.component === 'forum'"
-          class="fas fa-comments notification-type"
-          title="Forum"
-        />
-        <div class="notification-content">
-          <span>
-            {{ n.content }}
-          </span>
-          <div class="notification-time">
-            {{ n.course }} - {{ n.notify_time }}
-          </div>
-        </div>
-        <!-- FUTURE FEATURE: individual mark as seen
-                      <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
-                          <i class="far fa-envelope-open"></i>
-                      </a>
-                  -->
-      </a>
+      <SingleNotification
+        :notification="n"
+        @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
+      />
     </div>
   </div>
 </template>
@@ -115,7 +114,7 @@ const visibleNotifications = computed(() =>
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .notifications-header {
@@ -134,67 +133,9 @@ const visibleNotifications = computed(() =>
     border-collapse: collapse;
 }
 
-.notification {
-    display: flex;
-    border-bottom: 1px solid var(--standard-light-gray);
-    padding: 9px 0;
-    align-items: center;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-.notification:hover {
-    cursor: pointer;
-    background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
-}
-
-.notification.unseen {
-    background-color: var(--viewed-content);
-}
-
-a.notification {
-    color: var(--text-black);
-    text-decoration: none;
-}
-
-a.notification:last-of-type {
-    border-bottom: none;
-}
-
-.notification > * {
-    display: block;
-    align-items: center;
-}
-
-.notification-type {
-    margin-right: 1em;
-}
-
-.notification-contents {
-    display: flex;
-    flex-wrap: wrap;
-    flex-grow: 1;
-}
-
-.notification-content {
-    flex: 1;
-}
-
-.notification-time {
-    font-size: 0.9rem;
-    color: var(--standard-medium-dark-gray);
-    flex: 1 0 90%;
-    margin-top: 2px;
-}
-
-.notification-seen {
-    text-align: center;
-    flex: 0 0 auto;
-    padding: 10px 16px;
-}
-
-a.show-more {
-    display: inline-block;
-    margin-top: 10px;
+.notifications-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 </style>

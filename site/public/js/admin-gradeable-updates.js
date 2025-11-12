@@ -300,7 +300,12 @@ $(document).ready(() => {
             saveGraders();
             return;
         }
-        if ($(this).prop('id') === 'all_access' || $(this).prop('id') === 'minimum_grading_group') {
+        if ($(this).prop('id') === 'minimum_grading_group_autograding' || $(this).prop('id') === 'minimum_grading_group') {
+            $('#minimum_grading_group').val($(this).val());
+            $('#minimum_grading_group_autograding').val($(this).val());
+            saveGraders();
+        }
+        if ($(this).prop('id') === 'all_access') {
             saveGraders();
         }
         // Don't save if it we're ignoring it

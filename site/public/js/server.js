@@ -445,15 +445,43 @@ function newEditCourseMaterialsForm(tag) {
         }
     }
 
-    editFilePathRecommendations();
-    if (is_link === 1) {
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf('course_materials/') + 17).replace('link-', '')));
-    }
-    else {
-        path.val(file_path.substring(1));
-    }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 
+    // Set the directory value after select2 is initialized
+    const pathElement = $('#new-file-name');
+    let valueToSet;
+    // Extract directory path from full path for both files and links
+    const lastSlashIndex = file_path.lastIndexOf('/');
+
+    if (lastSlashIndex === -1) {
+        // Material is in root directory
+        valueToSet = '';
+    }
+    else {
+        // Extract directory path relative to course_materials
+        const fullDirPath = file_path.substring(0, lastSlashIndex);
+        const courseMaterialsIndex = fullDirPath.indexOf('course_materials/');
+
+        if (courseMaterialsIndex !== -1) {
+            valueToSet = fullDirPath.substring(courseMaterialsIndex + 17);
+        }
+        else {
+            valueToSet = '';
+        }
+    }
+    // Wait for select2 to be fully initialized by checking for the select2 container
+    const waitForSelect2 = () => {
+        if (pathElement.next('.select2-container').length > 0) {
+            // Select2 is initialized, set the value
+            pathElement.val(valueToSet).trigger('change');
+        }
+        else {
+            // Not ready yet, try again
+            setTimeout(waitForSelect2, 50);
+        }
+    };
+
+    setTimeout(waitForSelect2, 100);
     $('#material-edit-form', form).attr('data-id', id);
     $('#edit-picker', form).attr('value', release_time);
     $('#edit-sort', form).attr('value', dir);

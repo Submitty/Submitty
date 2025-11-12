@@ -428,11 +428,11 @@ body::-webkit-scrollbar-track {
 }
 
 .main-folder {
-    padding-bottom: 0.5em;
+    margin-bottom: 1em;
 }
 
 .main-folder-contents {
-    margin-left: 8px;
+    margin-left: 23px;
 }
 
 .config-about-add {
@@ -466,7 +466,7 @@ body::-webkit-scrollbar-track {
 
 .config-folder-view {
     list-style-type: none;
-    margin-bottom: 0.5em;
+    margin-bottom: 1em;
     margin-left: 0.5em;
 }
 
@@ -565,6 +565,8 @@ pre.CodeMirror-line {
     border: 1px solid var(--standard-light-gray) !important;
     /* stylelint-disable-next-line declaration-no-important */
     border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--text-black) !important;
     /* stylelint-disable-next-line declaration-no-important */
     vertical-align: middle !important;
     min-height: 500px;
