@@ -55,6 +55,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var object[]
      */
     private array $warning = [];
+    /**
+     * @var bool
+     */
+    private bool $extra_credit = false;
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
@@ -263,6 +267,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->warning)) {
             $this->warning = $json->warning;
         }
+
+        if (isset($json->extra_credit)) {
+            $this->extra_credit = $json->extra_credit;
+        }
     }
 
     /**
@@ -371,6 +379,24 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getMessages() {
         return $this->messages;
+    }
+
+    /**
+     * Get extra credit setting
+     *
+     * @return bool
+     */
+    public function getExtraCredit(): bool {
+        return $this->extra_credit;
+    }
+
+    /**
+     * Set extra credit setting
+     *
+     * @param bool $extra_credit
+     */
+    public function setExtraCredit(bool $extra_credit): void {
+        $this->extra_credit = $extra_credit;
     }
 
 

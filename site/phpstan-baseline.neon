@@ -2329,12 +2329,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			message: '#^Method app\\controllers\\forum\\ForumController\:\:search\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
 			message: '#^Method app\\controllers\\forum\\ForumController\:\:showCategories\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8650,18 +8644,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:searchThreads\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:searchThreads\(\) has parameter \$searchQuery with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:sendTeamInvitation\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14460,7 +14442,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 11
+			count: 10
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -14574,18 +14556,6 @@ parameters:
 		-
 			message: '#^Method app\\views\\forum\\ForumThreadView\:\:getUnreadThreadStatus\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: '#^Method app\\views\\forum\\ForumThreadView\:\:searchResult\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: '#^Method app\\views\\forum\\ForumThreadView\:\:searchResult\(\) has parameter \$threads with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
