@@ -720,6 +720,7 @@ class ReportController extends AbstractController {
                 'omit_section_from_statistics' => $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'extra_credit' => $customization->getExtraCredit(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
