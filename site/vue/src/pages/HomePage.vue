@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps, ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
@@ -21,13 +21,35 @@ interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
     course: boolean;
+    userId: string;
 }
 
 type SemesterCourses = {
     [semester: string]: Course[];
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const archivedCoursesVisible = ref(true);
+const hasArchivedCourses = computed(() => {
+    const archivedRanks = props.statuses.archived_courses;
+
+    return archivedRanks && Object.keys(archivedRanks).length > 0
+        && Object.values(archivedRanks).some((rank: Rank) => rank.courses && rank.courses.length > 0);
+});
+const toggleArchivedCourses = () => {
+    archivedCoursesVisible.value = !archivedCoursesVisible.value;
+    // Toggle archived course visibility indefinitely, scoped to user
+    localStorage.setItem(`archived_courses_visible_${props.userId}`, archivedCoursesVisible.value.toString());
+};
+
+onMounted(() => {
+    const storedValue = localStorage.getItem(`archived_courses_visible_${props.userId}`);
+
+    // Default to visible if no value is stored
+    if (storedValue !== null) {
+        archivedCoursesVisible.value = storedValue === 'true';
+    }
+});
 
 const getCourseTypeHeader = (course_type: Status) => {
     if (course_type === 'self_registration_courses') {
@@ -84,10 +106,19 @@ const buildCourseUrl = (course: Course) => {
             data-testid="courses-header"
           >
             {{ getCourseTypeHeader(course_type) }}
+            <button
+              v-if="course_type === 'archived_courses' && hasArchivedCourses"
+              type="button"
+              class="btn btn-default"
+              @click="toggleArchivedCourses"
+            >
+              {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
+            </button>
           </h1>
 
           <div
             v-for="rank in ranks"
+            v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
             <h3 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
@@ -120,6 +151,7 @@ const buildCourseUrl = (course: Course) => {
                   </a>
                 </li>
               </ul>
+              <br v-if="course_type === 'archived_courses'" />
             </div>
           </div>
         </div>
@@ -162,7 +194,11 @@ const buildCourseUrl = (course: Course) => {
 
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
 .div1 {
   grid-column: 1;
   padding: 20px;
