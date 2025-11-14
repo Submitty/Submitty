@@ -117,6 +117,7 @@
     padding-bottom: 1em;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .post_content > div {
     flex-grow: 1;
 }
