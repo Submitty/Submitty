@@ -689,6 +689,10 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            $course_json = $this->core->getConfig()->getCourseJson() ?? [];
+            $course_details = $course_json['course_details'] ?? [];
+            $nightly_from_course_json = isset($course_details['auto_rainbow_grades']) && $course_details['auto_rainbow_grades'];
+            $is_nightly_enabled = $nightly_from_course_json;
 
             $grade_summaries_last_run = $this->getGradeSummariesLastRun();
             $show_warning = false;
@@ -745,6 +749,7 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
+                'is_nightly_enabled' => $is_nightly_enabled,
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
             ]);

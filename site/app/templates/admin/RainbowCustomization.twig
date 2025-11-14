@@ -46,9 +46,35 @@
                         </span>
                     {% endif %}
                 </div>
+                <div class="card-btn-info nightly-status">
+                    {% if is_nightly_enabled %}
+                        <span class="nightly-status-enabled">
+                            Rainbow Grades Nightly Builds is currently enabled.
+                        </span>
+                    {% else %}
+                        <span class="nightly-status-disabled">
+                            Rainbow Grades Nightly Builds is currently not enabled.
+                            To enable nightly builds, follow the steps found 
+                            <a href="https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup" target="_blank">here</a>.
+                        </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
-
+        <!--
+        <div class="system-message {{ is_nightly_enabled ? 'info' : 'warning' }}" id="rg-system-message">
+            <span id="rg-system-message-text">
+                Rainbow Grades Nightly Builds are currently {{ is_nightly_enabled ? 'enabled' : 'not enabled' }}.
+                {% if not is_nightly_enabled %}
+                    <br>
+                    <span class="rg-small-text">
+                        To enable Nightly Builds, follow the steps found 
+                        <a href="https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup" target="_blank">here</a>.
+                    </span>
+                {% endif %}
+            </span>
+        </div>
+        -->
         <div id="save_status_container" class="customization_item">
             <div id="status_head">
                 <div id="build_buttons">
