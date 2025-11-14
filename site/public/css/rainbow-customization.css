@@ -406,3 +406,8 @@ div:has(.override)
 .rg-small-text {
     font-size: 0.85em;
 }
+
+.last-run-warning {
+    color: var(--standard-bronze);
+    margin-left: 8px;
+}
