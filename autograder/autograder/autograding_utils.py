@@ -477,7 +477,7 @@ def archive_autograding_results(
                         grade_result = line
         except Exception as e:
             with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
-                f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work,'grade.txt')}")
+                f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work, 'grade.txt')}")
             config.logger.log_message(
                 "ERROR: could not process grade.txt. See stack trace entry for more details.",
                 job_id=job_id,
@@ -541,7 +541,7 @@ def archive_autograding_results(
             shutil.move(results_json_path, os.path.join(tmp_results, "results.json"))
         except Exception as e:
             with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
-                f.write(f"\n\nERROR: Grading incomplete -- Could not open/write {os.path.join(tmp_work,'results.json')}")
+                f.write(f"\n\nERROR: Grading incomplete -- Could not open/write {os.path.join(tmp_work, 'results.json')}")
             config.logger.log_message(
                 "ERROR: results.json read/write error",
                 job_id=job_id,
@@ -699,7 +699,7 @@ def copy_contents_into(config, job_id, source, target, tmp_logs):
                 elif os.path.isfile(os.path.join(target, item)):
                     config.logger.log_message(
                         "ERROR: the target subpath is a file not a directory "
-                        f"'{os.path.join(target,item)}'",
+                        f"'{os.path.join(target, item)}'",
                         job_id=job_id,
                     )
                     raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target, item), "'")
