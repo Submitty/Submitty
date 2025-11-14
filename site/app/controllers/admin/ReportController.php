@@ -689,6 +689,23 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+            $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+            $show_warning = false;
+            $days_since_run = null;
+
+            if ($grade_summaries_last_run !== 'Never') {
+                // Make string parsable
+                $clean_date = preg_replace('/\s*@\s*/', ' ', $grade_summaries_last_run);
+                $last_run_date = date_create_from_format('Y-m-d h:i A T', $clean_date);
+
+                if ($last_run_date instanceof \DateTime) {
+                    $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+                    $days_since_run = $now->diff($last_run_date)->days;
+                    $show_warning = $days_since_run >= 7;
+                }
+            }
+
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
@@ -728,6 +745,8 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
+                'show_warning' => $show_warning,
+                'days_since_run' => $days_since_run,
             ]);
         }
 

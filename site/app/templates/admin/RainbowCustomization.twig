@@ -40,6 +40,11 @@
                 </button>
                 <div class="card-btn-info">
                     Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                    {% if show_warning %}
+                        <span class="last-run-warning">
+                            Warning: Last run was {{ days_since_run }} days ago.
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
