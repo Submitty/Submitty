@@ -70,11 +70,3 @@ const htmlContent = computed(() => {
     v-html="htmlContent"
   />
 </template>
-
-<style scoped>
-.markdown :deep(.katex-display) {
-  width: 100%;
-  text-align: center;
-  margin: 1em 0;
-}
-</style>
