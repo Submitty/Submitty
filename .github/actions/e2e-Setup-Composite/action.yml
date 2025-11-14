@@ -22,7 +22,7 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
   NODE_VERSION: 16
-  PYTHON_VERSION: "3.14"
+  PYTHON_VERSION: "3.13"
 
 runs:
   using: "composite"
