@@ -209,7 +209,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
      * notify_time: string,
      * semester: string|null,
      * course: string|null,
-     * notification_url: string
+     * url: string
      * }
      */
     public function jsonSerialize(): array {
@@ -223,14 +223,14 @@ class Notification extends AbstractModel implements \JsonSerializable {
                 $base_url = $this->core->buildUrl(['courses', $semester, $course, 'notifications', $this->getId()]);
             }
             else {
-                $base_url = $this->core->buildUrl(['home']);
+                $base_url = $this->core->buildCourseUrl(['notifications', $this->getId()]);
             }
         }
         else {
             $base_url = $this->core->buildUrl(['home']);
         }
 
-        $notification_url = $base_url . '?seen=' . ($this->isSeen() ? '1' : '0');
+        $url = $base_url . '?seen=' . ($this->isSeen() ? '1' : '0');
 
         return [
             'id' => $this->getId(),
@@ -243,7 +243,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'notify_time' => $this->getNotifyTime(),
             'semester' => $this->semester,
             'course' => $this->course,
-            'notification_url' => $notification_url
+            'url' => $url
         ];
     }
 }
