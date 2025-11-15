@@ -247,6 +247,52 @@ class UtilsTester extends BaseUnitTest {
         $this->assertFalse(Utils::checkUploadedImageFile('invalid'));
     }
 
+    public static function isPdfProvider() {
+        return [
+            ['test.pdf', true],
+            ['TEST.PDF', false], // case sensitive
+            ['test.PDF', false], // case sensitive
+            ['test.doc', false],
+            ['test.txt', false],
+            ['document.pdf', true],
+            ['file.pdf.txt', false], // not ending with .pdf
+            ['pdf', false] // no extension
+        ];
+    }
+
+    /**
+     * @dataProvider isPdfProvider
+     */
+    public function testIsPdf($filename, $expected) {
+        $this->assertEquals($expected, Utils::isPdf($filename));
+    }
+
+    public function testCheckUploadedImageOrPdfFileWithPdf() {
+        try {
+            $_FILES['test'] = [
+                'name' => ['test.pdf'],
+                'tmp_name' => [__TEST_DATA__ . '/.gitkeep'], // using existing file for mime test
+                'type' => ['application/pdf'],
+                'error' => [UPLOAD_ERR_OK],
+                'size' => [123]
+            ];
+            
+            // Mock mime_content_type to return PDF mime type
+            $this->getFunctionMock("app\\libraries", 'mime_content_type')
+                ->expects($this->once())
+                ->willReturn('application/pdf');
+                
+            $this->assertTrue(Utils::checkUploadedImageOrPdfFile('test'));
+        }
+        finally {
+            $_FILES = [];
+        }
+    }
+
+    public function testCheckUploadedImageOrPdfFileInvalidId() {
+        $this->assertFalse(Utils::checkUploadedImageOrPdfFile('invalid'));
+    }
+
     public static function comparableNullableGtProvider() {
         return [
             [null, null, false],

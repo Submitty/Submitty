@@ -45,7 +45,7 @@ function checkForumFileExtensions(post_box_id, files) {
     for (let i = 0; i < files.length; i++) {
         // eslint-disable-next-line no-undef
         const extension = getFileExtension(files[i].name);
-        if (!['gif', 'png', 'jpg', 'jpeg', 'bmp'].includes(extension)) {
+        if (!['gif', 'png', 'jpg', 'jpeg', 'bmp', 'pdf'].includes(extension)) {
             // eslint-disable-next-line no-undef
             deleteSingleFile(files[i].name, post_box_id, false);
             // eslint-disable-next-line no-undef
@@ -71,7 +71,7 @@ function checkNumFilesForumUpload(input, post_id) {
     }
     else {
         if (!checkForumFileExtensions(input.files)) {
-            displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            displayErrorMessage('Invalid file type. Please upload only image or PDF files. (PNG, JPG, GIF, BMP, PDF)');
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
@@ -152,7 +152,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
 
     let valid = true;
     if (!checkForumFileExtensions(post_box_id, files)) {
-        displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+        displayErrorMessage('Invalid file type. Please upload only image or PDF files. (PNG, JPG, GIF, BMP, PDF)');
         valid = false;
     }
 
