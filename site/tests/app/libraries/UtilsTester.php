@@ -276,12 +276,12 @@ class UtilsTester extends BaseUnitTest {
                 'error' => [UPLOAD_ERR_OK],
                 'size' => [123]
             ];
-            
+
             // Mock mime_content_type to return PDF mime type
             $this->getFunctionMock("app\\libraries", 'mime_content_type')
                 ->expects($this->once())
                 ->willReturn('application/pdf');
-                
+
             $this->assertTrue(Utils::checkUploadedImageOrPdfFile('test'));
         }
         finally {
