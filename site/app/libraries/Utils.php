@@ -208,17 +208,17 @@ class Utils {
      * @return bool true if filename references an image else false
      */
     public static function isImage(string $filename): bool {
-        return (substr($filename, -4) == ".png") ||
-            (substr($filename, -4) == ".jpg") ||
-            (substr($filename, -5) == ".jpeg") ||
-            (substr($filename, -4) == ".gif");
+        return (substr($filename, -4) === ".png") ||
+            (substr($filename, -4) === ".jpg") ||
+            (substr($filename, -5) === ".jpeg") ||
+            (substr($filename, -4) === ".gif");
     }
 
     public static function isPdf(string $filename): bool {
-        return substr($filename, -4) == ".pdf";
+        return substr($filename, -4) === ".pdf";
     }
 
-    public static function checkUploadedImageFile($id) {
+    public static function checkUploadedImageFile($id): bool {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
@@ -233,7 +233,7 @@ class Utils {
         return false;
     }
 
-    public static function checkUploadedImageOrPdfFile($id) {
+    public static function checkUploadedImageOrPdfFile($id): bool {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
