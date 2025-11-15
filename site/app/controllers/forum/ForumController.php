@@ -156,11 +156,11 @@ class ForumController extends AbstractController {
         if (count($_FILES[$file_post]['tmp_name']) > 5) {
             return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
         }
-        $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
-        if ($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])) {
-            return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
+        $attachmentCheck = Utils::checkUploadedImageOrPdfFile($file_post) ? 1 : 0;
+        if ($attachmentCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])) {
+            return $this->returnUserContentToPage("Invalid file type. Please upload only image or PDF files. (PNG, JPG, GIF, BMP, PDF)", $isThread, $thread_id);
         }
-        return [$imageCheck];
+        return [$attachmentCheck];
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
