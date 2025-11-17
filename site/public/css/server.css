@@ -1466,7 +1466,6 @@ end of styles used in the admin gradeable page
 
 .course-materials-NULL {
     color: var(--default-black);
-    /*border: 1px solid var(--text-black);*/
 }
 
 .course-materials-invalid {
