@@ -1469,15 +1469,15 @@ end of styles used in the admin gradeable page
 }
 
 .course-materials-invalid {
-	color: var(--standard-light-red);
+    color: var(--standard-light-red);
 }
 
 .course-materials-1 {
-	color: var(--standard-vibrant-green);
+    color: var(--standard-vibrant-green);
 }
 
 .course-materials-2 {
-	color: var(--important-post);
+    color: var(--important-post);
 }
 
 /* color for a limited access grader */
@@ -1490,6 +1490,7 @@ end of styles used in the admin gradeable page
 .grader-1 {
     background-color: var(--standard-vibrant-green); /* green */
 }
+
 
 
 .hide-highlights {
