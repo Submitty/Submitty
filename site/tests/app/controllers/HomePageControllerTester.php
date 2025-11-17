@@ -18,6 +18,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $user = $this->createMockModel(User::class);
         $user->method('getId')->willReturn($user_id);
         $core->method('getUser')->willReturn($user);
+        $user->method('getUserGroup')->willReturn(4);
         return $core;
     }
 
