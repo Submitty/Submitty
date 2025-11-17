@@ -113,6 +113,11 @@
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
+.post_content > div {
+    flex-grow: 1;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
 .post_viewed_btn {
     background-color: var(--standard-light-gray);
 }
