@@ -66,13 +66,13 @@ describe('Docker UI Test', () => {
         cy.exec('whoami').its('stdout').then((user) => {
             console.log(`Running Docker UI tests as user: ${user}`);
             // fail with user to test
-            expect(user).to.equal('submitty_php');
         });
         const json = JSON.stringify(autograding_containers, null, 4);
         cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
             // inside the vm, the directory exists
             if (result.code === 0) {
-                cy.writeFile('/usr/local/submitty/config/autograding_containers.json', json);
+                cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
+                cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
             }
             // outside the vm, need to run commands using vagrant
             else {
