@@ -1464,7 +1464,7 @@ end of styles used in the admin gradeable page
     background-color: var(--standard-plum-purple); /* purple */
 }
 
-.course-materials-NULL {
+.course-materials-null {
     color: var(--default-black);
 }
 
