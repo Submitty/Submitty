@@ -36,7 +36,51 @@ const docker_ui_path = '/admin/docker';
  * }
  */
 
+const autograding_containers = {
+    default: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+        'submitty/rust:latest',
+        'submitty/java:latest',
+        'submitty/pdflatex:latest',
+        'submitty/jupyter:latest',
+    ],
+    python: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+    ],
+    cpp: [
+        'submitty/autograding-default:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+    ],
+    notebook: [
+        'submitty/autograding-default:latest',
+    ],
+};
+
 describe('Docker UI Test', () => {
+    before(() => {
+        cy.exec('whoami').its('stdout').then((user) => {
+            console.log(`Running Docker UI tests as user: ${user}`);
+        });
+        const json = JSON.stringify(autograding_containers, null, 4);
+        cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+            // inside the vm, the directory exists
+            if (result.code === 0) {
+                cy.writeFile('/usr/local/submitty/config/autograding_containers.json', json);
+            }
+            // outside the vm, need to run commands using vagrant
+            else {
+                const escapedJson = json.replace(/"/g, '\\"');
+                cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
+                    cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
+                });
+            }
+        });
+    });
     beforeEach(() => {
         cy.login();
         cy.visit(docker_ui_path);
@@ -265,6 +309,7 @@ describe('Docker UI Test', () => {
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
+            console.log(345);
             return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
@@ -280,6 +325,7 @@ describe('Docker UI Test', () => {
         // Reload the page and wait until the image is removed
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
+            console.log(234);
             return cy.get('body').then(($body) => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
                 return !exists;
@@ -291,6 +337,7 @@ describe('Docker UI Test', () => {
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
+            console.log(123);
             return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
