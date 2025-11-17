@@ -1464,6 +1464,23 @@ end of styles used in the admin gradeable page
     background-color: var(--standard-plum-purple); /* purple */
 }
 
+.course-materials-NULL {
+    color: var(--default-black);
+    /*border: 1px solid var(--text-black);*/
+}
+
+.course-materials-invalid {
+	color: var(--standard-light-red);
+}
+
+.course-materials-1 {
+	color: var(--standard-vibrant-green);
+}
+
+.course-materials-2 {
+	color: var(--important-post);
+}
+
 /* color for a limited access grader */
 .grader-3 {
     background-color: var(--important-post); /* yellow */
@@ -1474,6 +1491,7 @@ end of styles used in the admin gradeable page
 .grader-1 {
     background-color: var(--standard-vibrant-green); /* green */
 }
+
 
 .hide-highlights {
     display: none;
