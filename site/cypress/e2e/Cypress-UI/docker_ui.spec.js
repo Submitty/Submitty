@@ -68,7 +68,7 @@ describe('Docker UI Test', () => {
             // fail with user to test
         });
         const json = JSON.stringify(autograding_containers, null, 4);
-        cy.exec('sudo test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+        cy.exec('sudo test -d /usr/local/submitty/config').then((result) => {
             // inside the vm, the directory exists
             if (result.code === 0) {
                 cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
