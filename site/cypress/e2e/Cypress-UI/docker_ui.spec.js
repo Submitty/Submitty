@@ -76,6 +76,7 @@ describe('Docker UI Test', () => {
             }
             // outside the vm, need to run commands using vagrant
             else {
+                expect(result.code).to.equal(0);
                 const escapedJson = json.replace(/"/g, '\\"');
                 cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
                     cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
