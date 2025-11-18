@@ -1468,15 +1468,15 @@ end of styles used in the admin gradeable page
     color: var(--default-black);
 }
 
-.course-materials-invalid {
+.course-materials-never {
     color: var(--standard-light-red);
 }
 
-.course-materials-1 {
+.course-materials-released {
     color: var(--standard-vibrant-green);
 }
 
-.course-materials-2 {
+.course-materials-imminent {
     color: var(--important-post);
 }
 
