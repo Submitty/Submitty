@@ -99,20 +99,24 @@ const buildCourseUrl = (course: Course) => {
         <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
           <br v-if="index > 0" />
           <br v-if="index > 0" />
-          <h1
-            class="courses-header"
-            data-testid="courses-header"
+          <div
+            class="courses-header-container"
           >
-            {{ getCourseTypeHeader(course_type) }}
-          </h1>
-          <button
-            v-if="course_type === 'archived_courses' && hasArchivedCourses"
-            type="button"
-            class="btn btn-default"
-            @click="toggleArchivedCourses"
-          >
-            {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
-          </button>
+            <h1
+              class="courses-header"
+              data-testid="courses-header"
+            >
+              {{ getCourseTypeHeader(course_type) }}
+            </h1>
+            <button
+              v-if="course_type === 'archived_courses' && hasArchivedCourses"
+              type="button"
+              class="btn btn-default archive-toggle-btn"
+              @click="toggleArchivedCourses"
+            >
+              {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
+            </button>
+          </div>
           <div
             v-for="rank in ranks"
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
@@ -181,11 +185,19 @@ const buildCourseUrl = (course: Course) => {
     }
 }
 
+.courses-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-grow: 1;
+}
+
+.archive-toggle-btn {
+    flex-grow: 0;
 }
 
 .div1 {
