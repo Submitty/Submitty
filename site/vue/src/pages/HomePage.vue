@@ -99,22 +99,20 @@ const buildCourseUrl = (course: Course) => {
         <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
           <br v-if="index > 0" />
           <br v-if="index > 0" />
-
           <h1
             class="courses-header"
             data-testid="courses-header"
           >
             {{ getCourseTypeHeader(course_type) }}
-            <button
-              v-if="course_type === 'archived_courses' && hasArchivedCourses"
-              type="button"
-              class="btn btn-default"
-              @click="toggleArchivedCourses"
-            >
-              {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
-            </button>
           </h1>
-
+          <button
+            v-if="course_type === 'archived_courses' && hasArchivedCourses"
+            type="button"
+            class="btn btn-default"
+            @click="toggleArchivedCourses"
+          >
+            {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
+          </button>
           <div
             v-for="rank in ranks"
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"

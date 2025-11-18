@@ -68,9 +68,9 @@ describe('Tests for self registering for courses', () => {
 
         // Check instructors view
         cy.login();
-        cy.get('[data-testid="courses-header"]').eq(0).should('contain', 'My Courses');
-        cy.get('[data-testid="courses-header"]').eq(1).should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="courses-header"]').eq(2).should('contain', 'My Archived Courses');
+        cy.get('[data-testid="courses-header"]').eq(0).should('have.text', 'My Courses');
+        cy.get('[data-testid="courses-header"]').eq(1).should('have.text', 'Courses Available for Self Registration');
+        cy.get('[data-testid="courses-header"]').eq(2).should('have.text', 'My Archived Courses');
         cy.logout();
         // Check normal view (with no course name)
         cy.login('gutmal');
