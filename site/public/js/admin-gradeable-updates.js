@@ -1066,11 +1066,11 @@ function updateGradeableEditor(g_id, file_path) {
 
 function isBinaryPath(path) {
     const binaryExtensions = [
-        "png", "jpg", "jpeg", "gif",
-        "bmp", "bin", "exe", "dll",
-        "pdf", "zip", "tar", "gz",
-        "7z", "rar", "iso",
-        "class", "o", "so"
+        'png', 'jpg', 'jpeg', 'gif',
+        'bmp', 'bin', 'exe', 'dll',
+        'pdf', 'zip', 'tar', 'gz',
+        '7z', 'rar', 'iso',
+        'class', 'o', 'so',
     ];
 
     const ext = path.split('.').pop().toLowerCase();
@@ -1150,21 +1150,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function toggleFolder(id) {
     const div = document.getElementById(id);
-    const icon = document.getElementById(id + '-icon');
-
-    if (!div) return;
-
-    if (div.style.display === "none") {
-        div.style.display = "block";
-        icon.classList.remove("fa-folder");
-        icon.classList.add("fa-folder-open");
-    } else {
-        div.style.display = "none";
-        icon.classList.remove("fa-folder-open");
-        icon.classList.add("fa-folder");
+    const icon = document.getElementById(`${id}-icon`);
+    if (!div) {
+        return;
+    }
+    if (div.style.display === 'none') {
+        div.style.display = 'block';
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+    }
+    else {
+        div.style.display = 'none';
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
     }
 }
-
 
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();

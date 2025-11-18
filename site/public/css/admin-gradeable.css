@@ -437,9 +437,6 @@ body::-webkit-scrollbar-track {
 
 .binary-file-type {
     color: var(--text-black);
-}
-
-.binary-file-type {
     pointer-events: none;
 }
 
