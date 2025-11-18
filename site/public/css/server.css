@@ -1464,22 +1464,6 @@ end of styles used in the admin gradeable page
     background-color: var(--standard-plum-purple); /* purple */
 }
 
-.course-materials-null {
-    color: var(--default-black);
-}
-
-.course-materials-never {
-    color: var(--standard-light-red);
-}
-
-.course-materials-released {
-    color: var(--standard-vibrant-green);
-}
-
-.course-materials-imminent {
-    color: var(--important-post);
-}
-
 /* color for a limited access grader */
 .grader-3 {
     background-color: var(--important-post); /* yellow */
