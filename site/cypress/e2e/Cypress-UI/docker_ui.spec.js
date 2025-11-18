@@ -62,29 +62,6 @@ const autograding_containers = {
 };
 
 describe('Docker UI Test', () => {
-    before(() => {
-        cy.exec('whoami').its('stdout').then((user) => {
-            console.log(`Running Docker UI tests as user: ${user}`);
-            // fail with user to test
-        });
-        const json = JSON.stringify(autograding_containers, null, 4);
-        cy.exec('sudo test -d /usr/local/submitty/config').then((result) => {
-            // inside the vm, the directory exists
-            expect(result).to.equal(1);
-            if (result.code === 0) {
-                cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
-                cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
-            }
-            // outside the vm, need to run commands using vagrant
-            else {
-                expect(result.code).to.equal(0);
-                const escapedJson = json.replace(/"/g, '\\"');
-                cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
-                    cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
-                });
-            }
-        });
-    });
     beforeEach(() => {
         cy.login();
         cy.visit(docker_ui_path);
@@ -321,7 +298,6 @@ describe('Docker UI Test', () => {
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            console.log(345);
             return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
@@ -337,7 +313,6 @@ describe('Docker UI Test', () => {
         // Reload the page and wait until the image is removed
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            console.log(234);
             return cy.get('body').then(($body) => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
                 return !exists;
@@ -349,7 +324,6 @@ describe('Docker UI Test', () => {
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            console.log(123);
             return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
@@ -360,5 +334,23 @@ describe('Docker UI Test', () => {
         // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
+    });
+
+    after(() => {
+        const json = JSON.stringify(autograding_containers, null, 4);
+        cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+            // inside the vm, the directory exists
+            if (result.exitCode === 0) {
+                cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
+                cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
+            }
+            // outside the vm, need to run commands using vagrant
+            else {
+                const escapedJson = json.replace(/"/g, '\\"');
+                cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
+                    cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
+                });
+            }
+        });
     });
 });
