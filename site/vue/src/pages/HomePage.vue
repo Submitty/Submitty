@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineProps, ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
-import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
+import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
@@ -20,6 +20,7 @@ type Course = {
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
+    course: boolean;
     userId: string;
 }
 
@@ -158,7 +159,15 @@ const buildCourseUrl = (course: Course) => {
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay :notifications="notifications" />
+    <div
+      class="notification-panel shadow"
+    >
+      <NotificationsDisplay
+        :notifications="notifications"
+        :course="false"
+        :visible-count="10"
+      />
+    </div>
   </div>
 </template>
 
@@ -221,5 +230,11 @@ ol.bare-list {
 }
 #courses h2 {
     margin: 0;
+}
+
+.notification-panel {
+    background-color: var(--default-white);
+    height: auto;
+    padding: 20px;
 }
 </style>
