@@ -1,4 +1,4 @@
-/* exported changeDiffView addMarkdownCode renderMarkdown previewMarkdown getFocusableElements popOutSubmittedFile
+/* exported changeDiffView addMarkdownCode renderMarkdown previewMarkdown getFocusableElements openSubmittedFile
    openPopUp enableTabsInTextArea submitAJAX getFileExtension toggleSidebar updateSidebarPreference detectColorScheme
    setAllRelease deleteOverriddenGrades flagUserImage peerFeedbackUpload resizeNoScrollTextareas checkBulkProgress
    updateTheme openSetAllRelease setChildNewDateTime escapeSpecialChars loadOverriddenGrades updateGradeOverride
@@ -1723,9 +1723,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
     });
 }
 
-function popOutSubmittedFile(html_file, url_file) {
+function openSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
+
     if (url_file.includes('submissions_processed')) {
         directory = 'submissions_processed';
     }
@@ -1748,10 +1749,15 @@ function popOutSubmittedFile(html_file, url_file) {
         directory = 'attachments';
     }
     file_path = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true`;
+
+    // If #submission_browser exists, the view is a grading context and the file should open in a pop-up. Otherwise, it should open in a new tab.
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
+        window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
     }
-    window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    else {
+        window.open(file_path, '_blank');
+    }
     return false;
 }
 
