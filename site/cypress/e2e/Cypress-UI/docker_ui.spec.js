@@ -36,6 +36,31 @@ const docker_ui_path = '/admin/docker';
  * }
  */
 
+const autograding_containers = {
+    default: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+        'submitty/rust:latest',
+        'submitty/java:latest',
+        'submitty/pdflatex:latest',
+        'submitty/jupyter:latest',
+    ],
+    python: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+    ],
+    cpp: [
+        'submitty/autograding-default:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+    ],
+    notebook: [
+        'submitty/autograding-default:latest',
+    ],
+};
+
 describe('Docker UI Test', () => {
     beforeEach(() => {
         cy.login();
@@ -54,6 +79,14 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Up-to-Date');
+                });
+        }, 10000, 500);
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker-version"]')
@@ -301,5 +334,23 @@ describe('Docker UI Test', () => {
         // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
+    });
+
+    after(() => {
+        const json = JSON.stringify(autograding_containers, null, 4);
+        cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+            // inside the vm, the directory exists
+            if (result.exitCode === 0) {
+                cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
+                cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
+            }
+            // outside the vm, need to run commands using vagrant
+            else {
+                const escapedJson = json.replace(/"/g, '\\"');
+                cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
+                    cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
+                });
+            }
+        });
     });
 });
