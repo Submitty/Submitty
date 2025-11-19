@@ -428,11 +428,20 @@ body::-webkit-scrollbar-track {
 }
 
 .main-folder {
-    margin-bottom: 1em;
+    margin-bottom: 4px;
 }
 
 .main-folder-contents {
-    margin-left: 23px;
+    margin-left: 31px;
+}
+
+.binary-file-type {
+    color: var(--text-black);
+    pointer-events: none;
+}
+
+.individual-folder-content {
+    margin: 10px 0;
 }
 
 .config-about-add {
@@ -466,7 +475,6 @@ body::-webkit-scrollbar-track {
 
 .config-folder-view {
     list-style-type: none;
-    margin-bottom: 1em;
     margin-left: 0.5em;
 }
 

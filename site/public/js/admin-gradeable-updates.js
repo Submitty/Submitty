@@ -1056,6 +1056,25 @@ function updateGradeableEditor(g_id, file_path) {
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
     }
+    else {
+        document.querySelectorAll('.key_to_click').forEach((link) => {
+            link.classList.remove('selected');
+        });
+        cancelGradeableConfigEdit();
+    }
+}
+
+function isBinaryPath(path) {
+    const binaryExtensions = [
+        'png', 'jpg', 'jpeg', 'gif',
+        'bmp', 'bin', 'exe', 'dll',
+        'pdf', 'zip', 'tar', 'gz',
+        '7z', 'rar', 'iso',
+        'class', 'o', 'so',
+    ];
+
+    const ext = path.split('.').pop().toLowerCase();
+    return binaryExtensions.includes(ext);
 }
 
 // When you load the editor
@@ -1097,7 +1116,6 @@ function loadGradeableEditor(g_id, file_path) {
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
                 loadCodeMirror();
-                scrollToBottom();
             }
             catch {
                 displayErrorMessage('Error parsing data. File type not supported in the editor.');
@@ -1129,6 +1147,24 @@ function updateEditorButtonStyle() {
 document.addEventListener('DOMContentLoaded', () => {
     updateEditorButtonStyle();
 });
+
+function toggleFolder(id) {
+    const div = document.getElementById(id);
+    const icon = document.getElementById(`${id}-icon`);
+    if (!div) {
+        return;
+    }
+    if (div.style.display === 'none') {
+        div.style.display = 'block';
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+    }
+    else {
+        div.style.display = 'none';
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
+    }
+}
 
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
