@@ -70,12 +70,11 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/grading_bin
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/grading_bin/*   ${SUBMITTY_INSTALL_DIR}/grading_bin/
 
-# COURSE_BUILDERS, DAEMON_USER, and others (container untrusted user) need access to these scripts
-array=( jupyter_notebook_grader.py )
-for i in "${array[@]}"; do
-    chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/grading_bin/${i}
-    chmod 555 ${SUBMITTY_INSTALL_DIR}/grading_bin/${i}
-done
+# COURSE_BUILDERS, DAEMON_USER, and others (container untrusted user) need access to all scripts in grading_bin
+# In the case that only specific scripts require this access, modify this to follow the logic above to loop through 
+# an array
+chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/grading_bin/*
+chmod 555 ${SUBMITTY_INSTALL_DIR}/grading_bin/*
 
 #####################################
 
