@@ -213,6 +213,33 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * Mark notifications from 1 or multiple courses as seen
+     * @return MultiResponse
+     */
+    #[Route("/home/mark_seen", methods: ["POST"])]
+    public function markSeen(): MultiResponse {
+        $user_id = $this->core->getUser()->getId();
+        $input = json_decode(file_get_contents("php://input"), true);
+        $courses = $input["courses"] ?? [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course_info) {
+            $term   = $course_info["term"];
+            $course = $course_info["course"];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+            $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return MultiResponse::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse("Marked seen")
+        );
+    }
+
+    /**
      * Display the HomePageView to the student.
      *
      * @return MultiResponse

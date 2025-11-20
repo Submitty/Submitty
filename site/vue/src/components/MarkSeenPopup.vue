@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import Popup from './Popup.vue';
 import type { UnseenNotificationCount } from '@/types/UnseenNotificationCount';
 import { buildUrl } from '../../../ts/utils/server';
@@ -8,29 +8,74 @@ const visible = ref(false);
 const notificationCounts = ref<UnseenNotificationCount[]>([]);
 const selected = ref<boolean[]>([]);
 
-function toggle() {
+async function toggle() {
+    if (!visible.value) {
+        await getUnseenCounts();
+    }
     visible.value = !visible.value;
-    selected.value = [];
+    if (!visible.value) {
+        selected.value = [];
+    }
 }
 
 function getUnseenCounts() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: buildUrl(['home', 'get_unseen_counts']),
+            type: 'GET',
+            dataType: 'json',
+            data: { csrf_token: window.csrfToken },
+            success(data) {
+                notificationCounts.value = data.data;
+                selected.value = new Array(data.data.length).fill(false);
+                resolve(true);
+            },
+            error(err) {
+                console.error(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+function selectAll() {
+    selected.value = new Array(notificationCounts.value.length).fill(true);
+}
+
+function clearAll() {
+    selected.value = new Array(notificationCounts.value.length).fill(false);
+}
+
+function markSeen() {
+    const selectedCourses = notificationCounts.value
+        .filter((_, idx) => selected.value[idx])
+        .map(item => ({
+            term: item.term,
+            course: item.title
+        }));
+
+    if (selectedCourses.length === 0) {
+        toggle();
+        return;
+    }
+
     $.ajax({
-        url: buildUrl(['home', 'get_unseen_counts']),
-        type: 'GET',
-        dataType: 'json',
-        data: { csrf_token: window.csrfToken },
-        success(data) {
-            notificationCounts.value = data.data;
-            selected.value = new Array(data.data.length).fill(false);
+        url: buildUrl(['home', 'mark_seen']),
+        type: 'POST',
+        contentType: "application/json",
+        data: JSON.stringify({
+            csrf_token: window.csrfToken,
+            courses: selectedCourses
+        }),
+        success() {
+            toggle();
         },
         error(err) {
-            console.error(err);
+            console.error("Failed to mark seen:", err);
         }
     });
 }
-onMounted(() => {
-    getUnseenCounts();
-});
+
 </script>
 
 <template>
@@ -39,7 +84,7 @@ onMounted(() => {
     :visible="visible"
     :savable="true"
     @toggle="toggle"
-    @save="true"
+    @save="markSeen"
     dismissText="Cancel"
     saveText="Mark Seen"
   >
@@ -55,6 +100,7 @@ onMounted(() => {
     <hr/>
     <div
     class="course-count-container"
+    :class="{ 'selected-row': selected[idx] }"
     v-for="(n, idx) in notificationCounts"
     :key="idx"
     @click="selected[idx] = !selected[idx]"
@@ -74,11 +120,13 @@ onMounted(() => {
       <div class="select-buttons">
         <a
           class="btn btn-primary"
+          @click="selectAll"
         >
           Select All
         </a>
         <a
           class="btn btn-primary"
+          @click="clearAll"
         >
           Clear Selection
         </a>
@@ -90,6 +138,9 @@ onMounted(() => {
 <style scoped>
 .course-count-container {
     cursor: pointer;
+}
+.selected-row {
+    background-color: var(--viewed-content);
 }
 .course-count-container:hover {
     background-color: var(--hover-notification);
@@ -110,6 +161,6 @@ hr {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    margin-top: 12px;
+    margin-top: 24px;
 }
 </style>
