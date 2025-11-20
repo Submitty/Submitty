@@ -178,6 +178,7 @@ class HomePageController extends AbstractController {
 
     /**
      * Returns the counts of unseen notifications in each of the user's courses
+     * @return MultiResponse
      */
     #[Route("/home/get_unseen_counts", methods: ["GET"])]
     public function getUnseenNotificationCounts(): MultiResponse {
@@ -187,18 +188,19 @@ class HomePageController extends AbstractController {
         $original_config = clone $this->core->getConfig();
 
         foreach ($courses as $course) {
-            $semester     = $course->getTerm();
-            $course_title = $course->getTitle();
+            $term = $course->getTerm();
+            $title = $course->getTitle();
 
-            $this->core->loadCourseConfig($semester, $course_title);
+            $this->core->loadCourseConfig($term, $title);
             $this->core->loadCourseDatabase();
 
             $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
 
             $results[] = [
-                "semester" => $semester,
-                "title"    => $course_title,
-                "count"    => $count,
+                "term" => $term,
+                "title" => $title,
+                "name" => $course->getDisplayName(),
+                "count" => $count,
             ];
         }
 

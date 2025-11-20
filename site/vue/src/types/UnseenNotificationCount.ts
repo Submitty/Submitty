@@ -1,5 +1,6 @@
 export interface UnseenNotificationCount {
-    semester: string;
+    term: string;
     title: string;
+    name: string;
     count: Number;
 }

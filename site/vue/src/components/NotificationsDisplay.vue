@@ -9,7 +9,6 @@ import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
 import MarkSeenPopup from './MarkSeenPopup.vue';
-import type { UnseenNotificationCount } from '@/types/UnseenNotificationCount';
 
 const props = defineProps<{
     notifications: Notification[];
