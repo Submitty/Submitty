@@ -8,18 +8,19 @@ import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
+import MarkSeenPopup from './MarkSeenPopup.vue';
+import type { UnseenNotificationCount } from '@/types/UnseenNotificationCount';
 
 const props = defineProps<{
     notifications: Notification[];
     course: boolean;
-    visibleCount: number;
 }>();
 
+const showPopup = ref(false);
 const localNotifications = ref<Notification[]>([...props.notifications]);
-
 const showUnseenOnly = ref(true);
 
-// Store preference for both home page and course
+// Preference is the same between course and home pages
 onMounted(() => {
     const pref = localStorage.getItem('notification-preference');
     if (pref === 'unseen') {
@@ -38,18 +39,21 @@ function toggleUnseenOnly() {
     );
 }
 
+// # of displayed notifications: All for course, set amount for home page
 const visibleNotifications = computed(() =>
-    props.visibleCount === -1
+    props.course
         ? filteredNotifications.value
-        : filteredNotifications.value.slice(0, props.visibleCount),
+        : filteredNotifications.value.slice(0, 10),
 );
 
+// Filter between most recent notifications and most recent unseen notifications
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.value.filter((n) => !n.seen)
         : localNotifications.value,
 );
 
+// mark notification as seen without reloading
 function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     const target = localNotifications.value.find(
         (n) => n.id === id && n.course === course,
@@ -59,8 +63,8 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     }
 }
 
-// Courses only
 function markAllAsSeen() {
+    // Course Page
     if (props.course) {
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
@@ -80,6 +84,10 @@ function markAllAsSeen() {
             },
         });
     }
+    // Home Page
+    else {  
+        showPopup.value = true;
+    }
 }
 </script>
 <template>
@@ -97,12 +105,15 @@ function markAllAsSeen() {
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
         <button
-          v-if="notifications.length !== 0 && course"
+          v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
           @click="markAllAsSeen"
         >
           Mark as seen
         </button>
+        <MarkSeenPopup
+          v-if="notifications.length !== 0 && !props.course"
+        />
         <a
           v-if="props.course"
           class="btn btn-primary notification-settings-btn"

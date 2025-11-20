@@ -132,7 +132,7 @@ class HomePageController extends AbstractController {
     }
 
     #[Route("/home/mark_seen", methods: ["POST"])]
-    public function markNotificationsAsSeen(): void {
+    public function markNotificationAsSeen(): void {
         $courses = $this->courses;
         $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
@@ -174,6 +174,40 @@ class HomePageController extends AbstractController {
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
         return $results;
+    }
+
+    /**
+     * Returns the counts of unseen notifications in each of the user's courses
+     */
+    #[Route("/home/get_unseen_counts", methods: ["GET"])]
+    public function getUnseenNotificationCounts(): MultiResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $semester     = $course->getTerm();
+            $course_title = $course->getTitle();
+
+            $this->core->loadCourseConfig($semester, $course_title);
+            $this->core->loadCourseDatabase();
+
+            $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+
+            $results[] = [
+                "semester" => $semester,
+                "title"    => $course_title,
+                "count"    => $count,
+            ];
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return MultiResponse::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($results)
+        );
     }
 
     /**
