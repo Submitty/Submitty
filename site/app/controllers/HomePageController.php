@@ -190,12 +190,9 @@ class HomePageController extends AbstractController {
         foreach ($courses as $course) {
             $term = $course->getTerm();
             $title = $course->getTitle();
-
             $this->core->loadCourseConfig($term, $title);
             $this->core->loadCourseDatabase();
-
             $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
-
             $results[] = [
                 "term" => $term,
                 "title" => $title,
@@ -216,16 +213,19 @@ class HomePageController extends AbstractController {
      * Mark notifications from 1 or multiple courses as seen
      * @return MultiResponse
      */
-    #[Route("/home/mark_seen", methods: ["POST"])]
+    #[Route("/home/mark_all_seen", methods: ["POST"])]
     public function markSeen(): MultiResponse {
         $user_id = $this->core->getUser()->getId();
-        $input = json_decode(file_get_contents("php://input"), true);
-        $courses = $input["courses"] ?? [];
+        $courses = $_POST['courses'] ?? [];
+
+        if (!is_array($courses)) {
+            $courses = [];
+        }
         $original_config = clone $this->core->getConfig();
 
-        foreach ($courses as $course_info) {
-            $term   = $course_info["term"];
-            $course = $course_info["course"];
+        foreach ($courses as $course) {
+            $term   = $course["term"];
+            $course = $course["course"];
             $this->core->loadCourseConfig($term, $course);
             $this->core->loadCourseDatabase();
             $this->core->getQueries()->markNotificationAsSeen($user_id, -1);

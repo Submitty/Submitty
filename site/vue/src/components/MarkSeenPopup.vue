@@ -24,7 +24,9 @@ function getUnseenCounts() {
             url: buildUrl(['home', 'get_unseen_counts']),
             type: 'GET',
             dataType: 'json',
-            data: { csrf_token: window.csrfToken },
+            data: {
+                csrf_token: window.csrfToken
+            },
             success(data) {
                 notificationCounts.value = data.data;
                 selected.value = new Array(data.data.length).fill(false);
@@ -60,13 +62,13 @@ function markSeen() {
     }
 
     $.ajax({
-        url: buildUrl(['home', 'mark_seen']),
+        url: buildUrl(['home', 'mark_all_seen']),
         type: 'POST',
-        contentType: "application/json",
-        data: JSON.stringify({
+        dataType: 'json',
+        data: {
             csrf_token: window.csrfToken,
             courses: selectedCourses
-        }),
+        },
         success() {
             toggle();
         },
