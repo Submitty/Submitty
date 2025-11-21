@@ -52,17 +52,7 @@ const filteredNotifications = computed(() =>
         : localNotifications.value,
 );
 
-// mark notification as seen without reloading
-function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
-    const target = localNotifications.value.find(
-        (n) => n.id === id && n.course === course,
-    );
-    if (target) {
-        target.seen = true;
-    }
-}
-
-function markAllAsSeen() {
+function markSeen() {
     // Course Page
     if (props.course) {
         $.ajax({
@@ -88,6 +78,28 @@ function markAllAsSeen() {
         showPopup.value = true;
     }
 }
+
+// mark notification as seen without reloading
+function markIndividualSeen({ id, course }: { id: number; course: string }) {
+    const target = localNotifications.value.find(
+        (n) => n.id === id && n.course === course,
+    );
+    if (target) {
+        target.seen = true;
+    }
+}
+
+// mark specified course notifications as seen without reloading
+function markAllSeen(courses: Record<string, unknown>[]) {
+    for (const { term, course } of courses) {
+        for (const n of localNotifications.value) {
+            if (n.semester === term && n.course === course) {
+                n.seen = true;
+            }
+        }
+    }
+}
+
 </script>
 <template>
   <div>
@@ -106,12 +118,13 @@ function markAllAsSeen() {
         <button
           v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
-          @click="markAllAsSeen"
+          @click="markSeen"
         >
           Mark as seen
         </button>
         <MarkSeenPopup
           v-if="notifications.length !== 0 && !props.course"
+          @mark-all="({ courses }) => markAllSeen(courses)"
         />
         <a
           v-if="props.course"
@@ -146,7 +159,7 @@ function markAllAsSeen() {
       <SingleNotification
         :notification="n"
         :course="props.course"
-        @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
+        @mark-individual="({ id, course }) => markIndividualSeen({ id, course })"
       />
     </div>
   </div>

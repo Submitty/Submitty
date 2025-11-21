@@ -18,6 +18,10 @@ async function toggle() {
     }
 }
 
+const emit = defineEmits<{
+    'mark-all': [payload: { courses: Record<string, unknown>[] }];
+}>();
+
 function getUnseenCounts() {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -70,6 +74,7 @@ function markSeen() {
             courses: selectedCourses
         },
         success() {
+            emit('mark-all', { courses: selectedCourses });
             toggle();
         },
         error(err) {
