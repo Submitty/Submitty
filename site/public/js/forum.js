@@ -37,7 +37,7 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 function checkForumFileExtensions(post_box_id, files) {
@@ -2149,6 +2149,40 @@ function loadAllInlineImages(open_override = false) {
     });
 }
 
+function loadInlinePDFs(encoded_data) {
+    const data = JSON.parse(encoded_data);
+    const attachment_well = $(`#${data[data.length - 1]}`);
+
+    if (attachment_well.is(':visible')) {
+        attachment_well.hide();
+    }
+    else {
+        attachment_well.show();
+    }
+
+    // if no PDFs are loaded for this well
+    if (attachment_well.children().length === 0) {
+        // add iframe tags for PDFs
+        for (let i = 0; i < data.length - 1; i++) {
+            const attachment = data[i];
+            const url = attachment[0];
+            const filename = decodeURI(attachment[2]);
+            const isPDF = filename.toLowerCase().endsWith('.pdf');
+            
+            if (isPDF) {
+                const iframe = $(`<iframe src="${url}" alt="Click to view PDF in new tab" title="Click to view PDF in new tab" class="attachment-pdf" width="100%" height="600px" style="border: 1px solid #ccc; margin: 5px 0;"></iframe>`);
+                const title = $(`<p>${escapeSpecialChars(filename)}</p>`);
+                iframe.click(function () {
+                    const url = $(this).attr('src');
+                    window.open(url, '_blank');
+                });
+                attachment_well.append(iframe);
+                attachment_well.append(title);
+            }
+        }
+    }
+}
+
 function loadInlineImages(encoded_data) {
     const data = JSON.parse(encoded_data);
     const attachment_well = $(`#${data[data.length - 1]}`);
@@ -2160,19 +2194,31 @@ function loadInlineImages(encoded_data) {
         attachment_well.show();
     }
 
-    // if they're no images loaded for this well
+    // if no attachments are loaded for this well
     if (attachment_well.children().length === 0) {
-    // add image tags
+        // add appropriate tags for images and PDFs
         for (let i = 0; i < data.length - 1; i++) {
             const attachment = data[i];
             const url = attachment[0];
-            const img = $(`<img src="${url}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">`);
-            const title = $(`<p>${escapeSpecialChars(decodeURI(attachment[2]))}</p>`);
-            img.click(function () {
-                const url = $(this).attr('src');
-                window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
-            });
-            attachment_well.append(img);
+            const filename = decodeURI(attachment[2]);
+            const isPDF = filename.toLowerCase().endsWith('.pdf');
+            const title = $(`<p>${escapeSpecialChars(filename)}</p>`);
+            
+            if (isPDF) {
+                const iframe = $(`<iframe src="${url}" alt="Click to view PDF in new tab" title="Click to view PDF in new tab" class="attachment-pdf" width="100%" height="600px" style="border: 1px solid #ccc; margin: 5px 0;"></iframe>`);
+                iframe.click(function () {
+                    const url = $(this).attr('src');
+                    window.open(url, '_blank');
+                });
+                attachment_well.append(iframe);
+            } else {
+                const img = $(`<img src="${url}" alt="Click to view attachment in new tab" title="Click to view attachment in new tab" class="attachment-img">`);
+                img.click(function () {
+                    const url = $(this).attr('src');
+                    window.open(url, '_blank');
+                });
+                attachment_well.append(img);
+            }
             attachment_well.append(title);
         }
     }
@@ -2180,7 +2226,7 @@ function loadInlineImages(encoded_data) {
 
 function openInWindow(img) {
     const url = $(img).attr('src');
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
