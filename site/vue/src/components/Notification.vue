@@ -8,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'dynamic-update': [payload: { id: number; course: string }];
+    'mark-individual': [payload: { id: number; course: string }];
 }>();
 
 function goToNotification() {
@@ -51,7 +51,7 @@ function markSeen(course: string, id: number) {
                 csrf_token: window.csrfToken,
             },
             success: function () {
-                emit('dynamic-update', { id, course });
+                emit('mark-individual', { id, course });
             },
             error: function (err) {
                 console.error(err);
@@ -69,7 +69,7 @@ function markSeen(course: string, id: number) {
                 csrf_token: window.csrfToken,
             },
             success: function () {
-                emit('dynamic-update', { id, course });
+                emit('mark-individual', { id, course });
             },
             error: function (err) {
                 console.error(err);
