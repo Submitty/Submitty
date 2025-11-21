@@ -4,6 +4,9 @@ import Popup from './Popup.vue';
 import type { UnseenNotificationCount } from '@/types/UnseenNotificationCount';
 import { buildUrl } from '../../../ts/utils/server';
 
+const emit = defineEmits<{
+    'mark-all': [payload: { courses: Record<string, unknown>[] }];
+}>();
 const visible = ref(false);
 const notificationCounts = ref<UnseenNotificationCount[]>([]);
 const selected = ref<boolean[]>([]);
@@ -18,10 +21,6 @@ async function toggle() {
     }
 }
 
-const emit = defineEmits<{
-    'mark-all': [payload: { courses: Record<string, unknown>[] }];
-}>();
-
 function getUnseenCounts() {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -29,7 +28,7 @@ function getUnseenCounts() {
             type: 'GET',
             dataType: 'json',
             data: {
-                csrf_token: window.csrfToken
+                csrf_token: window.csrfToken,
             },
             success(data) {
                 notificationCounts.value = data.data;
@@ -39,7 +38,7 @@ function getUnseenCounts() {
             error(err) {
                 console.error(err);
                 reject(err);
-            }
+            },
         });
     });
 }
@@ -55,9 +54,9 @@ function clearAll() {
 function markSeen() {
     const selectedCourses = notificationCounts.value
         .filter((_, idx) => selected.value[idx])
-        .map(item => ({
+        .map((item) => ({
             term: item.term,
-            course: item.title
+            course: item.title,
         }));
 
     if (selectedCourses.length === 0) {
@@ -71,15 +70,15 @@ function markSeen() {
         dataType: 'json',
         data: {
             csrf_token: window.csrfToken,
-            courses: selectedCourses
+            courses: selectedCourses,
         },
         success() {
             emit('mark-all', { courses: selectedCourses });
             toggle();
         },
         error(err) {
-            console.error("Failed to mark seen:", err);
-        }
+            console.error('Failed to mark seen:', err);
+        },
     });
 }
 
@@ -90,39 +89,39 @@ function markSeen() {
     title="Mark Seen"
     :visible="visible"
     :savable="true"
+    dismiss-text="Cancel"
+    save-text="Mark Seen"
     @toggle="toggle"
     @save="markSeen"
-    dismissText="Cancel"
-    saveText="Mark Seen"
   >
     <template #trigger>
-        <button
-          class="btn btn-primary"
-          @click="toggle"
-        >
-          Mark as seen
-        </button>
+      <button
+        class="btn btn-primary"
+        @click="toggle"
+      >
+        Mark as seen
+      </button>
     </template>
     <template #default>
-    <hr/>
-    <div
-    class="course-count-container"
-    :class="{ 'selected-row': selected[idx] }"
-    v-for="(n, idx) in notificationCounts"
-    :key="idx"
-    @click="selected[idx] = !selected[idx]"
-    >
+      <hr />
+      <div
+        v-for="(n, idx) in notificationCounts"
+        :key="idx"
+        class="course-count-container"
+        :class="{ 'selected-row': selected[idx] }"
+        @click="selected[idx] = !selected[idx]"
+      >
         <div class="course-count-grid">
-            <input
-                type="checkbox"
-                v-model="selected[idx]"
-                @click.stop 
-            />
-            <span>{{ n.title }}</span>
-            <span>{{ n.name }}</span>
-            <span><b>({{ n.count }})</b></span>
+          <input
+            v-model="selected[idx]"
+            type="checkbox"
+            @click.stop
+          />
+          <span>{{ n.title }}</span>
+          <span>{{ n.name }}</span>
+          <span><b>{{ n.count }}</b></span>
         </div>
-        <hr/>
+        <hr />
       </div>
       <div class="select-buttons">
         <a

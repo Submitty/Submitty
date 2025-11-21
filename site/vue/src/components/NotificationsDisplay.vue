@@ -74,7 +74,7 @@ function markSeen() {
         });
     }
     // Home Page
-    else {  
+    else {
         showPopup.value = true;
     }
 }
