@@ -178,10 +178,10 @@ class HomePageController extends AbstractController {
 
     /**
      * Returns the counts of unseen notifications in each of the user's courses
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/home/get_unseen_counts", methods: ["GET"])]
-    public function getUnseenNotificationCounts(): MultiResponse {
+    public function getUnseenNotificationCounts(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->courses;
         $results = [];
@@ -204,17 +204,15 @@ class HomePageController extends AbstractController {
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($results)
-        );
+        return JsonResponse::getSuccessResponse($results);
     }
 
     /**
      * Mark notifications from 1 or multiple courses as seen
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/home/mark_all_seen", methods: ["POST"])]
-    public function markSeen(): MultiResponse {
+    public function markSeen(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
         $courses = $_POST['courses'] ?? [];
 
@@ -234,9 +232,7 @@ class HomePageController extends AbstractController {
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse("Marked seen")
-        );
+        return JsonResponse::getSuccessResponse("Marked seen");
     }
 
     /**

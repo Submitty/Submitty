@@ -156,7 +156,6 @@ function markSeen() {
     grid-template-columns: 1fr 1.25fr 4fr 1fr;
     align-items: center;
     gap: 32px;
-    white-space: nowrap;
     padding: 6px;
 }
 hr {
