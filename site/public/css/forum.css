@@ -713,6 +713,20 @@
     box-shadow: 0 0 2px 1px var(--standard-gray-blue);
     cursor: pointer;
 }
+
+.attachment-pdf {
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    padding: 5px;
+    max-width: 100%;
+    display: block;
+    height: 600px;
+}
+
+.attachment-pdf:hover {
+    box-shadow: 0 0 2px 1px var(--standard-gray-blue);
+    cursor: pointer;
+}
 /* stylelint-disable-next-line selector-id-pattern */
 #forum_filter_bar {
     margin-top: 10px;

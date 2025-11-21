@@ -208,18 +208,39 @@ class Utils {
      * @return bool true if filename references an image else false
      */
     public static function isImage(string $filename): bool {
-        return (substr($filename, -4) == ".png") ||
-            (substr($filename, -4) == ".jpg") ||
-            (substr($filename, -5) == ".jpeg") ||
-            (substr($filename, -4) == ".gif");
+        return (substr($filename, -4) === ".png") ||
+            (substr($filename, -4) === ".jpg") ||
+            (substr($filename, -5) === ".jpeg") ||
+            (substr($filename, -4) === ".gif");
     }
 
-    public static function checkUploadedImageFile($id) {
+    public static function isPdf(string $filename): bool {
+        return substr($filename, -4) === ".pdf";
+    }
+
+    public static function checkUploadedImageFile($id): bool {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
                     $mime_type = mime_content_type($file_name);
                     if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static function checkUploadedImageOrPdfFile($id): bool {
+        if (isset($_FILES[$id])) {
+            foreach ($_FILES[$id]['tmp_name'] as $file_name) {
+                if (file_exists($file_name)) {
+                    $mime_type = mime_content_type($file_name);
+                    $is_image = substr($mime_type, 0, strrpos($mime_type, "/")) === "image" && getimagesize($file_name) !== false;
+                    $is_pdf = $mime_type === 'application/pdf';
+                    if (!$is_image && !$is_pdf) {
                         return false;
                     }
                 }
