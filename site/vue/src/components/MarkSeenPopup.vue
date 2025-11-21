@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from './Popup.vue';
-import type { UnseenNotificationCount } from '@/types/UnseenNotificationCount';
+import type { UnseenNotificationCount, GetUnseenCountsResponse } from '@/types/UnseenNotificationCount';
 import { buildUrl } from '../../../ts/utils/server';
 
 const emit = defineEmits<{
@@ -30,25 +30,25 @@ function getUnseenCounts() {
             data: {
                 csrf_token: window.csrfToken,
             },
-            success(data) {
+            success(data: GetUnseenCountsResponse) {
                 notificationCounts.value = data.data;
-                selected.value = new Array(data.data.length).fill(false);
+                selected.value = new Array<boolean>(data.data.length).fill(false);
                 resolve(true);
             },
             error(err) {
                 console.error(err);
-                reject(err);
+                reject(new Error('Failed to load unseen counts'));
             },
         });
     });
 }
 
 function selectAll() {
-    selected.value = new Array(notificationCounts.value.length).fill(true);
+    selected.value = new Array<boolean>(notificationCounts.value.length).fill(true);
 }
 
 function clearAll() {
-    selected.value = new Array(notificationCounts.value.length).fill(false);
+    selected.value = new Array<boolean>(notificationCounts.value.length).fill(false);
 }
 
 function markSeen() {
@@ -60,7 +60,7 @@ function markSeen() {
         }));
 
     if (selectedCourses.length === 0) {
-        toggle();
+        void toggle();
         return;
     }
 
@@ -74,7 +74,7 @@ function markSeen() {
         },
         success() {
             emit('mark-all', { courses: selectedCourses });
-            toggle();
+            void toggle();
         },
         error(err) {
             console.error('Failed to mark seen:', err);

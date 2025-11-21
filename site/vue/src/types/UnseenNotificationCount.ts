@@ -4,3 +4,8 @@ export interface UnseenNotificationCount {
     name: string;
     count: number;
 }
+
+export interface GetUnseenCountsResponse {
+    status: string;
+    data: UnseenNotificationCount[];
+};
