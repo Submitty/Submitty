@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineProps, ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
-import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
+import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
@@ -20,6 +20,7 @@ type Course = {
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
+    course: boolean;
     userId: string;
 }
 
@@ -99,22 +100,24 @@ const buildCourseUrl = (course: Course) => {
         <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
           <br v-if="index > 0" />
           <br v-if="index > 0" />
-
-          <h1
-            class="courses-header"
-            data-testid="courses-header"
+          <div
+            class="courses-header-container"
           >
-            {{ getCourseTypeHeader(course_type) }}
+            <h1
+              class="courses-header"
+              data-testid="courses-header"
+            >
+              {{ getCourseTypeHeader(course_type) }}
+            </h1>
             <button
               v-if="course_type === 'archived_courses' && hasArchivedCourses"
               type="button"
-              class="btn btn-default"
+              class="btn btn-default archive-toggle-btn"
               @click="toggleArchivedCourses"
             >
               {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
             </button>
-          </h1>
-
+          </div>
           <div
             v-for="rank in ranks"
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
@@ -156,7 +159,15 @@ const buildCourseUrl = (course: Course) => {
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay :notifications="notifications" />
+    <div
+      class="notification-panel shadow"
+    >
+      <NotificationsDisplay
+        :notifications="notifications"
+        :course="false"
+        :visible-count="10"
+      />
+    </div>
   </div>
 </template>
 
@@ -183,11 +194,19 @@ const buildCourseUrl = (course: Course) => {
     }
 }
 
+.courses-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-grow: 1;
+}
+
+.archive-toggle-btn {
+    flex-grow: 0;
 }
 
 .div1 {
@@ -211,5 +230,11 @@ ol.bare-list {
 }
 #courses h2 {
     margin: 0;
+}
+
+.notification-panel {
+    background-color: var(--default-white);
+    height: auto;
+    padding: 20px;
 }
 </style>

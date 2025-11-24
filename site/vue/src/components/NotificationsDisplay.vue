@@ -1,16 +1,25 @@
+<!--
+This is the vue component for course notifications. Most of the logic
+has conditionals based on the course boolean to determine functionality.
+-->
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
+import { buildCourseUrl } from '../../../ts/utils/server';
 
 const props = defineProps<{
     notifications: Notification[];
+    course: boolean;
+    visibleCount: number;
 }>();
 
 const localNotifications = ref<Notification[]>([...props.notifications]);
 
 const showUnseenOnly = ref(true);
 
+// Store preference for both home page and course
 onMounted(() => {
     const pref = localStorage.getItem('notification-preference');
     if (pref === 'unseen') {
@@ -29,24 +38,17 @@ function toggleUnseenOnly() {
     );
 }
 
-const visibleCount = 10;
+const visibleNotifications = computed(() =>
+    props.visibleCount === -1
+        ? filteredNotifications.value
+        : filteredNotifications.value.slice(0, props.visibleCount),
+);
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.value.filter((n) => !n.seen)
         : localNotifications.value,
 );
-
-const visibleNotifications = computed(() =>
-    filteredNotifications.value.slice(0, visibleCount),
-);
-
-function goToNotification(url: string) {
-    if (!url) {
-        return;
-    }
-    window.location.href = url;
-}
 
 function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     const target = localNotifications.value.find(
@@ -56,21 +58,59 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
         target.seen = true;
     }
 }
+
+// Courses only
+function markAllAsSeen() {
+    if (props.course) {
+        $.ajax({
+            url: buildCourseUrl(['notifications', 'seen']),
+            type: 'POST',
+            data: {
+                csrf_token: window.csrfToken,
+            },
+            success: function () {
+                for (const n of localNotifications.value) {
+                    if (!n.seen) {
+                        n.seen = true;
+                    }
+                }
+            },
+            error: function (err) {
+                console.error(err);
+            },
+        });
+    }
+}
 </script>
 <template>
-  <div class="notification-panel shadow">
+  <div>
     <div class="notifications-header-container">
       <h1 class="notifications-header">
         Notifications
       </h1>
       <div class="notifications-actions">
         <button
-          v-if="localNotifications.length !== 0"
+          v-if="notifications.length !== 0"
           class="btn btn-default"
           @click="toggleUnseenOnly"
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
+        <button
+          v-if="notifications.length !== 0 && course"
+          class="btn btn-primary"
+          @click="markAllAsSeen"
+        >
+          Mark as seen
+        </button>
+        <a
+          v-if="props.course"
+          class="btn btn-primary notification-settings-btn"
+          :href="buildCourseUrl(['notifications', 'settings'])"
+          data-testid="notification-settings-button"
+        >
+          Settings
+        </a>
       </div>
     </div>
     <p
@@ -90,31 +130,23 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
     <div
       v-for="n in visibleNotifications"
       :key="n.id"
-      role="link"
-      tabindex="0"
       class="notification"
       :class="{ unseen: !n.seen }"
-      @click="goToNotification(n.notification_url)"
     >
       <SingleNotification
         :notification="n"
+        :course="props.course"
         @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
       />
     </div>
   </div>
 </template>
 <style scoped>
-.notification-panel {
-    background-color: var(--default-white);
-    height: auto;
-    padding: 20px
-}
-
 .notifications-header-container {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .notifications-header {
@@ -137,5 +169,9 @@ function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+}
+
+.notification-settings-btn {
+  font-family: arial, sans-serif;
 }
 </style>
