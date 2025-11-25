@@ -229,6 +229,57 @@ class TestForum(BaseTestCase):
             assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
 
     @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
+    def test_mixed_file_upload_validation(self):
+        """Test that uploading a mix of valid images and invalid files works correctly"""
+        self.init_and_enable_discussion()
+        
+        # Create a thread first
+        self.switch_to_page_create_thread()
+        
+        # Create valid image file
+        valid_image = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name
+        image_url = self.test_url + "/img/submitty_logo.png"
+        urllib.request.urlretrieve(image_url, valid_image)
+        
+        # Create invalid file (text file with non-allowed extension)
+        invalid_file = tempfile.NamedTemporaryFile(suffix=".txt", delete=False).name
+        with open(invalid_file, 'w') as f:
+            f.write("This is an invalid file for forum upload")
+        
+        try:
+            # Fill in thread details
+            self.driver.find_element(By.NAME, "title").send_keys("Test Mixed Upload Thread")
+            self.driver.find_element(By.NAME, "thread_post_content").send_keys("Testing mixed file upload")
+            
+            # Try to upload both files
+            file_input = self.driver.find_element(By.ID, "input-file1")
+            file_input.send_keys(valid_image + "\n" + invalid_file)
+            
+            # The JavaScript should filter out the invalid file
+            # We expect only the valid image to be accepted
+            time.sleep(1)  # Wait for JavaScript validation
+            
+            # Submit the form
+            self.driver.find_element(By.XPATH, "//input[@value='Create Thread']").click()
+            
+            # Check that the thread was created successfully
+            # The invalid file should have been filtered out by checkForumFileExtensions
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[@class='post_content']"))
+            )
+            
+            # Verify thread exists
+            assert "Test Mixed Upload Thread" in self.driver.page_source
+            
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(valid_image)
+                os.unlink(invalid_file)
+            except OSError:
+                pass
+
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
     def test_infinite_scroll(self):
         self.init_and_enable_discussion()
         list_title = []
