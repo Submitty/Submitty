@@ -12,12 +12,14 @@ import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
     notifications: Notification[];
+    unseenCount: number;
     course: boolean;
 }>();
 
 const showPopup = ref(false);
 const localNotifications = ref<Notification[]>([...props.notifications]);
 const showUnseenOnly = ref(true);
+const localUnseenCount = ref(props.unseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -86,6 +88,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     );
     if (target) {
         target.seen = true;
+        localUnseenCount.value--;
     }
 }
 
@@ -95,6 +98,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         for (const n of localNotifications.value) {
             if (n.semester === term && n.course === course) {
                 n.seen = true;
+                localUnseenCount.value--;
             }
         }
     }
@@ -162,6 +166,12 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         @mark-individual="({ id, course }) => markIndividualSeen({ id, course })"
       />
     </div>
+      <p
+        v-if="!props.course && localUnseenCount > 0"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">{{ localUnseenCount }}</span> additional unseen notifications.
+      </p>
   </div>
 </template>
 <style scoped>
@@ -196,5 +206,13 @@ function markAllSeen(courses: Record<string, unknown>[]) {
 
 .notification-settings-btn {
   font-family: arial, sans-serif;
+}
+.unseen-count-p {
+  margin-top: 12px;
+  font-weight: 600;
+}
+.unseen-count {
+  color: var(--badge-backgroud-red);
+  font-weight: 900;
 }
 </style>

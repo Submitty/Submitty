@@ -20,6 +20,7 @@ type Course = {
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
+    unseenCount: number;
     course: boolean;
     userId: string;
 }
@@ -164,6 +165,7 @@ const buildCourseUrl = (course: Course) => {
     >
       <NotificationsDisplay
         :notifications="notifications"
+        :unseenCount="unseenCount"
         :course="false"
       />
     </div>

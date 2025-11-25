@@ -151,10 +151,12 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * Returns recent notifications for a user
-     * @return array<int, Notification>
+     * Returns recent all recent notifications for a user, 
+     * and the total count of their unseen notifications.
+     * @param int
+     * @return array<Notification>
      */
-    private function getAllRecentNotifications(): array {
+    private function getHomeNotificationData(int &$unseen_count = 0): array {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->courses;
         $results = [];
@@ -167,12 +169,14 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
             $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
+            $unseen_count += $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
         usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
 
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
+        $unseen_count = $unseen_count - 10; // We want the count of not currently displayed
         return $results;
     }
 
@@ -243,7 +247,8 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-        $notifications = $this->getAllRecentNotifications();
+        $unseen_count = 0;
+        $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
             new WebResponse(
@@ -254,7 +259,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
                 $courses["data"]["self_registration_courses"],
-                $notifications
+                $notifications,
+                $unseen_count
             )
         );
     }
