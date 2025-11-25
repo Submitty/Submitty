@@ -132,7 +132,7 @@ class HomePageController extends AbstractController {
     }
 
     #[Route("/home/mark_seen", methods: ["POST"])]
-    public function markNotificationsAsSeen(): void {
+    public function markNotificationAsSeen(): void {
         $courses = $this->courses;
         $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
@@ -174,6 +174,65 @@ class HomePageController extends AbstractController {
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
         return $results;
+    }
+
+    /**
+     * Returns the counts of unseen notifications in each of the user's courses
+     * @return JsonResponse
+     */
+    #[Route("/home/get_unseen_counts", methods: ["GET"])]
+    public function getUnseenNotificationCounts(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $title = $course->getTitle();
+            $this->core->loadCourseConfig($term, $title);
+            $this->core->loadCourseDatabase();
+            $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+            $results[] = [
+                "term" => $term,
+                "title" => $title,
+                "name" => $course->getDisplayName(),
+                "count" => $count,
+            ];
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    /**
+     * Mark notifications from 1 or multiple courses as seen
+     * @return JsonResponse
+     */
+    #[Route("/home/mark_all_seen", methods: ["POST"])]
+    public function markSeen(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $_POST['courses'] ?? [];
+
+        if (!is_array($courses)) {
+            $courses = [];
+        }
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term   = $course["term"];
+            $course = $course["course"];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+            $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse("Marked seen");
     }
 
     /**
