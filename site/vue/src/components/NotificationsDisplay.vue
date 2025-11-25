@@ -94,11 +94,11 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
 
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
-    for (const { term, course } of courses) {
+    for (const { term, course, count } of courses) {
+        localUnseenCount.value = localUnseenCount.value - Number(count);
         for (const n of localNotifications.value) {
             if (n.semester === term && n.course === course) {
                 n.seen = true;
-                localUnseenCount.value--;
             }
         }
     }
