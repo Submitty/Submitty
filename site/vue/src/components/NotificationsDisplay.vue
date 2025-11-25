@@ -12,12 +12,14 @@ import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
     notifications: Notification[];
+    unseenCount: number;
     course: boolean;
 }>();
 
 const showPopup = ref(false);
 const localNotifications = ref<Notification[]>([...props.notifications]);
 const showUnseenOnly = ref(true);
+const localUnseenCount = ref(props.unseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -86,12 +88,14 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     );
     if (target) {
         target.seen = true;
+        localUnseenCount.value--;
     }
 }
 
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
-    for (const { term, course } of courses) {
+    for (const { term, course, count } of courses) {
+        localUnseenCount.value = localUnseenCount.value - Number(count);
         for (const n of localNotifications.value) {
             if (n.semester === term && n.course === course) {
                 n.seen = true;
@@ -144,7 +148,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0 && localNotifications.length > 0"
+      v-if="filteredNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount === 0"
       id="no-recent-notifications"
       class="no-recent"
     >
@@ -161,6 +165,40 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         :course="props.course"
         @mark-individual="({ id, course }) => markIndividualSeen({ id, course })"
       />
+    </div>
+    <div
+      v-if="!props.course && showUnseenOnly || (filteredNotifications.length === 0 && localNotifications.length > 0) && localUnseenCount > 0"
+    >
+      <!-- 10 unseen notifications displayed -->
+      <!-- 1 additional notification -->
+      <p
+        v-if="filteredNotifications.length >= 10 && localUnseenCount === 11"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">1</span> additional unseen notification.
+      </p>
+      <!-- Multiple additional notifications -->
+      <p
+        v-if="filteredNotifications.length >= 10 && localUnseenCount > 11"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notifications.
+      </p>
+      <!-- <10 unseen notifications displayed -->
+       <!-- 1 older unseen notification that will not reach the front-end -->
+      <p
+        v-if="filteredNotifications.length < 10 && localUnseenCount === 1 && localNotifications.length > 10"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">1</span> older unseen notification.
+      </p>
+      <!-- Multiple unseen notifications that will not reach the panel -->
+      <p
+        v-if="filteredNotifications.length < 10 && localUnseenCount > 1 && localNotifications.length > 10"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">{{ localUnseenCount }}</span> older unseen notifications.
+      </p>
     </div>
   </div>
 </template>
@@ -196,5 +234,13 @@ function markAllSeen(courses: Record<string, unknown>[]) {
 
 .notification-settings-btn {
   font-family: arial, sans-serif;
+}
+.unseen-count-p {
+  margin-top: 12px;
+  font-weight: 600;
+}
+.unseen-count {
+  color: var(--badge-backgroud-red);
+  font-weight: 900;
 }
 </style>

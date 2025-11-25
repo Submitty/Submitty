@@ -57,6 +57,7 @@ function markSeen() {
         .map((item) => ({
             term: item.term,
             course: item.title,
+            count: item.count,
         }));
 
     if (selectedCourses.length === 0) {
