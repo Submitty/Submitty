@@ -153,7 +153,7 @@ class HomePageController extends AbstractController {
     /**
      * Returns recent all recent notifications for a user,
      * and the total count of their unseen notifications.
-     * @param int
+     * @param int $unseen_count
      * @return array<Notification>
      */
     private function getHomeNotificationData(int &$unseen_count = 0): array {
@@ -247,7 +247,7 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-        $unseen_count = 0;
+        int $unseen_count = 0;
         $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
