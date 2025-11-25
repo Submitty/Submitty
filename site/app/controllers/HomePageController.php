@@ -176,7 +176,7 @@ class HomePageController extends AbstractController {
 
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
-        $unseen_count = $unseen_count - 10; // We want the count of not currently displayed
+        $unseen_count = $unseen_count;
         return $results;
     }
 
