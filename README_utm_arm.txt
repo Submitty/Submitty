@@ -1,3 +1,7 @@
+Members Name:
+Syed Ale Mustafa Shamsi
+Ali Sher Javed
+Abdullah Riaz
 *************WORK IN PROGRESS************
 
 On an M1 Mac laptop, we cannot use virtual box, so follow these instructions instead:
