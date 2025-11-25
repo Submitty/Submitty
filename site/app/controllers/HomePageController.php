@@ -169,7 +169,7 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
             $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
-            $unseen_count += $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+            $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
         usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
@@ -247,7 +247,7 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-        int $unseen_count = 0;
+        $unseen_count = 0;
         $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
