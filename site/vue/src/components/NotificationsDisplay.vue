@@ -148,7 +148,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0 && localNotifications.length > 0"
+      v-if="filteredNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount === 0"
       id="no-recent-notifications"
       class="no-recent"
     >
