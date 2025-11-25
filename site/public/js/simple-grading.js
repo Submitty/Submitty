@@ -1,5 +1,5 @@
 /* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, full_grader_access */
-/* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
+/* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats, updateCheckpointCells */
 
 function updateVisibility() {
     const showGraders = $('#show-graders').is(':checked');
@@ -189,6 +189,7 @@ function padNumber(num) {
 }
 
 function updateCheckpointCells(elems, scores, no_cookie) {
+    console.log(elems, scores, no_cookie);
     // see if we're setting all of a row to one score
     let singleScore = null;
     if (scores && typeof scores !== 'object') {
@@ -828,11 +829,11 @@ function setupSimpleGrading(action) {
     });
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
-    registerKeyHandler({ name: 'Search', code: 'Enter' }, () => {});
-    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight' }, () => {});
-    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft' }, () => {});
-    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp' }, () => {});
-    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown' }, () => {});
+    // registerKeyHandler({ name: 'Search', code: 'Enter' }, () => {});
+    // registerKeyHandler({ name: 'Move Right', code: 'ArrowRight' }, () => {});
+    // registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft' }, () => {});
+    // registerKeyHandler({ name: 'Move Up', code: 'ArrowUp' }, () => {});
+    // registerKeyHandler({ name: 'Move Down', code: 'ArrowDown' }, () => {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
@@ -852,14 +853,14 @@ function setupSimpleGrading(action) {
 
     // register keybinds for grading controls
     if (action === 'lab') {
-        registerKeyHandler({ name: 'Set Cell to 0', code: 'KeyZ', options: { score: 0 } }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Cell to 0.5', code: 'KeyX', options: { score: 0.5 } }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Cell to 1', code: 'KeyC', options: { score: 1 } }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Cycle Cell Value', code: 'KeyV', options: { score: null } }, keySetCurrentCell);
-        registerKeyHandler({ name: 'Set Row to 0', code: 'KeyA', options: { score: 0 } }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Set Row to 0.5', code: 'KeyS', options: { score: 0.5 } }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Set Row to 1', code: 'KeyD', options: { score: 1 } }, keySetCurrentRow);
-        registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: { score: null } }, keySetCurrentRow);
+        // registerKeyHandler({ name: 'Set Cell to 0', code: 'KeyZ', options: { score: 0 } }, keySetCurrentCell);
+        // registerKeyHandler({ name: 'Set Cell to 0.5', code: 'KeyX', options: { score: 0.5 } }, keySetCurrentCell);
+        // registerKeyHandler({ name: 'Set Cell to 1', code: 'KeyC', options: { score: 1 } }, keySetCurrentCell);
+        // registerKeyHandler({ name: 'Cycle Cell Value', code: 'KeyV', options: { score: null } }, keySetCurrentCell);
+        // registerKeyHandler({ name: 'Set Row to 0', code: 'KeyA', options: { score: 0 } }, keySetCurrentRow);
+        // registerKeyHandler({ name: 'Set Row to 0.5', code: 'KeyS', options: { score: 0.5 } }, keySetCurrentRow);
+        // registerKeyHandler({ name: 'Set Row to 1', code: 'KeyD', options: { score: 1 } }, keySetCurrentRow);
+        // registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: { score: null } }, keySetCurrentRow);
     }
 
     // make sure to show focused cell when covered by student info

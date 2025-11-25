@@ -19,7 +19,16 @@
         </div>
 
         <div>
-            <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'ta_grading/SimpleGradingToolbar',
+                'args': {
+                    'fullAccess': full_settings_access,
+                    'type': action,
+                },
+                'id': 'settings-btn',
+                'style': 'display: inline',
+            } only %}
             <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
