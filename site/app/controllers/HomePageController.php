@@ -151,7 +151,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * Returns recent all recent notifications for a user, 
+     * Returns recent all recent notifications for a user,
      * and the total count of their unseen notifications.
      * @param int
      * @return array<Notification>
