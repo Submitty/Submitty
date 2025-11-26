@@ -134,5 +134,6 @@
     "jupyter":                 { "path": "/usr/local/bin/jupyter" },
 
     // Jupyter Notebooks
-    "jupyter_notebook_grader": { "path": "/usr/local/submitty/grading_bin/jupyter_notebook_grader.py" }
+    "jupyter_notebook_grader": { "path": "/usr/local/submitty/grading_bin/jupyter_notebook_grader.py" },
+    "insert_cells":            { "path": "/usr/local/submitty/grading_bin/insert_cells.py" }
 }
