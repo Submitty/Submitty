@@ -1,4 +1,5 @@
 [
+  "/home",
   "/courses/<term>/<course>",
   "/courses/<term>/<course>/download",
   "/courses/<term>/<course>/autograding_config",
