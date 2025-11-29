@@ -220,7 +220,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
   font-family: arial, sans-serif;
 }
 .unseen-count-p {
-  margin-top: 12px;
+  padding-top: 10px;
   font-weight: 600;
 }
 .unseen-count {
