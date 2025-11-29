@@ -1458,8 +1458,13 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
     }
     else {
         const scoreInput: JQuery<HTMLInputElement> = customMarkContainer.find('input[type=number]');
-        score = parseFloat(scoreInput.val()!);
-        comment = customMarkContainer.find('textarea').val()!;
+        const rawScore = scoreInput.val();
+        const rawComment = customMarkContainer.find('textarea').val();
+        score = rawScore ? parseFloat(rawScore.toString()) : 0.0;
+        if (isNaN(score)) {
+            score = 0.0;
+        }
+        comment = rawComment?.toString() ?? '';
     }
 
     const dataDOMElement = domElement.find('.graded-component-data');
