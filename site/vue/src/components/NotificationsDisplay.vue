@@ -89,6 +89,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
         if (n.id === id && n.course === course) {
             n.seen = true;
             localUnseenCount.value--;
+            break;
         }
     }
 }
