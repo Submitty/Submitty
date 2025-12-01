@@ -39,17 +39,17 @@ function toggleUnseenOnly() {
     );
 }
 
-// All notifications that are brought to the front-end
+// All notifications that are sent from the backend
 const localNotifications = ref<Notification[]>([...props.notifications]);
 
-// Filter between most recent notifications and most recent unseen notifications
+// Filter between most recent notifications and most recent unseen notifications based on local storage
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.value.filter((n) => !n.seen)
         : localNotifications.value,
 );
 
-// # of displayed, filtered notifications: All for course, set amount for home page
+// Manage maxumum number of displayed notifications based on course or home page
 const visibleNotifications = computed(() =>
     props.course
         ? filteredNotifications.value
