@@ -62,7 +62,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/katex": "^0.16.7",
     "@types/luxon": "^3.7.1",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.1",
     "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
     "@typescript-eslint/parser": "^8.46.4",
