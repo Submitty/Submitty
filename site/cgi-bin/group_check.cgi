@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/submitty/venv/bin/python3
 
 """
 This script is called via GET passing in base_path and head_instructor and it checks if the head_instructor is in the group that base_path belongs to.
