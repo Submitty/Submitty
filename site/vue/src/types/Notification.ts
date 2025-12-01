@@ -7,7 +7,7 @@ export interface Notification {
     elapsed_time: number;
     created_at: string;
     notify_time: string;
-    semester: string;
+    term: string;
     course: string;
     url: string;
 }
