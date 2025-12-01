@@ -85,12 +85,11 @@ function markSeen() {
 
 // mark notification as seen without reloading
 function markIndividualSeen({ id, course }: { id: number; course: string }) {
-    const target = localNotifications.value.find(
-        (n) => n.id === id && n.course === course,
-    );
-    if (target) {
-        target.seen = true;
-        localUnseenCount.value--;
+    for (const n of localNotifications.value) {
+        if (n.id === id && n.course === course) {
+            n.seen = true;
+            localUnseenCount.value--;
+        }
     }
 }
 
@@ -99,7 +98,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
         localUnseenCount.value = localUnseenCount.value - Number(count);
         for (const n of localNotifications.value) {
-            if (n.semester === term && n.course === course) {
+            if (n.term === term && n.course === course) {
                 n.seen = true;
             }
         }
