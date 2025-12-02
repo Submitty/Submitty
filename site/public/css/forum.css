@@ -1,3 +1,7 @@
+.content-overflow {
+    overflow: visible;
+}
+
 .float-right {
     float: right;
 }
@@ -106,6 +110,11 @@
     white-space: pre-wrap;
     overflow-x: auto;
     padding-bottom: 1em;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content > div {
+    flex-grow: 1;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */

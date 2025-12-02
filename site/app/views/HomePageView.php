@@ -12,6 +12,7 @@ class HomePageView extends AbstractView {
      * @param array $archived_courses
      * @param array<mixed> $self_registration_courses
      * @param array<array<string, mixed>> $notifications
+     * @param int $unseen_count
      */
     public function showHomePage(
         User $user,
@@ -20,6 +21,7 @@ class HomePageView extends AbstractView {
         array $archived_courses,
         array $self_registration_courses,
         array $notifications,
+        int $unseen_count
     ) {
         $statuses = [];
         $course_types = [
@@ -64,6 +66,8 @@ class HomePageView extends AbstractView {
             "args" => [
                 "statuses" => $statuses,
                 "notifications" => $notifications,
+                "unseenCount" => $unseen_count,
+                "userId" => $user->getId(),
             ]
         ]);
     }
