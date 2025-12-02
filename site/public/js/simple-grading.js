@@ -1062,15 +1062,18 @@ function filter_withdrawn_students() {
 window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
+    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'include';
+
     if (full_grader_access) {
-        if (withdrawnFilterStatus === 'include') {
-            withdrawnFilterBox.checked = false;
-            withdrawnFilterElements.show();
-        }
-        else {
-            withdrawnFilterBox.checked = true;
-            withdrawnFilterElements.hide();
+        if (withdrawnFilterBox) {
+            if (withdrawnFilterStatus === 'include') {
+                withdrawnFilterBox.checked = false;
+                withdrawnFilterElements.show();
+            }
+            else {
+                withdrawnFilterBox.checked = true;
+                withdrawnFilterElements.hide();
+            }
         }
     }
     else {
