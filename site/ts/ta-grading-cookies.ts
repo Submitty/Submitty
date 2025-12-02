@@ -48,6 +48,48 @@ window.filter_withdrawn_students = () => {
         withdrawn_simple.show();
         window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
     }
+
+    // Remove table-striped to prevent CSS conflicts with JS-set colors
+    $('table').removeClass('table-striped');
+
+    // Update row numbers and colors for simple grading after filtering
+    $('tbody[id^="section-"]').each(function () {
+        let rowNumber = 1;
+
+        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
+            if ($(this).is(':visible')) {
+                $(this).find('td:first').text(rowNumber);
+                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
+
+                $(this).css('background-color', `${color} !important`);
+                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', `${color} !important`);
+                rowNumber++;
+            }
+            else {
+                $(this).css('background-color', 'var(--default-white) !important');
+                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', 'var(--default-white) !important');
+            }
+        });
+    });
+
+    // Update row numbers and colors for electronic grading after filtering
+    let rowNumber = 1;
+
+    $('tr[data-student="electronic-grade-active"], tr[data-student="electronic-grade-withdrawn"]').each(function () {
+        if ($(this).is(':visible')) {
+            $(this).find('td:first').text(rowNumber);
+            if (rowNumber % 2 === 1) {
+                $(this).css('background-color', 'var(--default-white) !important');
+            }
+            else {
+                $(this).css('background-color', 'var(--standard-hover-light-gray) !important');
+            }
+            rowNumber++;
+        }
+        else {
+            $(this).css('background-color', 'var(--default-white) !important');
+        }
+    });
 };
 
 window.changeSections = () => {
