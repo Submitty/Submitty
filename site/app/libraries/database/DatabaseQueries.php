@@ -4503,7 +4503,7 @@ SQL;
      *
      * @param string  $user_id
      * @param string  $g_id
-     * @param integer $marks
+     * @param float $marks
      * @param string  $comment
      */
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
@@ -4521,10 +4521,10 @@ SQL;
     /**
      * @param string[] $user_ids
      * @param string $g_id
-     * @param int $marks
+     * @param float $marks
      * @param string $comment
      */
-    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, float $marks, string $comment): void {
         $values = [];
         $params = [];
 
