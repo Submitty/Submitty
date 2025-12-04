@@ -3,7 +3,7 @@
 setuptools==80.9.0
 
 # Linters
-pylint==3.3.8
+pylint==4.0.3
 flake8-bugbear==24.12.12
 flake8==7.3.0
 

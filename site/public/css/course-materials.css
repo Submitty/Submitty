@@ -75,3 +75,19 @@ a.popout-item > .fas:hover {
 #new-file-name {
     width: 100%;
 }
+
+.course-materials-null {
+    color: var(--default-black);
+}
+
+.course-materials-never {
+    color: var(--standard-light-red);
+}
+
+.course-materials-released {
+    color: var(--standard-vibrant-green);
+}
+
+.course-materials-imminent {
+    color: var(--important-post);
+}
