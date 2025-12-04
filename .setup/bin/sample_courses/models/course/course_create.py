@@ -260,7 +260,7 @@ class Course_create:
             os.system(f"chmod -R g+w {self.course_path}")
             os.system(
                 f"su {'submitty_daemon'} -c "
-                f"'{ os.path.join(self.course_path,f'BUILD_{self.code}.sh')}'"
+                f"'{os.path.join(self.course_path, f'BUILD_{self.code}.sh')}'"
             )
         os.system(
             f"chown -R {self.instructor.id}:{self.code}_tas_www "
