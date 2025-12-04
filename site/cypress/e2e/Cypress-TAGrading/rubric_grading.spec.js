@@ -115,7 +115,7 @@ describe('Test cases for TA grading page', () => {
     });
     it('Grader should only see selected mark and published marks when component collapses', () => {
         cy.login('ta');
-        cy.visit(['sample', 'gradeable', 'grading_homework','grading', 'grade?who_id=aYl92mR3NvJYGrK&sort=id&direction=ASC' ]);
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=aYl92mR3NvJYGrK&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '/ 2');
@@ -127,5 +127,5 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-64"]').should('contain', 'Read Me');
         cy.contains('Full Credit').should('not.be.visible');
-});
+    });
 });
