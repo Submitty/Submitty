@@ -621,10 +621,10 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-     /**
-     * Returns the full text if short, otherwise a preview capped at $limit characters.
-     * Adds "..." when truncated.
-     */
+    /**
+    * Returns the full text if short, otherwise a preview capped at $limit characters.
+    * Adds "..." when truncated.
+    */
     private function previewText(string $text, int $limit = 300): string {
         $text = str_replace("\r", "", $text);
         if (mb_strlen($text, 'UTF-8') <= $limit) {
