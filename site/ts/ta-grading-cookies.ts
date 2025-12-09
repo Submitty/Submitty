@@ -10,11 +10,69 @@ declare global {
         changeSortOrder: () => void;
         sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
         changeAnon: () => void;
+        updateSimpleGradingRowNumbersAndColors: () => void;
+        updateElectronicGradingRowNumbersAndColors: () => void;
     }
 }
 
 const coursePath = document.body.dataset.coursePath ?? '';
 const cookieArguments = { path: coursePath, expires: 365 };
+
+function updateSimpleGradingRowNumbersAndColors() {
+    $('tbody[id^="section-"]').each(function () {
+        let rowNumber = 1;
+
+        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
+            if ($(this).is(':visible')) {
+                $(this).find('td:first').text(rowNumber);
+                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-light-gray)';
+
+                $(this).css('background-color', `${color} !important`);
+                $(this).find('td').each(function () {
+                    if ($(this).hasClass('simple-full-credit')) {
+                        $(this).css('background-color', 'var(--simple-full-credit-dark-blue) !important');
+                    }
+                    else if ($(this).hasClass('simple-half-credit')) {
+                        $(this).css('background-color', 'var(--simple-half-credit-light-blue) !important');
+                    }
+                    else if ($(this).hasClass('simple-save-error')) {
+                        $(this).css('background-color', 'var(--simple-save-error-red) !important');
+                    }
+                    else {
+                        $(this).css('background-color', `${color} !important`);
+                    }
+                });
+                rowNumber++;
+            }
+            else {
+                $(this).css('background-color', 'var(--default-white) !important');
+                $(this).find('td').css('background-color', 'var(--default-white) !important');
+            }
+        });
+    });
+}
+
+function updateElectronicGradingRowNumbersAndColors() {
+    $('tbody.details-content').each(function () {
+        let rowNumber = 1;
+
+        $(this).find('tr[data-student="electronic-grade-active"], tr[data-student="electronic-grade-withdrawn"]').each(function () {
+            if ($(this).is(':visible')) {
+                $(this).find('td:first').text(rowNumber);
+                if (rowNumber % 2 === 1) {
+                    $(this).css('background-color', 'var(--default-white) !important');
+                }
+                else {
+                    $(this).css('background-color', 'var(--standard-light-gray) !important');
+                }
+                rowNumber++;
+            }
+            else {
+                $(this).css('background-color', 'var(--default-white) !important');
+            }
+        });
+    });
+}
 
 window.filter_overriden_grades = () => {
     const override_status = window.Cookies.get('include_grade_override') ?? 'omit';
@@ -52,44 +110,9 @@ window.filter_withdrawn_students = () => {
     // Remove table-striped to prevent CSS conflicts with JS-set colors
     $('table').removeClass('table-striped');
 
-    // Update row numbers and colors for simple grading after filtering
-    $('tbody[id^="section-"]').each(function () {
-        let rowNumber = 1;
-
-        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
-            if ($(this).is(':visible')) {
-                $(this).find('td:first').text(rowNumber);
-                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
-
-                $(this).css('background-color', `${color} !important`);
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', `${color} !important`);
-                rowNumber++;
-            }
-            else {
-                $(this).css('background-color', 'var(--default-white) !important');
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', 'var(--default-white) !important');
-            }
-        });
-    });
-
-    // Update row numbers and colors for electronic grading after filtering
-    let rowNumber = 1;
-
-    $('tr[data-student="electronic-grade-active"], tr[data-student="electronic-grade-withdrawn"]').each(function () {
-        if ($(this).is(':visible')) {
-            $(this).find('td:first').text(rowNumber);
-            if (rowNumber % 2 === 1) {
-                $(this).css('background-color', 'var(--default-white) !important');
-            }
-            else {
-                $(this).css('background-color', 'var(--standard-hover-light-gray) !important');
-            }
-            rowNumber++;
-        }
-        else {
-            $(this).css('background-color', 'var(--default-white) !important');
-        }
-    });
+    // Update row numbers and colors after filtering
+    updateSimpleGradingRowNumbersAndColors();
+    updateElectronicGradingRowNumbersAndColors();
 };
 
 window.changeSections = () => {
@@ -127,3 +150,6 @@ window.changeAnon = () => {
     window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', cookieArguments);
     location.reload();
 };
+
+window.updateSimpleGradingRowNumbersAndColors = updateSimpleGradingRowNumbersAndColors;
+window.updateElectronicGradingRowNumbersAndColors = updateElectronicGradingRowNumbersAndColors;

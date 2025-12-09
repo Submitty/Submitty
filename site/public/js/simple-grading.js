@@ -1023,48 +1023,16 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
-function filter_withdrawn_students() {
-    const withdrawn_students = Cookies.get('include_withdrawn_students') ?? 'omit';
-    // Show/hide withdrawn students based on cookie
-    const withdrawn_simple = $('[data-student="simple-grade-withdrawn"]');
-
-    if (withdrawn_students === 'include') {
-        withdrawn_simple.hide();
-        Cookies.set('include_withdrawn_students', 'omit', { path: document.body.dataset.coursePath ?? '', expires: 365 });
-    }
-    else {
-        withdrawn_simple.show();
-        Cookies.set('include_withdrawn_students', 'include', { path: document.body.dataset.coursePath ?? '', expires: 365 });
-    }
-
-    // Update row numbers and colors for simple grading after filtering
-    $('tbody[id^="section-"]').each(function () {
-        let rowNumber = 1;
-
-        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
-            if ($(this).is(':visible')) {
-                $(this).find('td:first').text(rowNumber);
-                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
-
-                $(this).css('background-color', `${color} !important`);
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', `${color} !important`);
-                rowNumber++;
-            }
-            else {
-                $(this).css('background-color', 'var(--default-white) !important');
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', 'var(--default-white) !important');
-            }
-        });
-    });
-}
-
-// Withdrawn filter checkbox should remain the same on reload
+// Initialize withdrawn student filter state on page load
 window.addEventListener('DOMContentLoaded', () => {
+    // Initialize simple grading
+    setupSimpleGrading(window.simple_grading_action);
+
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
     const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'include';
 
-    if (full_grader_access) {
+    if (window.full_grader_access) {
         if (withdrawnFilterBox) {
             if (withdrawnFilterStatus === 'include') {
                 withdrawnFilterBox.checked = false;
@@ -1079,30 +1047,8 @@ window.addEventListener('DOMContentLoaded', () => {
     else {
         withdrawnFilterElements.hide();
     }
-
-    // Update row numbers and colors for simple grading after initial load
-    $('tbody[id^="section-"]').each(function () {
-        let rowNumber = 1;
-
-        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
-            if ($(this).is(':visible')) {
-                $(this).find('td:first').text(rowNumber);
-                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
-
-                $(this).css('background-color', `${color} !important`);
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', `${color} !important`);
-                rowNumber++;
-            }
-            else {
-                $(this).css('background-color', 'var(--default-white) !important');
-                $(this).find('td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5)').css('background-color', 'var(--default-white) !important');
-            }
-        });
-    });
+    window.updateSimpleGradingRowNumbersAndColors();
 
     // Remove table-striped to prevent CSS conflicts with JS-set colors
     $('table#data-table').removeClass('table-striped');
 });
-
-// Attach the function to window to override the global one for simple grading
-window.filter_withdrawn_students = filter_withdrawn_students;
