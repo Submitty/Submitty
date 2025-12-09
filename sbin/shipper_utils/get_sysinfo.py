@@ -65,7 +65,7 @@ def print_docker_info() -> bool:
                     digest = full_digest
             else:
                 digest = "None"
-            print(f'\t-digest: { digest }')
+            print(f'\t-digest: {digest}')
         return True
     except docker.errors.APIError:
         print("APIError was raised.")

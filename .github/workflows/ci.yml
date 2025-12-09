@@ -18,7 +18,7 @@ env:
   POSTGRES_HOST: localhost
   PHP_VER: 8.1
   NODE_VERSION: 20
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.13"
 
 concurrency:
   # If this is a PR, cancel all previously running jobs on source branch
@@ -46,7 +46,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -71,7 +71,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -96,7 +96,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -635,7 +635,7 @@ jobs:
 
       - name: Pack Artifacts
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: dumped_database
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql
@@ -801,19 +801,19 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Submitty-JSON
           path: /usr/local/submitty/config/submitty.json
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-System-Videos
@@ -891,12 +891,12 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
@@ -966,7 +966,7 @@ jobs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -994,19 +994,19 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: install-log
           path: /usr/local/submitty/install.log
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-Ansible-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-Ansible-Videos

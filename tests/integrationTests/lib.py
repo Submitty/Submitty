@@ -757,6 +757,7 @@ def testcase(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)
     modname = mod.__name__
+    print(f"MODNAME 2 is {modname}")
     tw = TestcaseWrapper(path)
 
     @wraps(func)  # Allows pickling for this lambda
