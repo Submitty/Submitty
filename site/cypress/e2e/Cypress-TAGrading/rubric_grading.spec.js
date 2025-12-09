@@ -127,5 +127,12 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-64"]').should('contain', 'Read Me');
         cy.contains('Full Credit').should('not.be.visible');
+        cy.get('body').type('{downArrow}');
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
+            .should('contain', 'Save');
+        cy.get('body').type('{1}');
+        cy.get('[data-testid="component-64"]').should('contain', 'Full Credit');
+        cy.get('[data-testid="save-tools-save"]').click();
+        cy.contains('Full Credit').should('not.be.visible');
     });
 });
