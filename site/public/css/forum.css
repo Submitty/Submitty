@@ -1,3 +1,7 @@
+.content-overflow {
+    overflow: visible;
+}
+
 .float-right {
     float: right;
 }
@@ -73,15 +77,6 @@
     gap: 0.5rem;
 }
 
-.clear-filter-button {
-    flex: 0 1 auto;
-    flex-wrap: wrap;
-    min-width: 100px;
-    visibility: hidden;
-    margin-left: 0.5rem;
-    color: var(--actionable-blue);
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {
@@ -115,6 +110,11 @@
     white-space: pre-wrap;
     overflow-x: auto;
     padding-bottom: 1em;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content > div {
+    flex-grow: 1;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -981,4 +981,8 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+#search-clear {
+    cursor: pointer;
 }

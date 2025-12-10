@@ -132,7 +132,7 @@ class HomePageController extends AbstractController {
     }
 
     #[Route("/home/mark_seen", methods: ["POST"])]
-    public function markNotificationsAsSeen(): void {
+    public function markNotificationAsSeen(): void {
         $courses = $this->courses;
         $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
@@ -151,10 +151,12 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * Returns recent notifications for a user
-     * @return array<int, Notification>
+     * Returns recent all recent notifications for a user,
+     * and the total count of their unseen notifications.
+     * @param int $unseen_count
+     * @return array<Notification>
      */
-    private function getAllRecentNotifications(): array {
+    private function getHomeNotificationData(int &$unseen_count = 0): array {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->courses;
         $results = [];
@@ -167,13 +169,74 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
             $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
+            $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
         usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
 
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
+        $unseen_count = $unseen_count;
         return $results;
+    }
+
+    /**
+     * Returns the counts of unseen notifications in each of the user's courses
+     * @return JsonResponse
+     */
+    #[Route("/home/get_unseen_counts", methods: ["GET"])]
+    public function getUnseenNotificationCounts(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $title = $course->getTitle();
+            $this->core->loadCourseConfig($term, $title);
+            $this->core->loadCourseDatabase();
+            $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+            $results[] = [
+                "term" => $term,
+                "title" => $title,
+                "name" => $course->getDisplayName(),
+                "count" => $count,
+            ];
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    /**
+     * Mark notifications from 1 or multiple courses as seen
+     * @return JsonResponse
+     */
+    #[Route("/home/mark_all_seen", methods: ["POST"])]
+    public function markSeen(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $_POST['courses'] ?? [];
+
+        if (!is_array($courses)) {
+            $courses = [];
+        }
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term   = $course["term"];
+            $course = $course["course"];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+            $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse("Marked seen");
     }
 
     /**
@@ -184,7 +247,8 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-        $notifications = $this->getAllRecentNotifications();
+        $unseen_count = 0;
+        $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
             new WebResponse(
@@ -195,7 +259,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
                 $courses["data"]["self_registration_courses"],
-                $notifications
+                $notifications,
+                $unseen_count
             )
         );
     }
