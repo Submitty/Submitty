@@ -36,7 +36,7 @@
     "jquery-ui-dist": "1.13.3",
     "jquery.are-you-sure": "1.9.0",
     "js-cookie": "3.0.5",
-    "jspdf": "^3.0.3",
+    "jspdf": "^3.0.4",
     "katex": "^0.16.25",
     "luxon": "3.7.2",
     "pdfjs-dist": "5.4.449",
