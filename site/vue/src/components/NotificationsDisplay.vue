@@ -17,7 +17,6 @@ const props = defineProps<{
 }>();
 
 const showPopup = ref(false);
-const localNotifications = ref<Notification[]>([...props.notifications]);
 const showUnseenOnly = ref(true);
 const localUnseenCount = ref(props.unseenCount);
 
@@ -40,18 +39,21 @@ function toggleUnseenOnly() {
     );
 }
 
-// # of displayed notifications: All for course, set amount for home page
-const visibleNotifications = computed(() =>
-    props.course
-        ? filteredNotifications.value
-        : filteredNotifications.value.slice(0, 10),
-);
+// All notifications that are sent from the backend
+const localNotifications = ref<Notification[]>([...props.notifications]);
 
-// Filter between most recent notifications and most recent unseen notifications
+// Filter between most recent notifications and most recent unseen notifications based on local storage
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.value.filter((n) => !n.seen)
         : localNotifications.value,
+);
+
+// Manage maxumum number of displayed notifications based on course or home page
+const visibleNotifications = computed(() =>
+    props.course
+        ? filteredNotifications.value
+        : filteredNotifications.value.slice(0, 10),
 );
 
 function markSeen() {
@@ -83,12 +85,12 @@ function markSeen() {
 
 // mark notification as seen without reloading
 function markIndividualSeen({ id, course }: { id: number; course: string }) {
-    const target = localNotifications.value.find(
-        (n) => n.id === id && n.course === course,
-    );
-    if (target) {
-        target.seen = true;
-        localUnseenCount.value--;
+    for (const n of localNotifications.value) {
+        if (n.id === id && n.course === course) {
+            n.seen = true;
+            localUnseenCount.value--;
+            break;
+        }
     }
 }
 
@@ -97,7 +99,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
         localUnseenCount.value = localUnseenCount.value - Number(count);
         for (const n of localNotifications.value) {
-            if (n.semester === term && n.course === course) {
+            if (n.term === term && n.course === course) {
                 n.seen = true;
             }
         }
@@ -148,7 +150,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount === 0"
+      v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount <= 0"
       id="no-recent-notifications"
       class="no-recent"
     >
@@ -167,21 +169,21 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       />
     </div>
     <div
-      v-if="!props.course && showUnseenOnly || (filteredNotifications.length === 0 && localNotifications.length > 0) && localUnseenCount > 0"
+      v-if="!props.course && showUnseenOnly || (visibleNotifications.length === 0 && localNotifications.length > 0) && localUnseenCount > 0"
     >
       <!-- Additional notifications in the front-end -->
       <p
-        v-if="filteredNotifications.length >= 10 && localUnseenCount >= 11"
+        v-if="visibleNotifications.length >= 10 && localUnseenCount >= 11"
         class="unseen-count-p"
       >
         You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notification<span v-if="localUnseenCount > 11">s</span>.
       </p>
       <!-- Unseen notifications that will not reach the front-end -->
       <p
-        v-if="filteredNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10"
+        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10 && (localUnseenCount - visibleNotifications.length) > 0"
         class="unseen-count-p"
       >
-        You have <span class="unseen-count">{{ localUnseenCount - filteredNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
+        You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
       </p>
     </div>
   </div>
