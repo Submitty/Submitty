@@ -85,7 +85,7 @@
     "node-fetch": "^2.7.0",
     "prettier": "^3.7.3",
     "regenerator-runtime": "^0.14.1",
-    "stylelint": "^16.25.0",
+    "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
