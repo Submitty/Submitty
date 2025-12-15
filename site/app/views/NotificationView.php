@@ -3,21 +3,26 @@
 namespace app\views;
 
 use app\controllers\admin\ConfigurationController;
+use app\models\Notification;
 use app\models\User;
 
 class NotificationView extends AbstractView {
-    public function showNotifications($current_course, $show_all, $notifications, $notification_saves) {
+    /**
+     * @param string $current_course
+     * @param Notification[] $all_notifications
+     * @param array<string, mixed> $notification_saves
+     * @return string
+     */
+    public function showNotifications(string $current_course, array $all_notifications, array $notification_saves): string {
         $this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->enableMobileViewport();
-        $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
-            'course' => $current_course,
-            'show_all' => $show_all,
-            'notifications' => $notifications,
-            'notification_saves' => $notification_saves,
-            'notifications_url' => $this->core->buildCourseUrl(['notifications']),
-            'mark_all_as_seen_url' => $this->core->buildCourseUrl(['notifications', 'seen']),
-            'notification_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings'])
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "page",
+            "name" => "CourseNotificationsPage",
+            "args" => [
+                "notifications" => $all_notifications
+            ]
         ]);
     }
 

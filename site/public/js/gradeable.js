@@ -23,6 +23,7 @@ function loadTemplates() {
         return Promise.resolve();
     }
     loadedTemplates = true;
+
     const templates = [
         { id: 'GradingGradeable', href: '/templates/grading/GradingGradeable.twig' },
         { id: 'PeerGradeable', href: '/templates/grading/PeerGradeable.twig' },
