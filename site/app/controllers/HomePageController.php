@@ -119,8 +119,8 @@ class HomePageController extends AbstractController {
         $course_title = $_POST['course'];
         foreach ($courses as $course) {
             if ($course->getTitle() === $course_title) {
-                $semester = $course->getTerm();
-                $this->core->loadCourseConfig($semester, $course_title);
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
                 $this->core->loadCourseDatabase();
                 $url = $this->core->buildCourseUrl(['notifications']);
                 $this->core->redirect($url);
@@ -140,8 +140,8 @@ class HomePageController extends AbstractController {
         $notification_id = $_POST['notification_id'];
         foreach ($courses as $course) {
             if ($course->getTitle() === $course_title) {
-                $semester = $course->getTerm();
-                $this->core->loadCourseConfig($semester, $course_title);
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
                 $this->core->loadCourseDatabase();
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
                 break;
@@ -163,12 +163,12 @@ class HomePageController extends AbstractController {
         $original_config = clone $this->core->getConfig();
 
         foreach ($courses as $course) {
-            $semester = $course->getTerm();
+            $term = $course->getTerm();
             $course_name = $course->getTitle();
-            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseConfig($term, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db));
             $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
