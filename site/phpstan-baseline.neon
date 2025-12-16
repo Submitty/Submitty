@@ -349,12 +349,6 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
-			message: '#^Variable variables are not allowed\.$#'
-			identifier: variable.dynamicName
-			count: 1
-			path: app/controllers/HomePageController.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
