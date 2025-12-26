@@ -121,17 +121,37 @@ class Chatroom {
     }
 
     public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
+        $adjectives = [
+            "Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave",
+            "Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice",
+            "Proud","Quiet","Rapid","Swift"
+        ];
+
+        $nouns = [
+            "Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin",
+            "Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull",
+            "Cardinal","Canary","Finch","Hummingbird"
+        ];
+
+        // Session-stable seed
+        $session_started_at = $this->getSessionStartedAt();
+        $session_seed = $session_started_at !== null
+            ? $session_started_at->getTimestamp()
+            : time();
+
+        // Base seed (less predictable than before)
+        $seed = hash('sha256', $user_id . $this->getId() . $session_seed);
+
+        $adj_index  = hexdec(substr($seed, 0, 8)) % count($adjectives);
+        $noun_index = hexdec(substr($seed, 8, 8)) % count($nouns);
+
+        // Small random suffix to avoid collisions
+        $suffix = strtoupper(substr($seed, 16, 4));
+
         $adj  = $adjectives[$adj_index];
         $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+
+        return "Anonymous {$adj} {$noun} {$suffix}";
     }
 
     public function getSessionStartedAt(): ?\DateTime {
