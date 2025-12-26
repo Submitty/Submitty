@@ -145,7 +145,7 @@ class Chatroom {
         $adj_index  = hexdec(substr($seed, 0, 8)) % count($adjectives);
         $noun_index = hexdec(substr($seed, 8, 8)) % count($nouns);
 
-        // Small random suffix to avoid collisions
+        //  Small random suffix to avoid collisions
         $suffix = strtoupper(substr($seed, 16, 4));
 
         $adj  = $adjectives[$adj_index];
@@ -160,5 +160,6 @@ class Chatroom {
 
     public function setSessionStartedAt(?\DateTime $session_started_at): void {
         $this->session_started_at = $session_started_at;
+        
     }
 }
