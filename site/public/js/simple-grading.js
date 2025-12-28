@@ -1044,13 +1044,13 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function autoResize(textarea) {
-    textarea.style.height = "auto";
-    textarea.style.height = textarea.scrollHeight + "px";
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
 
     if (textarea.scrollHeight > textarea.maxHeight) {
-        textarea.style.overflowY = "auto";
+        textarea.style.overflowY = 'auto';
     }
     else {
-        textarea.style.overflowY = "scroll";
+        textarea.style.overflowY = 'scroll';
     }
 }
