@@ -1042,3 +1042,15 @@ window.addEventListener('DOMContentLoaded', () => {
         withdrawnFilterElements.hide();
     }
 });
+
+function autoResize(textarea) {
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+
+    if (textarea.scrollHeight > textarea.maxHeight) {
+        textarea.style.overflowY = "auto";
+    }
+    else {
+        textarea.style.overflowY = "scroll";
+    }
+}

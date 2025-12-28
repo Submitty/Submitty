@@ -284,10 +284,11 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-grade"
+            <textarea class="option-small-box cell-grade text-entry-cell"
                   tabindex="0" id="cell-comment-{{ section_id }}-{{ index }}-{{loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
+                  oninput="autoResize(this)"
                   ondblclick="this.dataset.typing = true;"
                   onblur="this.dataset.typing = false; minimizeHeight(this);"
                   onfocus="adjustHeight(this);"
@@ -358,10 +359,11 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-grade"
+            <textarea class="option-small-box cell-grade text-entry-cell"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
+                  oninput="autoResize(this)"
                   ondblclick="this.dataset.typing = true;"
                   onblur="this.dataset.typing = false; minimizeHeight(this);"
                   onfocus="adjustHeight(this);"
