@@ -1312,7 +1312,7 @@ body.no-scroll {
 
 .text-entry-cell {
     overflow-y: scroll;
-    max-height: 150px;   
+    max-height: 150px;
 }
 
 /* Makes the grade and time on checkpoint pages not visible at first */
