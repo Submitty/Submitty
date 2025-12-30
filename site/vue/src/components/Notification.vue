@@ -113,7 +113,15 @@ function markSeen(course: string, id: number) {
           class="course-notification-link"
           title="Go to notifications"
           @click.stop="goToCourseNotifications(notification.course)"
-        >{{ notification.course }}</span><span v-if="!course"> - </span>{{ notification.notify_time }}
+        >
+          <span v-if="notification.course_name">
+            {{ notification.course_name }} - 
+          </span>
+          <span v-else>
+            {{ notification.course }} - 
+          </span>
+        </span>
+        {{ notification.notify_time }}
       </div>
     </div>
     <a

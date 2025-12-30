@@ -5420,9 +5420,10 @@ AND gc_id IN (
      * @param string $semester
      * @param string $course_name
      * @param object $course_db
+     * @param string $course_display_name
      * @return array<int, Notification>
      */
-    public function getRecentUserNotifications($user_id, $semester, $course_name, $course_db) {
+    public function getRecentUserNotifications($user_id, $semester, $course, $course_db, $course_display_name) {
         $query = "
             SELECT id, component, metadata, content,
                 (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
@@ -5448,7 +5449,8 @@ AND gc_id IN (
                     'elapsed_time' => $row['elapsed_time'],
                     'created_at' => $row['created_at'],
                     'semester' => $semester,
-                    'course' => $course_name,
+                    'course' => $course,
+                    'course_name' => $course_display_name,
                 ]
             );
         }
