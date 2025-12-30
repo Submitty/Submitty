@@ -9,5 +9,6 @@ export interface Notification {
     notify_time: string;
     term: string;
     course: string;
+    course_name: string;
     url: string;
 }
