@@ -5418,7 +5418,7 @@ AND gc_id IN (
      * Get 10 most recent Notification objects in a course
      * @param string $user_id
      * @param string $semester
-     * @param string $course_name
+     * @param string $course
      * @param object $course_db
      * @param string $course_display_name
      * @return array<int, Notification>
