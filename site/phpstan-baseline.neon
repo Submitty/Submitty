@@ -349,12 +349,6 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
-			rawMessage: Variable variables are not allowed.
-			identifier: variable.dynamicName
-			count: 2
-			path: app/controllers/HomePageController.php
-
-		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
