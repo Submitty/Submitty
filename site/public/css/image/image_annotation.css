@@ -1,0 +1,176 @@
+/* Image Annotation CSS */
+.image-annotation-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.4286;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.annotation-toolbar {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #dddddd;
+    background-color: #f5f5f5;
+    border-radius: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: 90%;
+    width: 100%;
+    justify-content: left;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.annotation-toolbar .btn {
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+#annotatable-image {
+    max-width: 90%;
+    max-height: calc(100% - 120px); /* Account for toolbar and padding */
+    height: auto;
+    display: block;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    margin: 0 auto;
+    object-fit: contain;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+#image-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#image-viewer {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    margin-top: 75px;
+}
+
+#annotation-status {
+    margin-left: 20px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 3px;
+    min-width: 200px;
+    display: inline-block;
+}
+
+#image-error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .annotation-toolbar {
+        flex-direction: column;
+        align-items: normal;
+    }
+
+    .annotation-toolbar .btn {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #annotation-status {
+        margin-left: 0;
+        margin-top: 10px;
+        text-align: center;
+    }
+}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-success {
+    color: #ffffff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-warning {
+    color: #212529;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-info {
+    color: #ffffff;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+.btn-secondary {
+    color: #ffffff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
