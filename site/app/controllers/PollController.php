@@ -450,7 +450,6 @@ class PollController extends AbstractController {
                 }
                 $poll->addOption($option);
                 $em->persist($option);
-                $keep_ids[] = $option->getId();
             }
         }
 
