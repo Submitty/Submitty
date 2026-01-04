@@ -1310,6 +1310,11 @@ body.no-scroll {
     border-left: 1px solid var(--standard-medium-gray);
 }
 
+.text-entry-cell {
+    overflow-y: scroll;
+    max-height: 150px;
+}
+
 /* Makes the grade and time on checkpoint pages not visible at first */
 .simple-grade-grader,
 .simple-grade-date {
