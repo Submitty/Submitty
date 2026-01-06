@@ -85,24 +85,37 @@ class UserProfileController extends AbstractController {
     }
 
     #[Route("/user_profile/change_password", methods: ["POST"])]
-    public function changePassword(): MultiResponse {
-        $user = $this->core->getUser();
-        if (
-            !empty($_POST['new_password'])
-            && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']
-        ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
-        }
-        else {
-            $this->core->addErrorMessage("Must put same password in both boxes.");
-        }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
+    #[Route("/user_profile/change_password", methods: ["POST"])]
+public function changePassword(): MultiResponse {
+    $user = $this->core->getUser();
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_new_password'];
+
+    $password_requirements = $this->core->getConfig()->getUserIdRequirements();
+    $min = $password_requirements['min_length'];
+    $max = $password_requirements['max_length'];
+
+    if (
+        !empty($new_password)
+        && !empty($confirm_password)
+        && $new_password == $confirm_password
+        && \app\libraries\Utils::isValidPassword($new_password)
+    ) {
+        $user->setPassword($new_password);
+        $this->core->getQueries()->updateUser($user);
+        $this->core->addSuccessMessage("Updated password");
     }
+    else if ($new_password !== $confirm_password) {
+        $this->core->addErrorMessage("Must put same password in both boxes.");
+    }
+    else {
+        $this->core->addErrorMessage("Password must be between {$min} and {$max} characters.");
+    }
+
+    return MultiResponse::RedirectOnlyResponse(
+        new RedirectResponse($this->core->buildUrl(['home']))
+    );
+}
 
     #[Route("/user_profile/change_pronouns", methods: ["POST"])]
     public function changePronouns(): JsonResponse {
