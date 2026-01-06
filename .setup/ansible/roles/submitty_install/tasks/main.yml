@@ -47,21 +47,16 @@
         {{ submitty_install_vcs_url }}
         {{ submitty_install_institution_name }}
         {{ submitty_install_institution_url }}
-        {{ submitty_install_self_account_creation }}
         {{ submitty_install_sysadmin_email }}
-        {{ submitty_install_submitty_email }}
         {{ submitty_install_institution_url }}
         {{ submitty_install_authentication_method }}
-        {{ submitty_install_admin_email }}
         {{ submitty_install_email_enabled }}
-        {{ submitty_install_admin_email }}
+        {{ submitty_install_email_user }}
         {{ submitty_install_admin_password }}
-        {{ submitty_install_submitty_ip }}
+        {{ submitty_install_admin_email }}
         {{ submitty_install_submitty_email }}
-        {{ submitty_install_noreply_email }}
         {{ submitty_install_smtp_server }}
         {{ submitty_install_smtp_port }}
-        {{ submitty_install_institution_url }}
         " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
 
   args:
@@ -122,6 +117,18 @@
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__your_domain__"
+    replace: "{{ submitty_install_submitty_url }}"
+
+- name: Add domain to the Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "__cert_file__"
+    replace: "{{ submitty_install_submitty_url }}"
+
+- name: Add domain to the Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "__key_file__"
     replace: "{{ submitty_install_submitty_url }}"
 
 - name: Add email
