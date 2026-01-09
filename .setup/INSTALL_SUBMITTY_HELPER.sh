@@ -35,7 +35,79 @@ SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submi
 
 source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
+# added to preserve designated files
+source <(cat <<'EOF'
+########################################################################################################################
+########################################################################################################################
+# FILE PRESERVATION FUNCTIONS
 
+PRESERVE_LIST_FILE="${SUBMITTY_CONFIG_DIR}/preserve_file_list.json"
+PRESERVE_TMP_DIR="/tmp/submitty_preserve_$$"
+PRESERVE_MANIFEST="${PRESERVE_TMP_DIR}/manifest.txt"
+
+preserve_files_backup() {
+    if [ ! -f "$PRESERVE_LIST_FILE" ]; then
+        return 0
+    fi
+
+    echo -e "Backing up preserved files..."
+
+    mkdir -p "$PRESERVE_TMP_DIR"
+
+    if ! jq empty "$PRESERVE_LIST_FILE" 2>/dev/null; then
+        echo "Warning: preserve_file_list.json is not valid JSON, skipping file preservation"
+        return 0
+    fi
+
+    local file_count=0
+    jq -r '.[]' "$PRESERVE_LIST_FILE" 2>/dev/null | while IFS= read -r filepath; do
+        if [ -f "$filepath" ]; then
+            local file_hash=$(echo -n "$filepath" | md5sum | cut -d' ' -f1)
+            local tmp_path="$PRESERVE_TMP_DIR/$file_hash"
+
+            cp "$filepath" "$tmp_path"
+
+            echo "$tmp_path|$filepath" >> "$PRESERVE_MANIFEST"
+            file_count=$((file_count + 1))
+        fi
+    done
+
+    if [ "$file_count" -gt 0 ]; then
+        echo -e "Backed up $file_count preserved file(s) to $PRESERVE_TMP_DIR"
+    fi
+}
+
+# Function to restore files from backup
+preserve_files_restore() {
+    if [ ! -d "$PRESERVE_TMP_DIR" ] || [ ! -f "$PRESERVE_MANIFEST" ]; then
+        return 0
+    fi
+
+    echo -e "Restoring preserved files..."
+
+    local file_count=0
+    while IFS='|' read -r tmp_path orig_path; do
+        if [ -f "$tmp_path" ]; then
+            mkdir -p "$(dirname "$orig_path")"
+
+            cp "$tmp_path" "$orig_path"
+            file_count=$((file_count + 1))
+        fi
+    done < "$PRESERVE_MANIFEST"
+
+    if [ "$file_count" -gt 0 ]; then
+        echo -e "Restored $file_count preserved file(s)"
+    fi
+
+    rm -rf "$PRESERVE_TMP_DIR"
+}
+
+# ensure cleanup happens even on script failure
+trap preserve_files_restore EXIT
+EOF
+)
+
+preserve_files_backup
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
@@ -581,6 +653,9 @@ fi
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
+
+#restore files to be preserved
+preserve_files_restore
 
 ################################################################################################################
 ################################################################################################################
