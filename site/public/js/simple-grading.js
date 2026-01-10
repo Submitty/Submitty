@@ -1023,22 +1023,32 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
-// Withdrawn filter checkbox should remain the same on reload
+// Initialize withdrawn student filter state on page load
 window.addEventListener('DOMContentLoaded', () => {
+    // Initialize simple grading
+    setupSimpleGrading(window.simple_grading_action);
+
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
-    if (full_grader_access) {
-        if (withdrawnFilterStatus === 'include') {
-            withdrawnFilterBox.checked = false;
-            withdrawnFilterElements.show();
-        }
-        else {
-            withdrawnFilterBox.checked = true;
-            withdrawnFilterElements.hide();
+    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'include';
+
+    if (window.full_grader_access) {
+        if (withdrawnFilterBox) {
+            if (withdrawnFilterStatus === 'include') {
+                withdrawnFilterBox.checked = false;
+                withdrawnFilterElements.show();
+            }
+            else {
+                withdrawnFilterBox.checked = true;
+                withdrawnFilterElements.hide();
+            }
         }
     }
     else {
         withdrawnFilterElements.hide();
     }
+    window.updateSimpleGradingRowNumbersAndColors();
+
+    // Remove table-striped to prevent CSS conflicts with JS-set colors
+    $('table#data-table').removeClass('table-striped');
 });
