@@ -308,8 +308,11 @@ class ForumController extends AbstractController {
                 $category_visible_date = "";
             }
             else {
-                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
-                //ASSUME NO ISSUE
+                try {
+                    $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                } catch (\Exception $e) {
+                    return $this->core->getOutput()->renderJsonFail("Invalid date format provided.");
+                }
             }
         }
         else {
