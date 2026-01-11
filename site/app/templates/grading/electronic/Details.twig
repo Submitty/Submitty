@@ -775,7 +775,6 @@
     {% endif %}
 
     // Set global variable for electronic-grading JavaScript
-    window.full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
     const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     const is_student = {{ is_student ? 'true' : 'false' }};
 
@@ -837,7 +836,6 @@
         }
     }
 </script>
-<script src="{{ base_url }}js/electronic-grading.js"></script>
 
 {% include 'grading/electronic/GradeableMessage.twig' with {
     "course": course,

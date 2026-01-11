@@ -918,6 +918,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
+        $this->core->getOutput()->addInternalJs('electronic-grading.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,

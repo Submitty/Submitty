@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, full_grader_access */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -1032,21 +1032,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
     const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'include';
 
-    if (window.full_grader_access) {
-        if (withdrawnFilterBox) {
-            if (withdrawnFilterStatus === 'include') {
-                withdrawnFilterBox.checked = false;
-                withdrawnFilterElements.show();
-            }
-            else {
-                withdrawnFilterBox.checked = true;
-                withdrawnFilterElements.hide();
-            }
+    if (withdrawnFilterBox) {
+        if (withdrawnFilterStatus === 'include') {
+            withdrawnFilterBox.checked = false;
+            withdrawnFilterElements.show();
+        }
+        else {
+            withdrawnFilterBox.checked = true;
+            withdrawnFilterElements.hide();
         }
     }
-    else {
-        withdrawnFilterElements.hide();
-    }
+
     window.updateSimpleGradingRowNumbersAndColors();
 
     // Remove table-striped to prevent CSS conflicts with JS-set colors

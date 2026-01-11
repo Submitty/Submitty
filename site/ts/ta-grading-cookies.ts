@@ -25,7 +25,7 @@ function updateSimpleGradingRowNumbersAndColors() {
         $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
             if ($(this).is(':visible')) {
                 $(this).find('td:first').text(rowNumber);
-                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-light-gray)';
+                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
 
                 $(this).css('background-color', `${color} !important`);
                 $(this).find('td').each(function () {
@@ -63,7 +63,7 @@ function updateElectronicGradingRowNumbersAndColors() {
                     $(this).css('background-color', 'var(--default-white) !important');
                 }
                 else {
-                    $(this).css('background-color', 'var(--standard-light-gray) !important');
+                    $(this).css('background-color', 'var(--standard-hover-light-gray) !important');
                 }
                 rowNumber++;
             }
@@ -90,7 +90,7 @@ window.filter_null_section = () => {
 };
 
 window.filter_withdrawn_students = () => {
-    const withdrawn_students = window.Cookies.get('include_withdrawn_students') ?? 'omit';
+    const withdrawn_students = window.Cookies.get('include_withdrawn_students') || 'include';
 
     // even if this does not exist, we can still hide and show it
     // This helps as we don't have to determine which page we are on

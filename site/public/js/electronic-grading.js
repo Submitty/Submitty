@@ -1,4 +1,4 @@
-/* global full_access_grader_permission */
+/* global */
 
 // Withdrawn filter checkbox should remain the same on reload
 window.addEventListener('DOMContentLoaded', () => {
@@ -6,21 +6,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
     const withdrawnFilterStatus = window.Cookies.get('include_withdrawn_students') || 'include';
 
-    if (full_access_grader_permission) {
-        if (withdrawnFilterBox) {
-            if (withdrawnFilterStatus === 'include') {
-                withdrawnFilterBox.checked = false;
-                withdrawnFilterElements.show();
-            }
-            else {
-                withdrawnFilterBox.checked = true;
-                withdrawnFilterElements.hide();
-            }
+    if (withdrawnFilterBox) {
+        if (withdrawnFilterStatus === 'include') {
+            withdrawnFilterBox.checked = false;
+            withdrawnFilterElements.show();
+        }
+        else {
+            withdrawnFilterBox.checked = true;
+            withdrawnFilterElements.hide();
         }
     }
-    else {
-        withdrawnFilterElements.hide();
-    }
+
     window.updateElectronicGradingRowNumbersAndColors();
 
     // Remove table-striped to prevent CSS conflicts with JS-set colors

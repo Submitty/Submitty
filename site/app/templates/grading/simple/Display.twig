@@ -370,7 +370,5 @@
 
 <script>
     // Set global variables for simple-grading JavaScript
-    window.full_grader_access = {{ core.getUser().accessFullGrading() ? 'true' : 'false' }};
     window.simple_grading_action = "{{ action }}";
 </script>
-<script src="{{ base_url }}js/simple-grading.js"></script>
