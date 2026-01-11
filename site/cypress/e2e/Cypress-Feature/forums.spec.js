@@ -603,3 +603,32 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Forum Category Date Validation', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+    });
+
+    it('Should handle invalid date format when editing categories', () => {
+        const invalidDate = 'invalid-date-string';
+
+        // Direct request to endpoint to ensure it handles invalid dates without crashing (Fixes #12327)
+        cy.request({
+            method: 'POST',
+            url: buildUrl(['sample', 'forum', 'categories', 'edit']),
+            body: {
+                category_id: 1, // General Discussion
+                category_desc: 'General Discussion',
+                category_color: 'MAROON',
+                visibleDate: invalidDate
+            },
+            form: true,
+            failOnStatusCode: false
+        }).then((response) => {
+            expect(response.status).to.eq(200);
+            expect(response.body.status).to.eq('fail');
+            expect(response.body.message).to.eq('Invalid date format provided.');
+        });
+    });
+});
