@@ -26,13 +26,13 @@
             <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="Edit">Edit</th>
+                    <th scope="col" aria-label="Delete">Delete</th>
+                    <th scope="col" aria-label="Poll Name">Poll Name</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="View Poll">View Poll</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,7 +46,7 @@
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}","{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left">
+                        <td style="text-align: left; min-width: 200px;">
                             {{ poll.getName() }}
                         </td>
                         <td>
@@ -91,12 +91,12 @@
             <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="Edit">Edit</th>
+                    <th scope="col" aria-label="Delete">Delete</th>
+                    <th scope="col" aria-label="Poll Name">Poll Name</th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Responses</th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="View Poll">View Poll</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,7 +110,7 @@
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left; min-width: 200px;">
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
@@ -154,14 +154,14 @@
             <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="Edit">Edit</th>
+                    <th scope="col" aria-label="Deletel">Delete</th>
+                    <th scope="col" aria-label="Poll Name">Poll Name</th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="View Poll">View Poll</th>
                 </tr>
             </thead>
             <tbody>
@@ -175,7 +175,7 @@
                         <td>
                                 <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left">
+                        <td style="text-align: left; min-width: 200px;">
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
@@ -221,12 +221,12 @@
             <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="Edit">Edit</th>
+                    <th scope="col" aria-label="Delete">Delete</th>
+                    <th scope="col" aria-label="Poll Name">Poll Name</th>
                     <th scope="col">Date Released</th>
                     <th scope="col">Responses</th>
-                    <th scope="col" aria-label="Empty Cell"></th>
+                    <th scope="col" aria-label="View Poll">View Poll</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,7 +240,7 @@
                         <td>
                             <a class="fas fa-trash black-btn" tabindex="0" href='javascript:newDeletePollForm("{{ poll.getId() }}", "{{ poll.getName() }}", "{{ base_url }}");' title="delete poll {{ poll.getName() }}" aria-label="delete poll {{ poll.getId() }}"></a>
                         </td>
-                        <td style="text-align: left">
+                        <td style="text-align: left; min-width: 200px;">
                             {{ poll.getName() }}
                         </td>
                         <td> {{ poll.getReleaseDate() | date("Y-m-d") }} </td>
