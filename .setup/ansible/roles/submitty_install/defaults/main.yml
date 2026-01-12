@@ -24,7 +24,7 @@ submitty_install_admin_password: DO PASSWORD NOT USE
 submitty_install_noreply_email: noreply_email@localhost
 submitty_install_smtp_server: mail.localhost
 submitty_install_smtp_port: 25
-submitty_install_ssl_public_key_file: /usr/local/share/ca-certificates/submitty-vm.crt
-submitty_install_ssl_private_key_file: /etc/ssl/private/submitty-vm.key
+submitty_install_ssl_cert_file: /usr/local/share/ca-certificates/submitty-vm.crt
+submitty_install_ssl_key_file: /etc/ssl/private/submitty-vm.key
 submitty_install_submitty_version: main
 submitty_install_github_url: https://github.com/Submitty/Submitty.git

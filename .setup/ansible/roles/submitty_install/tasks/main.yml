@@ -119,17 +119,17 @@
     regexp: "__your_domain__"
     replace: "{{ submitty_install_submitty_url }}"
 
-- name: Add domain to the Apache Submitty configuration
+- name: Set certificate file for ssl
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__cert_file__"
-    replace: "{{ submitty_install_submitty_url }}"
+    replace: "{{ submitty_install_ssl_cert_file }}"
 
-- name: Add domain to the Apache Submitty configuration
+- name: Set key file for ssl
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__key_file__"
-    replace: "{{ submitty_install_submitty_url }}"
+    replace: "{{ submitty_install_ssl_key_file }}"
 
 - name: Add email
   ansible.builtin.replace:
