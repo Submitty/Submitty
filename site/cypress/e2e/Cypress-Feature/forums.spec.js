@@ -611,24 +611,14 @@ describe('Forum Category Date Validation', () => {
     });
 
     it('Should handle invalid date format when editing categories', () => {
-        const invalidDate = 'invalid-date-string';
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.contains('Edit Categories').click();
 
-        // Direct request to endpoint to ensure it handles invalid dates without crashing (Fixes #12327)
-        cy.request({
-            method: 'POST',
-            url: buildUrl(['sample', 'forum', 'categories', 'edit']),
-            body: {
-                category_id: 1, // General Discussion
-                category_desc: 'General Discussion',
-                category_color: 'MAROON',
-                visibleDate: invalidDate
-            },
-            form: true,
-            failOnStatusCode: false
-        }).then((response) => {
-            expect(response.status).to.eq(200);
-            expect(response.body.status).to.eq('fail');
-            expect(response.body.message).to.eq('Invalid date format provided.');
-        });
+        cy.get('input[name="visibleDate"]').first().as('dateInput');
+        cy.get('@dateInput').clear({ force: true }).type('invalid-date', { force: true });
+
+        cy.get('@dateInput').parents('form').find('[type="submit"]').click();
+
+        cy.contains('Invalid date format provided.').should('be.visible');
     });
 });
