@@ -31,7 +31,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
@@ -45,12 +45,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -70,12 +70,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -95,12 +95,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -123,15 +123,15 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.36.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -150,15 +150,15 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.36.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -186,8 +186,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.36.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -196,7 +196,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -219,12 +219,12 @@ jobs:
     name: Python Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -241,12 +241,12 @@ jobs:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -326,7 +326,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -337,7 +337,7 @@ jobs:
     name: Shell Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -350,13 +350,13 @@ jobs:
 
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: main
           path: MAIN
 
       - name: Checkout PR branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: PR
 
@@ -433,7 +433,7 @@ jobs:
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: branch/GIT_CHECKOUT/Submitty
           fetch-depth: 0
@@ -444,7 +444,7 @@ jobs:
                        -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
 
       - name: Checkout main Branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.MBASE || 'main' }}
           path: main/GIT_CHECKOUT/Submitty
@@ -635,7 +635,7 @@ jobs:
 
       - name: Pack Artifacts
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dumped_database
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql
@@ -663,11 +663,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -801,19 +801,19 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Submitty-JSON
           path: /usr/local/submitty/config/submitty.json
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-System-Videos
@@ -847,7 +847,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # If the matrix is currently on Development or Tutorial,
       # we should use the respective courses
@@ -866,7 +866,7 @@ jobs:
 
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -891,12 +891,12 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
@@ -927,7 +927,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
@@ -936,7 +936,7 @@ jobs:
     name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup SSH
         shell: bash
         run: |
@@ -970,7 +970,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -994,19 +994,19 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: install-log
           path: /usr/local/submitty/install.log
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-Ansible-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Cypress-Ansible-Videos
