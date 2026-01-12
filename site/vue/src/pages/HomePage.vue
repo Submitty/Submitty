@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps, ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
-import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
+import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
@@ -20,13 +20,37 @@ type Course = {
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
+    unseenCount: number;
+    course: boolean;
+    userId: string;
 }
 
 type SemesterCourses = {
     [semester: string]: Course[];
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const archivedCoursesVisible = ref(true);
+const hasArchivedCourses = computed(() => {
+    const archivedRanks = props.statuses.archived_courses;
+
+    return archivedRanks && Object.keys(archivedRanks).length > 0
+        && Object.values(archivedRanks).some((rank: Rank) => rank.courses && rank.courses.length > 0);
+});
+const toggleArchivedCourses = () => {
+    archivedCoursesVisible.value = !archivedCoursesVisible.value;
+    // Toggle archived course visibility indefinitely, scoped to user
+    localStorage.setItem(`archived_courses_visible_${props.userId}`, archivedCoursesVisible.value.toString());
+};
+
+onMounted(() => {
+    const storedValue = localStorage.getItem(`archived_courses_visible_${props.userId}`);
+
+    // Default to visible if no value is stored
+    if (storedValue !== null) {
+        archivedCoursesVisible.value = storedValue === 'true';
+    }
+});
 
 const getCourseTypeHeader = (course_type: Status) => {
     if (course_type === 'self_registration_courses') {
@@ -77,16 +101,27 @@ const buildCourseUrl = (course: Course) => {
         <div v-if="index === 0 || (ranks && Object.keys(ranks).length > 0)">
           <br v-if="index > 0" />
           <br v-if="index > 0" />
-
-          <h1
-            class="courses-header"
-            data-testid="courses-header"
+          <div
+            class="courses-header-container"
           >
-            {{ getCourseTypeHeader(course_type) }}
-          </h1>
-
+            <h1
+              class="courses-header"
+              data-testid="courses-header"
+            >
+              {{ getCourseTypeHeader(course_type) }}
+            </h1>
+            <button
+              v-if="course_type === 'archived_courses' && hasArchivedCourses"
+              type="button"
+              class="btn btn-default archive-toggle-btn"
+              @click="toggleArchivedCourses"
+            >
+              {{ archivedCoursesVisible ? 'Hide' : 'Show' }}
+            </button>
+          </div>
           <div
             v-for="rank in ranks"
+            v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
             <h3 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
@@ -119,12 +154,21 @@ const buildCourseUrl = (course: Course) => {
                   </a>
                 </li>
               </ul>
+              <br v-if="course_type === 'archived_courses'" />
             </div>
           </div>
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay :notifications="notifications" />
+    <div
+      class="notification-panel shadow"
+    >
+      <NotificationsDisplay
+        :notifications="notifications"
+        :unseenCount="unseenCount"
+        :course="false"
+      />
+    </div>
   </div>
 </template>
 
@@ -151,9 +195,21 @@ const buildCourseUrl = (course: Course) => {
     }
 }
 
+.courses-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
+    flex-grow: 1;
 }
+
+.archive-toggle-btn {
+    flex-grow: 0;
+}
+
 .div1 {
   grid-column: 1;
   padding: 20px;
@@ -175,5 +231,11 @@ ol.bare-list {
 }
 #courses h2 {
     margin: 0;
+}
+
+.notification-panel {
+    background-color: var(--default-white);
+    height: auto;
+    padding: 20px;
 }
 </style>

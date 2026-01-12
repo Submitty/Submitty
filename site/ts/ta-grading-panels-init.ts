@@ -132,7 +132,7 @@ function initializeTaLayout() {
     }
     else if (taLayoutDet.numOfPanelsEnabled) {
         togglePanelLayoutModes(true);
-        if (taLayoutDet.isFullLeftColumnMode && $('#silent-edit-id').length !== 0) {
+        if (taLayoutDet.isFullLeftColumnMode) {
             toggleFullLeftColumnMode(true);
         }
         // initialize the layout\

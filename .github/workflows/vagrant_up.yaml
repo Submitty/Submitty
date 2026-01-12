@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   vagrant-up:
-    runs-on: macos-13
+    runs-on: macos-15-intel
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: brew install --cask vagrant
       - name: install virtual box 7.0.20
         run: |

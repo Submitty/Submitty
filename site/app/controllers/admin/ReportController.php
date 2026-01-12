@@ -689,6 +689,27 @@ class ReportController extends AbstractController {
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            $course_json = $this->core->getConfig()->getCourseJson() ?? [];
+            $course_details = $course_json['course_details'] ?? [];
+            $nightly_from_course_json = isset($course_details['auto_rainbow_grades']) && $course_details['auto_rainbow_grades'];
+            $is_nightly_enabled = $nightly_from_course_json;
+
+            $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+            $show_warning = false;
+            $days_since_run = null;
+
+            if ($grade_summaries_last_run !== 'Never') {
+                // Make string parsable
+                $clean_date = preg_replace('/\s*@\s*/', ' ', $grade_summaries_last_run);
+                $last_run_date = date_create_from_format('Y-m-d h:i A T', $clean_date);
+
+                if ($last_run_date instanceof \DateTime) {
+                    $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+                    $days_since_run = $now->diff($last_run_date)->days;
+                    $show_warning = $days_since_run >= 7;
+                }
+            }
+
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
@@ -715,6 +736,7 @@ class ReportController extends AbstractController {
                 'omit_section_from_statistics' => $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'extra_credit' => $customization->getExtraCredit(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
@@ -727,6 +749,9 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
+                'is_nightly_enabled' => $is_nightly_enabled,
+                'show_warning' => $show_warning,
+                'days_since_run' => $days_since_run,
             ]);
         }
 

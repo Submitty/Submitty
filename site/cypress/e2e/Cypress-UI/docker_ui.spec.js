@@ -236,6 +236,9 @@ describe('Docker UI Test', () => {
             });
         }, 60000, 500);
 
+        // Wait for 2 seconds so that file modification times are different. See https://github.com/Submitty/Submitty/pull/12216 for details.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(2000);
         cy.reload();
 
         // Verify DockerUI status is "Up-to-Date"
