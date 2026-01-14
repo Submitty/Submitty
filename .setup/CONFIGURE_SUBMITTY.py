@@ -68,6 +68,7 @@ parser.add_argument('--worker', action='store_true', default=False, help='Config
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
 parser.add_argument('--websocket-port', default=8443, type=int, help='Port to use for websocket')
+parser.add_argument('--json-file', default='', action='store_true', help='Location to Json file with parameters.')
 
 args = parser.parse_args()
 
@@ -76,7 +77,8 @@ args = parser.parse_args()
 # (this command works even if we run configure from a different directory)
 SETUP_SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 SUBMITTY_REPOSITORY = os.path.dirname(SETUP_SCRIPT_DIRECTORY)
-
+SETUP_JSON_FILE = args.json_file
+if os.path.exists(SETUP_JSON_FILE):
 # recommended (default) directory locations
 # FIXME: Check that directories exist and are readable/writeable?
 SUBMITTY_INSTALL_DIR = args.install_dir
@@ -174,46 +176,14 @@ authentication_methods = [
     'SamlAuthentication'
 ]
 
-defaults = {
-    'database_host': 'localhost',
-    'database_port': 5432,
-    'database_user': 'submitty_dbuser',
-    'database_course_user': 'submitty_course_dbuser',
-    'submission_url': '',
-    'supervisor_user': 'submitty',
-    'vcs_url': '',
-    'authentication_method': 0,
-    'institution_name' : '',
-    'institution_homepage' : '',
-    'user_create_account' : False,
-    'timezone' : str(tzlocal.get_localzone()),
-    'submitty_admin_username': '',
-    'email_user': '',
-    'email_password': '',
-    'email_sender': 'submitty@myuniversity.edu',
-    'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
-    'email_server_hostname': 'mail.myuniversity.edu',
-    'email_server_port': 25,
-    'email_internal_domain': 'example.com',
-    'course_code_requirements': "Please follow your school's convention for course code.",
-    'sys_admin_email': '',
-    'sys_admin_url': '',
-    'ldap_options': {
-        'url': '',
-        'uid': '',
-        'bind_dn': ''
-    },
-    'saml_options': {
-        'name': '',
-        'username_attribute': ''
-    },
-    'course_material_file_upload_limit_mb': 100
-}
-
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
         loaded_defaults = json.load(conf_file)
+else:
+    with open(DEFAULTS_JSON) as defaults_file:
+        defaults = json.load(defaults_file)
+
 if os.path.isfile(SUBMITTY_ADMIN_JSON):
     with open(SUBMITTY_ADMIN_JSON) as submitty_admin_file:
         loaded_defaults.update(json.load(submitty_admin_file))
@@ -253,6 +223,8 @@ print()
 if args.worker:
     SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
     print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER))
+elif not ASK_QUESTIONS and :
+    print('Using configured JSON file')
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
@@ -406,7 +378,7 @@ os.chmod(SETUP_INSTALL_DIR, 0o751)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/.setup
-
+if 
 config = OrderedDict()
 
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
