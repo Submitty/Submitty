@@ -1126,6 +1126,14 @@ class SubmissionController extends AbstractController {
                 $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
                     $testcase_config = $testcase->getTestcase();
                     if ($testcase->canView()) {
+                        $autochecks = [];
+                        foreach($testcase->getAutochecks() as $autocheck) {
+                            $autochecks[] = [
+                                'description' => $autocheck->getDescription(),
+                                'messages' => $autocheck->getMessages(),
+                                'diff_viewer' => $autocheck->getDiffViewer()
+                            ]
+                        }
                         return [
                             'name' => $testcase_config->getName(),
                             'details' => $testcase_config->getDetails(),
@@ -1133,7 +1141,8 @@ class SubmissionController extends AbstractController {
                             'points_available' => $testcase_config->getPoints(),
                             'has_extra_results' => $testcase->hasAutochecks(),
                             'points_received' => $testcase->getPoints(),
-                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : '',
+                            'autochecks' => $autochecks,
                         ];
                     }
                     else {
