@@ -1131,8 +1131,10 @@ class SubmissionController extends AbstractController {
                             $autochecks[] = [
                                 'description' => $autocheck->getDescription(),
                                 'messages' => $autocheck->getMessages(),
-                                'diff_viewer' => $autocheck->getDiffViewer()
-                            ]
+                                'diff_viewer' => $autocheck->getDiffViewer(),
+                                'expected' => $autocheck->getDiffViewer()->getDisplayExpected(),
+                                'actual' => $autocheck->getDiffViewer()->getDisplayActual()
+                            ];
                         }
                         return [
                             'name' => $testcase_config->getName(),
