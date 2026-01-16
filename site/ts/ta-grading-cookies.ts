@@ -90,12 +90,13 @@ window.filter_null_section = () => {
 };
 
 window.filter_withdrawn_students = () => {
-    const withdrawn_students = window.Cookies.get('include_withdrawn_students') || 'include';
+    const withdrawn_students = window.Cookies.get('include_withdrawn_students') || 'omit';
 
     // even if this does not exist, we can still hide and show it
     // This helps as we don't have to determine which page we are on
     const withdrawn_electronic = $('[data-student="electronic-grade-withdrawn"]');
     const withdrawn_simple = $('[data-student="simple-grade-withdrawn"]');
+
     if (withdrawn_students === 'include') {
         withdrawn_electronic.hide();
         withdrawn_simple.hide();

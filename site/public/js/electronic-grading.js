@@ -4,7 +4,7 @@
 window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-    const withdrawnFilterStatus = window.Cookies.get('include_withdrawn_students') || 'include';
+    const withdrawnFilterStatus = window.Cookies.get('include_withdrawn_students') || 'omit';
 
     if (withdrawnFilterBox) {
         if (withdrawnFilterStatus === 'include') {

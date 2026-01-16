@@ -204,7 +204,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         const elem = $(el);
         let set_new = false;
 
-        old_scores[elem.data('id')] = elem.data('score');
+        old_scores[elem.data('id')] = parseFloat(elem.data('score')) || 0;
 
         // if one score passed, set all elems to it
         if (singleScore) {
@@ -218,10 +218,12 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         }
         // if no score set, toggle through options
         else if (!scores) {
-            if (elem.data('score') === 1.0) {
+            const currentScore = parseFloat(elem.data('score')) || 0;
+
+            if (currentScore === 1.0) {
                 elem.data('score', 0.5);
             }
-            else if (elem.data('score') === 0.5) {
+            else if (currentScore === 0.5) {
                 elem.data('score', 0);
             }
             else {
@@ -234,16 +236,21 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             new_scores[elem.data('id')] = elem.data('score');
 
             // update css to reflect score
-            if (elem.data('score') === 1.0) {
+            const currentScore = parseFloat(elem.data('score')) || 0;
+
+            if (currentScore === 1.0) {
                 elem.addClass('simple-full-credit');
+                elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
             }
-            else if (elem.data('score') === 0.5) {
+            else if (currentScore === 0.5) {
                 elem.removeClass('simple-full-credit');
                 elem.css('background-color', '');
                 elem.addClass('simple-half-credit');
+                elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
             }
             else {
                 elem.removeClass('simple-half-credit');
+                elem.removeClass('simple-full-credit');
                 elem.css('background-color', '');
             }
 
@@ -344,10 +351,10 @@ function minimizeHeight(el) {
 
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
-    $('td.cell-grade').click(function () {
+    $('#data-table').on('click', 'td.cell-grade', function () {
         updateCheckpointCells(this);
     });
-    $('.cell-grade').change(function () {
+    $('#data-table').on('change', '.cell-grade', function () {
         let elem = $(this);
         const split_id = elem.attr('id').split('-');
         const row_el = $(`tr#row-${split_id[2]}-${split_id[3]}`);
@@ -985,14 +992,17 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             switch (score) {
                 case 1.0:
                     elem.addClass('simple-full-credit');
+                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
                     break;
                 case 0.5:
                     elem.removeClass('simple-full-credit');
                     elem.css('background-color', '');
                     elem.addClass('simple-half-credit');
+                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
                     elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
                     elem.css('background-color', '');
                     break;
             }
@@ -1030,7 +1040,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'include';
+    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
 
     if (withdrawnFilterBox) {
         if (withdrawnFilterStatus === 'include') {
