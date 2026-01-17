@@ -614,8 +614,12 @@ describe('Forum Category Date Validation', () => {
         cy.get('[data-testid="more-dropdown"]').click();
         cy.contains('Edit Categories').click();
 
-        cy.get('input[name="visibleDate"]').first().as('dateInput');
-        cy.get('@dateInput').clear({ force: true }).type('invalid-date', { force: true });
+        // Assert existence/visibility to force a wait.
+        // This gives the popup time to open.
+        cy.get('input[name="visibleDate"]').should('be.visible').first().as('dateInput');
+
+        cy.get('@dateInput').clear({ force: true });
+        cy.get('@dateInput').type('invalid-date', { force: true });
 
         cy.get('@dateInput').parents('form').find('[type="submit"]').click();
 
