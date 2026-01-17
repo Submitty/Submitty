@@ -87,18 +87,25 @@ class UserProfileController extends AbstractController {
     #[Route("/user_profile/change_password", methods: ["POST"])]
     public function changePassword(): MultiResponse {
         $user = $this->core->getUser();
-        if (
-            !empty($_POST['new_password'])
-            && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']
-        ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
+        $new_password = $_POST['new_password'] ?? '';
+        $confirm_password = $_POST['confirm_new_password'] ?? '';
+
+        if (empty($new_password) || empty($confirm_password)) {
+            $this->core->addErrorMessage("Password fields cannot be empty.");
         }
-        else {
+        elseif ($new_password !== $confirm_password) {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
+        // Aligning with isValidPassword requirement of > 12 characters
+        elseif (strlen($new_password) < 12) {
+            $this->core->addErrorMessage("New password is too short. It must be at least 12 characters long.");
+        }
+        else {
+            $user->setPassword($new_password);
+            $this->core->getQueries()->updateUser($user);
+            $this->core->addSuccessMessage("Updated password successfully.");
+        }
+
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))
         );
