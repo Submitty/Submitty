@@ -603,3 +603,22 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Forum Category Date Validation', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+    });
+
+    it('Should handle invalid date format when editing categories', () => {
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.contains('Edit Categories').click();
+
+        cy.get('input[name="visibleDate"]').first().as('dateInput');
+        cy.get('@dateInput').clear({ force: true }).type('invalid-date', { force: true });
+
+        cy.get('@dateInput').parents('form').find('[type="submit"]').click();
+
+        cy.contains('Invalid date format provided.').should('be.visible');
+    });
+});
