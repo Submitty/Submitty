@@ -133,26 +133,18 @@ class Chatroom {
             "Cardinal", "Canary", "Finch", "Hummingbird"
         ];
 
-        // Session-stable seed
-        $session_started_at = $this->getSessionStartedAt();
-        $session_seed = $session_started_at !== null
-            ? $session_started_at->getTimestamp()
-            : time();
+        $adj_index = random_int(0, count($adjectives) - 1);
+        $noun_index = random_int(0, count($nouns) - 1);
 
-        // Base seed (less predictable than before)
-        $seed = hash('sha256', $user_id . $this->getId() . $session_seed);
-
-        $adj_index = hexdec(substr($seed, 0, 8)) % count($adjectives);
-        $noun_index = hexdec(substr($seed, 8, 8)) % count($nouns);
-
-        // Small random suffix to avoid collisions
-        $suffix = strtoupper(substr($seed, 16, 4));
+        // Non-deterministic suffix to reduce collisions
+        $suffix = strtoupper(bin2hex(random_bytes(2)));
 
         $adj = $adjectives[$adj_index];
         $noun = $nouns[$noun_index];
 
         return "Anonymous {$adj} {$noun} {$suffix}";
     }
+
 
     public function getSessionStartedAt(): ?\DateTime {
         return $this->session_started_at;
