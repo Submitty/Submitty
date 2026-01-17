@@ -26,9 +26,17 @@
             const browserTime = Date.now();
             const serverTime = {{ server_time|e('js') }} * 1000;
             const timeDifference = serverTime - browserTime;
-            // Warn if time difference is greater than 2 minutes (120000 milliseconds)
+            // Detect if time difference is greater than 2 minutes (120000 milliseconds)
             if (Math.abs(timeDifference) > 120000) {
-                document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
+                // Try reloading a potentially stale page. Add+check search parameter to prevent infinite reload loop.
+                var page_url = new URL(window.location.href);
+                if (page_url.searchParams.get("refreshed_stale_page") == "true") {
+                    // Page has already been reloaded, warn user about system clock.
+                    document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
+                } else {
+                    page_url.searchParams.set("refreshed_stale_page", "true");
+                    window.location.href = page_url.href;
+                }               
             }
         });
     </script>
