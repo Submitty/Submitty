@@ -1245,24 +1245,33 @@ function enableTabsInTextArea(jQuerySelector) {
     });
     t.trigger('input');
     t.keydown(function (event) {
-        if (event.which === 27) { // ESC was pressed, proceed to next control element.
+        if (event.which === 27 || event.key === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("GEMINI DEBUG: ESC key detected!");
+    this.blur();
+    const controls = $(':tabbable').filter(':visible');
+    const nextIndex = controls.index(this) + 1;
+    if (nextIndex < controls.length) {
+        controls.eq(nextIndex).focus();
+    }
+    return false;
+}
+                // ESC was pressed, proceed to next control element.
             // Next control element may not be a sibling, so .next().focus() is not guaranteed
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
             // focus to the next control in the list.
-            const controls = $(':tabbable').filter(':visible');
-            controls.eq(controls.index(this) + 1).focus();
-            return false;
-        }
-        else if (!event.shiftKey && event.code === 'Tab') { // TAB was pressed without SHIFT, text indent
-            const text = this.value;
-            const beforeCurse = this.selectionStart;
-            const afterCurse = this.selectionEnd;
-            this.value = `${text.substring(0, beforeCurse)}\t${text.substring(afterCurse)}`;
-            this.selectionStart = this.selectionEnd = beforeCurse + 1;
-            return false;
-        }
-        // No need to test for SHIFT+TAB as it is not being redefined.
+
+        else if (!event.shiftKey && event.code === 'Tab')  
+            { const text = this.value; const beforeCurse = this.selectionStart; const afterCurse = this.selectionEnd;
+
+        if (!document.execCommand('insertText', false, '\t')) 
+        { this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse); }
+
+        this.selectionStart = this.selectionEnd = beforeCurse + 1; return false; 
+    }
+
     });
 }
 
