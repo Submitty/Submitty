@@ -20,13 +20,15 @@ function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibili
     }
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
-    if (!codemirror_config.mode) {
-        CodeMirrorSpellChecker({
-            codeMirrorInstance: CodeMirror,
-        });
-        codemirror_config.lineWrapping = true;
-        codemirror_config.mode = 'spell-checker';
-    }
+    // Line 25
+if (!codemirror_config.mode) {
+    CodeMirrorSpellChecker({
+        codeMirrorInstance: CodeMirror,
+    });
+    codemirror_config.lineWrapping = false; // Prevents text from breaking to new lines
+    codemirror_config.mode = 'spell-checker';
+    codemirror_config.readOnly = "nocursor"; // Allows scrolling without a text cursor
+}
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
     makeCodeMirrorAccessible(cm, 'Esc');
@@ -42,17 +44,35 @@ function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibili
  *                                   instantiated with.
  * @returns {CodeMirror}
  */
+// site/public/js/code-mirror-utils.js
+
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
-    codemirror_config.scrollbarStyle = null;
-    codemirror_config.lineNumbers = false;
-    codemirror_config.mode = 'spell-checker';
+    codemirror_config.scrollbarStyle = 'native'; 
+    codemirror_config.lineWrapping = true;      // Enable the wrap
+    codemirror_config.readOnly = true;           // Allow focus/scroll but no typing
+    codemirror_config.viewportMargin = Infinity;
 
     CodeMirrorSpellChecker({
         codeMirrorInstance: CodeMirror,
     });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
-    cm.setSize(150, 30);
+    // Increase height to 120px so the scrollbar doesn't cover the text
+    cm.setSize('100%', 120); 
+    // Force the scrollbar to refresh and show up
+    cm.on("change", function() {
+    const scrollInfo = cm.getScrollInfo();
+    if (scrollInfo.height > scrollInfo.clientHeight) {
+        cm.getWrapperElement().querySelector(".CodeMirror-vscrollbar").style.display = "block";
+        cm.getWrapperElement().querySelector(".CodeMirror-vscrollbar").style.pointerEvents = "auto";
+    }
+});
+
+// Manually trigger a refresh to fix the 118px vs 736px mismatch
+setTimeout(() => {
+    cm.refresh();
+}, 1);
+    
     makeCodeMirrorAccessible(cm, 'Tab');
     disableEnterKey(cm);
     return cm;
