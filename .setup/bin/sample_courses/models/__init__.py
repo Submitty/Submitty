@@ -67,6 +67,7 @@ class User(object):
         access_level
         registration_section
         rotating_section
+        registration_type
         unix_groups
         courses
     """
@@ -85,6 +86,7 @@ class User(object):
         self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
+        self.registration_type = "graded"
         self.grading_registration_section = None
         self.unix_groups = None
         self.courses = None
@@ -113,6 +115,8 @@ class User(object):
             self.registration_section = int(user["registration_section"])
         if "rotating_section" in user:
             self.rotating_section = int(user["rotating_section"])
+        if "registration_type" in user:
+            self.registration_type = user["registration_type"]
         if "grading_registration_section" in user:
             self.grading_registration_section = user["grading_registration_section"]
         if "unix_groups" in user:
