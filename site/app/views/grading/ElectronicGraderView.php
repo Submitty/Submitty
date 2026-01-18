@@ -964,8 +964,7 @@ HTML;
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "active_graders" => $active_graders,
-            "csrf_token" => $this->core->getCsrfToken(),
-            "base_url" => $this->core->getConfig()->getBaseUrl(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 

@@ -775,8 +775,9 @@
     {% endif %}
 
     // Set global variable for electronic-grading JavaScript
-    const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
-    const is_student = {{ is_student ? 'true' : 'false' }};
+    window.is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
+    window.is_student = {{ is_student ? 'true' : 'false' }};
+    window.full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
 
     // Function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
     function ajaxCountRegrade(choice, e, confirmMessage) {
