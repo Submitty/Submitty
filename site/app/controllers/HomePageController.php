@@ -59,11 +59,13 @@ class HomePageController extends AbstractController {
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
-            foreach (['archived_courses', 'unarchived_courses'] as $var) {
-                $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
-                });
-            }
+            $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
+
+            $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
         }
 
         $self_rejoin_tester = new SelfRejoinController($this->core);

@@ -19,7 +19,7 @@ use app\libraries\DateUtils;
  * @method void     setNotifySource($content)
  * @method void     setNotifyTarget($content)
  * @method void     setType($t)
- * @method void setSemester(string $semester)
+ * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCourseName(string $course_name)
 
@@ -39,8 +39,6 @@ use app\libraries\DateUtils;
  * @method string   getNotifyMetadata()
  * @method bool     getNotifyNotToSource()
  * @method string   getType()
- * @method string|null getSemester()
- * @method string|null getCourse()
  */
 class Notification extends AbstractModel implements \JsonSerializable {
     /** @prop
@@ -71,8 +69,8 @@ class Notification extends AbstractModel implements \JsonSerializable {
     protected $notify_not_to_source;
 
     /** @prop
-     * @var string|null Semester for this notification */
-    protected ?string $semester = null;
+     * @var string|null Term for this notification */
+    protected ?string $term = null;
 
     /** @prop
      * @var string|null Course for this notification */
@@ -131,8 +129,8 @@ class Notification extends AbstractModel implements \JsonSerializable {
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);
         $instance->setNotifyContent($details['content']);
-        if (isset($details['semester'])) {
-            $instance->setSemester($details['semester']);
+        if (isset($details['term'])) {
+            $instance->setTerm($details['term']);
         }
 
         if (isset($details['course'])) {
@@ -216,7 +214,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
      * elapsed_time: float,
      * created_at: string,
      * notify_time: string,
-     * semester: string|null,
+     * term: string|null,
      * course: string|null,
      * course_name: string|null,
      * url: string
@@ -226,11 +224,11 @@ class Notification extends AbstractModel implements \JsonSerializable {
         $base_url = '';
 
         if ($this->getNotifyMetadata() !== null) {
-            $semester = $this->semester;
+            $term = $this->term;
             $course = $this->course;
 
-            if (($semester !== null && $semester !== '') && ($course !== null && $course !== '')) {
-                $base_url = $this->core->buildUrl(['courses', $semester, $course, 'notifications', $this->getId()]);
+            if (($term !== null && $term !== '') && ($course !== null && $course !== '')) {
+                $base_url = $this->core->buildUrl(['courses', $term, $course, 'notifications', $this->getId()]);
             }
             else {
                 $base_url = $this->core->buildCourseUrl(['notifications', $this->getId()]);
@@ -251,7 +249,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'elapsed_time' => $this->getElapsedTime(),
             'created_at' => $this->getCreatedAt(),
             'notify_time' => $this->getNotifyTime(),
-            'semester' => $this->semester,
+            'term' => $this->term,
             'course' => $this->course,
             'course_name' => $this->course_name,
             'url' => $url
