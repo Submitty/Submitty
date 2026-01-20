@@ -604,25 +604,18 @@ describe('Should test Search functionality', () => {
     });
 });
 
-describe('Forum Category Date Validation', () => {
-    beforeEach(() => {
-        cy.login('instructor');
-        cy.visit(['sample', 'forum']);
-    });
+it('Should handle invalid date format when editing categories', () => {
+    cy.get('[data-testid="more-dropdown"]').click();
+    cy.contains('Edit Categories').click();
 
-    it('Should handle invalid date format when editing categories', () => {
-        cy.get('[data-testid="more-dropdown"]').click();
-        cy.contains('Edit Categories').click();
+    cy.get('.edit-category-date-button').first().click();
 
-        // Assert existence/visibility to force a wait.
-        // This gives the popup time to open.
-        cy.get('input[name="visibleDate"]').should('be.visible').first().as('dateInput');
+    cy.get('.edit-category-date-input').should('be.visible').first().as('dateInput');
 
-        cy.get('@dateInput').clear({ force: true });
-        cy.get('@dateInput').type('invalid-date', { force: true });
+    cy.get('@dateInput').clear({ force: true });
+    cy.get('@dateInput').type('invalid-date', { force: true });
 
-        cy.get('@dateInput').parents('form').find('[type="submit"]').click();
+    cy.get('.save-date-button').first().click();
 
-        cy.contains('Invalid date format provided.').should('be.visible');
-    });
+    cy.contains('Invalid date format provided.').should('be.visible');
 });
