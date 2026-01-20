@@ -11,16 +11,6 @@ const emit = defineEmits<{
     'mark-individual': [payload: { id: number; course: string }];
 }>();
 
-function goToNotification() {
-    if (props.course && props.notification.url) {
-        console.log('Course URL: ', props.notification.url);
-        window.location.href = props.notification.url;
-    }
-    else if (!props.course && props.notification.url) {
-        window.location.href = props.notification.url;
-    }
-}
-
 function goToCourseNotifications(course: string) {
     const form = document.createElement('form');
     form.method = 'POST';
@@ -85,10 +75,9 @@ function markSeen(course: string, id: number) {
     class="notification"
     :class="{ unseen: !notification.seen }"
   >
-    <div
+    <a
       class="main-notification-content"
-      role="link"
-      @click="goToNotification()"
+      :href="props.notification.url"
     >
       <i
         v-if="notification.component === 'forum'"
@@ -119,11 +108,10 @@ function markSeen(course: string, id: number) {
           >{{ notification.course }}</span><span v-if="!course"> - </span>{{ notification.notify_time }}
         </div>
       </div>
-    </div>
+    </a>
     <button
       v-if="!notification.seen"
       class="notification-seen"
-      role="button"
       title="Mark as seen"
       aria-label="Mark as seen"
       @click.stop.prevent="markSeen(notification.course, Number(notification.id))"
@@ -139,7 +127,10 @@ function markSeen(course: string, id: number) {
   flex-direction: row;
   border-bottom: 1px solid var(--standard-light-gray);
   align-items: center;
-  cursor: pointer;
+}
+
+.notification a {
+  text-decoration: none;
 }
 
 .main-notification-content {
@@ -148,6 +139,7 @@ function markSeen(course: string, id: number) {
   flex-direction: row;
   align-items: center;
   padding: 10px 10px 10px 20px;
+  cursor: pointer;
 }
 
 .notification-content {
