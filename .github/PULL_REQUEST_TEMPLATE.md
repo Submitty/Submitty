@@ -1,3 +1,9 @@
+<!-- NOTE: Please ensure your title and description align with Submitty conventions (see 
+https://submitty.org/developer/getting_started/make_a_pull_request for more details). Each title 
+has a prefix, and a limit of 40 chars. A description template has been provided and must be completed 
+in full. Please also ensure that all CI/CD tests are passing. Your pull request is ineligible for 
+review until these requirements have been met. -->
+
 ### Why is this Change Important & Necessary?
 <!-- Include any GitHub issue that is fixed/closed using "Fixes #<number>" or "Closes #<number>" syntax.  
 Alternately write "Partially addresses #<number>" or "Related to #<number>" as appropriate. -->
