@@ -1,4 +1,4 @@
-describe('Tests cases revolving around gradeable access and submition', () => {
+describe('Tests cases revolving around gradeable access and submission', () => {
     ['student', 'ta', 'grader', 'instructor'].forEach((user) => {
         it('Should upload file, submit, and remove file', () => {
             cy.login(user);
@@ -63,5 +63,9 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             cy.get('[data-testid="new-submission-info"]').should('exist');
             cy.logout();
         });
+    });
+    it('Should test whether or not team autograding is working correctly', () => {
+        cy.login('student');
+        cy.visit(['sample', 'gradeable', 'closed_team_homework', 'grading', 'grade?who_id=aYl92mR3NvJYGrK&sort=id&direction=ASC']);
     });
 });
