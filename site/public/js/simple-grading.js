@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, full_grader_access */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -204,7 +204,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         const elem = $(el);
         let set_new = false;
 
-        old_scores[elem.data('id')] = elem.data('score');
+        old_scores[elem.data('id')] = parseFloat(elem.data('score')) || 0;
 
         // if one score passed, set all elems to it
         if (singleScore) {
@@ -218,10 +218,12 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         }
         // if no score set, toggle through options
         else if (!scores) {
-            if (elem.data('score') === 1.0) {
+            const currentScore = parseFloat(elem.data('score')) || 0;
+
+            if (currentScore === 1.0) {
                 elem.data('score', 0.5);
             }
-            else if (elem.data('score') === 0.5) {
+            else if (currentScore === 0.5) {
                 elem.data('score', 0);
             }
             else {
@@ -234,16 +236,21 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             new_scores[elem.data('id')] = elem.data('score');
 
             // update css to reflect score
-            if (elem.data('score') === 1.0) {
+            const currentScore = parseFloat(elem.data('score')) || 0;
+
+            if (currentScore === 1.0) {
                 elem.addClass('simple-full-credit');
+                elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
             }
-            else if (elem.data('score') === 0.5) {
+            else if (currentScore === 0.5) {
                 elem.removeClass('simple-full-credit');
                 elem.css('background-color', '');
                 elem.addClass('simple-half-credit');
+                elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
             }
             else {
                 elem.removeClass('simple-half-credit');
+                elem.removeClass('simple-full-credit');
                 elem.css('background-color', '');
             }
 
@@ -344,10 +351,10 @@ function minimizeHeight(el) {
 
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
-    $('td.cell-grade').click(function () {
+    $('#data-table').on('click', 'td.cell-grade', function () {
         updateCheckpointCells(this);
     });
-    $('.cell-grade').change(function () {
+    $('#data-table').on('change', '.cell-grade', function () {
         let elem = $(this);
         const split_id = elem.attr('id').split('-');
         const row_el = $(`tr#row-${split_id[2]}-${split_id[3]}`);
@@ -385,21 +392,31 @@ function setupCheckboxCells() {
 
     if (Cookies.get('show_grader') === 'true') {
         $('.simple-grade-grader').css('display', 'block');
+        $('col.option-small-col').eq(0).css('width', '150px');
         showGradersCheckbox.prop('checked', true);
+    }
+    else {
+        $('col.option-small-col').eq(0).css('width', '0px');
     }
 
     if (Cookies.get('show_dates') === 'true') {
         $('.simple-grade-date').css('display', 'block');
+        $('col.option-small-col').eq(1).css('width', '150px');
         showDatesGradedCheckbox.prop('checked', true);
+    }
+    else {
+        $('col.option-small-col').eq(1).css('width', '0px');
     }
 
     // show all the hidden grades when showGradersCheckbox is clicked
     showGradersCheckbox.on('change', function () {
         if ($(this).is(':checked')) {
             $('.simple-grade-grader').css('display', 'block');
+            $('col.option-small-col').eq(0).css('width', '150px');
         }
         else {
             $('.simple-grade-grader').css('display', 'none');
+            $('col.option-small-col').eq(0).css('width', '0px');
         }
         Cookies.set('show_grader', showGradersCheckbox.is(':checked'));
     });
@@ -408,9 +425,11 @@ function setupCheckboxCells() {
     showDatesGradedCheckbox.on('change', function () {
         if ($(this).is(':checked')) {
             $('.simple-grade-date').css('display', 'block');
+            $('col.option-small-col').eq(1).css('width', '150px');
         }
         else {
             $('.simple-grade-date').css('display', 'none');
+            $('col.option-small-col').eq(1).css('width', '0px');
         }
         Cookies.set('show_dates', showDatesGradedCheckbox.is(':checked'));
     });
@@ -985,14 +1004,17 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             switch (score) {
                 case 1.0:
                     elem.addClass('simple-full-credit');
+                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
                     break;
                 case 0.5:
                     elem.removeClass('simple-full-credit');
                     elem.css('background-color', '');
                     elem.addClass('simple-half-credit');
+                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
                     elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
                     elem.css('background-color', '');
                     break;
             }
@@ -1023,12 +1045,16 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
-// Withdrawn filter checkbox should remain the same on reload
+// Initialize withdrawn student filter state on page load
 window.addEventListener('DOMContentLoaded', () => {
+    // Initialize simple grading
+    setupSimpleGrading(window.simple_grading_action);
+
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
-    if (full_grader_access) {
+    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
+
+    if (withdrawnFilterBox) {
         if (withdrawnFilterStatus === 'include') {
             withdrawnFilterBox.checked = false;
             withdrawnFilterElements.show();
@@ -1038,7 +1064,9 @@ window.addEventListener('DOMContentLoaded', () => {
             withdrawnFilterElements.hide();
         }
     }
-    else {
-        withdrawnFilterElements.hide();
-    }
+
+    window.updateSimpleGradingRowNumbersAndColors();
+
+    // Remove table-striped to prevent CSS conflicts with JS-set colors
+    $('table#data-table').removeClass('table-striped');
 });

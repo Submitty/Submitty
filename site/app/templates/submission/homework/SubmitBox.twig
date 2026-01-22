@@ -197,7 +197,7 @@
             <br><br>
         {% endif %}
         
-        {% if vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1) %}
+        {% if (vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1)) or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>Grade your repository:</h3>
             {% if using_subdirectory %}
             <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
