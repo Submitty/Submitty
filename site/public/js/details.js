@@ -141,10 +141,11 @@ window.addEventListener('DOMContentLoaded', () => {
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
         // Withdrawn Students
-        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
+        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+
         if (!is_team_assignment) { // Toggle not available on team assignments
-            if (withdrawnFilterStatus === 'omit' || withdrawnFilterStatus === undefined) {
+            if (withdrawnFilterStatus === 'omit') {
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
             }

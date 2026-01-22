@@ -55,7 +55,7 @@ tr:nth-child(odd) td:nth-child(n + 1):nth-child(-n + 5) {
 }
 
 tr:nth-child(even) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--standard-light-gray);
+    background: var(--standard-hover-light-gray);
 }
 
 #data-table td:focus,
