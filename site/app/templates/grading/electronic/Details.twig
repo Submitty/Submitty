@@ -590,7 +590,7 @@
 
 {# Index #}
 {% macro render_column_index(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ index }}</td>
+    <td></td>
 {% endmacro %}
 
 {# Section Number #}
@@ -774,12 +774,13 @@
         inquiryUpdate();
     {% endif %}
 
-    const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
-    const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
-    const is_student = {{ is_student ? 'true' : 'false' }};
+    // Set global variable for electronic-grading JavaScript
+    window.is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
+    window.is_student = {{ is_student ? 'true' : 'false' }};
+    window.full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
 
-    //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
-    function ajaxCountRegrade(choice,e,confirmMessage) {
+    // Function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
+    function ajaxCountRegrade(choice, e, confirmMessage) {
         const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
         let formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -811,7 +812,8 @@
             }
         });
     }
-    function confirmMessage(e,count, choice) {
+
+    function confirmMessage(e, count, choice) {
         if(count > 50) {
             e.preventDefault();
             if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {

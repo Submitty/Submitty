@@ -170,7 +170,8 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseConfig($term, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db));
+            $course_display_name = $course->getDisplayName();
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name));
             $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
