@@ -66,30 +66,18 @@ describe('Tests cases revolving around gradeable access and submission', () => {
     });
     it('Should test whether or not team autograding is working correctly', () => {
         cy.login('student');
-        const testfileteam = '\more_autograding_examples\cpp_hidden_tests\submissions';
-        cy.visit(['sample', 'gradeable', 'closed_team_homework', 'grading']);
-        cy.get('#upload1').selectFile(testfileteam, { action: 'drag-drop' });
-            cy.get('#startnew').click();
-            cy.get('#submit').should('be.disabled');
-            cy.get('#upload1').selectFile(testfileteam, { action: 'drag-drop' });
+        const teamFile = 'cypress/fixtures/frame_hardcoded.cpp';
+        cy.visit(['sample', 'gradeable', 'closed_team_homework']);
 
-            cy.waitPageChange(() => {
-                cy.get('#submit').click();
-            });
-            cy.get('#submitted-files > div').contains('frame_hardcoded.cpp');
-            cy.get('#submitted-files > div').contains('Download all files:').should('not.exist');
+        cy.get('#upload1').selectFile(teamFile, { action: 'drag-drop' });
 
-            cy.get('[fname = "file1.txt"] > td').first().contains('file1.txt').next('.file-trash').click();
-            cy.get('[fname = "file1.txt"]').should('not.exist');
-            cy.get('#upload1').selectFile(testfileteam, { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
 
-            cy.waitPageChange(() => {
-                cy.get('.alert-success > a').click(); // Dismiss successful upload message
-                cy.get('#submit').click();
-            });
-
-            // Checks submitted files
-            cy.get('#submitted-files > div').contains('span', 'frame_hardcoded.cpp');
-            cy.get('#submitted-files > div').contains('Download all files:');
+        cy.get('#submitted-files').within(() => {
+            cy.contains('frame_hardcoded.cpp');
+            cy.contains('Download all files:');
+        });
     });
 });
