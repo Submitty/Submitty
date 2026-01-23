@@ -563,6 +563,16 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
+        elseif (isset($_POST['update_course_ID']) && $_POST['update_course_ID'] !== "") {
+            if (User::validateUserData('registration_section', $_POST['update_course_ID'])) {
+                $num_new_ID = $this->core->getQueries()->updateCourseID($_POST['update_course_ID']); 
+
+            }
+            else {
+                $this->core->addErrorMessage("Course Id entered does not follow the specified format");
+                $_SESSION['request'] = $_POST;
+            }
+        }
         elseif (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
