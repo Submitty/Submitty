@@ -14,6 +14,13 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
+    #[Route('/time.js')]
+    public function time() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return $this->core->getOutput()->renderTwigOutput('TimeHeader.twig', ["server_time"=>0]);
+    }
+
     #[Route('/courses/{_semester}/{_course}', requirements: ['_semester' => '^(?!api)[^\/]+', '_course' => '[^\/]+'])]
     public function navigationPage() {
         try {
