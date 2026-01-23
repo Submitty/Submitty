@@ -428,14 +428,6 @@ class GlobalController extends AbstractController {
         // FACULTY & SUPERUSERS ONLY
         if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['admin', 'docker']),
-                "title" => "Docker UI",
-                "id" => "nav-sidebar-docker-link",
-                "icon" => "fa-docker",
-                "prefix" => "fab",
-            ]);
-
-            $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['home', 'courses', 'new']),
                 "title" => "New Course",
                 "icon" => "fa-plus-square"
@@ -492,6 +484,14 @@ class GlobalController extends AbstractController {
                 "href" => $this->core->buildUrl(['autograding_status']),
                 "title" => "Autograding Status",
                 "icon" => "fa-server"
+            ]);
+
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['admin', 'docker']),
+                "title" => "Docker UI",
+                "id" => "nav-sidebar-docker-link",
+                "icon" => "fa-docker",
+                "prefix" => "fab",
             ]);
         }
 
