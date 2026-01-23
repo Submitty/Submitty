@@ -414,7 +414,7 @@ class GlobalController extends AbstractController {
             "icon" => "fa-calendar"
         ]);
 
-        $is_instructor = !empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()));
+        $is_instructor = count($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) !== 0;
         // Create the line for all faculties, superusers, and instructors
         if (
             $this->core->getUser()->accessFaculty()
@@ -481,17 +481,16 @@ class GlobalController extends AbstractController {
         // INSTRUCTOR IN ANY COURSE
         if ($is_instructor || $this->core->getUser()->isSuperUser()) {
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildUrl(['autograding_status']),
-                "title" => "Autograding Status",
-                "icon" => "fa-server"
-            ]);
-
-            $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['admin', 'docker']),
                 "title" => "Docker UI",
                 "id" => "nav-sidebar-docker-link",
                 "icon" => "fa-docker",
                 "prefix" => "fab",
+            ]);
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildUrl(['autograding_status']),
+                "title" => "Autograding Status",
+                "icon" => "fa-server"
             ]);
         }
 
