@@ -21,6 +21,8 @@ use app\libraries\DateUtils;
  * @method void     setType($t)
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
+ * @method void setCourseName(string $course_name)
+
 
  *
  * @method bool     isViewOnly()
@@ -73,6 +75,10 @@ class Notification extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string|null Course for this notification */
     protected ?string $course = null;
+
+    /** @prop
+     * @var string|null Display name of the course for this notification */
+    protected ?string $course_name = null;
 
     /** @prop
      * @var int Notification ID */
@@ -129,6 +135,9 @@ class Notification extends AbstractModel implements \JsonSerializable {
 
         if (isset($details['course'])) {
             $instance->setCourse($details['course']);
+        }
+        if (isset($details['course_name'])) {
+            $instance->setCourseName($details['course_name']);
         }
         return $instance;
     }
@@ -207,6 +216,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
      * notify_time: string,
      * term: string|null,
      * course: string|null,
+     * course_name: string|null,
      * url: string
      * }
      */
@@ -241,6 +251,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'notify_time' => $this->getNotifyTime(),
             'term' => $this->term,
             'course' => $this->course,
+            'course_name' => $this->course_name,
             'url' => $url
         ];
     }
