@@ -565,7 +565,14 @@ class UsersController extends AbstractController {
         }
         elseif (isset($_POST['update_course_ID']) && $_POST['update_course_ID'] !== "") {
             if (User::validateUserData('registration_section', $_POST['update_course_ID'])) {
-                $num_new_ID = $this->core->getQueries()->updateCourseID($_POST['update_course_ID']); 
+                $num_new_ID = $this->core->getQueries()->updateCourseID($_POST['update_course_ID']);
+
+                if($num_new_ID == 0) {
+                        $this->core->addErrorMessage("Section {$_POST['update_course_ID']} Course ID not updated.");
+                    }
+                    else {
+                        $this->core->addSuccessMessage("Registration section {$_POST['update_course_ID']} Course ID updated.");
+                    }
 
             }
             else {

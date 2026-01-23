@@ -3209,6 +3209,13 @@ ORDER BY user_id ASC"
         $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE term=? AND course=? AND registration_section_id=?", [$semester, $course, $section]);
         return $this->submitty_db->getRowCount();
     }
+    // adding this function for updating course id?
+    public function updateCourseID($newid) {
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $section = $this->core->getConfig()->getDefaultRegistrationSection();
+        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id=$newid WHERE term=? AND course=? AND registration_section_id=?",[$semester, $course, $section]);
+    }
 
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", [$gradeable_id]);

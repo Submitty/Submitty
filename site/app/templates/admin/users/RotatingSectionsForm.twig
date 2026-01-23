@@ -64,8 +64,8 @@
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
-                                <td> {{ section['course_section_id'] }} </td>
+                                <td Section {{ section['sections_registration_id'] }} </td>
+                                <td class="fas fa-pencil-alt" {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                                 {% if is_self_register %}
                                     <td>
@@ -127,19 +127,6 @@
 							<span class="option-alt">
                             <strong>Format:</strong> Alphanumeric (a-z, A-Z, 0-9), underscores, hyphens, with no space and maximum 20 characters.<br>
                             Enter a registration section which is not already a registration section.
-                        </span>
-						</label>
-                    </div>
-                </div>
-                <div class="option">
-                    <div class="option-input"><input type="text" name="update_course_id" id="update_course_id" value="" placeholder="Eg: 12345" /></div>
-                    <div class="option-desc">
-            <label for="update_course_id">
-							<span class="option-title">Update Course ID</span>
-              <br>
-							<span class="option-alt">
-                            <strong>Format:</strong> 5 digit unique number.<br>
-                            Enter a new Course ID
                         </span>
 						</label>
                     </div>
