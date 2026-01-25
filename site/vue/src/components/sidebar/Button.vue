@@ -68,7 +68,7 @@ function getButtonId(button: Button): string | undefined {
               v-if="button.icon"
               :class="[button.prefix, button.icon]"
             />
-            <span class="icon-title">{{ button.title }}</span>
+            <span class="icon-title title-spacer">{{ button.title }}</span>
           </span>
           <span
             v-if="button.badge && button.badge > 0"
@@ -85,5 +85,6 @@ function getButtonId(button: Button): string | undefined {
 .flex-line {
     display: flex;
     align-items: center;
+    gap: 12px;
 }
 </style>
