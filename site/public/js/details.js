@@ -95,11 +95,12 @@ function getCollapsedSections() {
 
 function updateToggleButtonText() {
     const collapsed = getCollapsedSections();
-    const button = $('#toggle-sections-btn');
+    const button = $('#toggle-all-sections-btn');
 
     if (collapsed.length === 0) {
         button.text('Collapse All Sections');
-    } else {
+    }
+    else {
         button.text('Expand All Sections');
     }
 }
@@ -134,8 +135,8 @@ function toggleAllSections() {
 
     if (collapsed.length === 0) {
         collapseAllSections();
-
-    } else {
+    }
+    else {
         expandAllSections();
     }
 }
