@@ -1248,7 +1248,6 @@ function enableTabsInTextArea(jQuerySelector) {
         if (event.which === 27 || event.key === 'Escape') {
     event.preventDefault();
     event.stopPropagation();
-    console.log("GEMINI DEBUG: ESC key detected!");
     this.blur();
     const controls = $(':tabbable').filter(':visible');
     const nextIndex = controls.index(this) + 1;
