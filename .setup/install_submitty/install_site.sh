@@ -425,9 +425,7 @@ chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
-chmod -R a+x ${NODE_FOLDER}/vite/node_modules/@esbuild/
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
-chmod -R a+x ${NODE_FOLDER}/vite/node_modules/@esbuild/
 chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc

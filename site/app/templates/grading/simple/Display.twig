@@ -216,13 +216,6 @@
             {% endfor %}
         {% endif %}
     </table>
-    <script>
-        const full_grader_access = {{ core.getUser().accessFullGrading() ? 'true' : 'false' }};
-
-        $(function() {
-            setupSimpleGrading("{{ action }}");
-        });
-    </script>
 </div>
 
 {# Render one student's row in the table #}
@@ -237,7 +230,7 @@
             class="highlighted-row"
         {% endif %}
     >
-        <td class="">{{ index + 1 }}</td>
+        <td class=""></td>
         <td class="">{{ grade.getSubmitter().getUser().getRegistrationSection() }}
             {% if grade.getSubmitter().getUser().getRegistrationSubsection() is not empty %}
                 - {{  grade.getSubmitter().getUser().getRegistrationSubsection() }}
@@ -262,19 +255,19 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade {{ component_grade is not null ? component_grade.getScore() == 1.0 ? "simple-full-credit" : "simple-half-credit" : "" }}"
+                class="cell-grade {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
-                data-score="{{ component_grade.getScore() | default('0') }}"
-                data-grader="{{ component_grade.getGrader().getId() | default('') }}"
-                {% if component_grade is not null and component_grade.getGradeTime() != null %}
+                data-score="{{ component_grade ? component_grade.getScore() : 0 }}"
+                data-grader="{{ component_grade and component_grade.getGrader() ? component_grade.getGrader().getId() : '' }}"
+                {% if component_grade and component_grade.getGradeTime() != null %}
                     data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                 {% endif %}
             >
                 {% if core.getUser().accessFullGrading() %}
-                    <p class="simple-grade-grader">{{ component_grade is not null ? component_grade.getGrader().getId() }}</p>
-                    <p class="simple-grade-date">{{ component_grade is not null and component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+                    <p class="simple-grade-grader">{{ component_grade and component_grade.getGrader() ? component_grade.getGrader().getId() : '' }}</p>
+                    <p class="simple-grade-date">{{ component_grade and component_grade.getGradeTime() ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
                 {% endif %}
 
             </td>
@@ -296,7 +289,7 @@
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                   rows="1"
                   style="resize: vertical;"
-            >{{ component_grade.getComment() | default('') }}</textarea>
+            >{{ component_grade ? component_grade.getComment() : '' }}</textarea>
         </td>
     {% endfor %}
 {% endmacro %}
@@ -309,7 +302,7 @@
             {% set max_clamp = component.getUpperClamp() %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
-            {% set component_score = component_grade.getScore() | default(0) %}
+            {% set component_score = component_grade ? component_grade.getScore() : 0 %}
             {% set total = total + component_score %}
             <td class="option-small-input">
                 <input
@@ -327,10 +320,10 @@
                     onblur="this.dataset.typing = false;"
                     onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     onkeydown="return ['Backspace','Delete','ArrowLeft','ArrowRight','Period'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
-                    {% if component_grade is not null and component_grade.getGrader() != null %}
+                    {% if component_grade and component_grade.getGrader() %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
-                    {% if component_grade is not null and component_grade.getGradeTime() != null %}
+                    {% if component_grade and component_grade.getGradeTime() %}
                         data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                     {% endif %}
                     data-num="true"
@@ -370,7 +363,12 @@
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                   rows="1"
                   style="resize: vertical;"
-            >{{ component_grade.getComment() | default('') }}</textarea>
+            >{{ component_grade ? component_grade.getComment() : '' }}</textarea>
         </td>
     {% endfor %}
 {% endmacro %}
+
+<script>
+    // Set global variables for simple-grading JavaScript
+    window.simple_grading_action = "{{ action }}";
+</script>
