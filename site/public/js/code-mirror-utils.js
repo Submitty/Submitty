@@ -47,34 +47,21 @@ if (!codemirror_config.mode) {
 // site/public/js/code-mirror-utils.js
 
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
+    // Standard Submitty configuration
     codemirror_config.scrollbarStyle = 'native'; 
-    codemirror_config.lineWrapping = true;      // Enable the wrap
-    codemirror_config.readOnly = true;           // Allow focus/scroll but no typing
+    codemirror_config.lineNumbers = false;
+    codemirror_config.lineWrapping = true;      
+    codemirror_config.readOnly = true;           
     codemirror_config.viewportMargin = Infinity;
 
-    CodeMirrorSpellChecker({
-        codeMirrorInstance: CodeMirror,
-    });
-
     const cm = CodeMirror(attachment_elem, codemirror_config);
-    // Increase height to 120px so the scrollbar doesn't cover the text
-    cm.setSize('100%', 120); 
-    // Force the scrollbar to refresh and show up
-    cm.on("change", function() {
-    const scrollInfo = cm.getScrollInfo();
-    if (scrollInfo.height > scrollInfo.clientHeight) {
-        cm.getWrapperElement().querySelector(".CodeMirror-vscrollbar").style.display = "block";
-        cm.getWrapperElement().querySelector(".CodeMirror-vscrollbar").style.pointerEvents = "auto";
-    }
-});
-
-// Manually trigger a refresh to fix the 118px vs 736px mismatch
-setTimeout(() => {
-    cm.refresh();
-}, 1);
     
+    // Set height using the native API instead of !important CSS
+    cm.setSize('100%', 120); 
+
     makeCodeMirrorAccessible(cm, 'Tab');
     disableEnterKey(cm);
+    
     return cm;
 }
 

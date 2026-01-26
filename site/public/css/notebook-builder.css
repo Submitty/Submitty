@@ -108,17 +108,6 @@
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
-.CodeMirror {
-    /* stylelint-disable-next-line declaration-no-important */
-    background-color: var(--standard-input-background) !important;
-    /* stylelint-disable-next-line declaration-no-important */
-    border: 1px solid var(--standard-light-gray) !important;
-    /* stylelint-disable-next-line declaration-no-important */
-    border-radius: 4px !important;
-    /* stylelint-disable-next-line declaration-no-important */
-    vertical-align: middle !important;
-}
-
 /**
  * Multiple choice widget styles
  */
@@ -299,4 +288,20 @@
 .item-widget .from-pool-div label {
     float: left;
     clear: both;
+}
+/* Increase height of CodeMirror in notebooks without breaking layout */
+.large-mirror .CodeMirror {
+    min-height: 120px; /* Increased from 30px to 120px */
+}
+
+/* Add vertical scrolling only to the short_answer CodeMirror instance */
+.notebook .short_answer .CodeMirror-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Use a specific selector to ensure the scrollbar is visible without !important */
+#notebook-view .short_answer .CodeMirror-vscrollbar {
+    display: block;
+    visibility: visible;
 }
