@@ -438,19 +438,16 @@ class ForumController extends AbstractController {
                 $full_course_name = $this->core->getFullCourseName();
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
                 if ($announcement) {
-                    // notify on a new announcement
-                    $subject = "New Announcement: " . $thread_title;
-                    $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
+                  $subject = "Announcement: " . $thread_title;
+                    $content = "An Instructor or TA made an announcement in:\n" . $full_course_name . "\n\n" . $post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
-                    $this->core->getNotificationFactory()->onNewAnnouncement($event);
-                }
-                else {
-                    // notify on a new thread
-                    $subject = "New Thread: " . $thread_title;
-                    $content = "A new discussion thread was created in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
-                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
-                    $this->core->getNotificationFactory()->onNewThread($event);
-                }
+                      $this->core->getNotificationFactory()->onNewAnnouncement($event);
+                } else {
+                    $subject = "New Reply: " . $thread_title;
+                    $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . $parent_post_content . "\n\nNew Reply:\n\n" . $post_content;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                    $this->core->getNotificationFactory()->onNewPost($event);
+                        }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
@@ -501,6 +498,7 @@ class ForumController extends AbstractController {
     public function publishPost() {
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
         $post_content_tag = 'thread_post_content';
         $file_post = 'file_input';
@@ -642,7 +640,8 @@ class ForumController extends AbstractController {
             true,
             $_POST['post_box_id'],
             true,
-            $post->getThread()->isAnnounced()
+            $post->getThread()->isAnnounced(),
+            $post->getThread()->isPinned()
         );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }

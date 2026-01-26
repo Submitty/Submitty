@@ -185,13 +185,18 @@
             <input type="checkbox" class="thread-anon-checkbox" data-testid="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
             <label>Anonymous (to class) </label>
         {% endif %}
-        {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
+        {# Check if user is staff (Instructor/TA) #}
+        {% if core.getUser().accessFullGrading() %}
             {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
-            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
-            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
-            <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            {% if show_title is defined and show_title %}
+             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
+             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
+            {% endif %}
+            {% if (show_announcement is defied and show_announcement) or (thread_pinned is defined and thread_pinned) %}
+                <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
-        {% endif %}
+              {% endif %}
+            {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
             <div id="pin-expiration-date">
               <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
