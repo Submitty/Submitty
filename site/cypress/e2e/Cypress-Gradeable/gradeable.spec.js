@@ -71,10 +71,8 @@ describe('Tests cases revolving around gradeable access and submission', () => {
 
         cy.get('#upload1').selectFile(teamFile, { action: 'drag-drop' });
         cy.get('#submit').click();
-        
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Team Homework');
         cy.get('body').type('{enter}');
-        
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Team Homework');
         cy.get('body').should('not.contain', 'went wrong');
     });
@@ -87,7 +85,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
 
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Homework');
         cy.get('body').type('{enter}');
-        
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Homework');
         cy.get('body').should('not.contain', 'went wrong');
     });
