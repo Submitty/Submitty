@@ -399,19 +399,18 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             }
                         }));
                     }
-
                     Promise.all(renderPagePromises).then(() => {
                         $('.pdfViewer .page').each(function () {
                             $(this).css('width', `calc(${$(this).css('width')} * var(--pdf-scale))`);
                             $(this).css('height', `calc(${$(this).css('height')} * var(--pdf-scale))`);
                         });
 
-                        let scale = window.RENDER_OPTIONS.scale;
+                        const scale = window.RENDER_OPTIONS.scale;
                         let zoomTimeout = null;
 
                         $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
 
-                        function handleWheel(e) {
+                        const handleWheel = (e) => {
                             if (!e.ctrlKey && !e.metaKey) {
                                 return;
                             }
@@ -454,19 +453,20 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 viewer.css('--pdf-scale', newScale / window.RENDER_OPTIONS.scale);
                             }
 
-                            scale = newScale;
-                            $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
+                            window.RENDER_OPTIONS.scale = newScale;
+                            $('#file-zoom-display').text(`${Math.round(window.RENDER_OPTIONS.scale * 100)}%`);
 
                             clearTimeout(zoomTimeout);
-                            zoomTimeout = setTimeout(rescale, 100);
-                        }
+                            zoomTimeout = setTimeout(() => {
+                                rescalePDF(window.RENDER_OPTIONS.scale);
+                            }, 100);
+                        };
 
-                        function rescale() {
-                            rescalePDF(scale);
+                        const fileContent = $('#file-content')[0];
+                        if (fileContent) {
+                            fileContent.removeEventListener('wheel', handleWheel);
+                            fileContent.addEventListener('wheel', handleWheel, { passive: false });
                         }
-
-                        $('#file-content')[0].removeEventListener('wheel', handleWheel);
-                        $('#file-content')[0].addEventListener('wheel', handleWheel, { passive: false });
                     });
                 });
             },
