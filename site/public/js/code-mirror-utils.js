@@ -20,15 +20,13 @@ function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibili
     }
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
-    // Line 25
-if (!codemirror_config.mode) {
-    CodeMirrorSpellChecker({
-        codeMirrorInstance: CodeMirror,
-    });
-    codemirror_config.lineWrapping = false; // Prevents text from breaking to new lines
-    codemirror_config.mode = 'spell-checker';
-    codemirror_config.readOnly = "nocursor"; // Allows scrolling without a text cursor
-}
+    if (!codemirror_config.mode) {
+        CodeMirrorSpellChecker({
+            codeMirrorInstance: CodeMirror,
+        });
+        codemirror_config.lineWrapping = true;
+        codemirror_config.mode = 'spell-checker';
+    }
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
     makeCodeMirrorAccessible(cm, 'Esc');
@@ -44,24 +42,24 @@ if (!codemirror_config.mode) {
  *                                   instantiated with.
  * @returns {CodeMirror}
  */
-// site/public/js/code-mirror-utils.js
-
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
-    // Standard Submitty configuration
+    // 1. Change scrollbarStyle to 'native' to allow the scrollbar to exist
     codemirror_config.scrollbarStyle = 'native'; 
     codemirror_config.lineNumbers = false;
     codemirror_config.lineWrapping = true;      
-    codemirror_config.readOnly = true;           
-    codemirror_config.viewportMargin = Infinity;
+    codemirror_config.mode = 'spell-checker';
+
+    CodeMirrorSpellChecker({
+        codeMirrorInstance: CodeMirror,
+    });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
     
-    // Set height using the native API instead of !important CSS
+    // 2. Increase the height to 120px here via the API
     cm.setSize('100%', 120); 
-
+    
     makeCodeMirrorAccessible(cm, 'Tab');
     disableEnterKey(cm);
-    
     return cm;
 }
 

@@ -33,16 +33,29 @@
     font-family: monospace;
 }
 
+/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+
 /* Input field is the first child */
 .mc > label > :nth-child(2) {
     display: inline;
 }
 
 /* Style the color of notebook feedback messages */
-.notebook .feedback-msg-failure { color: var(--badge-backgroud-red); }
-.notebook .feedback-msg-warning { color: var(--standard-vibrant-orange); }
-.notebook .feedback-msg-info { color: var(--standard-deep-blue); }
-.notebook .feedback-msg-success { color: var(--standard-dark-green); }
+.notebook .feedback-msg-failure {
+    color: var(--badge-backgroud-red);
+}
+
+.notebook .feedback-msg-warning {
+    color: var(--standard-vibrant-orange);
+}
+
+.notebook .feedback-msg-info {
+    color: var(--standard-deep-blue);
+}
+
+.notebook .feedback-msg-success {
+    color: var(--standard-dark-green);
+}
 
 .sa-box {
     display: block;
@@ -66,11 +79,13 @@ textarea.sa-box {
     margin: 5px;
 }
 
+/* Add some margin for informational content that is inside <p> tags */
 .notebook p {
     margin-top: 12px;
     margin-bottom: 12px;
 }
 
+/* Clear that margin for <p> tags that are part of a multiple choice input */
 .notebook fieldset p {
     margin-top: 0;
     margin-bottom: 0;
@@ -87,9 +102,13 @@ img {
 
 /* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-input-background) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border: 1px solid var(--standard-light-gray) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     vertical-align: middle !important;
 }
 
@@ -103,14 +122,16 @@ img {
 /* stylelint-disable-next-line selector-class-pattern */
 .large-mirror .CodeMirror {
     resize: vertical;
-    min-height: 120px;
+    min-height: 30px;
     max-height: 80vh;
 }
 
+/* Fixes Safari spacing issue */
 .notebook fieldset legend {
     -webkit-margin-top-collapse: separate;
 }
 
+/* Not set for images as we want to allow them to be wider than 700px */
 /* stylelint-disable selector-class-pattern */
 .notebook .multiple_choice,
 .notebook .short_answer,
@@ -118,80 +139,76 @@ img {
     max-width: 700px;
 }
 
-/* ============================================================
-   FIX: Notebook Box Height, Wrapping, and Scrolling Overrides
-   ============================================================ */
-
-/* 1. Force parents to stop clipping the scrollbar */
-.grading_panel, 
-.simple-grading-wrapper, 
-.sticky-top, 
-.not-sticky, 
-#notebook-view, 
-.short_answer {
-    overflow: visible !important;
-    display: block !important;
-    height: auto !important;
-}
-
-/* 2. Set height and ensure content doesn't collide with the bar */
-html body #notebook-view .short_answer .CodeMirror,
-html body #notebook-view .short_answer .CodeMirror-scroll {
-    height: 120px !important;
-    max-height: 120px !important;
-    overflow-y: scroll !important; 
-    overflow-x: hidden !important; 
-    pointer-events: auto !important; 
-    z-index: 100 !important;
-}
-
-/* Create space for the scrollbar so it doesn't cut words */
-html body #notebook-view .short_answer .CodeMirror-lines {
-    padding-right: 25px !important; 
-}
-
-/* 3. Force the physical scrollbar visibility with moderate opacity */
-html body #notebook-view .short_answer .CodeMirror-vscrollbar {
-    width: 18px !important;
-    background: rgba(200, 200, 200, 0.3) !important; 
-    display: block !important;
-    visibility: visible !important;
-    opacity: 0.6 !important; 
-    position: absolute !important;
-    right: 0 !important;
-    z-index: 9999 !important;
-    pointer-events: auto !important;
-    transition: opacity 0.2s ease;
-}
-
-html body #notebook-view .short_answer .CodeMirror-vscrollbar:hover {
-    opacity: 1 !important;
-}
-
-/* 4. Style the handle (thumb) */
-html body #notebook-view .short_answer .CodeMirror-vscrollbar::-webkit-scrollbar {
-    width: 18px !important;
-    display: block !important;
-}
-
-html body #notebook-view .short_answer .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(68, 68, 68, 0.7) !important;
-    border-radius: 6px !important;
-}
-
-/* 5. Ensure internal content height matches reality */
-html body #notebook-view .short_answer .CodeMirror-sizer {
-    min-height: 736px !important; 
-    padding-bottom: 50px !important;
-}
-
 /* stylelint-enable selector-class-pattern */
 @media print {
-    @page { size: auto; margin: 0; break-inside: avoid; }
-    gradeable-time-remaining-text, .submit-gradeable, aside, .flex-row.shadow, #printing, performance-warning-system-message-text, .mc-clear, .mc-recent, .codebox-clear-reset { display: none; }
-    .content { padding: 0; }
-    .content:not(#gradeable-submission-cont) { display: none; margin: 0; padding: 0; }
-    h1 { font-size: 25px; }
-    h2 { font-size: 21px; }
-    p { font-size: 16px; }
+    @page {
+        size: auto;
+        margin: 0;
+        /* stylelint-disable-next-line at-rule-descriptor-no-unknown */
+        break-inside: avoid;
+    }
+
+    gradeable-time-remaining-text {
+        display: none;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .content:not(#gradeable-submission-cont) {
+        display: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .submit-gradeable {
+        display: none;
+    }
+
+    aside,
+    .flex-row.shadow {
+        display: none;
+    }
+
+    #printing {
+        display: none;
+    }
+
+    #gradeable-time-remaining-text {
+        display: none;
+    }
+
+    h1 {
+        font-size: 25px;
+    }
+
+    h2 {
+        font-size: 21px;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    performance-warning-system-message-text {
+        display: none;
+    }
+
+    .mc-clear,
+    .mc-recent,
+    .codebox-clear-reset {
+        display: none;
+    }
+}
+.large-mirror .CodeMirror {
+    min-height: 120px;
+}
+.notebook .short_answer .CodeMirror-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#notebook-view .short_answer .CodeMirror-vscrollbar {
+    display: block;
+    visibility: visible;
 }
