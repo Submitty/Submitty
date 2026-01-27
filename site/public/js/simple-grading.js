@@ -1045,6 +1045,31 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
+function adjustHeight(el){
+    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+}
+function minimizeHeight(el) {
+    el.style.height = '30px';
+}
+
+function autoResize() {
+    const filterCheckbox = document.getElementById('expand-row-heights');
+    const textareas = document.querySelectorAll('textarea');
+
+    if (filterCheckbox.checked) {
+        textareas.forEach((textarea) => {
+            adjustHeight(textarea);
+        });
+        Cookies.set('expand_row_heights', 'true');
+    }
+    else {
+        textareas.forEach((textarea) => {
+            minimizeHeight(textarea);
+        });
+        Cookies.set('expand_row_heights', 'false');
+    }
+}
+
 // Initialize withdrawn student filter state on page load
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize simple grading
@@ -1065,20 +1090,21 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const expandRowBox = document.getElementById('expand-row-heights');
+    const expandRowStatus = Cookies.get('expand_row_heights') || 'omit';
+
+    if (expandRowBox) {
+        if (expandRowStatus === 'true') {
+            expandRowBox.checked = true;
+        }
+        else {
+            expandRowBox.checked = false;
+        }
+        autoResize();
+    }
+
     window.updateSimpleGradingRowNumbersAndColors();
 
     // Remove table-striped to prevent CSS conflicts with JS-set colors
     $('table#data-table').removeClass('table-striped');
 });
-
-function autoResize(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-
-    if (textarea.scrollHeight > textarea.maxHeight) {
-        textarea.style.overflowY = 'auto';
-    }
-    else {
-        textarea.style.overflowY = 'scroll';
-    }
-}
