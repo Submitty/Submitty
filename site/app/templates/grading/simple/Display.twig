@@ -151,15 +151,9 @@
                 {% if action == 'lab' %}
                     {% set colspan = 5 + gradeable.getComponents()|length %}
                     {% for component in gradeable.getComponents() %}
-                        {% if not component.isText() %}
-                            <th style="width:125px" scope="col">
-                                {{ component.getTitle() }}
-                            </th>
-                        {% else %}
-                            <th style="width:200px" scope="col">
-                                {{ component.getTitle() }}
-                            </th>
-                        {% endif %}
+                        <th style="{{ component.isText() ? 'width: 200px;' : 'width: 125px;' }}" scope="col">
+                            {{ component.getTitle() }}
+                        </th>
                     {% endfor %}
                 {% else %}
                     {% set colspan = 5 + components_numeric|length + components_text|length %}
@@ -264,7 +258,7 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
+                class="cell-grade cell-checkpoint {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
@@ -286,7 +280,7 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-entry text-entry-cell"
+            <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-comment-{{ section_id }}-{{ index }}-{{loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
@@ -350,7 +344,7 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-entry text-entry-cell"
+            <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"

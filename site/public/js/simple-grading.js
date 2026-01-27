@@ -339,12 +339,9 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
-function adjustHeight(el) {
-    el.style.height = el.scrollHeight > el.clientHeight
-        ? `${el.scrollHeight}px`
-        : '30px';
+function adjustHeight(el){
+    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
 }
-
 function minimizeHeight(el) {
     el.style.height = '30px';
 }
@@ -1043,13 +1040,6 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }
     }
-}
-
-function adjustHeight(el){
-    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
-}
-function minimizeHeight(el) {
-    el.style.height = '30px';
 }
 
 function autoResize() {
