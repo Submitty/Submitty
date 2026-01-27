@@ -41,16 +41,21 @@ class GradeablesController extends AbstractController {
 
     #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
     public function viewUsersGradeableList(string $term, string $course): JsonResponse {
-        $user_id = $_GET['user_id'] ?? '';
-        if (($this->core->getUser()->getGroup() !== \app\models\User::GROUP_INSTRUCTOR) && ($user_id !== $this->core->getUser()->getId())) {
-            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
-        }
+
         if (!$this->core->getQueries()->courseExists($term, $course)) {
             return JsonResponse::getFailResponse("Course $course for term $term does not exist");
         }
+
+        $user = $this->core->getUser();
+        if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
+            $user_id = $_GET['user_id'] ?? '';
+            if ($user_id !== '') {
+               $user = $this->core->getQueries()->getUserById($user_id);
+            }            
+        } 
+
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
-        $user = $this->core->getQueries()->getUserById($user_id);
         $gradeables = new GradeableList($this->core, $user);
         return JsonResponse::getSuccessResponse($gradeables->toJson(true));
     }
