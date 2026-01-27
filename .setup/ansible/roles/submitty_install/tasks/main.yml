@@ -123,7 +123,7 @@
   ansible.builtin.replace:
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "__cert_file__"
-    replace: "{{ submitty_install_ssl_cert_file }}"\
+    replace: "{{ submitty_install_ssl_cert_file }}"
   when: submitty_install_ssl_enabled | bool
 
 - name: Set key file for ssl
