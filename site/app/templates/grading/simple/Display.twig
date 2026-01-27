@@ -81,6 +81,9 @@
                 <label for="filter-withdrawn" class="column-wrapper">Hide Withdrawn Students
                     <input type="checkbox" id="filter-withdrawn" onchange="filter_withdrawn_students()">
                 </label>
+                <label for="auto-expand" class="column-wrapper">Auto-Expand Rows
+                    <input type="checkbox" id="expand-row-heights" onchange="autoResize()">
+                </label>
             {% endif %}
         </div>
     </div>
@@ -148,7 +151,7 @@
                 {% if action == 'lab' %}
                     {% set colspan = 5 + gradeable.getComponents()|length %}
                     {% for component in gradeable.getComponents() %}
-                        <th style="width:150px" scope="col">
+                        <th style="{{ component.isText() ? 'width: 200px;' : 'width: 125px;' }}" scope="col">
                             {{ component.getTitle() }}
                         </th>
                     {% endfor %}
@@ -157,14 +160,14 @@
                     {% if components_numeric|length > 0 %}
                         {% set colspan = colspan + 1 %}
                         {% for component in components_numeric %}
-                            <th style="width:150px; text-align: center" scope="col">
+                            <th style="width:90px; text-align: center" scope="col">
                                 {{ component.getTitle() }}({{ component.getMaxValue() }})
                             </th>
                         {% endfor %}
                         <th style="width:60px; text-align: center" scope="col">Total</th>
                     {% endif %}
                     {% for component in components_text %}
-                        <th style="width:200px" style="text-align: center">
+                        <th style="width:250px" style="text-align: center">
                             {{ component.getTitle() }}
                         </th>
                     {% endfor %}
@@ -255,7 +258,7 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
+                class="cell-grade cell-checkpoint {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
@@ -277,7 +280,7 @@
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-grade"
+            <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-comment-{{ section_id }}-{{ index }}-{{loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
@@ -288,7 +291,6 @@
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                   rows="1"
-                  style="resize: vertical;"
             >{{ component_grade ? component_grade.getComment() : '' }}</textarea>
         </td>
     {% endfor %}
@@ -306,8 +308,8 @@
             {% set total = total + component_score %}
             <td class="option-small-input">
                 <input
-                    class="option-small-box cell-grade" tabindex="0"
-                    style="text-align: center; width: 120px; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                    class="option-small-box cell-entry" tabindex="0"
+                    style="text-align: center; width: 80px; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_score == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="number"
                     id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
@@ -337,21 +339,12 @@
         </td>
     {% endif %}
 
-    <script>
-        function adjustHeight(el){
-            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
-        }
-        function minimizeHeight(el) {
-            el.style.height = '30px';
-        }
-    </script>
-
     {% set text_start = components_numeric|length %}
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
         <td class="option-small-input">
-            <textarea class="option-small-box cell-grade"
+            <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
                   onclick="this.dataset.typing || this.select()"
@@ -362,7 +355,6 @@
                   data-id="{{ component.getId() }}"
                   aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
                   rows="1"
-                  style="resize: vertical;"
             >{{ component_grade ? component_grade.getComment() : '' }}</textarea>
         </td>
     {% endfor %}

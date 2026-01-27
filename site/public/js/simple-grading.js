@@ -339,12 +339,9 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
-function adjustHeight(el) {
-    el.style.height = el.scrollHeight > el.clientHeight
-        ? `${el.scrollHeight}px`
-        : '30px';
+function adjustHeight(el){
+    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
 }
-
 function minimizeHeight(el) {
     el.style.height = '30px';
 }
@@ -1045,6 +1042,24 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
+function autoResize() {
+    const filterCheckbox = document.getElementById('expand-row-heights');
+    const textareas = document.querySelectorAll('textarea');
+
+    if (filterCheckbox.checked) {
+        textareas.forEach((textarea) => {
+            adjustHeight(textarea);
+        });
+        Cookies.set('expand_row_heights', 'true');
+    }
+    else {
+        textareas.forEach((textarea) => {
+            minimizeHeight(textarea);
+        });
+        Cookies.set('expand_row_heights', 'false');
+    }
+}
+
 // Initialize withdrawn student filter state on page load
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize simple grading
@@ -1063,6 +1078,19 @@ window.addEventListener('DOMContentLoaded', () => {
             withdrawnFilterBox.checked = true;
             withdrawnFilterElements.hide();
         }
+    }
+
+    const expandRowBox = document.getElementById('expand-row-heights');
+    const expandRowStatus = Cookies.get('expand_row_heights') || 'omit';
+
+    if (expandRowBox) {
+        if (expandRowStatus === 'true') {
+            expandRowBox.checked = true;
+        }
+        else {
+            expandRowBox.checked = false;
+        }
+        autoResize();
     }
 
     window.updateSimpleGradingRowNumbersAndColors();
