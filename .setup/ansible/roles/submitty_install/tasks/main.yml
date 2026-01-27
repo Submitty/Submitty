@@ -50,6 +50,7 @@
         {{ submitty_install_sysadmin_email }}
         {{ submitty_install_institution_url }}
         {{ submitty_install_authentication_method }}
+        {{ submitty_install_admin_username }}
         {{ submitty_install_email_enabled }}
         {{ submitty_install_admin_email }}
         {{ submitty_install_admin_password }}
