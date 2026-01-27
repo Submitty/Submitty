@@ -5,6 +5,7 @@ const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
+    updateToggleButtonText();
     const collapsedSections = Cookies.get('collapsed_sections');
     collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
@@ -88,6 +89,22 @@ function hideGradeableMessage() {
     message.css('display', 'none');
 }
 
+function getCollapsedSections() {
+    return JSON.parse(Cookies.get('collapsed_sections') || '[]');
+}
+
+function updateToggleButtonText() {
+    const collapsed = getCollapsedSections();
+    const button = $('#toggle-all-sections-btn');
+
+    if (collapsed.length === 0) {
+        button.text('Collapse All Sections');
+    }
+    else {
+        button.text('Expand All Sections');
+    }
+}
+
 function updateCollapsedSections() {
     Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
 }
@@ -99,6 +116,7 @@ function expandAllSections() {
     });
     collapseItems.clear();
     updateCollapsedSections();
+    updateToggleButtonText();
 }
 
 function collapseAllSections() {
@@ -109,6 +127,18 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
+    updateToggleButtonText();
+}
+
+function toggleAllSections() {
+    const collapsed = getCollapsedSections();
+
+    if (collapsed.length === 0) {
+        collapseAllSections();
+    }
+    else {
+        expandAllSections();
+    }
 }
 
 function inquiryUpdate() {
