@@ -63,32 +63,54 @@
                             {% if 'sections_registration_id' in section|keys %}
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
-                            <tr>
-                                <td Section {{ section['sections_registration_id'] }} </td>
-                                <td class="fas fa-pencil-alt" {{ section['course_section_id'] }} </td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
-                                {% if is_self_register %}
-                                    <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                <tr>
+                                    <td>Section {{ section['sections_registration_id'] }}</td>
+                                    <td class="course-id-cell">
+                                        <button
+                                            type="button"
+                                            class="edit-course-btn"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Edit Course ID"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <span class="course-id-text">{{ section['course_section_id'] }}</span>
                                     </td>
-                                {% endif %}
-                            </tr>
+                                    <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                                    {% if is_self_register %}
+                                        <td>
+                                            <input
+                                                type="radio"
+                                                name="default_section"
+                                                value="{{ section['sections_registration_id'] }}"
+                                                {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                            />
+                                        </td>
+                                    {% endif %}
+                                </tr>
                             {% else %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>0</td>
+                                <tr>
+                                    <td>Section {{ section['sections_registration_id'] }}</td>
+                                    <td class="course-id-cell">
+                                        <button
+                                            type="button"
+                                            class="edit-course-btn"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Edit Course ID"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <span class="course-id-text">{{ section['course_section_id'] }}</span>
+                                    </td>
+                                    <td>0</td>
                                 {% if is_self_register %}
                                     <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
+                                        <input
+                                            type="radio"
+                                            name="default_section"
+                                            value="{{ section['sections_registration_id'] }}"
                                             {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
                                         />
                                     </td>
