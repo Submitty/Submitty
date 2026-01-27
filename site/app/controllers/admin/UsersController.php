@@ -563,23 +563,7 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
-        elseif (isset($_POST['update_course_ID']) && $_POST['update_course_ID'] !== "") {
-            if (User::validateUserData('registration_section', $_POST['update_course_ID'])) {
-                $num_new_ID = $this->core->getQueries()->updateCourseID($_POST['update_course_ID']);
 
-                if($num_new_ID == 0) {
-                        $this->core->addErrorMessage("Section {$_POST['update_course_ID']} Course ID not updated.");
-                    }
-                    else {
-                        $this->core->addSuccessMessage("Registration section {$_POST['update_course_ID']} Course ID updated.");
-                    }
-
-            }
-            else {
-                $this->core->addErrorMessage("Course Id entered does not follow the specified format");
-                $_SESSION['request'] = $_POST;
-            }
-        }
         elseif (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
@@ -621,6 +605,20 @@ class UsersController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
+    }
+    #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
+    public function updateCourseId() {
+        $this->core->checkCsrfToken($_POST['csrf_token']);
+
+        $section_id = $_POST['section_id'] ?? null;
+        $course_id  = trim($_POST['course_id'] ?? '');
+
+        if ($section_id === null || $course_id === '') {
+            return $this->core->getOutput()->renderJsonError('Invalid input');
+        }
+        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
+
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
