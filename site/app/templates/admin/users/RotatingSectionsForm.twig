@@ -72,6 +72,7 @@
                                             data-section-id="{{ section['sections_registration_id'] }}"
                                             data-course-id="{{ section['course_section_id'] }}"
                                             title="Edit Course ID"
+                                            onclick="showEditCourseIdPopup({{ section['course_section_id'] }})"
                                         >
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
@@ -99,6 +100,7 @@
                                             data-section-id="{{ section['sections_registration_id'] }}"
                                             data-course-id="{{ section['course_section_id'] }}"
                                             title="Edit Course ID"
+                                            onclick="showEditCourseIdPopup({{ section['course_section_id'] }})"
                                         >
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
@@ -285,4 +287,14 @@
             </div>
         </div>
     </form>
+    <script>
+        function showEditCourseIdPopup(course_id) {
+            $('.popup-form').css('display', 'none');
+            const form = $('#edit-courseid-form');
+            showPopup('#edit-courseid-form');
+            form.find('.form-body').scrollTop(0);
+            $('#new-course-id').focus();
+        }
+    </script>
 </div>
+{% include 'EditCourseIDForm.twig' %}

@@ -1,0 +1,24 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-courseid-form{% endblock %}
+{% block title %}Edit Course ID{% endblock %}
+{% block body %}
+    <p class="std-margin">
+        Enter a unique 5 digit number used to identify a specific section of a course.
+    </p>
+    <div class="flex-col" id="user_settings_modal">
+        <input id="course-id-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="edit_user_row">
+            <label for="new-course-id">New Course ID:&emsp;</label>
+            <input type="text"/>
+        </div>
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateCourseID()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
