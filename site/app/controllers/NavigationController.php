@@ -14,11 +14,15 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    #[Route('/time.js')]
-    public function time() {
+    #[Route('verify_time.js')]
+    public function verify_time() {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderTwigOutput('TimeHeader.twig', ["server_time" => 0]);
+        header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        header("Pragma: no-cache"); // HTTP 1.0.
+        header("Expires: 0"); // Proxies.
+        header("Content-Type: text/javascript");
+        return $this->core->getOutput()->renderTwigOutput('TimeHeader.twig', ["server_time" => time()]);
     }
 
     #[Route('/courses/{_semester}/{_course}', requirements: ['_semester' => '^(?!api)[^\/]+', '_course' => '[^\/]+'])]
