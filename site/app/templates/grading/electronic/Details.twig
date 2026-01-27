@@ -74,11 +74,11 @@
         {% endif %}
         {% if can_regrade %}
             <div>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-testid="regrade-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Regrade All Students <span style="margin-left: 6px" class="sr-only"></span>
                 </button>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(0,event,confirmMessage);">Active Versions Only</a>
+                    <a class="dropdown-item regrade-btn-all" data-testid="regrade-all" onclick="ajaxCountRegrade(0,event,confirmMessage);">Active Versions Only</a>
                     <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">All Versions</a>
                 </div>
             </div>
