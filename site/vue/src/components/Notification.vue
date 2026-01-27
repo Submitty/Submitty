@@ -11,16 +11,6 @@ const emit = defineEmits<{
     'mark-individual': [payload: { id: number; course: string }];
 }>();
 
-function goToNotification() {
-    if (props.course && props.notification.url) {
-        console.log('Course URL: ', props.notification.url);
-        window.location.href = props.notification.url;
-    }
-    else if (!props.course && props.notification.url) {
-        window.location.href = props.notification.url;
-    }
-}
-
 function goToCourseNotifications(course: string) {
     const form = document.createElement('form');
     form.method = 'POST';
@@ -81,70 +71,81 @@ function markSeen(course: string, id: number) {
 <template>
   <div
     :key="notification.id"
-    role="link"
     tabindex="0"
     class="notification"
     :class="{ unseen: !notification.seen }"
-    @click="goToNotification()"
   >
-    <i
+    <a
+      class="main-notification-content"
+      :href="props.notification.url"
+    >
+      <i
       v-if="notification.component === 'forum'"
       class="fas fa-comments notification-type"
       title="Forum"
     />
-    <i
-      v-else-if="notification.component === 'grading'"
-      class="fas fa-star notification-type"
-      title="Gradeable"
-    />
-    <i
-      v-else-if="notification.component === 'team'"
-      class="fas fa-users notification-type"
-      title="Team Action"
-    />
+      <i
+        v-else-if="notification.component === 'grading'"
+        class="fas fa-star notification-type"
+        title="Gradeable"
+      />
+      <i
+        v-else-if="notification.component === 'team'"
+        class="fas fa-users notification-type"
+        title="Team Action"
+      />
 
-    <div class="notification-content">
-      <p class="notification-text">
-        {{ notification.content }}
-      </p>
-      <div class="notification-time">
-        <span
-          v-if="!course"
-        >
+      <div class="notification-content">
+        <p class="notification-text">
+          {{ notification.content }}
+        </p>
+        <div class="notification-time">
           <span
-            class="course-notification-link"
-            title="Go to notifications"
-            @click.stop="goToCourseNotifications(notification.course)"
+            v-if="!course"
           >
-            {{ notification.course_name ? notification.course_name : notification.course }}
+            <span
+              class="course-notification-link"
+              title="Go to notifications"
+              @click.stop="goToCourseNotifications(notification.course)"
+            >
+              {{ notification.course_name ? notification.course_name : notification.course }}
+            </span>
+            -
           </span>
-          -
-        </span>
-        {{ notification.notify_time }}
+          {{ notification.notify_time }}
+        </div>
       </div>
-    </div>
-    <a
+    </a>
+    <button
       v-if="!notification.seen"
       class="notification-seen"
-      href="#"
-      role="button"
       title="Mark as seen"
       aria-label="Mark as seen"
       @click.stop.prevent="markSeen(notification.course, Number(notification.id))"
       @keydown.enter.stop.prevent="markSeen(notification.course, Number(notification.id))"
     >
       <i class="far fa-envelope-open notification-seen-icon" />
-    </a>
+    </button>
   </div>
 </template>
 <style scoped>
 .notification {
   display: flex;
   flex-direction: row;
-  gap: 6px;
   border-bottom: 1px solid var(--standard-light-gray);
-  padding: 9px 20px;
   align-items: center;
+}
+
+.notification a {
+  text-decoration: none;
+}
+
+.main-notification-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 10px 10px 20px;
   cursor: pointer;
 }
 
@@ -158,22 +159,12 @@ function markSeen(course: string, id: number) {
   text-decoration: none;
 }
 
-.notification a {
-  color: var(--text-black);
-  text-decoration: none;
-}
-
 .notification.unseen {
     background-color: var(--viewed-content);
 }
 
 .notification:hover {
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
-}
-
-.notification a {
-  color: var(--text-black);
-  text-decoration: none;
 }
 
 .course-notification-link {
@@ -185,11 +176,6 @@ function markSeen(course: string, id: number) {
 
 .notification.unseen {
     background-color: var(--viewed-content);
-}
-
-.notification > * {
-    display: block;
-    align-items: center;
 }
 
 .notification-type {
@@ -208,8 +194,8 @@ function markSeen(course: string, id: number) {
     cursor: pointer;
     text-align: center;
     flex: 0 0 auto;
-    padding: 10px 16px;
-    margin-left: auto;
+    padding: 13px 18px;
+    margin-right: 5px;
     color: var(--text-black);
 }
 
