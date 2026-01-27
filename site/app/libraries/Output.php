@@ -225,6 +225,7 @@ HTML;
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
         $this->addInternalJs('markdown.js');
+        $this->js->add('verify_time.js');
 
         // Add vue support
         $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
