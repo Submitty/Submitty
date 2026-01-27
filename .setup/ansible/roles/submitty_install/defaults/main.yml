@@ -17,7 +17,7 @@ submitty_install_submitty_email: submitty@localhost
 submitty_install_authentication_method: 1
 submitty_install_self_account_creation: n
 submitty_install_admin_username: admin
-submitty_install_email_enabled: n
+submitty_install_email_enabled: y
 submitty_install_admin_email: admin@localhost
 submitty_install_submitty_ip: 127.0.0.1
 submitty_install_admin_password: submitty_admin_password
