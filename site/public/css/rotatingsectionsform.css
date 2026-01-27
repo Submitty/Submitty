@@ -34,3 +34,25 @@ table caption {
 table caption .subcaption {
     font-size: 1rem;
 }
+
+.edit-course-btn {
+    /* stylelint-disable-next-line declaration-no-important */
+    background: none !important;
+    border: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 !important;
+    color: var(--external-link-blue);
+    text-decoration: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    font-family: "Source Sans Pro", sans-serif !important;
+    font-size: 100%;
+    cursor: pointer;
+}
+
+.edit_course-btn:hover {
+    color: var(--external-link-blue);
+}
+
+.edit_course-btn:focus {
+    outline: none;
+}

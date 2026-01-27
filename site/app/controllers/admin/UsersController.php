@@ -563,6 +563,7 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
+
         elseif (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
@@ -604,6 +605,20 @@ class UsersController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
+    }
+    #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
+    public function updateCourseId() {
+        $this->core->checkCsrfToken($_POST['csrf_token']);
+
+        $section_id = $_POST['section_id'] ?? null;
+        $course_id  = trim($_POST['course_id'] ?? '');
+
+        if ($section_id === null || $course_id === '') {
+            return $this->core->getOutput()->renderJsonError('Invalid input');
+        }
+        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
+
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
