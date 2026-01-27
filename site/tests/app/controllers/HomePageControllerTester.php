@@ -55,8 +55,8 @@ class HomePageControllerTester extends BaseUnitTest {
         $course_instructor = $this->createCourse($core, 'course_instructor', 1);
         $val_map = [
             ['student', false, false, [$course_1]],
-            ['student', true, false, []],
-            ['student', false, true, [$course_dropped]],
+            ['student', true, false, [$course_dropped]],
+            ['student', false, true, []],
             ['other_student', false, false, [$course_2]],
             ['other_student', true, false, []],
             ['other_student', false, true, []],
@@ -68,14 +68,6 @@ class HomePageControllerTester extends BaseUnitTest {
         $em = $core->getSubmittyEntityManager();
 
         $repo = $this->createMock(EntityRepository::class);
-
-        $repo->method('findOneBy')->willReturn(
-            new CourseUser(
-                'f24',
-                'course1',
-                $core->getUser()
-            )
-        );
 
         $em->method('getRepository')->willReturn($repo);
 
