@@ -24,14 +24,20 @@
 
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
         let loop = Math.ceil(range/increment);
+        if(increment === 1){
+            loop += 1
+        }
         let tracking = min;
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
             tracking = +parseFloat(tracking+increment).toPrecision(4);
             if(i===(loop-1)){
-                xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <="+max);
-            }
-            else{
+                if(increment === 1){
+                    xBuckets.push(String(max));
+                }else{
+                    xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <="+max);
+                }
+            }else{
                xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <"+tracking);
             }
         }

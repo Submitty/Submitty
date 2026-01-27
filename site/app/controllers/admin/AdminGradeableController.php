@@ -324,7 +324,7 @@ class AdminGradeableController extends AbstractController {
                         break;
                 }
                 if ($gradeable->isUsingSubdirectory()) {
-                    $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
+                    $vcs_values['vcs_subdirectory'] = $gradeable->getVcsSubdirectory();
                 }
                 $return_json['vcs'] = $vcs_values;
             }

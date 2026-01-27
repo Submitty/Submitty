@@ -383,3 +383,31 @@ div:has(.override)
     border: none;
     margin-right: 10px;
 }
+
+.nightly-status-enabled {
+    color: var(--standard-dark-green);
+}
+
+.nightly-status-disabled {
+    color: var(--standard-bronze);
+}
+
+#rg-system-message.info {
+    background-color: var(--good-green);
+    color: var(--default-white);
+    border: 1px solid var(--default-white);
+}
+
+#rg-system-message.warning {
+    background-color: var(--alert-warning-yellow);
+    color: var(--warning-brown);
+}
+
+.rg-small-text {
+    font-size: 0.85em;
+}
+
+.last-run-warning {
+    color: var(--standard-bronze);
+    margin-left: 8px;
+}

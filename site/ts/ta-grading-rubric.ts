@@ -1458,8 +1458,13 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
     }
     else {
         const scoreInput: JQuery<HTMLInputElement> = customMarkContainer.find('input[type=number]');
-        score = parseFloat(scoreInput.val()!);
-        comment = customMarkContainer.find('textarea').val()!;
+        const rawScore = scoreInput.val();
+        const rawComment = customMarkContainer.find('textarea').val();
+        score = rawScore ? parseFloat(rawScore.toString()) : 0.0;
+        if (isNaN(score)) {
+            score = 0.0;
+        }
+        comment = rawComment?.toString() ?? '';
     }
 
     const dataDOMElement = domElement.find('.graded-component-data');
@@ -3113,13 +3118,21 @@ async function checkMark(component_id: number, mark_id: number) {
 
     // Uncheck the first mark if it's checked
     const firstMarkId = getComponentFirstMarkId(component_id);
-    if (isMarkChecked(firstMarkId)) {
+    const wasFirstChecked = isMarkChecked(firstMarkId);
+
+    if (wasFirstChecked) {
         // If first mark is checked, it will be the first element in the array
         gradedComponent.mark_ids.splice(0, 1);
     }
 
     // Then add the mark id to the array
     gradedComponent.mark_ids.push(mark_id);
+
+    // Update visual immediately
+    if (wasFirstChecked) {
+        $(`#mark-${firstMarkId} .mark-selector`).removeClass('mark-selected');
+    }
+    $(`#mark-${mark_id} .mark-selector`).addClass('mark-selected');
 
     // Finally, re-render the component
     await injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
@@ -3142,6 +3155,9 @@ function unCheckMark(component_id: number, mark_id: number) {
             break;
         }
     }
+
+    // Update visual immediately
+    $(`#mark-${mark_id} .mark-selector`).removeClass('mark-selected');
 
     // Finally, re-render the component
     return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);

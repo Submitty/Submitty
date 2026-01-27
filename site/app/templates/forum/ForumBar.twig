@@ -16,12 +16,13 @@
 	<div class="toolbar">
 		<div class="toolbar-left">
 			{% if thread_exists %}
-			<form id="search_block" method="post" action="{{ search_url }}">
+			<form action="javascript:void(0);">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" />
 				<div class="search-actions">
-					<button type="submit" name="search" title="Submit search" class="btn btn-primary" data-testid="search-submit">
+					<i title="Clear search" id="search-clear" class="fa-solid fa-circle-xmark"></i>
+					<button name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
 						Search
 					</button>
 
@@ -40,7 +41,7 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					<a id="clear_filter_button" class="text-decoration-none key_to_click clear-filter-button" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
@@ -158,6 +159,9 @@
 
 	$( document ).ready(function() {
 		loadFilterHandlers();
+		$('#search-content').val(Cookies.get('search_query')).trigger('change');
+		updateThreads(true, null);
+		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
@@ -179,11 +183,6 @@
 		$('#unread').prop("checked", {{cookie_selected_unread_value}});
 
 		unread_marked = checkUnread();
-
-		if(filters_applied.length > 0 || unread_marked ){
-			$('#forum_filter_bar').css('display', 'inline-block');
-			$('#clear_filter_button').css('visibility', 'visible');
-		}
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
 			$("#{{display_option }}_label").addClass('active');
