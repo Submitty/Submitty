@@ -75,51 +75,15 @@ function markSeen(course: string, id: number) {
     class="notification"
     :class="{ unseen: !notification.seen }"
   >
-    <i
-      v-if="notification.component === 'forum'"
-      class="fas fa-comments notification-type"
-      title="Forum"
-    />
-    <i
-      v-else-if="notification.component === 'grading'"
-      class="fas fa-star notification-type"
-      title="Gradeable"
-    />
-    <i
-      v-else-if="notification.component === 'team'"
-      class="fas fa-users notification-type"
-      title="Team Action"
-    />
-
-    <div class="notification-content">
-      <p class="notification-text">
-        {{ notification.content }}
-      </p>
-      <div class="notification-time">
-        <span
-          v-if="!course"
-        >
-          <span
-            class="course-notification-link"
-            title="Go to notifications"
-            @click.stop="goToCourseNotifications(notification.course)"
-          >
-            {{ notification.course_name ? notification.course_name : notification.course }}
-          </span>
-          -
-        </span>
-        {{ notification.notify_time }}
-      </div>
-    </div>
     <a
       class="main-notification-content"
       :href="props.notification.url"
     >
       <i
-        v-if="notification.component === 'forum'"
-        class="fas fa-comments notification-type"
-        title="Forum"
-      />
+      v-if="notification.component === 'forum'"
+      class="fas fa-comments notification-type"
+      title="Forum"
+    />
       <i
         v-else-if="notification.component === 'grading'"
         class="fas fa-star notification-type"
@@ -138,10 +102,17 @@ function markSeen(course: string, id: number) {
         <div class="notification-time">
           <span
             v-if="!course"
-            class="course-notification-link"
-            title="Go to notifications"
-            @click.stop="goToCourseNotifications(notification.course)"
-          >{{ notification.course }}</span><span v-if="!course"> - </span>{{ notification.notify_time }}
+          >
+            <span
+              class="course-notification-link"
+              title="Go to notifications"
+              @click.stop="goToCourseNotifications(notification.course)"
+            >
+              {{ notification.course_name ? notification.course_name : notification.course }}
+            </span>
+            -
+          </span>
+          {{ notification.notify_time }}
         </div>
       </div>
     </a>
