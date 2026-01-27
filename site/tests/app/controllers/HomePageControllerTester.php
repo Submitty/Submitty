@@ -21,7 +21,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $user->method('getGroup')->willReturn(4);
         $user->method('getRegistrationSection')->willReturn('a');
         $user->method('getRegistrationType')->willReturn('graded');
-        $user->method('isManualRegisistration')->willReturn(false);
+        $user->method('isManualRegistration')->willReturn(false);
         return $core;
     }
 
