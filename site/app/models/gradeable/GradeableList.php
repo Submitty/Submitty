@@ -355,6 +355,9 @@ class GradeableList extends AbstractModel {
                 'section' => $section,
                 'section_name' => $this->sectionToString($section),
                 'due_date' => $gradeable->getSubmissionDueDate()
+                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
+                'vcs_repository' => $gradeable->getRepositoryPath($this->core->getUser()),
+                'vcs_subdirectory' => $gradeable->getVcsSubdirectory()
             ];
         }
         return $gradeables;
