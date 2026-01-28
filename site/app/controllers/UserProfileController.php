@@ -46,6 +46,20 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * API route to return user data
+     *
+     */
+    #[Route("/api/me", methods: ["GET"])]
+    public function showUserProfile(): MultiResponse {
+        $user = $this->core->getUser();
+        return JsonResponse::getSuccessResponse(
+            'user_id' => $user->getId(),
+            'user_given_name' => $user->getDisplayedGivenName(),
+            'user_family_name' => $user->getDisplayedFamilyName()
+        );
+    }
+
+    /**
      *
      * Handle ajax request to update the currently logged in user's time zone data.
      *
@@ -80,7 +94,6 @@ class UserProfileController extends AbstractController {
             $user->setPreferredLocale(empty($_POST['locale']) ? null : $_POST['locale']);
             return JsonResponse::getSuccessResponse([ 'locale' => $user->getPreferredLocale() ]);
         }
-
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 
