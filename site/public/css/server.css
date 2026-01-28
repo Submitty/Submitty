@@ -1304,18 +1304,6 @@ body.no-scroll {
     width: 100%;
 }
 
-/* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
-.cell-grade {
-    cursor: pointer;
-    border-left: 1px solid var(--standard-medium-gray);
-}
-
-/* Makes the grade and time on checkpoint pages not visible at first */
-.simple-grade-grader,
-.simple-grade-date {
-    display: none;
-}
-
 .tooltip {
     position: relative;
     display: inline-block;
