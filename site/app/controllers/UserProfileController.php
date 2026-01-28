@@ -52,10 +52,11 @@ class UserProfileController extends AbstractController {
     #[Route("/api/me", methods: ["GET"])]
     public function apiMeResponse(): MultiResponse {
         $user = $this->core->getUser();
-        return JsonResponse::getSuccessResponse(
+        return JsonResponse::getSuccessResponse([
             'user_id' => $user->getId(),
             'user_given_name' => $user->getDisplayedGivenName(),
             'user_family_name' => $user->getDisplayedFamilyName()
+        ]
         );
     }
 
