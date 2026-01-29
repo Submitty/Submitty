@@ -19,7 +19,10 @@
             {% endfor %}
         </pre>
     {% endif %}
-    <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
+    {% if is_faculty %}
+        <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
+    {% endif %}
+
     {% if update_needed %}
         <span class="btn btn-danger status" data-testid="docker-status" style="margin-top: 1em">Changes Pending</span>
     {% else %}
@@ -158,6 +161,7 @@
 </div>
 {% endif %}
 
+{% if is_faculty %}
 <div class="content">
     <div> </div>
     <h2 class="docker-header">Add Image to Capability</h2>
@@ -184,5 +188,14 @@
         </label>
         <input type="text" id="add-field" style="width:93%; padding:1%;"></input>
     </div>
-    <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
+    <button class="send-button btn btn-primary" id="send-button" data-testid="add-image-to-capability" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
+{% else %}
+    <div class="content danger-banner" data-testid="no-permission-banner">
+        <h4>
+            You do not have permission to add images to capabilities.
+            <br>
+            Please contact a faculty member or sysadmin for assistance.
+        </h4>
+    </div>
+{% endif %}

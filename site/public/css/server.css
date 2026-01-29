@@ -2207,3 +2207,8 @@ End of slider switch
     background-color: var(--standard-vibrant-yellow);
     color: var(--default-black);
 }
+
+.danger-banner {
+    background-color: var(--standard-light-red);
+    color: var(--default-black);
+}

@@ -305,4 +305,22 @@ describe('Docker UI Test', () => {
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
     });
+
+    it('Should test instructor user permissions', () => {
+        // Logout current user
+        cy.logout();
+
+        // Login as an instructor but not a faculty member
+        cy.login('manne');
+        cy.visit(docker_ui_path);
+
+        // Update docker and machines button should not exist
+        cy.get('#update-machines').should('not.exist');
+
+        // Add image to capability section should not exist
+        cy.get('[data-testid="add-image-to-capability"]').should('not.exist');
+
+        // Should show permission error message
+        cy.get('[data-testid="no-permission-banner"]').should('contain.text', 'You do not have permission to add images to capabilities.');
+    });
 });
