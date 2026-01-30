@@ -55,6 +55,10 @@ class ForumController extends AbstractController {
         return $unread_threads;
     }
 
+    private function searchQuery(): string {
+        return $_COOKIE["search_query"] ?? "";
+    }
+
     private function getSavedCategoryIds($currentCourse, $category_ids) {
         if (empty($category_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             $category_ids = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
@@ -492,12 +496,6 @@ class ForumController extends AbstractController {
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
     }
 
-    #[Route("/courses/{_semester}/{_course}/forum/search", methods: ["POST"])]
-    public function search() {
-        $results = $this->core->getQueries()->searchThreads($_POST['search-content']);
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
-    }
-
     #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/new", methods: ["POST"])]
     public function publishPost() {
@@ -586,8 +584,9 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
+                $parent_preview = $this->previewText($parent_post_content, 100);
                 $subject = "New Reply: " . $thread_title;
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . $parent_post_content . "\n\nNew Reply:\n\n" . $post_content;
+                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -620,6 +619,18 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * Returns the full text if short, otherwise a preview capped at $limit characters.
+     * Adds "...(truncated)" when truncated.
+     */
+    private function previewText(string $text, int $limit = 300): string {
+        $text = str_replace("\r", "", $text);
+        if (mb_strlen($text, 'UTF-8') <= $limit) {
+            return $text;
+        }
+        return mb_substr($text, 0, $limit, 'UTF-8') . "...(truncated)";
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]
@@ -1117,13 +1128,24 @@ class ForumController extends AbstractController {
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
+        $search_query = $this->searchQuery();
         $scroll_down = filter_var($_POST['scroll_down'] ?? "true", FILTER_VALIDATE_BOOLEAN);
 
         $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
         $thread_status = $this->getSavedThreadStatus($thread_status);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number, $scroll_down);
+        $threads = $repo->getAllThreads(
+            $categories_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number,
+            $scroll_down
+        );
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1165,12 +1187,22 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number
+        );
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread, $block_number);
     }
 
@@ -1183,6 +1215,7 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $option = 'tree';
@@ -1214,7 +1247,16 @@ class ForumController extends AbstractController {
         $merge_thread_options = $repo->getMergeThreadOptions($thread);
 
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $user,
+            $block_number
+        );
         if (!empty($_REQUEST["ajax"])) {
             $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
         }
