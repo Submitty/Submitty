@@ -5,12 +5,20 @@
     <p class="std-margin">
         Enter a unique 5 digit number used to identify a specific section of a course.
     </p>
-    <div class="flex-col" id="user_settings_modal">
-        <input id="course-id-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div class="edit_user_row">
-            <label for="new-course-id">New Course ID:&emsp;</label>
-            <input type="text"/>
-        </div>
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="section_id" />
+
+    <div class="edit_user_row">
+        <label for="new-course-id">New Course ID:&emsp;</label>
+        <input
+            id="new-course-id"
+            name="course_id"
+            type="text"
+            pattern="\d{5}"
+            maxlength="5"
+            required
+        />
     </div>
 {% endblock %}
 {% block form %}

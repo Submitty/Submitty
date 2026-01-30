@@ -72,7 +72,7 @@
                                             data-section-id="{{ section['sections_registration_id'] }}"
                                             data-course-id="{{ section['course_section_id'] }}"
                                             title="Edit Course ID"
-                                            onclick="showEditCourseIdPopup({{ section['course_section_id'] }})"
+                                            onclick="showEditCourseIdPopup(this)"
                                         >
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
@@ -100,7 +100,7 @@
                                             data-section-id="{{ section['sections_registration_id'] }}"
                                             data-course-id="{{ section['course_section_id'] }}"
                                             title="Edit Course ID"
-                                            onclick="showEditCourseIdPopup({{ section['course_section_id'] }})"
+                                            onclick="showEditCourseIdPopup(this)"
                                         >
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
@@ -288,12 +288,62 @@
         </div>
     </form>
     <script>
-        function showEditCourseIdPopup(course_id) {
+        function showEditCourseIdPopup(button) {
             $('.popup-form').css('display', 'none');
             const form = $('#edit-courseid-form');
             showPopup('#edit-courseid-form');
+            const section_id = button.getAttribute('data-section-id');
+            const course_id  = button.getAttribute('data-course-id');
+            form.find('input[name="section_id"]').val(section_id);
+            form.find('#new-course-id').val(course_id);
             form.find('.form-body').scrollTop(0);
             $('#new-course-id').focus();
+        }
+
+        function updateCourseID() {
+            const course_id = $('#new-course-id').val();
+            const section_id = $('#edit-courseid-form')
+                .find('input[name="section_id"]')
+                .val();
+
+            if (!course_id || !section_id) {
+                displayErrorMessage('Missing course ID or section ID');
+                return false;
+            }
+
+            const data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('course_id', course_id);
+            data.append('section_id', section_id);
+
+            $.ajax({
+                url: "{{ update_course_id_url }}",
+                type: 'POST',
+                data,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    const response = JSON.parse(res);
+
+                    if (response.status === 'success') {
+                        const btn = document.querySelector(
+                            `.edit-course-btn[data-section-id="${section_id}"]`
+                        );
+
+                        btn.dataset.courseId = course_id;
+                        btn.closest('.course-id-cell')
+                            .querySelector('.course-id-text')
+                            .textContent = course_id;
+                    }
+                    else {
+                        displayErrorMessage(response.message);
+                        return;
+                    }
+                }
+            });
+
+            $('.popup-form').css('display', 'none');
+            return false;
         }
     </script>
 </div>
