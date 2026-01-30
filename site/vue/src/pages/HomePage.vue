@@ -124,9 +124,9 @@ const buildCourseUrl = (course: Course) => {
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
-            <h3 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
+            <h2 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'" class="courses-rank-title">
               As {{ rank.title }}
-            </h3>
+            </h2>
 
             <div
               v-for="(courses, semester) in groupCoursesBySemester(rank.courses)"
@@ -204,6 +204,10 @@ const buildCourseUrl = (course: Course) => {
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
     flex-grow: 1;
+}
+
+.courses-rank-title {
+    font-size: 19px;
 }
 
 .archive-toggle-btn {
