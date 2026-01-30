@@ -447,6 +447,7 @@ HTML;
 				});
 
 				function sortTable(sort_element_index){
+                    console.log("test");
 					var table = document.getElementById("content_upload_table");
 					var switching = true;
 					while(switching){
