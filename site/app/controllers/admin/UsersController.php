@@ -606,19 +606,40 @@ class UsersController extends AbstractController {
 
         $this->core->redirect($return_url);
     }
+    
     #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
-    public function updateCourseId() {
-        $this->core->checkCsrfToken($_POST['csrf_token']);
+    public function updateCourseId(): JsonResponse {
+        try {
+            $this->core->checkCsrfToken($_POST['csrf_token'] ?? '');
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getErrorResponse('Invalid CSRF token');
+        }
 
         $section_id = $_POST['section_id'] ?? null;
         $course_id  = trim($_POST['course_id'] ?? '');
 
         if ($section_id === null || $course_id === '') {
-            return $this->core->getOutput()->renderJsonError('Invalid input');
+            return JsonResponse::getErrorResponse('Invalid input');
         }
-        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
 
-        return $this->core->getOutput()->renderJsonSuccess();
+        if (!preg_match('/^\d{5}$/', $course_id)) {
+            return JsonResponse::getErrorResponse('Course ID must be a 5-digit number');
+        }
+
+        $semester = $this->core->getConfig()->getTerm();
+        $course   = $this->core->getConfig()->getCourse();
+
+        $this->core->getQueries()->updateCourseSectionId(
+            $section_id,
+            $course_id
+        );
+
+        return JsonResponse::getSuccessResponse([
+            'message'    => 'Course ID updated successfully',
+            'section_id' => $section_id,
+            'course_id'  => $course_id,
+        ]);
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
