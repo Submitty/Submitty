@@ -414,7 +414,7 @@ class GlobalController extends AbstractController {
             "icon" => "fa-calendar"
         ]);
 
-        $is_instructor = count($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) !== 0;
+        $is_instructor = count($this->core->getUser()->getInstructorCourses()) > 0;
         // Create the line for all faculties, superusers, and instructors
         if (
             $this->core->getUser()->accessFaculty()

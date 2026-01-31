@@ -24,7 +24,7 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
-        $is_instructor = count($this->core->getQueries()->getInstructorLevelAccessCourse($user->getId())) !== 0;
+        $is_instructor = count($user->getInstructorCourses()) > 0;
         $is_faculty = $user->accessFaculty();
         if (is_null($user) || (!$is_instructor && !$is_faculty)) {
             return new MultiResponse(

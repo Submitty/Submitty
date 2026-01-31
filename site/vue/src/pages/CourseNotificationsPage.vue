@@ -13,7 +13,7 @@ defineProps<{
   >
     <NotificationsDisplay
       :notifications="notifications"
-      :unseen-count="-1"
+      :unseenCount="-1"
       :course="true"
     />
   </div>
