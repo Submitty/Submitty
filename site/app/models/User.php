@@ -58,7 +58,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getDisplayImageState()
  * @method bool getEnforceSingleSession()
  * @method string getRegistrationSubsection()
- * @method array<int, array<string, string>> getInstructorCourses()
  */
 class User extends AbstractModel implements \JsonSerializable {
     /**
@@ -218,9 +217,9 @@ class User extends AbstractModel implements \JsonSerializable {
     private $anon_id_by_gradeable = [];
 
     /** @prop
-     * @var array<int, array<string, string>> List of courses where the user has instructor level access
+     * @var false|array<int, array<string, string>> List of courses where the user has instructor level access
      */
-    protected $instructor_courses = [];
+    protected $instructor_courses = false;
 
     /**
      * User constructor.
@@ -802,6 +801,16 @@ class User extends AbstractModel implements \JsonSerializable {
      */
     public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
+
+    /**
+     *  @return array<int, array<string, string>> List of courses where the user has instructor level access
+     */
+    public function getInstructorCourses() {
+        if ($this->instructor_courses === false) {
+            $this->instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->id);
+        }
+        return $this->instructor_courses;
     }
 
     /**
