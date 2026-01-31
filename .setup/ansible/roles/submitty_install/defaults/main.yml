@@ -27,5 +27,5 @@ submitty_install_smtp_port: 25
 submitty_install_ssl_cert_file: /etc/ssl/certs/submitty.pem
 submitty_install_ssl_key_file: /etc/ssl/private/submitty.key
 submitty_install_submitty_version: main
-submitty_install_github_url: https://github.com/Submitty/Submitty.git\
+submitty_install_github_url: https://github.com/Submitty/Submitty.git
 submitty_install_ssl_enabled: false
