@@ -77,12 +77,12 @@ describe('Docker UI Test', () => {
         // This tag has no images
         cy.get('button[data-capability=\'et-cetera\']')
             .click();
-        cy.get('.image-row')
+        cy.get('[data-testid="image-row"]')
             .should('not.be.visible');
         // Default filter should have all images
         cy.get('button[data-capability=\'default\']')
             .click();
-        cy.get('.image-row')
+        cy.get('[data-testid="image-row"]')
             .should('be.visible');
     });
 
@@ -316,6 +316,10 @@ describe('Docker UI Test', () => {
 
         // Update docker and machines button should not exist
         cy.get('#update-machines').should('not.exist');
+
+        // images should be visible
+        cy.get('[data-testid="image-row"]').should('exist');
+        cy.get('[data-testid="image-row"]').contains('submitty/autograding-default');
 
         // Add image to capability section should not exist
         cy.get('[data-testid="add-image-to-capability"]').should('not.exist');
