@@ -217,7 +217,7 @@ class User extends AbstractModel implements \JsonSerializable {
     private $anon_id_by_gradeable = [];
 
     /** @prop
-     * @var false|array<int, array<string, string>> List of courses where the user has instructor level access
+     * @var false|array<int, array<string, string>> List of courses where the user has instructor level access, or false if not loaded
      */
     protected $instructor_courses = false;
 
