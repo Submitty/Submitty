@@ -1,4 +1,20 @@
+{% import _self as self %}
+
+
+{% if late_days is defined %}
 <div class="content">
-    <h1>My Late Day Usage</h1>
+    <h1>Your Late Days</h1>
+    <h3>
+    You have {{ late_days.getLateDaysRemaining() }} late days remaining. <br> 
+    </h3>
+    <p>The table below describes your progression throughout the semester towards your late days. Depending on
+    your class, you may have a fixed number of late days or you may be able to earn late days
+    depending on your class. You will find any information regarding when and why you recieved a late day 
+    below.
+    </p>
+
     {% include 'LateDaysTablePlugin.twig' %}
 </div>
+
+{% endif %}
+
