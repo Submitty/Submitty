@@ -7,7 +7,7 @@ use app\models\DockerUI;
 use app\views\AbstractView;
 
 class DockerView extends AbstractView {
-    public function displayDockerPage(DockerUI $docker_ui, string $is_faculty): string {
+    public function displayDockerPage(DockerUI $docker_ui, bool $is_faculty): string {
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
