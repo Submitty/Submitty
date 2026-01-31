@@ -804,7 +804,7 @@ class User extends AbstractModel implements \JsonSerializable {
     }
 
     /**
-     *  @return array<int, array<string, string>> List of courses where the user has instructor level access
+     * @return array<int, array<string, string>> List of courses where the user has instructor level access
      */
     public function getInstructorCourses() {
         if ($this->instructor_courses === false) {
