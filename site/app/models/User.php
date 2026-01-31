@@ -313,7 +313,6 @@ class User extends AbstractModel implements \JsonSerializable {
 
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
-        $this->instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->id);
     }
 
     /**
