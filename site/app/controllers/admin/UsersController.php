@@ -630,10 +630,7 @@ class UsersController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course   = $this->core->getConfig()->getCourse();
 
-        $this->core->getQueries()->updateCourseSectionId(
-            $section_id,
-            $course_id
-        );
+        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
 
         return JsonResponse::getSuccessResponse([
             'message'    => 'Course ID updated successfully',
