@@ -1,9 +1,11 @@
-{% if late_days is defined %}
+
 <div class="content">
     <h1>My Late Days</h1>
+    {% if late_days is defined %}
     <h3>
     Number of late days remaining: {{ late_days.getLateDaysRemaining() }}<br> 
     </h3>
+    {% endif %}
     <p>The table below tracks your late day balance for the semester. Depending on your course policy, you may have a fixed amount 
     or the opportunity to earn additional days. A detailed history of your earned and used late days is provided below.
     </p>
@@ -11,5 +13,5 @@
     {% include 'LateDaysTablePlugin.twig' %}
 </div>
 
-{% endif %}
+
 
