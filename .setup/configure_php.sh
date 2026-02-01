@@ -5,18 +5,19 @@ PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 SUBMITTY_CONFIG_DIR="/usr/local/submitty/config"
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submitty.json")
 
+# shellcheck disable=SC1091
 source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 # Edit php settings.  Note that if you need to accept larger files,
 # you’ll need to increase both upload_max_filesize and
 # post_max_filesize
 
-sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
-sed -i -e 's/^post_max_size = 8M/post_max_size = 200M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' "/etc/php/${PHP_VERSION}/fpm/php.ini"
+sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 200M/g' "/etc/php/${PHP_VERSION}/fpm/php.ini"
+sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' "/etc/php/${PHP_VERSION}/fpm/php.ini"
+sed -i -e 's/^post_max_size = 8M/post_max_size = 200M/g' "/etc/php/${PHP_VERSION}/fpm/php.ini"
+sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' "/etc/php/${PHP_VERSION}/fpm/php.ini"
+sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' "/etc/php/${PHP_VERSION}/fpm/php.ini"
 # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
 # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
 # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -34,25 +35,25 @@ DISABLED_FUNCTIONS+="pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_ws
 DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
 DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
 
-if [ ${IS_VAGRANT} != 1 ]; then
+if [ "${IS_VAGRANT}" != "1" ]; then
     DISABLED_FUNCTIONS+="phpinfo,"
 fi
 
-sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/${PHP_VERSION}/fpm/php.ini
+sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" "/etc/php/${PHP_VERSION}/fpm/php.ini"
 
-if [ ${IS_VAGRANT} == 1 ]; then
+if [ "${IS_VAGRANT}" == "1" ]; then
     # Create folder and give permissions to PHP user for xdebug profiling
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
-    usermod -aG vagrant ${PHP_USER}
+    mkdir -p "${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler"
+    usermod -aG vagrant "${PHP_USER}"
 
     # Enable xdebug support for debugging
     phpenmod xdebug
 
     # In case you reprovision without wiping the drive, don't paste this twice
-    if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+    if ! grep -q 'xdebug\.remote_enable' "/etc/php/${PHP_VERSION}/mods-available/xdebug.ini"
     then
         # Tell it to send requests to our host on port 9003 (PhpStorm default)
-        cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+        cat << EOF >> "/etc/php/${PHP_VERSION}/mods-available/xdebug.ini"
 xdebug.start_with_request=trigger
 xdebug.client_port=9003
 xdebug.discover_client_host=true
@@ -60,12 +61,12 @@ xdebug.mode=debug
 EOF
     fi
 
-    if [ -z $(grep 'xdebug\.profiler_enable_trigger' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+    if ! grep 'xdebug\.profiler_enable_trigger' "/etc/php/${PHP_VERSION}/mods-available/xdebug.ini"
     then
         # Allow remote profiling and upload outputs to the shared folder
-        cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+        cat << EOF >> "/etc/php/${PHP_VERSION}/mods-available/xdebug.ini"
 xdebug.output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
-        sed -i -e "s/xdebug.mode=debug/xdebug.mode=debug,profile/g" /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+        sed -i -e "s/xdebug.mode=debug/xdebug.mode=debug,profile/g" "/etc/php/${PHP_VERSION}/mods-available/xdebug.ini"
     fi
 fi
