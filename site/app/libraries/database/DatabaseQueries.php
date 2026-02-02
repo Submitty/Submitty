@@ -3210,7 +3210,7 @@ ORDER BY user_id ASC"
         return $this->submitty_db->getRowCount();
     }
 
-    public function updateCourseSectionId($section_id, $course_id): void {
+    public function updateCourseSectionId($section_id, $course_id) {
         $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE registration_section_id = ?", [$course_id, $section_id]);
 
         $semester = $this->core->getConfig()->getTerm();
@@ -3218,7 +3218,7 @@ ORDER BY user_id ASC"
         $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?", [$course_id, $section_id]);
     }
 
-    public function courseIdExists(string $course_id, string $section_id): bool {
+    public function courseIdExists($course_id, $section_id): bool {
         return $this->course_db->query("SELECT 1 FROM sections_registration WHERE course_section_id = :course_id 
         AND sections_registration_id != :section_id LIMIT 1", [ $course_id, $section_id]) !== null;
     }
