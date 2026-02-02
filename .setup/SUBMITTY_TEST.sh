@@ -35,7 +35,7 @@ if [ -z "$1" ] || [ "$1" == "help" ]; then
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
           php-lint: phpcs & phpstan
-          php-unit: run php unit tests
+          php-unit: run php unit tests [option: --filter testFunctionName, testFile]
           js-lint : eslint
           css-lint: css-stylelint
           "
