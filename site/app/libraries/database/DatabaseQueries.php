@@ -3218,6 +3218,11 @@ ORDER BY user_id ASC"
         $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?",[$course_id, $section_id]);
     }
 
+    public function courseIdExists($course_id, $section_id): bool {
+        return $this->course_db->query("SELECT 1 FROM sections_registration WHERE course_section_id = :course_id 
+        AND sections_registration_id != :section_id LIMIT 1", [ $course_id, $section_id]) !== null;
+    }
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", [$gradeable_id]);
         foreach ($graders as $grader => $sections) {

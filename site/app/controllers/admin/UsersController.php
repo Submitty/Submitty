@@ -627,6 +627,10 @@ class UsersController extends AbstractController {
             return JsonResponse::getErrorResponse('Course ID must be a 5-digit number');
         }
 
+        if ($this->core->getQueries()->courseIdExists($course_id, $section_id)) {
+            return $this->core->getOutput()->renderJsonFail('That Course ID is already in use.');
+        }
+        
         $semester = $this->core->getConfig()->getTerm();
         $course   = $this->core->getConfig()->getCourse();
 
