@@ -612,18 +612,18 @@ class UsersController extends AbstractController {
             $this->core->checkCsrfToken($_POST['csrf_token'] ?? '');
         }
         catch (\Exception $e) {
-            return JsonResponse::getErrorResponse('Invalid CSRF token');
+            return $this->core->getOutput()->rednerJsonFail('Invalid CSRF token');
         }
 
         $section_id = $_POST['section_id'] ?? null;
         $course_id  = trim($_POST['course_id'] ?? '');
 
         if ($section_id === null || $course_id === '') {
-            return JsonResponse::getErrorResponse('Invalid input');
+            return $this->core->getOutput()->rednerJsonFail('Invalid input');
         }
 
         if (!preg_match('/^\d{5}$/', $course_id)) {
-            return JsonResponse::getErrorResponse('Course ID must be a 5-digit number');
+            return $this->core->getOutput()->rednerJsonFail('Course ID must be a 5-digit number');
         }
 
         if ($this->core->getQueries()->courseIdExists($course_id, $section_id)) {
@@ -635,7 +635,7 @@ class UsersController extends AbstractController {
 
         $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
 
-        return JsonResponse::getSuccessResponse([
+        return $this->core->getOutput()->renderJsonSuccess([
             'message'    => 'Course ID updated successfully',
             'section_id' => $section_id,
             'course_id'  => $course_id,
