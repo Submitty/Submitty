@@ -49,10 +49,10 @@ table caption .subcaption {
     cursor: pointer;
 }
 
-.edit_course-btn:hover {
+.edit-course-btn:hover {
     color: var(--external-link-blue);
 }
 
-.edit_course-btn:focus {
+.edit-course-btn:focus {
     outline: none;
 }
