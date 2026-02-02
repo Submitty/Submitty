@@ -27,7 +27,7 @@ run_css_style() {
 
 run_php_unit() {
     COMPOSER_ALLOW_SUPERUSER=1 composer install
-    sudo -u submitty_php php vendor/bin/phpunit
+    sudo -u submitty_php php vendor/bin/phpunit "${@:2}" 2>/dev/null
 }
 
 if [ -z "$1" ] || [ "$1" == "help" ]; then
@@ -47,7 +47,7 @@ elif [ "$1" == "php-lint" ]; then
     run_php_cs
     run_php_stan "$@"
 elif [ "$1" == "php-unit" ]; then
-    run_php_unit
+    run_php_unit "$@"
 elif [ "$1" == "js-lint" ]; then
     run_js_es
 elif [ "$1" == "css-lint" ]; then
