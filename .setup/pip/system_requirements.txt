@@ -20,7 +20,7 @@ sqlalchemy==2.0.45
 psutil==7.2.2
 python-dateutil==2.9.0.post0
 watchdog==6.0.0
-xlsx2csv==0.8.4
+xlsx2csv==0.8.6
 pause==0.3
 paramiko==4.0.0
 tzlocal==5.3.1
