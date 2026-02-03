@@ -21,7 +21,6 @@ interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
     unseenCount: number;
-    course: boolean;
     userId: string;
 }
 
