@@ -158,7 +158,6 @@ export default tseslint.config(
             'vue/valid-define-options': ['error'],
             'vue/html-indent': ['error', 2],
             'vue/attribute-hyphenation': ['error', 'always'],
-
         },
     },
     {
