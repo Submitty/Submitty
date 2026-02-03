@@ -687,29 +687,7 @@ else
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
-        echo -e "/var/run/postgresql
-${DB_USER}
-${DATABASE_PASSWORD}
-${DB_COURSE_USER}
-${DB_COURSE_PASSWORD}
-America/New_York
-en_US
-100
-${SUBMISSION_URL}
-
-
-sysadmin@example.com
-https://example.com
-1
-submitty-admin
-y
-
-
-submitty@vagrant
-do-not-reply@vagrant
-localhost
-25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --dev-vm --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json

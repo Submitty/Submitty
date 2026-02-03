@@ -9,7 +9,6 @@ import pwd
 import secrets
 import shutil
 import string
-import tzlocal
 import tempfile
 
 
@@ -28,7 +27,9 @@ def get_ids(user):
         raise SystemExit("ERROR: Could not find user: " + user)
 
 
-def get_input(question, default=""):
+def get_input(question, default="", use_default = False):
+    if use_default:
+        return default
     add = "[{}] ".format(default) if default != "" else ""
     user = input("{}: {}".format(question, add)).strip()
     if user == "":
@@ -61,9 +62,8 @@ parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty to be in debug mode. '
                                                                         'This should not be used in production!')
-parser.add_argument('--setup-for-sample-courses', action='store_true', default=False,
-                    help="Sets up Submitty for use with the sample courses. This is a Vagrant convenience "
-                         "flag and should not be used in production!")
+parser.add_argument('--dev-vm', action='store_true', default=False,
+                    help="Sets up submitty for use with Vagrant for developers, not to be used for production")
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
@@ -157,6 +157,7 @@ NUM_GRADING_SCHEDULER_WORKERS = 5
 SETUP_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 SETUP_REPOSITORY_DIR = os.path.join(SUBMITTY_REPOSITORY, '.setup')
 
+DEFAULTS_FILE = os.path.join(SETUP_REPOSITORY_DIR, 'defaults.json')
 INSTALL_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
@@ -174,41 +175,9 @@ authentication_methods = [
     'SamlAuthentication'
 ]
 
-defaults = {
-    'database_host': 'localhost',
-    'database_port': 5432,
-    'database_user': 'submitty_dbuser',
-    'database_course_user': 'submitty_course_dbuser',
-    'submission_url': '',
-    'supervisor_user': 'submitty',
-    'vcs_url': '',
-    'authentication_method': 0,
-    'institution_name' : '',
-    'institution_homepage' : '',
-    'user_create_account' : False,
-    'timezone' : str(tzlocal.get_localzone()),
-    'submitty_admin_username': '',
-    'email_user': '',
-    'email_password': '',
-    'email_sender': 'submitty@myuniversity.edu',
-    'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
-    'email_server_hostname': 'mail.myuniversity.edu',
-    'email_server_port': 25,
-    'email_internal_domain': 'example.com',
-    'course_code_requirements': "Please follow your school's convention for course code.",
-    'sys_admin_email': '',
-    'sys_admin_url': '',
-    'ldap_options': {
-        'url': '',
-        'uid': '',
-        'bind_dn': ''
-    },
-    'saml_options': {
-        'name': '',
-        'username_attribute': ''
-    },
-    'course_material_file_upload_limit_mb': 100
-}
+defaults = {}
+with open(DEFAULTS_FILE, 'r') as defaults_file:
+    defaults = json.load(defaults_file)
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
@@ -249,73 +218,73 @@ if args.worker:
 
 print('Hit enter to use default in []')
 print()
-
+USE_DEFAULT = args.dev_vm
 if args.worker:
-    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
+    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'], USE_DEFAULT)
     print('SUPERVISOR USER : {}'.format(SUPERVISOR_USER))
 else:
-    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
+    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'], USE_DEFAULT)
     print()
 
     if not os.path.isdir(DATABASE_HOST):
-        DATABASE_PORT = int(get_input('What is the database port?', defaults['database_port']))
+        DATABASE_PORT = int(get_input('What is the database port?', defaults['database_port']), USE_DEFAULT)
         print()
     else:
         DATABASE_PORT = defaults['database_port']
 
-    DATABASE_USER = get_input('What is the global database user/role?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the global database user/role?', defaults['database_user'], USE_DEFAULT)
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the password for the global database user/role {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the global database user/role {}? {}'.format(DATABASE_USER, default), USE_DEFAULT)
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
 
-    DATABASE_COURSE_USER = get_input('What is the course database user/role?', defaults['database_course_user'])
+    DATABASE_COURSE_USER = get_input('What is the course database user/role?', defaults['database_course_user'], USE_DEFAULT)
     print()
 
     default = ''
     if 'database_course_password' in defaults and DATABASE_COURSE_USER == defaults['database_course_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_COURSE_PASSWORD = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_COURSE_USER, default))
+    DATABASE_COURSE_PASSWORD = get_input('What is the password for the course database user/role {}? {}'.format(DATABASE_COURSE_USER, default), USE_DEFAULT)
     if DATABASE_COURSE_PASSWORD == '' and DATABASE_COURSE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
         DATABASE_COURSE_PASSWORD = defaults['database_course_password']
     print()
 
-    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
+    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'], USE_DEFAULT)
     print()
 
     DEFAULT_LOCALE = get_input('What default language should the Submitty site use?', 'en_US')
     print()
 
-    COURSE_MATERIAL_UPLOAD_LIMIT_MB = get_input('What is the maximum file upload size for course materials (in MB)?', defaults['course_material_file_upload_limit_mb'])
+    COURSE_MATERIAL_UPLOAD_LIMIT_MB = get_input('What is the maximum file upload size for course materials (in MB)?', defaults['course_material_file_upload_limit_mb'], USE_DEFAULT)
     print()
 
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
-                               'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+                               'https://submitty.cs.rpi.edu)', defaults['submission_url'], USE_DEFAULT).rstrip('/')
     print()
 
-    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url']).rstrip('/')
+    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url'], USE_DEFAULT).rstrip('/')
     print()
 
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
-                             defaults['institution_name'])
+                             defaults['institution_name'], USE_DEFAULT)
     print()
 
     if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
         INSTITUTION_HOMEPAGE = ''
     else:
         INSTITUTION_HOMEPAGE = get_input("What is the url of your institution\'s homepage? "
-                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'], USE_DEFAULT)
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
     
-    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
-    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
+    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'], USE_DEFAULT)
+    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'], USE_DEFAULT)
 
     print('What authentication method to use:')
     for i in range(len(authentication_methods)):
@@ -323,7 +292,7 @@ else:
 
     while True:
         try:
-            auth = int(get_input('Enter number?', defaults['authentication_method'])) - 1
+            auth = int(get_input('Enter number?', defaults['authentication_method']), USE_DEFAULT) - 1
         except ValueError:
             auth = -1
         if auth in range(len(authentication_methods)):
@@ -341,13 +310,13 @@ else:
     }
     USER_CREATE_ACCOUNT = False
     if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
-        user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
+        user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n', USE_DEFAULT)
         USER_CREATE_ACCOUNT = user_create_account.lower() in ['yes', 'y']
         print()
     if AUTHENTICATION_METHOD == 'LdapAuthentication':
-        LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
-        LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
-        LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'])
+        LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'], USE_DEFAULT)
+        LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'], USE_DEFAULT)
+        LDAP_OPTIONS['bind_dn'] = get_input('Enter LDAP bind_dn?', LDAP_OPTIONS['bind_dn'], USE_DEFAULT)
 
     default_auth_options = defaults.get('saml_options', dict())
     SAML_OPTIONS = {
@@ -356,28 +325,28 @@ else:
     }
 
     if AUTHENTICATION_METHOD == 'SamlAuthentication':
-        SAML_OPTIONS['name'] = get_input('Enter name you would like shown to user for authentication?', SAML_OPTIONS['name'])
-        SAML_OPTIONS['username_attribute'] = get_input('Enter SAML username attribute?', SAML_OPTIONS['username_attribute'])
+        SAML_OPTIONS['name'] = get_input('Enter name you would like shown to user for authentication?', SAML_OPTIONS['name'], USE_DEFAULT)
+        SAML_OPTIONS['username_attribute'] = get_input('Enter SAML username attribute?', SAML_OPTIONS['username_attribute'], USE_DEFAULT)
 
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
-    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
+    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'], USE_DEFAULT)
 
     while True:
-        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
+        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y', USE_DEFAULT)
         if (is_email_enabled.lower() in ['yes', 'y']):
             EMAIL_ENABLED = True
-            EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
-            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
-            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
-            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
-            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
+            EMAIL_USER = get_input("What is the email user?", defaults['email_user'], USE_DEFAULT)
+            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'], USE_DEFAULT)
+            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'], USE_DEFAULT)
+            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'], USE_DEFAULT)
+            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'], USE_DEFAULT)
             try:
-                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
+                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']), USE_DEFAULT)
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
-            EMAIL_INTERNAL_DOMAIN = get_input("What is the internal email address format?", defaults['email_internal_domain'])
+            EMAIL_INTERNAL_DOMAIN = get_input("What is the internal email address format?", defaults['email_internal_domain'], USE_DEFAULT)
             break
 
         elif (is_email_enabled.lower() in ['no', 'n']):
@@ -541,7 +510,7 @@ os.removedirs(tmp_folder)
 if not args.worker:
     if not os.path.isfile(WORKERS_JSON):
         capabilities = ["default"]
-        if args.setup_for_sample_courses:
+        if args.dev_vm:
             capabilities.extend(["cpp", "python", "et-cetera", "notebook", "unsupported"])
 
         worker_dict = {
