@@ -429,7 +429,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_simple = [
-        'ta_view_start_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date'
@@ -440,7 +439,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_elec_ta = [
-        'ta_view_start_date',
         'submission_open_date',
         'grade_start_date',
         'grade_due_date'
@@ -451,7 +449,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_elec_no_ta = [
-        'ta_view_start_date',
         'submission_open_date'
     ];
 
