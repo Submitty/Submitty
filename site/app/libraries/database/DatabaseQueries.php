@@ -3219,12 +3219,18 @@ ORDER BY user_id ASC"
     }
 
     public function courseIdExists(string $course_id, string $section_id): bool {
-        if($this->course_db->query("SELECT 1 FROM sections_registration WHERE course_section_id = :course_id 
-                                    AND sections_registration_id != :section_id LIMIT 1", [ $course_id, $section_id]) > 0 )
-            return TRUE;
-        else
-            return FALSE;
+        if (
+            $this->course_db->query(
+                "SELECT 1 FROM sections_registration WHERE 
+                course_section_id = :course_id 
+                AND sections_registration_id != :section_id 
+                LIMIT 1", [ $course_id, $section_id]
+            ) > 0 
+        ) {   
+            return true;
+        }
 
+        return false;
     }
 
     public function setupRotatingSections($graders, $gradeable_id) {
