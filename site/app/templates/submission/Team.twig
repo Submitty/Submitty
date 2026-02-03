@@ -59,13 +59,12 @@
                 <em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em>
                     <br />
                     <br />
-                <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
-            <br />
-            </span>
-            <br />
-            {% if git_auth_token_required %}
-                <span>Note: Your school requires that you use Authentication Tokens.</span><br>
-            {% endif %}
+                <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp><br><br>
+                <span><em>You will log in using </em> '<code>{{user_id}}</code>'<em> as your username and VCS / GIT Authentication Token as the password.  <br> Click the button below to generate a VCS / GIT Authentication Token for Submitty if this is your first time using GIT with Submitty. </em></span> 
+                <br><br>
+                {% if git_auth_token_required %}
+                    <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
+                {% endif %}
             <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
         {% endif %}
         {# /Repository status #}

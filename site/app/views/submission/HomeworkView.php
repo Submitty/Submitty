@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\authentication\SamlAuthentication as AuthenticationSamlAuthentication;
 use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
@@ -16,6 +17,7 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\controllers\SamlAuthentication;
 /* Notebook */
 use app\models\notebook\AbstractNotebookInput;
 
@@ -631,7 +633,7 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false,
+            'git_auth_token_required' => $this->core->getAuthentication() instanceof AuthenticationSamlAuthentication,
             'vcs_repo_exists' => $vcs_repo_exists,
             'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);
