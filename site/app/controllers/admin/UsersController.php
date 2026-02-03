@@ -627,7 +627,7 @@ class UsersController extends AbstractController {
         }
 
         if ($this->core->getQueries()->courseIdExists($course_id, $section_id) > 0) {
-            return $this->core->getOutput()->renderJsonFail('That Course ID is already in use.');
+            return JsonResponse::getErrorResponse('That Course ID is already in use.');
         }
 
         $semester = $this->core->getConfig()->getTerm();
