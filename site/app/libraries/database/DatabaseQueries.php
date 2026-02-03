@@ -3224,9 +3224,13 @@ ORDER BY user_id ASC"
                 "SELECT 1 FROM sections_registration WHERE 
                 course_section_id = :course_id 
                 AND sections_registration_id != :section_id 
-                LIMIT 1", [ $course_id, $section_id]
-            ) > 0 
-        ) {   
+                LIMIT 1", 
+                [
+                    $course_id, 
+                    $section_id
+                ]
+            ) > 0
+        ) {
             return true;
         }
 
