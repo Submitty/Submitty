@@ -64,7 +64,18 @@
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
+                                <td class="registration-section-cell">
+                                        <button
+                                            type="button"
+                                            class="delete-section-btn"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Delete Registration Section"
+                                            onclick="deleteRegistrationSection(this)"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                                 {% if is_self_register %}
@@ -80,7 +91,18 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td class="registration-section-cell">
+                                        <button
+                                            type="button"
+                                            class="delete-section-btn"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Delete Registration Section"
+                                            onclick="deleteRegistrationSection(this)"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
                                 {% if is_self_register %}
