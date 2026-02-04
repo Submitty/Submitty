@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* eslint-disable vue/no-v-html */
 import { computed } from 'vue';
 import { Marked, type TokenizerExtension } from 'marked';
 import { renderToString } from 'katex';
@@ -64,9 +63,11 @@ const htmlContent = computed(() => {
 </script>
 
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <div
     class="markdown"
     :data-testid="testId"
     v-html="htmlContent"
   />
+  <!-- eslint-enable vue/no-v-html -->
 </template>

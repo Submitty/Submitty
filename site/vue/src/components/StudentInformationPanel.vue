@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* eslint-disable vue/no-v-html */
 import { ref, onMounted } from 'vue';
 import VersionChoice from './VersionChoice.vue';
 
@@ -194,6 +193,7 @@ onMounted(() => {
             <br />
 
             <div class="modal-body">
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 v-for="(table, index) in tables"
                 :id="`page_${index + 1}_content`"
@@ -202,12 +202,15 @@ onMounted(() => {
                 :class="{ 'active-content': activeTab === index + 1 }"
                 v-html="table"
               />
+              <!-- eslint-enable vue/no-v-html -->
             </div>
           </form>
+          <!-- eslint-disable vue/no-v-html -->
           <div
             v-else
             v-html="tables[0]"
           />
+          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
     </div>
