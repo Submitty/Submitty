@@ -344,8 +344,10 @@
                         const { data } = response;
                         displaySuccessMessage(data.message);
                         document.getElementById("course-id-" + section_id).textContent = data.course_id;
-                        existingCourseIds.delete(originalCourseId);
-                        existingCourseIds.add(data.course_id);
+                        existingCourseIds.clear();
+                        document.querySelectorAll('.course-id-text').forEach(span => {
+                            existingCourseIds.add(span.textContent.trim());
+                        });
 
                         closePopup();
                     }
