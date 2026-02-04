@@ -8,6 +8,7 @@ selenium*.jar
 *.orig*
 *~
 *.o
+
 __pycache__/
 *.pyc
 *.aux
@@ -16,6 +17,8 @@ __pycache__/
 *.synctex.gz
 .coverage
 coverage.xml
+
+
 /site/cache/
 /site/coverage/
 /site/vendor/
