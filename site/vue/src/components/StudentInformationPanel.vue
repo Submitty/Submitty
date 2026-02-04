@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-v-html */
 import { ref, onMounted } from 'vue';
 import VersionChoice from './VersionChoice.vue';
 

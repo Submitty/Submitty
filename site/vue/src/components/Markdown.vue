@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-v-html */
 import { computed } from 'vue';
 import { Marked, type TokenizerExtension } from 'marked';
 import { renderToString } from 'katex';
