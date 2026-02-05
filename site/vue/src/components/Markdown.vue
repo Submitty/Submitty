@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-html -->
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Marked, type TokenizerExtension } from 'marked';
@@ -64,9 +63,11 @@ const htmlContent = computed(() => {
 </script>
 
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <div
     class="markdown"
     :data-testid="testId"
     v-html="htmlContent"
   />
+  <!-- eslint-enable vue/no-v-html -->
 </template>

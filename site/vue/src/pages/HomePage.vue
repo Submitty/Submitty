@@ -21,7 +21,6 @@ interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
     unseenCount: number;
-    course: boolean;
     userId: string;
 }
 
@@ -124,7 +123,10 @@ const buildCourseUrl = (course: Course) => {
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
-            <h2 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'" class="courses-rank-title">
+            <h2
+              v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'"
+              class="courses-rank-title"
+            >
               As {{ rank.title }}
             </h2>
 
@@ -165,7 +167,7 @@ const buildCourseUrl = (course: Course) => {
     >
       <NotificationsDisplay
         :notifications="notifications"
-        :unseenCount="unseenCount"
+        :unseen-count="unseenCount"
         :course="false"
       />
     </div>
