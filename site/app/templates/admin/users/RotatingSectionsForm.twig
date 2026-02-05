@@ -65,19 +65,21 @@
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
                                 <td class="registration-section-cell">
-                                {% if reg_sections_count[section['sections_registration_id']] == 0 %}
+                                    {% if reg_sections_count[section['sections_registration_id']] == 0 %}
                                         <button
                                             type="button"
                                             class="delete-section-btn"
                                             data-section-id="{{ section['sections_registration_id'] }}"
-                                            data-course-id="{{ section['course_section_id'] }}"
                                             title="Delete Registration Section"
-                                            onclick="updateRegistrationSections()"
                                         >
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                {% endif %}
-                                    <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
+                                    {% endif %}
+                                    <span id="registration-section-{{ section['sections_registration_id'] }}"
+                                        class="course-id-text">
+                                        {{ section['sections_registration_id'] }}
+                                    </span>
+                                </td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                                 {% if is_self_register %}
@@ -94,7 +96,6 @@
                             {% else %}
                             <tr>
                                 <td class="registration-section-cell">
-                                    {% if  reg_sections_count[section['sections_registration_id']] == 0 %}
                                         <button
                                             type="button"
                                             class="delete-section-btn"
@@ -105,7 +106,6 @@
                                         >
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                    {% endif %}
                                     <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
@@ -289,4 +289,19 @@
             </div>
         </div>
     </form>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.delete-section-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const sectionId = button.dataset.sectionId;
+                if (!confirm(`Delete registration section ${sectionId}?`)) {
+                    return;
+                }
+                const deleteInput = document.getElementById('delete_reg_section');
+                deleteInput.value = sectionId;
+                deleteInput.closest('form').submit();
+            });
+        });
+    });
+    </script>
 </div>
