@@ -68,7 +68,7 @@
                                     {% if reg_sections_count[section['sections_registration_id']] == 0 %}
                                         <button
                                             type="button"
-                                            class="delete-section-btn"
+                                            class="icon"
                                             data-section-id="{{ section['sections_registration_id'] }}"
                                             title="Delete Registration Section"
                                         >
@@ -96,16 +96,16 @@
                             {% else %}
                             <tr>
                                 <td class="registration-section-cell">
-                                        <button
-                                            type="button"
-                                            class="delete-section-btn"
-                                            data-section-id="{{ section['sections_registration_id'] }}"
-                                            data-course-id="{{ section['course_section_id'] }}"
-                                            title="Delete Registration Section"
-                                            onclick="updateRegistrationSections()"
-                                        >
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                    <button
+                                        type="button"
+                                        class="icon"
+                                        data-section-id="{{ section['sections_registration_id'] }}"
+                                        data-course-id="{{ section['course_section_id'] }}"
+                                        title="Delete Registration Section"
+                                        onclick="updateRegistrationSections()"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                     <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
@@ -160,6 +160,7 @@
                 <div class="option">
                     <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
                     <input type="submit" id="delete_reg_section_submit" style="display:none;" />
+                    <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
                 </div>
             </div>
         </div>
@@ -282,7 +283,7 @@
     </form>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.delete-section-btn').forEach(button => {
+        document.querySelectorAll('.icon').forEach(button => {
             button.addEventListener('click', () => {
                 const sectionId = button.dataset.sectionId;
                 if (!confirm(`Delete registration section ${sectionId}?`)) {
