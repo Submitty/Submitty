@@ -83,7 +83,7 @@ jobs:
                 ${{ runner.os }}-cache-node-modules-
       - run: npm ci
       - name: Run eslint
-        run: npm run eslint
+        run: npm run eslint -- --max-warnings=0
       - name: Run npm build (tsc and esbuild)
         run: npm run build
 
