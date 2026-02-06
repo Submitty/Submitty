@@ -2213,7 +2213,8 @@ End of slider switch
     color: var(--default-black);
 }
 
-.icon { /* moved from user-profile.css */
+.icon {
+    /* moved from user-profile.css */
     /* stylelint-disable-next-line declaration-no-important */
     background: none !important;
     border: none;
