@@ -3211,10 +3211,11 @@ ORDER BY user_id ASC"
     }
 
     public function updateCourseSectionId(string $section_id, string $course_id): void {
-        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE registration_section_id = ?", [$course_id, $section_id]);
-
-        $semester = $this->core->getConfig()->getTerm();
+        $term = $this->core->getConfig()->getTerm();
         $course   = $this->core->getConfig()->getCourse();
+
+        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE term=? AND course=? AND registration_section_id = ?", [$course_id, $term, $course, $section_id]);
+
         $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?", [$course_id, $section_id]);
     }
 

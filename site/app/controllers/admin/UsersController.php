@@ -608,13 +608,6 @@ class UsersController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
     public function updateCourseId(): JsonResponse {
-        try {
-            $this->core->checkCsrfToken($_POST['csrf_token'] ?? '');
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getErrorResponse('Invalid CSRF token');
-        }
-
         $section_id = $_POST['section_id'] ?? null;
         $course_id  = trim($_POST['course_id'] ?? '');
 
@@ -629,9 +622,6 @@ class UsersController extends AbstractController {
         if ($this->core->getQueries()->courseIdExists($course_id, $section_id) > 0) {
             return JsonResponse::getErrorResponse('That Course ID is already in use.');
         }
-
-        $semester = $this->core->getConfig()->getTerm();
-        $course   = $this->core->getConfig()->getCourse();
 
         $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
 

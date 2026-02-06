@@ -2207,3 +2207,25 @@ End of slider switch
     background-color: var(--standard-vibrant-yellow);
     color: var(--default-black);
 }
+
+.icon { /* moved from user-profile.css */
+    /* stylelint-disable-next-line declaration-no-important */
+    background: none !important;
+    border: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 !important;
+    color: var(--external-link-blue);
+    text-decoration: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    font-family: "Source Sans Pro", sans-serif !important;
+    font-size: 100%;
+    cursor: pointer;
+}
+
+.fas {
+    color: var(--btn-default-text);
+}
+
+.fas:hover {
+    color: var(--external-link-blue);
+}
