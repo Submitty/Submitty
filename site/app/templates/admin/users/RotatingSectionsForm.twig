@@ -64,7 +64,22 @@
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
+                                <td class="registration-section-cell">
+                                    {% if reg_sections_count[section['sections_registration_id']] == 0 %}
+                                        <button
+                                            type="button"
+                                            class="icon"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            title="Delete Registration Section"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                    <span id="registration-section-{{ section['sections_registration_id'] }}"
+                                        class="course-id-text">
+                                        {{ section['sections_registration_id'] }}
+                                    </span>
+                                </td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                                 {% if is_self_register %}
@@ -80,7 +95,18 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td class="registration-section-cell">
+                                    <button
+                                        type="button"
+                                        class="icon"
+                                        data-section-id="{{ section['sections_registration_id'] }}"
+                                        data-course-id="{{ section['course_section_id'] }}"
+                                        title="Delete Registration Section"
+                                        onclick="updateRegistrationSections()"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <span id="registration-section-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['sections_registration_id'] }}</span>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
                                 {% if is_self_register %}
@@ -132,16 +158,8 @@
                     </div>
                 </div>
                 <div class="option">
-                    <div class="option-input"><input type="text" name="delete_reg_section" id="delete_reg_section" value="" placeholder="Eg: 3" /></div>
-                    <div class="option-desc">
-            <label for="delete_reg_section">
-							<span class="option-title">Delete a Registration Section</span>
-              <br>
-							<span class="option-alt">
-								Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
-							</span>
-						</label>
-                    </div><br />
+                    <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
+                    <input type="submit" id="delete_reg_section_submit" style="display:none;" />
                     <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
                 </div>
             </div>
@@ -263,4 +281,19 @@
             </div>
         </div>
     </form>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.icon').forEach(button => {
+            button.addEventListener('click', () => {
+                const sectionId = button.dataset.sectionId;
+                if (!confirm(`Delete registration section ${sectionId}?`)) {
+                    return;
+                }
+                const deleteInput = document.getElementById('delete_reg_section');
+                deleteInput.value = sectionId;
+                deleteInput.closest('form').submit();
+            });
+        });
+    });
+    </script>
 </div>
