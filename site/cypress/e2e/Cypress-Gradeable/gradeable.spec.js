@@ -66,7 +66,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
     });
     it('Should test if team autograding is working correctly', () => {
         cy.login('student');
-        const teamFile = 'cypress/fixtures/frame_hardcoded.cpp';
+        const teamFile = 'cypress/fixtures/copy_of_more_autograding_examples/cpp_hidden_tests/submissions/frame_hardcoded.cpp';
         cy.visit(['sample', 'gradeable', 'closed_team_homework']);
 
         cy.get('#upload1').selectFile(teamFile, { action: 'drag-drop' });
@@ -78,14 +78,14 @@ describe('Tests cases revolving around gradeable access and submission', () => {
     });
     it('Should test if non-team autograding is working correctly', () => {
         cy.login('student');
-        const subFile = 'cypress/fixtures/frame.cpp';
-        cy.visit(['sample', 'gradeable', 'closed_homework']);
+        const subFile = 'cypress/fixtures/copy_of_tutorial/examples/12_system_calls/submissions/serial_fork.c';
+        cy.visit(['sample', 'gradeable', 'grades_released_homework_autota']);
         cy.get('#upload1').selectFile(subFile, { action: 'drag-drop' });
         cy.get('#submit').click();
 
-        cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Homework');
+        cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Autograde');
         cy.get('body').type('{enter}');
-        cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Homework');
+        cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Autograde');
         cy.get('body').should('not.contain', 'went wrong');
     });
 });
