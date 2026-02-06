@@ -467,4 +467,19 @@ class Utils {
                 return null;
         }
     }
+    /**
+ * Centralized password validator for Submitty.
+ * @param string $password
+ * @return array List of error messages; empty array if valid.
+ */
+public static function validatePassword(string $password): array {
+    $errors = [];
+    
+    // Requirement: Length standard (currently hardcoded to 12 as requested)
+    if (strlen($password) < 12) {
+        $errors[] = "New password is too short. It must be at least 12 characters long.";
+    }
+
+    return $errors;
+}
 }
