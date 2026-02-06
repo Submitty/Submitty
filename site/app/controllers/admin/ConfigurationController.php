@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\entities\forum\Category;
 use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
