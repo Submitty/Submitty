@@ -606,6 +606,32 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
+    public function updateCourseId(): JsonResponse {
+        $section_id = $_POST['section_id'] ?? null;
+        $course_id  = trim($_POST['course_id'] ?? '');
+
+        if ($section_id === null || $course_id === '') {
+            return JsonResponse::getErrorResponse('Invalid input');
+        }
+
+        if (!preg_match('/^\d{5}$/', $course_id)) {
+            return JsonResponse::getErrorResponse('Course ID must be a 5-digit number');
+        }
+
+        if ($this->core->getQueries()->courseIdExists($course_id, $section_id) > 0) {
+            return JsonResponse::getErrorResponse('That Course ID is already in use.');
+        }
+
+        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
+
+        return JsonResponse::getSuccessResponse([
+            'message'    => 'Course ID updated successfully',
+            'section_id' => $section_id,
+            'course_id'  => $course_id,
+        ]);
+    }
+
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);

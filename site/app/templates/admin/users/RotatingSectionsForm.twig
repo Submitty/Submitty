@@ -63,32 +63,56 @@
                             {% if 'sections_registration_id' in section|keys %}
                             {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
-                                {% if is_self_register %}
-                                    <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                <tr>
+                                    <td>Section {{ section['sections_registration_id'] }}</td>
+                                    <td class="course-id-cell">
+                                        <button
+                                            type="button"
+                                            class="icon"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Edit Course ID"
+                                            onclick="showEditCourseIdPopup(this)"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <span id="course-id-{{ section['sections_registration_id'] }}" class="course-id-text">{{ section['course_section_id'] }}</span>
                                     </td>
-                                {% endif %}
-                            </tr>
+                                    <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                                    {% if is_self_register %}
+                                        <td>
+                                            <input
+                                                type="radio"
+                                                name="default_section"
+                                                value="{{ section['sections_registration_id'] }}"
+                                                {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                            />
+                                        </td>
+                                    {% endif %}
+                                </tr>
                             {% else %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>0</td>
+                                <tr>
+                                    <td>Section {{ section['sections_registration_id'] }}</td>
+                                    <td class="course-id-cell">
+                                        <button
+                                            type="button"
+                                            class="edit-course-btn"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Edit Course ID"
+                                            onclick="showEditCourseIdPopup(this)"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <span id="course-id-{{ section['course_section_id'] }}" class="course-id-text">{{ section['course_section_id'] }}</span>
+                                    </td>
+                                    <td>0</td>
                                 {% if is_self_register %}
                                     <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
+                                        <input
+                                            type="radio"
+                                            name="default_section"
+                                            value="{{ section['sections_registration_id'] }}"
                                             {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
                                         />
                                     </td>
@@ -263,4 +287,83 @@
             </div>
         </div>
     </form>
+    <script>
+        const existingCourseIds = new Set([
+            {% for section in reg_sections %}
+                {% if section['course_section_id'] is not empty %}
+                    "{{ section['course_section_id'] }}"{% if not loop.last %},{% endif %}
+                {% endif %}
+            {% endfor %}
+        ]);
+    </script>
+    <script>
+        function showEditCourseIdPopup(button) {
+            $('.popup-form').css('display', 'none');
+            const form = $('#edit-courseid-form');
+            showPopup('#edit-courseid-form');
+            const section_id = button.getAttribute('data-section-id');
+            const course_id  = button.getAttribute('data-course-id');
+            form.find('input[name="section_id"]').val(section_id);
+            form.find('#new-course-id').val(course_id);
+            form.data('original-course-id', course_id);
+            form.find('.form-body').scrollTop(0);
+            $('#new-course-id').focus();
+        }
+
+        function updateCourseID() {
+            const form = $('#edit-courseid-form');
+            const course_id = $('#new-course-id').val();
+            const section_id = form.find('input[name="section_id"]').val();
+            const originalCourseId = form.data('original-course-id');
+
+            if (!course_id || !section_id) {
+                displayErrorMessage('Missing course ID or section ID');
+                return false;
+            }
+
+            if (course_id !== originalCourseId && existingCourseIds.has(course_id)) {
+                displayErrorMessage('That Course ID already exists. Please choose a unique one.');
+                return false;
+            }
+
+            const data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('course_id', course_id);
+            data.append('section_id', section_id);
+
+            $.ajax({
+                url: "{{ update_course_id_url }}",
+                type: 'POST',
+                data: data,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (response) {
+
+                    if (response.status === 'success') {
+                        const { data } = response;
+                        displaySuccessMessage(data.message);
+                        document.getElementById("course-id-" + section_id).textContent = data.course_id;
+                        existingCourseIds.clear();
+                        document.querySelectorAll('.course-id-text').forEach(span => {
+                            existingCourseIds.add(span.textContent.trim());
+                        });
+
+                        closePopup();
+                    }
+                    else {
+                        displayErrorMessage(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    displayErrorMessage('Unexpected server error');
+                }
+            });
+
+            $('.popup-form').css('display', 'none');
+            return false;
+        }
+    </script>
 </div>
+{% include 'EditCourseIDForm.twig' %}
