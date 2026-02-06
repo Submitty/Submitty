@@ -108,55 +108,53 @@ class ElectronicGraderController extends AbstractController {
 
             $is_bad_submission = $ov->getAutoGradedGradeable()->hasSubmission() && $ov->getAutoGradedGradeable()->getActiveVersion() == 0;
 
+            //should we include bad submissions
             if (!$include_bad_submissions && $is_bad_submission) {
                 continue;
             }
             
+            //if the submission is valid, add the data to the histogram data
             if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0) {
                 if ($ov->getAutoGradedGradeable()->getActiveVersion() != 0) {
-                    $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
-                    $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
-                    $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
-                    $histogram["memory"]  = array_merge($histogram["memory"], [$metrics['memory']]);
-                    $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
-                }
-                else {
-                        /* this was added in an effort to get 
-                        if ($include_bad_submissions) {
-                            array_push($histogram["bAuto"], 0);
-                        }
-                        */
-                        $histogram["cancelledSub"] += 1;
-
-                    }
-                }
-
-            // Status counters
-                if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
-                    $histogram["noSub"] += 1;
-                }
-                elseif ($ov->getAutoGradedGradeable()->getActiveVersion() == 0) {
-                    $histogram["noActive"] += 1;
-                }
-                elseif ($ov->getTaGradedGradeable()->anyGrades()) {
-                    if ($ov->hasActiveGradeInquiry()) {
-                        $histogram["GradeInq"] += 1;
-                    }
-                    elseif ($ov->getTaGradedGradeable() !== null && $ov->getTaGradedGradeable()->hasVersionConflict()) {
-                        $histogram["VerConf"] += 1;
-                    }
-                    elseif (!$ov->isTaGradingComplete()) {
-                        $histogram["IncompGrading"] += 1;
-                    }
-                    else {
-                        $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
-                        $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getTaGradedGradeable()->getTotalScore()]); // may be useful in the future
+                    if (!$ov->getOrCreateTaGradedGradeable()->hasVersionConflict()) {   
+                    //do not include version conflicts in autograding histogram ^
+                        $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                        $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
+                        $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
+                        $histogram["memory"]  = array_merge($histogram["memory"], [$metrics['memory']]);
+                        $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
                     }
                 }
             }
 
-            return $histogram;
+            // Status counters
+            if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
+                $histogram["noSub"] += 1;
+            }
+            elseif ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0 & $ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
+                $histogram["cancelledSub"] += 1;
+            }
+            elseif ($ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
+                $histogram["noActive"] += 1;
+            }
+            elseif ($ov->getTaGradedGradeable()->anyGrades()) {
+                if ($ov->hasActiveGradeInquiry()) {
+                    $histogram["GradeInq"] += 1;
+                }
+                elseif ($ov->getTaGradedGradeable()->hasVersionConflict()) {
+                    $histogram["VerConf"] += 1;
+                }
+                elseif (!$ov->isTaGradingComplete()) {
+                    $histogram["IncompGrading"] += 1;
+                }
+                else {
+                    $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
+                    $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
+                }
+            }
         }
+        return $histogram;
+    }
 
     /**
      * Helper function for Randomization
