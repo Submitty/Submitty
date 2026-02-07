@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\authentication\SamlAuthentication;
 use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
 use app\models\Team;
@@ -48,7 +49,7 @@ class TeamView extends AbstractView {
             "remove_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message', 'remove']),
             "csrf_token" => $this->core->getCsrfToken(),
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false
+            'git_auth_token_required' => $this->core->getAuthentication() instanceof SamlAuthentication
         ]);
     }
 }
