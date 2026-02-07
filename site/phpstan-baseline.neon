@@ -1377,7 +1377,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
+			count: 1
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
