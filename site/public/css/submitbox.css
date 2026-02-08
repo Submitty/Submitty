@@ -59,6 +59,24 @@
     font-size: 0.9rem;
 }
 
+.file-size-warning {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-left: 4px solid #dc2626;  
+    background-color: #fef2f2;
+    color: #991b1b;
+    font-size: 0.9rem;
+}
+
+.submission-attempt-warning {
+    margin: 12px 0;
+    padding: 8px 12px;
+    border-left: 4px solid #f59e0b;
+    background-color: #fffbeb;
+    color: #92400e;
+    font-size: 0.95rem;
+}
+
 #gradeable-submission-cont #submit {
     /* stylelint-disable-next-line declaration-no-important */
     color: white !important;

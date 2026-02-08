@@ -30,7 +30,8 @@ var changed = false; // if files from previous submission changed
 
 let total_files_added = 0;
 let MAX_NUM_OF_FILES;
-
+let total_file_size = 0;
+let MAX_POST_SIZE;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
@@ -100,6 +101,10 @@ function initMaxNoFiles(max_no_of_files) {
     MAX_NUM_OF_FILES = max_no_of_files;
 }
 
+// initialize maximum file size with that of the php_ini value
+function initMaxPostSize(max_post_size) {
+    MAX_POST_SIZE = max_post_size;
+}
 // add files dragged
 function drop(e) {
     draghandle(e);
@@ -280,18 +285,22 @@ function addFile(file, part, check_duplicate_zip = true) {
             if (confirm(`Note: All files currently in the bucket will be deleted if you try to upload a zip: ${file.name}. Do you want to continue?`)) {
                 deleteFiles(part);
                 file_array[part - 1].push(file);
+                total_file_size += file.size;
                 addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
             }
         }
         else {
             file_array[part - 1].push(file);
+            total_file_size += file.size;
             addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
         }
     }
     // eslint-disable-next-line eqeqeq
     else if (i[0] == 0) { // file already selected
         if (confirm(`Note: ${file_array[part - 1][i[1]].name} is already selected. Do you want to replace it?`)) {
+            total_file_size -= file_array[part - 1][i[1]].size;
             file_array[part - 1].splice(i[1], 1, file);
+            total_file_size += file.size;
             removeLabel(file.name, part);
             addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
         }
@@ -299,6 +308,7 @@ function addFile(file, part, check_duplicate_zip = true) {
     else { // file in previous submission
         if (confirm(`Note: ${previous_files[part - 1][i[1]]} was in your previous submission. Do you want to replace it?`)) {
             file_array[part - 1].push(file);
+            total_file_size += file.size;
             previous_files[part - 1].splice(i[1], 1);
             removeLabel(file.name, part);
             addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
@@ -307,13 +317,31 @@ function addFile(file, part, check_duplicate_zip = true) {
     }
 
     setButtonStatus();
+    updateFileSizeWarning();
 }
 
+// File size warning
+function updateFileSizeWarning() {
+    if (typeof MAX_POST_SIZE !== 'number') {
+        return;
+    }
+
+    document.querySelectorAll('.file-size-warning').forEach(warning => {
+        if (total_file_size > MAX_POST_SIZE) {
+            warning.classList.remove('d-none');
+        } else {
+            warning.classList.add('d-none');
+        }
+    });
+}
 // REMOVE FILES
 // ========================================================================================
 // delete files selected for a part
 function deleteFiles(part) {
     if (file_array.length !== 0) {
+        for (let i = 0; i < file_array[part - 1].length; i++) {
+            total_file_size -= file_array[part - 1][i].size;
+        }
         file_array[part - 1] = [];
     }
     if (previous_files.length !== 0) {
@@ -328,6 +356,7 @@ function deleteFiles(part) {
     label_array[part - 1] = [];
     changed = true;
     setButtonStatus();
+    updateFileSizeWarning();
 }
 
 function deleteSingleFile(filename, part, previous) {
@@ -346,6 +375,7 @@ function deleteSingleFile(filename, part, previous) {
     else {
         for (let j = 0; j < file_array[part - 1].length; j++) {
             if (file_array[part - 1][j].name === filename) {
+                total_file_size -= file_array[part - 1][j].size;
                 file_array[part - 1].splice(j, 1);
                 label_array[part - 1].splice(j, 1);
                 total_files_added--;
@@ -354,6 +384,7 @@ function deleteSingleFile(filename, part, previous) {
         }
     }
     setButtonStatus();
+    updateFileSizeWarning();
 }
 
 function setButtonStatus(inactive_version = false) {

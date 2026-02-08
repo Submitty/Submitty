@@ -233,6 +233,15 @@
             } %}
         {% endif %}
 
+        {# Warn students when they are close to the penalty-free submission limit #}
+        {% set submissions_remaining = max_submissions - versions_used %}
+        {% if submissions_remaining <= 5 %}
+            <p class="submission-attempt-warning" aria-live="polite">
+                You have {{ submissions_remaining }} penalty-free submission{{ submissions_remaining == 1 ? '' : 's' }} remaining
+                out of {{ max_submissions }} allowed.
+            </p>
+        {% endif %}
+
         {# File upload boxes #}
         <div id="upload-boxes">
             {# Submit boxes #}
@@ -268,6 +277,9 @@
                     {% else %}
                        <p class="file-count-warning d-none" data-max-files="{{ max_file_uploads }}" aria-live="polite">
                             Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.
+                        </p>
+                        <p class="file-size-warning d-none" data-max-post-size="{{ max_post_size }}" aria-live="polite">
+                            Total upload size exceeds the allowed limit.
                         </p>
                     {% endif %}
                 </div>
@@ -352,6 +364,7 @@
             $(function() {
                 setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
+                initMaxPostSize({{ max_post_size }}); 
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
