@@ -89,11 +89,10 @@ function draghandle(e) {
 // ========================================================================================
 // check if adding a file is valid (not exceeding the limit)
 function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
-        alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
-        return false;
+    if (typeof MAX_NUM_OF_FILES !== 'number') {
+        return true; // fail open, backend still enforces
     }
-    return true;
+    return files_to_add + total_added_files <= MAX_NUM_OF_FILES;
 }
 
 // initialize maximum no of files with that of the php_ini value
@@ -154,6 +153,15 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
+    const uploadBox = document.getElementById(`upload${part}`);
+    if (uploadBox) {
+        const warning = uploadBox.querySelector('.file-count-warning');
+        if (filestream.length + total_files_added > MAX_NUM_OF_FILES) {
+            warning?.classList.remove('d-none');
+        } else {
+            warning?.classList.add('d-none');
+        }
+    }
     if (addIsValid(filestream.length, total_files_added)) {
         for (let i = 0; i < filestream.length; i++) {
             addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check

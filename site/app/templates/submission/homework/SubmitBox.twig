@@ -266,7 +266,9 @@
                     {% if viewing_inactive_version %}
                         <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
                     {% else %}
-                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                       <p class="file-count-warning d-none" data-max-files="{{ max_file_uploads }}" aria-live="polite">
+                            Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.
+                        </p>
                     {% endif %}
                 </div>
             {% endfor %}

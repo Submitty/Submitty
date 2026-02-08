@@ -50,6 +50,15 @@
     margin: 3px;
 }
 
+.file-count-warning {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-left: 4px solid #d97706; 
+    background-color: #fff7ed;        
+    color: #92400e;                   
+    font-size: 0.9rem;
+}
+
 #gradeable-submission-cont #submit {
     /* stylelint-disable-next-line declaration-no-important */
     color: white !important;
