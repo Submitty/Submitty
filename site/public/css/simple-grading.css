@@ -135,3 +135,23 @@ input[type="number"]::-webkit-outer-spin-button {
 #details-legend li {
     font-size: 0.9em;
 }
+
+.cell-grade {
+    border-left: 1px solid var(--standard-medium-gray);
+}
+
+.cell-text-entry {
+    overflow-y: scroll;
+    resize: vertical;
+    min-height: 30px;
+    cursor: text;
+}
+
+.cell-checkpoint {
+    cursor: pointer;
+}
+
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
+}
