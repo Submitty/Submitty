@@ -14,17 +14,6 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    #[Route('verify_time.js')]
-    public function verify_time(): void {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
-        header("Pragma: no-cache"); // HTTP 1.0.
-        header("Expires: 0"); // Proxies.
-        header("Content-Type: text/javascript");
-        $this->core->getOutput()->renderTwigOutput('TimeHeader.twig', ["server_time" => time()]);
-    }
-
     #[Route('/courses/{_semester}/{_course}', requirements: ['_semester' => '^(?!api)[^\/]+', '_course' => '[^\/]+'])]
     public function navigationPage() {
         try {
