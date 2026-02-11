@@ -1,0 +1,9 @@
+{   
+    "primary": {
+        "capabilities": ["default", "cpp", "python", "et-cetera", "notebook", "unsupported"],
+        "address": "localhost",
+        "username": "",
+        "num_autograding_workers": 5,
+        "enabled" : true
+    }
+}

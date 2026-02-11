@@ -1,0 +1,9 @@
+{
+    "email_user": "",
+    "email_password": "",
+    "email_sender": "submitty@myuniversity.edu",
+    "email_reply_to": "submitty_do_not_reply@myuniversity.edu",
+    "email_server_hostname": "localhost",
+    "email_server_port": 25,
+    "email_internal_domain": "example.com"
+}

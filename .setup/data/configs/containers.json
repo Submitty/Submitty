@@ -1,0 +1,24 @@
+{   
+    "default":  [
+        "submitty/autograding-default:latest",
+        "submitty/python:latest",
+        "submitty/clang:latest",
+        "submitty/gcc:latest",
+        "submitty/rust:latest",
+        "submitty/java:latest",
+        "submitty/pdflatex:latest",
+        "submitty/jupyter:latest"
+    ],
+    "python":   [
+        "submitty/autograding-default:latest",
+        "submitty/python:latest"
+    ],
+    "cpp":      [
+        "submitty/autograding-default:latest",
+        "submitty/clang:latest",
+        "submitty/gcc:latest"
+    ],
+    "notebook": [
+        "submitty/autograding-default:latest"
+    ]
+}
