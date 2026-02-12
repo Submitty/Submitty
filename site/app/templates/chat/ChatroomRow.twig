@@ -3,7 +3,7 @@
 {% if isAdmin %}
     <tr id="{{ id|e('html_attr') }}" data-testid="chatroom-item">
         <td>
-            <a data-testid="edit-chatroom" href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
+            <a data-testid="edit-chatroom" href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }}, {{ allowReadOnlyAfterEnd ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
         </td>
         <td>
             {% if not isActive %}
@@ -14,6 +14,9 @@
             <span data-testid="chatroom-title" title="{{ title|e('html_attr') }}">
                 {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
             </span>
+            {% if isReadOnly %}
+                    <span class="badge badge-secondary ml-1">Read-only</span>
+            {% endif %}
         </td>
         <td>
             <span data-testid="chatroom-description" title="{{ description|e('html_attr') }}">
@@ -48,12 +51,15 @@
         </td>
     </tr>
 {% else %}
-    {% if isActive %} <!--students only have access to active chat rooms-->
+    {% if isActive or isReadOnly %} <!--students only have access to active chat rooms or read-only chat rooms-->
         <tr id="{{ id|e('html_attr') }}" data-testid="chatroom-item">
             <td>
                 <span data-testid="chatroom-title" class="display-short" title="{{ title|e('html_attr') }}">
                     {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
                 </span>
+                {% if isReadOnly %}
+                    <span class="badge badge-secondary ml-1">Read-only</span>
+                {% endif %}
             </td>
             <td data-testid="chatroom-host">
                 {{ hostName|e }}

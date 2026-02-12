@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict 2NCEHaXsbze5OtZVk1zydlkyFnfImIuS3gfbL1QboXbB79HSfC7XAyGc5sHeuh6
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -787,7 +789,8 @@ CREATE TABLE public.chatrooms (
     is_active boolean DEFAULT false NOT NULL,
     allow_anon boolean DEFAULT true NOT NULL,
     session_started_at timestamp with time zone,
-    is_deleted boolean DEFAULT false NOT NULL
+    is_deleted boolean DEFAULT false NOT NULL,
+    allow_read_only_after_end boolean DEFAULT false NOT NULL
 );
 
 
@@ -3128,19 +3131,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3850,4 +3853,6 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict 2NCEHaXsbze5OtZVk1zydlkyFnfImIuS3gfbL1QboXbB79HSfC7XAyGc5sHeuh6
 

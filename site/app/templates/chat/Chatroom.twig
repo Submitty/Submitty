@@ -21,6 +21,7 @@
         "userId": "{{ user_id }}",
         "displayName": "{{ user_display_name }}",
         "user_admin": "{{ user_admin }}",
-        "isAnonymous": "{{ anonymous }}"
+        "isAnonymous": "{{ anonymous }}",
+        "read_only": {{isReadOnly ? 'true' : 'false' }}
     }
 </script>

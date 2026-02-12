@@ -29,12 +29,15 @@
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %} <!-- This loads from /app/ -->
                         {% include "chat/ChatroomRow.twig" with
-                        {"id": chatroom.getId(),
-                        "description": chatroom.getDescription(),
-                        "title": chatroom.getTitle(),
-                        "isAllowAnon": chatroom.isAllowAnon(),
+                        { "id": chatroom.id,
+                        "description": chatroom.description,
+                        "title": chatroom.title,
+                        "hostName": chatroom.hostName,
+                        "isAllowAnon": chatroom.isAllowAnon,
                         "isAdmin": user_admin,
-                        "isActive": chatroom.isActive(),
+                        "isActive": chatroom.isActive,
+                        "isReadOnly": chatroom.isReadOnly,
+                        "allowReadOnlyAfterEnd": chatroom.allowReadOnlyAfterEnd,
                         "baseUrl": base_url } %}
                     {% endfor %}
                 </tbody>
@@ -54,13 +57,15 @@
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %} <!-- This loads from /app/ -->
                         {% include "chat/ChatroomRow.twig" with
-                        { "id": chatroom.getId(),
-                        "description": chatroom.getDescription(),
-                        "title": chatroom.getTitle(),
-                        "hostName": chatroom.getHostName(),
-                        "isAllowAnon": chatroom.isAllowAnon(),
+                        { "id": chatroom.id,
+                        "description": chatroom.description,
+                        "title": chatroom.title,
+                        "hostName": chatroom.hostName,
+                        "isAllowAnon": chatroom.isAllowAnon,
                         "isAdmin": user_admin,
-                        "isActive": chatroom.isActive(),
+                        "isActive": chatroom.isActive,
+                        "isReadOnly": chatroom.isReadOnly,
+                        "allowReadOnlyAfterEnd": chatroom.allowReadOnlyAfterEnd,
                         "baseUrl": base_url } %}
                     {% endfor %}
                 </tbody>
