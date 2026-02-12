@@ -10,6 +10,7 @@ use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * ORM representation of app\libraries\User class.
@@ -19,6 +20,18 @@ use Doctrine\Common\Collections\Collection;
 #[ORM\Entity]
 #[ORM\Table(name: "users")]
 class UserEntity {
+
+   /**
+     * @var Collection<CourseUser>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CourseUser::class)]
+    protected Collection $course_users;
+
+    /** @return Collection<CourseUser> */
+    public function getCourseUsers(): Collection {
+        return $this->courseUsers;
+    }
+
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
@@ -119,6 +132,13 @@ class UserEntity {
      */
     #[ORM\ManyToMany(mappedBy: "upduckers", targetEntity: Post::class)]
     protected Collection $upducks;
+
+    public function __construct() {
+        $this->courseUsers = new ArrayCollection();
+        $this->posts = new ArrayCollection();
+        $this->threads = new ArrayCollection();
+        $this->upducks = new ArrayCollection();
+    }
 
     public function getDisplayedGivenName(): string {
         return $this->user_preferred_givenname ?? $this->user_givenname;

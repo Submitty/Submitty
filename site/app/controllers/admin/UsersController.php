@@ -411,14 +411,14 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+            $user = $this->core->getCourseEntityManager()->find(UserEntity::class, $_POST['user_id']);
             $em = $this->core->getSubmittyEntityManager();
             $course_user = new CourseUser($semester, $course, $user);
             $em->persist($course_user);
             $em->flush();
             $this->core->getQueries()->updateUserInCourse($user);
             $this->core->addSuccessMessage("Added user {$user->getId()} to course $course");
-            if ($submitty_user === null) {
+            if ($user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
@@ -426,7 +426,7 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $user->setEmailBoth($submitty_user->getEmailBoth());
+                $user->setEmailBoth($user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
@@ -907,7 +907,8 @@ class UsersController extends AbstractController {
                             }
                         }
                         $em = $this->core->getSubmittyEntityManager();
-                        $course_user = new CourseUser($semester, $course, $user);
+                        $user_entity = $this->core->getCourseEntityManager()->find(UserEntity::class, $user->getId());
+                        $course_user = new CourseUser($semester, $course, $user_entity);
                         $em->persist($course_user);
                         $em->flush();
                         $this->core->getQueries()->updateUserInCourse($user);
