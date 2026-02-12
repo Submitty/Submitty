@@ -3,8 +3,7 @@ import os
 import tempfile
 import shutil
 import time
-import dateutil
-import dateutil.parser
+import datetime
 import string
 import random
 import zipfile
@@ -17,9 +16,12 @@ from . import insert_database_version_data, autograding_utils
 
 # ==================================================================================
 def get_queue_time(next_directory, next_to_grade):
-    t = time.ctime(os.path.getctime(os.path.join(next_directory, next_to_grade)))
-    t = dateutil.parser.parse(t)
-    t = t.astimezone(dateutils.get_timezone())
+    # Get the creation time of the file (returns a float timestamp)
+    creation_time = os.path.getctime(os.path.join(next_directory, next_to_grade))
+    
+    # Convert the timestamp directly to a timezone-aware datetime object
+    t = datetime.datetime.fromtimestamp(creation_time, dateutils.get_timezone())
+    
     return t
 
 
