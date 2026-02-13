@@ -500,7 +500,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($gradeable->getComponents() as $comp) {
                     if (!$comp->isPeerComponent()) {
                         $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
-                        if ($graded_component !== null && $graded_component->getGraderId() !== $grader->getId()) {
+                        if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()) {
                             $graded_component->setVerifier($grader);
                             $graded_component->setVerifyTime($this->core->getDateTimeNow());
                         }
