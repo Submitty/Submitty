@@ -444,13 +444,15 @@ function checkWarningBanners() {
     const ta_beta_testing_start_date = $('#date_ta_view').val();
     const submission_open_date = $('#date_submit').val();
 
-    // hide/show element when ta beta testing date is after the submission open date
-    if (ta_beta_testing_start_date > submission_open_date) {
-        $('#ta-beta-testing-after-students-dates-warning').show();
-        $('#gradeable-dates-warnings-banner').show();
-    }
-    else {
-        $('#ta-beta-testing-after-students-dates-warning').hide();
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
     }
 
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
