@@ -183,22 +183,30 @@ const verifyAllNotificationsSeen = (user) => {
 let notificationCount = 0;
 
 const createAnnouncement = (title, content) => {
+    const body = {
+        'title': title,
+        'markdown_status': 0,
+        'lock_thread_date': '',
+        'thread_post_content': content,
+        'cat[]': '1',
+        'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+        'thread_status': -1,
+    };
+
     return cy.request({
         method: 'POST',
         url: buildUrl(['sample', 'forum', 'threads', 'new']),
         form: true,
-        body: {
-            title: title,
-            thread_post_content: content,
-            thread_status: 0,
-            cat: [1],
-            Announcement: 'Announcement'
-        }
+        body: body,
+    }).then((res) => {
+        expect(res.status).to.eq(200);
+        expect(res.body.status).to.eq('success');
     });
 };
 
 const createAnnouncements = (count) => {
     cy.login('instructor');
+    cy.visit(['sample', 'forum']);
 
     for (let i = 0; i < count; i++) {
         createAnnouncement(`Cypress Thread ${notificationCount + i}`, 'This is a Cypress-generated announcement.');
@@ -230,10 +238,8 @@ describe('Tests for creating and interacting with notifications', () => {
         cy.logout();
 
         ['instructor', 'student'].forEach((user) => {
-            it(`Should test triggering notifications, marking seen, navigation, dynamic updates for ${user}`, () => {
-                verifyAllNotificationsSeen(user);
-                markAllNotificationsSeen(user);
-            });
+            verifyAllNotificationsSeen(user);
+            markAllNotificationsSeen(user);
         });
 
         createAnnouncements(12);
