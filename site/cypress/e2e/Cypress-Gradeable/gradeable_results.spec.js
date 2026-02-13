@@ -3,7 +3,7 @@ import { skipOn } from '@cypress/skip-test';
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Testing functionality of Autograder Results', () => {
         beforeEach(() => {
-            cy.visit(['sample', 'gradeable', 'closed_team_homework']);
+            cy.visit(['sample', 'gradeable', 'grades_released_homework_autohiddenEC']);
             cy.login('student');
         });
 
@@ -41,6 +41,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#testcase_2').should('be.visible');
             cy.get('#testcase_3').scrollIntoView();
             cy.get('#testcase_3').should('be.visible');
+            cy.get('#testcase_4').scrollIntoView();
+            cy.get('#testcase_4').should('be.visible');
             cy.get('#testcase_6').scrollIntoView();
             cy.get('#testcase_6').should('be.visible');
             cy.get('#testcase_8').scrollIntoView();
@@ -53,6 +55,8 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('#testcase_2').should('not.be.visible');
             cy.get('#testcase_3').scrollIntoView();
             cy.get('#testcase_3').should('not.be.visible');
+            cy.get('#testcase_4').scrollIntoView();
+            cy.get('#testcase_4').should('not.be.visible');
             cy.get('#testcase_6').scrollIntoView();
             cy.get('#testcase_6').should('not.be.visible');
             cy.get('#testcase_8').scrollIntoView();
