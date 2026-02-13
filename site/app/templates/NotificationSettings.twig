@@ -26,6 +26,8 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)" data-testid="subscribe-all-emails">Subscribe to all emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)" data-testid="unsubscribe-all-optional-emails">Unsubscribe from all optional emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
+                            #add a button 
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="setNotification(this)" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -389,7 +391,17 @@
             $('#form_notification_settings').trigger("change");
         }
 
-
+        #create setNotification
+        function setNotification(button){
+            $.ajax({
+                type: "POST",
+                url: "{{ sync_settings_url }}", 
+                data: $('#form_notification_settings').serialize(),
+                success: function(data){
+                    displaySuccessMessage("Synced to all courses.");
+                }
+            });
+        }
 
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
