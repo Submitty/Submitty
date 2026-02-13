@@ -338,8 +338,7 @@ class GradeableList extends AbstractModel {
                 return 'GRADED';
             default:
                 return 'INVALID';
-        } 
-
+        }
     }
 
     public function toJson(bool $is_student) {

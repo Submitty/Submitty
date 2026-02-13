@@ -56,8 +56,7 @@ class UserProfileController extends AbstractController {
             'user_id' => $user->getId(),
             'user_given_name' => $user->getDisplayedGivenName(),
             'user_family_name' => $user->getDisplayedFamilyName()
-        ]
-        );
+        ]);
     }
 
     /**

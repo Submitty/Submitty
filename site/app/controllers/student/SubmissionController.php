@@ -1127,7 +1127,7 @@ class SubmissionController extends AbstractController {
                     $testcase_config = $testcase->getTestcase();
                     if ($testcase->canView()) {
                         $autochecks = [];
-                        foreach($testcase->getAutochecks() as $autocheck) {
+                        foreach ($testcase->getAutochecks() as $autocheck) {
                             $autochecks[] = [
                                 'description' => $autocheck->getDescription(),
                                 'messages' => $autocheck->getMessages(),
@@ -2305,12 +2305,13 @@ class SubmissionController extends AbstractController {
         }
 
         $user = $this->core->getUser();
+        // Allow instructors to get list of courses for themselves, or for a different user
         if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
             $user_id = $_GET['user_id'] ?? '';
             if ($user_id !== '') {
-               $user = $this->core->getQueries()->getUserById($user_id);
-            }            
-        } 
+                $user = $this->core->getQueries()->getUserById($user_id);
+            }    
+        }
 
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
