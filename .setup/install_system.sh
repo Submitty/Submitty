@@ -114,12 +114,9 @@ if [ ${WORKER} == 1 ]; then
 fi
 
 # Validate configs exist
-if [ ${DEV_VM} == 1 ] then
-    python3 ${COMMAND} ${CURRENT_DIR}/generate_configs.py
+if [ ${DEV_VM} == 0 ] then
+    python3 ${COMMAND} ${CURRENT_DIR}/validate_configs.py
 fi
-
-python3 ${COMMAND} ${CURRENT_DIR}/validate_configs.py
-
 
 
 if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
@@ -357,6 +354,11 @@ echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
+
+if [ ${DEV_VM} == 1 ] then
+   python3 ${COMMAND} ${CURRENT_DIR}/generate_configs.py
+fi
+
 
 #################################################################
 # JAR SETUP

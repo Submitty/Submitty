@@ -1,5 +1,5 @@
-{   
-    "default":  [
+{
+    "default": [
         "submitty/autograding-default:latest",
         "submitty/python:latest",
         "submitty/clang:latest",
@@ -9,11 +9,11 @@
         "submitty/pdflatex:latest",
         "submitty/jupyter:latest"
     ],
-    "python":   [
+    "python": [
         "submitty/autograding-default:latest",
         "submitty/python:latest"
     ],
-    "cpp":      [
+    "cpp": [
         "submitty/autograding-default:latest",
         "submitty/clang:latest",
         "submitty/gcc:latest"

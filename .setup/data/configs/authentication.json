@@ -1,12 +1,2 @@
 {
-    "authentication_method": "PamAuthentication",
-    "ldap_options": {
-        "url": "",
-        "uid": "",
-        "bind_dn": ""
-    },
-    "saml_options": {
-        "name": "",
-        "username_attribute": ""
-    }
 }
