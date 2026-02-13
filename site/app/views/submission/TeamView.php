@@ -33,6 +33,7 @@ class TeamView extends AbstractView {
             "team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
             "user" => $this->core->getUser(),
+            "user_id" => $this->core->getUser()->getId(),
             "lock" => $lock,
             "members" => $members,
             "seekers" => $seekers,
