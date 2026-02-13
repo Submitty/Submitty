@@ -2297,4 +2297,24 @@ class SubmissionController extends AbstractController {
             $this->core->buildCourseUrl(['gradeable', $gradeable_id])
         );
     }
+    #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
+    public function viewUsersGradeableList(string $term, string $course): JsonResponse {
+
+        if (!$this->core->getQueries()->courseExists($term, $course)) {
+            return JsonResponse::getFailResponse("Course $course for term $term does not exist");
+        }
+
+        $user = $this->core->getUser();
+        if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
+            $user_id = $_GET['user_id'] ?? '';
+            if ($user_id !== '') {
+               $user = $this->core->getQueries()->getUserById($user_id);
+            }            
+        } 
+
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+        $gradeables = new GradeableList($this->core, $user);
+        return JsonResponse::getSuccessResponse($gradeables->toJson(true));
+    }
 }

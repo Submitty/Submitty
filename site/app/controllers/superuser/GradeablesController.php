@@ -13,6 +13,7 @@ use app\models\gradeable\GradeableList;
 use app\views\superuser\GradeablesView;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[AccessControl(level: "SUPERUSER")]
 class GradeablesController extends AbstractController {
     #[AccessControl(level: "SUPERUSER")]
     #[Route("/api/superuser/gradeables")]
@@ -37,26 +38,5 @@ class GradeablesController extends AbstractController {
             JsonResponse::getSuccessResponse($gradeable_list->getGradeablesBySection()),
             new WebResponse(GradeablesView::class, 'showGradeablesList', $gradeable_list)
         );
-    }
-
-    #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
-    public function viewUsersGradeableList(string $term, string $course): JsonResponse {
-
-        if (!$this->core->getQueries()->courseExists($term, $course)) {
-            return JsonResponse::getFailResponse("Course $course for term $term does not exist");
-        }
-
-        $user = $this->core->getUser();
-        if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
-            $user_id = $_GET['user_id'] ?? '';
-            if ($user_id !== '') {
-               $user = $this->core->getQueries()->getUserById($user_id);
-            }            
-        } 
-
-        $this->core->loadCourseConfig($term, $course);
-        $this->core->loadCourseDatabase();
-        $gradeables = new GradeableList($this->core, $user);
-        return JsonResponse::getSuccessResponse($gradeables->toJson(true));
     }
 }
