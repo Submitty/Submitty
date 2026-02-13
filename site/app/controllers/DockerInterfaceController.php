@@ -24,7 +24,9 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
-        if (is_null($user) || !$user->accessFaculty()) {
+        $is_instructor = count($user->getInstructorCourses()) > 0;
+        $is_faculty = $user->accessFaculty();
+        if (is_null($user) || (!$is_instructor && !$is_faculty)) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
@@ -73,6 +75,7 @@ class DockerInterfaceController extends AbstractController {
                 ['admin', 'Docker'],
                 'displayDockerPage',
                 new DockerUI($this->core, $json),
+                $is_faculty
             )
         );
     }
