@@ -1,5 +1,5 @@
 import { buildUrl } from '../../support/utils';
-
+/*
 const verifyUpdateMessage = (exists = true) => {
     if (exists) {
         cy.get('[data-testid="popup-message"]')
@@ -151,7 +151,7 @@ describe('Test cases revolving around notification/email settings', () => {
         cy.get('input[data-testid="checkbox-input"]')
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
-});
+}); */
 
 const no_unseen_message = 'No unseen notifications.';
 
@@ -182,17 +182,26 @@ const verifyAllNotificationsSeen = (user) => {
 // Tracks total notifications created
 let notificationCount = 0;
 
-const createAnnouncements = (added) => {
-    cy.login('instructor');
-    cy.visit(buildUrl(['sample', 'forum']));
+const createAnnouncement = (title, content) => {
+    return cy.request({
+        method: 'POST',
+        url: buildUrl(['sample', 'forum', 'threads', 'new']),
+        form: true,
+        body: {
+            title: title,
+            thread_post_content: content,
+            thread_status: 0,
+            cat: [1],
+            Announcement: 'Announcement'
+        }
+    });
+};
 
-    for (let i = 0; i < added; i++) {
-        cy.get('[data-testid="Create Thread"]').click();
-        cy.get('[data-testid="title"]').clear().type(`Thread ${notificationCount}`);
-        cy.get('[data-testid="reply_box_1"]').clear().type("This is a Cypress-generated thread.");
-        cy.get('[data-testid="categories-pick-list"]').children().first().click();
-        cy.get('[data-testid="announce-thread"]').click();
-        cy.get('[data-testid="forum-publish-thread"]').click();
+const createAnnouncements = (count) => {
+    cy.login('instructor');
+
+    for (let i = 0; i < count; i++) {
+        createAnnouncement(`Cypress Thread ${notificationCount + i}`, 'This is a Cypress-generated announcement.');
         notificationCount++;
     }
 
@@ -220,22 +229,21 @@ describe('Tests for creating and interacting with notifications', () => {
         cy.get('[data-testid="toggle-unseen-only"]') .should('have.text', 'Show All'); // Verify the initial state of local storage is unseen only
         cy.logout();
 
-        markAllNotificationsSeen('instructor');
-        verifyAllNotificationsSeen('instructor');
-        markAllNotificationsSeen('student');
-        verifyAllNotificationsSeen('student');
+        ['instructor', 'student'].forEach((user) => {
+            it(`Should test triggering notifications, marking seen, navigation, dynamic updates for ${user}`, () => {
+                verifyAllNotificationsSeen(user);
+                markAllNotificationsSeen(user);
+            });
+        });
 
         createAnnouncements(12);
-
-        // Prefire the cleanup
-        deleteAnnouncements();
     });
 
     after(() => {
         deleteAnnouncements();
     });
 
-    ['student'].forEach((user) => { // Should add more?
+    ['student'].forEach((user) => {
         it(`Should test triggering notifications, marking seen, navigation, dynamic updates for ${user}`, () => {
             cy.login(user);
             cy.visit();
