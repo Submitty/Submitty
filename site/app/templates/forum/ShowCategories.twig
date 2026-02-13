@@ -35,7 +35,7 @@
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <span  style="float: right;">
-                <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
+                <input id="new_category_text" data-testid="new-category-text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
 
                 
                 <input class="date_picker flatpickr-input active" placeholder=" mm / dd / yyyy " name="visible_date" id="category_visible_date" type="text">

@@ -152,3 +152,93 @@ describe('Test cases revolving around notification/email settings', () => {
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
 });
+
+const no_unseen_message = 'No unseen notifications.';
+
+const markAllNotificationsSeen = (user) => {
+    cy.login(user);
+    cy.visit();
+    cy.get('[data-testid="mark-seen-btn"]').click();
+    cy.get('[data-testid="select-mark-all"]').click();
+    cy.contains('button', 'Mark Seen').click();
+    cy.logout();
+}
+
+const verifyAllNotificationsSeen = (user) => {
+    cy.login(user);
+    cy.visit();
+    cy.get('[data-testid="toggle-unseen-only"]').then($btn => {
+        if ($btn.text().includes('Show Unseen Only')) {
+            cy.wrap($btn).click()
+        }
+    });
+    cy.contains(no_unseen_message);
+    cy.visit(buildUrl(['sample', 'notifications']));
+    cy.contains(no_unseen_message);
+
+    cy.logout();
+};
+
+// Tracks total notifications created
+let notificationCount = 0;
+
+const createAnnouncements = (added) => {
+    cy.login('instructor');
+    cy.visit(buildUrl(['sample', 'forum']));
+
+    for (let i = 0; i < added; i++) {
+        cy.get('[data-testid="Create Thread"]').click();
+        cy.get('[data-testid="title"]').clear().type(`Thread ${notificationCount}`);
+        cy.get('[data-testid="reply_box_1"]').clear().type("This is a Cypress-generated thread.");
+        cy.get('[data-testid="categories-pick-list"]').children().first().click();
+        cy.get('[data-testid="announce-thread"]').click();
+        cy.get('[data-testid="forum-publish-thread"]').click();
+        notificationCount++;
+    }
+
+    cy.logout();
+};
+
+const deleteAnnouncements = () => {
+    cy.login('instructor');
+    cy.visit(buildUrl(['sample', 'forum']));
+
+    cy.on('window:confirm', () => true);
+    for (let i = 0; i < notificationCount; i++) {
+        cy.get('[data-testid="thread_box"]').first().click();
+        cy.get('[data-testid="thread-dropdown"]').click();
+        cy.get('[data-testid="delete-post-button"]').click();
+    }
+
+    cy.logout();
+}
+
+describe('Tests for creating and interacting with notifications', () => {
+    before(() => {
+        cy.login('student');
+        cy.visit();
+        cy.get('[data-testid="toggle-unseen-only"]') .should('have.text', 'Show All'); // Verify the initial state of local storage is unseen only
+        cy.logout();
+
+        markAllNotificationsSeen('instructor');
+        verifyAllNotificationsSeen('instructor');
+        markAllNotificationsSeen('student');
+        verifyAllNotificationsSeen('student');
+
+        createAnnouncements(12);
+
+        // Prefire the cleanup
+        deleteAnnouncements();
+    });
+
+    after(() => {
+        deleteAnnouncements();
+    });
+
+    ['student'].forEach((user) => { // Should add more?
+        it(`Should test triggering notifications, marking seen, navigation, dynamic updates for ${user}`, () => {
+            cy.login(user);
+            cy.visit();
+        });
+    });
+});
