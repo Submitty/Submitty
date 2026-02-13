@@ -233,13 +233,15 @@
             } %}
         {% endif %}
 
-        {# Warn students when they are close to the penalty-free submission limit #}
-        {% set submissions_remaining = max_submissions - versions_used %}
-        {% if submissions_remaining <= 5 %}
-            <p class="submission-attempt-warning" aria-live="polite">
-                You have {{ submissions_remaining }} penalty-free submission{{ submissions_remaining == 1 ? '' : 's' }} remaining
-                out of {{ max_submissions }} allowed.
-            </p>
+       {# Warn students when they are close to the penalty-free submission limit #}
+        {% if max_submissions is defined and highest_version is defined %}
+            {% set submissions_remaining = max_submissions - highest_version %}
+            {% if submissions_remaining >= 0 and submissions_remaining <= 5 %}
+                <p class="submission-attempt-warning" aria-live="polite">
+                    You have {{ submissions_remaining }} penalty-free submission{{ submissions_remaining == 1 ? '' : 's' }} remaining
+                    out of {{ max_submissions }} allowed.
+                </p>
+            {% endif %}
         {% endif %}
 
         {# File upload boxes #}
