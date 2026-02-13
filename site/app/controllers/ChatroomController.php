@@ -239,6 +239,7 @@ class ChatroomController extends AbstractController {
             $indiv_msg_array = [];
             if ($chatroom->isActive()) {
                 $msg_array['type'] = 'chat_close';
+                $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
 
                 if (!$chatroom->allowReadOnlyAfterEnd()) {
                     $indiv_msg_array = [];
