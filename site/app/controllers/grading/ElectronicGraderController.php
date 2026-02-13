@@ -65,7 +65,7 @@ class ElectronicGraderController extends AbstractController {
         $include_withdrawn       = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
 
         $overridden_user_ids = [];
-        if ($include_grade_override && !empty($overall_scores)) {
+        if (!$include_grade_override && count($overall_scores) > 0) {
             $g_id = $overall_scores[0]->getGradeable()->getId();
             $rows = $this->core->getQueries()->getRawUsersWithOverriddenGrades($g_id);
             foreach ($rows as $r) {
@@ -500,7 +500,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($gradeable->getComponents() as $comp) {
                     if (!$comp->isPeerComponent()) {
                         $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
-                        if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()) {
+                        if ($graded_component !== null && $graded_component->getGraderId() !== $grader->getId()) {
                             $graded_component->setVerifier($grader);
                             $graded_component->setVerifyTime($this->core->getDateTimeNow());
                         }
