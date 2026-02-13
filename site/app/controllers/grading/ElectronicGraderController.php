@@ -64,6 +64,15 @@ class ElectronicGraderController extends AbstractController {
         $include_null_section    = ($_COOKIE['include_null_section'] ?? 'omit') === 'include';
         $include_withdrawn       = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
 
+        $overridden_user_ids = [];
+        if ($include_grade_override && !empty($overall_scores)) {
+            $g_id = $overall_scores[0]->getGradeable()->getId();
+            $rows = $this->core->getQueries()->getRawUsersWithOverriddenGrades($g_id);
+            foreach ($rows as $r) {
+                $overridden_user_ids[$r['user_id']] = true;
+            }
+        }
+
         $histogram = [
             "bTA" => [],
             "tTA" => [],
@@ -101,8 +110,9 @@ class ElectronicGraderController extends AbstractController {
                 continue;
             }
 
+            $submitter_id = $submitter->getId();
             // should we include grade overrides
-            if (!$include_grade_override && $ov->hasOverriddenGrades()) {
+            if (!$include_grade_override && isset($overridden_user_ids[$submitter_id])) {
                 continue;
             }
 
@@ -112,11 +122,11 @@ class ElectronicGraderController extends AbstractController {
             if (!$include_bad_submissions && $is_bad_submission) {
                 continue;
             }
-            
+
             //if the submission is valid, add the data to the histogram data
-            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0) {
-                if ($ov->getAutoGradedGradeable()->getActiveVersion() != 0) {
-                    if (!$ov->getOrCreateTaGradedGradeable()->hasVersionConflict()) {   
+            if ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0) {
+                if ($ov->getAutoGradedGradeable()->getActiveVersion() !== 0) {
+                    if (!$ov->getOrCreateTaGradedGradeable()->hasVersionConflict()) {
                     //do not include version conflicts in autograding histogram ^
                         $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
                         $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
@@ -131,7 +141,7 @@ class ElectronicGraderController extends AbstractController {
             if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
                 $histogram["noSub"] += 1;
             }
-            elseif ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0 & $ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
+            elseif ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0 && $ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
                 $histogram["cancelledSub"] += 1;
             }
             elseif ($ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
@@ -318,40 +328,40 @@ class ElectronicGraderController extends AbstractController {
         $student_list = [];
         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
         foreach ($students as $student) {
-         $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-         $sorted_students[$reg_sec][] = $student;
-         array_push($student_list, ['user_id' => $student->getId()]);
-         if ($submit_before_grading) {
-            if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
+            $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $sorted_students[$reg_sec][] = $student;
+            array_push($student_list, ['user_id' => $student->getId()]);
+            if ($submit_before_grading) {
+                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
+                    array_push($student_array, $student->getId());
+                }
+            }
+            else {
                 array_push($student_array, $student->getId());
             }
         }
-        else {
-            array_push($student_array, $student->getId());
+        $number_of_students = count($student_array);
+        if ($number_of_students <= 1) {
+            $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
+            return JsonResponse::getFailResponse("Not Enough Submissions");
         }
-    }
-    $number_of_students = count($student_array);
-    if ($number_of_students <= 1) {
-        $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
-        return JsonResponse::getFailResponse("Not Enough Submissions");
-    }
-    if ($number_to_grade > $number_of_students) {
-        $all_grade_all = true;
-    }
-    if ($all_grade_all) {
-        $final_grading_info = $this->setAllGradAllGrading($student_array);
+        if ($number_to_grade > $number_of_students) {
+            $all_grade_all = true;
+        }
+        if ($all_grade_all) {
+            $final_grading_info = $this->setAllGradAllGrading($student_array);
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse($final_grading_info);
+        }
+        $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
+        if ($number_to_grade < 1) {
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
+        }
         $gradeable->setRandomPeerGradersList($final_grading_info);
+        $gradeable->setPeerGradingSet($number_to_grade);
         return JsonResponse::getSuccessResponse($final_grading_info);
     }
-    $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
-    if ($number_to_grade < 1) {
-        $gradeable->setRandomPeerGradersList($final_grading_info);
-        return JsonResponse::getSuccessResponse("Clear Peer Matrix");
-    }
-    $gradeable->setRandomPeerGradersList($final_grading_info);
-    $gradeable->setPeerGradingSet($number_to_grade);
-    return JsonResponse::getSuccessResponse($final_grading_info);
-}
     /**
      * Route for getting whitespace information for the diff viewer
      */
@@ -758,123 +768,38 @@ class ElectronicGraderController extends AbstractController {
             if (!$gradeable->isTeamAssignment() && $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [
                    // Total peer components to grade = Number of peer components * Number of Students who submitted
-                   'total_who_submitted' => $total_who_submitted,
-                   'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
-                   'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
-                   'graded_components' => 0,
-                   'verified_components' => 0,
-                   'non_late_graded_components' => 0,
-                   'non_late_verified_components' => 0,
-                   'view_peer_graded_components' => $peer_graded_components,
-                   'view_peer_components' => $peer_components,
-                   'ta_graded_components' => 0,
-                   'num_gradeables' => $num_gradeables,
-                   'graders' => [],
-                   'valid_graders' => []
-               ];
-           }
-           if ($peer) {
+                 'total_who_submitted' => $total_who_submitted,
+                 'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
+                 'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
+                 'graded_components' => 0,
+                 'verified_components' => 0,
+                 'non_late_graded_components' => 0,
+                 'non_late_verified_components' => 0,
+                 'view_peer_graded_components' => $peer_graded_components,
+                 'view_peer_components' => $peer_components,
+                 'ta_graded_components' => 0,
+                 'num_gradeables' => $num_gradeables,
+                 'graders' => [],
+                 'valid_graders' => []
+                ];
+            }
+            if ($peer) {
                  // If a team assignment => Team Peer Grading Stats Should be Visible
                  // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
-            if ($gradeable->isTeamAssignment()) {
-                $sections['stu_grad'] = [
-                       'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
-                       'non_late_total_components' => count($gradeable->getPeerComponents()),
-                       'graded_components' => $my_grading,
-                       'verified_components' => $my_grading,
-                       'non_late_graded_components' => $my_grading,
-                       'non_late_verified_components' => $my_grading,
-                       'num_gradeables' => $num_gradeables,
-                       'ta_graded_components' => 0,
-                       'graders' => [],
-                       'valid_graders' => []
-                   ];
-                   $sections['all'] = [
-                       'total_components' => 0,
-                       'graded_components' => 0,
-                       'verified_components' => 0,
-                       'non_late_total_components' => 0,
-                       'non_late_graded_components' => 0,
-                       'non_late_verified_components' => 0,
-                       'graders' => [],
-                       'valid_graders' => []
-                   ];
-                   foreach ($total_users as $key => $value) {
-                    if ($key == 'NULL') {
-                        continue;
-                    }
-                    $sections['all']['total_components'] += $value * $num_components;
-                    $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
-                    $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
-                }
-                $sections['all']['total_components'] -= $num_components;
-                $sections['all']['graded_components'] -= $my_grading;
-                $sections['all']['verified_components'] -= $my_grading;
-                $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
-                $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
-                $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
-                $sections['stu_grad']['no_team'] = 0;
-                $sections['stu_grad']['team'] = 0;
-                $sections['all']['no_team'] = 0;
-                $sections['all']['team'] = 0;
-            }
-            else {
-                    // If not a team assignment => Individual Peer Grading Stats Should be Visible
-                $sections['stu_grad'] = [
-                    'total_components' => $num_components * $peers_to_grade,
-                    'non_late_total_components' => $num_components * $peers_to_grade,
-                    'graded_components' => $my_grading,
-                    'verified_components' => $my_grading,
-                    'non_late_graded_components' => $my_grading,
-                    'non_late_verified_components' => $my_grading,
-                    'num_gradeables' => $num_gradeables,
-                    'ta_graded_components' => 0,
-                    'graders' => [],
-                    'valid_graders' => []
-                ];
-                $sections['all'] = [
-                    'total_components' => 0,
-                    'graded_components' => 0,
-                    'verified_components' => 0,
-                    'non_late_total_components' => 0,
-                    'non_late_graded_components' => 0,
-                    'non_late_verified_components' => 0,
-                    'graders' => [],
-                    'valid_graders' => []
-                ];
-                foreach ($total_users as $key => $value) {
-                    if ($key == 'NULL') {
-                        continue;
-                    }
-                    $sections['all']['total_components'] += $value * $num_components;
-                    $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
-                    $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
-                }
-                $sections['all']['total_components'] -= $num_components;
-                $sections['all']['graded_components'] -= $my_grading;
-                $sections['all']['verified_components'] -= $my_grading;
-                $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
-                $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
-                $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
-            }
-        }
-        else {
-            foreach ($total_users as $key => $value) {
-                if (array_key_exists($key, $num_submitted)) {
-                    $sections[$key] = [
-                        'total_components' => $num_submitted[$key],
-                        'non_late_total_components' => $num_submitted[$key] - (array_key_exists($key, $late_submitted) ? $late_submitted[$key] : 0),
-                        'graded_components' => 0,
-                        'verified_components' => 0,
-                        'non_late_graded_components' => 0,
-                        'non_late_verified_components' => 0,
+                if ($gradeable->isTeamAssignment()) {
+                    $sections['stu_grad'] = [
+                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
+                        'non_late_total_components' => count($gradeable->getPeerComponents()),
+                        'graded_components' => $my_grading,
+                        'verified_components' => $my_grading,
+                        'non_late_graded_components' => $my_grading,
+                        'non_late_verified_components' => $my_grading,
+                        'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
                         'graders' => [],
                         'valid_graders' => []
                     ];
-                }
-                else {
-                    $sections[$key] = [
+                    $sections['all'] = [
                         'total_components' => 0,
                         'graded_components' => 0,
                         'verified_components' => 0,
@@ -884,84 +809,169 @@ class ElectronicGraderController extends AbstractController {
                         'graders' => [],
                         'valid_graders' => []
                     ];
+                    foreach ($total_users as $key => $value) {
+                        if ($key == 'NULL') {
+                            continue;
+                        }
+                        $sections['all']['total_components'] += $value * $num_components;
+                        $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
+                        $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
+                    }
+                    $sections['all']['total_components'] -= $num_components;
+                    $sections['all']['graded_components'] -= $my_grading;
+                    $sections['all']['verified_components'] -= $my_grading;
+                    $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
+                    $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
+                    $sections['stu_grad']['no_team'] = 0;
+                    $sections['stu_grad']['team'] = 0;
+                    $sections['all']['no_team'] = 0;
+                    $sections['all']['team'] = 0;
                 }
-                if ($gradeable->isTeamAssignment()) {
-                    $sections[$key]['no_team'] = $no_team_users[$key];
-                    $sections[$key]['team'] = $team_users[$key];
+                else {
+                    // If not a team assignment => Individual Peer Grading Stats Should be Visible
+                    $sections['stu_grad'] = [
+                        'total_components' => $num_components * $peers_to_grade,
+                        'non_late_total_components' => $num_components * $peers_to_grade,
+                        'graded_components' => $my_grading,
+                        'verified_components' => $my_grading,
+                        'non_late_graded_components' => $my_grading,
+                        'non_late_verified_components' => $my_grading,
+                        'num_gradeables' => $num_gradeables,
+                        'ta_graded_components' => 0,
+                        'graders' => [],
+                        'valid_graders' => []
+                    ];
+                    $sections['all'] = [
+                        'total_components' => 0,
+                        'graded_components' => 0,
+                        'verified_components' => 0,
+                        'non_late_total_components' => 0,
+                        'non_late_graded_components' => 0,
+                        'non_late_verified_components' => 0,
+                        'graders' => [],
+                        'valid_graders' => []
+                    ];
+                    foreach ($total_users as $key => $value) {
+                        if ($key == 'NULL') {
+                            continue;
+                        }
+                        $sections['all']['total_components'] += $value * $num_components;
+                        $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
+                        $sections['all']['verified_components'] += $verified_components[$key] ?? 0;
+                    }
+                    $sections['all']['total_components'] -= $num_components;
+                    $sections['all']['graded_components'] -= $my_grading;
+                    $sections['all']['verified_components'] -= $my_grading;
+                    $sections['all']['non_late_total_components'] = $sections['all']['total_components'];
+                    $sections['all']['non_late_graded_components'] = $sections['all']['graded_components'];
+                    $sections['all']['non_late_verified_components'] = $sections['all']['verified_components'];
                 }
-                if (isset($graded_components[$key])) {
+            }
+            else {
+                foreach ($total_users as $key => $value) {
+                    if (array_key_exists($key, $num_submitted)) {
+                        $sections[$key] = [
+                            'total_components' => $num_submitted[$key],
+                            'non_late_total_components' => $num_submitted[$key] - (array_key_exists($key, $late_submitted) ? $late_submitted[$key] : 0),
+                            'graded_components' => 0,
+                            'verified_components' => 0,
+                            'non_late_graded_components' => 0,
+                            'non_late_verified_components' => 0,
+                            'ta_graded_components' => 0,
+                            'graders' => [],
+                            'valid_graders' => []
+                        ];
+                    }
+                    else {
+                        $sections[$key] = [
+                            'total_components' => 0,
+                            'graded_components' => 0,
+                            'verified_components' => 0,
+                            'non_late_total_components' => 0,
+                            'non_late_graded_components' => 0,
+                            'non_late_verified_components' => 0,
+                            'graders' => [],
+                            'valid_graders' => []
+                        ];
+                    }
+                    if ($gradeable->isTeamAssignment()) {
+                        $sections[$key]['no_team'] = $no_team_users[$key];
+                        $sections[$key]['team'] = $team_users[$key];
+                    }
+                    if (isset($graded_components[$key])) {
                         // Clamp to total components if unsubmitted assignment is graded for whatever reason
-                    $sections[$key]['graded_components'] = $graded_components[$key];
-                    $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_components[$key];
-                    $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                }
-                if (isset($verified_components[$key])) {
-                    $sections[$key]['verified_components'] = $verified_components[$key];
-                    $sections[$key]['non_late_verified_components'] = $verified_components[$key];
-                }
-                if (isset($graders[$key])) {
-                    $sections[$key]['graders'] = $graders[$key];
+                        $sections[$key]['graded_components'] = $graded_components[$key];
+                        $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_components[$key];
+                        $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    }
+                    if (isset($verified_components[$key])) {
+                        $sections[$key]['verified_components'] = $verified_components[$key];
+                        $sections[$key]['non_late_verified_components'] = $verified_components[$key];
+                    }
+                    if (isset($graders[$key])) {
+                        $sections[$key]['graders'] = $graders[$key];
 
                         // If we allow NULL sections, use any.
                         // If not, make sure $key is not NULL
-                    if ((array_key_exists('include_null_registration', $_COOKIE) && $_COOKIE['include_null_registration'] === 'true') || $key !== "NULL") {
-                        $valid_graders = [];
-                        foreach ($graders[$key] as $valid_grader) {
-                            /* @var User $valid_grader */
-                            if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
-                                $valid_graders[] = $valid_grader->getDisplayedGivenName();
+                        if ((array_key_exists('include_null_registration', $_COOKIE) && $_COOKIE['include_null_registration'] === 'true') || $key !== "NULL") {
+                            $valid_graders = [];
+                            foreach ($graders[$key] as $valid_grader) {
+                                /* @var User $valid_grader */
+                                if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
+                                    $valid_graders[] = $valid_grader->getDisplayedGivenName();
+                                }
                             }
+                            $sections[$key]["valid_graders"] = $valid_graders;
                         }
-                        $sections[$key]["valid_graders"] = $valid_graders;
                     }
                 }
             }
         }
-    }
-    $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
-    $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
+        $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
+        $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
 
-    $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
+        $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
 
-    if (isset($order) && $gradeable->isTeamAssignment()) {
-        $total_students_submitted = 0;
-        foreach ($order->getSortedGradedGradeables() as $g) {
-            $team = $g->getSubmitter()->getTeam();
-            $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-            if (array_key_exists($team_section, $total_users)) {
-                if ($this->core->getQueries()->getActiveVersionForTeam($gradeable->getId(), $team->getId()) != 0) {
-                    $total_students_submitted += count($team->getMembers());
+        if (isset($order) && $gradeable->isTeamAssignment()) {
+            $total_students_submitted = 0;
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                $team = $g->getSubmitter()->getTeam();
+                $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if (array_key_exists($team_section, $total_users)) {
+                    if ($this->core->getQueries()->getActiveVersionForTeam($gradeable->getId(), $team->getId()) != 0) {
+                        $total_students_submitted += count($team->getMembers());
+                    }
                 }
             }
         }
+        else {
+            $total_students_submitted = 0;
+        }
+        $this->core->getOutput()->renderOutput(
+            ['grading', 'ElectronicGrader'],
+            'statusPage',
+            $gradeable,
+            $sections,
+            $component_averages,
+            $manual_average,
+            $autograded_average,
+            $overall_scores,
+            $overall_average,
+            $histogram_data,
+            $total_submissions,
+            $individual_viewed_grade ?? 0,
+            $total_students_submitted,
+            $registered_but_not_rotating,
+            $rotating_but_not_registered,
+            $viewed_grade,
+            $section_key,
+            $grade_inquiries,
+            $graders_of_inquiries,
+            $show_warnings,
+            $submissions_in_queue
+        );
     }
-    else {
-        $total_students_submitted = 0;
-    }
-    $this->core->getOutput()->renderOutput(
-        ['grading', 'ElectronicGrader'],
-        'statusPage',
-        $gradeable,
-        $sections,
-        $component_averages,
-        $manual_average,
-        $autograded_average,
-        $overall_scores,
-        $overall_average,
-        $histogram_data,
-        $total_submissions,
-        $individual_viewed_grade ?? 0,
-        $total_students_submitted,
-        $registered_but_not_rotating,
-        $rotating_but_not_registered,
-        $viewed_grade,
-        $section_key,
-        $grade_inquiries,
-        $graders_of_inquiries,
-        $show_warnings,
-        $submissions_in_queue
-    );
-}
 
     /**
      * Shows the list of submitters
