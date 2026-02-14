@@ -341,7 +341,7 @@ class GradeableList extends AbstractModel {
         }
     }
 
-    public function toJson(bool $is_student) {
+    public function toJson() {
         $gradeables = [];
         foreach ($this->getSubmittableElectronicGradeables() as $gradeable) {
             $section = $this->getGradeableSection($this->core, $gradeable);

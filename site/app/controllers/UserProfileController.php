@@ -94,6 +94,7 @@ class UserProfileController extends AbstractController {
             $user->setPreferredLocale(empty($_POST['locale']) ? null : $_POST['locale']);
             return JsonResponse::getSuccessResponse([ 'locale' => $user->getPreferredLocale() ]);
         }
+
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 

@@ -2310,12 +2310,12 @@ class SubmissionController extends AbstractController {
             $user_id = $_GET['user_id'] ?? '';
             if ($user_id !== '') {
                 $user = $this->core->getQueries()->getUserById($user_id);
-            }    
+            }
         }
 
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
         $gradeables = new GradeableList($this->core, $user);
-        return JsonResponse::getSuccessResponse($gradeables->toJson(true));
+        return JsonResponse::getSuccessResponse($gradeables->toJson());
     }
 }
