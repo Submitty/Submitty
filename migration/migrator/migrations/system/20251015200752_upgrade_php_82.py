@@ -4,6 +4,7 @@ import os
 import subprocess
 import tempfile
 
+# copied from .setup/install_system.sh
 CONFIGURE_PHP = """#!/bin/bash
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 
