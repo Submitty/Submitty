@@ -183,24 +183,29 @@ const verifyAllNotificationsSeen = (user) => {
 let notificationCount = 0;
 
 const createAnnouncement = (title, content) => {
-    const body = {
-        'title': title,
-        'markdown_status': 0,
-        'lock_thread_date': '',
-        'thread_post_content': content,
-        'cat[]': '1',
-        'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
-        'thread_status': -1,
-    };
+    cy.window().then(async (win) => {
+        const body = {
+            'title': title,
+            'markdown_status': 0,
+            'lock_thread_date': '',
+            'thread_post_content': content,
+            'cat[]': '1',
+            'thread_status': -1,
+            'csrf_token': win.csrfToken,
+        };
 
-    return cy.request({
-        method: 'POST',
-        url: buildUrl(['sample', 'forum', 'threads', 'new']),
-        form: true,
-        body: body,
-    }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.body.status).to.eq('success');
+        return cy.request({
+            method: 'POST',
+            url: buildUrl(['sample', 'forum', 'threads', 'new']),
+            form: true,
+            body: body,
+            
+        }).then((res) => {
+            const body = JSON.parse(res.body);
+            expect(res.status).to.eq(200);
+            expect(body.status).to.eq('success');
+            
+        });
     });
 };
 
@@ -209,7 +214,7 @@ const createAnnouncements = (count) => {
     cy.visit(['sample', 'forum']);
 
     for (let i = 0; i < count; i++) {
-        createAnnouncement(`Cypress Thread ${notificationCount + i}`, 'This is a Cypress-generated announcement.');
+        createAnnouncement(`Cypress Thread ${notificationCount}`, 'This is a Cypress-generated announcement.');
         notificationCount++;
     }
 
@@ -220,12 +225,38 @@ const deleteAnnouncements = () => {
     cy.login('instructor');
     cy.visit(buildUrl(['sample', 'forum']));
 
-    cy.on('window:confirm', () => true);
-    for (let i = 0; i < notificationCount; i++) {
-        cy.get('[data-testid="thread_box"]').first().click();
-        cy.get('[data-testid="thread-dropdown"]').click();
-        cy.get('[data-testid="delete-post-button"]').click();
-    }
+    cy.get('[data-testid="thread-list-item"]').first().invoke('text').then((text) => {
+        const match = text.match(/\((\d+)\)/);
+        const threadId = match ? Number(match[1]) : null;
+
+        for (let i = 0; i < count; i++) {
+            cy.window().then(async (win) => {
+                const body = {
+                    'title': title,
+                    'markdown_status': 0,
+                    'lock_thread_date': '',
+                    'thread_post_content': content,
+                    'cat[]': '1',
+                    'thread_status': -1,
+                    'csrf_token': win.csrfToken,
+                };
+
+                return cy.request({
+                    method: 'POST',
+                    url: buildUrl(['sample', 'forum', 'threads', 'new']),
+                    form: true,
+                    body: body,
+                    
+                }).then((res) => {
+                    const body = JSON.parse(res.body);
+                    expect(res.status).to.eq(200);
+                    expect(body.status).to.eq('success');
+                    
+                });
+            });
+        }
+    });
+
 
     cy.logout();
 }
