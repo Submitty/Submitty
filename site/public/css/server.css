@@ -2214,7 +2214,6 @@ End of slider switch
 }
 
 .icon {
-    /* moved from user-profile.css */
     /* stylelint-disable-next-line declaration-no-important */
     background: none !important;
     border: none;
