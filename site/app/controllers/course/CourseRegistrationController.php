@@ -67,7 +67,7 @@ class CourseRegistrationController extends AbstractController {
         $em = $this->core->getSubmittyEntityManager();
         $course_user = $em->getRepository(CourseUser::Class)
             ->findOneBy([
-                'user_id' => $this->core->getUser()->getId(),
+                'user' => $this->core->getUser()->getId(),
                 'term' => $term,
                 'course' => $course
         ]);
@@ -82,17 +82,13 @@ class CourseRegistrationController extends AbstractController {
 
     public function registerCourseUser(string $term, string $course): void {
         $user = $this->core->getUser();
-        $user = $this->core->getCourseEntityManager()->find(UserEntity::class, $this->core->getUser()->getId());
         $user_id = $user->getId();
-        // if ($this->core->getQueries()->checkStudentActiveInCourse($user_id, $course, $term)) {
-        //     // User is already registered and active
-        //     return;
-        // }
+
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $em = $this->core->getSubmittyEntityManager();
         $course_user = $em->getRepository(CourseUser::class)
             ->findOneBy([
-                'user_id' => $user_id,
+                'user' => $user_id,
                 'term' => $term,
                 'course' => $course
         ]);

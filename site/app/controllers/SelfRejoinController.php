@@ -10,6 +10,7 @@ use app\entities\Term;
 use app\models\Email;
 use app\models\User;
 use app\entities\CourseUser;
+use app\entities\UserEntity;
 
 class SelfRejoinController extends AbstractController {
     /**
@@ -36,7 +37,7 @@ class SelfRejoinController extends AbstractController {
 
     /**
      * Returns if the user is allowed to self-readd to a course after being dropped.
-     * This function can be called from a non-coure context.
+     * This function can be called from a non-core context.
      *
      * @return bool True if can re-add, false otherwise.
      */
@@ -99,16 +100,15 @@ class SelfRejoinController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $term = $this->core->getConfig()->getTerm();
 
-        // --------------------------------
-        // Reasons why you can't rejoin:
-
         // findOneBy returns either the CourseUser entity if it was found givin the parameters, or null if one doesn't match
         $course_user = $this->core->getSubmittyEntityManager()->getRepository(CourseUser::class)
             ->findOneBy([
-                'user_id' => $user_id,
+                'user' => $user_id,
                 'term' => $term,
                 'course' => $course
         ]);
+        // --------------------------------
+        // Reasons why you can't rejoin:
 
         // Can't rejoin courses you were never in.
         if ($course_user === null) {

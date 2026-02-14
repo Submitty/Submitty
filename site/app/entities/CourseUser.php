@@ -25,7 +25,7 @@ class CourseUser {
     protected string $course;
 
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: 'courseUsers')]
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: 'course_users')]
     #[ORM\JoinColumn(
         name: 'user_id',           // The column in courses_users
         referencedColumnName: 'user_id', // The column in users
