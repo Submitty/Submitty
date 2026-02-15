@@ -37,7 +37,7 @@
     "jquery.are-you-sure": "1.9.0",
     "js-cookie": "3.0.5",
     "jspdf": "^4.0.0",
-    "katex": "^0.16.27",
+    "katex": "^0.16.28",
     "luxon": "3.7.2",
     "mermaid": "11.12.2",
     "pdfjs-dist": "5.4.530",
