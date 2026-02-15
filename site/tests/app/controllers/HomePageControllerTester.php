@@ -4,9 +4,11 @@ namespace tests\app\controllers;
 
 use app\controllers\HomePageController;
 use app\libraries\Core;
+use app\libraries\response\MultiResponse;
 use app\models\Course;
 use app\models\User;
 use app\entities\Term;
+use Doctrine\ORM\EntityRepository;
 use tests\BaseUnitTest;
 use DateTime;
 
@@ -174,5 +176,51 @@ class HomePageControllerTester extends BaseUnitTest {
         $response = $controller->showHomepage();
         $this->assertEquals('showHomePage', $response->web_response->view_function);
         $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], [], [], 0], $response->web_response->parameters);
+    }
+
+    public function testCreateCoursePage() {
+        // student level
+        $core = $this->createMockCore([], []);
+        $controller = new HomePageController($core);
+        $response = $controller->createCoursePage();
+        $this->assertInstanceOf(MultiResponse::class, $response);
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('Error', $response->web_response->view_class);
+        $this->assertEquals('errorPage', $response->web_response->view_function);
+
+        // instructor level
+        $core = $this->createMockCore([], ['access_admin' => true]);
+        $controller = new HomePageController($core);
+        $response = $controller->createCoursePage();
+        $this->assertInstanceOf(MultiResponse::class, $response);
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('Error', $response->web_response->view_class);
+        $this->assertEquals('errorPage', $response->web_response->view_function);
+
+        // faculty level
+        $core = $this->createMockCore([], ['access_faculty' => true]);
+
+        // mock terms
+        $terms = [
+            new Term('s26', 'Spring 2026', new DateTime(), new DateTime()),
+            new Term('f25', 'Fall 2025', new DateTime(), new DateTime())
+        ];
+        $termRepo = $this->createMock(EntityRepository::class);
+        $termRepo->method('findBy')->willReturn($terms);
+
+        $core->getSubmittyEntityManager()->method('getRepository')
+            ->willReturn($termRepo);
+
+        $controller = new HomePageController($core);
+        $response = $controller->createCoursePage();
+        $this->assertInstanceOf(MultiResponse::class, $response);
+        $this->assertEquals(null, $response->json_response);
+        $this->assertEquals(['HomePage'], $response->web_response->view_class);
+        $this->assertEquals('showCourseCreationPage', $response->web_response->view_function);
+        $args = $response->web_response->parameters;
+        $this->assertNull($args[0]);
+        $this->assertEquals('testUser', $args[1]);
+        $this->assertEquals($terms, $args[2]);
+        $this->assertFalse($args[3]);
     }
 }
