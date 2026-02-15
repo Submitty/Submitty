@@ -32,7 +32,7 @@
     "codemirror": "5.65.20",
     "codemirror-spell-checker": "1.1.2",
     "flatpickr": "4.6.13",
-    "jquery": "3.7.1",
+    "jquery": "4.0.0",
     "jquery-ui-dist": "1.13.3",
     "jquery.are-you-sure": "1.9.0",
     "js-cookie": "3.0.5",
