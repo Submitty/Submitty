@@ -33,7 +33,7 @@
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
-      set -o pipefail bash -p ./.setup/install_system.sh --utm > /usr/local/submitty/install.log 2>&1
+      set -o pipefail; bash -p ./.setup/install_system.sh --utm > /usr/local/submitty/install.log 2>&1
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
