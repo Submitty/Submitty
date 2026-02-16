@@ -8,7 +8,6 @@ import pwd
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
 
-
 def get_gid(user):
     return pwd.getpwnam(user).pw_gid
 
@@ -26,6 +25,7 @@ parser.add_argument('--debug', action='store_true', default=False, help='Configu
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+parser.add_argument('--ci', action='store_true', default=False, help='Flag for running Submitty in CI, since it uses different parameters')
 
 args = parser.parse_args()
 
@@ -34,6 +34,27 @@ os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 CONFIG_INSTALL_DIR = os.path.join(args.install_dir, 'config')
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 CONFIG_REPOSITORY = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
+
+if args.ci is True:
+    database_config = os.path.join(CONFIG_REPOSITORY, 'database.json')
+    authentication_config = os.path.join(CONFIG_REPOSITORY, 'authentication.json')
+    with open(database_config, 'r', encoding='utf-8') as f:
+        database_json = json.load(f)
+
+    database_json['authentication_method'] = 'DatabaseAuthentication'
+    database_json['database_host'] = 'localhost'
+
+    with open(database_config, 'w', encoding='utf-8') as f:
+        json.dump(database_json, f, indent=2)
+
+    with open(authentication_config, 'r', encoding='utf-8') as f:
+        authentication_json = json.load(f)
+
+    authentication_json['authentication_method'] = 'DatabaseAuthentication'
+
+    with open(authentication_config, 'w', encoding='utf-8') as f:
+        json.dump(authentication_json, f, indent=2)
+
 
 if not args.worker:
     for item in os.listdir(CONFIG_REPOSITORY):
@@ -48,7 +69,6 @@ if not args.worker:
                 print(f"Permission denied for '{item}'")
             except Exception as e:
                 print(f"An error occurred while copying '{item}': {e}")
-
 
 PHP_USER = 'submitty_php'
 PHP_GROUP = 'submitty_php'
