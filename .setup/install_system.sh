@@ -75,7 +75,7 @@ echo "Running setup:"
 while :; do
     case $1 in
         --utm)
-            export UTM=1
+            # export UTM=1
             export DEV_VM=1
             echo "utm"
             ;;

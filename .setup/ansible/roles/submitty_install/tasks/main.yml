@@ -33,32 +33,7 @@
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
-      set -o pipefail
-      echo  "{{ submitty_install_db_host }}
-        {{ submitty_install_db_port }}
-        {{ submitty_install_submitty_dbuser }}
-        {{ submitty_install_submitty_dbuser_password }}
-        {{ submitty_install_submitty_course_dbuser }}
-        {{ submitty_install_submitty_course_dbuser_password }}
-        {{ submitty_install_timezone }}
-        {{ submitty_install_language }}
-        {{ submitty_install_course_materials_file_upload_limit_mb }}
-        {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
-        {{ submitty_install_vcs_url }}
-        {{ submitty_install_institution_name }}
-        {{ submitty_install_institution_url }}
-        {{ submitty_install_sysadmin_email }}
-        {{ submitty_install_institution_url }}
-        {{ submitty_install_authentication_method }}
-        {{ submitty_install_admin_username }}
-        {{ submitty_install_email_enabled }}
-        {{ submitty_install_admin_email }}
-        {{ submitty_install_admin_password }}
-        {{ submitty_install_admin_email }}
-        {{ submitty_install_submitty_email }}
-        {{ submitty_install_smtp_server }}
-        {{ submitty_install_smtp_port }}
-        " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+      set -o pipefail bash -p ./.setup/install_system.sh --utm > /usr/local/submitty/install.log 2>&1
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
