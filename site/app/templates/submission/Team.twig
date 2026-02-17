@@ -52,13 +52,10 @@
         {# /Team invitations status #}
 
         {# Repository status #}
-        {% if gradeable.isVcs() %}
+        {% if vcs_repo_exists %}
             <br />
             <h3>To access your Team Repository:</h3>
             <span>
-                <em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em>
-                    <br />
-                    <br />
                 <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
             <br />
             </span>
@@ -67,6 +64,10 @@
                 <span>Note: Your school requires that you use Authentication Tokens.</span><br>
             {% endif %}
             <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
+        {% else %}
+            <br />
+            <h3>Your repository does not exist.</h3>
+            <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
         {% endif %}
         {# /Repository status #}
 
