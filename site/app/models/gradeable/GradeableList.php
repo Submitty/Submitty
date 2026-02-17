@@ -345,7 +345,7 @@ class GradeableList extends AbstractModel {
         $gradeables = [];
         foreach ($this->getSubmittableElectronicGradeables() as $gradeable) {
             $section = $this->getGradeableSection($this->core, $gradeable);
-            $gradeables[] = [
+            $gradeables[$gradeable->getId()] = [
                 'id' => $gradeable->getId(),
                 'title' => $gradeable->getTitle(),
                 'instructions_url' => $gradeable->getInstructionsUrl(),
