@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\entities\Term;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -72,7 +73,16 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
+    /**
+     * @param array<User>|null $faculty
+     * @param string $head_instructor
+     * @param array<Term> $terms
+     * @param bool $is_superuser
+     * @param string $csrf_token
+     * @param array $courses
+     * @return string
+     */
+    public function showCourseCreationPage(array|null $faculty, string $head_instructor, array $terms, bool $is_superuser, string $csrf_token, array $courses) {
         $this->output->addBreadcrumb("New Course");
         $course_names = [];
         foreach ($courses as $course) {
@@ -85,7 +95,7 @@ class HomePageView extends AbstractView {
             "head_instructor" => $head_instructor,
             "faculty" => $faculty,
             "is_superuser" => $is_superuser,
-            "semesters" => $semesters,
+            "terms" => $terms,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
             "add_term_url" => $this->output->buildUrl(['term', 'new']),
