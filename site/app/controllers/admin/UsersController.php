@@ -423,7 +423,7 @@ class UsersController extends AbstractController {
                 }
 
                 $user_entity = $em->find(UserEntity::class, $_POST['user_id']);
-                $course_user = new CourseUser($semester, $course, $user);
+                $course_user = new CourseUser($semester, $course, $user_entity);
                 $em->persist($course_user);
                 $em->flush();
                 $this->core->getQueries()->updateUserInCourse($user);
