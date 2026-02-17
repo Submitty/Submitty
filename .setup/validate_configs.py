@@ -28,6 +28,15 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 
 CONFIG_REPOSITORY = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
 
+with open(INSTALL_FILE, 'w') as open_file:
+    def write(x=''):
+        print(x, file=open_file)
+    write('#!/bin/bash')
+    write()
+    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@"')
+
+os.chmod(INSTALL_FILE, 0o700)
+
 if not args.worker:
     for item in os.listdir(CONFIG_REPOSITORY):
         source_path = os.path.join(CONFIG_REPOSITORY, item)

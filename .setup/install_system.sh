@@ -75,7 +75,7 @@ echo "Running setup:"
 while :; do
     case $1 in
         --utm)
-            export UTM=1
+            # export UTM=1
             export DEV_VM=1
             echo "utm"
             ;;
@@ -113,7 +113,10 @@ if [ ${WORKER} == 1 ]; then
     COMMAND=--worker
 fi
 
-# Validate configs exist
+if [ ${DEV_VM} == 1 ]; then
+    python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
+fi
+
 if [ ${DEV_VM} == 0 ]; then
     python3 ${COMMAND} ${CURRENT_DIR}/validate_configs.py
 fi
@@ -679,55 +682,7 @@ fi
 # #################################################################
 # # SUBMITTY SETUP
 # #################
-# echo Beginning Submitty Setup
-
-# #If in worker mode, run configure with --worker option.
-# if [ ${WORKER} == 1 ]; then
-#     echo "Running configure submitty in worker mode"
-#     if [ ${DEV_VM} == 1 ]; then
-#         echo "submitty" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
-#     else
-#         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
-#     fi
-# else
-#     if [ ${DEV_VM} == 1 ]; then
-#         # This should be set by setup_distro.sh for whatever distro we have, but
-#         # in case it is not, default to our primary URL
-#         if [ -z "${SUBMISSION_URL}" ]; then
-#             SUBMISSION_URL='http://192.168.56.101'
-#         fi
-#         echo -e "/var/run/postgresql
-# ${DB_USER}
-# ${DATABASE_PASSWORD}
-# ${DB_COURSE_USER}
-# ${DB_COURSE_PASSWORD}
-# America/New_York
-# en_US
-# 100
-# ${SUBMISSION_URL}
-
-
-# sysadmin@example.com
-# https://example.com
-# 1
-# submitty-admin
-# y
-
-
-# submitty@vagrant
-# do-not-reply@vagrant
-# localhost
-# 25
-# " | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
-
-#         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
-#         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-#         sed -i -e 's/"uid": ""/"uid": "uid"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-#         sed -i -e 's/"bind_dn": ""/"bind_dn": "ou=users,dc=vagrant,dc=local"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
-#     else
-#         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
-#     fi
-# fi
+echo Beginning Submitty Setup
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.

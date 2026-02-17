@@ -8,7 +8,6 @@ import pwd
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
 
-
 def get_gid(user):
     return pwd.getpwnam(user).pw_gid
 
@@ -26,6 +25,7 @@ parser.add_argument('--debug', action='store_true', default=False, help='Configu
 parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+parser.add_argument('--ci', action='store_true', default=False, help='Flag for running Submitty in CI, since it uses different parameters')
 
 args = parser.parse_args()
 
@@ -34,6 +34,27 @@ os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 CONFIG_INSTALL_DIR = os.path.join(args.install_dir, 'config')
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 CONFIG_REPOSITORY = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
+
+if args.ci is True:
+    database_config = os.path.join(CONFIG_REPOSITORY, 'database.json')
+    authentication_config = os.path.join(CONFIG_REPOSITORY, 'authentication.json')
+    with open(database_config, 'r', encoding='utf-8') as f:
+        database_json = json.load(f)
+
+    database_json['authentication_method'] = 'DatabaseAuthentication'
+    database_json['database_host'] = 'localhost'
+
+    with open(database_config, 'w', encoding='utf-8') as f:
+        json.dump(database_json, f, indent=2)
+
+    with open(authentication_config, 'r', encoding='utf-8') as f:
+        authentication_json = json.load(f)
+
+    authentication_json['authentication_method'] = 'DatabaseAuthentication'
+
+    with open(authentication_config, 'w', encoding='utf-8') as f:
+        json.dump(authentication_json, f, indent=2)
+
 
 if not args.worker:
     for item in os.listdir(CONFIG_REPOSITORY):
@@ -48,42 +69,3 @@ if not args.worker:
                 print(f"Permission denied for '{item}'")
             except Exception as e:
                 print(f"An error occurred while copying '{item}': {e}")
-
-
-PHP_USER = 'submitty_php'
-PHP_GROUP = 'submitty_php'
-CGI_USER = 'submitty_cgi'
-DAEMON_USER = 'submitty_daemon'
-DAEMON_GROUP = 'submitty_daemon'
-DAEMONPHP_GROUP = 'submitty_daemonphp'
-DAEMONPHPCGI_GROUP = 'submitty_daemonphpcgi'
-DAEMONCGI_GROUP = 'submitty_daemoncgi'
-
-FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
-DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
-
-config = OrderedDict()
-config['num_grading_scheduler_workers'] = 5
-config['num_untrusted'] = 60
-config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
-config['first_untrusted_gid'] = FIRST_UNTRUSTED_GID
-config['daemon_uid'] = DAEMON_UID
-config['daemon_gid'] = DAEMON_GID
-config['daemon_user'] = DAEMON_USER
-config['course_builders_group'] = 'submitty_course_builders'
-
-if not args.worker:
-    PHP_UID, PHP_GID = get_ids(PHP_USER)
-    CGI_UID, CGI_GID = get_ids(CGI_USER)
-    config['php_uid'] = PHP_UID
-    config['php_gid'] = PHP_GID
-    config['php_user'] = PHP_USER
-    config['cgi_user'] = CGI_USER
-    config['daemonphp_group'] = DAEMONPHP_GROUP
-    config['daemoncgi_group'] = DAEMONCGI_GROUP
-    config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
-else:
-    config['supervisor_user'] = SUPERVISOR_USER
-
-with open(os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json'), 'w') as users_file:
-    json.dump(config, users_file, indent=2)
