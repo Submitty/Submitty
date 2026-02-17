@@ -137,7 +137,3 @@ if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
     chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 fi
-
-
-echo -e "Updating system dependencies"
-bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
