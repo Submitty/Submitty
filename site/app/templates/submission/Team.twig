@@ -56,6 +56,7 @@
             <br />
             <h3>To access your Team Repository:</h3>
             <span>
+<<<<<<< update-repo-prep-delay-note
                 <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
             <br />
             </span>
@@ -63,6 +64,18 @@
             {% if git_auth_token_required %}
                 <span>Note: Your school requires that you use Authentication Tokens.</span><br>
             {% endif %}
+=======
+                <em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span>
+                    <br />
+                    <br />
+                <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp><br><br>
+                <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
+                if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
+                <br><br>
+                {% if git_auth_token_required %}
+                    <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
+                {% endif %}
+>>>>>>> main
             <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
         {% else %}
             <br />
