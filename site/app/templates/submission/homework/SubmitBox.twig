@@ -153,16 +153,10 @@
             or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
             {% if vcs_repo_exists %}
                 <h3>To access your Repository:</h3>
-<<<<<<< update-repo-prep-delay-note
                 <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-                {# Below will get uncommented once SAML is active #}
-                {# <p>You will need to use an Authentication Token.</p> #}
-=======
-                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-                <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY </samp><br><br>
+                <br><br>
                 <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
                 if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
->>>>>>> main
                 <br><br>
                 {% if git_auth_token_required %}
                     <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>

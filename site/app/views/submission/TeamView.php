@@ -65,12 +65,9 @@ class TeamView extends AbstractView {
             "remove_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message', 'remove']),
             "csrf_token" => $this->core->getCsrfToken(),
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-<<<<<<< update-repo-prep-delay-note
             'git_auth_token_required' => false,
-            'vcs_repo_exists' => $vcs_repo_exists
-=======
+            'vcs_repo_exists' => $vcs_repo_exists,
             'git_auth_token_required' => $this->core->getAuthentication() instanceof SamlAuthentication
->>>>>>> main
         ]);
     }
 }
