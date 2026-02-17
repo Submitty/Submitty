@@ -10,7 +10,6 @@ use app\entities\Term;
 use app\models\Email;
 use app\models\User;
 use app\entities\CourseUser;
-use app\entities\UserEntity;
 
 class SelfRejoinController extends AbstractController {
     /**

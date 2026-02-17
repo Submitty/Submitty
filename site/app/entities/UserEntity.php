@@ -29,7 +29,7 @@ class UserEntity {
 
     /** @return Collection<CourseUser> */
     public function getCourseUsers(): Collection {
-        return $this->courseUsers;
+        return $this->course_users;
     }
 
     #[ORM\Id]

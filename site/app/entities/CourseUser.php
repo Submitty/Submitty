@@ -19,7 +19,7 @@ class CourseUser {
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
     protected string $term;
-    
+
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
     protected string $course;
