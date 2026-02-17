@@ -50,31 +50,27 @@
     margin: 3px;
 }
 
-.file-count-warning {
+.file-count-warning,
+.file-size-warning,
+.submission-attempt-warning {
     margin-top: 8px;
     padding: 6px 10px;
-    border-left: 4px solid #d97706; 
-    background-color: #fff7ed;        
-    color: #92400e;                   
     font-size: 0.9rem;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.file-count-warning,
+.submission-attempt-warning {
+    border-left-color: var(--alert-warning-yellow);
+    background-color: var(--alert-background-warning-yellow);
+    color: var(--alert-warning-yellow);
 }
 
 .file-size-warning {
-    margin-top: 8px;
-    padding: 6px 10px;
-    border-left: 4px solid #dc2626;  
-    background-color: #fef2f2;
-    color: #991b1b;
-    font-size: 0.9rem;
-}
-
-.submission-attempt-warning {
-    margin: 12px 0;
-    padding: 8px 12px;
-    border-left: 4px solid #f59e0b;
-    background-color: #fffbeb;
-    color: #92400e;
-    font-size: 0.95rem;
+    border-left-color: var(--danger-red);
+    background-color: var(--alert-background-danger-red);
+    color: var(--text-black);
 }
 
 #gradeable-submission-cont #submit {

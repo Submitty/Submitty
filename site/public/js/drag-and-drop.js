@@ -28,7 +28,6 @@ var use_previous = false;
 // eslint-disable-next-line no-var
 var changed = false; // if files from previous submission changed
 
-let total_files_added = 0;
 let MAX_NUM_OF_FILES;
 let total_file_size = 0;
 let MAX_POST_SIZE;
@@ -48,6 +47,7 @@ function initializeDragAndDrop() {
     empty_inputs = true;
     student_ids = [];
     num_clipboard_files = 0;
+    total_file_size = 0;
 }
 
 // initializing file_array and previous_files
@@ -105,16 +105,34 @@ function initMaxNoFiles(max_no_of_files) {
 function initMaxPostSize(max_post_size) {
     MAX_POST_SIZE = max_post_size;
 }
+
 // add files dragged
 function drop(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    const uploadBox = document.getElementById(`upload${part}`);
+    const warning = uploadBox?.querySelector('.file-count-warning');
+
+    if (typeof MAX_NUM_OF_FILES !== 'number') {
+        return;
+    }
+
+    const allowed = MAX_NUM_OF_FILES - getTotalFilesAdded();
+
+    if (allowed <= 0) {
+        warning?.classList.remove('d-none');
+        return;
+    }
+
+    for (let i = 0; i < Math.min(filestream.length, allowed); i++) {
+        addFileWithCheck(filestream[i], part);
+    }
+
+    if (filestream.length > allowed) {
+        warning?.classList.remove('d-none');
+    } else {
+        warning?.classList.add('d-none');
     }
 }
 
@@ -122,12 +140,29 @@ function drop(e) {
 function dropWithMultipleZips(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part, false); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    const uploadBox = document.getElementById(`upload${part}`);
+    const warning = uploadBox?.querySelector('.file-count-warning');
+
+    if (typeof MAX_NUM_OF_FILES !== 'number') {
+        return;
+    }
+
+    const allowed = MAX_NUM_OF_FILES - getTotalFilesAdded();
+
+    if (allowed <= 0) {
+        warning?.classList.remove('d-none');
+        return;
+    }
+
+    for (let i = 0; i < Math.min(filestream.length, allowed); i++) {
+        addFileWithCheck(filestream[i], part, false);
+    }
+
+    if (filestream.length > allowed) {
+        warning?.classList.remove('d-none');
+    } else {
+        warning?.classList.add('d-none');
     }
 }
 
@@ -155,24 +190,43 @@ function get_part_number(e) {
     return node.id.substring(6);
 }
 
+function getTotalFilesAdded() {
+    let total = 0;
+    for (let i = 0; i < file_array.length; i++) {
+        total += file_array[i].length;
+    }
+    return total;
+}
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
     const uploadBox = document.getElementById(`upload${part}`);
-    if (uploadBox) {
-        const warning = uploadBox.querySelector('.file-count-warning');
-        if (filestream.length + total_files_added > MAX_NUM_OF_FILES) {
-            warning?.classList.remove('d-none');
-        } else {
-            warning?.classList.add('d-none');
-        }
+    const warning = uploadBox?.querySelector('.file-count-warning');
+
+    if (typeof MAX_NUM_OF_FILES !== 'number') {
+        return;
     }
-    if (addIsValid(filestream.length, total_files_added)) {
-        for (let i = 0; i < filestream.length; i++) {
-            addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
-            total_files_added++;
-        }
+
+    const allowed = MAX_NUM_OF_FILES - getTotalFilesAdded();
+
+    // If already at or above limit
+    if (allowed <= 0) {
+        warning?.classList.remove('d-none');
+        return;
     }
+
+    // Add only up to allowed amount
+    for (let i = 0; i < Math.min(filestream.length, allowed); i++) {
+        addFile(filestream[i], part, check_duplicate_zip);
+    }
+
+    // Show warning only if overflow attempted
+    if (filestream.length > allowed) {
+        warning?.classList.remove('d-none');
+    } else {
+        warning?.classList.add('d-none');
+    }
+
     $(`#input-file${part}`).val('');
 }
 
@@ -320,13 +374,14 @@ function addFile(file, part, check_duplicate_zip = true) {
     updateFileSizeWarning();
 }
 
-// File size warning
 function updateFileSizeWarning() {
     if (typeof MAX_POST_SIZE !== 'number') {
         return;
     }
 
-    document.querySelectorAll('.file-size-warning').forEach(warning => {
+    const warnings = document.querySelectorAll('.file-size-warning');
+
+    warnings.forEach((warning) => {
         if (total_file_size > MAX_POST_SIZE) {
             warning.classList.remove('d-none');
         } else {
@@ -334,6 +389,7 @@ function updateFileSizeWarning() {
         }
     });
 }
+ 
 // REMOVE FILES
 // ========================================================================================
 // delete files selected for a part
@@ -351,12 +407,14 @@ function deleteFiles(part) {
     const labels = dropzone.getElementsByClassName('file-label');
     while (labels[0]) {
         dropzone.removeChild(labels[0]);
-        total_files_added--;
     }
     label_array[part - 1] = [];
     changed = true;
     setButtonStatus();
     updateFileSizeWarning();
+    const uploadBox = document.getElementById(`upload${part}`);
+    const warning = uploadBox?.querySelector('.file-count-warning');
+    warning?.classList.add('d-none');
 }
 
 function deleteSingleFile(filename, part, previous) {
@@ -378,13 +436,18 @@ function deleteSingleFile(filename, part, previous) {
                 total_file_size -= file_array[part - 1][j].size;
                 file_array[part - 1].splice(j, 1);
                 label_array[part - 1].splice(j, 1);
-                total_files_added--;
                 break;
             }
         }
     }
     setButtonStatus();
     updateFileSizeWarning();
+    const uploadBox = document.getElementById(`upload${part}`);
+    const warning = uploadBox?.querySelector('.file-count-warning');
+    if (typeof MAX_NUM_OF_FILES === 'number' &&
+        getTotalFilesAdded() < MAX_NUM_OF_FILES) {
+        warning?.classList.add('d-none');
+    }
 }
 
 function setButtonStatus(inactive_version = false) {
@@ -462,7 +525,7 @@ function addLabel(filename, filesize, part, previous) {
     // styling
     fileTrashElement.onmouseover = function (e) {
         e.stopPropagation();
-        this.style.color = '#FF3933';
+        this.style.color = 'var(--danger-red)';
     };
     fileTrashElement.onmouseout = function (e) {
         e.stopPropagation();
