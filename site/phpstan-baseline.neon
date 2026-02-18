@@ -2439,7 +2439,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 17
+			count: 16
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
