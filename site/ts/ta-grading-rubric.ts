@@ -1320,8 +1320,7 @@ function getComponentPageNumber(component_id: number) {
  * @param {int} component_id
  * @return {Object}
  */
-function getComponentFromDOM(component_id: number):
-    Component {
+function getComponentFromDOM(component_id: number): Component {
     const domElement = getComponentJQuery(component_id);
 
     if (isInstructorEditEnabled() && isComponentOpen(component_id)) {
