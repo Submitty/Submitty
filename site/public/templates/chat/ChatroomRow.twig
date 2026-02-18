@@ -10,12 +10,18 @@
                 <a data-testid="delete-chatroom" href='javascript:deleteChatroomForm("{{ id|e('js') }}", "{{ title|e('js') }}", "{{ baseUrl|e('js') }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
             {% endif %}
         </td>
-        <td>
+        <td class="chatroom-name-cell">
             <span data-testid="chatroom-title" title="{{ title|e('html_attr') }}">
                 {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
             </span>
-            {% if isReadOnly %}
-                    <span class="badge badge-secondary ml-1">Read-only</span>
+        </td>
+        <td class="chatroom-status-cell">
+            {% if allowReadOnlyAfterEnd %}
+                {% if isActive %}
+                    <span class="badge badge-secondary readonly-badge">Read only when closed</span>
+                {% else %}
+                    <span class="badge badge-secondary readonly-badge">Read only</span>
+                {% endif %}
             {% endif %}
         </td>
         <td>
@@ -53,14 +59,18 @@
 {% else %}
     {% if isActive or isReadOnly %} <!--students only have access to active chat rooms or read-only chat rooms-->
         <tr id="{{ id|e('html_attr') }}" data-testid="chatroom-item">
-            <td>
+            <td class="chatroom-name-cell">
                 <span data-testid="chatroom-title" class="display-short" title="{{ title|e('html_attr') }}">
                     {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
                 </span>
-                {% if isReadOnly %}
-                    <span class="badge badge-secondary ml-1">Read-only</span>
-                {% endif %}
             </td>
+                {% if allowReadOnlyAfterEnd  %}
+                    {% if isActive %}
+                        <span class="badge badge-secondary readonly-badge">Read-only when closed</span>
+                    {% else %}
+                        <span class="badge badge-secondary readonly-badge">Read-only</span>
+                    {% endif %}
+                {% endif %}
             <td data-testid="chatroom-host">
                 {{ hostName|e }}
             </td>

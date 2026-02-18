@@ -47,7 +47,7 @@ class ChatroomView extends AbstractView {
      */
     public function showAllChatrooms(array $chatrooms): string {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        
+
         $chatroom_rows = [];
         foreach ($chatrooms as $chatroom) {
             $chatroom_rows[] = [

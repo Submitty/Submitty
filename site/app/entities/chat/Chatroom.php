@@ -36,7 +36,7 @@ class Chatroom {
 
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_anon;
-    
+
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_read_only_after_end = false;
 
@@ -147,7 +147,7 @@ class Chatroom {
     }
 
     public function allowReadOnlyAfterEnd(): bool {
-    return $this->allow_read_only_after_end;
+        return $this->allow_read_only_after_end;
     }
 
     public function setAllowReadOnlyAfterEnd(bool $allow): void {

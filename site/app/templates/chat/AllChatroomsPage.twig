@@ -10,8 +10,9 @@
             {% if user_admin %} <!--instructor's view-->
                 <col style="width: 2.5%">
                 <col style="width: 5%">
-                <col style="width: 20%">
-                <col style="width: 35%">
+                <col style="width: 18%">
+                <col style="width: 12%">
+                <col style="width: 30%">
                 <col style="width: 12.5%">
                 <col style="width: 15%">
                 <col style="width: 10%">
@@ -19,7 +20,8 @@
                     <tr>
                         <th scope="col" style="text-align: left"></th>
                         <th scope="col" style="text-align: left"></th>
-                        <th scope="col">Name</th>
+                        <th scope="col" style="text-align:left;">Name</th>
+                        <th scope="col" style="text-align:left;">Status</th>
                         <th scope="col">Description</th>
                         <th scope="col"></th>
                         <th scope="col"></th>
@@ -42,13 +44,15 @@
                     {% endfor %}
                 </tbody>
             {% else %} <!--student's view-->
-                <col style="width: 25%">
-                <col style="width: 25%">
-                <col style="width: 25%">
-                <col style="width: 25%">
+                <col style="width: 22%">
+                <col style="width: 12%">
+                <col style="width: 22%">
+                <col style="width: 22%">
+                <col style="width: 22%">
                 <thead>
                     <tr>
                         <th scope="col">Name</th>
+                        <th scope="col" style="text-align:left;">Status</th>
                         <th scope="col">Host</th>
                         <th scope="col">Description</th>
                         <th scope="col" style="text-align: left"></th>

@@ -34,7 +34,7 @@ function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon
         isAdmin: isAdmin,
         isActive: isActive,
         baseUrl: base_url,
-        csrf_token: csrfToken
+        csrf_token: csrfToken,
     });
 }
 
@@ -150,7 +150,9 @@ function initChatroomSocketClient(chatroomId) {
                     messageInput.disabled = true;
                     messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
                     sendButton.disabled = true;
-                } else {
+                } 
+                else 
+                {
                     window.alert('Chatroom has been closed by the instructor.');
                     window.location.href = buildCourseUrl(['chat']);
                 }
@@ -205,7 +207,7 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon, 
     document.getElementById('chatroom-title-input').value = title;
     document.getElementById('chatroom-description-input').value = description;
     document.getElementById('chatroom-anon-allow').checked = allow_anon;
-    document.getElementById("edit-chatroom-read-only-allow").checked = readOnly;
+    document.getElementById('edit-chatroom-read-only-allow').checked = readOnly;
 }
 
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
@@ -329,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
-        if(!read_only) {
+        if (!read_only) {
             messageInput.addEventListener('keypress', (event) => {
                 if (event.keyCode === 13 && !event.shiftKey) {
                     event.preventDefault();
@@ -337,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        if(!read_only) {
+        if (!read_only) {
             sendButton.addEventListener('click', (event) => {
                 event.preventDefault();
                 const messageContent = messageInput.value.trim();
@@ -357,7 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
             messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
             sendButton.disabled = true;
         }
-
     }
     const chatroomsTable = document.getElementById('chatrooms-table');
     const allChatroomData = document.getElementById('all-chatroom-data');
