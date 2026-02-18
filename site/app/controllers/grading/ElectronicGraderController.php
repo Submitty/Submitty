@@ -64,6 +64,7 @@ class ElectronicGraderController extends AbstractController {
         $include_null_section    = ($_COOKIE['include_null_section'] ?? 'omit') === 'include';
         $include_withdrawn       = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
 
+        //check overrides here to minimize database calls
         $overridden_user_ids = [];
         if (!$include_grade_override && count($overall_scores) > 0) {
             $g_id = $overall_scores[0]->getGradeable()->getId();
@@ -116,9 +117,24 @@ class ElectronicGraderController extends AbstractController {
                 continue;
             }
 
-            $is_bad_submission = $ov->getAutoGradedGradeable()->hasSubmission() && $ov->getAutoGradedGradeable()->getActiveVersion() == 0;
+            // calculate if too many late days were used
+            $is_bad_submission = false;
 
-            //should we include bad submissions
+            $auto = $ov->getAutoGradedGradeable();
+            if ($auto !== null) {
+                $graded_gradeable = $auto->getGradedGradeable();
+                $user = $submitter->getUser();
+
+                if ($user !== null && $graded_gradeable !== null) {
+                    $ldi = $this->core->getQueries()
+                    ->getLateDayInfoForUserGradeable($user, $graded_gradeable);
+
+                    if ($ldi !== null) {
+                        $is_bad_submission = ($ldi->getStatus() === LateDayInfo::STATUS_BAD);
+                    }
+                }
+            }
+
             if (!$include_bad_submissions && $is_bad_submission) {
                 continue;
             }
@@ -781,13 +797,13 @@ class ElectronicGraderController extends AbstractController {
                  'num_gradeables' => $num_gradeables,
                  'graders' => [],
                  'valid_graders' => []
-                ];
-            }
-            if ($peer) {
+             ];
+         }
+         if ($peer) {
                  // If a team assignment => Team Peer Grading Stats Should be Visible
                  // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
-                if ($gradeable->isTeamAssignment()) {
-                    $sections['stu_grad'] = [
+            if ($gradeable->isTeamAssignment()) {
+                $sections['stu_grad'] = [
                         'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
                         'non_late_total_components' => count($gradeable->getPeerComponents()),
                         'graded_components' => $my_grading,
