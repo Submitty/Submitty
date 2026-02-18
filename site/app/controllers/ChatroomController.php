@@ -238,16 +238,13 @@ class ChatroomController extends AbstractController {
             $msg_array['type'] = 'chat_close';
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
-            if ($chatroom->isActive()) {
-                $msg_array['type'] = 'chat_close';
-                $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
+            $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
 
-                if (!$chatroom->allowReadOnlyAfterEnd()) {
-                    $indiv_msg_array = [];
-                    $indiv_msg_array['type'] = 'chat_close';
-                    $indiv_msg_array['chatroom_id'] = $chatroom->getId();
-                    $this->sendSocketMessage($indiv_msg_array, true);
-                }
+            if (!$chatroom->allowReadOnlyAfterEnd()) {
+                $indiv_msg_array = [];
+                $indiv_msg_array['type'] = 'chat_close';
+                $indiv_msg_array['chatroom_id'] = $chatroom->getId();
+                $this->sendSocketMessage($indiv_msg_array, true);
             }
         }
         $this->sendSocketMessage($msg_array);

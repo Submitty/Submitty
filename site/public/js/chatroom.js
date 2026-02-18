@@ -150,9 +150,8 @@ function initChatroomSocketClient(chatroomId) {
                     messageInput.disabled = true;
                     messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
                     sendButton.disabled = true;
-                } 
-                else 
-                {
+                }
+                else {
                     window.alert('Chatroom has been closed by the instructor.');
                     window.location.href = buildCourseUrl(['chat']);
                 }
