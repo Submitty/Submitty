@@ -19,8 +19,8 @@
             </label>
             <label for="chatroom-allow-read-only" id="allow-read-only-label">
                 Enable read-only after session ends?
-                <input type="checkbox" name="allow_read_only_after_end" id="chatroom-read-only-allow" data-testid="edit-read-only"
-                {% if chatroom is defined and chatroom.allowReadOnlyAfterEnd() %}checked{% endif %}>
+                <input type="checkbox" name="allow_read_only_after_end" id="edit-chatroom-read-only-allow">
+                {% if chatroom is defined and chatroom.allowReadOnlyAfterEnd() %}checked{% endif %}
             </label>
         </div>
     </form>

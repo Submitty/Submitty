@@ -205,7 +205,7 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon, 
     document.getElementById('chatroom-title-input').value = title;
     document.getElementById('chatroom-description-input').value = description;
     document.getElementById('chatroom-anon-allow').checked = allow_anon;
-    document.getElementById("chatroom-read-only-allow").checked = readOnly;
+    document.getElementById("edit-chatroom-read-only-allow").checked = readOnly;
 }
 
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {

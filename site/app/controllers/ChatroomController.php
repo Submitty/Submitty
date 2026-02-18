@@ -109,7 +109,8 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom title cannot be empty");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        $chatroom = new Chatroom($userEntity, $title, $description, $allow_read_only_after_end);
+        $chatroom = new Chatroom($userEntity, $title, $description);
+        $chatroom->setAllowReadOnlyAfterEnd($allow_read_only_after_end);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
