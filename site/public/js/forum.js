@@ -2642,6 +2642,7 @@ $(() => {
         setupForumAutosave();
     }
     $('form#thread_form').submit(updateThread);
+    enableTabsInTextArea('.thread_post_content');
 });
 
 // When the user uses tab navigation on the thread list, this function
