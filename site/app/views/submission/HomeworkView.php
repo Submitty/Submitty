@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\authentication\SamlAuthentication;
 use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
@@ -631,7 +632,7 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false,
+            'git_auth_token_required' => $this->core->getAuthentication() instanceof SamlAuthentication,
             'vcs_repo_exists' => $vcs_repo_exists,
             'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);
