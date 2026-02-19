@@ -35,17 +35,6 @@ function closeAllAutoGrading() {
     $('[id^=\'details_tc_\']').find('.loading-tools-show').show();
 }
 
-// determine if any of the test cases are closed
-// function anyTestcaseClosed(): boolean {
-//     const testcase_divs = $('[id^=\'testcase_\']');
-//     for (let i = 0; i < testcase_divs.length; i++) {
-//         if ($(testcase_divs[i]).css('display') === 'none') {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
 // determine if the testcases are open or closed
 function testCasesOpen(): boolean {
     const testcase_divs = $('[id^=\'testcase_\']');
