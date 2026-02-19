@@ -943,6 +943,16 @@ class UsersController extends AbstractController {
 
         $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
+        // First row in csv file are column titles
+        $column_titles = array_shift($uploaded_data);
+
+        // Find the column containing usernames
+        $username_column = array_search("User ID", $column_titles, TRUE);
+        if ($username_column === FALSE) {
+            $this->core->addErrorMessage('Missing "User ID" column in uploaded CSV');
+            $this->core->redirect($return_url);
+        }
+
         // Validation and error checking.
         $pref_givenname_idx = $use_database ? 6 : 5;
         $pref_familyname_idx = $pref_givenname_idx + 1;
@@ -968,7 +978,8 @@ class UsersController extends AbstractController {
             'user_legal_givenname' => 'Legal first name must be alpha characters, white-space, or certain punctuation.',
             'user_legal_familyname' => 'Legal last name must be alpha characters, white-space, or certain punctuation.',
             'user_email' => 'Email address should be valid with appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.',
-            'registration_section' =>  'Registration must contain only these characters - A-Z,a-z,_,-',
+            'registration_section' =>  'Registration section must contain only these characters - A-Z,a-z,_,-',
+            'registration_subsection' =>  'Registration subsection must contain only these characters - A-Z,a-z,_,-," "',
             'grader_group' => 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
             'user_preferred_givenname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
@@ -981,7 +992,7 @@ class UsersController extends AbstractController {
         ];
         $users = [];
         foreach ($uploaded_data as $vals) {
-            $users[] = $vals[0];
+            $users[] = $vals[$username_column];
         }
         $authentication = $this->core->getAuthentication();
         if ($authentication instanceof SamlAuthentication) {
@@ -989,144 +1000,213 @@ class UsersController extends AbstractController {
         }
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
-            if (count($vals) === 1) {
-                if (!User::validateUserData('user_id', $vals[0])) {
-                    $bad_rows[] = ($row_num + 1);
-                }
-                continue;
-            }
-            // Bounds check to ensure minimum required number of rows is present.
-            if (count($vals) < 5 || count($vals) > 10) {
-                $bad_row_details[$row_num + 1][] = 'column Count';
-                if (!in_array('column_count', $bad_columns)) {
-                    $bad_columns[] = 'column_count';
-                }
-            }
-            // Username must contain only lowercase alpha, numbers, underscores, hyphens
-            if (!User::validateUserData('user_id', $vals[0])) {
-                $bad_row_details[$row_num + 1][] = 'user_id';
-                if (!in_array('user_id', $bad_columns)) {
-                    $bad_columns[] = 'user_id';
-                }
-            }
-            if ($authentication instanceof SamlAuthentication) {
-                if ($authentication->isInvalidUsername($vals[0])) {
-                    $bad_row_details[$row_num + 1][] = 'user_id';
-                    if (!in_array('user_id_saml', $bad_columns)) {
-                        $bad_columns[] = 'user_id_saml';
-                    }
-                }
-            }
-            // Given Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_givenname', $vals[1])) {
-                $bad_row_details[$row_num + 1][] = 'given name';
-                if (!in_array('user_legal_givenname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_givenname';
-                }
-            }
-            // Family Name must be alpha characters, white-space, or certain punctuation.
-            if (!User::validateUserData('user_legal_familyname', $vals[2])) {
-                $bad_row_details[$row_num + 1][] = 'family name';
-                if (!in_array('user_legal_familyname', $bad_columns)) {
-                    $bad_columns[] = 'user_legal_familyname';
-                }
-            }
-            // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            if (!User::validateUserData('user_email', $vals[3])) {
-                $bad_row_details[$row_num + 1][] = 'user email';
-                if (!in_array('user_email', $bad_columns)) {
-                    $bad_columns[] = 'user_email';
-                }
-            }
-            /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- .
-            Registration section is optional for graders, so automatically validate if not set.*/
-            if (isset($vals[$registration_section_idx]) && strtolower($vals[$registration_section_idx]) === "null") {
-                $vals[$registration_section_idx] = null;
-            }
-            $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$registration_section_idx]));
-            if (!($unset_grader_registration_section || User::validateUserData('registration_section', $vals[$registration_section_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'Registration section';
-                if (!in_array('registration_section', $bad_columns)) {
-                    $bad_columns[] = 'registration_section';
-                }
-            }
-            /* Check grader group for appropriate format if graderlist upload. */
-            if ($list_type === 'graderlist') {
-                if (isset($vals[4]) && is_numeric($vals[4])) {
-                    $vals[4] = intval($vals[4]); //change float read from xlsx to int
-                }
-                //grader-level check is a digit between 1 - 4.
-                if (!User::validateUserData('user_group', $vals[4])) {
-                    $bad_row_details[$row_num + 1][] = 'Grader-group';
-                    if (!in_array('grader_group', $bad_columns)) {
-                        $bad_columns[] = 'grader_group';
-                    }
-                }
-            }
-            /* Database password cannot be blank, no check on format.
-               Automatically validate if NOT using database authentication (e.g. using PAM authentication) */
-            if (!(!$use_database || User::validateUserData('user_password', $vals[5]))) {
-                $bad_row_details[$row_num + 1][] = 'User password';
-                if (!in_array('user_password', $bad_columns)) {
-                    $bad_columns[] = 'user_password';
-                }
-            }
-            /* Preferred given and family name must be alpha characters, white-space, or certain punctuation.
-               Automatically validate if not set (this field is optional) */
-            if (!(empty($vals[$pref_givenname_idx]) || User::validateUserData('user_preferred_givenname', $vals[$pref_givenname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred given name';
-                if (!in_array('user_preferred_givenname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_givenname';
-                }
-            }
-            if (!(empty($vals[$pref_familyname_idx]) || User::validateUserData('user_preferred_familyname', $vals[$pref_familyname_idx]))) {
-                $bad_row_details[$row_num + 1][] = 'preferred family name';
-                if (!in_array('user_preferred_familyname', $bad_columns)) {
-                    $bad_columns[] = 'user_preferred_familyname';
-                }
-            }
-            /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
-               Automatically validate if not set (this field is optional). */
-            if ($list_type === 'graderlist' && !(empty($vals[$grading_assignments_idx]))) {
-                if (!User::validateUserData('grading_assignments', $vals[$grading_assignments_idx])) {
-                    // Regex check for comma-separated registration sections.
-                    $bad_row_details[$row_num + 1][] = 'grading assignments format';
-                    if (!in_array('grading_assignments_format', $bad_columns)) {
-                        $bad_columns[] = 'grading_assignments_format';
-                    }
-                }
-                else {
-                    $grading_assignments = explode(',', $vals[$grading_assignments_idx]);
-                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
-                        // Prevent duplicate registration sections from being specified for assignment.
-                        $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
-                        if (!in_array('grading_assignments_format', $bad_columns)) {
-                            $bad_columns[] = 'grading_assignments_duplicate';
-                        }
-                    }
-                    else {
-                        // Confirm entered registration sections are valid, pre-existing sections within the course.
-                        $unrecognized_sections = array_diff($grading_assignments, $valid_sections);
-                        if (count($unrecognized_sections) > 0) {
-                            $bad_row_details[$row_num + 1][] = 'grading assignment sections';
-                            if (!in_array('invalid_grading_assignments', $bad_columns)) {
-                                $bad_columns[] = 'invalid_grading_assignments';
+            foreach ($vals as $col_num => $value) {
+                switch ($column_titles[$col_num]) {
+                    case "Given Name":
+                        // Given Name must be alpha characters, white-space, or certain punctuation.
+                        if (!User::validateUserData('user_legal_givenname', $value)) {
+                            $bad_row_details[$row_num + 1][] = 'given name';
+                            if (!in_array('user_legal_givenname', $bad_columns)) {
+                                $bad_columns[] = 'user_legal_givenname';
                             }
-                            $invalid_grading_assignments = array_unique(array_merge($invalid_grading_assignments, $unrecognized_sections));
                         }
-                    }
+                        break;
+                    case "Family Name":
+                        // Family Name must be alpha characters, white-space, or certain punctuation.
+                        if (!User::validateUserData('user_legal_familyname', $value)) {
+                            $bad_row_details[$row_num + 1][] = 'family name';
+                            if (!in_array('user_legal_familyname', $bad_columns)) {
+                                $bad_columns[] = 'user_legal_familyname';
+                            }
+                        }
+                        break;
+                    case "Preferred Given Name":
+                        /* Preferred given and family name must be alpha characters, white-space, or certain punctuation.
+                        Automatically validate if not set (this field is optional) */
+                        if (!(empty($vals[$col_num]) || User::validateUserData('user_preferred_givenname', $vals[$col_num]))) {
+                            $bad_row_details[$row_num + 1][] = 'preferred given name';
+                            if (!in_array('user_preferred_givenname', $bad_columns)) {
+                                $bad_columns[] = 'user_preferred_givenname';
+                            }
+                        }
+                        break;
+                    case "Preferred Family Name":
+                        if (!(empty($vals[$col_num]) || User::validateUserData('user_preferred_familyname', $vals[$col_num]))) {
+                            $bad_row_details[$row_num + 1][] = 'preferred family name';
+                            if (!in_array('user_preferred_familyname', $bad_columns)) {
+                                $bad_columns[] = 'user_preferred_familyname';
+                            }
+                        }
+                        break;
+                    case "User ID":
+                        // Username must contain only lowercase alpha, numbers, underscores, hyphens
+                        if (!User::validateUserData('user_id', $value)) {
+                            $bad_row_details[$row_num + 1][] = 'user_id';
+                            if (!in_array('user_id', $bad_columns)) {
+                                $bad_columns[] = 'user_id';
+                            }
+                        }
+                        if ($authentication instanceof SamlAuthentication) {
+                            if ($authentication->isInvalidUsername($value)) {
+                                $bad_row_details[$row_num + 1][] = 'user_id';
+                                if (!in_array('user_id_saml', $bad_columns)) {
+                                    $bad_columns[] = 'user_id_saml';
+                                }
+                            }
+                        }
+                        break;
+                    case "Email":
+                        // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                        if (!User::validateUserData('user_email', $value)) {
+                            $bad_row_details[$row_num + 1][] = 'user email';
+                            if (!in_array('user_email', $bad_columns)) {
+                                $bad_columns[] = 'user_email';
+                            }
+                        }
+                        break;
+                    case "Secondary Email":
+                        // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                        if (!User::validateUserData('user_email_secondary', $value)) {
+                            $bad_row_details[$row_num + 1][] = 'user email secondary';
+                            if (!in_array('user_email_secondary', $bad_columns)) {
+                                $bad_columns[] = 'user_email_secondary';
+                            }
+                        }
+                        break;
+                    case "UTC Offset":
+                        // Ignore UTC Offset column from exported lists.
+                        break;
+                    case "Time Zone":
+                        // Ignore Time Zone column from exported lists.
+                        break;
+                    case "Registration Section":
+                        if ($list_type == "classlist") {
+                            /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- .
+                            Registration section is optional for graders, so automatically validate if not set.*/
+                            if (isset($vals[$col_num]) && strtolower($vals[$col_num]) === "null") {
+                                $vals[$col_num] = null;
+                            }
+                            $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$col_num]));
+                            if (!($unset_grader_registration_section || User::validateUserData('registration_section', $vals[$col_num]))) {
+                                $bad_row_details[$row_num + 1][] = 'Registration section';
+                                if (!in_array('registration_section', $bad_columns)) {
+                                    $bad_columns[] = 'registration_section';
+                                }
+                            }
+                        } elseif ($list_type == "graderlist") {
+                            /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
+                            Automatically validate if not set (this field is optional). */
+                            if ($list_type === 'graderlist' && !(empty($vals[$col_num]))) {
+                                if (!User::validateUserData('grading_assignments', $vals[$col_num])) {
+                                    // Regex check for comma-separated registration sections.
+                                    $bad_row_details[$row_num + 1][] = 'grading assignments format';
+                                    if (!in_array('grading_assignments_format', $bad_columns)) {
+                                        $bad_columns[] = 'grading_assignments_format';
+                                    }
+                                }
+                                else {
+                                    $grading_assignments = explode(',', $vals[$col_num]);
+                                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
+                                        // Prevent duplicate registration sections from being specified for assignment.
+                                        $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
+                                        if (!in_array('grading_assignments_format', $bad_columns)) {
+                                            $bad_columns[] = 'grading_assignments_duplicate';
+                                        }
+                                    }
+                                    else {
+                                        // Confirm entered registration sections are valid, pre-existing sections within the course.
+                                        $unrecognized_sections = array_diff($grading_assignments, $valid_sections);
+                                        if (count($unrecognized_sections) > 0) {
+                                            $bad_row_details[$row_num + 1][] = 'grading assignment sections';
+                                            if (!in_array('invalid_grading_assignments', $bad_columns)) {
+                                                $bad_columns[] = 'invalid_grading_assignments';
+                                            }
+                                            $invalid_grading_assignments = array_unique(array_merge($invalid_grading_assignments, $unrecognized_sections));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case "Group":
+                        /* Check grader group for appropriate format. */
+                        if (isset($vals[$col_num]) && is_numeric($vals[$col_num])) {
+                            $vals[$col_num] = intval($vals[$col_num]); //change float read from xlsx to int
+                        }
+                        //grader-level check is a digit between 1 - 4 or one of the group strings:
+                        // "Instructor"
+                        // "Student"
+                        // "Limited Access Grader (Mentor)"
+                        // "Full Access Grader (Grad TA)"
+                        if (!User::validateUserData('user_group', $vals[$col_num])) {
+                            $bad_row_details[$row_num + 1][] = 'Grader-group';
+                            if (!in_array('grader_group', $bad_columns)) {
+                                $bad_columns[] = 'grader_group';
+                            }
+                        }
+                        break;
+                    case "Registation Sub-Section":
+                        /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-, .
+                        Registration subsection is optional for graders, so automatically validate if not set.*/
+                        if (isset($vals[$col_num]) && strtolower($vals[$col_num]) === "null") {
+                            $vals[$col_num] = null;
+                        }
+                        $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$col_num]));
+                        if (!($unset_grader_registration_section || User::validateUserData('registration_subsection', $vals[$col_num]))) {
+                            $bad_row_details[$row_num + 1][] = 'Registration subsection';
+                            if (!in_array('registration_subsection', $bad_columns)) {
+                                $bad_columns[] = 'registration_subsection';
+                            }
+                        }
+                        break;
+                    case "Password":
+                        /* Database password cannot be blank, no check on format.
+                        Automatically validate if NOT using database authentication (e.g. using PAM authentication) */
+                        if (!(!$use_database || User::validateUserData('user_password', $vals[5]))) {
+                            $bad_row_details[$row_num + 1][] = 'User password';
+                            if (!in_array('user_password', $bad_columns)) {
+                                $bad_columns[] = 'user_password';
+                            }
+                        }
+                        break;
+                    case "Registration Type":
+                        /* Check valid registration type for classlist uploads; automatically validate if not set (this field is optional).
+                        Graderlist uploads default to 'staff' registration type. */
+                        if ($list_type === 'classlist' && !(empty($vals[$col_num]))) {
+                            if (!User::validateUserData('student_registration_type', $vals[$col_num])) {
+                                $bad_row_details[$row_num + 1][] = 'registration type';
+                                if (!in_array('user_registration_type', $bad_columns)) {
+                                    $bad_columns[] = 'user_registration_type';
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        // Unrecognized column name, exit immediatly.
+                        $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
+                        $this->core->redirect($return_url);
+                        break;
                 }
             }
-            /* Check valid registration type for classlist uploads; automatically validate if not set (this field is optional).
-               Graderlist uploads default to 'staff' registration type. */
-            if ($list_type === 'classlist' && !(empty($vals[$registration_type_idx]))) {
-                if (!User::validateUserData('student_registration_type', $vals[$registration_type_idx])) {
-                    $bad_row_details[$row_num + 1][] = 'registration type';
-                    if (!in_array('user_registration_type', $bad_columns)) {
-                        $bad_columns[] = 'user_registration_type';
-                    }
-                }
-            }
+
+            // if (count($vals) === 1) {
+            //     if (!User::validateUserData('user_id', $vals[0])) {
+            //         $bad_rows[] = ($row_num + 1);
+            //     }
+            //     continue;
+            // }
+            // // Bounds check to ensure minimum required number of rows is present.
+            // if (count($vals) < 5 || count($vals) > 10) {
+            //     $bad_row_details[$row_num + 1][] = 'column Count';
+            //     if (!in_array('column_count', $bad_columns)) {
+            //         $bad_columns[] = 'column_count';
+            //     }
+            // }
+            
+            
+            
+            
+            
             // Ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data.
             $uploaded_data[$row_num] = $vals;
         }
