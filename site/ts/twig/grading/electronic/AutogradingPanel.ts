@@ -72,7 +72,6 @@ $(() => {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
     const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
     const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
-    let isClosed: boolean = true;
     $('#autograding-results-toggle-all').on('click', () => {
         const currentlyOpen = testCasesOpen();
 
