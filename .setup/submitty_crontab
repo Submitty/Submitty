@@ -20,3 +20,5 @@
 0 * * * * submitty_daemon   sudo /usr/local/submitty/sbin/repair_services.sh
 # Run the send_notification.py script every hour
 0 * * * * submitty_daemon   python3 /usr/local/submitty/sbin/send_notification.py
+# Run cleanup_active_graders.py every day at 3AM
+0 3 * * * submitty_daemon   python3 /usr/local/submitty/sbin/cleanup_active_graders.py
