@@ -16,7 +16,6 @@ def up(config):
     paths_to_preserve = [
         "/usr/local/submitty/site/public/img/submitty_logo.png",
         "/usr/local/submitty/site/public/img/submitty_banner.png",
-        "/usr/local/submitty/testfile.txt"
     ]
 
     os.makedirs(os.path.dirname(preserve_path), exist_ok=True)
