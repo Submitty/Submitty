@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE chatrooms
-        ADD COLUMN allow_read_only_after_end BOOLEAN NOT NULL DEFAULT FALSE;
+        ADD COLUMN IF NOT EXISTS allow_read_only_after_end BOOLEAN NOT NULL DEFAULT FALSE;
     """)
 
 def down(config, database, semester, course):
