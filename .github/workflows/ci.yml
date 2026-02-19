@@ -495,28 +495,10 @@ jobs:
             mkdir -vp "$1/site"     &&  chmod -vR 777 "$1/site"
             mkdir -vp "$2/courses"  &&  chmod -vR 777 "$2/courses"
 
-            (
-              echo "localhost"                    # database host
-              echo "$4"                           # database port
-              echo ""                             # global db user
-              echo "submitty_dbuser"              # global db pass
-              echo ""                             # course db user
-              echo "submitty_dbuser"              # course db pass
-              echo ""                             # timezone
-              echo ""                             # default locale
-              echo ""                             # default course materials file upload limit
-              echo "http://localhost"             # submitty url
-              echo ""                             # vcs url
-              echo ""                             # institution name
-              echo "y"                            # user create account
-              echo ""                             # sysadmin email
-              echo ""                             # where to report
-              echo "1"                            # PamAuth
-              echo ""                             # sysadmin username
-              echo "n"                            # email notification
-            ) | tee /dev/stderr                                                             \
-              | sudo -E python3 "$3/Submitty/.setup/CONFIGURE_SUBMITTY.py"                  \
-                        --install-dir "$1" --data-dir "$2" --debug
+            sudo -E python3 "$3/Submitty/.setup/generate_configs.py" \
+                        --install-dir "$1" --repo-dir "$3" --debug
+            sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
+                        --install-dir "$1"
 
             # Copy necessary files to the installation path
             cp -vr "$3/Submitty/sbin" "$1"
@@ -524,9 +506,11 @@ jobs:
             sudo chmod -vR 777 "$1/sbin"
           }
 
-          configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
-            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
+          # configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
+          #   "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
           configure_submitty "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
+            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
+          configure_submitty "${MAIN_INSTALL_PATH}"   "${MAIN_DATA_PATH}"                       \
             "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
 
 
@@ -664,7 +648,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - uses: ./.github/actions/e2e-Setup-Composite
+      - name: Run setup script
+        uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v5
@@ -890,6 +875,17 @@ jobs:
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
+      
+      - name: tail apache logs
+        if: failure()
+        run: |
+          sudo tail -n 200 /var/log/apache2/submitty.log
+          sudo tail -n 200 /var/log/apache2/error.log
+        
+      - name: Check services
+        if: failure()
+        run: |
+          ls -alF ${{ env.SUBMITTY_INSTALL_DIR }}/config
 
       - uses: actions/upload-artifact@v6
         if: failure()
@@ -993,6 +989,13 @@ jobs:
           spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+      
+      - name: tail apache logs
+        if: failure()
+        run: |
+          sudo tail -n 200 /var/log/apache2/submitty.log
+          sudo tail -n 200 /var/log/apache2/error.log
+          sudo cat /usr/local/submitty/config/database.json
 
       - uses: actions/upload-artifact@v6
         if: failure()
