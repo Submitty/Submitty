@@ -26,7 +26,7 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)" data-testid="subscribe-all-emails">Subscribe to all emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)" data-testid="unsubscribe-all-optional-emails">Unsubscribe from all optional emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
-                            #add a button 
+                            {#add a button#}
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="setNotification(this)" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
                         </div>
                     {% endif %}
@@ -58,6 +58,25 @@
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email New Announcement" name="announcement_email" id="announcement_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_announcements_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
+            </div>
+
+            {# add page changes for button#}
+            <div class="row row-spacing" id="sync-course-container" style="display:none;">
+                <div class="heading col-md-12">
+                    <h3>Select Courses to Sync To</h3>
+                    <p class="option-alt">Choose one or more courses.</p>
+                </div>
+                <div class="col-md-12">
+                    <select name="sync_course_ids[]" id="sync_course_ids"
+                        class="form-control"
+                        multiple size="6">
+                    {% for course in available_courses %}
+                        <option value="{{ course.id }}">
+                            {{ course.semester }} — {{ course.title }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
             </div>
 
             <div class="option row">
@@ -391,8 +410,24 @@
             $('#form_notification_settings').trigger("change");
         }
 
-        #create setNotification
+        {#create setNotification#}
         function setNotification(button){
+            const container = $('#sync-course-container');
+
+            //first click -> show selector instead of syncing
+            if (container.is(':hidden')) {
+                container.slideDown();
+                return;
+            }
+
+            //ensure at least one course selected
+            const selected = $('#sync_course_ids').val();
+            if (!selected || selected.length === 0) {
+                displayErrorMessage("Please select at least one course.");
+                return;
+            }
+
+            //perform sycning
             $.ajax({
                 type: "POST",
                 url: "{{ sync_settings_url }}", 

@@ -123,6 +123,13 @@ class NotificationController extends AbstractController {
             )
         );
     }
+    /**
+     * @return MultiResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/settings", methods:["GET"])]
+    public function syncNotificationSettings(): MultiResponse {
+        
+    }
 
     /**
      * @return MultiResponse
