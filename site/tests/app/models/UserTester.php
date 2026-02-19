@@ -214,7 +214,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'self_registration_email' => true,
             ],
             'registration_subsection' => '',
-            'enforce_single_session' => false
+            'enforce_single_session' => false,
+            'instructor_courses' => false,
         ];
         $this->assertEquals($expected, $actual);
     }
