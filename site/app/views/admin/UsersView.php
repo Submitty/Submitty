@@ -150,7 +150,8 @@ class UsersView extends AbstractView {
             "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken(),
             "default_section" => $default_section,
-            "is_self_register" => $is_self_register
+            "is_self_register" => $is_self_register,
+            "update_course_id_url" => $this->core->buildCourseUrl(['sections', 'update_course_id'])
         ]);
     }
 }
