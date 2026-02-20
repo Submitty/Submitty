@@ -4882,16 +4882,6 @@ SQL;
     }
 
     /**
-     * Set whether a course can be unarchived by instructors
-     * @param string $semester
-     * @param string $course
-     * @param bool $unarchivable
-     */
-    public function setCourseUnarchivable(string $semester, string $course, bool $unarchivable): void {
-        $this->submitty_db->query("UPDATE courses SET unarchivable=? WHERE term=? AND course=?", [$unarchivable, $semester, $course]);
-    }
-
-    /**
      * Check if a course is marked as unarchivable
      * @param string $semester
      * @param string $course

@@ -1,10 +1,7 @@
 /**
  * Course Archive/Unarchive Manager
  * Handles archiving and unarchiving courses via checkbox toggle
- * Follows the same pattern as self-registration in configuration.js
  */
-
-/* global buildCourseUrl, csrfToken */
 
 function confirmArchiveToggle(element) {
     const isArchiving = element.checked;
