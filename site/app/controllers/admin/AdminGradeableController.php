@@ -1864,7 +1864,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
-                $this->shiftDates($dates, 'ta_view_start_date', $now);
+                $dates['ta_view_start_date'] = $now;
                 $message .= "Opened TA access to ";
                 $success = true;
             }
