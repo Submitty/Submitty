@@ -227,7 +227,8 @@ class ConfigurationController extends AbstractController {
      * Archive a course
      * @return MultiResponse
      */
-    #[Route("/api/courses/{_semester}/{_course}/archive", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
     public function archiveCourse(): MultiResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
@@ -253,7 +254,8 @@ class ConfigurationController extends AbstractController {
      * Unarchive a course
      * @return MultiResponse
      */
-    #[Route("/api/courses/{_semester}/{_course}/unarchive", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
     public function unarchiveCourse(): MultiResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
