@@ -4,7 +4,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Testing functionality of Autograder Results', () => {
         beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'grades_released_homework_autohiddenEC']);
-            cy.login('student');
+            cy.login('bitdiddle');
         });
 
         it('Should display confetti', () => {
