@@ -41,24 +41,6 @@
     dest: /usr/local/submitty/config/
     mode: "0644"
 
-- name: Set the database host to specified host
-  ansible.builtin.replace:
-    path: /usr/local/submitty/config/database.json
-    regexp: "/var/run/postgresql"
-    replace: "{{ submitty_install_db_host }}"
-
-- name: Set the authentication method in database.json
-  ansible.builtin.replace:
-    path: /usr/local/submitty/config/database.json
-    regexp: "PamAuthentication"
-    replace: "{{ submitty_install_authentication_method }}"
-
-- name: Set the authentication method in authentication.json
-  ansible.builtin.replace:
-    path: /usr/local/submitty/config/authentication.json
-    regexp: "PamAuthentication"
-    replace: "{{ submitty_install_authentication_method }}"
-
 - name: Run install_system.sh script
   ansible.builtin.shell:
     executable: "/bin/bash"

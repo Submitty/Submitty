@@ -55,6 +55,8 @@ tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $
 tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "$SUBMITTY_INSTALL_DIR/config/authentication.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/authentication.json"
 tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$SUBMITTY_INSTALL_DIR/config/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/submitty.json"
 tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$SUBMITTY_INSTALL_DIR/config/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/submitty.json"
+tmp=$(mktemp) && jq --arg v "true" '.user_create_account = $v' "$SUBMITTY_INSTALL_DIR/config/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/submitty.json"
+
 
 python3 ${SUBMITTY_REPOSITORY}/.setup/set_config_permissions.py
 
