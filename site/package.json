@@ -65,7 +65,7 @@
     "@types/node": "^25.0.3",
     "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/parser": "^8.55.0",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/tsconfig": "^0.8.1",
