@@ -953,6 +953,9 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        // Find the column containing whether to autofill data
+        $autofill_data_column = array_search("Autofill Data", $column_titles, TRUE);
+
         // Validation and error checking.
         $pref_givenname_idx = $use_database ? 6 : 5;
         $pref_familyname_idx = $pref_givenname_idx + 1;
@@ -989,6 +992,7 @@ class UsersController extends AbstractController {
             'grading_assignments_duplicate' => 'Grading assignments must be unique. Duplicate registration sections detected.',
             'invalid_grading_assignments' => 'Grading assignments must be valid course registration sections.',
             'user_registration_type' => 'Student registration type must be one of either "graded", "audit", or "withdrawn".',
+            'autofill_data' => 'Autofill data indicator must be either "TRUE" or "FALSE"',
         ];
         $users = [];
         foreach ($uploaded_data as $vals) {
@@ -1181,6 +1185,15 @@ class UsersController extends AbstractController {
                             }
                         }
                         break;
+                    case "Autofill Data":
+                        // Check that autofill data indicator is either true or false.
+                        if ($value != "TRUE" && $value != "FALSE") {
+                            $bad_row_details[$row_num + 1][] = 'autofill data';
+                            if (!in_array('autofill_data', $bad_columns)) {
+                                $bad_columns[] = 'autofill_data';
+                            }
+                        }
+                        break;
                     default:
                         // Unrecognized column name, exit immediatly.
                         $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
@@ -1236,21 +1249,8 @@ class UsersController extends AbstractController {
         foreach ($uploaded_data as $row) {
             $exists = false;
             foreach ($existing_users as $i => $existing_user) {
-                if ($row[0] === $existing_user->getId()) {
-                    // Validate if this user has any data to update.
-                    // Did student registration section, grader group, or registration type change?
-                    if (count($row) === 1) {
-                        $users_to_update[] = $row;
-                    }
-                    elseif (!empty($row[$registration_section_idx]) && $row[$registration_section_idx] !== $existing_user->getRegistrationSection()) {
-                        $users_to_update[] = $row;
-                    }
-                    elseif ($list_type === 'graderlist' && $row[4] !== (string) $existing_user->getGroup()) {
-                        $users_to_update[] = $row;
-                    }
-                    elseif ($list_type === 'classlist' && !empty($row[$registration_type_idx]) && $row[$registration_type_idx] !== $existing_user->getRegistrationType()) {
-                        $users_to_update[] = $row;
-                    }
+                if ($row[$username_column] === $existing_user->getId()) {
+                    $users_to_update[] = $row;
                     $exists = true;
                     //Unset this existing user.
                     //Those that remain in this list are candidates to be moved to NULL reg section, later.
@@ -1270,8 +1270,8 @@ class UsersController extends AbstractController {
 
         foreach ($users_to_add as $key => $row) {
             // Remove the rows in which wrong or incorrect user_id is passed (only for row containing user_id)
-            if (count($row) === 1 && is_null($this->core->getQueries()->getSubmittyUser($row[0]))) {
-                $users_not_found[] = $row[0];
+            if ($autofill_data_column !=== FALSE && $row[$autofill_data_column] === "TRUE" && is_null($this->core->getQueries()->getSubmittyUser($row[$username_column]))) {
+                $users_not_found[] = $row[$username_column];
                 unset($users_to_add[$key]);
             }
         }
@@ -1281,8 +1281,8 @@ class UsersController extends AbstractController {
         }
         foreach ($users_to_add as $row) {
             // Auto-populate user detail if only user_id is given
-            if (count($row) === 1) {
-                $user = $this->core->getQueries()->getUserById($row[0]);
+            if ($autofill_data_column !=== FALSE && $row[$autofill_data_column] === "TRUE") {
+                $user = $this->core->getQueries()->getUserById($row[$username_column]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
                 $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
@@ -1292,37 +1292,111 @@ class UsersController extends AbstractController {
             }
             else {
                 $user = new User($this->core);
-                $user->setId($row[0]);
-                $user->setLegalGivenName($row[1]);
-                $user->setLegalFamilyName($row[2]);
-                $user->setEmail($row[3]);
-                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
-                // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                if (!empty($row[$registration_section_idx])) {
-                    $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);
-                    $user->setRegistrationSection($row[$registration_section_idx]);
-                }
-                $user->setGroup($list_type === 'classlist' ? 4 : $row[4]);
-                if (!empty($row[$pref_givenname_idx])) {
-                    $user->setPreferredGivenName($row[$pref_givenname_idx]);
-                }
-                if (!empty($row[$pref_familyname_idx])) {
-                    $user->setPreferredFamilyName($row[$pref_familyname_idx]);
-                }
-                if ($use_database) {
-                    $user->setPassword($row[5]);
-                }
-                if ($list_type === 'graderlist' && !empty($row[$grading_assignments_idx])) {
-                    $grading_assignments = explode(',', $row[$grading_assignments_idx]);
-                    sort($grading_assignments);
-                    $user->setGradingRegistrationSections($grading_assignments);
-                }
-                if ($list_type === 'classlist') {
-                    $user->setRegistrationType($row[$registration_type_idx] ?? 'graded');
-                }
-                else {
+
+                // Make sure the default group is permissionless.
+                $user->setGroup(4);
+
+                // Make sure all graders are assigned the 'staff' type by default
+                if ($list_type === 'graderlist') {
                     $user->setRegistrationType('staff');
                 }
+
+                foreach ($row as $col_num => $value) {
+                    switch ($column_titles[$col_num]) {
+                        case "Given Name":
+                            $user->setLegalGivenName($value);
+                            break;
+                        case "Family Name":
+                            $user->setLegalFamilyName($value);
+                            break;
+                        case "Preferred Given Name":
+                            if (!empty($row[$col_num])) {
+                                $user->setPreferredGivenName($value);
+                            }
+                            break;
+                        case "Preferred Family Name":
+                            if (!empty($row[$col_num])) {
+                                $user->setPreferredFamilyName($value);
+                            }
+                            break;
+                        case "User ID":
+                            $user->setId($value);
+                            break;
+                        case "Email":
+                            $user->setEmail($value);
+                            break;
+                        case "Secondary Email":
+                            if (!empty($row[$col_num])) {
+                                $user->setSecondaryEmail($value);
+                            }
+                            break;
+                        case "UTC Offset":
+                            // Ignore UTC Offset column from exported lists.
+                            break;
+                        case "Time Zone":
+                            // Ignore Time Zone column from exported lists.
+                            break;
+                        case "Registration Section":
+                            if ($list_type == 'classlist') {
+                                $user->setRegistrationSection($value);
+                            } elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
+                                $grading_assignments = explode(',', $row[$col_num]);
+                                sort($grading_assignments);
+                                $user->setGradingRegistrationSections($grading_assignments);
+                            }
+                            break;
+                        case "Group":
+                            if ($list_type == 'classlist') {
+                                $user->setGroup(4);
+                            } elseif ($list_type == 'graderlist') {
+                                switch ($value) {
+                                    case "1":
+                                    case "Instructor":
+                                        $user->setGroup(1);
+                                        break;
+                                    case "2":
+                                    case "Full Access Grader (Grad TA)":
+                                        $user->setGroup(2);
+                                        break;
+                                    case "3":
+                                    case "Limited Access Grader (Mentor)":
+                                        $user->setGroup(3);
+                                        break;
+                                    case "4":
+                                    case "Student":
+                                        $user->setGroup(4);
+                                        break;
+                                }
+                            }
+                            break;
+                        case "Registation Sub-Section":
+                            if (!empty($row[$col_num])) {
+                                $user->setRegistrationSubsection($value);
+                            }
+                            break;
+                        case "Password":
+                            if ($use_database) {
+                                $user->setPassword($value);
+                            }
+                            break;
+                        case "Registration Type":
+                            if ($list_type === 'classlist') {
+                                $user->setRegistrationType($row[$col_num] ?? 'graded');
+                            } elseif ($list_type === 'graderlist') {
+                                $user->setRegistrationType('staff');
+                            }
+                            break;
+                        case "Autofill Data":
+                            // Ignore autofill column, already used to find manual vs autofilled users
+                            break;
+                        default:
+                            // Unrecognized column name, exit immediatly.
+                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
+                            $this->core->redirect($return_url);
+                            break;
+                    }
+                }
+                
                 $insert_or_update_user_function('insert', $user);
             }
         }
