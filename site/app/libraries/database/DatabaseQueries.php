@@ -4847,6 +4847,38 @@ SQL;
         return $this->submitty_db->row()['status'];
     }
 
+    /**
+     * Set the status of a course (1 = active, 2 = archived)
+     * @param string $semester
+     * @param string $course
+     * @param int $status
+     */
+    public function setCourseStatus(string $semester, string $course, int $status): void {
+        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $semester, $course]);
+    }
+
+    /**
+     * Set whether a course can be unarchived by instructors
+     * @param string $semester
+     * @param string $course
+     * @param bool $unarchivable
+     */
+    public function setCourseUnarchivable(string $semester, string $course, bool $unarchivable): void {
+        $this->submitty_db->query("UPDATE courses SET unarchivable=? WHERE term=? AND course=?", [$unarchivable, $semester, $course]);
+    }
+
+    /**
+     * Check if a course is marked as unarchivable
+     * @param string $semester
+     * @param string $course
+     * @return bool
+     */
+    public function isCourseUnarchivable(string $semester, string $course): bool {
+        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$semester, $course]);
+        $result = $this->submitty_db->row();
+        return $result !== null && $result['unarchivable'];
+    }
+
     public function getPeerAssignment($gradeable_id, $grader) {
         $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", [$gradeable_id, $grader]);
         $return = [];
