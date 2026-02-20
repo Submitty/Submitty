@@ -3210,6 +3210,30 @@ ORDER BY user_id ASC"
         return $this->submitty_db->getRowCount();
     }
 
+    public function updateCourseSectionId(string $section_id, string $course_id): void {
+        $term = $this->core->getConfig()->getTerm();
+        $course   = $this->core->getConfig()->getCourse();
+
+        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE term=? AND course=? AND registration_section_id = ?", [$course_id, $term, $course, $section_id]);
+
+        $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?", [$course_id, $section_id]);
+    }
+
+    public function courseIdExists(string $course_id, string $section_id): bool {
+        $this->course_db->query(
+            "SELECT 1 FROM sections_registration WHERE
+            course_section_id = :course_id
+            AND sections_registration_id != :section_id
+            LIMIT 1",
+            [
+                $course_id,
+                $section_id
+            ]
+        );
+
+        return $this->course_db->getRowCount() > 0;
+    }
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", [$gradeable_id]);
         foreach ($graders as $grader => $sections) {
