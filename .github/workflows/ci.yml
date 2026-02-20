@@ -944,6 +944,15 @@ jobs:
           rm -rf /opt/ghc
           rm -rf "$AGENT_TOOLSDIRECTORY"
 
+      - name: Update database values
+        run: |
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$SUBMITTY_REPOSITORY/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "$SUBMITTY_REPOSITORY/.setup/data/configs/database.json"
+            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "$SUBMITTY_REPOSITORY/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "$SUBMITTY_REPOSITORY/.setup/data/configs/database.json"
+            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "$SUBMITTY_REPOSITORY/.setup/data/configs/authentication.json" > "$tmp" && mv "$tmp" "$SUBMITTY_REPOSITORY/.setup/data/configs/authentication.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$SUBMITTY_REPOSITORY/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_REPOSITORY/.setup/data/configs/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$SUBMITTY_REPOSITORY/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_REPOSITORY/.setup/data/configs/submitty.json"
+                
+
       - name: Run ansible script
         shell: bash
         run: |
@@ -967,17 +976,6 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
                 ${{ runner.os }}-cache-node-modules-
-      
-      - name: Update database values
-        run: |
-            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$SUBMITTY_INSTALL_DIR/config/database.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/database.json"
-            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "$SUBMITTY_INSTALL_DIR/config/database.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/database.json"
-            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "$SUBMITTY_INSTALL_DIR/config/authentication.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/authentication.json"
-            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$SUBMITTY_INSTALL_DIR/config/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/submitty.json"            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$SUBMITTY_INSTALL_DIR/config/submitty.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/submitty.json"
-                
-      - name: Run set_permissions
-        run: |
-          python3 ${{env.SUBMITTY_REPOSITORY}}/.setup/set_config_permissions.py
 
       - name: Install node dependencies
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
