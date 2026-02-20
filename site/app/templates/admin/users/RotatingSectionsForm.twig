@@ -50,6 +50,7 @@
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
@@ -61,58 +62,72 @@
                     <tbody>
                         {% for section in reg_sections %}
                             {% if 'sections_registration_id' in section|keys %}
-                            {% if section['sections_registration_id'] in reg_sections_count|keys and
-                                reg_sections_count[section['sections_registration_id']] %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
-                                {% if is_self_register %}
-                                    <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                <tr>
+                                    <td class="delete-section-cell">
+                                        {% if section['sections_registration_id'] in reg_sections_count|keys and
+                                            reg_sections_count[section['sections_registration_id']] == 0 %}
+                                            <button
+                                                type="button"
+                                                class="icon"
+                                                data-section-id="{{ section['sections_registration_id'] }}"
+                                                onclick="deleteRegistrationSection(this)"
+                                                title="Delete Registration Section"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        {% elseif section['sections_registration_id'] not in reg_sections_count|keys %}
+                                            <button
+                                                type="button"
+                                                class="icon"
+                                                data-section-id="{{ section['sections_registration_id'] }}"
+                                                onclick="deleteRegistrationSection(this)"
+                                                title="Delete Registration Section"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        {% endif %}
                                     </td>
-                                {% endif %}
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>0</td>
-                                {% if is_self_register %}
                                     <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                        {{ section['sections_registration_id'] }}
                                     </td>
-                                {% endif %}
-                            </tr>
-                            {% endif %}
+                                    <td>
+                                        {{ section['course_section_id'] }}
+                                    </td>
+                                    <td>
+                                        {% if section['sections_registration_id'] in reg_sections_count|keys %}
+                                            {{ reg_sections_count[section['sections_registration_id']] }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    {% if is_self_register %}
+                                        <td>
+                                            <input
+                                                type="radio"
+                                                name="default_section"
+                                                value="{{ section['sections_registration_id'] }}"
+                                                {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                            />
+                                        </td>
+                                    {% endif %}
+                                </tr>
                             {% endif %}
                         {% endfor %}
-                        {% if reg_sections_count['NULL'] %}
                         <tr>
-                            <td>Section NULL</td>
+                            <td></td>
                             <td>NULL</td>
-                            <td>{{ reg_sections_count['NULL'] }}</td>
+                            <td>NULL</td>
+                            <td>
+                                {% if reg_sections_count['NULL'] %}
+                                    {{ reg_sections_count['NULL'] }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
                             {% if is_self_register %}
                                 <td></td>
                             {% endif %}
                         </tr>
-                        {% else %}
-                        <tr>
-                            <td>Section NULL</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -132,16 +147,8 @@
                     </div>
                 </div>
                 <div class="option">
-                    <div class="option-input"><input type="text" name="delete_reg_section" id="delete_reg_section" value="" placeholder="Eg: 3" /></div>
-                    <div class="option-desc">
-            <label for="delete_reg_section">
-							<span class="option-title">Delete a Registration Section</span>
-              <br>
-							<span class="option-alt">
-								Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
-							</span>
-						</label>
-                    </div><br />
+                    <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
+                    <input type="submit" id="delete_reg_section_submit" style="display:none;" />
                     <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
                 </div>
             </div>
@@ -263,4 +270,15 @@
             </div>
         </div>
     </form>
+    <script>
+    function deleteRegistrationSection(button) {
+        const sectionId = button.dataset.sectionId;
+        if (!confirm(`Delete registration section ${sectionId}?`)) {
+            return;
+        }
+        const deleteInput = document.getElementById('delete_reg_section');
+        deleteInput.value = sectionId;
+        deleteInput.closest('form').submit();
+    }
+    </script>
 </div>
