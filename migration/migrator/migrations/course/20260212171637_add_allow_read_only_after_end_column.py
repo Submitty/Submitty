@@ -16,12 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE chatrooms
-        ADD COLUMN IF NOT EXISTS allow_read_only_after_end BOOLEAN NOT NULL DEFAULT FALSE;
-    """)
-
-    database.execute("""
-        ALTER TABLE course_materials_sections RENAME CONSTRAINT fk_course_material_id TO fk_course_materials_sections_material_id;
-        ALTER TABLE course_materials_access RENAME CONSTRAINT fk_course_material_id TO fk_course_materials_access_material_id;
+        ADD COLUMN allow_read_only_after_end BOOLEAN NOT NULL DEFAULT FALSE;
     """)
 
 def down(config, database, semester, course):
@@ -37,15 +32,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE course_materials_sections 
-        RENAME CONSTRAINT fk_course_materials_sections_material_id TO fk_course_material_id;
-        
-        ALTER TABLE course_materials_access 
-        RENAME CONSTRAINT fk_course_materials_access_material_id TO fk_course_material_id;
-    """)
-
-    database.execute("""
-        ALTER TABLE chatrooms 
-        DROP COLUMN IF EXISTS allow_read_only_after_end;
-    """)
+    pass
