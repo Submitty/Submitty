@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 defineProps<{
