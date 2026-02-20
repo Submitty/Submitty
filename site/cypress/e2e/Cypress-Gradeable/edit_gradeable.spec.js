@@ -243,8 +243,18 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // This should not be allowed, its after the submission open date
-        updateDates('#date_ta_view', future_date, 'Some Changes Failed!');
+        // This SHOULD be allowed, because there are no more constraints on the ta_view_date
+        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+
+        // Set submission open date to the past
+        updateDates("#submission-open-date", past_date, 'All Changes Saved');
+
+        // The gradeable should be visible to everyone (Submission open date get priority in listing over ta view date)
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
+
         // Reset to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
