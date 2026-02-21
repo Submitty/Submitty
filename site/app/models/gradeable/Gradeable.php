@@ -2304,6 +2304,9 @@ class Gradeable extends AbstractModel {
             if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
                 $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsPartialPath();
             }
+            elseif ($this->core->getConfig()->getVcsBaseUrl() === $this->getVcsPartialPath()) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/');
+            }
             else {
                 $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsPartialPath());
             }

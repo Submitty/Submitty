@@ -1126,6 +1126,16 @@ class SubmissionController extends AbstractController {
                 $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
                     $testcase_config = $testcase->getTestcase();
                     if ($testcase->canView()) {
+                        $autochecks = [];
+                        foreach ($testcase->getAutochecks() as $autocheck) {
+                            $autochecks[] = [
+                                'description' => $autocheck->getDescription(),
+                                'messages' => $autocheck->getMessages(),
+                                'diff_viewer' => $autocheck->getDiffViewer(),
+                                'expected' => $autocheck->getDiffViewer()->getDisplayExpected(),
+                                'actual' => $autocheck->getDiffViewer()->getDisplayActual()
+                            ];
+                        }
                         return [
                             'name' => $testcase_config->getName(),
                             'details' => $testcase_config->getDetails(),
@@ -1133,7 +1143,8 @@ class SubmissionController extends AbstractController {
                             'points_available' => $testcase_config->getPoints(),
                             'has_extra_results' => $testcase->hasAutochecks(),
                             'points_received' => $testcase->getPoints(),
-                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : '',
+                            'autochecks' => $autochecks,
                         ];
                     }
                     else {
@@ -2285,5 +2296,26 @@ class SubmissionController extends AbstractController {
         return new RedirectResponse(
             $this->core->buildCourseUrl(['gradeable', $gradeable_id])
         );
+    }
+    #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
+    public function viewUsersGradeableList(string $term, string $course): JsonResponse {
+
+        if (!$this->core->getQueries()->courseExists($term, $course)) {
+            return JsonResponse::getFailResponse("Course $course for term $term does not exist");
+        }
+
+        $user = $this->core->getUser();
+        // Allow instructors to get list of courses for themselves, or for a different user
+        if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
+            $user_id = $_GET['user_id'] ?? '';
+            if ($user_id !== '') {
+                $user = $this->core->getQueries()->getUserById($user_id);
+            }
+        }
+
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+        $gradeables = new GradeableList($this->core, $user);
+        return JsonResponse::getSuccessResponse($gradeables->toJson());
     }
 }
