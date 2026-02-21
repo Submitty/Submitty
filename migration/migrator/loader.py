@@ -29,17 +29,20 @@ def load_migrations(path):
     """
     migrations = OrderedDict()
     r = re.compile(r'^[0-9]+\_.+\.py$')
-    filtered = filter(
-        lambda x: r.search(x) is not None,
-        [x.name for x in path.iterdir()]
-    )
-    for migration in sorted(filtered):
-        migration_id = migration[:-3]
+    #Using rglob to search recursively inside the YYYY folders
+    filtered_paths = [
+        p for p in path.rglob('*.py') 
+        if p.is_file() and r.search(p.name) is not None
+    ]
+    
+    # Sorting paths based on their filename to keep chronological order
+    for file_path in sorted(filtered_paths, key=lambda x: x.name):
+        migration_id = file_path.name[:-3]
         migrations[migration_id] = {
             'id': migration_id,
             'commit_time': None,
             'status': 0,
-            'module': load_module(migration_id, path / migration),
+            'module': load_module(migration_id, file_path), # Pass the exact nested path
             'table': None
         }
     return migrations
