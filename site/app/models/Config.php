@@ -65,6 +65,7 @@ use app\libraries\FileUtils;
  * @method array getCourseJson()
  * @method array getAcceptedEmails()
  * @method array getUserIdRequirements()
+ * @method array getPasswordRequirements()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
@@ -121,6 +122,10 @@ class Config extends AbstractModel {
     /** @prop
      * @var array<mixed> */
     protected $user_id_requirements = [];
+
+    /** @prop
+     * @var array<mixed> */
+    protected $password_requirements = [];
 
     /** @prop
      * @var array<string> */
@@ -453,6 +458,10 @@ class Config extends AbstractModel {
             $this->user_create_account = $submitty_json['user_create_account'];
             $this->user_id_requirements = $submitty_json['user_id_requirements'];
             $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
+        }
+
+        if (isset($submitty_json['password_requirements'])) {
+            $this->password_requirements = $submitty_json['password_requirements'];
         }
 
         if (isset($submitty_json['timezone'])) {

@@ -357,7 +357,8 @@ EMAIL;
             'signupForm',
             [
                 'accepted_emails' => $this->core->getConfig()->getAcceptedEmails(),
-                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements()
+                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements(),
+                'password_requirements' => $this->core->getConfig()->getPasswordRequirements()
             ]
         );
     }
@@ -473,7 +474,7 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!Utils::isValidPassword($password)) {
+        if (!Utils::isValidPassword($password, $this->core->getConfig()->getPasswordRequirements())) {
             $this->core->addErrorMessage('Password does not meet the requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }

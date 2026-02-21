@@ -51,6 +51,41 @@ class UtilsTester extends BaseUnitTest {
         $this->assertFalse(Utils::isValidPassword($bad_password_lowercase));
     }
 
+    public function testValidPasswordWithCustomRequirements() {
+        $requirements = [
+            'min_length' => 8,
+            'max_length' => 255,
+            'require_uppercase' => false,
+            'require_lowercase' => true,
+            'require_numbers' => true,
+            'require_special_chars' => false
+        ];
+        $this->assertTrue(Utils::isValidPassword('simple8pass1', $requirements));
+        $this->assertTrue(Utils::isValidPassword('alllower1', $requirements));
+        $this->assertFalse(Utils::isValidPassword('short1', $requirements));
+        $this->assertFalse(Utils::isValidPassword('NOLOWERCASE1', [
+            'min_length' => 8,
+            'max_length' => 255,
+            'require_uppercase' => false,
+            'require_lowercase' => true,
+            'require_numbers' => false,
+            'require_special_chars' => false
+        ]));
+    }
+
+    public function testValidPasswordMaxLength() {
+        $requirements = [
+            'min_length' => 1,
+            'max_length' => 10,
+            'require_uppercase' => false,
+            'require_lowercase' => false,
+            'require_numbers' => false,
+            'require_special_chars' => false
+        ];
+        $this->assertTrue(Utils::isValidPassword('short', $requirements));
+        $this->assertFalse(Utils::isValidPassword('toolongpassword', $requirements));
+    }
+
     public function testAcceptedEmail() {
         $core = $this->createMockCore(['accepted_emails' => ['gmail.com']]);
         $reqs = $core->getConfig()->getAcceptedEmails();
