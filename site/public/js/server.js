@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup toggleGlobalFullScreenMode */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -27,6 +27,11 @@ var desktopHomeLink = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
+
+    const isFullScreen = localStorage.getItem('globalFullScreenMode') === 'true';
+    if (isFullScreen) {
+        document.getElementById('main').classList.add('full-screen-mode');
+    }
 });
 function loadInBreadcrumbLinks() {
     mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $('#home-button').attr('href');
@@ -837,7 +842,7 @@ function check_server(url, anon_id = '') {
     $.get(url, { anon_id: anon_id },
         (data) => {
             try {
-            // if the response bool is true, reload the page
+                // if the response bool is true, reload the page
                 const refresh_bool = JSON.parse(data).data;
                 if (refresh_bool === true) {
                     location.reload();
@@ -1684,7 +1689,7 @@ function keyToClickKeyup(event) {
 function enableKeyToClick() {
     const key_to_click = document.getElementsByClassName('key_to_click');
     for (let i = 0; i < key_to_click.length; i++) {
-    // In case this function is run multiple times, we need to remove the old event listeners
+        // In case this function is run multiple times, we need to remove the old event listeners
         key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
         key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
 
@@ -1881,7 +1886,7 @@ function previewMarkdown(mode) {
         throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
     }
     if (!(typeof data === 'object')) {
-        throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
+        throw new TypeError(`Expected type 'object' for 'data'. Got '${typeof data}'`);
     }
     if (!markdown_area.length) {
         throw new Error('Could not obtain markdown_area.');
@@ -2018,3 +2023,17 @@ function scorePillDark() {
     }
 }
 document.addEventListener('DOMContentLoaded', scorePillDark);
+
+/**
+ * Toggles the global full screen mode by adding or removing the .full-screen-mode class on the main element.
+ * Also saves the state to localStorage so it persists across pages.
+ */
+function toggleGlobalFullScreenMode() {
+    const mainMain = document.getElementById('main');
+    if (!mainMain) {
+        return;
+    }
+    mainMain.classList.toggle('full-screen-mode');
+    const isFullScreen = mainMain.classList.contains('full-screen-mode');
+    localStorage.setItem('globalFullScreenMode', isFullScreen);
+}
