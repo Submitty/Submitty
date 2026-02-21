@@ -50,6 +50,29 @@
     margin: 3px;
 }
 
+.file-count-warning,
+.file-size-warning,
+.submission-attempt-warning {
+    margin-top: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.file-count-warning,
+.submission-attempt-warning {
+    border-left-color: var(--alert-warning-yellow);
+    background-color: var(--alert-background-warning-yellow);
+    color: var(--alert-warning-yellow);
+}
+
+.file-size-warning {
+    border-left-color: var(--danger-red);
+    background-color: var(--alert-background-danger-red);
+    color: var(--text-black);
+}
+
 #gradeable-submission-cont #submit {
     /* stylelint-disable-next-line declaration-no-important */
     color: white !important;
