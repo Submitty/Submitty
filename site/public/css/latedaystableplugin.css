@@ -30,3 +30,7 @@
         content: none !important;
     }
 }
+
+.content > * + * {
+    margin-top: 0.5rem;
+}
