@@ -238,6 +238,7 @@ def prepare_autograding_and_submission_zip(
     instructor_solution_path = os.path.join(course_dir, "instructor_solution", obj["gradeable"])
     test_input_path = os.path.join(course_dir, "test_input", obj["gradeable"])
     test_output_path = os.path.join(course_dir, "test_output", obj["gradeable"])
+    instructor_solution_executable_path = os.path.join(course_dir, "instructor_solution_executable", obj["gradeable"])
     bin_path = os.path.join(course_dir, "bin", obj["gradeable"])
     form_json_config = os.path.join(course_dir, "config", "form", f"form_{obj['gradeable']}.json")
     custom_validation_code_path = os.path.join(
@@ -286,6 +287,8 @@ def prepare_autograding_and_submission_zip(
                        os.path.join(tmp_autograding, "test_input"))
     copytree_if_exists(config, job_id, test_output_path,
                        os.path.join(tmp_autograding, "test_output"))
+    copytree_if_exists(config, job_id, instructor_solution_executable_path,
+                       os.path.join(tmp_autograding, "instructor_solution_executable"))
     copytree_if_exists(config, job_id, generated_output_path,
                        os.path.join(tmp_autograding, "generated_output"))
     copytree_if_exists(config, job_id, bin_path, os.path.join(tmp_autograding, "bin"))
