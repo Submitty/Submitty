@@ -479,8 +479,8 @@
     {% set badge_count = 0 %}
 
     {% if graded_gradeable.getSubmitter().getId() in overrides %}
-        {% set contents = "Overridden" %}
-        {% set btn_class = "btn-default" %}
+        {% set contents = "Overridden (" ~ graded_gradeable.getOverriddenGrades().getMarks() ~ ")" %}
+        {% set btn_class = "btn-warning" %}
 
 
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
