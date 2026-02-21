@@ -267,6 +267,13 @@
         $(':not(.post_content_reply, .skip-first-post)').focus(function(){
             $('.skip-first-post').attr('tabindex', '-1');
         });
+
+        // Clear the "dirty" form state on submit so that the areYouSure
+        // plugin does not trigger a "changes will not be saved" popup
+        // when the browser navigates away after a successful post.
+        $('form').on('submit', function(){
+            $(this).trigger('reinitialize.areYouSure');
+        });
     });
 
     function submitNearestForm(e, textarea){
