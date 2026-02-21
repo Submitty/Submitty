@@ -1,0 +1,70 @@
+name: Package Cloud VM - macOS ARM
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vagrant-up:
+    runs-on: macos-15-xlarge
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Vagrant
+        run: |
+          brew tap hashicorp/tap
+          brew install hashicorp/tap/hashicorp-vagrant
+
+      - name: Install VirtualBox
+        run: brew install --cask virtualbox
+
+      - name: Install HCP CLI
+        run: brew install hashicorp/tap/hcp
+
+      - name: Get latest version
+        id: get-version
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          if ! [[ $TAG =~ ^v[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]]; then
+            echo "Invalid tag name: '$TAG'"
+            exit 1
+          fi
+          echo "version=${TAG:1}" >> $GITHUB_OUTPUT
+
+      - name: Vagrant Up
+        run: CI=1 vagrant up
+
+      - name: Validate image
+        run: curl --show-error --fail --include http://localhost:1511
+
+      - name: Save image
+        run: vagrant package --output submitty.box
+
+      - name: Get HCP token
+        id: hcp-token
+        run: |
+          hcp auth login --client-id=${{ secrets.HCP_CLIENT_ID }} --client-secret=${{ secrets.HCP_CLIENT_SECRET }}
+          echo "HCP_TOKEN=$(hcp auth print-access-token)" >> $GITHUB_OUTPUT
+
+      - name: Publish image
+        run: |
+          export VAGRANT_CLOUD_TOKEN="${{ steps.hcp-token.outputs.HCP_TOKEN }}"
+          vagrant cloud auth login
+          vagrant cloud publish skara9/submitty-u22-arm ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
+          vagrant cloud auth logout
+
+      - name: Acquire Job ID
+        if: failure()
+        id: get-job-id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
+          job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
