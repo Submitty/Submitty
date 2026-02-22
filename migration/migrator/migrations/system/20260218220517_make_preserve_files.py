@@ -14,8 +14,8 @@ def up(config):
     preserve_path = "/usr/local/submitty/config/preserve_files_list.json"
 
     paths_to_preserve = [
-        "/usr/local/submitty/site/public/img/submitty_logo.png",
-        "/usr/local/submitty/site/public/img/submitty_banner.png",
+        "/usr/local/submitty/config/footer_links.json",
+        "/usr/local/submitty/config/login.md"
     ]
 
     os.makedirs(os.path.dirname(preserve_path), exist_ok=True)
