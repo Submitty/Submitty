@@ -132,6 +132,36 @@ function socketChatMessageHandler(msg) {
     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
+function shuffleAnonName(chatroomId) {
+    $.ajax({
+        url: buildCourseUrl(['chat', chatroomId, 'regenerateAnonName']),
+        type: 'POST',
+        data: {
+            csrf_token: csrfToken,
+        },
+        success: function (response) {
+            const msg = JSON.parse(response);
+            if (msg.status === 'success') {
+                displaySuccessMessage('Anonymous names have been shuffled!');
+                const pageDataElement = document.getElementById('page-data');
+                if (pageDataElement) {
+                    const pageData = JSON.parse(pageDataElement.textContent);
+                    if (pageData.isAnonymous) {
+                        pageData.displayName = msg.data.newName;
+                        pageDataElement.textContent = JSON.stringify(pageData);
+                        showJoinMessage(`Your anonymous name is now ${msg.data.newName}.`);
+                    }
+                }
+            } else {
+                displayErrorMessage(msg.message || 'Failed to shuffle anonymous names');
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong with shuffling anonymous names');
+        },
+    });
+}
+
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
@@ -150,6 +180,24 @@ function initChatroomSocketClient(chatroomId) {
                 }
                 break;
             }
+            case 'anon_names_regenerated': {
+                const messages = document.querySelectorAll('.message-container');
+                messages.forEach(messageElement => {
+                    const senderNameElement = messageElement.querySelector('.sender-name');
+                    if (senderNameElement && senderNameElement.innerText.startsWith('Anonymous')) {
+                        showJoinMessage('Anonymous names have been shuffled by the instructor.');
+                    }
+                });
+                const pageDataElement = document.getElementById('page-data');
+                if (pageDataElement) {
+                    const pageData = JSON.parse(pageDataElement.textContent);
+                    if (pageData.isAnonymous) {
+                        pageData.displayName = msg.newName;
+                        pageDataElement.textContent = JSON.stringify(pageData);
+                        showJoinMessage(`Your anonymous name is now ${msg.newName}.`);
+                    }
+                }
+                break;
             default:
                 console.error(msg);
         }

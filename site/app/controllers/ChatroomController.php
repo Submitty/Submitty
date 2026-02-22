@@ -283,7 +283,7 @@ class ChatroomController extends AbstractController {
         $msg_array['user_id'] = $isAnonymous ? 'null' : $user->getId();
         $display_name = '';
         if ($chatroom->isAllowAnon() && $isAnonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId());
+            $display_name = $chatroom->calcAnonName($user->getId(), $em);
         }
         else {
             if ($user->accessAdmin()) {
@@ -303,6 +303,35 @@ class ChatroomController extends AbstractController {
         $msg_array['message_id'] = $message->getId();
         $this->sendSocketMessage($msg_array, true);
         return JsonResponse::getSuccessResponse($message);
+    }
+
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonName", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
+    public function regenerateAnonNames(string $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
+        
+        if ($chatroom === null) {
+            return JsonResponse::getFailResponse("Chatroom not found");
+        }
+        
+        if (!$chatroom->isAllowAnon()) {
+            return JsonResponse::getFailResponse("Chatroom does not allow anonymous users");
+        }
+        
+        $user = $this->core->getUser();
+        $oldName = $chatroom->calcAnonName($user->getId(), $em);
+        $chatroom->regenerateAllAnonNames($em);
+        $newName = $chatroom->calcAnonName($user->getId(), $em);
+        
+        $msg_array = [];
+        $msg_array['type'] = 'anon_names_regenerated';
+        $msg_array['chatroom_id'] = $chatroom->getId();
+        $msg_array['oldName'] = $oldName;
+        $msg_array['newName'] = $newName;
+        $this->sendSocketMessage($msg_array, true);
+        
+        return JsonResponse::getSuccessResponse(['newName' => $newName]);
     }
 
     #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
