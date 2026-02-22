@@ -37,10 +37,12 @@ apt-get install cloc --yes
 # PYTHON PACKAGE SETUP
 #########################
 
-pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt
+(umask 022 && python3 -m venv /usr/local/submitty/venv)
+
+(umask 022 && /usr/local/submitty/venv/bin/pip3 install -r ${CURRENT_DIR}/pip/system_requirements.txt)
 
 if [ ${VAGRANT} == 1 ] && [ ${WORKER} == 0 ] ; then
-    pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt -r ${CURRENT_DIR}/pip/dev_requirements.txt
+    (umask 022 && /usr/local/submitty/venv/bin/pip3 install -r ${CURRENT_DIR}/pip/vagrant_requirements.txt -r ${CURRENT_DIR}/pip/dev_requirements.txt)
 fi
 
 echo "Done."
