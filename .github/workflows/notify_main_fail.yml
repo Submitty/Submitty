@@ -6,6 +6,9 @@ on:
     types: [completed]
     branches:
       - 'main'
+
+permissions: {}
+
 jobs:
   Notify-Failure:
     if: ${{ github.event.workflow_run.head_repository.full_name == 'Submitty/Submitty' }}

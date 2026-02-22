@@ -4,6 +4,9 @@ on:
   issues:
     types:
       - labeled
+
+permissions: {}
+
 jobs:
   notify_zulip:
     runs-on: ubuntu-latest

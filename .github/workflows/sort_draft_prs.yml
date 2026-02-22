@@ -6,6 +6,9 @@ on:
       - converted_to_draft
       - ready_for_review
 
+permissions:
+  contents: read
+
 env:
   PR_ID: ${{ github.event.pull_request.number }}
 

@@ -4,6 +4,9 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   firstIssueReply:
     # Only when it is an issue rather than a PR
