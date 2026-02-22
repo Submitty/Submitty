@@ -2366,7 +2366,7 @@ class Gradeable extends AbstractModel {
 
         //If we're not instructor and this is not open to TAs
         $date = $this->core->getDateTimeNow();
-        if ($this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+        if ($this->getTaViewStartDate() > $date && $this->getSubmissionOpenDate() > $date && !$user->accessAdmin()) {
             return false;
         }
 
