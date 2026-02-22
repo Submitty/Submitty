@@ -112,6 +112,19 @@
     --standard-light-blue: #99ccff;
     --standard-light-seafoam: #a4dad5;
 
+    --banner-info-bg: var(--alert-background-blue);
+    --banner-info-border: var(--alert-border-blue);
+    --banner-info-text: var(--alert-info-blue);
+    --banner-warning-bg: var(--alert-background-warning-yellow);
+    --banner-warning-border: var(--alert-border-yellow);
+    --banner-warning-text: var(--alert-warning-yellow);
+    --banner-success-bg: var(--alert-background-success-green);
+    --banner-success-border: var(--alert-border-success-green);
+    --banner-success-text: var(--alert-success-green);
+    --banner-danger-bg: var(--alert-background-danger-red);
+    --banner-danger-border: var(--alert-border-danger-red);
+    --banner-danger-text: var(--alert-danger-red);
+
     /* the look of the webpage itself */
     --background-blue: #f6fbfe;
     --main-body-white: #ffffff;
@@ -122,8 +135,10 @@
     --focus-dropdown: #f5f5f5;
 
     /* text and fonts */
-    --text-black: #000000; /* use only on white/background-blue */
-    --text-white: #ffffff; /* use on all colors */
+    --text-black: #000000;
+    /* use only on white/background-blue */
+    --text-white: #ffffff;
+    /* use on all colors */
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
@@ -131,7 +146,8 @@
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
     --deleted-discussion-post-grey: #dcdcdc;
-    --important-post: #ffd700; /* is also for star color */
+    --important-post: #ffd700;
+    /* is also for star color */
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
     --upduck-yellow: #f5bd41;
@@ -199,16 +215,14 @@
     --category-color-20: #c0c246;
 
     /* rainbow */
-    --rainbow-gradient: linear-gradient(
-        135deg,
-        rgb(255 0 0 / 30%),
-        rgb(255 255 0 / 30%),
-        rgb(0 255 0 / 30%),
-        rgb(0 255 155 / 30%),
-        rgb(0 0 255 / 30%),
-        rgb(255 0 255 / 30%),
-        rgb(255 0 0 / 30%)
-    );
+    --rainbow-gradient: linear-gradient(135deg,
+            rgb(255 0 0 / 30%),
+            rgb(255 255 0 / 30%),
+            rgb(0 255 0 / 30%),
+            rgb(0 255 155 / 30%),
+            rgb(0 0 255 / 30%),
+            rgb(255 0 255 / 30%),
+            rgb(255 0 0 / 30%));
 
     /* poll histogram colors */
     --histogram-default: var(--standard-vibrant-dark-blue);
@@ -255,6 +269,19 @@
     --diff-background-expected: #122816;
     --diff-char-background-actual: #f26b6c;
     --diff-char-background-expected: #47c73b;
+
+    --banner-info-bg: #687379;
+    --banner-info-border: #2b5e68;
+    --banner-info-text: #9dd0de;
+    --banner-warning-bg: #805b02;
+    --banner-warning-border: #996d02;
+    --banner-warning-text: #f2e3b5;
+    --banner-success-bg: #1e4d2e;
+    --banner-success-border: #2a6640;
+    --banner-success-text: #8acc9a;
+    --banner-danger-bg: #5a1a1a;
+    --banner-danger-border: #7a2020;
+    --banner-danger-text: #f4a0a0;
 }
 
 [data-theme="dark"] {
@@ -292,6 +319,19 @@
     --standard-light-green: #427742;
     --standard-pastel-blue: #2f6580;
 
+    --banner-info-bg: #687379;
+    --banner-info-border: #2b5e68;
+    --banner-info-text: #9dd0de;
+    --banner-warning-bg: #805b02;
+    --banner-warning-border: #996d02;
+    --banner-warning-text: #f2e3b5;
+    --banner-success-bg: #1e4d2e;
+    --banner-success-border: #2a6640;
+    --banner-success-text: #8acc9a;
+    --banner-danger-bg: #5a1a1a;
+    --banner-danger-border: #7a2020;
+    --banner-danger-text: #f4a0a0;
+
     /* the look of the webpage itself */
     --background-blue: #202225;
     --main-body-white: #ffffff;
@@ -302,8 +342,10 @@
     --focus-dropdown: #f5f5f5;
 
     /* text and fonts */
-    --text-black: #ffffff; /* use only on white/background-blue */
-    --text-white: #000000; /* use on all colors */
+    --text-black: #ffffff;
+    /* use only on white/background-blue */
+    --text-white: #000000;
+    /* use on all colors */
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #ffffff;

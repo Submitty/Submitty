@@ -2,12 +2,8 @@
 
 {% if messages|length > 0 %}
 {# WRAP THE LATE DAY INFORMATION IN A DIV #}
-<div class="content"
-    {% if error %}
-        style="background-color: var(--standard-light-red);"
-    {% endif %}
->
-    <h4>
+<div class="submitty-banner {% if error %}submitty-banner-danger{% else %}submitty-banner-warning{% endif %}">
+    <h4 class="submitty-banner-title">
         {% for message in messages %}
             {% if message.type == 'extension' %}
                 You have a {{ message.info.extensions }} day deadline extension for this assignment.
