@@ -252,6 +252,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
             cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
         });
 
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
         // Reset to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
