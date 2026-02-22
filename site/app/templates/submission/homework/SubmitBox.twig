@@ -71,11 +71,6 @@
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
-    {% if core.getUser().accessAdmin() and max_post_size <= max_file_size %}
-        <h4 style="color: red;">
-            Warning: PHP <code>post_max_size</code> ({{ max_post_size }} bytes) should be strictly greater than <code>upload_max_filesize</code> ({{ max_file_size }} bytes). This misconfiguration may cause file uploads to fail silently. Please ask a system administrator to update the <code>php.ini</code> configuration.
-        </h4>
-    {% endif %}
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() and bulk_upload_access %}
         <form id="submission-form" method="POST">
