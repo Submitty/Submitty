@@ -246,9 +246,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // This SHOULD be allowed, because there are no more constraints on the ta_view_date
         updateDates('#date_ta_view', future_date, 'All Changes Saved');
 
-        // Set submission open date to the past
-        updateDates('[data-testid="submission-open-date"]', past_date, 'All Changes Saved');
-
         // The gradeable should be visible to everyone (Submission open date get priority in listing over ta view date)
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
