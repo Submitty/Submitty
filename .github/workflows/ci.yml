@@ -928,8 +928,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
-        with:
-          path: GIT_CHECKOUT
       - name: Setup SSH
         shell: bash
         run: |
@@ -948,16 +946,16 @@ jobs:
 
       - name: Update database values
         run: |
-            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/database.json"
-            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/authentication.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/authentication.json"
-            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/submitty.json"
-            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs/submitty.json"
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "${{ github.WORKSPACE }}/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/database.json"
+            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "${{ github.WORKSPACE }}/.setup/data/configs/authentication.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/authentication.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json"
 
       - name: Run ansible script
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_config_location=${{ github.WORKSPACE }}/GIT_CHECKOUT/Submitty/.setup/data/configs submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_config_location=${{ github.WORKSPACE }}/.setup/data/configs submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
      
       - name: Set perms
