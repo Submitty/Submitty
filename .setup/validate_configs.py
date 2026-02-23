@@ -1,6 +1,5 @@
 import os
 import argparse
-import pwd
 import json
 
 if os.getuid() != 0:
@@ -21,7 +20,7 @@ if not os.path.isdir(SUBMITTY_INSTALL_DIR) or not os.access(SUBMITTY_INSTALL_DIR
     raise SystemExit('Install directory {} does not exist or is not accessible'.format(SUBMITTY_INSTALL_DIR))
 
 
-SUBMITTY_DATA_DIR = args.data_dir 
+SUBMITTY_DATA_DIR = args.data_dir
 os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 INSTALL_FILE = os.path.join(SUBMITTY_INSTALL_DIR, '.setup/INSTALL_SUBMITTY.sh')
 

@@ -2,7 +2,6 @@ import argparse
 import os
 import shutil
 import json
-import pwd
 
 parser = argparse.ArgumentParser(description='Submitty config validation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -61,13 +60,3 @@ if not args.worker:
                 print(f"Permission denied for '{item}'")
             except Exception as e:
                 print(f"An error occurred while copying '{item}': {e}")
-
-
-with open(INSTALL_FILE, 'w') as open_file:
-    def write(x=''):
-        print(x, file=open_file)
-    write('#!/bin/bash')
-    write()
-    write(f'bash {SETUP_REPOSITORY_DIR}/INSTALL_SUBMITTY_HELPER.sh  "$@"')
-
-os.chmod(INSTALL_FILE, 0o700)

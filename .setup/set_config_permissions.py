@@ -1,14 +1,11 @@
 import argparse
 from collections import OrderedDict
-import grp
 import json
 import os
 import pwd
 import secrets
 import shutil
 import string
-import tzlocal
-import tempfile
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -113,8 +110,6 @@ if not args.worker:
     config['daemonphp_group'] = DAEMONPHP_GROUP
     config['daemoncgi_group'] = DAEMONCGI_GROUP
     config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
-else:
-    config['supervisor_user'] = SUPERVISOR_USER
 
 with open(os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json'), 'w') as users_file:
     json.dump(config, users_file, indent=2)

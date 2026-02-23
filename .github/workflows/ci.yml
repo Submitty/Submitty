@@ -499,6 +499,8 @@ jobs:
                         --install-dir "$1" --repo-dir "$3" --debug
             sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
                         --install-dir "$1"
+            sudo -E python3 "$3/Submitty/.setup/validate_config.py" \
+                        --install-dir "$1"
 
             # Copy necessary files to the installation path
             cp -vr "$3/Submitty/sbin" "$1"
@@ -886,7 +888,7 @@ jobs:
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
-      
+
       - uses: actions/upload-artifact@v6
         if: failure()
         with:
@@ -955,9 +957,9 @@ jobs:
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_config_location=${{ github.WORKSPACE }}/.setup/data/configs submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_config_location=${{ github.WORKSPACE }}/.setup/data/configs/ submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
-     
+
       - name: Set perms
         shell: bash
         run: |
@@ -991,7 +993,7 @@ jobs:
           spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-      
+
       - name: tail apache logs
         if: failure()
         run: |
