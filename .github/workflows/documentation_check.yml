@@ -7,6 +7,10 @@ on:
     # * new commits are added (to ensure failing title blocks merging)
     types: [opened, reopened, edited, synchronize]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   title-check:
     name: Title Check
