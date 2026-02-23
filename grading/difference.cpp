@@ -2,8 +2,7 @@
 #include "clean.h"
 #include "myersDiff.h"
 
-// FIXME: Thus function has terrible variable names (diff1, diff2, a, b)
-//   and the code is insufficiently commented for long term maintenance.
+// In Change (see change.h), a_* fields are student/actual output and b_* are expected/reference.
 Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0),
   type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {
@@ -17,53 +16,57 @@ Difference::Difference() :
 }
 
 
+// Emits JSON: { "differences": [ { "actual": {...}, "expected": {...} }, ... ] }
+// Each block has start index and per-level entries ("line"/"line_number", "char"/"char_number").
 void Difference::printJSON(std::ostream & file_out) {
-  std::string diff1_name = "line";
-  std::string diff2_name = "char";
+  // JSON key names for the two diff levels (line-level and character-level)
+  const std::string line_level_key = "line";
+  const std::string char_level_key = "char";
 
   nlohmann::json whole_file;
-
-  // always have a "differences" tag, even if it is an empty array
   whole_file["differences"] = nlohmann::json::array();
 
-  for (unsigned int block = 0; block < changes.size(); block++) {
-    nlohmann::json blob;
-    nlohmann::json student;
-    nlohmann::json expected;
+  for (unsigned int block_idx = 0; block_idx < changes.size(); block_idx++) {
+    const Change& change_block = changes[block_idx];
+    nlohmann::json block_json;
+    nlohmann::json student_json;
+    nlohmann::json expected_json;
 
-    student["start"] = changes[block].a_start;
-    for (unsigned int line = 0; line < changes[block].a_changes.size(); line++) {
-      nlohmann::json d1;
-      d1[diff1_name+"_number"] = changes[block].a_changes[line];
-      if (changes[block].a_characters.size() > line &&
-          changes[block].a_characters[line].size() > 0) {
-        nlohmann::json d2;
-        for (unsigned int character=0; character< changes[block].a_characters[line].size(); character++) {
-          d2.push_back(changes[block].a_characters[line][character]);
+    // Student/actual side (a_* in Change)
+    student_json["start"] = change_block.a_start;
+    for (unsigned int line = 0; line < change_block.a_changes.size(); line++) {
+      nlohmann::json line_entry;
+      line_entry[line_level_key + "_number"] = change_block.a_changes[line];
+      if (change_block.a_characters.size() > line &&
+          change_block.a_characters[line].size() > 0) {
+        nlohmann::json char_positions;
+        for (unsigned int character = 0; character < change_block.a_characters[line].size(); character++) {
+          char_positions.push_back(change_block.a_characters[line][character]);
         }
-        d1[diff2_name+"_number"] = d2;
+        line_entry[char_level_key + "_number"] = char_positions;
       }
-      student[diff1_name].push_back(d1);
+      student_json[line_level_key].push_back(line_entry);
     }
 
-    expected["start"] = changes[block].b_start;
-    for (unsigned int line = 0; line < changes[block].b_changes.size(); line++) {
-      nlohmann::json d1;
-      d1[diff1_name+"_number"] = changes[block].b_changes[line];
-      if (changes[block].b_characters.size() > line &&
-          changes[block].b_characters[line].size() > 0) {
-        nlohmann::json d2;
-        for (unsigned int character=0; character< changes[block].b_characters[line].size(); character++) {
-          d2.push_back(changes[block].b_characters[line][character]);
+    // Expected/reference side (b_* in Change)
+    expected_json["start"] = change_block.b_start;
+    for (unsigned int line = 0; line < change_block.b_changes.size(); line++) {
+      nlohmann::json line_entry;
+      line_entry[line_level_key + "_number"] = change_block.b_changes[line];
+      if (change_block.b_characters.size() > line &&
+          change_block.b_characters[line].size() > 0) {
+        nlohmann::json char_positions;
+        for (unsigned int character = 0; character < change_block.b_characters[line].size(); character++) {
+          char_positions.push_back(change_block.b_characters[line][character]);
         }
-        d1[diff2_name+"_number"] = d2;
+        line_entry[char_level_key + "_number"] = char_positions;
       }
-      expected[diff1_name].push_back(d1);
+      expected_json[line_level_key].push_back(line_entry);
     }
 
-    blob["actual"] = student;
-    blob["expected"] = expected;
-    whole_file["differences"].push_back(blob);
+    block_json["actual"] = student_json;
+    block_json["expected"] = expected_json;
+    whole_file["differences"].push_back(block_json);
   }
 
   file_out << whole_file.dump(4) << std::endl;
@@ -71,12 +74,16 @@ void Difference::printJSON(std::ostream & file_out) {
 }
 
 
+// Grading: (1) If config has max_char_changes, grade by character-change count;
+// (2) else if extraStudentOutputOk, only missing (expected) lines deduct;
+// (3) else grade by edit distance over max of student/expected length.
 void Difference::PrepareGrade(const nlohmann::json& j) {
   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "PREPARE GRADE" << std::endl;
 
 
   // --------------------------------------------------------
+  // Branch 1: Grade by character-change bounds (min/max_char_changes).
   //std::cout << "json " << j.dump(4) << std::endl;
   if (j.find("max_char_changes") != j.end()) {
     std::cout << "MAX CHAR CHANGES" << std::endl;
@@ -146,8 +153,8 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
   }
 
   // --------------------------------------------------------
+  // Branch 2: Extra student output allowed; only missing expected lines deduct.
   else if (this->extraStudentOutputOk) {
-    // only missing lines (deletions) are a problem
     int count_of_missing_lines = 0;
     for (int x = 0; x < this->changes.size(); x++) {
       int num_b_lines = this->changes[x].b_changes.size();
@@ -186,8 +193,8 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
   }
 
   // --------------------------------------------------------
+  // Branch 3: Strict comparison; both missing and extra lines reduce grade.
   else {
-    // both missing lines (deletions) and extra lines are a deduction
     int max_output_length = std::max(this->output_length_a, this->output_length_b);
     float grade = 1.0;
     if (max_output_length == 0) {
