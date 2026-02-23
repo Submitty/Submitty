@@ -17,10 +17,12 @@ from . import insert_database_version_data, autograding_utils
 def get_queue_time(next_directory, next_to_grade):
     # Get the creation time of the file (returns a float timestamp)
     creation_time = os.path.getctime(os.path.join(next_directory, next_to_grade))
-     # Convert the timestamp directly to a timezone-aware datetime object
+    # Convert the timestamp directly to a timezone-aware datetime object
     t = datetime.datetime.fromtimestamp(creation_time, dateutils.get_timezone())
 
     return t
+
+
 def load_queue_file_obj(config, job_id, next_directory, next_to_grade):
     queue_file = Path(next_directory) / next_to_grade
 
