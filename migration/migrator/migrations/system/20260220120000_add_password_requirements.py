@@ -13,8 +13,6 @@ def up(config):
     :type config: migrator.config.Config
     """
     submitty_json_path = os.path.join(config.config_path, 'submitty.json')
-    if not os.path.exists(submitty_json_path):
-        return
 
     with open(submitty_json_path, 'r') as f:
         submitty_config = json.load(f)
@@ -40,15 +38,4 @@ def down(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    submitty_json_path = os.path.join(config.config_path, 'submitty.json')
-    if not os.path.exists(submitty_json_path):
-        return
-
-    with open(submitty_json_path, 'r') as f:
-        submitty_config = json.load(f)
-
-    if 'password_requirements' in submitty_config:
-        del submitty_config['password_requirements']
-
-        with open(submitty_json_path, 'w') as f:
-            json.dump(submitty_config, f, indent=4)
+    pass

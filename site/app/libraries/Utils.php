@@ -98,23 +98,23 @@ class Utils {
 
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
+     *
+     * @param array{min_length: int, max_length: int, require_uppercase: bool, require_lowercase: bool, require_numbers: bool, require_special_chars: bool} $requirements The password requirements taken from the config file
      */
-    public static function isValidPassword(string $password, array $requirements = []): bool {
-        $min_length = $requirements['min_length'] ?? 12;
-        $max_length = $requirements['max_length'] ?? 255;
-        if (strlen($password) < $min_length || strlen($password) > $max_length) {
+    public static function isValidPassword(string $password, array $requirements): bool {
+        if (strlen($password) < $requirements['min_length'] || strlen($password) > $requirements['max_length']) {
             return false;
         }
-        if (($requirements['require_uppercase'] ?? true) && !preg_match('/[A-Z]/', $password)) {
+        if ($requirements['require_uppercase'] && !preg_match('/[A-Z]/', $password)) {
             return false;
         }
-        if (($requirements['require_lowercase'] ?? true) && !preg_match('/[a-z]/', $password)) {
+        if ($requirements['require_lowercase'] && !preg_match('/[a-z]/', $password)) {
             return false;
         }
-        if (($requirements['require_numbers'] ?? true) && !preg_match('/[0-9]/', $password)) {
+        if ($requirements['require_numbers'] && !preg_match('/[0-9]/', $password)) {
             return false;
         }
-        if (($requirements['require_special_chars'] ?? true) && !preg_match('/[^A-Za-z0-9]/', $password)) {
+        if ($requirements['require_special_chars'] && !preg_match('/[^A-Za-z0-9]/', $password)) {
             return false;
         }
         return true;
