@@ -7,6 +7,7 @@ import secrets
 import shutil
 import string
 
+
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
 
@@ -20,6 +21,7 @@ def get_ids(user):
         return get_uid(user), get_gid(user)
     except KeyError:
         raise SystemExit("ERROR: Could not find user: " + user)
+
 
 parser = argparse.ArgumentParser(description='Submitty config validation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
