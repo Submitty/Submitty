@@ -10,56 +10,57 @@ use app\models\User;
 use app\entities\poll\Poll;
 use InvalidArgumentException;
 
-class Access {
+class Access
+{
     // Access control options
 
     /** Allow Instructors to do this */
-    const ALLOW_INSTRUCTOR              = 1 << 0;
+    const ALLOW_INSTRUCTOR = 1 << 0;
     /** Allow full access graders to do this */
-    const ALLOW_FULL_ACCESS_GRADER      = 1 << 1;
+    const ALLOW_FULL_ACCESS_GRADER = 1 << 1;
     /** Allow limited access graders to do this */
-    const ALLOW_LIMITED_ACCESS_GRADER   = 1 << 2;
+    const ALLOW_LIMITED_ACCESS_GRADER = 1 << 2;
     /** Allow students to do this */
-    const ALLOW_STUDENT                 = 1 << 3;
+    const ALLOW_STUDENT = 1 << 3;
     /** Allow logged out users to do this */
-    const ALLOW_LOGGED_OUT              = 1 << 4;
+    const ALLOW_LOGGED_OUT = 1 << 4;
     /**
      * Check that the current user is at or above the minimum grading group required for a gradeable
      * If the gradeable has peer grading, this will also accept for students
      */
-    const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_GRADEABLE_MIN_GROUP = 1 << 5 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's grading section for a gradeable
      * Only applies to limited access graders
      */
-    const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_GRADING_SECTION_GRADER = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's peer grading assignment for a gradeable
      * Only applies to students
      */
     const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADEABLE;
     /** Require that the given gradeable have an active version / submission */
-    const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_HAS_SUBMISSION = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
     /** Check that a valid CSRF token was passed in the request */
-    const CHECK_CSRF                    = 1 << 9;
+    const CHECK_CSRF = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
-    const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+    const ALLOW_SELF_GRADEABLE = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
     /** Only allow access if the gradeable is our own */
-    const ALLOW_ONLY_SELF_GRADEABLE     = 1 << 11 | self::REQUIRE_ARG_GRADEABLE;
+    const ALLOW_ONLY_SELF_GRADEABLE = 1 << 11 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check if the given component allows peer grading
      * Only applies to students
      */
-    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
+    const CHECK_COMPONENT_PEER_STUDENT = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
-    const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
+    const CHECK_FILE_DIRECTORY = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
     /** Require that the given file exists */
-    const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
+    const CHECK_FILE_EXISTS = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
     /**
      * Check that students are allowed to view the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_VIEW = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that students are allowed to submit the given gradeable
      * Only applies to students
@@ -72,38 +73,38 @@ class Access {
     const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
 
     /** Check that the course status is such that the user can view the course */
-    const CHECK_COURSE_STATUS           = 1 << 18;
+    const CHECK_COURSE_STATUS = 1 << 18;
 
     /** If the current set of flags requires the "gradeable" (type Gradeable) argument */
-    const REQUIRE_ARG_GRADEABLE         = 1 << 24;
+    const REQUIRE_ARG_GRADEABLE = 1 << 24;
     /** If the current set of flags requires the "component" (type GradeableComponent) argument */
-    const REQUIRE_ARG_COMPONENT         = 1 << 25;
+    const REQUIRE_ARG_COMPONENT = 1 << 25;
     /** If the current set of flags requires the "dir" (type string) and "path" (type string) arguments */
-    const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
+    const REQUIRE_ARGS_DIR_PATH = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" (type int) argument */
-    const REQUIRE_ARG_VERSION           = 1 << 27;
+    const REQUIRE_ARG_VERSION = 1 << 27;
     /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
-    const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
+    const REQUIRE_ARGS_SEMESTER_COURSE = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */
-    const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
-    const CHECK_PEER_AUTOGRADING         = 1 << 30;
-    const CHECK_PEER_SOLUTIONS           = 1 << 31;
-    const REQUIRE_ARG_POLL               = 1 << 32;
-    const POLL_CHECK_HISTOGRAM           = 1 << 33;
+    const REQUIRE_FORUM_SAME_STUDENT = 1 << 29;
+    const CHECK_PEER_AUTOGRADING = 1 << 30;
+    const CHECK_PEER_SOLUTIONS = 1 << 31;
+    const REQUIRE_ARG_POLL = 1 << 32;
+    const POLL_CHECK_HISTOGRAM = 1 << 33;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
 
-    const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
+    const ALLOW_MIN_STUDENT = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
     const ALLOW_MIN_LIMITED_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
-    const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
-    const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
-    const DENY_ALL                        = -1;
+    const ALLOW_MIN_FULL_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
+    const ALLOW_MIN_INSTRUCTOR = self::ALLOW_INSTRUCTOR;
+    const DENY_ALL = -1;
 
     const ACCESS_LEVELS = [
-        User::LEVEL_USER        => "User",
-        User::LEVEL_FACULTY     => "Faculty",
-        User::LEVEL_SUPERUSER   => "Superuser"
+        User::LEVEL_USER => "User",
+        User::LEVEL_FACULTY => "Faculty",
+        User::LEVEL_SUPERUSER => "Superuser"
     ];
 
     /**
@@ -119,7 +120,8 @@ class Access {
      */
     private $directories = null;
 
-    public function __construct(Core $core) {
+    public function __construct(Core $core)
+    {
         $this->core = $core;
 
         // TODO: these are new actions that should be audited
@@ -212,7 +214,7 @@ class Access {
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
-        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
         $this->permissions["path.write.submission_versions"] = self::DENY_ALL;
@@ -236,7 +238,8 @@ class Access {
      * Load directory access paths
      * Needs to be later because the constructor is called before the config is loaded
      */
-    private function loadDirectories() {
+    private function loadDirectories()
+    {
         $this->directories["annotations"] = [
             //Base directory on disk where files are located. If you try to access anything via this directory
             // the path needs to start with this base.
@@ -392,7 +395,8 @@ class Access {
      * @param array $args Any extra arguments that are required to check permissions
      * @return bool True if they are allowed to do that action
      */
-    public function canI(string $action, $args = []) {
+    public function canI(string $action, $args = [])
+    {
         $user = $args["user"] ?? $this->core->getUser();
         return $this->canUser($user, $action, $args);
     }
@@ -404,7 +408,8 @@ class Access {
      * @param array $args Any extra arguments that are required to check permissions
      * @return bool True if they are allowed to do that action
      */
-    public function canUser($user, string $action, $args) {
+    public function canUser($user, string $action, $args)
+    {
         if (!array_key_exists($action, $this->permissions)) {
             throw new InvalidArgumentException("Unknown action '$action'");
         }
@@ -421,22 +426,18 @@ class Access {
                 return false;
             }
             $group = User::GROUP_NONE;
-        }
-        else {
+        } else {
             $group = $user->getGroup();
         }
 
         //Check user group first
         if ($group === User::GROUP_STUDENT && !self::checkBits($checks, self::ALLOW_STUDENT)) {
             return false;
-        }
-        elseif ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
+        } elseif ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        }
-        elseif ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
+        } elseif ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
-        }
-        elseif ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
+        } elseif ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
             return false;
         }
 
@@ -460,8 +461,7 @@ class Access {
             if (array_key_exists("graded_gradeable", $args)) {
                 $graded_gradeable = $args["graded_gradeable"];
                 $gradeable = $graded_gradeable->getGradeable();
-            }
-            else {
+            } else {
                 $gradeable = $this->requireArg($args, "gradeable");
                 if ($gradeable === null) {
                     return false;
@@ -486,6 +486,12 @@ class Access {
                         $grading_checks = false;
                     }
                 }
+
+                if ($grading_checks && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+                    if ($gradeable->getGradeStartDate() !== null && $gradeable->getGradeStartDate() > $this->core->getDateTimeNow()) {
+                        $grading_checks = false;
+                    }
+                }
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
@@ -500,8 +506,7 @@ class Access {
                     if (!$this->isSectionInGradingSections($gradeable, $args["section"], $user)) {
                         $grading_checks = false;
                     }
-                }
-                else {
+                } else {
                     //If graded gradeable is null then we're asking if we can grade anything in this gradeable, which we can.
                     // If a graded gradeable is passed then we need to make sure we can grade that specific graded gradeable.
                     if ($graded_gradeable !== null) {
@@ -603,8 +608,7 @@ class Access {
             //checks for top level dirs like annotations, checkout, course_materials, submissions ... )
             if (!array_key_exists($dir, $this->directories)) {
                 return false;
-            }
-            elseif (!file_exists($path)) {
+            } elseif (!file_exists($path)) {
                 //checks for the existence of path which is asked for
                 return false;
             }
@@ -623,12 +627,10 @@ class Access {
                 // only instructors should be able to access courses with status archived==2
                 if ($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
                     return false;
-                }
-                elseif ($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                } elseif ($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
                     // only students with a non-null registration section should be able to view courses (and only active==1 courses)
                     return false;
-                }
-                elseif ($course_status > 2) {
+                } elseif ($course_status > 2) {
                     // no one can view courses with status greater than 2
                     return false;
                 }
@@ -658,7 +660,8 @@ class Access {
      * @param string $name Name of required arg
      * @return mixed Arg value
      */
-    private function requireArg(array $args, string $name) {
+    private function requireArg(array $args, string $name)
+    {
         if (!array_key_exists($name, $args)) {
             throw new InvalidArgumentException("Missing argument '$name'");
         }
@@ -671,7 +674,8 @@ class Access {
      * @param int $test Bit mask (flags to check for)
      * @return bool If matches
      */
-    private function checkBits(int $bits, int $test) {
+    private function checkBits(int $bits, int $test)
+    {
         return ($bits & $test) === $test;
     }
 
@@ -681,7 +685,8 @@ class Access {
      * @param User $user
      * @return bool If they are
      */
-    public function isGradedGradeableInGradingSections($graded_gradeable, User $user) {
+    public function isGradedGradeableInGradingSections($graded_gradeable, User $user)
+    {
         $now = $this->core->getDateTimeNow();
 
         $gradeable = $graded_gradeable->getGradeable();
@@ -697,8 +702,7 @@ class Access {
                 if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
                     return true;
                 }
-            }
-            else {
+            } else {
                 if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
                     return true;
                 }
@@ -715,7 +719,8 @@ class Access {
      * @param User $user
      * @return bool
      */
-    public function isSectionInGradingSections($gradeable, string $section, User $user) {
+    public function isSectionInGradingSections($gradeable, string $section, User $user)
+    {
         $sections = $gradeable->getGradingSectionsForUser($user);
         foreach ($sections as $check_section) {
             /** @var GradingSection $check_section */
@@ -735,7 +740,8 @@ class Access {
      * @param User $user User doing the peer grading
      * @return bool
      */
-    public function isGradedGradeableInPeerAssignment(?Gradeable $gradeable, ?GradedGradeable $graded_gradeable, User $user) {
+    public function isGradedGradeableInPeerAssignment(?Gradeable $gradeable, ?GradedGradeable $graded_gradeable, User $user)
+    {
         if ($gradeable === null && $graded_gradeable === null) {
             return false;
         }
@@ -751,8 +757,7 @@ class Access {
 
         if (!$gradeable->hasPeerComponent()) {
             return false;
-        }
-        else {
+        } else {
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
             if ($any_peer) {
                 if (empty($user_ids_to_grade)) {
@@ -780,7 +785,8 @@ class Access {
      * @param int $minimum
      * @return bool
      */
-    public function checkGroupPrivilege(int $check, int $minimum) {
+    public function checkGroupPrivilege(int $check, int $minimum)
+    {
         //Because access levels decrease as they get more powerful, this needs to be <=
         // If groups ever become non-sequential in the future, this needs to be replaced.
         return $check <= $minimum;
@@ -792,7 +798,8 @@ class Access {
      * @param User $user User to check
      * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
      */
-    public function isGradedGradeableByUser($graded_gradeable, User $user) {
+    public function isGradedGradeableByUser($graded_gradeable, User $user)
+    {
         if ($graded_gradeable !== null) {
             if ($graded_gradeable->getSubmitter()->getTeam() !== null) {
                 return $graded_gradeable->getSubmitter()->getTeam()->hasMember($user->getId());
@@ -808,13 +815,13 @@ class Access {
      * @param Submitter $submitter Submitter to check
      * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
      */
-    public function isGradedGradeableBySubmitter($graded_gradeable, Submitter $submitter) {
+    public function isGradedGradeableBySubmitter($graded_gradeable, Submitter $submitter)
+    {
         if ($graded_gradeable !== null) {
             if ($graded_gradeable->getSubmitter()->isTeam()) {
                 if ($submitter->isTeam()) {
                     return $graded_gradeable->getSubmitter()->getId() === $submitter->getId();
-                }
-                else {
+                } else {
                     return $graded_gradeable->getSubmitter()->getTeam()->hasMember($submitter->getId());
                 }
             }
@@ -832,7 +839,8 @@ class Access {
      * @param array $args Additional arguments for specific checks
      * @return bool True if they are allowed to access this file
      */
-    public function canUserAccessPath(string $action, string $path, string $dir, User $user, array $args = []) {
+    public function canUserAccessPath(string $action, string $path, string $dir, User $user, array $args = [])
+    {
         if ($this->directories === null) {
             $this->loadDirectories();
         }
@@ -889,8 +897,7 @@ class Access {
                                 return false;
                             }
                         }
-                    }
-                    else {
+                    } else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
                     $hidden_files = $args["gradeable"]->getHiddenFiles();
@@ -909,13 +916,11 @@ class Access {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
                             $graded_gradeable = $args["graded_gradeable"];
-                        }
-                        elseif (array_key_exists("gradeable", $args)) {
+                        } elseif (array_key_exists("gradeable", $args)) {
                             $gradeable = $args["gradeable"];
                             $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
                             $args["graded_gradeable"] = $graded_gradeable;
-                        }
-                        else {
+                        } else {
                             return false;
                         }
                         if ($graded_gradeable === null || !($graded_gradeable instanceof GradedGradeable)) {
@@ -958,7 +963,8 @@ class Access {
      * @param string $path
      * @return bool|string Absolute path of the file in that directory or false if unsafe
      */
-    public function resolveDirPath(string $dir, string $path) {
+    public function resolveDirPath(string $dir, string $path)
+    {
         if ($this->directories === null) {
             $this->loadDirectories();
         }
