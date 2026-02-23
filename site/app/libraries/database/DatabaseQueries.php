@@ -1762,7 +1762,7 @@ WHERE term=? AND course=? AND user_id=?",
         $params = [];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS TRUE";
             $params = $sections;
         }
         if (!$include_withdrawn_students) {
@@ -1808,7 +1808,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS TRUE";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -1864,7 +1864,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS TRUE";
             $params = array_merge($params, $sections_keys);
         }
         if (!$include_withdrawn_students) {
@@ -1909,7 +1909,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS TRUE";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -2057,7 +2057,7 @@ ORDER BY {$orderby}",
         $params = [$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS TRUE";
             $params = array_merge($params, $sections);
         }
         // if we omit withdrawn students and not on a team gradeable
@@ -2197,7 +2197,7 @@ ORDER BY merged_data.{$section_key}
         $params = [$g_id,$g_id,$g_id];
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $where = "WHERE active_version > 0 AND ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS TRUE";
             $params = array_merge($params, $sections);
         }
         if (!$include_withdrawn_students && !$is_team) {
@@ -4030,7 +4030,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $params = [$g_id];
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = " ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE AND";
+            $sections_query = " ({$section_key} IN " . $this->createParameterList(count($sections)) . ") IS TRUE AND";
             $params = array_merge($sections, $params);
         }
         if ($section_key === 'registration_section') {
@@ -4075,7 +4075,7 @@ ORDER BY {$orderby}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS TRUE";
             $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query(
@@ -4118,7 +4118,7 @@ ORDER BY {$section_key}",
             // Expand out where clause
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $where = "WHERE ({$section_key} IN {$placeholders}) IS NOT FALSE";
+            $where = "WHERE ({$section_key} IN {$placeholders}) IS TRUE";
             $params = array_merge($params, $sections_keys);
         }
 
@@ -4185,7 +4185,7 @@ ORDER BY {$section_key}",
         if (count($sections) > 0) {
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $sections_query = "({$section_key} IN {$placeholders}) IS NOT FALSE AND";
+            $sections_query = "({$section_key} IN {$placeholders}) IS TRUE AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
@@ -4230,7 +4230,7 @@ ORDER BY {$orderBy}",
         if (count($sections) > 0) {
             $sections_keys = array_values($sections);
             $placeholders = $this->createParameterList(count($sections_keys));
-            $sections_query = "({$section_key} IN {$placeholders}) IS NOT FALSE AND";
+            $sections_query = "({$section_key} IN {$placeholders}) IS TRUE AND";
             $params = array_merge($sections, $params);
         }
         $orderBy = "";
