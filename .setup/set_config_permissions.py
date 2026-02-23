@@ -20,13 +20,15 @@ def get_ids(user):
     try:
         return get_uid(user), get_gid(user)
     except KeyError:
-        raise SystemExit("ERROR: Could not find user: " + user)
+        raise KeyError("ERROR: Could not find user: " + user)
 
 
 parser = argparse.ArgumentParser(description='Submitty config validation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
-parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
+parser.add_argument('--install-dir', default='/usr/local/submitty',
+                    help='Set the install directory for Submitty')
+parser.add_argument('--worker', action='store_true', default=False,
+                    help='Configure Submitty with autograding only')
 
 args = parser.parse_args()
 
@@ -71,8 +73,8 @@ shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMO
 
 if not args.worker:
     config = OrderedDict()
-    characters = string.ascii_letters + string.digits
-    config['session'] = ''.join(secrets.choice(characters) for _ in range(64))
+    CHARACTERS = string.ascii_letters + string.digits
+    config['session'] = ''.join(secrets.choice(CHARACTERS) for _ in range(64))
     with open(SECRETS_PHP_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
 shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
