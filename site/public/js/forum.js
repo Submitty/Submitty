@@ -421,8 +421,12 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 return;
             }
         },
-        error: function (a, b) {
-            window.alert('Something went wrong when adding new thread. Please refresh the page.');
+        error: function (jqXHR, textStatus, errorThrown) {
+            // Firefox will abort requests during page reloads (often showing up as status 0 or textStatus 'error' with empty errorThrown)
+            if (textStatus === 'abort' || jqXHR.status === 0) {
+                return;
+            }
+            displayErrorMessage('Something went wrong when adding new thread. Please refresh the page.');
         },
     });
 }
@@ -480,7 +484,7 @@ function socketAnnounceThreadHandler(thread_id) {
     hr.remove(); // removing this sibling <hr>
     // if there exists other announcements
     if ($('.thread-announcement').length !== 0) {
-    // if thread to announce is already bookmarked
+        // if thread to announce is already bookmarked
         if ($(thread_to_announce).find('.thread-favorite').length !== 0) {
             // if there exists other bookmarked announcements
             if ($('.thread-announcement').siblings('.thread-favorite').length !== 0) {
@@ -554,7 +558,7 @@ function socketAnnounceThreadHandler(thread_id) {
     // if user's current thread is the one modified -> update
     // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
-    // if is instructor
+        // if is instructor
         const instructor_pin = $('.not-active-thread-announcement');
         if (instructor_pin.length) {
             instructor_pin.removeClass('.not-active-thread-announcement').addClass('active-thread-remove-announcement');
@@ -652,7 +656,7 @@ function socketUnpinThreadHandler(thread_id) {
     // if user's current thread is the one modified -> update
     // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
-    // if is instructor
+        // if is instructor
         const instructor_pin = $('.active-thread-remove-announcement');
         if (instructor_pin.length) {
             instructor_pin.removeClass('active-thread-remove-announcement').addClass('not-active-thread-announcement');
@@ -2162,7 +2166,7 @@ function loadInlineImages(encoded_data) {
 
     // if they're no images loaded for this well
     if (attachment_well.children().length === 0) {
-    // add image tags
+        // add image tags
         for (let i = 0; i < data.length - 1; i++) {
             const attachment = data[i];
             const url = attachment[0];
