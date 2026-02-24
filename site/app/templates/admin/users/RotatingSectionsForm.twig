@@ -98,9 +98,6 @@
                                         </span>
                                     </td>
                                     <td>
-                                        {{ section['course_section_id'] }}
-                                    </td>
-                                    <td>
                                         {% if section['sections_registration_id'] in reg_sections_count|keys %}
                                             {{ reg_sections_count[section['sections_registration_id']] }}
                                         {% else %}
