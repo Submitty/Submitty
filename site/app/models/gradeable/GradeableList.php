@@ -341,15 +341,17 @@ class GradeableList extends AbstractModel {
         }
     }
 
-    public function toJson() {
+    /**
+     * @return array<string, array<string, string>> Gradeable ID mapped to it's property values.
+     */
+    public function toJson(): array {
         $gradeables = [];
         foreach ($this->getSubmittableElectronicGradeables() as $gradeable) {
-            $section = $this->getGradeableSection($this->core, $gradeable);
+            $section = self::getGradeableSection($this->core, $gradeable);
             $gradeables[$gradeable->getId()] = [
                 'id' => $gradeable->getId(),
                 'title' => $gradeable->getTitle(),
                 'instructions_url' => $gradeable->getInstructionsUrl(),
-                'gradeable_type' => $gradeable->getType(),
                 'syllabus_bucket' => $gradeable->getSyllabusBucket(),
                 'section' => $section,
                 'section_name' => $this->sectionToString($section),

@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradeableList;
 use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
@@ -2297,7 +2298,7 @@ class SubmissionController extends AbstractController {
             $this->core->buildCourseUrl(['gradeable', $gradeable_id])
         );
     }
-    #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
+    #[Route("/api/{term}/{course}/gradeables", methods: ['GET'])]
     public function viewUsersGradeableList(string $term, string $course): JsonResponse {
 
         if (!$this->core->getQueries()->courseExists($term, $course)) {
