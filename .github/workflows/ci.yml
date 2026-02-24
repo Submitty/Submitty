@@ -496,7 +496,7 @@ jobs:
             mkdir -vp "$2/courses"  &&  chmod -vR 777 "$2/courses"
 
             sudo -E python3 "$3/Submitty/.setup/generate_configs.py" \
-                        --install-dir "$1" --repo-dir "$3" --debug
+                        --install-dir "$1" --debug
             sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
                         --install-dir "$1"
             sudo -E python3 "$3/Submitty/.setup/validate_config.py" \
@@ -508,13 +508,10 @@ jobs:
             sudo chmod -vR 777 "$1/sbin"
           }
 
-          # configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
-          #   "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
+          configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
+            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
           configure_submitty "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
             "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
-          configure_submitty "${MAIN_INSTALL_PATH}"   "${MAIN_DATA_PATH}"                       \
-            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
-
 
       - name: Create Databases
         run: |
@@ -791,12 +788,6 @@ jobs:
       - uses: actions/upload-artifact@v6
         if: failure()
         with:
-          name: Submitty-JSON
-          path: /usr/local/submitty/config/submitty.json
-
-      - uses: actions/upload-artifact@v6
-        if: failure()
-        with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
@@ -993,13 +984,6 @@ jobs:
           spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-
-      - name: tail apache logs
-        if: failure()
-        run: |
-          sudo tail -n 200 /var/log/apache2/submitty.log
-          sudo tail -n 200 /var/log/apache2/error.log
-          sudo cat /usr/local/submitty/config/database.json
 
       - uses: actions/upload-artifact@v6
         if: failure()

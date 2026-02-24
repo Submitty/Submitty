@@ -24,10 +24,11 @@ os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 os.makedirs(SETUP_REPOSITORY_DIR, exist_ok=True)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 if not args.worker:
+    # Copy all files from .setup/data/configs to the install config directory 
     for item in os.listdir(CONFIG_REPOSITORY):
         source_path = os.path.join(CONFIG_REPOSITORY, item)
         destination_path = os.path.join(CONFIG_INSTALL_DIR, item)
-        # Check if the item is a file before copying
+        # Only copy files, if the file does not exist at the destination
         if os.path.isfile(source_path) and not os.path.exists(destination_path):
             try:
                 shutil.copy(source_path, destination_path)

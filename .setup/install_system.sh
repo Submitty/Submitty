@@ -75,7 +75,7 @@ echo "Running setup:"
 while :; do
     case $1 in
         --utm)
-            # export UTM=1
+            export UTM=1
             export DEV_VM=1
             echo "utm"
             ;;
@@ -680,9 +680,9 @@ if [ ! -d "${clangsrc}" ]; then
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
 
-# #################################################################
-# # SUBMITTY SETUP
-# #################
+#################################################################
+# SUBMITTY SETUP
+#################
 echo Beginning Submitty Setup
 
 if [ ${WORKER} == 1 ]; then

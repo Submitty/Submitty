@@ -33,7 +33,6 @@ parser.add_argument('--worker', action='store_true', default=False,
 args = parser.parse_args()
 
 SUBMITTY_INSTALL_DIR = args.install_dir
-
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
@@ -59,28 +58,19 @@ FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
 if not args.worker:
-    for file in [WORKERS_JSON, CONTAINERS_JSON]:
-        os.chmod(file, 0o660)
-    shutil.chown(WORKERS_JSON, PHP_USER, DAEMONPHP_GROUP)
-    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
-
-os.chmod(SUBMITTY_JSON, 0o444)
-
-os.chmod(SUBMITTY_USERS_JSON, 0o440)
-
-shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
-
-
-if not args.worker:
+    # Set secrets session token
     config = OrderedDict()
     CHARACTERS = string.ascii_letters + string.digits
     config['session'] = ''.join(secrets.choice(CHARACTERS) for _ in range(64))
     with open(SECRETS_PHP_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
-os.chmod(SECRETS_PHP_JSON, 0o440)
 
-if not args.worker:
+    # Change file permissions
+    for file in [WORKERS_JSON, CONTAINERS_JSON]:
+        os.chmod(file, 0o660)
+    shutil.chown(WORKERS_JSON, PHP_USER, DAEMONPHP_GROUP)
+    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
+
     shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
@@ -93,7 +83,16 @@ if not args.worker:
     shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(EMAIL_JSON, 0o440)
 
+os.chmod(SUBMITTY_JSON, 0o444)
+os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+
+shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
+os.chmod(SECRETS_PHP_JSON, 0o440)
+
+# Users aren't created yet when running generate_configs,
+# so create the submitty_users json here
 config = OrderedDict()
 config['num_grading_scheduler_workers'] = 5
 config['num_untrusted'] = 60
