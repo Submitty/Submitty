@@ -1,7 +1,6 @@
 ---
 submitty_install_submitty_url: localhost
 submitty_install_submitty_email: submitty@localhost
-submitty_install_authentication_method: DatabaseAuthentication
 submitty_install_submitty_ip: 127.0.0.1
 submitty_install_ssl_cert_file: /etc/ssl/certs/submitty.pem
 submitty_install_ssl_key_file: /etc/ssl/private/submitty.key
