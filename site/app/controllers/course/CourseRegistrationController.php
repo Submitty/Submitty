@@ -7,6 +7,7 @@ use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
+use app\entities\CourseUser;
 
 class CourseRegistrationController extends AbstractController {
     /**
@@ -63,6 +64,17 @@ class CourseRegistrationController extends AbstractController {
             $this->core->addErrorMessage('You cannot unregister from this course on your own.');
             return new RedirectResponse($this->core->buildCourseUrl());
         }
+        $em = $this->core->getSubmittyEntityManager();
+        $course_user = $em->getRepository(CourseUser::Class)
+            ->findOneBy([
+                'user' => $this->core->getUser()->getId(),
+                'term' => $term,
+                'course' => $course
+        ]);
+        $course_user->setRegistrationSection(null);
+        $em->persist($course_user);
+        $em->flush();
+        // Unregisters user in users table, not courses_users
         $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
         $this->core->addSuccessMessage('You have successfully unregistered from the course.');
         return new RedirectResponse($this->core->buildUrl(['home']));
@@ -71,18 +83,30 @@ class CourseRegistrationController extends AbstractController {
     public function registerCourseUser(string $term, string $course): void {
         $user = $this->core->getUser();
         $user_id = $user->getId();
-        if ($this->core->getQueries()->checkStudentActiveInCourse($user_id, $course, $term)) {
-            // User is already registered and active
-            return;
-        }
+
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-        if ($this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
-            $this->core->getUser()->setRegistrationSection($default_section);
+        $em = $this->core->getSubmittyEntityManager();
+        $course_user = $em->getRepository(CourseUser::class)
+            ->findOneBy([
+                'user' => $user_id,
+                'term' => $term,
+                'course' => $course
+        ]);
+        // Course user exists
+        if ($course_user !== null) {
+            $user->setRegistrationSection($default_section);
+            $course_user->setRegistrationSection($user->getRegistrationSection());
+            $em->persist($course_user);
+            $em->flush();
             $this->core->getQueries()->updateUser($user, $term, $course);
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
-            $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+            $user_entity = $em->getRepository(UserEntity::class)->find($user_id);
+            $course_user = new CourseUser($term, $course, $user_entity);
+            $em->persist($course_user);
+            $em->flush();
+            $this->core->getQueries()->updateUserInCourse($user);
         }
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
