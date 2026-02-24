@@ -1094,11 +1094,9 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
-        $user_id = $_GET['user_id'] ?? '';
-        // Instructors can get values for other users, otherwise require the $_GET user id to be the same as the
-        // API authenticated user.
-        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
-            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        $user_id = $this->core->getUser()->getId();
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
+            $user_id = $_GET['user_id'] ?? $user_id;
         }
 
         try {
