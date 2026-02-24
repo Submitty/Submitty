@@ -1078,6 +1078,9 @@ class UsersController extends AbstractController {
                     case "Time Zone":
                         // Ignore Time Zone column from exported lists.
                         break;
+                    case "Rotation Section":
+                        // Ignore Rotation Section column from exported lists.
+                        break;
                     case "Registration Section":
                         if ($list_type == "classlist") {
                             /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- .
@@ -1191,7 +1194,7 @@ class UsersController extends AbstractController {
                         break;
                     default:
                         // Unrecognized column name, exit immediatly.
-                        $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
+                        $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
                         $this->core->redirect($return_url);
                         break;
                 }
@@ -1265,7 +1268,7 @@ class UsersController extends AbstractController {
 
         foreach ($users_to_add as $key => $row) {
             // Remove the rows in which wrong or incorrect user_id is passed (only for row containing user_id)
-            if ($autofill_data_column !=== FALSE && $row[$autofill_data_column] === "TRUE" && is_null($this->core->getQueries()->getSubmittyUser($row[$username_column]))) {
+            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE" && is_null($this->core->getQueries()->getSubmittyUser($row[$username_column]))) {
                 $users_not_found[] = $row[$username_column];
                 unset($users_to_add[$key]);
             }
@@ -1276,7 +1279,7 @@ class UsersController extends AbstractController {
         }
         foreach ($users_to_add as $row) {
             // Auto-populate user detail if only user_id is given
-            if ($autofill_data_column !=== FALSE && $row[$autofill_data_column] === "TRUE") {
+            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE") {
                 $user = $this->core->getQueries()->getUserById($row[$username_column]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
                 $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
@@ -1331,6 +1334,9 @@ class UsersController extends AbstractController {
                         case "Time Zone":
                             // Ignore Time Zone column from exported lists.
                             break;
+                        case "Rotation Section":
+                            // Ignore Rotation Section column from exported lists.
+                            break;
                         case "Registration Section":
                             if ($list_type == 'classlist') {
                                 $user->setRegistrationSection($value);
@@ -1341,27 +1347,23 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "Group":
-                            if ($list_type == 'classlist') {
-                                $user->setGroup(4);
-                            } elseif ($list_type == 'graderlist') {
-                                switch ($value) {
-                                    case "1":
-                                    case "Instructor":
-                                        $user->setGroup(User::GROUP_INSTRUCTOR);
-                                        break;
-                                    case "2":
-                                    case "Full Access Grader (Grad TA)":
-                                        $user->setGroup(User::GROUP_FULL_ACCESS_GRADER);
-                                        break;
-                                    case "3":
-                                    case "Limited Access Grader (Mentor)":
-                                        $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
-                                        break;
-                                    case "4":
-                                    case "Student":
-                                        $user->setGroup(User::GROUP_STUDENT);
-                                        break;
-                                }
+                            switch ($value) {
+                                case "1":
+                                case "Instructor":
+                                    $user->setGroup(User::GROUP_INSTRUCTOR);
+                                    break;
+                                case "2":
+                                case "Full Access Grader (Grad TA)":
+                                    $user->setGroup(User::GROUP_FULL_ACCESS_GRADER);
+                                    break;
+                                case "3":
+                                case "Limited Access Grader (Mentor)":
+                                    $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
+                                    break;
+                                case "4":
+                                case "Student":
+                                    $user->setGroup(User::GROUP_STUDENT);
+                                    break;
                             }
                             break;
                         case "Registation Sub-Section":
@@ -1386,7 +1388,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
+                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
@@ -1400,7 +1402,7 @@ class UsersController extends AbstractController {
         foreach ($users_to_update as $row) {
             $user = $this->core->getQueries()->getUserById($row[$username_column]);
             //Update registration section (student) or group (grader)
-            if (autofill_data_column !=== FALSE && $row[$autofill_data_column] === "TRUE") {
+            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE") {
                 // set group as 'limited access grader' if upload is meant for graderlist, otherwise don't change it
                 if ($list_type === 'graderlist') {
                     $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
@@ -1437,6 +1439,9 @@ class UsersController extends AbstractController {
                         case "Time Zone":
                             // Ignore Time Zone column from exported lists.
                             break;
+                        case "Rotation Section":
+                            // Ignore Rotation Section column from exported lists.
+                            break;
                         case "Registration Section":
                             // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                             // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
@@ -1452,27 +1457,23 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "Group":
-                            if ($list_type == 'classlist') {
-                                $user->setGroup(4);
-                            } elseif ($list_type == 'graderlist') {
-                                switch ($value) {
-                                    case "1":
-                                    case "Instructor":
-                                        $user->setGroup(User::GROUP_INSTRUCTOR);
-                                        break;
-                                    case "2":
-                                    case "Full Access Grader (Grad TA)":
-                                        $user->setGroup(User::GROUP_FULL_ACCESS_GRADER);
-                                        break;
-                                    case "3":
-                                    case "Limited Access Grader (Mentor)":
-                                        $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
-                                        break;
-                                    case "4":
-                                    case "Student":
-                                        $user->setGroup(User::GROUP_STUDENT);
-                                        break;
-                                }
+                            switch ($value) {
+                                case "1":
+                                case "Instructor":
+                                    $user->setGroup(User::GROUP_INSTRUCTOR);
+                                    break;
+                                case "2":
+                                case "Full Access Grader (Grad TA)":
+                                    $user->setGroup(User::GROUP_FULL_ACCESS_GRADER);
+                                    break;
+                                case "3":
+                                case "Limited Access Grader (Mentor)":
+                                    $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
+                                    break;
+                                case "4":
+                                case "Student":
+                                    $user->setGroup(User::GROUP_STUDENT);
+                                    break;
                             }
                             break;
                         case "Registation Sub-Section":
@@ -1492,7 +1493,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $title . '"');
+                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
