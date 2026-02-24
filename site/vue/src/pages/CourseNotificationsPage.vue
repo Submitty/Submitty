@@ -1,8 +1,4 @@
 <script setup lang="ts">
-<<<<<<< HEAD
-=======
-
->>>>>>> 478d28dbc (Fix #11535: Suppress abort alerts during Firefox page reloads)
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 defineProps<{

@@ -1,8 +1,4 @@
 <script setup lang="ts">
-<<<<<<< HEAD
-=======
-
->>>>>>> 478d28dbc (Fix #11535: Suppress abort alerts during Firefox page reloads)
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
