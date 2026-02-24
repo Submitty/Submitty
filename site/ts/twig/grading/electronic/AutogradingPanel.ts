@@ -35,43 +35,16 @@ function closeAllAutoGrading() {
     $('[id^=\'details_tc_\']').find('.loading-tools-show').show();
 }
 
-// determine if the testcases are open or closed
-function testCasesOpen(): boolean {
-    const testcase_divs = $('[id^=\'testcase_\']');
-
-    if (testcase_divs.length === 0) {
-        return false;
-    }
-
-    for (let i = 0; i < testcase_divs.length; i++) {
-        if ($(testcase_divs[i]).css('display') === 'none') {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// update the text of the button
-function setToggleAllButtonText(isOpen: boolean): void {
-    $('#autograding-results-toggle-all').text(isOpen ? 'Collapse All' : 'Expand All');
-}
-
 $(() => {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
     const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
     const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
-    $('#autograding-results-toggle-all').on('click', () => {
-        const currentlyOpen = testCasesOpen();
 
-        if (currentlyOpen) {
-            closeAllAutoGrading();
-            setToggleAllButtonText(false);
-        }
-        else {
-            openAllAutoGrading();
-            setToggleAllButtonText(true);
-        }
+    $('#autograding-results-open-all').on('click', () => {
+        openAllAutoGrading();
+    });
+    $('#autograding-results-close-all').on('click', () => {
+        closeAllAutoGrading();
     });
     $('#autograding-results-regrade-active').on('click', () => {
         regrade(1, null, GRADEABLE_ID, USER_ID);
