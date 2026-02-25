@@ -198,6 +198,7 @@ function initChatroomSocketClient(chatroomId) {
                     }
                 }
                 break;
+            }
             default:
                 console.error(msg);
         }
