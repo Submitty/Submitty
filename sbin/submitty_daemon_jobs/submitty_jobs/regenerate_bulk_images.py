@@ -26,55 +26,54 @@ def process_single_submission(submitter_dir, redactions, stats):
             if not active_version_path.is_dir():
                 stats['skipped'] += 1
                 return f"Skipped {submitter_dir.name} - invalid active version path"
-            
+
             # Check if PDF exists
             pdf_path = active_version_path / "upload.pdf"
             if not pdf_path.exists():
                 stats['skipped'] += 1
                 return f"Skipped {submitter_dir.name} - no PDF file"
-                
+
             # Run the generate_pdf_images job on the active version
             results_path = str(active_version_path).replace("submissions", "submissions_processed")
             start_time = time.time()
-            
+
             generate_pdf_images.main(
                 str(pdf_path),
                 results_path,
                 redactions,
             )
-            
+
             elapsed = time.time() - start_time
             stats['processed'] += 1
             stats['total_time'] += elapsed
             return f"Processed {submitter_dir.name} in {elapsed:.2f}s"
-            
+
     except Exception as e:
         stats['errors'] += 1
         return f"Error processing {submitter_dir.name}: {str(e)}"
 
 
-# Regenerate images for all submissions in a bulk upload
 def main(folder, redactions, max_workers=None):
     """Main function with parallel processing support."""
     start_time = time.time()
-    
+
     # Convert folder to Path object
     folder_path = Path(folder)
-    
+
     # Early exit if no redactions
     if not redactions:
         print("No redactions provided, skipping bulk regeneration")
         return
-    
+
     # Get all submitter directories
     submitter_dirs = [d for d in folder_path.iterdir() if d.is_dir()]
-    
+
     if not submitter_dirs:
         print("No submitter directories found")
         return
-    
+
     print(f"Found {len(submitter_dirs)} submissions to process")
-    
+
     # Statistics tracking
     stats = {
         'processed': 0,
@@ -82,21 +81,21 @@ def main(folder, redactions, max_workers=None):
         'errors': 0,
         'total_time': 0
     }
-    
+
     # Thread-safe stats updating
     stats_lock = threading.Lock()
-    
+
     def update_stats_local(result):
         with stats_lock:
             print(result)
-    
+
     # Determine optimal number of workers (default to CPU count, but cap at 4 to avoid overwhelming system)
     if max_workers is None:
         import os
         max_workers = min(4, os.cpu_count() or 2)
-    
+
     print(f"Using {max_workers} parallel workers")
-    
+
     # Process submissions in parallel
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tasks
@@ -104,12 +103,12 @@ def main(folder, redactions, max_workers=None):
             executor.submit(process_single_submission, submitter_dir, redactions, stats): submitter_dir
             for submitter_dir in submitter_dirs
         }
-        
+
         # Process completed tasks
         for future in as_completed(future_to_submission):
             result = future.result()
             update_stats_local(result)
-    
+
     # Print final statistics
     total_elapsed = time.time() - start_time
     print(f"\nBulk regeneration completed in {total_elapsed:.2f} seconds")
