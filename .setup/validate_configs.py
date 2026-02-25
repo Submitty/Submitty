@@ -11,6 +11,8 @@ parser.add_argument('--worker', action='store_true', default=False,
                     help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty',
                     help='Set the install directory for Submitty')
+parser.add_argument('--data-dir', default='/var/local/submitty',
+                    help='Set the data directory for Submitty')
 
 args = parser.parse_args()
 
@@ -21,6 +23,7 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 INSTALL_SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
 
+os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 
 if not os.path.isdir(SUBMITTY_INSTALL_DIR) or not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
     raise SystemExit('Install directory {} does not exist or is not accessible'.format(SUBMITTY_INSTALL_DIR))
