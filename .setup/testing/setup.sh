@@ -48,7 +48,7 @@ chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 chmod -R 777 ${SUBMITTY_DATA_DIR}
 
 python3 ${SUBMITTY_REPOSITORY}/.setup/generate_configs.py --install-dir $SUBMITTY_INSTALL_DIR
-python3 ${SUBMITTY_REPOSITORY}/.setup/validate_configs.py --install-dir $SUBMITTY_INSTALL_DIR
+python3 ${SUBMITTY_REPOSITORY}/.setup/validate_configs.py --install-dir $SUBMITTY_INSTALL_DIR --data-dir $SUBMITTY_DATA_DIR
 
 ls -alF ${SUBMITTY_INSTALL_DIR}/config
 tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$SUBMITTY_INSTALL_DIR/config/database.json" > "$tmp" && mv "$tmp" "$SUBMITTY_INSTALL_DIR/config/database.json"
