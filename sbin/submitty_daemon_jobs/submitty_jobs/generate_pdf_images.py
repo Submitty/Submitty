@@ -32,20 +32,31 @@ def create_redaction_pattern(width: int, height: int, square_size: int = 25) -> 
 
 def apply_redaction_optimized(img: Image.Image, redaction: 'Redaction', pattern_cache: Dict[tuple, Image.Image]) -> None:
     """Apply redaction using pre-computed pattern for better performance."""
+    # Convert coordinates from relative to absolute pixel values
     x0 = int(redaction.coordinates[0] * img.size[0])
     y0 = int(redaction.coordinates[1] * img.size[1])
     x1 = int(redaction.coordinates[2] * img.size[0])
     y1 = int(redaction.coordinates[3] * img.size[1])
 
-    width = x1 - x0
-    height = y1 - y0
+    # Normalize coordinates to ensure top-left and bottom-right ordering
+    left = min(x0, x1)
+    right = max(x0, x1)
+    top = min(y0, y1)
+    bottom = max(y0, y1)
+    width = right - left
+    height = bottom - top
+
+    # Skip malformed or degenerate redaction rectangles
+    if width <= 0 or height <= 0:
+        return
 
     # Use cached pattern or create new one
     pattern_key = (width, height)
     if pattern_key not in pattern_cache:
         pattern_cache[pattern_key] = create_redaction_pattern(width, height)
 
-    img.paste(pattern_cache[pattern_key], (x0, y0))
+    # Paste the pattern onto the image
+    img.paste(pattern_cache[pattern_key], (left, top))
 
 
 def get_file_hash(pdf_file_path: str) -> str:
@@ -56,11 +67,6 @@ def get_file_hash(pdf_file_path: str) -> str:
 
 def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     start_time = time.time()
-    
-    # Early exit if no redactions
-    if not redactions:
-        print(f"No redactions provided, skipping processing for {pdf_file_path}")
-        return
     
     directory = os.path.dirname(pdf_file_path)
     if directory:
@@ -96,12 +102,8 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
         # Open PDF with PyMuPDF
         pdf_document = fitz.open(pdf_file_path)
 
-        # Process each page that has redactions
+        # Process all pages (both with and without redactions)
         for page_number in range(len(pdf_document)):
-            # Skip pages without redactions
-            if (page_number + 1) not in redactions_by_page:
-                continue
-
             image_filename = os.path.join(
                 output_dir,
                 "."
@@ -121,9 +123,10 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
             img_data = pix.tobytes("ppm")
             img = Image.open(io.BytesIO(img_data))
 
-            # Apply all redactions for this page
-            for redaction in redactions_by_page[page_number + 1]:
-                apply_redaction_optimized(img, redaction, pattern_cache)
+            # Apply redactions only if this page has them
+            if (page_number + 1) in redactions_by_page:
+                for redaction in redactions_by_page[page_number + 1]:
+                    apply_redaction_optimized(img, redaction, pattern_cache)
 
             print(f"Saving image {image_filename}")
             img.save(image_filename, "JPEG", quality=20, optimize=True)

@@ -1,10 +1,11 @@
 import json
+import os
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
-import generate_pdf_images
+from . import generate_pdf_images
 
 
 def process_single_submission(submitter_dir, redactions, stats):
@@ -60,11 +61,6 @@ def main(folder, redactions, max_workers=None):
     # Convert folder to Path object
     folder_path = Path(folder)
 
-    # Early exit if no redactions
-    if not redactions:
-        print("No redactions provided, skipping bulk regeneration")
-        return
-
     # Get all submitter directories
     submitter_dirs = [d for d in folder_path.iterdir() if d.is_dir()]
 
@@ -91,7 +87,6 @@ def main(folder, redactions, max_workers=None):
 
     # Determine optimal number of workers (default to CPU count, but cap at 4 to avoid overwhelming system)
     if max_workers is None:
-        import os
         max_workers = min(4, os.cpu_count() or 2)
 
     print(f"Using {max_workers} parallel workers")
