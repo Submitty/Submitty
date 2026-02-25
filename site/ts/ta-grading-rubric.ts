@@ -2096,7 +2096,13 @@ window.onCancelComponent = async function (me: HTMLElement) {
     const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
     // If there is any changes made in comment of a component , prompt the TA
     if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
-        if (confirm('Are you sure you want to discard all changes to the student message?')) {
+        // Show the discard changes confirmation popup
+        const popup = $('#discard-changes-popup');
+        popup.show();
+        
+        // Setup the confirm button handler
+        $('#discard-changes-confirm').off('click').on('click', async function() {
+            popup.hide();
             try {
                 await toggleComponent(component_id, false);
             }
@@ -2104,7 +2110,7 @@ window.onCancelComponent = async function (me: HTMLElement) {
                 console.error(err);
                 alert(`Error closing component! ${(err as Error).message}`);
             }
-        }
+        });
     }
     // There is no change in comment, i.e it is same as the saved comment (before)
     else {
