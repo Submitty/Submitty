@@ -402,7 +402,7 @@ jobs:
 
     services:
       postgres-main:
-        image: postgres:17
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -412,7 +412,7 @@ jobs:
           - 5432
 
       postgres-branch:
-        image: postgres:17
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -429,7 +429,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get autoremove -y postgresql-14 postgresql-client-common
-          sudo apt-get install -y postgresql-17
+          sudo apt-get install -y postgresql-14
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
