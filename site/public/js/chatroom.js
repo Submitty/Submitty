@@ -152,7 +152,8 @@ function shuffleAnonName(chatroomId) {
                         showJoinMessage(`Your anonymous name is now ${msg.data.newName}.`);
                     }
                 }
-            } else {
+            }
+            else {
                 displayErrorMessage(msg.message || 'Failed to shuffle anonymous names');
             }
         },
@@ -182,7 +183,7 @@ function initChatroomSocketClient(chatroomId) {
             }
             case 'anon_names_regenerated': {
                 const messages = document.querySelectorAll('.message-container');
-                messages.forEach(messageElement => {
+                messages.forEach((messageElement) => {
                     const senderNameElement = messageElement.querySelector('.sender-name');
                     if (senderNameElement && senderNameElement.innerText.startsWith('Anonymous')) {
                         showJoinMessage('Anonymous names have been shuffled by the instructor.');
