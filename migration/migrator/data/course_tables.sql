@@ -756,18 +756,6 @@ CREATE TABLE public.chatroom_messages (
 
 
 --
--- Name: chatroom_anonymous_names; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.chatroom_anonymous_names (
-    chatroom_id integer NOT NULL,
-    user_id character varying NOT NULL,
-    display_name character varying(50) NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
---
 -- Name: chatroom_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -801,6 +789,18 @@ CREATE TABLE public.chatrooms (
     session_started_at timestamp with time zone,
     is_deleted boolean DEFAULT false NOT NULL,
     allow_read_only_after_end boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: chatroom_anonymous_names; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatroom_anonymous_names (
+    chatroom_id integer NOT NULL,
+    user_id character varying NOT NULL,
+    display_name character varying(50) NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -2939,7 +2939,7 @@ CREATE INDEX grading_registration_user_id_index ON public.grading_registration U
 -- Name: idx_chatroom_anon_names_display; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_chatroom_anon_names_display ON public.chatroom_anonymous_names USING btree (chatroom_id, display_name);
+CREATE UNIQUE INDEX idx_chatroom_anon_names_display ON public.chatroom_anonymous_names USING btree (chatroom_id, display_name);
 
 
 --
