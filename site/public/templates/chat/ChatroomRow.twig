@@ -3,17 +3,26 @@
 {% if isAdmin %}
     <tr id="{{ id|e('html_attr') }}" data-testid="chatroom-item">
         <td>
-            <a data-testid="edit-chatroom" href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
+            <a data-testid="edit-chatroom" href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }}, {{ chatroom.allowReadOnlyAfterEnd ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
         </td>
         <td>
             {% if not isActive %}
                 <a data-testid="delete-chatroom" href='javascript:deleteChatroomForm("{{ id|e('js') }}", "{{ title|e('js') }}", "{{ baseUrl|e('js') }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
             {% endif %}
         </td>
-        <td>
+        <td class="chatroom-name-cell">
             <span data-testid="chatroom-title" title="{{ title|e('html_attr') }}">
                 {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
             </span>
+        </td>
+        <td class="chatroom-status-cell">
+            {% if allowReadOnlyAfterEnd %}
+                {% if isActive %}
+                    <span class="badge badge-secondary readonly-badge">Read only when closed</span>
+                {% else %}
+                    <span class="badge badge-secondary readonly-badge">Read only</span>
+                {% endif %}
+            {% endif %}
         </td>
         <td>
             <span data-testid="chatroom-description" title="{{ description|e('html_attr') }}">
@@ -54,13 +63,20 @@
         </td>
     </tr>
 {% else %}
-    {% if isActive %} <!--students only have access to active chat rooms-->
+    {% if isActive or isReadOnly %} <!--students only have access to active chat rooms or read-only chat rooms-->
         <tr id="{{ id|e('html_attr') }}" data-testid="chatroom-item">
-            <td>
+            <td class="chatroom-name-cell">
                 <span data-testid="chatroom-title" class="display-short" title="{{ title|e('html_attr') }}">
                     {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
                 </span>
             </td>
+                {% if allowReadOnlyAfterEnd  %}
+                    {% if isActive %}
+                        <span class="badge badge-secondary readonly-badge">Read-only when closed</span>
+                    {% else %}
+                        <span class="badge badge-secondary readonly-badge">Read-only</span>
+                    {% endif %}
+                {% endif %}
             <td data-testid="chatroom-host">
                 {{ hostName|e }}
             </td>

@@ -36,6 +36,9 @@ class Chatroom {
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_anon;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $allow_read_only_after_end = false;
+
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     private ?\DateTime $session_started_at = null;
 
@@ -53,6 +56,7 @@ class Chatroom {
         $this->is_active = false;
         $this->allow_anon = true;
         $this->is_deleted = false;
+        $this->allow_read_only_after_end = false;
     }
 
     public function getId(): int {
@@ -131,6 +135,18 @@ class Chatroom {
         $this->session_started_at = $session_started_at;
     }
 
+    public function allowReadOnlyAfterEnd(): bool {
+        return $this->allow_read_only_after_end;
+    }
+
+    public function setAllowReadOnlyAfterEnd(bool $allow): void {
+        $this->allow_read_only_after_end = $allow;
+    }
+
+    public function isReadOnly(): bool {
+        return !$this->isActive() && $this->allowReadOnlyAfterEnd();
+    }
+
     public function calcAnonName(string $user_id, ?\Doctrine\ORM\EntityManagerInterface $em = null): string {
         $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
         $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
@@ -187,7 +203,7 @@ class Chatroom {
 
     public function regenerateAllAnonNames(\Doctrine\ORM\EntityManagerInterface $em): void {
         $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hack","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
         $usedNames = [];
 
         $repository = $em->getRepository(ChatroomAnonymousName::class);
