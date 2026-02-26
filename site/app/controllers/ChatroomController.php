@@ -96,6 +96,7 @@ class ChatroomController extends AbstractController {
         $user = $this->core->getUser();
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
+        $allow_read_only_after_end = isset($_POST['allow_read_only_after_end']);
 
         $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
 
@@ -109,6 +110,7 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
         $chatroom = new Chatroom($userEntity, $title, $description);
+        $chatroom->setAllowReadOnlyAfterEnd($allow_read_only_after_end);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
@@ -141,7 +143,11 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
-        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
+        if (
+            !$chatroom->isActive()
+            && !$chatroom->allowReadOnlyAfterEnd()
+            && !$this->core->getUser()->accessAdmin()
+        ) {
             $this->core->addErrorMessage("Chatroom not enabled");
             return new RedirectResponse(
                 $this->core->buildCourseUrl(['chat'])
@@ -188,6 +194,9 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
+        $chatroom->setAllowReadOnlyAfterEnd(
+            isset($_POST['allow_read_only_after_end'])
+        );
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         if (trim($title) === '') {
@@ -229,9 +238,14 @@ class ChatroomController extends AbstractController {
             $msg_array['type'] = 'chat_close';
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
-            $indiv_msg_array['type'] = 'chat_close';
-            $indiv_msg_array['chatroom_id'] = $chatroom->getId();
-            $this->sendSocketMessage($indiv_msg_array, true);
+            $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
+
+            if (!$chatroom->allowReadOnlyAfterEnd()) {
+                $indiv_msg_array = [];
+                $indiv_msg_array['type'] = 'chat_close';
+                $indiv_msg_array['chatroom_id'] = $chatroom->getId();
+                $this->sendSocketMessage($indiv_msg_array, true);
+            }
         }
         $this->sendSocketMessage($msg_array);
         $chatroom->setSessionStartedAt($chatroom->isActive() ? null : new \DateTime("now"));
@@ -272,6 +286,10 @@ class ChatroomController extends AbstractController {
             return JsonResponse::getFailResponse("Chatroom not found");
         }
         if (!$chatroom->isActive() && !$user->accessAdmin()) {
+            if ($chatroom->allowReadOnlyAfterEnd()) {
+                return JsonResponse::getFailResponse("This chatroom is read-only.");
+            }
+
             return JsonResponse::getFailResponse("This chatroom is not enabled");
         }
         if (strcmp($_POST['content'], "") === 0) {
