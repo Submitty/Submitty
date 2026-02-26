@@ -86,7 +86,7 @@
     path: /etc/apache2/sites-available/submitty.conf
     regexp: "Require host __your_domain__"
     replace: "Require all granted"
-  when: submitty_install_authentication_method == 1
+  when: submitty_install_authentication_method == PamAuthentication
 
 - name: Set up SSL in Apache Submitty configuration
   ansible.builtin.replace:
