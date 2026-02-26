@@ -67,19 +67,19 @@
             <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/> 
                 <ul class="requirements-list">
-                    {% if pwd_reqs["require_uppercase"] is not defined or pwd_reqs["require_uppercase"] %}
+                    {% if pwd_reqs["require_uppercase"] %}
                         <li> 1 Capital Letter </li>
                     {% endif %}
-                    {% if pwd_reqs["require_lowercase"] is not defined or pwd_reqs["require_lowercase"] %}
+                    {% if pwd_reqs["require_lowercase"] %}
                         <li> 1 Lowercase Letter </li>
                     {% endif %}
-                    {% if pwd_reqs["require_numbers"] is not defined or pwd_reqs["require_numbers"] %}
+                    {% if pwd_reqs["require_numbers"] %}
                         <li> 1 Number </li>
                     {% endif %}
-                    {% if pwd_reqs["require_special_chars"] is not defined or pwd_reqs["require_special_chars"] %}
+                    {% if pwd_reqs["require_special_chars"] %}
                         <li> 1 Special Character </li>
                     {% endif %}
-                    <li> {{ pwd_reqs["min_length"] is defined ? pwd_reqs["min_length"] : 12 }} Characters </li>
+                    <li> {{ pwd_reqs["min_length"] }} Characters </li>
                 </ul>
             </div>
             <input type="password" name="password" data-testid="password" required id="password-input" />
