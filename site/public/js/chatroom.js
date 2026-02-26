@@ -196,12 +196,16 @@ function initChatroomSocketClient(chatroomId) {
             }
             case 'anon_names_regenerated': {
                 const messages = document.querySelectorAll('.message-container');
+                let hasAnonymousMessages = false;
                 messages.forEach((messageElement) => {
                     const senderNameElement = messageElement.querySelector('.sender-name');
                     if (senderNameElement && senderNameElement.innerText.startsWith('Anonymous')) {
-                        showJoinMessage('Anonymous names have been shuffled by the instructor.');
+                        hasAnonymousMessages = true;
                     }
                 });
+                if (hasAnonymousMessages) {
+                    showJoinMessage('Anonymous names have been shuffled by the instructor.');
+                }
                 const pageDataElement = document.getElementById('page-data');
                 if (pageDataElement) {
                     const pageData = JSON.parse(pageDataElement.textContent);

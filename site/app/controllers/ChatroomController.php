@@ -325,6 +325,7 @@ class ChatroomController extends AbstractController {
 
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonName", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonName", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function regenerateAnonNames(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);

@@ -19,7 +19,7 @@ def up(config, database, semester, course):
             PRIMARY KEY (chatroom_id, user_id)
         );
         
-        CREATE INDEX idx_chatroom_anon_names_display ON chatroom_anonymous_names(chatroom_id, display_name);
+        CREATE UNIQUE INDEX idx_chatroom_anon_names_display ON chatroom_anonymous_names(chatroom_id, display_name);
         """)
 
 def down(config, database, semester, course):

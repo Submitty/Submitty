@@ -9,7 +9,7 @@ def up(config, database, semester, course):
         if anon_id_exists:
             database.execute("""
                 ALTER TABLE chatroom_anonymous_names ADD COLUMN display_name character varying(50);
-                UPDATE chatroom_anonymous_names SET display_name = 'Anonymous Mysterious Sparrow #' || anon_id;
+                UPDATE chatroom_anonymous_names SET display_name = 'Anonymous Mysterious Sparrow #' || RIGHT(anon_id, 4);
                 ALTER TABLE chatroom_anonymous_names ALTER COLUMN display_name SET NOT NULL;
                 ALTER TABLE chatroom_anonymous_names DROP COLUMN anon_id;
             """)
