@@ -614,9 +614,8 @@ describe('Forum Categories Release Date Management', () => {
     });
 
     afterEach(() => {
-        // Clean up - navigate to categories and remove any test categories
-        cy.get('[data-testid="more-dropdown"]').click();
-        cy.get('a[href*="forum/categories"]').click();
+        // Clean up - navigate directly to categories page to avoid UI state issues
+        cy.visit(['sample', 'forum', 'categories']);
         cy.get('#ui-category-list').should('be.visible');
 
         // Remove the test category if it exists
@@ -644,8 +643,8 @@ describe('Forum Categories Release Date Management', () => {
         // Select the first available date
         cy.get('.flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.disabled)').first().click();
 
-        // Verify date was set
-        cy.get('#category_visible_date').should('have.value');
+        // Verify date was set (input should not be empty)
+        cy.get('#category_visible_date').should('not.have.value', '');
 
         // Add the category
         cy.get('button').contains('Add category').click();
