@@ -22,26 +22,27 @@ SUBMITTY_DATA_DIR = args.data_dir
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 INSTALL_SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
+if args.worker:
+    CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs/worker')
 
 os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 
 if not os.path.isdir(SUBMITTY_INSTALL_DIR) or not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
     raise SystemExit('Install directory {} does not exist or is not accessible'.format(SUBMITTY_INSTALL_DIR))
 
-if not args.worker:
-    for item in os.listdir(CONFIG_REPOSITORY):
-        source_path = os.path.join(CONFIG_REPOSITORY, item)
-        destination_path = os.path.join(CONFIG_INSTALL_DIR, item)
-        if os.path.isfile(source_path):
-            with open(source_path, 'r') as f1, open(destination_path, 'r') as f2:
-                try:
-                    required = json.load(f1).keys()
-                    existing = json.load(f2).keys()
-                    difference = required - existing
-                    if len(difference) > 0:
-                        raise KeyError("Required key(s) {} not present in {}".format(difference, item))
-                except FileNotFoundError:
-                    raise FileNotFoundError("Required file {} not found".format(destination_path))
+for item in os.listdir(CONFIG_REPOSITORY):
+    source_path = os.path.join(CONFIG_REPOSITORY, item)
+    destination_path = os.path.join(CONFIG_INSTALL_DIR, item)
+    if os.path.isfile(source_path):
+        with open(source_path, 'r') as f1, open(destination_path, 'r') as f2:
+            try:
+                required = json.load(f1).keys()
+                existing = json.load(f2).keys()
+                difference = required - existing
+                if len(difference) > 0:
+                    raise KeyError("Required key(s) {} not present in {}".format(difference, item))
+            except FileNotFoundError:
+                raise FileNotFoundError("Required file {} not found".format(destination_path))
 
 # Create INSTALL_SUBMITTY.sh file that was created by CONFIGURE_SUBMITTY.py
 os.makedirs(INSTALL_SETUP_DIR, exist_ok=True)
