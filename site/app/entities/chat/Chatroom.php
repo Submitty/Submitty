@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace app\entities\chat;
@@ -119,7 +120,7 @@ class Chatroom {
         return $this->is_deleted;
     }
 
-    public function getHostId(): int {
+    public function getHostId(): string {
         return $this->host->getId();
     }
 
@@ -150,7 +151,7 @@ class Chatroom {
     public function calcAnonName(string $user_id, ?\Doctrine\ORM\EntityManagerInterface $em = null): string {
         $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
         $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        
+
         $fallbackWithSuffix = function () use ($user_id, $adjectives, $nouns): string {
             $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
             $seed_string = $user_id . "-" . $this->getId() . "-" . $this->getHostId() . "-" . $session_started_at;
@@ -196,14 +197,15 @@ class Chatroom {
             $em->flush();
 
             return $displayName;
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e) {
             return $fallbackWithSuffix();
         }
     }
 
     public function regenerateAllAnonNames(\Doctrine\ORM\EntityManagerInterface $em): void {
         $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hack","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
         $usedNames = [];
 
         $repository = $em->getRepository(ChatroomAnonymousName::class);

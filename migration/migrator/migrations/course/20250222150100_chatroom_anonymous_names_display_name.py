@@ -2,18 +2,10 @@
 
 
 def up(config, database, semester, course):
-    # Check if display_name already exists (fresh install from first migration)
-    display_name_exists = database.execute("""
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name = 'chatroom_anonymous_names' AND column_name = 'display_name'
-    """)
-    
     # Only run migration if we have the old schema (anon_id exists and display_name doesn't)
+    display_name_exists = database.table_has_column("chatroom_anonymous_names", "display_name")
     if not display_name_exists:
-        anon_id_exists = database.execute("""
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'chatroom_anonymous_names' AND column_name = 'anon_id'
-        """)
+        anon_id_exists = database.table_has_column("chatroom_anonymous_names", "anon_id")
         if anon_id_exists:
             database.execute("""
                 ALTER TABLE chatroom_anonymous_names ADD COLUMN display_name character varying(50);
@@ -24,11 +16,8 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    result = database.execute("""
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name = 'chatroom_anonymous_names' AND column_name = 'display_name'
-    """)
-    if result:
+    display_name_exists = database.table_has_column("chatroom_anonymous_names", "display_name")
+    if display_name_exists:
         database.execute("""
             ALTER TABLE chatroom_anonymous_names ADD COLUMN anon_id character varying(32);
             UPDATE chatroom_anonymous_names SET anon_id = SUBSTRING(display_name FROM '#([A-Fa-f0-9]{4})$');
