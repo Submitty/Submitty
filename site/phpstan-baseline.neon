@@ -175,12 +175,6 @@ parameters:
 			path: app/controllers/AutogradingStatusController.php
 
 		-
-			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
-			identifier: empty.notAllowed
-			count: 3
-			path: app/controllers/AutogradingStatusController.php
-
-		-
 			rawMessage: 'Method app\controllers\AutogradingStatusController::getAutogradingInfo() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -219,7 +213,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 3
+			count: 2
 			path: app/controllers/GlobalController.php
 
 		-
@@ -1383,7 +1377,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
+			count: 1
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -2419,12 +2413,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: Elseif condition is always true.
-			identifier: elseif.alwaysTrue
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			rawMessage: Implicit array creation is not allowed - variable $gradeables does not exist.
 			identifier: variable.implicitArray
 			count: 1
@@ -2439,13 +2427,13 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 24
+			count: 11
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 17
+			count: 16
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -9804,7 +9792,7 @@ parameters:
 		-
 			rawMessage: 'Variable property access on $this(app\models\Config).'
 			identifier: property.dynamicName
-			count: 10
+			count: 1
 			path: app/models/Config.php
 
 		-
@@ -11224,12 +11212,6 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			rawMessage: 'Variable property access on $this(app\models\gradeable\AutoGradedVersion).'
-			identifier: property.dynamicName
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
 			rawMessage: 'Method app\models\gradeable\AutoGradedVersionHistory::__construct() has parameter $details with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11790,12 +11772,6 @@ parameters:
 		-
 			rawMessage: 'Strict comparison using === between app\models\gradeable\Gradeable and null will always evaluate to false.'
 			identifier: identical.alwaysFalse
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			rawMessage: 'Variable property access on $this(app\models\gradeable\Component).'
-			identifier: property.dynamicName
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -12364,12 +12340,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			rawMessage: 'Variable property access on $this(app\models\gradeable\Gradeable).'
-			identifier: property.dynamicName
-			count: 5
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
@@ -12379,12 +12349,6 @@ parameters:
 			rawMessage: Variable method call on app\models\gradeable\Gradeable.
 			identifier: method.dynamicName
 			count: 4
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			rawMessage: 'Variable property access on $this(app\models\gradeable\GradeableList).'
-			identifier: property.dynamicName
-			count: 1
 			path: app/models/gradeable/GradeableList.php
 
 		-
@@ -13624,32 +13588,8 @@ parameters:
 			path: app/views/GlobalView.php
 
 		-
-			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/views/HomePageView.php
-
-		-
 			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has parameter $courses with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/views/HomePageView.php
-
-		-
-			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has parameter $faculty with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/HomePageView.php
-
-		-
-			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has parameter $head_instructor with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/HomePageView.php
-
-		-
-			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has parameter $semesters with no type specified.'
-			identifier: missingType.parameter
 			count: 1
 			path: app/views/HomePageView.php
 
