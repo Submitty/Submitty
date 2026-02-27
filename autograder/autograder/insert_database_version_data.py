@@ -223,6 +223,27 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     db.close()
     engine.dispose()
 
+"""
+Build the rows for complete autograding test results
+"""
+def build_testcase_rows(testcases, results_testcases):
+    rows = []
+    for i in range(min(len(testcases), len(results_testcases))):
+        spec = testcases[i]
+        res = results_testcases[i]
+        rows.append({
+            "testcase_id": spec["testcase_id"],
+            "testcase_order": i,
+            "hidden": spec["hidden"],
+            "extra_credit": spec["extra_credit"],
+            "points_possible": res["total_points"],
+            "points_earned": res["points"],
+            "elapsed_time": res["elapsed_time"],
+            "max_rss_size": res["max_rss_size"],
+            "passed": res["points"] >= spec["total_points"]
+        })
+    return rows
+
 
 def get_testcases(config, semester, course, g_id, notebook_data):
     """
