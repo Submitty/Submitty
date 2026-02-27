@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    submitty_common_php_version: 8.1
+    submitty_common_php_version: 8.2
 
   tasks:
     - name: Term Creation

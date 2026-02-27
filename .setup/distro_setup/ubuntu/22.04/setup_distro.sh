@@ -53,10 +53,10 @@ apt-get install -qqy libpam-passwdqc
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-14
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
-apt-get install -qqy php8.1 php8.1-cli php8.1-fpm php8.1-curl php8.1-pgsql php8.1-zip php8.1-mbstring php8.1-xml php8.1-ds php8.1-imagick php8.1-intl
+apt-get install -qqy php8.2-cli php8.2-fpm php8.2-curl php8.2-pgsql php8.2-zip php8.2-mbstring php8.2-xml php8.2-ds php8.2-imagick php8.2-intl
 
 if [ ${DEV_VM} == 1 ]; then
-    apt-get install -qqy php8.1-xdebug php8.1-ldap php8.1-sqlite3
+    apt-get install -qqy php8.2-xdebug php8.2-ldap php8.2-sqlite3
 fi
 
 #Add the scrot screenshotting program
