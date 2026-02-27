@@ -2748,3 +2748,16 @@ function highlightAndScrollToCurrentThread() {
         }
     }
 }
+function enableTabsInTextArea(selector) {
+    $(selector).on('keydown', (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const text = e.target.value;
+            // Use template literal and const to satisfy linter
+            e.target.value = `${text.substring(0, start)}\t${text.substring(end)}`;
+            e.target.selectionStart = e.target.selectionEnd = start + 1;
+        }
+    });
+}
