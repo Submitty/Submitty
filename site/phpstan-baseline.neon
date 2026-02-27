@@ -1377,7 +1377,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
+			count: 1
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -2413,12 +2413,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: Elseif condition is always true.
-			identifier: elseif.alwaysTrue
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			rawMessage: Implicit array creation is not allowed - variable $gradeables does not exist.
 			identifier: variable.implicitArray
 			count: 1
@@ -2433,13 +2427,13 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 24
+			count: 11
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
 			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 17
+			count: 16
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
