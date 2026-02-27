@@ -39,7 +39,8 @@
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
     <p>
-        The 'default section' is assigned to students who have self-registered for this course.
+        The 'default section' is assigned to students who have self-registered for this course. <br>
+        Note: Sections can only be deleted if they contain no students.
     </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
