@@ -125,18 +125,30 @@ class Chatroom {
     }
 
     public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
-        $adj  = $adjectives[$adj_index];
+        $adjectives = [
+            "Quick", "Lazy", "Cheerful", "Pensive", "Mysterious", "Bright", "Sly", "Brave",
+            "Calm", "Eager", "Fierce", "Gentle", "Jolly", "Kind", "Lively", "Nice",
+            "Proud", "Quiet", "Rapid", "Swift"
+        ];
+
+        $nouns = [
+            "Duck", "Goose", "Swan", "Eagle", "Parrot", "Owl", "Sparrow", "Robin",
+            "Pigeon", "Falcon", "Hawk", "Flamingo", "Pelican", "Seagull",
+            "Cardinal", "Canary", "Finch", "Hummingbird"
+        ];
+
+        $adj_index = random_int(0, count($adjectives) - 1);
+        $noun_index = random_int(0, count($nouns) - 1);
+
+        // Non-deterministic suffix to reduce collisions
+        $suffix = strtoupper(bin2hex(random_bytes(2)));
+
+        $adj = $adjectives[$adj_index];
         $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+
+        return "Anonymous {$adj} {$noun} {$suffix}";
     }
+
 
     public function getSessionStartedAt(): ?\DateTime {
         return $this->session_started_at;
@@ -144,6 +156,7 @@ class Chatroom {
 
     public function setSessionStartedAt(?\DateTime $session_started_at): void {
         $this->session_started_at = $session_started_at;
+        
     }
 
     public function allowReadOnlyAfterEnd(): bool {
