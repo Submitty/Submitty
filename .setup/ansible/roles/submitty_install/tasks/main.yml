@@ -73,7 +73,7 @@
 
 - name: Update the PHP disabled functions
   ansible.builtin.lineinfile:
-    path: /etc/php/8.1/fpm/php.ini
+    path: /etc/php/8.2/fpm/php.ini
     regexp: "^disable_functions = "
     line: |
       disable_functions = popen,pclose,proc_open,php_real_logo_guid,php_egg_logo_guid,

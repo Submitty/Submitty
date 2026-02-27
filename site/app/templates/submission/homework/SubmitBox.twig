@@ -153,8 +153,8 @@
             or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
             {% if vcs_repo_exists %}
                 <h3>To access your Repository:</h3>
-                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-                <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY </samp><br><br>
+                <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+                <br><br>
                 <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
                 if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
                 <br><br>
@@ -165,7 +165,7 @@
                 <br><br>
             {% else %}
                 <h3>Your repository does not exist.</h3>
-                <p>Please click the button below and refresh the page in a minute.</p><br>
+                <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
                 <form method="POST" action="{{ vcs_generate_repo_url }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <button type="submit" class="btn btn-primary">Generate Repository</button>
