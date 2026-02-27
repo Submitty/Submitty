@@ -163,6 +163,13 @@ function initChatroomSocketClient(chatroomId) {
                 }
                 break;
             }
+            case 'chat_edit':
+                // If we're in the chatroom that was edited, update the header
+                const currentRoomId = document.querySelector('#chat-messages')?.getAttribute('data-room-id');
+                if (currentRoomId && currentRoomId === msg.chatroom_id.toString()) {
+                    updateCurrentChatroomHeader(msg.title, msg.description, msg.allow_anon);
+                }
+                break;
             default:
                 console.error(msg);
         }
@@ -185,6 +192,9 @@ function initChatroomListSocketClient(user_admin, base_url) {
                 break;
             case 'chat_delete':
                 removeChatroomRow(msg.chatroom_id);
+                break;
+            case 'chat_edit':
+                handleChatEdit(msg);
                 break;
             default:
                 console.error('Unknown message type:', msg);
@@ -280,6 +290,60 @@ function removeChatroomRow(chatroomId) {
     const row = document.getElementById(`${chatroomId}`);
     if (row) {
         row.remove();
+    }
+}
+
+function handleChatEdit(msg) {
+    const { chatroom_id, title, description, allow_anon } = msg;
+    
+    // Update the chatroom row in the table
+    const row = document.getElementById(`${chatroom_id}`);
+    if (row) {
+        // Update title
+        const titleElement = row.querySelector('.chat-room-title');
+        if (titleElement) {
+            titleElement.textContent = title;
+        }
+        
+        // Update description
+        const descElement = row.querySelector('.chat-room-description');
+        if (descElement) {
+            descElement.textContent = description;
+        }
+        
+        // Update anonymous badge visibility
+        const anonBadge = row.querySelector('.anonymous-badge');
+        if (anonBadge) {
+            anonBadge.style.display = allow_anon ? 'inline-block' : 'none';
+        }
+    }
+    
+    // If we're currently in this chatroom, update the header too
+    const currentRoomHeader = document.querySelector('#chat-room-header');
+    if (currentRoomHeader) {
+        const currentRoomId = document.querySelector('#chat-messages')?.getAttribute('data-room-id');
+        if (currentRoomId && currentRoomId === chatroom_id.toString()) {
+            updateCurrentChatroomHeader(title, description, allow_anon);
+        }
+    }
+}
+
+function updateCurrentChatroomHeader(title, description, allowAnonymous) {
+    // Update the header in the active chatroom view
+    const headerTitle = document.querySelector('#chat-room-header .room-title');
+    if (headerTitle) {
+        headerTitle.textContent = title;
+    }
+    
+    const headerDesc = document.querySelector('#chat-room-header .room-description');
+    if (headerDesc) {
+        headerDesc.textContent = description;
+    }
+    
+    // Update anonymous indicator in header if it exists
+    const anonIndicator = document.querySelector('#chat-room-header .anonymous-indicator');
+    if (anonIndicator) {
+        anonIndicator.style.display = allowAnonymous ? 'inline-block' : 'none';
     }
 }
 
