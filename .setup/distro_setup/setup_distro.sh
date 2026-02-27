@@ -44,8 +44,8 @@ fi
 if [ "${VAGRANT}" == 1 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
-        chmod -x /etc/update-motd.d/*
-        chmod +x /etc/update-motd.d/00-header
+        chmod -x /etc/update-motd.d/* || true
+        chmod 644 /etc/update-motd.d/00-header || true
     fi
     if [ -f /usr/share/landscape/landscape-sysinfo.wrapper ]; then
         chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
