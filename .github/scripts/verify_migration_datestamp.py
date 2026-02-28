@@ -23,9 +23,10 @@ def parse_migration_filename(filename):
     match = MIGRATION_PATTERN.match(filename)
     if not match:
         return None
-    
+
     try:
-        return datetime.strptime(match.group(1), DATESTAMP_FORMAT)
+        dt = datetime.strptime(match.group(1), DATESTAMP_FORMAT)
+        return dt.replace(tzinfo=timezone.utc)
     except ValueError:
         return None
 
@@ -39,24 +40,25 @@ def get_changed_migration_files():
             text=True,
             check=True
         )
-        
+
         files = result.stdout.strip().split('\n')
         migration_files = []
-        
+
         for filepath in files:
             # Normalize path for comparison (git always uses forward slashes)
             normalized_path = filepath.replace('\\', '/')
             for migration_dir in MIGRATION_DIRS:
                 migration_dir_str = str(migration_dir).replace('\\', '/')
-                if normalized_path.startswith(migration_dir_str) and normalized_path.endswith('.py'):
+                if (normalized_path.startswith(migration_dir_str) and
+                        normalized_path.endswith('.py')):
                     filename = os.path.basename(filepath)
                     if filename != "__init__.py":
                         migration_files.append((filepath, filename))
-        
+
         return migration_files
-    
+
     except subprocess.CalledProcessError as e:
-        print(f" Error: Could not get git diff: {e}")
+        print(f"Error: Could not get git diff: {e}")
         print("Make sure you're running this in a git repository with proper remote setup.")
         sys.exit(1)
 
@@ -69,66 +71,66 @@ def get_current_time():
 def verify_migration_freshness():
     """Checks all changed migrations and reports stale or invalid files."""
     changed_files = get_changed_migration_files()
-    
+
     if not changed_files:
         print("No new or modified migration files to verify")
         return True
-    
+
     print(f"🔍 Checking {len(changed_files)} migration file(s) for freshness...\n")
-    
+
     now = get_current_time()
     max_age_threshold = now - timedelta(days=MAX_AGE_DAYS)
-    
+
     stale_migrations = []
     invalid_migrations = []
     valid_migrations = []
-    
+
     for filepath, filename in changed_files:
         migration_type = os.path.basename(os.path.dirname(filepath))
         print(f"Checking: {migration_type}/{filename}")
-        
+
         datestamp = parse_migration_filename(filename)
-        
+
         if datestamp is None:
             invalid_migrations.append((filepath, filename))
-            print(f"Invalid datestamp format")
+            print("Invalid datestamp format")
             continue
-        
+
         age_days = (now - datestamp).days
         age_str = datestamp.strftime('%Y-%m-%d %H:%M:%S')
-        
+
         print(f"Migration date: {age_str}")
         print(f"Age: {age_days} day(s)")
-        
+
         if datestamp < max_age_threshold:
             stale_migrations.append((filepath, filename, datestamp, age_days))
             print(f"STALE: Migration is more than {MAX_AGE_DAYS} days old!")
         else:
             valid_migrations.append((filepath, filename, datestamp))
             print(f"Fresh (within {MAX_AGE_DAYS} days)")
-        
+
         print()
-    
+
     print("=" * 70)
     print("SUMMARY")
     print("=" * 70)
-    
+
     if valid_migrations:
         print(f"\nValid migrations: {len(valid_migrations)}")
-    
+
     if invalid_migrations:
         print(f"\nINVALID FORMAT ({len(invalid_migrations)}):")
         for filepath, filename in invalid_migrations:
             print(f"  - {filepath}")
         print("\nExpected format: YYYYMMDDHHMMSS_description.py")
-    
+
     if stale_migrations:
         print(f"\nSTALE MIGRATIONS ({len(stale_migrations)}):")
         for filepath, filename, datestamp, age_days in stale_migrations:
             print(f"  - {filepath}")
             print(f"    Date: {datestamp.strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"    Age: {age_days} days (max allowed: {MAX_AGE_DAYS} days)")
-        
+
         print("\n" + "=" * 70)
         print(" MIGRATION DATESTAMP CHECK FAILED")
         print("=" * 70)
@@ -139,16 +141,17 @@ def verify_migration_freshness():
             description = filename.split('_', 1)[1] if '_' in filename else 'description.py'
             new_datestamp = now.strftime(DATESTAMP_FORMAT)
             new_filename = f"{new_datestamp}_{description}"
-            print(f"  git mv {filepath} migration/migrator/migrations/{migration_type}/{new_filename}")
-        
+            new_path = f"migration/migrator/migrations/{migration_type}/{new_filename}"
+            print(f"  git mv {filepath} {new_path}")
+
         print("\nMore info: https://submitty.org/developer/development_instructions/migrations\n")
-        
+
         return False
-    
+
     if invalid_migrations:
         print("\nPlease fix the invalid migration filename format.")
         return False
-    
+
     print("\nAll migration files have fresh datestamps!")
     return True
 

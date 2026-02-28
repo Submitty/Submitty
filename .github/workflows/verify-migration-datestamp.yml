@@ -8,19 +8,19 @@ on:
 jobs:
   verify-migration-freshness:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # get all history to detect new or mod files
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
+
       - name: Verify migration datestamp freshness
         run: python .github/scripts/verify_migration_datestamp.py
         env:
-          MAX_MIGRATION_AGE_DAYS: 7  
+          MAX_MIGRATION_AGE_DAYS: 7
