@@ -2041,6 +2041,12 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			rawMessage: Unable to resolve the template type T in call to function array_values
+			identifier: argument.templateType
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 3
@@ -4330,8 +4336,20 @@ parameters:
 			path: app/libraries/CascadingIterator.php
 
 		-
+			rawMessage: 'Method app\libraries\CascadingIterator::__construct() has parameter $iterators with generic interface Iterator but does not specify its types: TKey, TValue'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
 			rawMessage: 'Method app\libraries\CascadingIterator::seek() has no return type specified.'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
+			rawMessage: 'Property app\libraries\CascadingIterator::$iterators with generic interface Iterator does not specify its types: TKey, TValue'
+			identifier: missingType.generics
 			count: 1
 			path: app/libraries/CascadingIterator.php
 
@@ -7152,6 +7170,18 @@ parameters:
 		-
 			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedComponentsCountByTeamGradingSections() has parameter $sections with no type specified.'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedGradeables() return type with generic interface Iterator does not specify its types: TKey, TValue'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedGradeablesUserOrTeam() return type with generic interface Iterator does not specify its types: TKey, TValue'
+			identifier: missingType.generics
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
