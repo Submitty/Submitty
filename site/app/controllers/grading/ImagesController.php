@@ -83,7 +83,12 @@ class ImagesController extends AbstractController {
             }
         }
 
-        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $upload_max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $post_max_size = Utils::returnBytes(ini_get('post_max_size'));
+        // In practice, upload max size shouldn't be larger than post max size,
+        // but if it is misconfigured, we restrict to the smaller of the two.
+        $max_size = min($upload_max_size, $post_max_size);
+
         if ($file_size > $max_size) {
             return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.", false);
         }
