@@ -1024,17 +1024,21 @@ function openUrl(url) {
 }
 
 function changeName(element, user, visible_username, anon) {
-    const new_element = element.getElementsByTagName('strong')[0];
+    const new_element = element.getElementsByClassName('author-name')[0];
+    if (!new_element) {
+        return;
+    }
+
     // eslint-disable-next-line eqeqeq
     anon = anon == 'true';
     icon = element.getElementsByClassName('fas fa-eye')[0];
     if (icon === undefined) {
         icon = element.getElementsByClassName('fas fa-eye-slash')[0];
         if (anon) {
-            new_element.style.color = 'black';
+            new_element.style.removeProperty('color');
             new_element.style.fontStyle = 'normal';
         }
-        new_element.textContent = visible_username;
+        new_element.childNodes[0].nodeValue = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
