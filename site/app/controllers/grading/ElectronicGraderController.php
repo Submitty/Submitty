@@ -59,6 +59,21 @@ class ElectronicGraderController extends AbstractController {
      * @return array of histogram data
      */
     public function generateHistogramData($overall_scores) {
+        $include_grade_override  = ($_COOKIE['include_grade_override'] ?? 'omit') === 'include';
+        $include_bad_submissions = ($_COOKIE['include_bad_submissions'] ?? 'omit') === 'include';
+        $include_null_section    = ($_COOKIE['include_null_section'] ?? 'omit') === 'include';
+        $include_withdrawn       = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
+
+        //check overrides here to minimize database calls
+        $overridden_user_ids = [];
+        if (!$include_grade_override && count($overall_scores) > 0) {
+            $g_id = $overall_scores[0]->getGradeable()->getId();
+            $rows = $this->core->getQueries()->getRawUsersWithOverriddenGrades($g_id);
+            foreach ($rows as $r) {
+                $overridden_user_ids[$r['user_id']] = true;
+            }
+        }
+
         $histogram = [
             "bTA" => [],
             "tTA" => [],
@@ -76,61 +91,91 @@ class ElectronicGraderController extends AbstractController {
 
         // Iterate through all the Scores
         foreach ($overall_scores as $ov) {
-            // If Autograded, add the points to the array of autograded scores
-            if ($ov->getAutoGradedGradeable()->getHighestVersion() != 0) {
-                if ($ov->getAutoGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                    if ($ov->getGradeable()->getAutogradingConfig()->getTotalNonExtraCredit() != 0) {
-                        if ($ov->getAutoGradedGradeable()->getTotalPoints() >= 0 || $ov->getAutoGradedGradeable()->getTotalPoints() < 0) {
-                            $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
-                            $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
-                            $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
-                            $histogram["memory"] = array_merge($histogram["memory"], [$metrics['memory']]);
-                            $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
-                        }
-                        else {
-                            $histogram["cancelledSub"] += 1;
-                        }
+            $submitter = null;
+            if ($ov->getTaGradedGradeable() !== null) {
+                $submitter = $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter();
+            }
+            else {
+                $submitter = $ov->getAutoGradedGradeable()->getGradedGradeable()->getSubmitter();
+            }
+
+            $reg_section = $submitter->getRegistrationSection();
+
+            // should we include null sections
+            if (!$include_null_section && $reg_section === null) {
+                continue;
+            }
+
+            // should we include withdrawn
+            if (!$include_withdrawn && !$ov->getGradeable()->isTeamAssignment() && $submitter->getUser()->getRegistrationType() === "withdrawn") {
+                continue;
+            }
+
+            $submitter_id = $submitter->getId();
+            // should we include grade overrides
+            if (!$include_grade_override && isset($overridden_user_ids[$submitter_id])) {
+                continue;
+            }
+
+            // calculate if too many late days were used
+            $is_bad_submission = false;
+
+            $auto = $ov->getAutoGradedGradeable();
+            if ($auto !== null) {
+                $graded_gradeable = $auto->getGradedGradeable();
+                $user = $submitter->getUser();
+
+                if ($user !== null && $graded_gradeable !== null) {
+                    $ldi = $this->core->getQueries()
+                    ->getLateDayInfoForUserGradeable($user, $graded_gradeable);
+
+                    if ($ldi !== null) {
+                        $is_bad_submission = ($ldi->getStatus() === LateDayInfo::STATUS_BAD);
                     }
                 }
             }
 
+            if (!$include_bad_submissions && $is_bad_submission) {
+                continue;
+            }
+
+            //if the submission is valid, add the data to the histogram data
+            if ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0) {
+                if ($ov->getAutoGradedGradeable()->getActiveVersion() !== 0) {
+                    if (!$ov->getOrCreateTaGradedGradeable()->hasVersionConflict()) {
+                    //do not include version conflicts in autograding histogram ^
+                        $histogram["bAuto"] = array_merge($histogram["bAuto"], [$ov->getAutoGradedGradeable()->getTotalPoints()]);
+                        $metrics = $ov->getAutoGradedGradeable()->getMetrics_Sum();
+                        $histogram["runtime"] = array_merge($histogram["runtime"], [$metrics['runtime']]);
+                        $histogram["memory"]  = array_merge($histogram["memory"], [$metrics['memory']]);
+                        $histogram["submitters"] = array_merge($histogram["submitters"], [$ov->getAutoGradedGradeable()->getSubmitterId()]);
+                    }
+                }
+            }
+
+            // Status counters
             if (!$ov->getAutoGradedGradeable()->hasSubmission()) {
-                // if no submission and not in Null section add to count
-                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                    $histogram["noSub"] += 1;
-                }
+                $histogram["noSub"] += 1;
             }
-            elseif ($ov->getAutoGradedGradeable()->getActiveVersion() == 0) {
-                // if no active version and not in Null section add to count
-                if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                    $histogram["noActive"] += 1;
-                }
+            elseif ($ov->getAutoGradedGradeable()->getHighestVersion() !== 0 && $ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
+                $histogram["cancelledSub"] += 1;
             }
-            elseif ($ov->getGradeable()->isTaGrading()) {
-                if ($ov->getOrCreateTaGradedGradeable()->anyGrades()) {
-                    // if grade inquiry and not in Null section add to count
-                    if ($ov->hasActiveGradeInquiry()) {
-                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                            $histogram["noActive"] += 1;
-                        }
-                    }
-                    elseif ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->hasVersionConflict()) {
-                        // if version conflict and not in Null section add to count
-                        if ($ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                            $histogram["VerConf"] += 1;
-                        }
-                    }
-                    elseif (!$ov->isTaGradingComplete()) {
-                        // if assignment incomplete and not in Null section add to count
-                        $histogram["IncompGrading"] += 1;
-                    }
-                    elseif ($ov->isTaGradingComplete()) {
-                        // otherwise add the overall grade to array and total score possible to array (possible future use)
-                        if ($ov->getTaGradedGradeable() != null && $ov->getTaGradedGradeable()->getGradedGradeable()->getSubmitter()->getRegistrationSection() != null) {
-                            $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
-                            $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
-                        }
-                    }
+            elseif ($ov->getAutoGradedGradeable()->getActiveVersion() === 0) {
+                $histogram["noActive"] += 1;
+            }
+            elseif ($ov->getTaGradedGradeable()->anyGrades()) {
+                if ($ov->hasActiveGradeInquiry()) {
+                    $histogram["GradeInq"] += 1;
+                }
+                elseif ($ov->getTaGradedGradeable()->hasVersionConflict()) {
+                    $histogram["VerConf"] += 1;
+                }
+                elseif (!$ov->isTaGradingComplete()) {
+                    $histogram["IncompGrading"] += 1;
+                }
+                else {
+                    $histogram["bTA"] = array_merge($histogram["bTA"], [$ov->getTaGradedGradeable()->getTotalScore() + $ov->getAutoGradedGradeable()->getTotalPoints()]);
+                    $histogram["tTA"] = array_merge($histogram["tTA"], [$ov->getTaGradedGradeable()->getTotalScore()]);
                 }
             }
         }
@@ -157,9 +202,9 @@ class ElectronicGraderController extends AbstractController {
         [ [A,[C,E]],[B,[F,D]], ...]
         A grades C and E, B grades F and D ..and so on!
         */
-            $max_offset = count($student_array);
-            $offset_array = [];
-            $temp_offset = [];
+        $max_offset = count($student_array);
+        $offset_array = [];
+        $temp_offset = [];
         for ($i = 1; $i < $max_offset; ++$i) {
             array_push($temp_offset, $i);
         }
@@ -186,7 +231,7 @@ class ElectronicGraderController extends AbstractController {
             }
             array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
         }
-            return $final_grading_info;
+        return $final_grading_info;
     }
 
     /**
@@ -273,7 +318,7 @@ class ElectronicGraderController extends AbstractController {
 
                 $number_of_students = count($student_array);
                 /* If number of students entered is more than number of students in registration section,
-                   then for each registration section with less number of students, everyone will grade everyone */
+                then for each registration section with less number of students, everyone will grade everyone */
                 if ($number_to_grade >= $number_of_students) {
                     $all_grade_all_registration = true;
                 }
@@ -299,9 +344,9 @@ class ElectronicGraderController extends AbstractController {
         $student_list = [];
         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
         foreach ($students as $student) {
-             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-             $sorted_students[$reg_sec][] = $student;
-             array_push($student_list, ['user_id' => $student->getId()]);
+            $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $sorted_students[$reg_sec][] = $student;
+            array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
                 if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                     array_push($student_array, $student->getId());
@@ -739,19 +784,19 @@ class ElectronicGraderController extends AbstractController {
             if (!$gradeable->isTeamAssignment() && $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [
                    // Total peer components to grade = Number of peer components * Number of Students who submitted
-                   'total_who_submitted' => $total_who_submitted,
-                   'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
-                   'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
-                   'graded_components' => 0,
-                   'verified_components' => 0,
-                   'non_late_graded_components' => 0,
-                   'non_late_verified_components' => 0,
-                   'view_peer_graded_components' => $peer_graded_components,
-                   'view_peer_components' => $peer_components,
-                   'ta_graded_components' => 0,
-                   'num_gradeables' => $num_gradeables,
-                   'graders' => [],
-                   'valid_graders' => []
+                 'total_who_submitted' => $total_who_submitted,
+                 'total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
+                 'non_late_total_components' => count($gradeable->getPeerComponents()) * $total_who_submitted,
+                 'graded_components' => 0,
+                 'verified_components' => 0,
+                 'non_late_graded_components' => 0,
+                 'non_late_verified_components' => 0,
+                 'view_peer_graded_components' => $peer_graded_components,
+                 'view_peer_components' => $peer_components,
+                 'ta_graded_components' => 0,
+                 'num_gradeables' => $num_gradeables,
+                 'graders' => [],
+                 'valid_graders' => []
                 ];
             }
             if ($peer) {
@@ -759,26 +804,26 @@ class ElectronicGraderController extends AbstractController {
                  // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
                 if ($gradeable->isTeamAssignment()) {
                     $sections['stu_grad'] = [
-                       'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
-                       'non_late_total_components' => count($gradeable->getPeerComponents()),
-                       'graded_components' => $my_grading,
-                       'verified_components' => $my_grading,
-                       'non_late_graded_components' => $my_grading,
-                       'non_late_verified_components' => $my_grading,
-                       'num_gradeables' => $num_gradeables,
-                       'ta_graded_components' => 0,
-                       'graders' => [],
-                       'valid_graders' => []
+                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
+                        'non_late_total_components' => count($gradeable->getPeerComponents()),
+                        'graded_components' => $my_grading,
+                        'verified_components' => $my_grading,
+                        'non_late_graded_components' => $my_grading,
+                        'non_late_verified_components' => $my_grading,
+                        'num_gradeables' => $num_gradeables,
+                        'ta_graded_components' => 0,
+                        'graders' => [],
+                        'valid_graders' => []
                     ];
                     $sections['all'] = [
-                       'total_components' => 0,
-                       'graded_components' => 0,
-                       'verified_components' => 0,
-                       'non_late_total_components' => 0,
-                       'non_late_graded_components' => 0,
-                       'non_late_verified_components' => 0,
-                       'graders' => [],
-                       'valid_graders' => []
+                        'total_components' => 0,
+                        'graded_components' => 0,
+                        'verified_components' => 0,
+                        'non_late_total_components' => 0,
+                        'non_late_graded_components' => 0,
+                        'non_late_verified_components' => 0,
+                        'graders' => [],
+                        'valid_graders' => []
                     ];
                     foreach ($total_users as $key => $value) {
                         if ($key == 'NULL') {
@@ -986,11 +1031,11 @@ class ElectronicGraderController extends AbstractController {
         // Anon mode for limited access graders should be based on the limited access blind setting
         // For the instructor, they can choose to toggle anon mode, so check the cookie then the setting
         $anon_mode =
-            ($current_user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
-            ($current_user->getGroup() < 3 && (
-                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
-                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
-            ));
+        ($current_user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+        ($current_user->getGroup() < 3 && (
+            (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+            (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+        ));
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
 
@@ -1659,11 +1704,11 @@ class ElectronicGraderController extends AbstractController {
             }
             foreach ($add_user_ids as $id) {
                 $json["team_history"][] = ["action" => "admin_add_user", "time" => $current_time,
-                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id];
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $id];
             }
             foreach ($remove_user_ids as $id) {
                 $json["team_history"][] = ["action" => "admin_remove_user", "time" => $current_time,
-                    "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id];
+                "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id];
             }
             if ($new_team_name) {
                 $json["team_history"][] = ["action" => "change_name", "time" => $current_time, "user" => $this->core->getUser()->getId()];
@@ -1992,11 +2037,11 @@ class ElectronicGraderController extends AbstractController {
 
         $user = $this->core->getUser();
         $anon_mode =
-            ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
-            ($user->getGroup() < 3 && (
-                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
-                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
-            ));
+        ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+        ($user->getGroup() < 3 && (
+            (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+            (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+        ));
 
         $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
@@ -2061,9 +2106,9 @@ class ElectronicGraderController extends AbstractController {
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
-                return $component->toArray();
+            return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
-                return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
         $return['components'] = array_values($return['components']);
         return $return;
@@ -2743,7 +2788,7 @@ class ElectronicGraderController extends AbstractController {
                 'default' => $default,
                 'max_value' => $max_value,
                 'upper_clamp' => $upper_clamp
-                ]);
+            ]);
             $component->setPage($page);
             if ($is_notebook_gradeable) {
                 if ($is_itempool_linked === 'true') {
@@ -3649,8 +3694,8 @@ class ElectronicGraderController extends AbstractController {
         $ta_graded_components = [];
         if (count($sections) > 0) {
             $total_users = ($gradeable->isTeamAssignment()) ?
-                $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
-                $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
+            $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
+            $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
         }
 
