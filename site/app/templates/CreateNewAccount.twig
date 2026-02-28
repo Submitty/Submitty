@@ -1,6 +1,7 @@
 {% set user_id_reqs = requirements["user_id_requirements"] %}
 {% set name_reqs = requirements["user_id_requirements"]["name_requirements"] %}
 {% set email_reqs = requirements["user_id_requirements"]["email_requirements"] %}
+{% set pwd_reqs = requirements["password_requirements"] is defined ? requirements["password_requirements"] : {} %}
 <div class="content shadow" id="login-box">
     <div id="login-guest">
         <h1> Sign Up <a target=_blank href="https://submitty.org/student/self_account_creation">
@@ -66,11 +67,20 @@
             <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/> 
                 <ul class="requirements-list">
-                    <li> 1 Capital Letter </li>
-                    <li> 1 Lowercase Letter </li>
-                    <li> 1 Number </li>
-                    <li> 1 Special Character </li>
-                    <li> 12 Characters </li>
+                    {% if pwd_reqs["require_uppercase"] %}
+                        <li> 1 Capital Letter </li>
+                    {% endif %}
+                    {% if pwd_reqs["require_lowercase"] %}
+                        <li> 1 Lowercase Letter </li>
+                    {% endif %}
+                    {% if pwd_reqs["require_numbers"] %}
+                        <li> 1 Number </li>
+                    {% endif %}
+                    {% if pwd_reqs["require_special_chars"] %}
+                        <li> 1 Special Character </li>
+                    {% endif %}
+                    <li> {{ pwd_reqs["min_length"] }} Characters </li>
+                </ul>
             </div>
             <input type="password" name="password" data-testid="password" required id="password-input" />
         </div>

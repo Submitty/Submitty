@@ -35,6 +35,22 @@ describe('Self account creation tests', () => {
         inputData(undefined, undefined, 'pass!123', 'pass!123');
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        // Password missing uppercase
+        inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        // Password missing lowercase
+        inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        // Password missing numbers
+        inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
+        cy.get('[data-testid="sign-up-button"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        // Password missing special characters
+        inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
         // Passwords don't match
         inputData(undefined, undefined, 'Password123!', 'NotPassword123!');
         cy.get('[data-testid="confirm-password"]').blur();
