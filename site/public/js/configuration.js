@@ -87,6 +87,117 @@ $(document).ready(() => {
     }
 
     $(document).on('change', '#auto-rainbow-grades', updateRainbowCustomizationWarning);
+
+    const pullButton = $('#pull-course-repository');
+    const stateElem = $('#course-repo-sync-state');
+    const messageElem = $('#course-repo-sync-message');
+    let pollingHandle = null;
+
+    function renderRepoStatus(data) {
+        const queueStatus = data.queue_status;
+        const lastSync = data.last_sync;
+        let stateText = '';
+        if (queueStatus === 'processing') {
+            stateText = 'Sync in progress...';
+            pullButton.prop('disabled', true);
+        }
+        else if (queueStatus === 'queued') {
+            stateText = 'Sync queued...';
+            pullButton.prop('disabled', true);
+        }
+        else {
+            pullButton.prop('disabled', false);
+            if (lastSync && lastSync.status) {
+                stateText = `Last sync: ${lastSync.status}`;
+            }
+            else {
+                stateText = 'No sync has run yet.';
+            }
+        }
+        stateElem.text(stateText);
+
+        if (lastSync && lastSync.message) {
+            let message = lastSync.message;
+            if (lastSync.last_updated) {
+                message += ` (updated ${lastSync.last_updated})`;
+            }
+            if (lastSync.commit) {
+                message += ` commit ${lastSync.commit}`;
+            }
+            if (Array.isArray(lastSync.created_gradeables) || Array.isArray(lastSync.updated_gradeables)) {
+                const createdCount = Array.isArray(lastSync.created_gradeables) ? lastSync.created_gradeables.length : 0;
+                const updatedCount = Array.isArray(lastSync.updated_gradeables) ? lastSync.updated_gradeables.length : 0;
+                message += ` | gradeables created: ${createdCount}, updated: ${updatedCount}`;
+            }
+            if (Array.isArray(lastSync.warnings) && lastSync.warnings.length > 0) {
+                message += ` | warnings: ${lastSync.warnings.length}`;
+            }
+            messageElem.text(message);
+        }
+        else {
+            messageElem.text('');
+        }
+
+        if (queueStatus === 'queued' || queueStatus === 'processing') {
+            if (pollingHandle === null) {
+                pollingHandle = setInterval(fetchRepoStatus, 3000);
+            }
+        }
+        else if (pollingHandle !== null) {
+            clearInterval(pollingHandle);
+            pollingHandle = null;
+        }
+    }
+
+    function fetchRepoStatus() {
+        $.ajax({
+            url: buildCourseUrl(['config', 'course_repository', 'status']),
+            type: 'GET',
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
+                    if (response.status === 'success') {
+                        renderRepoStatus(response.data);
+                    }
+                }
+                catch (exc) {
+                    // Ignore parse errors and keep previous status text.
+                }
+            },
+        });
+    }
+
+    pullButton.on('click', () => {
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        pullButton.prop('disabled', true);
+        $.ajax({
+            url: buildCourseUrl(['config', 'course_repository', 'pull']),
+            data: formData,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
+                }
+                catch (exc) {
+                    response = {
+                        status: 'fail',
+                        message: 'invalid response received from server',
+                    };
+                }
+                if (response.status === 'fail') {
+                    alert(response.message);
+                    pullButton.prop('disabled', false);
+                    return;
+                }
+                fetchRepoStatus();
+            },
+        });
+    });
+
+    fetchRepoStatus();
 });
 
 function confirmSelfRegistration(element, needs_reg_sections) {

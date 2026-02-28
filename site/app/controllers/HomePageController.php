@@ -330,6 +330,43 @@ class HomePageController extends AbstractController {
         }
 
         $group_name = $_POST['group_name'];
+        $course_repo_url = trim(strval($_POST['course_repo_url'] ?? ''));
+        $course_repo_branch = trim(strval($_POST['course_repo_branch'] ?? 'main'));
+        $course_repo_subdirectory = trim(strval($_POST['course_repo_subdirectory'] ?? ''), " \t\n\r\0\x0B/");
+        if ($course_repo_branch === '') {
+            $course_repo_branch = 'main';
+        }
+        if ($course_repo_subdirectory === '.') {
+            $course_repo_subdirectory = '';
+        }
+
+        if (preg_match('/\s/', $course_repo_url)) {
+            $error = "Repository URL cannot contain whitespace.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $course_repo_branch) || str_contains($course_repo_branch, '..') || str_starts_with($course_repo_branch, '/')) {
+            $error = "Invalid repository branch name.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        if (str_contains($course_repo_subdirectory, '..') || ($course_repo_subdirectory !== '' && !preg_match('/^[A-Za-z0-9._\/-]+$/', $course_repo_subdirectory))) {
+            $error = "Invalid repository subdirectory.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
 
         try {
             $group_check = $this->core->curlRequest(
@@ -386,7 +423,11 @@ class HomePageController extends AbstractController {
             'semester' => $semester,
             'course' => $course_title,
             'head_instructor' => $head_instructor,
-            'group_name' => $group_name
+            'group_name' => $group_name,
+            'course_repo_url' => $course_repo_url,
+            'course_repo_branch' => $course_repo_branch,
+            'course_repo_subdirectory' => $course_repo_subdirectory,
+            'triggered_by' => $user->getId(),
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
