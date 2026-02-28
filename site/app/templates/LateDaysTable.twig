@@ -1,4 +1,13 @@
 <div class="content">
-    <h1>My Late Day Usage</h1>
+    <h1>My Late Days</h1>
+    <h3>
+    Number of late days remaining: {{ late_days.getLateDaysRemaining() }}
+    </h3>
+    <p>The table below provides a detailed history of your
+late day balance throughout the term. Depending
+on your course policy, you may have a fixed
+amount or the opportunity to earn additional days.
+    </p>
+
     {% include 'LateDaysTablePlugin.twig' %}
 </div>
