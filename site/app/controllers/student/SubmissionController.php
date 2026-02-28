@@ -976,41 +976,43 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid user id.", false);
         }
 
-        if (!isset($_POST['regrade']) || !isset($_POST['regrade_all']) || !isset($_POST['regrade_all_students_all'])) {
-            return $this->uploadResult("Invalid user id.", false);
-        }
-        $who_id = "";
-        //grab all graded gradeables for this gradeable
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-        $order->sort("id", "ASC");
-        $graded_gradeables = [];
-        /** @var GradedGradeable $g */
-        foreach ($order->getSortedGradedGradeables() as $g) {
-            if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
-                $graded_gradeables[] = $g;
-            }
-        }
-
+        // regrade - regrade the active version for one selected student ($user_id) who submitted a certain gradeable
+        // regrade_all - regrade every version for one selected student ($user_id) who submitted a certain gradeable
+        // regrade_all_students - regrade the active version for every student who submitted a certain gradeable - default behavior
+        // regrade_all_students_all - regrade every version for every student who submitted a certain gradeable
         $regrade = $_POST['regrade'];
         $regrade_all = $_POST['regrade_all'];
         $regrade_all_students_all = $_POST['regrade_all_students_all'];
         $user_id = $_POST['user_id'];
 
-        $count = 0;
-        foreach ($graded_gradeables as $g) {
-            //if only regrading one student/teams assignments(s), skip gradeables from other submitters
-            if ($regrade === 'true' || $regrade_all === 'true') {
-                if ($gradeable->isTeamAssignment()) {
-                    if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()) {
-                        continue;
-                    }
-                }
-                else {
-                    if ($user_id !== $g->getSubmitter()->getId()) {
-                        continue;
-                    }
+        if (!isset($regrade) || !isset($regrade_all) || !isset($regrade_all_students_all)) {
+            return $this->uploadResult("Invalid regrade mode.", false);
+        }
+
+        $graded_gradeables = [];
+        // if we are only regrading one user, only get that one gradeable
+        if (Utils::getBooleanValue($regrade) || Utils::getBooleanValue($regrade_all)) {
+            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_id) as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $graded_gradeables[] = $g;
                 }
             }
+        }
+        else {
+            //grab all graded gradeables for this gradeable
+            $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+            $order->sort("id", "ASC");
+            /** @var GradedGradeable $g */
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $graded_gradeables[] = $g;
+                }
+            }
+        }
+
+        $who_id = "";
+        $count = 0;
+        foreach ($graded_gradeables as $g) {
             //determine how many times the next loop should loop
             if ($regrade_all_students_all === 'true' || $regrade_all === 'true') {
                 $limit = $g->getAutoGradedGradeable()->getHighestVersion();
