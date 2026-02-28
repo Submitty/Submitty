@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Marked, type TokenizerExtension } from 'marked';
+import { Marked, type TokenizerAndRendererExtension } from 'marked';
 import { renderToString } from 'katex';
 import DOMPurify from 'dompurify';
 
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const inlineLatex: (TokenizerExtension) = {
+const inlineLatex: TokenizerAndRendererExtension = {
     name: 'inlineLatex',
     level: 'inline',
     start(src: string) {
@@ -42,17 +42,30 @@ const inlineLatex: (TokenizerExtension) = {
             displayMode = false;
         }
         return {
-            type: 'html',
+            type: 'inlineLatex',
             raw: codeSpan[0],
             text: renderToString(math, { displayMode }),
         };
     },
+    renderer(token) {
+        return (token as unknown as { text: string }).text;
+    },
+};
+const escapeHtml = (html: string): string => {
+    return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 };
 const markdownToHtml = (markdown: string | null | undefined): string => {
     if (!markdown) {
         return '';
     }
-    const marked = new Marked({ extensions: [inlineLatex] });
+    const marked = new Marked({
+        extensions: [inlineLatex],
+        renderer: {
+            html(token) {
+                return escapeHtml(token.text);
+            },
+        },
+    });
     return marked.parse(markdown, { async: false });
 };
 
