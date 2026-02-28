@@ -68,12 +68,8 @@ class Chatroom {
         return $this->host;
     }
 
-    public function getHostId(): string {
-        return $this->host->getId();
-    }
-
-    public function getHostName(): string {
-        return $this->host->getDisplayFullName();
+    public function setHost(UserEntity $host): void {
+        $this->host = $host;
     }
 
     public function getTitle(): string {
@@ -124,18 +120,12 @@ class Chatroom {
         return $this->is_deleted;
     }
 
-    public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
-        $adj  = $adjectives[$adj_index];
-        $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+    public function getHostId(): string {
+        return $this->host->getId();
+    }
+
+    public function getHostName(): string {
+        return $this->host->getDisplayFullName();
     }
 
     public function getSessionStartedAt(): ?\DateTime {
@@ -156,5 +146,109 @@ class Chatroom {
 
     public function isReadOnly(): bool {
         return !$this->isActive() && $this->allowReadOnlyAfterEnd();
+    }
+
+    public function calcAnonName(string $user_id, ?\Doctrine\ORM\EntityManagerInterface $em = null): string {
+        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
+        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+
+        $fallbackWithSuffix = function () use ($user_id, $adjectives, $nouns): string {
+            $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
+            $seed_string = $user_id . "-" . $this->getId() . "-" . $this->getHostId() . "-" . $session_started_at;
+            $adj_hash = crc32($seed_string);
+            $noun_hash = crc32(strrev($seed_string));
+            $adj_index = abs($adj_hash) % count($adjectives);
+            $noun_index = abs($noun_hash) % count($nouns);
+            $suffix = strtoupper(substr(md5($seed_string), 0, 4));
+            return "Anonymous {$adjectives[$adj_index]} {$nouns[$noun_index]} #{$suffix}";
+        };
+
+        if ($em === null) {
+            return $fallbackWithSuffix();
+        }
+
+        try {
+            $repository = $em->getRepository(ChatroomAnonymousName::class);
+            $anonName = $repository->findOneBy([
+                "chatroomId" => $this->getId(),
+                "userId" => $user_id
+            ]);
+
+            if ($anonName !== null) {
+                $stored = $anonName->getDisplayName();
+                if (strpos($stored, ' #') === false || !preg_match('/ #[A-Fa-f0-9]{4}$/', $stored)) {
+                    $adj = $adjectives[random_int(0, count($adjectives) - 1)];
+                    $noun = $nouns[random_int(0, count($nouns) - 1)];
+                    $suffix = strtoupper(bin2hex(random_bytes(2)));
+                    $displayName = "Anonymous {$adj} {$noun} #{$suffix}";
+                    $anonName->setDisplayName($displayName);
+                    $em->flush();
+                    return $displayName;
+                }
+                return $stored;
+            }
+
+            // Generate unique display name with retry logic for collisions
+            $maxRetries = 5;
+            $displayName = null;
+            for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+                $adj = $adjectives[random_int(0, count($adjectives) - 1)];
+                $noun = $nouns[random_int(0, count($nouns) - 1)];
+                $suffix = strtoupper(bin2hex(random_bytes(2)));
+                $candidateName = "Anonymous {$adj} {$noun} #{$suffix}";
+                
+                // Check if this name already exists in the chatroom
+                $repo = $em->getRepository(ChatroomAnonymousName::class);
+                $existing = $repo->createQueryBuilder('can')
+                    ->where('can.chatroom_id = :chatroom_id')
+                    ->andWhere('can.display_name = :display_name')
+                    ->setParameter('chatroom_id', $this->getId())
+                    ->setParameter('display_name', $candidateName)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                
+                if ($existing === null) {
+                    $displayName = $candidateName;
+                    break;
+                }
+            }
+            
+            // Fallback if max retries exceeded (very unlikely)
+            if ($displayName === null) {
+                $suffix = strtoupper(bin2hex(random_bytes(2)));
+                $displayName = "Anonymous User #{$suffix}";
+            }
+            
+            $anonName = new ChatroomAnonymousName($this->getId(), $user_id, $displayName);
+            $em->persist($anonName);
+            $em->flush();
+
+            return $displayName;
+        }
+        catch (\Throwable $e) {
+            return $fallbackWithSuffix();
+        }
+    }
+
+    public function regenerateAllAnonNames(\Doctrine\ORM\EntityManagerInterface $em): void {
+        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
+        $nouns = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+        $usedNames = [];
+
+        $repository = $em->getRepository(ChatroomAnonymousName::class);
+        $anonNames = $repository->findBy(["chatroomId" => $this->getId()]);
+
+        foreach ($anonNames as $anonName) {
+            do {
+                $adj = $adjectives[random_int(0, count($adjectives) - 1)];
+                $noun = $nouns[random_int(0, count($nouns) - 1)];
+                $suffix = strtoupper(bin2hex(random_bytes(2)));
+                $displayName = "Anonymous {$adj} {$noun} #{$suffix}";
+            } while (in_array($displayName, $usedNames, true));
+            $usedNames[] = $displayName;
+            $anonName->setDisplayName($displayName);
+        }
+
+        $em->flush();
     }
 }

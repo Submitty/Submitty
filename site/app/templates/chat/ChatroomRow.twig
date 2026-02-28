@@ -54,6 +54,12 @@
             <button data-testid="clear-chatroom" class="btn btn-danger" onclick="clearChatroom('{{ id|e('js') }}', '{{ title|e('js') }}')">
                 Clear
             </button>
+            {% if isAllowAnon and isActive %}
+                <button data-testid="shuffle-anon-names" class="btn btn-warning" onclick="shuffleAnonName('{{ id|e('js') }}')">
+                    <i class="fas fa-random"></i>
+                    Shuffle Names
+                </button>
+            {% endif %}
         </td>
     </tr>
 {% else %}
