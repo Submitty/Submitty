@@ -301,7 +301,7 @@ class ChatroomController extends AbstractController {
         $msg_array['user_id'] = $isAnonymous ? 'null' : $user->getId();
         $display_name = '';
         if ($chatroom->isAllowAnon() && $isAnonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId());
+            $display_name = $chatroom->calcAnonName($this->core, $user->getId());
         }
         else {
             if ($user->accessAdmin()) {
