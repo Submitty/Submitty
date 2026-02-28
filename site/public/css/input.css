@@ -18,8 +18,10 @@ input[type="color"] {
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
+    /* stylelint-disable-next-line color-no-hex */
     color: #555555;
     vertical-align: middle;
+    /* stylelint-disable-next-line color-no-hex */
     border: 1px solid #cccccc;
     border-radius: 4px;
     width: auto;
@@ -27,10 +29,12 @@ input[type="color"] {
 
 [data-theme="dark"] input[type="text"],
 [data-theme="dark"] input[type="password"] {
+    /* stylelint-disable-next-line color-named */
     color: white;
 }
 
 input.readonly {
+    /* stylelint-disable-next-line color-no-hex */
     background-color: #f2f2f2;
     cursor: not-allowed;
 }
@@ -38,8 +42,10 @@ input.readonly {
 select {
     padding: 5px 35px 5px 10px;
     font-size: 16px;
+    /* stylelint-disable-next-line color-no-hex */
     border: 1px solid #cccccc;
     height: 34px;
+    /* stylelint-disable-next-line color-no-hex */
     background: #ffffff;
     background-size: 20px;
 }
@@ -47,16 +53,19 @@ select {
 input[type="checkbox"] {
     cursor: pointer;
     appearance: none;
+    /* stylelint-disable-next-line color-no-hex */
     background: #ffffff;
     box-sizing: border-box;
     width: 20px;
     height: 20px;
+    /* stylelint-disable-next-line color-no-hex */
     border: 1px solid #000000;
     transition: all 0.2s linear;
     border-radius: 4px;
 }
 
 input[type="checkbox"]:checked {
+    /* stylelint-disable-next-line color-no-hex */
     background-color: #3093fc;
 }
 
@@ -73,5 +82,6 @@ input[type="checkbox"]:checked::before {
 select.disabled,
 textarea.disabled,
 input.disabled {
+    /* stylelint-disable-next-line color-named */
     background-color: lightgrey;
 }
