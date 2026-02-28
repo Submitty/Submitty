@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: [repo-release]
 
+permissions:
+  contents: read
+
 jobs:
   repo-up:
     runs-on: ubuntu-latest
