@@ -84,25 +84,38 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 
-    #[Route("/user_profile/change_password", methods: ["POST"])]
-    public function changePassword(): MultiResponse {
-        $user = $this->core->getUser();
-        if (
-            !empty($_POST['new_password'])
-            && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']
-        ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
-        }
-        else {
-            $this->core->addErrorMessage("Must put same password in both boxes.");
-        }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
+   #[Route("/user_profile/change_password", methods: ["POST"])]
+public function changePassword(): MultiResponse {
+    $user = $this->core->getUser();
+    $new_password = $_POST['new_password'] ?? '';
+    $confirm_password = $_POST['confirm_new_password'] ?? '';
+
+    if (empty($new_password) || empty($confirm_password)) {
+        $this->core->addErrorMessage("Password fields cannot be empty.");
     }
+    elseif ($new_password !== $confirm_password) {
+        $this->core->addErrorMessage("Must put same password in both boxes.");
+    }
+    else {
+        // CALL THE NEW CENTRALIZED VALIDATOR
+        $password_errors = Utils::validatePassword($new_password);
+
+        if (!empty($password_errors)) {
+            foreach ($password_errors as $error) {
+                $this->core->addErrorMessage($error);
+            }
+        } else {
+            // Only update if validatePassword returns no errors
+            $user->setPassword($new_password);
+            $this->core->getQueries()->updateUser($user);
+            $this->core->addSuccessMessage("Updated password successfully.");
+        }
+    }
+
+    return MultiResponse::RedirectOnlyResponse(
+        new RedirectResponse($this->core->buildUrl(['home']))
+    );
+}
 
     #[Route("/user_profile/change_pronouns", methods: ["POST"])]
     public function changePronouns(): JsonResponse {
