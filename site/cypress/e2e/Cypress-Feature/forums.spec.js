@@ -603,3 +603,113 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Forum Categories Release Date Management', () => {
+    const newCategoryName = 'Cypress Test Category';
+
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    afterEach(() => {
+        // Clean up - navigate directly to categories page to avoid UI state issues
+        cy.visit(['sample', 'forum', 'categories']);
+        cy.get('#ui-category-list').should('be.visible');
+
+        // Remove the test category if it exists
+        cy.get('#ui-category-list').then(($list) => {
+            if ($list.text().includes(newCategoryName)) {
+                cy.get('#ui-category-list').contains(newCategoryName).parent()
+                    .find('.delete-category-button').click();
+            }
+        });
+    });
+
+    it('Should save a category with a valid release date using the date picker', () => {
+        // Navigate to categories management
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.get('a[href*="forum/categories"]').should('be.visible').click();
+        cy.get('#ui-category-list').should('be.visible');
+
+        // Add a new category
+        cy.get('#new_category_text').type(newCategoryName);
+
+        // Set a valid date using the date picker
+        cy.get('#category_visible_date').click();
+        cy.get('.flatpickr-calendar').should('be.visible');
+
+        // Select the first available date
+        cy.get('.flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.disabled)').first().click();
+
+        // Verify date was set (input should not be empty)
+        cy.get('#category_visible_date').should('not.have.value', '');
+
+        // Add the category
+        cy.get('button').contains('Add category').click();
+
+        // Verify the category was created
+        cy.get('#ui-category-list').should('contain', newCategoryName);
+    });
+
+    it('Should save a category with an empty release date', () => {
+        // Navigate to categories management
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.get('a[href*="forum/categories"]').should('be.visible').click();
+        cy.get('#ui-category-list').should('be.visible');
+
+        // Add a new category without setting a date
+        cy.get('#new_category_text').type(newCategoryName);
+
+        // Add the category without entering a date
+        cy.get('button').contains('Add category').click();
+
+        // Verify the category was created successfully even without a date
+        cy.get('#ui-category-list').should('contain', newCategoryName);
+    });
+
+    it('Should edit a category to set a release date', () => {
+        // Navigate to categories management
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.get('a[href*="forum/categories"]').should('be.visible').click();
+        cy.get('#ui-category-list').should('be.visible');
+
+        // Get the first category and edit its date
+        cy.get('.edit-category-date-button').first().click({ force: true });
+
+        // The date edit input should be visible
+        cy.get('.flatpickr-date-edit').should('be.visible').click();
+
+        // Wait for the calendar to open
+        cy.get('.flatpickr-calendar').should('be.visible');
+
+        // Select a date
+        cy.get('.flatpickr-day:not(.prevMonthDay):not(.nextMonthDay):not(.disabled)').first().click();
+
+        // Save the date change
+        cy.get('.save-date-button').click();
+
+        // Verify we returned to the normal view
+        cy.get('.categorylistitemdate-desc').first().should('be.visible');
+    });
+
+    it('Should successfully clear a category date and save', () => {
+        // Navigate to categories management
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.get('a[href*="forum/categories"]').should('be.visible').click();
+        cy.get('#ui-category-list').should('be.visible');
+
+        // Edit the first category's date
+        cy.get('.edit-category-date-button').first().click({ force: true });
+
+        // Clear the date field
+        cy.get('.flatpickr-date-edit').should('be.visible').clear();
+
+        // Save the empty date
+        cy.get('.save-date-button').click();
+
+        // Verify the edit completed and we're back to normal view
+        cy.get('.categorylistitemdate-desc').first().should('exist');
+    });
+});
