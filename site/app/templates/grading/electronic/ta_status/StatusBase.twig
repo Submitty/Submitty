@@ -42,23 +42,24 @@
             }
         }
         var maxMin = tracking-increment;
-        var ct = 0;
+        // Assign each score to exactly one bucket (last bucket first) so total count stays correct.
         for(i = 0;i<xValue.length;i++){
-           ct++;
-           for(var [key,value] of betterBuckets){
-                if(key===maxMin){
-                    if(xValue[i]>=key&&xValue[i]<=max){
-                       betterBuckets.set(key,value+1);
-                   }
-                }
-               else{
-                    if(xValue[i]>=key && xValue[i]<(key+increment)){
-                        betterBuckets.set(key,value+1);
+            let score = xValue[i];
+            let assigned = false;
+            if(score >= maxMin && score <= max){
+                betterBuckets.set(maxMin, betterBuckets.get(maxMin) + 1);
+                assigned = true;
+            }
+            if(!assigned){
+                for(const [key,value] of betterBuckets){
+                    if(key !== maxMin && score >= key && score < (key + increment)){
+                        betterBuckets.set(key, value + 1);
+                        break;
                     }
                 }
-           }
+            }
         }
-        for(var[key,value]of betterBuckets){
+        for(const [key,value] of betterBuckets){
             if(value>modeCount){
                 modeCount=value;
                 mode = key+" to <"+(key+increment);
