@@ -11,20 +11,6 @@ main#main {
     min-width: 0;
 }
 
-main#main.full-screen-mode {
-    z-index: 10;
-    transform: scale(1, 1);
-    position: fixed;
-    height: 100vh;
-    width: 100vw;
-    top: 0;
-    left: 0;
-}
-
-main#main.full-screen-mode .content {
-    margin: 0;
-}
-
 #wrapper {
     min-height: max-content;
 }
@@ -300,6 +286,7 @@ progress::-webkit-progress-value {
 #autograding_results_select option:focus {
     background: var(--standard-medium-dark-red);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -314,6 +301,7 @@ progress::-webkit-progress-value {
 #grading_rubric_select option:focus {
     background: var(--standard-dark-green);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -328,6 +316,7 @@ progress::-webkit-progress-value {
 #submission_browser_select option:focus {
     background: var(--standard-medium-dark-blue);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -342,6 +331,7 @@ progress::-webkit-progress-value {
 #student_info_select option:focus {
     background: var(--subheading-underscore-grey);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -356,6 +346,7 @@ progress::-webkit-progress-value {
 #peer_info_select option:focus {
     background: var(--standard-plum-purple);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -370,6 +361,7 @@ progress::-webkit-progress-value {
 #discussion_browser_select option:focus {
     background: var(--standard-medium-dark-blue);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -384,6 +376,7 @@ progress::-webkit-progress-value {
 #grade_inquiry_info_select option:focus {
     background: var(--standard-bronze);
 }
+
 /* stylelint-enable selector-id-pattern */
 
 /* Grading Panel Position selector */
