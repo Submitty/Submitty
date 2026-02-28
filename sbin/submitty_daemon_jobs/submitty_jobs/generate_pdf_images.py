@@ -1,10 +1,12 @@
 import os
 import traceback
-from typing import List, Sequence
+import hashlib
+import io
+from typing import List, Sequence, Dict
+import time
 
-from pdf2image import convert_from_bytes
-from PIL import ImageDraw
-from PyPDF2 import PdfReader
+import fitz  # PyMuPDF
+from PIL import ImageDraw, Image
 
 
 class Redaction:
@@ -13,21 +15,95 @@ class Redaction:
         self.coordinates = coordinates
 
 
+def create_redaction_pattern(width: int, height: int, square_size: int = 25) -> Image.Image:
+    """Create a reusable checkered pattern for redactions."""
+    pattern = Image.new('RGB', (width, height), 'white')
+    draw = ImageDraw.Draw(pattern)
+
+    for y in range(0, height, square_size):
+        for x in range(0, width, square_size):
+            fill_color = "black" if ((x // square_size + y // square_size) % 2 == 0) else "grey"
+            draw.rectangle(
+                [x, y, min(x + square_size, width), min(y + square_size, height)],
+                fill=fill_color
+            )
+    return pattern
+
+
+def apply_redaction_optimized(img: Image.Image, redaction: 'Redaction', pattern_cache: Dict[tuple, Image.Image]) -> None:
+    """Apply redaction using pre-computed pattern for better performance."""
+    # Convert coordinates from relative to absolute pixel values
+    x0 = int(redaction.coordinates[0] * img.size[0])
+    y0 = int(redaction.coordinates[1] * img.size[1])
+    x1 = int(redaction.coordinates[2] * img.size[0])
+    y1 = int(redaction.coordinates[3] * img.size[1])
+
+    # Normalize coordinates to ensure top-left and bottom-right ordering
+    left = min(x0, x1)
+    right = max(x0, x1)
+    top = min(y0, y1)
+    bottom = max(y0, y1)
+    width = right - left
+    height = bottom - top
+
+    # Skip malformed or degenerate redaction rectangles
+    if width <= 0 or height <= 0:
+        return
+
+    # Use cached pattern or create new one
+    pattern_key = (width, height)
+    if pattern_key not in pattern_cache:
+        pattern_cache[pattern_key] = create_redaction_pattern(width, height)
+
+    # Paste the pattern onto the image
+    img.paste(pattern_cache[pattern_key], (left, top))
+
+
+def get_file_hash(pdf_file_path: str) -> str:
+    """Get hash of PDF file for caching purposes."""
+    with open(pdf_file_path, 'rb') as f:
+        return hashlib.md5(f.read()).hexdigest()
+
+
 def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
+    start_time = time.time()
+    
     directory = os.path.dirname(pdf_file_path)
     if directory:
         os.chdir(os.path.dirname(pdf_file_path))
+    
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    
+    # Group redactions by page for efficient processing
+    redactions_by_page = {}
+    for redaction in redactions:
+        if redaction.page_number not in redactions_by_page:
+            redactions_by_page[redaction.page_number] = []
+        redactions_by_page[redaction.page_number].append(redaction)
+    
+    # Cache for redaction patterns
+    pattern_cache = {}
+    
     try:
-        pdfPages = PdfReader(pdf_file_path, strict=False)
-        with open(pdf_file_path, "rb") as open_file:
-            imagePages = convert_from_bytes(
-                open_file.read(),
-            )
-        # Loop through each page in the PDF and save it as an image
-        for page_number in range(len(pdfPages.pages)):
+        # Check if we need to regenerate (optional optimization)
+        cache_file = os.path.join(output_dir, ".cache_info")
+        current_hash = get_file_hash(pdf_file_path)
+        
+        # Only proceed if cache doesn't exist or hash changed
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r') as f:
+                cached_hash = f.read().strip()
+            if cached_hash == current_hash:
+                print(f"Skipping {pdf_file_path} - unchanged (cached)")
+                return
+        
+        # Open PDF with PyMuPDF
+        pdf_document = fitz.open(pdf_file_path)
+
+        # Process all pages (both with and without redactions)
+        for page_number in range(len(pdf_document)):
             image_filename = os.path.join(
                 output_dir,
                 "."
@@ -36,35 +112,36 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
                 + str(page_number + 1).zfill(2)
                 + ".jpg",
             )
-            img = imagePages[page_number]
-            draw = ImageDraw.Draw(img)
-            for redaction in redactions:
-                # Add 1 to page_number because redactions are 1-indexed
-                # and page_number is 0-indexed
-                if redaction.page_number != page_number + 1:
-                    continue
-                square_size = 25
 
-                # Convert coordinates from relative to absolute pixel values
-                x0 = int(redaction.coordinates[0] * img.size[0])
-                y0 = int(redaction.coordinates[1] * img.size[1])
-                x1 = int(redaction.coordinates[2] * img.size[0])
-                y1 = int(redaction.coordinates[3] * img.size[1])
+            # Get page and render to image
+            page = pdf_document[page_number]
+            # Render at higher DPI for better quality
+            mat = fitz.Matrix(2.0, 2.0)  # 2x zoom
+            pix = page.get_pixmap(matrix=mat)
 
-                # Create a grid of black and grey squares within the redaction area
-                # Loops ensure that the checkered pattern is created
-                for y in range(y0, y1, square_size):
-                    for x in range(x0, x1, square_size):
-                        fill_color = "black" if ((x // square_size + y // square_size) % 2 == 0) else "grey"
-                        draw.rectangle(
-                            [x, y, x + square_size, y + square_size], fill=fill_color
-                        )
+            # Convert to PIL Image
+            img_data = pix.tobytes("ppm")
+            img = Image.open(io.BytesIO(img_data))
+
+            # Apply redactions only if this page has them
+            if (page_number + 1) in redactions_by_page:
+                for redaction in redactions_by_page[page_number + 1]:
+                    apply_redaction_optimized(img, redaction, pattern_cache)
+
             print(f"Saving image {image_filename}")
             img.save(image_filename, "JPEG", quality=20, optimize=True)
+
+        pdf_document.close()
+
+        # Update cache
+        with open(cache_file, 'w') as f:
+            f.write(current_hash)
+
+        elapsed = time.time() - start_time
+        print(f"Processed {pdf_file_path} in {elapsed:.2f} seconds")
+
     except Exception:
         msg = "Failed when splitting pdf " + pdf_file_path
         print(msg)
         traceback.print_exc()
-        # print everything in the buffer just in case it didn't write
         pass
-    pass

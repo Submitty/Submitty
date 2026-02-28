@@ -450,7 +450,9 @@ class RegenerateBulkImages(AbstractJob):
             generate_pdf_images.Redaction(**r)
             for r in self.job_details.get("redactions", [])
         ]
-        regenerate_bulk_images.main(folder, redactions)
+        # Support configurable parallel workers (default to None for auto-detection)
+        max_workers = self.job_details.get("max_workers", None)
+        regenerate_bulk_images.main(folder, redactions, max_workers)
 
     def cleanup_job(self):
         pass
