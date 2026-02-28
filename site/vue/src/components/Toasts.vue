@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted, type Ref } from 'vue';
+import { ref, computed, onMounted, type Ref } from 'vue';
 
 type Message = {
     type: 'error' | 'success' | 'warning';

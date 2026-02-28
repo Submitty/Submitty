@@ -1304,18 +1304,6 @@ body.no-scroll {
     width: 100%;
 }
 
-/* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
-.cell-grade {
-    cursor: pointer;
-    border-left: 1px solid var(--standard-medium-gray);
-}
-
-/* Makes the grade and time on checkpoint pages not visible at first */
-.simple-grade-grader,
-.simple-grade-date {
-    display: none;
-}
-
 .tooltip {
     position: relative;
     display: inline-block;
@@ -2218,4 +2206,31 @@ End of slider switch
 .warning-banner {
     background-color: var(--standard-vibrant-yellow);
     color: var(--default-black);
+}
+
+.danger-banner {
+    background-color: var(--standard-light-red);
+    color: var(--default-black);
+}
+
+.icon {
+    /* stylelint-disable-next-line declaration-no-important */
+    background: none !important;
+    border: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    padding: 0 !important;
+    color: var(--external-link-blue);
+    text-decoration: none;
+    /* stylelint-disable-next-line declaration-no-important */
+    font-family: "Source Sans Pro", sans-serif !important;
+    font-size: 100%;
+    cursor: pointer;
+}
+
+.fas {
+    color: var(--btn-default-text);
+}
+
+.fas:hover {
+    color: var(--external-link-blue);
 }

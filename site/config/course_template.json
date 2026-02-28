@@ -18,7 +18,7 @@
         "course_repo_url": "",
         "course_repo_branch": "main",
         "course_repo_subdirectory": "",
-        "forum_enabled": false,
+        "forum_enabled": true,
         "forum_create_thread_message": "",
         "grade_inquiry_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
         "seating_only_for_instructor": false,

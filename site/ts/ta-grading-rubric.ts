@@ -47,21 +47,10 @@ declare global {
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
+        OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
     }
 }
 
-/**
- *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
- */
-
-/**
- * Global variables.  Add these very sparingly
- */
-
-const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {};
-const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
-const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
-let GRADED_GRADEABLE: GradedGradeable | null = null;
 type Stats = { section_submitter_count: string; total_submitter_count: string; section_graded_component_count: string; total_graded_component_count: string; section_total_component_count: string; total_total_component_count: string; submitter_ids: string[]; submitter_anon_ids: Record<string, string> };
 type Gradeable = {
     id: string;
@@ -139,6 +128,19 @@ type GradedGradeable = {
     itempool_items: Record<number, string>;
 };
 
+/**
+ *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
+ */
+
+/**
+ * Global variables.  Add these very sparingly
+ */
+
+const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {};
+const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
+const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
+let GRADED_GRADEABLE: GradedGradeable | null = null;
+
 export type MarkConflicts = Record<number, MarkConflictInfo>;
 
 /**
@@ -154,7 +156,7 @@ const OLD_MARK_LIST: Record<string, Mark[]> = {};
  * Each 'graded_component' has at least properties 'score', 'mark_ids', 'comment'
  * @type {{Object}}
  */
-const OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo> = {};
+window.OLD_GRADED_COMPONENT_LIST = {};
 
 /**
  * A number to represent the id of no component
@@ -1318,8 +1320,7 @@ function getComponentPageNumber(component_id: number) {
  * @param {int} component_id
  * @return {Object}
  */
-function getComponentFromDOM(component_id: number):
-Component {
+function getComponentFromDOM(component_id: number): Component {
     const domElement = getComponentJQuery(component_id);
 
     if (isInstructorEditEnabled() && isComponentOpen(component_id)) {
@@ -2267,7 +2268,7 @@ export async function onToggleEditMode() {
         alert(`Error saving component! ${(err as Error).message}`);
     }
     try {
-    // Once components are saved, reload the component in edit mode
+        // Once components are saved, reload the component in edit mode
         updateEditModeEnabled();
         if (reopen_component_id !== NO_COMPONENT_ID) {
             await reloadGradingComponent(reopen_component_id, isEditModeEnabled(), true);
@@ -2645,7 +2646,7 @@ async function reloadGradingComponent(component_id: number, editable = false, sh
     COMPONENT_RUBRIC_LIST[component_id] = component;
     const graded_component = await ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
     // Set the global graded component list data for this component to detect changes
-    OLD_GRADED_COMPONENT_LIST[component_id] = graded_component!;
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = graded_component!;
     GRADED_COMPONENTS_LIST[component_id] = graded_component;
     return await injectGradingComponent(component, graded_component!, editable, showMarkList);
 }
@@ -2876,7 +2877,7 @@ async function openComponentGrading(component_id: number) {
         displayAjaxError(err);
         throw err;
     }
-    OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
     OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
 
     await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id]!, isEditModeEnabled(), true);
@@ -3118,13 +3119,21 @@ async function checkMark(component_id: number, mark_id: number) {
 
     // Uncheck the first mark if it's checked
     const firstMarkId = getComponentFirstMarkId(component_id);
-    if (isMarkChecked(firstMarkId)) {
+    const wasFirstChecked = isMarkChecked(firstMarkId);
+
+    if (wasFirstChecked) {
         // If first mark is checked, it will be the first element in the array
         gradedComponent.mark_ids.splice(0, 1);
     }
 
     // Then add the mark id to the array
     gradedComponent.mark_ids.push(mark_id);
+
+    // Update visual immediately
+    if (wasFirstChecked) {
+        $(`#mark-${firstMarkId} .mark-selector`).removeClass('mark-selected');
+    }
+    $(`#mark-${mark_id} .mark-selector`).addClass('mark-selected');
 
     // Finally, re-render the component
     await injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
@@ -3147,6 +3156,9 @@ function unCheckMark(component_id: number, mark_id: number) {
             break;
         }
     }
+
+    // Update visual immediately
+    $(`#mark-${mark_id} .mark-selector`).removeClass('mark-selected');
 
     // Finally, re-render the component
     return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
@@ -3356,7 +3368,7 @@ async function saveComponent(component_id: number) {
         }
         // We're in grade mode, so save the graded component
         // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
-        if (!gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
+        if (!gradedComponentsEqual(gradedComponent, window.OLD_GRADED_COMPONENT_LIST[component_id])) {
             await saveGradedComponent(component_id);
             if (!isSilentEditModeEnabled()) {
                 GRADED_COMPONENTS_LIST[component_id]!.grader_id = getGraderId();
