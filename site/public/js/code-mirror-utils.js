@@ -43,8 +43,10 @@ function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibili
  * @returns {CodeMirror}
  */
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
-    codemirror_config.scrollbarStyle = null;
+    // 1. Change scrollbarStyle to 'native' to allow the scrollbar to exist
+    codemirror_config.scrollbarStyle = 'native'; 
     codemirror_config.lineNumbers = false;
+    codemirror_config.lineWrapping = true;      
     codemirror_config.mode = 'spell-checker';
 
     CodeMirrorSpellChecker({
@@ -52,7 +54,10 @@ function getSmallCodeMirror(attachment_elem, codemirror_config) {
     });
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
-    cm.setSize(150, 30);
+    
+    // 2. Increase the height to 120px here via the API
+    cm.setSize('100%', 120); 
+    
     makeCodeMirrorAccessible(cm, 'Tab');
     disableEnterKey(cm);
     return cm;
