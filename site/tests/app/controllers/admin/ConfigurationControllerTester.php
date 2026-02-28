@@ -10,6 +10,7 @@ use app\libraries\FileUtils;
 use app\libraries\SessionManager;
 use app\libraries\Utils;
 use app\models\Config;
+use app\models\User;
 use app\repositories\forum\CategoryRepository;
 use app\views\admin\ConfigurationView;
 use Doctrine\ORM\EntityManager;
@@ -45,7 +46,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false, "chat_enabled": false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","course_repo_url":"","course_repo_branch":"main","course_repo_subdirectory":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false, "chat_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -103,6 +104,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'forum_create_thread_message'    => '',
             'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
+            'course_repo_url'                => '',
+            'course_repo_branch'             => 'main',
+            'course_repo_subdirectory'       => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
@@ -189,6 +193,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'forum_create_thread_message'    => '',
             'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
+            'course_repo_url'                => '',
+            'course_repo_branch'             => 'main',
+            'course_repo_subdirectory'       => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
@@ -282,6 +289,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'forum_create_thread_message'    => '',
             'grade_inquiry_message'          => 'Grade Inquiry Message',
             'private_repository'             => '',
+            'course_repo_url'                => '',
+            'course_repo_branch'             => 'main',
+            'course_repo_subdirectory'       => '',
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
@@ -505,5 +515,151 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         ];
         $this->assertNotNull($response->json_response);
         $this->assertEquals($expected, $response->json_response->json);
+    }
+
+    public function testPullCourseRepositoryQueuesJob(): void {
+        $this->setUpConfig();
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
+
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $instructor = $this->createMock(User::class);
+        $instructor->method('getId')->willReturn('instructor');
+        $core->setUser($instructor);
+
+        $_POST['name'] = 'course_repo_url';
+        $_POST['entry'] = 'https://example.com/course.git';
+        $controller = new ConfigurationController($core);
+        $controller->updateConfiguration();
+
+        $response = $controller->pullCourseRepository();
+        $this->assertEquals('success', $response->json_response->json['status']);
+        $this->assertEquals('queued', $response->json_response->json['data']['queue_status']);
+
+        $job_file = FileUtils::joinPaths(
+            $this->test_dir,
+            'daemon_job_queue',
+            'sync_course_repo__f19__sample.json'
+        );
+        $this->assertFileExists($job_file);
+    }
+
+    public function testPullCourseRepositoryWithoutUrlFails(): void {
+        $this->setUpConfig();
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
+
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $instructor = $this->createMock(User::class);
+        $instructor->method('getId')->willReturn('instructor');
+        $core->setUser($instructor);
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->pullCourseRepository();
+
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals(
+            'Set a Course Repository URL before pulling',
+            $response->json_response->json['message']
+        );
+    }
+
+    public function testCourseRepositoryStatusQueued(): void {
+        $this->setUpConfig();
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'config'), true);
+        FileUtils::writeJsonFile(
+            FileUtils::joinPaths($this->test_dir, 'daemon_job_queue', 'sync_course_repo__f19__sample.json'),
+            ['job' => 'SyncCourseRepo', 'semester' => 'f19', 'course' => 'sample']
+        );
+
+        FileUtils::writeJsonFile(
+            FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'config', 'course_repo_sync_status.json'),
+            ['status' => 'success', 'message' => 'ok']
+        );
+
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->courseRepositoryStatus();
+        $this->assertEquals('success', $response->json_response->json['status']);
+        $this->assertEquals('queued', $response->json_response->json['data']['queue_status']);
+        $this->assertEquals('success', $response->json_response->json['data']['last_sync']['status']);
+    }
+
+    public function testUpdateConfigurationRejectsInvalidCourseRepoBranch(): void {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $_POST['name'] = 'course_repo_branch';
+        $_POST['entry'] = '../main';
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->updateConfiguration();
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('Invalid repository branch name', $response->json_response->json['message']);
+    }
+
+    public function testUpdateConfigurationRejectsInvalidCourseRepoSubdirectory(): void {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $_POST['name'] = 'course_repo_subdirectory';
+        $_POST['entry'] = 'gradeables/../outside';
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->updateConfiguration();
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('Repository subdirectory cannot contain ".."', $response->json_response->json['message']);
+    }
+
+    public function testPullCourseRepositoryFailsWhenAlreadyProcessing(): void {
+        $this->setUpConfig();
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
+
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $instructor = $this->createMock(User::class);
+        $instructor->method('getId')->willReturn('instructor');
+        $core->setUser($instructor);
+
+        $_POST['name'] = 'course_repo_url';
+        $_POST['entry'] = 'https://example.com/course.git';
+        $controller = new ConfigurationController($core);
+        $controller->updateConfiguration();
+
+        $processing_file = FileUtils::joinPaths(
+            $this->test_dir,
+            'daemon_job_queue',
+            'PROCESSING_sync_course_repo__f19__sample.json'
+        );
+        file_put_contents($processing_file, '{}');
+
+        $response = $controller->pullCourseRepository();
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('A repository pull is already in progress', $response->json_response->json['message']);
     }
 }
