@@ -243,13 +243,30 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // This should not be allowed, its after the submission open date
-        updateDates('#date_ta_view', future_date, 'Some Changes Failed!');
+        // This SHOULD be allowed, because there are no more constraints on the ta_view_date
+        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+
+        // The gradeable should be visible to everyone (Submission open date get priority in listing over ta view date)
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
+        // Open submission date > now()
+        updateDates('#date_submit', future_date, 'All Changes Saved');
+
+        // The gradeable should only be visible to instructors when both TA beta testing and open submission is set in the future.
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
         // Reset to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
-
-        // Make the submit date the future date
-        updateDates('#date_submit', future_date, 'All Changes Saved');
 
         // Gradeable should not be visible to students, but visible to TA and graders
         ['ta', 'grader'].forEach((user) => {
@@ -283,5 +300,39 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_due', past_date, 'All Changes Saved');
         updateDates('#date_grade', past_date, 'All Changes Saved');
         updateDates('#date_grade_due', past_date, 'All Changes Saved');
+
+        // --- LAB GRADEABLE DATE TESTS ---
+
+        // Login to a TA lab gradeable
+        logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
+
+        // Move TA view in the future
+        updateDates('#date_ta_view', '9997-12-31 23:59:59', 'All Changes Saved');
+
+        // Move date grade to the past
+        updateDates('#date_grade', '1970-02-10 23:59:59', 'All Changes Saved');
+
+        // The gradeable should be visible to graders because the grade start date takes priority over the ta view date
+        ['grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Future (TAs) Lab');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
+
+        // Move manual grading to the future
+        updateDates('#date_grade', future_date, 'All Changes Saved');
+
+        // The gradeable should only be visible to instructors
+        ['grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('not.contain.text', 'Future (TAs) Lab');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
+
+        // Reset dates
+        updateDates('#date_ta_view', '1970-01-01 23:59:59', 'All Changes Saved');
+        updateDates('#date_grade', '9997-12-31 23:59:59', 'All Changes Saved');
     });
 });
