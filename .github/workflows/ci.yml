@@ -302,11 +302,11 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       #  submitty_daemon_jobs unit tests
-      - name: Install bulk upload dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y poppler-utils
-          sudo apt-get install -y libzbar0
+      - name: Cache and install bulk upload dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: poppler-utils libzbar0
+          version: 1.0
 
       - name: Run bulk upload unit tests
         working-directory: sbin/submitty_daemon_jobs
@@ -327,8 +327,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
-      - name: install yamllint
-        run: sudo apt-get install -y yamllint
+      - name: Cache and install yamllint
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: yamllint
+          version: 1.0
       - name: Run yamllint
         run: yamllint .
 
@@ -338,8 +341,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
-      - name: install ShellCheck
-        run: sudo apt-get install -y shellcheck
+      - name: Cache and install ShellCheck
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: shellcheck
+          version: 1.0
       - name: Run ShellCheck
         run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
 
