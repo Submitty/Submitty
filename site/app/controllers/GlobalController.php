@@ -65,6 +65,8 @@ class GlobalController extends AbstractController {
         $bannerImages = $repo->getValidBannerImages();
         $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
 
+        $this->setCacheControlHeaders();
+
         return $this->core->getOutput()->renderTemplate(
             'Global',
             'header',
@@ -866,5 +868,11 @@ class GlobalController extends AbstractController {
         }
 
         return true;
+    }
+
+    private function setCacheControlHeaders(): void {
+        header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        header("Pragma: no-cache"); // HTTP 1.0.
+        header("Expires: 0"); // Proxies
     }
 }
