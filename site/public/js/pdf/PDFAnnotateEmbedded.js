@@ -1,6 +1,6 @@
 /* global pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
-
+/* global container, zoomIn, zoomOut */
 window.RENDER_OPTIONS = {
     documentId: '',
     userId: '',
