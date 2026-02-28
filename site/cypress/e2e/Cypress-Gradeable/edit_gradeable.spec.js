@@ -266,10 +266,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
 
         // Move TA view in the future
-        //updateDates('#date_ta_view', future_date, 'All Changes Saved');
+        updateDates('#date_ta_view', future_date, /^(All Changes Saved|)$/);
 
         // Move date grade to the past
-        //updateDates('#date_grade', past_date, 'All Changes Saved');
+        updateDates('#date_grade', past_date, /^(All Changes Saved|)$/);
 
         // The gradeable should be visible to graders because the grade start date takes priority over the ta view date
         ['grader', 'ta'].forEach((user) => {
@@ -291,8 +291,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
 
         // Reset dates
-        updateDates('#date_ta_view', future_date, 'All Changes Saved');
-        updateDates('#date_grade', past_date, 'All Changes Saved');
+        updateDates('#date_ta_view', '1970-01-01 23:59:59', 'All Changes Saved');
+        updateDates('#date_grade', '9997-12-31 23:59:59', 'All Changes Saved');
 
         // Back to electronic gradeables
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
