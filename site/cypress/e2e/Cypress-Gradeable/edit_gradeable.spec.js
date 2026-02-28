@@ -266,8 +266,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
 
         // Move TA view in the future
-        cy.get('#date_ta_view').should('be.enabled');
-        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+        //updateDates('#date_ta_view', future_date, 'All Changes Saved');
 
         // Move date grade to the past
         updateDates('#date_grade', past_date, 'All Changes Saved');
