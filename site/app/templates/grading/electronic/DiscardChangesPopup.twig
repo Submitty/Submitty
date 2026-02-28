@@ -1,0 +1,10 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}discard-changes-popup{% endblock %}
+{% block title %}Discard Changes?{% endblock %}
+{% block body %}
+    <p>Are you sure you want to discard all changes to the student message?</p>
+{% endblock %}
+{% block buttons %}
+    <button class="btn btn-default close-button" id="discard-changes-cancel" onclick="$('#{{ block('popup_id') }}').hide(); event.stopPropagation()" tabindex="0">Keep Editing</button>
+    <button class="btn btn-danger" id="discard-changes-confirm" tabindex="0">Discard Changes</button>
+{% endblock %}
