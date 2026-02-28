@@ -3,6 +3,8 @@ name: Label Stale PRs
 on:
   schedule:
     - cron: '0 0 * * *'  # runs every day at midnight
+  workflow_dispatch:
+
 jobs:
   autoClosePr:
     name: auto close pr
