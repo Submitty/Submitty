@@ -620,6 +620,8 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'overridden_grades_score' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades() ? $graded_gradeable->getTotalScore() : 0,
+            'overridden_grades_comment' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades() ? $graded_gradeable->getOverriddenComment() : '',
             'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
