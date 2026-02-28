@@ -421,8 +421,12 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 return;
             }
         },
-        error: function (a, b) {
-            window.alert('Something went wrong when adding new thread. Please refresh the page.');
+        error: function (jqXHR, textStatus, errorThrown) {
+            // Firefox will abort requests during page reloads (often showing up as status 0 or textStatus 'error' with empty errorThrown)
+            if (textStatus === 'abort' || jqXHR.status === 0) {
+                return;
+            }
+            displayErrorMessage('Something went wrong when adding new thread. Please refresh the page.');
         },
     });
 }
