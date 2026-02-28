@@ -122,16 +122,11 @@ runs:
         PGPASSWORD=${PGPASSWORD} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
       shell: bash
 
-    - name: Install apt-get packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install libseccomp-dev
-        sudo apt-get install libboost-all-dev
-        sudo apt-get install poppler-utils
-        sudo apt-get install valgrind
-        sudo apt-get install ca-certificates
-        sudo apt-get install moreutils
-      shell: bash
+    - name: Cache and install apt packages
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libseccomp-dev libboost-all-dev poppler-utils valgrind ca-certificates moreutils
+        version: 1.0
 
     - name: Install third party dependencies
       run: |
@@ -165,9 +160,14 @@ runs:
         sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
       shell: bash
 
+    - name: Cache and install nginx
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: nginx
+        version: 1.0
+
     - name: Set up nginx
       run: |
-        sudo apt-get install nginx
         cd $SUBMITTY_REPOSITORY
         sudo mkdir /etc/systemd/system/nginx.service.d
         sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
@@ -180,14 +180,15 @@ runs:
         sudo service nginx restart
       shell: bash
 
+    # NOTE: php version below must match PHP_VER env variable (currently 8.2)
+    - name: Cache and install apache packages
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3 php8.2-fpm
+        version: 1.0
+
     - name: Set up apache
       run: |
-        sudo apt-get install apache2
-        sudo apt-get install apache2-suexec-custom
-        sudo apt-get install libapache2-mod-authnz-external
-        sudo apt-get install libapache2-mod-authz-unixgroup
-        sudo apt-get install libapache2-mod-wsgi-py3
-        sudo apt-get install php${PHP_VER}-fpm
         cd $SUBMITTY_REPOSITORY
         sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
