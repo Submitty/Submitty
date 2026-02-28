@@ -342,7 +342,7 @@ class GradeableList extends AbstractModel {
     }
 
     /**
-     * @return array<string, array<string, string>> Gradeable ID mapped to it's property values.
+     * @return array<string, array<string, mixed>> Gradeable ID mapped to it's property values.
      */
     public function toJson(): array {
         $gradeables = [];
