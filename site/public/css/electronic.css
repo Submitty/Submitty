@@ -156,12 +156,16 @@ button > i.fas:hover {
 }
 
 :root {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: black;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px black;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: grey;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px grey;
 }
 
@@ -538,6 +542,7 @@ progress::-webkit-progress-value {
 }
 
 .panel-instructions {
+    /* stylelint-disable-next-line color-named */
     color: dimgray;
     position: absolute;
     top: 50%;
@@ -809,6 +814,7 @@ progress::-webkit-progress-value {
 }
 
 .file-viewer a:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #6db7ff;
     text-decoration: none;
 }

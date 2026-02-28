@@ -269,6 +269,7 @@
 }
 
 .markdown img {
+    /* stylelint-disable-next-line color-named */
     background-color: white;
     max-width: 100%;
 }

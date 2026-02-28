@@ -11,6 +11,7 @@ a:visited,
 a:link,
 a.fa:hover,
 a > i.fa:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #2627ee;
 }
 
@@ -19,6 +20,7 @@ a:visited,
 a:link,
 a.fas:hover,
 a > i.fas:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #2627ee;
 }
 
@@ -27,14 +29,17 @@ a:visited,
 a:link,
 a.far:hover,
 a > i.far:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #2627ee;
 }
 
 a:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #131399;
 }
 
 a:active {
+    /* stylelint-disable-next-line color-no-hex */
     color: #991313;
 }
 
@@ -116,16 +121,20 @@ a.btn {
 .black-btn:hover,
 .black-btn > i.fas:hover {
     /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line color-no-hex */
     color: #405e90 !important;
     /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line color-no-hex */
     border-color: #405e90 !important;
 }
 
 .black-btn:active,
 .black-btn > i.fas:active {
     /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line color-no-hex */
     color: #991313 !important;
     /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line color-no-hex */
     border-color: #991313 !important;
 }
 /* stylelint-enable no-descending-specificity */
