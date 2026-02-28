@@ -34,3 +34,22 @@ table caption {
 table caption .subcaption {
     font-size: 1rem;
 }
+
+.delete-section-cell {
+    width: 5px;
+    text-align: center;
+}
+
+.add-section-row {
+    margin-top: 20px;
+    padding: 10px 0;
+    gap: 10px;
+}
+
+.add-section-row input[type="text"] {
+    width: 140px;
+}
+
+.add-section-row .btn {
+    padding: 6px 16px;
+} 
