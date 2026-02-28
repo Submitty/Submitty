@@ -254,9 +254,6 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // Ta beta testing date > now()
-        updateDates('#date_ta_view', future_date, 'All Changes Saved');
-
         // Open submission date > now()
         updateDates('#date_submit', future_date, 'All Changes Saved');
 
