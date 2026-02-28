@@ -320,4 +320,47 @@ class GradeableList extends AbstractModel {
         }
         return -1;
     }
+
+    private function sectionToString(int $section): string {
+        $value = 'INVALID';
+        switch ($section) {
+            case self::FUTURE:
+                return 'FUTURE';
+            case self::BETA:
+                return 'BETA';
+            case self::OPEN:
+                return 'OPEN';
+            case self::CLOSED:
+                return 'CLOSED';
+            case self::GRADING:
+                return 'GRADING';
+            case self::GRADED:
+                return 'GRADED';
+            default:
+                return 'INVALID';
+        }
+    }
+
+    /**
+     * @return array<string, array<string, string>> Gradeable ID mapped to it's property values.
+     */
+    public function toJson(): array {
+        $gradeables = [];
+        foreach ($this->getSubmittableElectronicGradeables() as $gradeable) {
+            $section = self::getGradeableSection($this->core, $gradeable);
+            $gradeables[$gradeable->getId()] = [
+                'id' => $gradeable->getId(),
+                'title' => $gradeable->getTitle(),
+                'instructions_url' => $gradeable->getInstructionsUrl(),
+                'syllabus_bucket' => $gradeable->getSyllabusBucket(),
+                'section' => $section,
+                'section_name' => $this->sectionToString($section),
+                'due_date' => $gradeable->getSubmissionDueDate(),
+                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
+                'vcs_repository' => $gradeable->getRepositoryPath($this->core->getUser()),
+                'vcs_subdirectory' => $gradeable->getVcsSubdirectory()
+            ];
+        }
+        return $gradeables;
+    }
 }
