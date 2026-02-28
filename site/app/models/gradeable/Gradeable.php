@@ -2371,7 +2371,6 @@ class Gradeable extends AbstractModel {
         }
 
         // If the gradeable has NO open submission date and TA view start date is in the future
-        $date = $this->core->getDateTimeNow();
         if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
             return false;
         }

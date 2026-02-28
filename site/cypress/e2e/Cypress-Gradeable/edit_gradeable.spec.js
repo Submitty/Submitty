@@ -254,11 +254,22 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
+        // Ta beta testing date > now()
+        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+
+        // Open submission date > now()
+        updateDates('#date_submit', future_date, 'All Changes Saved');
+
+        // The gradeable should only be visible to instructors when both TA beta testing and open submission is set in the future.
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
         // Reset to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
-
-        // Make the submit date the future date
-        updateDates('#date_submit', future_date, 'All Changes Saved');
 
         // Gradeable should not be visible to students, but visible to TA and graders
         ['ta', 'grader'].forEach((user) => {
