@@ -2,7 +2,7 @@
   "name": "submitty/submitty",
   "config": {
     "platform": {
-      "php": "8.1"
+      "php": "8.2"
     },
     "sort-packages": true,
     "allow-plugins": {
@@ -42,7 +42,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "1.2.0",
     "php-mock/php-mock-phpunit": "2.15.0",
-    "phpstan/phpstan": "2.1.38",
+    "phpstan/phpstan": "2.1.40",
     "phpstan/phpstan-deprecation-rules": "2.0.3",
     "phpstan/phpstan-doctrine": "2.0.17",
     "phpstan/phpstan-strict-rules": "2.0.8",
