@@ -25,6 +25,7 @@ pause==0.3
 paramiko==4.0.0
 tzlocal==5.3.1
 PyPDF2==3.0.1
+PyMuPDF==1.27.1
 distro==1.9.0
 jsonschema==4.26.0
 jsonref==1.1.0
