@@ -30,6 +30,7 @@ jobs:
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - name: Run ansible-lint
@@ -41,6 +42,7 @@ jobs:
   css-lint:
     name: CSS Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -66,6 +68,7 @@ jobs:
   js-lint:
     name: JavaScript Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -91,6 +94,7 @@ jobs:
   js-unit:
     name: JavaScript Unit
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -119,6 +123,7 @@ jobs:
   twig-lint:
     name: Twig Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -146,6 +151,7 @@ jobs:
   php-lint:
     name: PHP Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -182,6 +188,7 @@ jobs:
   php-unit:
     name: PHP Unit
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: site
@@ -218,6 +225,7 @@ jobs:
   python-lint:
     name: Python Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -240,6 +248,7 @@ jobs:
   python-unit:
     name: Python Unit
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -325,6 +334,7 @@ jobs:
   yaml-lint:
     name: YAML Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - name: install yamllint
@@ -336,6 +346,7 @@ jobs:
   shellcheck:
     name: Shell Lint
     runs-on: ubuntu-22.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - name: install ShellCheck
@@ -347,6 +358,7 @@ jobs:
   colors-css:
     name: colors.css Check
     runs-on: ubuntu-22.04
+    timeout-minutes: 5
 
     steps:
       - name: Checkout main branch
@@ -391,6 +403,7 @@ jobs:
   db-check:
     name: DB Check
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     env:
       PGPASSWORD: submitty_dbuser
       MAIN_INSTALL_PATH: ${{ github.WORKSPACE }}/main
@@ -645,6 +658,7 @@ jobs:
   Cypress-System:
     name: Cypress (System)
     runs-on: ubuntu-22.04
+    timeout-minutes: 40
     services:
       postgres:
         image: postgres
@@ -825,6 +839,7 @@ jobs:
 
   Cypress:
     runs-on: ubuntu-22.04
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -906,6 +921,7 @@ jobs:
   Integration:
     name: Integration
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     # Postgres should not be needed for the integration tests.
     # But unfortunately Configure test suite seems to use it at the moment, and
     # Configure test suite seems to be necessary for the Integration tests
@@ -935,6 +951,7 @@ jobs:
   ansible-ci:
     name: Ansible Install
     runs-on: ubuntu-22.04
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v6
       - name: Setup SSH
