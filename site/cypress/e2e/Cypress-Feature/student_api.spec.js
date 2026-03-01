@@ -182,7 +182,7 @@ describe('Tests cases for the Student API', () => {
                 expect(data.subdirectory_vcs_homework.due_date.timezone_type).equal(3);
                 expect(data.subdirectory_vcs_homework.due_date.timezone).equal('America/New_York');
                 expect(data.subdirectory_vcs_homework.gradeable_type).equal('Electronic File');
-                expect(data.subdirectory_vcs_homework.vcs_repository).equal(`http://localhost:1511/git/${getCurrentSemester()}/sample/subdirectory_vcs_homework/student`);
+                expect(data.subdirectory_vcs_homework.vcs_repository).equal(`http://localhost/git/${getCurrentSemester()}/sample/subdirectory_vcs_homework/student`);
                 expect(data.subdirectory_vcs_homework.vcs_subdirectory).equal('src');
 
                 // Open homework
