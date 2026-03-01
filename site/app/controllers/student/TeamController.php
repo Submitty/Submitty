@@ -550,10 +550,23 @@ class TeamController extends AbstractController {
         $invites_received = [];
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
         $seeking_partner = false;
+
+        // Batch-fetch all needed users in a single query instead of
+        // calling getUserById() per user inside loops (N+1 pattern)
+        $all_user_ids = array_merge(
+            $team !== null ? $team->getMembers() : [],
+            $users_seeking_team
+        );
+        $users_map = !empty($all_user_ids)
+            ? $this->core->getQueries()->getUsersById(array_unique($all_user_ids))
+            : [];
+
         if ($team !== null) {
             //List team members
             foreach ($team->getMembers() as $teammate) {
-                $members[] = $this->core->getQueries()->getUserById($teammate);
+                if (isset($users_map[$teammate])) {
+                    $members[] = $users_map[$teammate];
+                }
             }
         }
         else {
@@ -569,7 +582,9 @@ class TeamController extends AbstractController {
         }
 
         foreach ($users_seeking_team as $user_seeking_team) {
-            $seekers[] = $this->core->getQueries()->getUserById($user_seeking_team);
+            if (isset($users_map[$user_seeking_team])) {
+                $seekers[] = $users_map[$user_seeking_team];
+            }
         }
 
         $date = $this->core->getDateTimeNow();
