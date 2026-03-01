@@ -120,13 +120,13 @@ def verify_migration_freshness():
 
     if invalid_migrations:
         print(f"\nINVALID FORMAT ({len(invalid_migrations)}):")
-        for filepath, filename in invalid_migrations:
+        for filepath, _filename in invalid_migrations:
             print(f"  - {filepath}")
         print("\nExpected format: YYYYMMDDHHMMSS_description.py")
 
     if stale_migrations:
         print(f"\nSTALE MIGRATIONS ({len(stale_migrations)}):")
-        for filepath, filename, datestamp, age_days in stale_migrations:
+        for filepath, _filename, datestamp, age_days in stale_migrations:
             print(f"  - {filepath}")
             print(f"    Date: {datestamp.strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"    Age: {age_days} days (max allowed: {MAX_AGE_DAYS} days)")
@@ -136,7 +136,7 @@ def verify_migration_freshness():
         print("=" * 70)
         print(f"\nMigrations must be ≤{MAX_AGE_DAYS} days old to prevent out-of-order execution.")
         print("\nTo fix, rename the file with today's datestamp:")
-        for filepath, filename, datestamp, age_days in stale_migrations:
+        for filepath, filename, _datestamp, _age_days in stale_migrations:
             migration_type = os.path.basename(os.path.dirname(filepath))
             description = filename.split('_', 1)[1] if '_' in filename else 'description.py'
             new_datestamp = now.strftime(DATESTAMP_FORMAT)
