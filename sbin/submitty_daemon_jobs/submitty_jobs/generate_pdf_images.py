@@ -67,30 +67,30 @@ def get_file_hash(pdf_file_path: str) -> str:
 
 def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     start_time = time.time()
-    
+
     directory = os.path.dirname(pdf_file_path)
     if directory:
         os.chdir(os.path.dirname(pdf_file_path))
-    
+
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    
+
     # Group redactions by page for efficient processing
     redactions_by_page = {}
     for redaction in redactions:
         if redaction.page_number not in redactions_by_page:
             redactions_by_page[redaction.page_number] = []
         redactions_by_page[redaction.page_number].append(redaction)
-    
+
     # Cache for redaction patterns
     pattern_cache = {}
-    
+
     try:
         # Check if we need to regenerate (optional optimization)
         cache_file = os.path.join(output_dir, ".cache_info")
         current_hash = get_file_hash(pdf_file_path)
-        
+
         # Only proceed if cache doesn't exist or hash changed
         if os.path.exists(cache_file):
             with open(cache_file, 'r') as f:
@@ -98,7 +98,7 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
             if cached_hash == current_hash:
                 print(f"Skipping {pdf_file_path} - unchanged (cached)")
                 return
-        
+
         # Open PDF with PyMuPDF
         pdf_document = fitz.open(pdf_file_path)
 
