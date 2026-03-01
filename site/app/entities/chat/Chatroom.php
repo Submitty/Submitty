@@ -120,18 +120,55 @@ class Chatroom {
         return $this->is_deleted;
     }
 
-    public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
-        $adj  = $adjectives[$adj_index];
-        $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+    /**
+     * Format: AdjectiveAnimalNumber (e.g., "SwiftPanda123")
+     * 
+     * @param \app\libraries\Core $core Core instance for config access
+     * @param string $user_id User ID
+     * @return string Anonymous name
+     */
+    public function calcAnonName(\app\libraries\Core $core, string $user_id): string {
+        // Use multiple entropy sources for security
+        $session_started = $this->getSessionStartedAt();
+        $session_timestamp = $session_started ? $session_started->getTimestamp() : 0;
+        
+        // This makes it difficult to reverse-engineer while remaining deterministic
+        $hash_input = sprintf(
+            '%s:%d:%s:%d:%s',
+            $user_id,
+            $this->getId(),
+            $this->getHostId(),
+            $session_timestamp,
+            $core->getConfig()->getSecretSession() // Use Submitty's session secret
+        );
+        
+        $hash = hash('sha256', $hash_input);
+        
+        // Convert hash to name components
+        $adjectives = [
+            'Swift', 'Brave', 'Clever', 'Wise', 'Bold', 'Calm', 'Bright', 'Quick',
+            'Silent', 'Fierce', 'Gentle', 'Noble', 'Proud', 'Sharp', 'Strong', 'Keen',
+            'Loyal', 'Steady', 'Witty', 'Daring', 'Graceful', 'Humble', 'Mighty', 'Nimble',
+            'Patient', 'Radiant', 'Serene', 'Vigilant', 'Zesty', 'Agile', 'Curious', 'Eager',
+            'Fearless', 'Happy', 'Jolly', 'Kind', 'Lively', 'Merry', 'Peaceful', 'Cheerful'
+        ];
+        
+        $animals = [
+            'Panda', 'Eagle', 'Dolphin', 'Wolf', 'Fox', 'Tiger', 'Bear', 'Hawk',
+            'Owl', 'Raven', 'Falcon', 'Lynx', 'Otter', 'Deer', 'Moose', 'Bison',
+            'Cheetah', 'Jaguar', 'Leopard', 'Panther', 'Lion', 'Cougar', 'Dragon', 'Phoenix',
+            'Penguin', 'Turtle', 'Seal', 'Walrus', 'Badger', 'Ferret', 'Mink', 'Raccoon',
+            'Squirrel', 'Rabbit', 'Hare', 'Vixen', 'Stag', 'Buck', 'Mustang', 'Stallion'
+        ];
+        
+        // Use hash bytes to select components
+        $hash_int = hexdec(substr($hash, 0, 8));
+        
+        $adjective_idx = $hash_int % count($adjectives);
+        $animal_idx = (int)(($hash_int / count($adjectives)) % count($animals));
+        $number = 100 + ($hash_int % 900); // 100-999
+        
+        return "{$adjectives[$adjective_idx]}{$animals[$animal_idx]}{$number}";
     }
 
     public function getSessionStartedAt(): ?\DateTime {
