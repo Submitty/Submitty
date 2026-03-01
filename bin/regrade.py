@@ -203,6 +203,11 @@ def main():
                     datastore = json.load(build_configuration)
                     required_capabilities = datastore.get('required_capabilities', 'default')
                     max_grading_time = datastore.get('max_possible_grading_time', -1)
+                    is_team_assignment = datastore.get('team_assignment', False)
+                    if not isinstance(is_team_assignment, bool):
+                        raise SystemExit(
+                            "ERROR: build config field 'team_assignment' must be a boolean for gradeable '{}'".format(my_gradeable)
+                        )
 
                 #get the current time
                 queue_time = dateutils.write_submitty_date()
@@ -213,15 +218,14 @@ def main():
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
 
-                # FIXME: This will be incorrect if the username includes an underscore
-                if '_' not in my_who:
-                    my_user = my_who
-                    my_team = ""
-                    my_is_team = False
-                else:
+                if is_team_assignment:
                     my_user = ""
                     my_team = my_who
                     my_is_team = True
+                else:
+                    my_user = my_who
+                    my_team = ""
+                    my_is_team = False
 
                 # Note: If the initial checkout failed, or if
                 # autograding failed to create a results subdirectory
