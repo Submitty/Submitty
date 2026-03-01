@@ -8,39 +8,51 @@ William Allen, 2021-current
 
 ## Developers  
 
-Tony Fausto, 2024-current  
+
+
+Ryan Koester, 2025-current  
+Christopher Poon, 2025-current  
+Justin Manion, 2025-current  
 Alex Lavallee, 2024-current  
-Itamar Oren-naftalovich, 2024-current  
-Chris McCarthy, 2024-current  
-Dorian Bilelis, 2024-current  
-Michael Papadopoulos, 2024-current  
-William Powe, 2024-current  
 Zachary Niles Peretz, 2024-current  
 Williams Chen, 2024-current  
-Sahil Suman, 2024, Google Summer of Code 2024  
-Rahul Vishwakarma, 2024, Google Summer of Code 2024  
-Sophia Oliinik, 2024, Google Summer of Code 2024  
-Nithish Reddy Banda, 2024, Google Summer of Code 2024  
 Jeffrey Cordero, 2024-current  
-Kush Raval, 2024-current  
-Ryan Varughese, 2024-current  
-Zheyu Deng, 2023-current  
-Chuanyi Pan, 2023-current  
 Tate Whiteberg, 2023-current  
 Cameron Peterson, 2023-current, Google Summer of Code 2023  
 Sátvik Karanam 2023-current  
-Jaeseok Kang 2023-current  
-Hanson Gu 2023-current  
 Viane Matsibekker 2023-current  
-Yanli Wang 2023-current  
 Shail Patel 2018-current  
-Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
 Steven Lindsey 2014-current  
 Peter Bailie 2014-current  
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
+Jaeseok Kang 2023-2025  
+Yanli Wang 2023-2025  
+Ryan Styron, 2025  
+Rafiuzzaman Khan, 2025  
+Giancarlo Martinelli, 2025  
+Yichang Lin, 2025  
+Garrett Gee, 2025  
+Max Dyer, 2025  
+Kana Rudnick, 2025  
+Hanson Gu 2023-2024  
+Jasmine Plum 2017-2024  
+Tony Fausto, 2024  
+Itamar Oren-naftalovich, 2024  
+Chris McCarthy, 2024  
+Dorian Bilelis, 2024  
+Michael Papadopoulos, 2024  
+William Powe, 2024  
+Sahil Suman, 2024, Google Summer of Code 2024  
+Rahul Vishwakarma, 2024, Google Summer of Code 2024  
+Sophia Oliinik, 2024, Google Summer of Code 2024  
+Nithish Reddy Banda, 2024, Google Summer of Code 2024  
+Kush Raval, 2024  
+Ryan Varughese, 2024  
+Zheyu Deng, 2023-2025  
+Chuanyi Pan, 2023-2024  
 Johnny Chen, 2024  
 James Fitzgerald, 2024  
 Michael Krar, 2024  

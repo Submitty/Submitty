@@ -216,6 +216,11 @@ class User extends AbstractModel implements \JsonSerializable {
     /** @var array A cache of [gradeable id] => [anon id] */
     private $anon_id_by_gradeable = [];
 
+    /** @prop
+     * @var false|array<int, array{term: string, course: string}> List of courses where the user has instructor level access, or false if not loaded
+     */
+    protected $instructor_courses = false;
+
     /**
      * User constructor.
      *
@@ -795,6 +800,16 @@ class User extends AbstractModel implements \JsonSerializable {
      */
     public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
+
+    /**
+     * @return array<int, array{term: string, course: string}> List of courses where the user has instructor level access
+     */
+    public function getInstructorCourses() {
+        if ($this->instructor_courses === false) {
+            $this->instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->id);
+        }
+        return $this->instructor_courses;
     }
 
     /**
