@@ -53,7 +53,7 @@ Expected output: `hello world`
 
 ## Notes
 
-- The module name must match the filename (without the `.erl` extension)
+- In Erlang, the module name should match the filename (without the `.erl` extension); for your submission, use `hello.erl` for the `hello` module
 - Erlang uses `~n` for newlines in `io:format/1` rather than `\n`
 - The `-noshell` flag runs Erlang without an interactive shell
 - The `-s init stop` flag ensures the Erlang VM terminates after running the function
