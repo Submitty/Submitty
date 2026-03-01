@@ -92,6 +92,8 @@ abstract class AbstractDatabase {
         if ($this->conn === null) {
             try {
                 $config = new Configuration();
+                // Disable result cache to avoid using deprecated doctrine/cache
+                $config->setResultCache(null);
                 if ($debug) {
                     $this->query_logger = new QueryLogger();
                     $logger_middleware = new Middleware($this->query_logger);
