@@ -143,7 +143,7 @@ function shuffleAnonName(chatroomId) {
             csrf_token: csrfToken,
         },
         success: function (response) {
-            const msg = JSON.parse(response);
+            const msg = typeof response === 'string' ? JSON.parse(response) : response;
             if (msg.status === 'success') {
                 displaySuccessMessage('Anonymous names have been shuffled!');
                 const pageDataElement = document.getElementById('page-data');
@@ -151,6 +151,7 @@ function shuffleAnonName(chatroomId) {
                     const pageData = JSON.parse(pageDataElement.textContent);
                     if (pageData.isAnonymous) {
                         pageData.displayName = msg.data.newName;
+                        window.currentChatDisplayName = msg.data.newName;
                         pageDataElement.textContent = JSON.stringify(pageData);
                         showJoinMessage(`Your anonymous name is now ${msg.data.newName}.`);
                     }
@@ -211,6 +212,7 @@ function initChatroomSocketClient(chatroomId) {
                     const pageData = JSON.parse(pageDataElement.textContent);
                     if (pageData.isAnonymous) {
                         pageData.displayName = msg.newName;
+                        window.currentChatDisplayName = msg.newName;
                         pageDataElement.textContent = JSON.stringify(pageData);
                         showJoinMessage(`Your anonymous name is now ${msg.newName}.`);
                     }
@@ -374,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
         const { chatroomId, userId, displayName, user_admin, isAnonymous, read_only } = pageData;
+        window.currentChatDisplayName = displayName;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
 
@@ -402,7 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const role = user_admin ? 'instructor' : 'student';
-                sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+                const activeDisplayName = window.currentChatDisplayName || displayName;
+                sendMessage(chatroomId, userId, activeDisplayName, role, messageContent, isAnonymous);
 
                 messageInput.value = '';
             });

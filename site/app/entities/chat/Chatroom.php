@@ -196,29 +196,29 @@ class Chatroom {
                 $noun = $nouns[random_int(0, count($nouns) - 1)];
                 $suffix = strtoupper(bin2hex(random_bytes(2)));
                 $candidateName = "Anonymous {$adj} {$noun} #{$suffix}";
-                
+
                 // Check if this name already exists in the chatroom
                 $repo = $em->getRepository(ChatroomAnonymousName::class);
                 $existing = $repo->createQueryBuilder('can')
-                    ->where('can.chatroom_id = :chatroom_id')
-                    ->andWhere('can.display_name = :display_name')
-                    ->setParameter('chatroom_id', $this->getId())
-                    ->setParameter('display_name', $candidateName)
+                    ->where('can.chatroomId = :chatroomId')
+                    ->andWhere('can.displayName = :displayName')
+                    ->setParameter('chatroomId', $this->getId())
+                    ->setParameter('displayName', $candidateName)
                     ->getQuery()
                     ->getOneOrNullResult();
-                
+
                 if ($existing === null) {
                     $displayName = $candidateName;
                     break;
                 }
             }
-            
+
             // Fallback if max retries exceeded (very unlikely)
             if ($displayName === null) {
                 $suffix = strtoupper(bin2hex(random_bytes(2)));
                 $displayName = "Anonymous User #{$suffix}";
             }
-            
+
             $anonName = new ChatroomAnonymousName($this->getId(), $user_id, $displayName);
             $em->persist($anonName);
             $em->flush();
