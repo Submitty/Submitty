@@ -2,6 +2,9 @@
 {% set name_reqs = requirements["user_id_requirements"]["name_requirements"] %}
 {% set email_reqs = requirements["user_id_requirements"]["email_requirements"] %}
 {% set pwd_reqs = requirements["password_requirements"] is defined ? requirements["password_requirements"] : {} %}
+<script>
+    var passwordRequirements = {{ pwd_reqs | json_encode | raw }};
+</script>
 <div class="content shadow" id="login-box">
     <div id="login-guest">
         <h1> Sign Up <a target=_blank href="https://submitty.org/student/self_account_creation">
@@ -88,6 +91,16 @@
             Confirm Password
             <input type="password" name="confirm_password" data-testid="confirm-password" required id="confirm-password-input" onblur="checkPasswordsMatch()" />
         </div>
-        <input type="submit" name="signup" value="Sign Up" class="btn signup-btn btn-primary" data-testid="sign-up-button" />
+        <input type="submit" name="signup" value="Sign Up" class="btn signup-btn btn-primary" data-testid="sign-up-button" onclick="
+            if ($('#password-input').val() !== $('#confirm-password-input').val()) {
+                event.preventDefault();
+                displayErrorMessage('Passwords did not match.');
+                return;
+            }
+            if (!validatePasswordClientSide($('#password-input').val(), passwordRequirements)) {
+                event.preventDefault();
+                displayErrorMessage('Password does not meet the requirements.');
+            }
+        " />
     </form>
 </div>

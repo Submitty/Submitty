@@ -102,22 +102,24 @@ class Utils {
      * @param array{min_length: int, max_length: int, require_uppercase: bool, require_lowercase: bool, require_numbers: bool, require_special_chars: bool} $requirements The password requirements taken from the config file
      */
     public static function isValidPassword(string $password, array $requirements): bool {
-        if (strlen($password) < $requirements['min_length'] || strlen($password) > $requirements['max_length']) {
-            return false;
+        $len = strlen($password);
+        $has_uppercase = false;
+        $has_lowercase = false;
+        $has_numbers = false;
+        $has_special = false;
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $password[$i];
+            $has_uppercase = $has_uppercase || ($ch >= 'A' && $ch <= 'Z');
+            $has_lowercase = $has_lowercase || ($ch >= 'a' && $ch <= 'z');
+            $has_numbers = $has_numbers || ($ch >= '0' && $ch <= '9');
+            $has_special = $has_special || !($ch >= 'A' && $ch <= 'Z') && !($ch >= 'a' && $ch <= 'z') && !($ch >= '0' && $ch <= '9');
         }
-        if ($requirements['require_uppercase'] && !preg_match('/[A-Z]/', $password)) {
-            return false;
-        }
-        if ($requirements['require_lowercase'] && !preg_match('/[a-z]/', $password)) {
-            return false;
-        }
-        if ($requirements['require_numbers'] && !preg_match('/[0-9]/', $password)) {
-            return false;
-        }
-        if ($requirements['require_special_chars'] && !preg_match('/[^A-Za-z0-9]/', $password)) {
-            return false;
-        }
-        return true;
+        $valid_length = ($len >= $requirements['min_length']) && ($len <= $requirements['max_length']);
+        $valid_uppercase = !$requirements['require_uppercase'] || $has_uppercase;
+        $valid_lowercase = !$requirements['require_lowercase'] || $has_lowercase;
+        $valid_numbers = !$requirements['require_numbers'] || $has_numbers;
+        $valid_special = !$requirements['require_special_chars'] || $has_special;
+        return $valid_length && $valid_uppercase && $valid_lowercase && $valid_numbers && $valid_special;
     }
 
     /**
