@@ -204,10 +204,6 @@ def main():
                     required_capabilities = datastore.get('required_capabilities', 'default')
                     max_grading_time = datastore.get('max_possible_grading_time', -1)
                     is_team_assignment = datastore.get('team_assignment', False)
-                    if not isinstance(is_team_assignment, bool):
-                        raise SystemExit(
-                            "ERROR: build config field 'team_assignment' must be a boolean for gradeable '{}'".format(my_gradeable)
-                        )
 
                 #get the current time
                 queue_time = dateutils.write_submitty_date()
