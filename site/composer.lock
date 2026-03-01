@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fcae34ccc1bf38ffedea1fd1b300fbe9",
+    "content-hash": "c964496d6039faa33fb2243607281190",
     "packages": [
         {
             "name": "brick/math",
@@ -5485,16 +5485,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.22.2",
+            "version": "v3.23.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "946ddeafa3c9f4ce279d1f34051af041db0e16f2"
+                "reference": "a64dc5d2cc7d6cafb9347f6cd802d0d06d0351c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/946ddeafa3c9f4ce279d1f34051af041db0e16f2",
-                "reference": "946ddeafa3c9f4ce279d1f34051af041db0e16f2",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/a64dc5d2cc7d6cafb9347f6cd802d0d06d0351c9",
+                "reference": "a64dc5d2cc7d6cafb9347f6cd802d0d06d0351c9",
                 "shasum": ""
             },
             "require": {
@@ -5548,7 +5548,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.22.2"
+                "source": "https://github.com/twigphp/Twig/tree/v3.23.0"
             },
             "funding": [
                 {
@@ -5560,7 +5560,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-14T11:28:47+00:00"
+            "time": "2026-01-23T21:00:41+00:00"
         }
     ],
     "packages-dev": [
@@ -6152,11 +6152,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.38",
+            "version": "2.1.40",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/dfaf1f530e1663aa167bc3e52197adb221582629",
-                "reference": "dfaf1f530e1663aa167bc3e52197adb221582629",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
+                "reference": "9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
                 "shasum": ""
             },
             "require": {
@@ -6201,7 +6201,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-30T17:12:46+00:00"
+            "time": "2026-02-23T15:04:35+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -8854,7 +8854,7 @@
     "platform": {},
     "platform-dev": {},
     "platform-overrides": {
-        "php": "8.1"
+        "php": "8.2"
     },
     "plugin-api-version": "2.6.0"
 }
