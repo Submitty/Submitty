@@ -76,17 +76,17 @@ class submitty_router():
   # All messages will be passed through this function for optional decoding 
   # to string
   def sequence_diagram_message_preprocess(self, message):
-    ret = message
-    try:
+    if isinstance(message, bytes):
+        try:
+            encoding_prediction = chardet.detect(message)
+            encoding = encoding_prediction.get("encoding")
+            confidence = encoding_prediction.get("confidence", 0)
 
-        encoding_prediction = chardet.detect(message)
-
-        if encoding_prediction['confidence'] >0.8:
-
-          ret = message.decode(encoding_prediction['encoding'])
-    except Exception:
-        pass
-    return ret
+            if encoding and confidence > 0.8:
+                return message.decode(encoding)
+        except Exception:
+            pass
+    return message
 
   def write_sequence_file(self, obj, status, message_type):
     append_write = 'a' if os.path.exists(self.sequence_diagram_file) else 'w'
