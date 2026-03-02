@@ -61,11 +61,13 @@
         {% if file.files is defined %}
             <li>
                 {% if indent == 1 %}
-                    <a class="fas fa-pencil-alt key_to_click" tabindex="0" onclick="openRenamePopup('{{ file.path }}')"></a>
-                    <a class="fas fa-download key_to_click" tabindex="0" onclick="downloadConfig('{{ file.path }}')"></a>
-                    {% if file.path not in inuse_config %}
-                        <a class="fas fa-trash key_to_click" tabindex="0" onclick="openDeletePopup('{{ file.path }}')"></a>
-                    {% endif %}
+                    <div class="config-actions-group">
+                        <a class="fas fa-pencil-alt key_to_click config-action-button" tabindex="0" onclick="openRenamePopup('{{ file.path }}')" title="Rename"></a>
+                        <a class="fas fa-download key_to_click config-action-button" tabindex="0" onclick="downloadConfig('{{ file.path }}')" title="Download"></a>
+                        {% if file.path not in inuse_config %}
+                            <a class="fas fa-trash key_to_click config-action-button" tabindex="0" onclick="openDeletePopup('{{ file.path }}')" title="Delete"></a>
+                        {% endif %}
+                    </div>
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a class="key_to_click" tabindex="0" onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <ul id='{{ id }}' style='margin-left: {{ margin_left }}px; list-style-type: none; display: none'>

@@ -15,7 +15,11 @@
 }
 
 .upload-buttons-padding {
-    padding-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 16px;
+    align-items: center;
 }
 
 .upload-button {
@@ -43,4 +47,30 @@
     opacity: 0.5;
     pointer-events: none;
     cursor: not-allowed;
+}
+
+.config-actions-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.config-action-button {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    color: var(--always-default-blue);
+    text-decoration: none;
+}
+
+.config-action-button:hover {
+    background-color: rgb(0 0 0 / 5%);
+    color: var(--always-default-blue);
+}
+
+.config-action-button:focus {
+    outline: 2px solid var(--always-default-blue);
+    outline-offset: 2px;
 }
