@@ -1437,6 +1437,7 @@ class ElectronicGraderController extends AbstractController {
         /** @var string[][] */
         $new_teams_members = [];
         $team_names = [];
+        $all_csv_user_ids = [];
         foreach ($contents as $content) {
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
@@ -1456,15 +1457,25 @@ class ElectronicGraderController extends AbstractController {
                 $team_name = null;
             }
 
-            if ($this->core->getQueries()->getUserById($user_id) === null) {
-                $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
-                continue;
-            }
+            $all_csv_user_ids[] = $user_id;
             if (!array_key_exists($team_id, $new_teams_members)) {
                 $new_teams_members[$team_id] = [];
             }
             $new_teams_members[$team_id][] = $user_id;
             $team_names[$team_id] = $team_name;
+        }
+
+        // Batch-fetch all users from the CSV in a single query instead of
+        // calling getUserById() per row for validation (N+1 pattern)
+        $all_users_map = !empty($all_csv_user_ids)
+            ? $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids))
+            : [];
+
+        // Validate that all user IDs exist
+        foreach ($all_csv_user_ids as $uid) {
+            if (!isset($all_users_map[$uid])) {
+                $error_message .= "ERROR: user_id '{$uid}' doesn't exist<br>";
+            }
         }
 
         if ($error_message != "") {
@@ -1481,10 +1492,16 @@ class ElectronicGraderController extends AbstractController {
         foreach ($new_teams_members as $team_id => $members) {
             $leader_id = $members[0];
 
-            $leader = $this->core->getQueries()->getUserById($leader_id);
-            $members = $this->core->getQueries()->getUsersById(array_slice($members, 1));
+            // Use pre-fetched user map instead of calling getUserById() per team (N+1 pattern)
+            $leader = $all_users_map[$leader_id] ?? null;
+            $member_users = [];
+            foreach (array_slice($members, 1) as $member_id) {
+                if (isset($all_users_map[$member_id])) {
+                    $member_users[$member_id] = $all_users_map[$member_id];
+                }
+            }
             try {
-                $gradeable->createTeam($leader, $members, '', -1, $team_names[$team_id]);
+                $gradeable->createTeam($leader, $member_users, '', -1, $team_names[$team_id]);
             }
             catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized ($leader_id): {$e->getMessage()}");
