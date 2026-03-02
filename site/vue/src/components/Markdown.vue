@@ -9,6 +9,12 @@ interface Props {
     testId?: string;
 }
 
+interface InlineLatexToken {
+    type: 'inlineLatex';
+    raw: string;
+    text: string;
+}
+
 const props = defineProps<Props>();
 const inlineLatex: TokenizerAndRendererExtension = {
     name: 'inlineLatex',
@@ -48,7 +54,7 @@ const inlineLatex: TokenizerAndRendererExtension = {
         };
     },
     renderer(token) {
-        return (token as unknown as { text: string }).text;
+        return (token as unknown as InlineLatexToken).text;
     },
 };
 const escapeHtml = (html: string): string => {
