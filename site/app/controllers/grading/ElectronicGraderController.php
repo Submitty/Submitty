@@ -304,10 +304,16 @@ class ElectronicGraderController extends AbstractController {
                 $all_grade_all_registration = false;
                 $student_array = [];
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
+                // Batch-fetch which students have submissions in a single query
+                // instead of calling getUserHasSubmission() per student (N+1 pattern)
+                $all_student_ids = array_map(fn($s) => $s->getId(), $students);
+                $submitted_set = $submit_before_grading
+                    ? array_flip($this->core->getQueries()->getUsersWithSubmissions($gradeable, $all_student_ids))
+                    : [];
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
                     if ($submit_before_grading) {
-                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
+                        if (isset($submitted_set[$student->getId()])) {
                             array_push($student_array, $student->getId());
                         }
                     }
@@ -343,12 +349,18 @@ class ElectronicGraderController extends AbstractController {
         $student_array = [];
         $student_list = [];
         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+        // Batch-fetch which students have submissions in a single query
+        // instead of calling getUserHasSubmission() per student (N+1 pattern)
+        $all_student_ids = array_map(fn($s) => $s->getId(), $students);
+        $submitted_set = $submit_before_grading
+            ? array_flip($this->core->getQueries()->getUsersWithSubmissions($gradeable, $all_student_ids))
+            : [];
         foreach ($students as $student) {
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
             $sorted_students[$reg_sec][] = $student;
             array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
-                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
+                if (isset($submitted_set[$student->getId()])) {
                     array_push($student_array, $student->getId());
                 }
             }
