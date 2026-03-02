@@ -23,12 +23,16 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 INSTALL_SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
 if args.worker:
-    CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs/worker')
+    CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR,
+        'GIT_CHECKOUT/Submitty/.setup/data/configs/worker')
 
 os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 
-if not os.path.isdir(SUBMITTY_INSTALL_DIR) or not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
-    raise SystemExit('Install directory {} does not exist or is not accessible'.format(SUBMITTY_INSTALL_DIR))
+if not os.path.isdir(SUBMITTY_INSTALL_DIR) or
+    not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
+    raise SystemExit(
+       f'Install directory {SUBMITTY_INSTALL_DIR} does not exist or is not accessible'
+    )
 
 for item in os.listdir(CONFIG_REPOSITORY):
     source_path = os.path.join(CONFIG_REPOSITORY, item)
@@ -40,9 +44,9 @@ for item in os.listdir(CONFIG_REPOSITORY):
                 existing = json.load(f2).keys()
                 difference = required - existing
                 if len(difference) > 0:
-                    raise KeyError("Required key(s) {} not present in {}".format(difference, item))
-            except FileNotFoundError:
-                raise FileNotFoundError("Required file {} not found".format(destination_path))
+                    raise KeyError(f'Required key(s) {difference} not present in {item}.')
+            except FileNotFoundError as error:
+                raise FileNotFoundError(f'Required file {destination_path} not found.') from error
 
 # Create INSTALL_SUBMITTY.sh file that was created by CONFIGURE_SUBMITTY.py
 os.makedirs(INSTALL_SETUP_DIR, exist_ok=True)

@@ -19,8 +19,8 @@ def get_gid(user):
 def get_ids(user):
     try:
         return get_uid(user), get_gid(user)
-    except KeyError:
-        raise KeyError("ERROR: Could not find user: " + user)
+    except KeyError as error:
+        raise KeyError("ERROR: Could not find user: " + user) from error
 
 
 parser = argparse.ArgumentParser(description='Submitty config validation script',

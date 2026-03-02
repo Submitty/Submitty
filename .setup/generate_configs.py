@@ -2,7 +2,7 @@ import argparse
 import os
 import shutil
 
-parser = argparse.ArgumentParser(description='Submitty config validation script',
+parser = argparse.ArgumentParser(description='Submitty config generation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--worker', action='store_true', default=False,
                     help='Configure Submitty with autograding only')
