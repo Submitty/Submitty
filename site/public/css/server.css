@@ -1711,11 +1711,9 @@ end of styles used in the admin gradeable page
 .black-btn:hover,
 .black-btn:hover > i,
 .black-btn > i:hover {
-    /* stylelint-disable-next-line declaration-no-important */
-    /* stylelint-disable-next-line color-no-hex */
+    /* stylelint-disable-next-line declaration-no-important, color-no-hex */
     color: #405e90 !important;
-    /* stylelint-disable-next-line declaration-no-important */
-    /* stylelint-disable-next-line color-no-hex */
+    /* stylelint-disable-next-line declaration-no-important, color-no-hex */
     border-color: #405e90 !important;
 }
 
