@@ -82,7 +82,7 @@ if not args.worker:
 
     shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(EMAIL_JSON, 0o440)
-        
+
     shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
     os.chmod(SECRETS_PHP_JSON, 0o440)
 
@@ -90,7 +90,6 @@ os.chmod(SUBMITTY_JSON, 0o444)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
-
 
 # Users aren't created yet when running generate_configs,
 # so create the submitty_users json here

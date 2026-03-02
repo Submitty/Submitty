@@ -1,7 +1,6 @@
 import argparse
 import os
 import shutil
-import json
 
 parser = argparse.ArgumentParser(description='Submitty config validation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -26,7 +25,7 @@ os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 os.makedirs(SETUP_REPOSITORY_DIR, exist_ok=True)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 
-# Copy all files from .setup/data/configs to the install config directory 
+# Copy all files from .setup/data/configs to the install config directory
 for item in os.listdir(CONFIG_REPOSITORY):
     source_path = os.path.join(CONFIG_REPOSITORY, item)
     destination_path = os.path.join(CONFIG_INSTALL_DIR, item)
