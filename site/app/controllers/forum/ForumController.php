@@ -584,11 +584,40 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
-                $parent_preview = $this->previewText($parent_post_content, 100);
-                $subject = "New Reply: " . $thread_title;
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
-                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
-                $this->core->getNotificationFactory()->onNewPost($event);
+                // Check if this is a reply announcement (for pinned threads)
+                $is_reply_announcement = isset($_POST['replyAnnouncement']) 
+                    && $_POST['replyAnnouncement'] == 'replyAnnouncement' 
+                    && $this->core->getUser()->accessFullGrading();
+                
+                if ($is_reply_announcement) {
+                    // Verify thread is actually pinned
+                    $repo = $this->core->getCourseEntityManager()->getRepository(\app\entities\forum\Thread::class);
+                    $thread = $repo->findOneBy(['id' => intval($thread_id)]);
+                    
+                    if ($thread && $thread->isPinned()) {
+                        // Send as announcement notification
+                        $subject = "Update to Pinned Thread: " . $thread_title;
+                        $content = "An Instructor or Teaching Assistant posted an important update in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nUpdate:\n\n" . $post_content;
+                        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                        $this->core->getNotificationFactory()->onNewAnnouncement($event);
+                        
+                        // Update the thread's announced timestamp
+                        $this->core->getQueries()->setAnnounced($thread_id);
+                    }
+                    else {
+                        // Fall back to normal notification if thread is not pinned
+                        $is_reply_announcement = false;
+                    }
+                }
+                
+                if (!$is_reply_announcement) {
+                    // Send normal reply notification
+                    $parent_preview = $this->previewText($parent_post_content, 100);
+                    $subject = "New Reply: " . $thread_title;
+                    $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                    $this->core->getNotificationFactory()->onNewPost($event);
+                }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;

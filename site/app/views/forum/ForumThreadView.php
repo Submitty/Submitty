@@ -378,7 +378,9 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
+            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ];
         if ($render) {
             $generated_post_list = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", $generated_post_list);
@@ -864,6 +866,8 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ];
 
         if ($render) {
