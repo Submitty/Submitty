@@ -28,8 +28,10 @@ if args.worker:
 
 os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 
-if not os.path.isdir(SUBMITTY_INSTALL_DIR) or
-    not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK):
+if (
+    not os.path.isdir(SUBMITTY_INSTALL_DIR) or
+    not os.access(SUBMITTY_INSTALL_DIR, os.R_OK | os.W_OK)
+):
     raise SystemExit(
        f'Install directory {SUBMITTY_INSTALL_DIR} does not exist or is not accessible'
     )

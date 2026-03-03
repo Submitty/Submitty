@@ -533,6 +533,11 @@ jobs:
 
             sudo -E python3 "$3/Submitty/.setup/generate_configs.py" \
                         --install-dir "$1"
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --argjson v $4 '.database_port = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            
             sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
                         --install-dir "$1"
             sudo -E python3 "$3/Submitty/.setup/validate_config.py" \
@@ -544,7 +549,7 @@ jobs:
             sudo chmod -vR 777 "$1/sbin"
           }
 
-          configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
+          configure_submitty_main "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
             "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
           configure_submitty_branch "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
             "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"

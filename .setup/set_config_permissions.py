@@ -33,6 +33,11 @@ parser.add_argument('--worker', action='store_true', default=False,
 args = parser.parse_args()
 
 SUBMITTY_INSTALL_DIR = args.install_dir
+SUBMITTY_DIRECTORY_DIR = '/var/submitty/config'
+SUBMITTY_DIRECTORY_JSON = os.path.join(SUBMITTY_DIRECTORY_DIR, 'submitty.json')
+
+os.makedirs(SUBMITTY_DIRECTORY_DIR)
+
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
@@ -116,3 +121,8 @@ if not args.worker:
 
 with open(os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json'), 'w') as users_file:
     json.dump(config, users_file, indent=2)
+
+with open(SUBMITTY_DIRECTORY_JSON, 'w') as directory_json:
+    config = OrderedDict()
+    config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
+    json.dump(config, directory_json, indent=2)
