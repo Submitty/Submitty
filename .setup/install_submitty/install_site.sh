@@ -137,6 +137,22 @@ if [ ${VAGRANT} == 1 ]; then
     chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
 fi
 
+# Restore installation-specific files that were backed up during "install clean"
+# (e.g. institution logo in site/public/img, config/footer_links.json). See issue #9511.
+CLEAN_BACKUP_DIR="${SUBMITTY_CONFIG_DIR:?}/.install_clean_backup"
+if [ -d "${CLEAN_BACKUP_DIR}" ]; then
+    if [ -d "${CLEAN_BACKUP_DIR}/img" ]; then
+        mkdir -p "${SUBMITTY_INSTALL_DIR}/site/public/img"
+        cp -a "${CLEAN_BACKUP_DIR}/img/." "${SUBMITTY_INSTALL_DIR}/site/public/img/"
+        chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site/public/img"
+    fi
+    if [ -f "${CLEAN_BACKUP_DIR}/footer_links.json" ]; then
+        cp -a "${CLEAN_BACKUP_DIR}/footer_links.json" "${SUBMITTY_INSTALL_DIR}/config/footer_links.json"
+        chown root:root "${SUBMITTY_INSTALL_DIR}/config/footer_links.json"
+    fi
+    rm -rf "${CLEAN_BACKUP_DIR}"
+fi
+
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
 # run, but it could be someone just deleted the folders to try and fix some
