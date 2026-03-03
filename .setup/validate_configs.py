@@ -23,8 +23,10 @@ CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 INSTALL_SETUP_DIR = os.path.join(SUBMITTY_INSTALL_DIR, '.setup')
 CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT/Submitty/.setup/data/configs')
 if args.worker:
-    CONFIG_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR,
-        'GIT_CHECKOUT/Submitty/.setup/data/configs/worker')
+    CONFIG_REPOSITORY = os.path.join(
+        SUBMITTY_INSTALL_DIR,
+        'GIT_CHECKOUT/Submitty/.setup/data/configs/worker'
+    )
 
 os.makedirs(SUBMITTY_DATA_DIR, exist_ok=True)
 
