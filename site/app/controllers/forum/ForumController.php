@@ -586,7 +586,7 @@ class ForumController extends AbstractController {
 
                 // Check if this is a reply announcement (for pinned threads)
                 $is_reply_announcement = isset($_POST['replyAnnouncement'])
-                    && $_POST['replyAnnouncement'] == 'replyAnnouncement'
+                    && $_POST['replyAnnouncement'] === 'replyAnnouncement'
                     && $this->core->getUser()->accessFullGrading();
 
                 if ($is_reply_announcement) {
