@@ -4,6 +4,9 @@ on:
     types:
       - review_requested
 
+permissions:
+  contents: read
+
 env:
   PR_ID: ${{ github.event.pull_request.number }}
 
