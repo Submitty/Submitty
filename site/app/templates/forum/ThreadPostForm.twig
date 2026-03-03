@@ -192,7 +192,6 @@
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
         {% endif %}
-        <!-- DEBUG: show_reply={{show_reply_announcement is defined ? show_reply_announcement : "UNDEF"}}, email={{email_enabled is defined ? email_enabled : "UNDEF"}}, access={{core.getUser().accessFullGrading() ? "YES" : "NO"}} -->
         {% if show_reply_announcement is defined and show_reply_announcement and core.getUser().accessFullGrading() %}
             {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
             <input type="checkbox" id="replyAnnouncement" name="replyAnnouncement" value="replyAnnouncement" data-ays-ignore="true"/>
