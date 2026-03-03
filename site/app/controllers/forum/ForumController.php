@@ -603,7 +603,8 @@ class ForumController extends AbstractController {
 
                         // Update the thread's announced timestamp
                         $this->core->getQueries()->setAnnounced($thread_id);
-                    } else {
+                    }
+                    else {
                         // Fall back to normal notification if thread is not pinned
                         $is_reply_announcement = false;
                     }
