@@ -47,6 +47,18 @@ if [[ "$#" -ge 1 && "$1" == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR:?}, for a clean installation\n"
 
+    # Backup installation-specific files that would otherwise be lost on clean.
+    # These are restored by install_site.sh after the site is rsync'd (see issue #9511).
+    CLEAN_BACKUP_DIR="${SUBMITTY_CONFIG_DIR:?}/.install_clean_backup"
+    rm -rf "${CLEAN_BACKUP_DIR}"
+    mkdir -p "${CLEAN_BACKUP_DIR}"
+    if [ -d "${SUBMITTY_INSTALL_DIR:?}/site/public/img" ]; then
+        cp -a "${SUBMITTY_INSTALL_DIR:?}/site/public/img" "${CLEAN_BACKUP_DIR}/img"
+    fi
+    if [ -f "${SUBMITTY_INSTALL_DIR:?}/config/footer_links.json" ]; then
+        cp -a "${SUBMITTY_INSTALL_DIR:?}/config/footer_links.json" "${CLEAN_BACKUP_DIR}/footer_links.json"
+    fi
+
     if [[ "$#" -ge 1 && $1 == "quick" ]] ; then
         # pop this argument from the list of arguments...
         shift
