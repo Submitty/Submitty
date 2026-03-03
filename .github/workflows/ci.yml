@@ -543,7 +543,7 @@ jobs:
             
             sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
                         --install-dir "$1"
-            sudo -E python3 "$3/Submitty/.setup/validate_config.py" \
+            sudo -E python3 "$3/Submitty/.setup/validate_configs.py" \
                         --install-dir "$1" --data-dir "$2"
 
             # Copy necessary files to the installation path
