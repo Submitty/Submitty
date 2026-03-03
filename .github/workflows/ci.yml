@@ -540,6 +540,8 @@ jobs:
             tmp=$(mktemp) && jq --argjson v $4 '.database_port = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
             tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
             tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$2" '.submitty_data_dir = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$3" '.submitty_repository = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
             
             sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
                         --install-dir "$1"

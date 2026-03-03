@@ -32,7 +32,7 @@ DATABASE_USER=$(jq -r '.database_user' "${CONF_DIR}/database.json")
 DATABASE_PASS=$(jq -r '.database_password' "${CONF_DIR}/database.json")
 DATABASE_COURSE_USER=$(jq -r '.database_course_user' "${CONF_DIR}/database.json")
 echo $DATABASE_COURSE_USER
-
+echo "--- $CONF_DIR"
 ########################################################################################################################
 ########################################################################################################################
 
