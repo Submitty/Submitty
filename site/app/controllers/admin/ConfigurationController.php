@@ -172,7 +172,7 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'course_repo_url') {
             if (preg_match('/\s/', $entry)) {
-                return MultiResponse::JsonOnlyResponse(
+                return new MultiResponse(
                     JsonResponse::getFailResponse('Repository URL cannot contain whitespace')
                 );
             }
@@ -183,7 +183,7 @@ class ConfigurationController extends AbstractController {
                 $entry = 'main';
             }
             if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $entry) || str_contains($entry, '..') || str_starts_with($entry, '/')) {
-                return MultiResponse::JsonOnlyResponse(
+                return new MultiResponse(
                     JsonResponse::getFailResponse('Invalid repository branch name')
                 );
             }
@@ -194,12 +194,12 @@ class ConfigurationController extends AbstractController {
                 $entry = '';
             }
             if (str_contains($entry, '..')) {
-                return MultiResponse::JsonOnlyResponse(
+                return new MultiResponse(
                     JsonResponse::getFailResponse('Repository subdirectory cannot contain ".."')
                 );
             }
             if ($entry !== '' && !preg_match('/^[A-Za-z0-9._\/-]+$/', $entry)) {
-                return MultiResponse::JsonOnlyResponse(
+                return new MultiResponse(
                     JsonResponse::getFailResponse('Invalid repository subdirectory')
                 );
             }
@@ -254,7 +254,7 @@ class ConfigurationController extends AbstractController {
     public function pullCourseRepository(): MultiResponse {
         $repo_url = trim($this->core->getConfig()->getCourseRepoUrl());
         if ($repo_url === '') {
-            return MultiResponse::JsonOnlyResponse(
+            return new MultiResponse(
                 JsonResponse::getFailResponse('Set a Course Repository URL before pulling')
             );
         }
@@ -265,13 +265,13 @@ class ConfigurationController extends AbstractController {
         $processing_file = FileUtils::joinPaths($queue_dir, "PROCESSING_{$job_filename}");
 
         if (is_file($processing_file)) {
-            return MultiResponse::JsonOnlyResponse(
+            return new MultiResponse(
                 JsonResponse::getFailResponse('A repository pull is already in progress')
             );
         }
 
         if (is_file($queue_file)) {
-            return MultiResponse::JsonOnlyResponse(
+            return new MultiResponse(
                 JsonResponse::getSuccessResponse(['queue_status' => 'queued'])
             );
         }
@@ -280,16 +280,16 @@ class ConfigurationController extends AbstractController {
             'job' => 'SyncCourseRepo',
             'semester' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
-            'triggered_by' => $this->core->getUser()?->getId() ?? '',
+            'triggered_by' => $this->core->getUser()->getId(),
         ];
 
         if (!FileUtils::writeJsonFile($queue_file, $job_data)) {
-            return MultiResponse::JsonOnlyResponse(
+            return new MultiResponse(
                 JsonResponse::getFailResponse('Unable to queue course repository pull')
             );
         }
 
-        return MultiResponse::JsonOnlyResponse(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse(['queue_status' => 'queued'])
         );
     }
@@ -319,7 +319,7 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        return MultiResponse::JsonOnlyResponse(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse([
                 'queue_status' => $queue_status,
                 'last_sync' => $last_sync,
