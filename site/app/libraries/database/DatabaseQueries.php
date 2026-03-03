@@ -7554,6 +7554,29 @@ AND gc_id IN (
     }
 
     /**
+    * Batch check which users have submissions for a gradeable.
+    *
+    * @param  \app\models\gradeable\Gradeable $gradeable
+    * @param  string[]                        $user_ids
+    * @return array                           Map of user_id => true for users with submissions
+    */
+    public function getUsersWithSubmissions(Gradeable $gradeable, array $user_ids): array {
+        if (empty($user_ids)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($user_ids), '?'));
+        $this->course_db->query(
+            "SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND user_id IN ({$placeholders})",
+            array_merge([$gradeable->getId()], $user_ids)
+        );
+        $result = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['user_id']] = true;
+        }
+        return $result;
+    }
+
+    /**
      * Get the active version for all given submitter ids. If they do not have an active version,
      * their version will be zero.
      *
