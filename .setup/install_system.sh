@@ -118,7 +118,7 @@ if [ ${DEV_VM} == 1 ]; then
 fi
 
 if [ ${DEV_VM} == 0 ]; then
-    python3 ${COMMAND} ${CURRENT_DIR}/validate_configs.py
+    python3 ${CURRENT_DIR}/validate_configs.py ${COMMAND} 
 fi
 
 
@@ -359,7 +359,7 @@ sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
 
-python3 ${COMMAND} ${CURRENT_DIR}/set_config_permissions.py
+python3 ${CURRENT_DIR}/set_config_permissions.py ${COMMAND}
 
 
 #################################################################

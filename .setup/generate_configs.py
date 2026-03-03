@@ -5,7 +5,7 @@ import shutil
 parser = argparse.ArgumentParser(description='Submitty config generation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--worker', action='store_true', default=False,
-                    help='Configure Submitty with autograding only')
+                    help='Generate configs for only autograding')
 parser.add_argument('--install-dir', default='/usr/local/submitty',
                     help='Set the install directory for Submitty')
 

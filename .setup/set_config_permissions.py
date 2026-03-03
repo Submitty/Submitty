@@ -23,12 +23,12 @@ def get_ids(user):
         raise KeyError("ERROR: Could not find user: " + user) from error
 
 
-parser = argparse.ArgumentParser(description='Submitty config validation script',
+parser = argparse.ArgumentParser(description='Submitty config permissions script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--install-dir', default='/usr/local/submitty',
-                    help='Set the install directory for Submitty')
+                    help='The install dir of Submitty')
 parser.add_argument('--worker', action='store_true', default=False,
-                    help='Configure Submitty with autograding only')
+                    help='Set config permissions assuming it is created as a worker')
 
 args = parser.parse_args()
 

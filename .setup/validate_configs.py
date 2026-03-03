@@ -8,9 +8,9 @@ if os.getuid() != 0:
 parser = argparse.ArgumentParser(description='Submitty config validation script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--worker', action='store_true', default=False,
-                    help='Configure Submitty with autograding only')
+                    help='Validate worker configs')
 parser.add_argument('--install-dir', default='/usr/local/submitty',
-                    help='Set the install directory for Submitty')
+                    help='The install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty',
                     help='Set the data directory for Submitty')
 
