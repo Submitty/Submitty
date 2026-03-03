@@ -117,7 +117,14 @@ function appendMessage(displayName, role, ts, content, msgID) {
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
     messageContent.setAttribute('data-testid', 'message-content');
-    messageContent.innerText = content;
+    messageContent.id = `message-content-${msgID}`;
+
+    window.submitty.render(
+        messageContent,
+        'component',
+        'Markdown',
+        { content: content }
+    );
 
     message.appendChild(messageHeader);
     message.appendChild(messageContent);
@@ -328,19 +335,28 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMessages(chatroomId);
 
         const sendButton = document.querySelector('.send-message-btn');
-        const messageInput = document.querySelector('.message-input');
+
+        // The MarkdownArea Vue component renders a <textarea> with this ID asynchronously
+        const getMessageInput = () => document.getElementById('chat-markdown-input');
 
         if (!read_only) {
-            messageInput.addEventListener('keypress', (event) => {
-                if (event.keyCode === 13 && !event.shiftKey) {
-                    event.preventDefault();
-                    sendButton.click();
+            // Use event delegation since the textarea may not exist yet at DOMContentLoaded
+            document.body.addEventListener('keypress', (event) => {
+                if (event.target && event.target.id === 'chat-markdown-input') {
+                    if (event.keyCode === 13 && !event.shiftKey) {
+                        event.preventDefault();
+                        sendButton.click();
+                    }
                 }
             });
-        }
-        if (!read_only) {
+
             sendButton.addEventListener('click', (event) => {
                 event.preventDefault();
+                const messageInput = getMessageInput();
+                if (!messageInput) {
+                    return;
+                }
+
                 const messageContent = messageInput.value.trim();
                 if (messageContent === '') {
                     alert('Please enter a message.');
@@ -351,11 +367,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
 
                 messageInput.value = '';
+                // Trigger input event so Vue's v-model stays in sync
+                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
             });
         }
-        if (read_only) {
-            messageInput.disabled = true;
-            messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+        else {
+            const messageInput = getMessageInput();
+            if (messageInput) {
+                messageInput.disabled = true;
+                messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+            }
             sendButton.disabled = true;
         }
     }
