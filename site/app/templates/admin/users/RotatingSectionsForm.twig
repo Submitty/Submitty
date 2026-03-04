@@ -61,7 +61,7 @@
                     <tbody>
                         {% for section in reg_sections %}
                             {% if 'sections_registration_id' in section|keys %}
-                            {% if reg_sections_count[section['sections_registration_id']] is defined and
+                            {% if section['sections_registration_id'] in reg_sections_count|keys and
                                 reg_sections_count[section['sections_registration_id']] %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }} </td>

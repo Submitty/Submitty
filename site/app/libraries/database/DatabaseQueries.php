@@ -3200,8 +3200,6 @@ ORDER BY user_id ASC"
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         // Prevent numerically-equivalent sections from both being inserted (e.g. '01' vs '1').
-        // registration_section_id is VARCHAR so '01' != '1' at the DB level, but the sort query
-        // treats them as the same integer, causing a crash. See GitHub issue #12484.
         if (is_numeric($section)) {
             $numeric_val = (string)(int)$section;
             $this->submitty_db->query(
