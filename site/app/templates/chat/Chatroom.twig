@@ -11,11 +11,13 @@
                 <div class="input-container">
                     {% include "Vue.twig" with { "name" : "MarkdownArea",
                         "type": "component",
+                        "class": "message-input-vue-wrapper",
                         "args": {
                             "markdownAreaId" : "chat-markdown-input",
                             "markdownAreaName" : "content",
                             "placeholder" : "Enter your message here",
-                            "renderHeader" : true
+                            "renderHeader" : true,
+                            "chatMode": true
                         }
                     } only %}
                     <button class="send-message-btn btn btn-primary" data-testid="send-btn">Send</button>
