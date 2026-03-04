@@ -11,10 +11,13 @@ from unittest.mock import patch, MagicMock
 script_path = Path(__file__).parent.parent.parent / '.github' / 'scripts'
 sys.path.insert(0, str(script_path))
 
+# pylint: disable=wrong-import-position
 import verify_migration_datestamp  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 class TestParseMigrationFilename(unittest.TestCase):
+    """Unit tests for the parse_migration_filename function."""
 
     def test_valid_migration_filename(self):
         result = verify_migration_datestamp.parse_migration_filename(
@@ -45,6 +48,7 @@ class TestParseMigrationFilename(unittest.TestCase):
 
 
 class TestGetChangedMigrationFiles(unittest.TestCase):
+    """Unit tests for the get_changed_migration_files function."""
 
     @patch('verify_migration_datestamp.subprocess.run')
     def test_get_changed_files_in_pr(self, mock_run):
@@ -79,6 +83,7 @@ class TestGetChangedMigrationFiles(unittest.TestCase):
 
 
 class TestVerifyMigrationFreshness(unittest.TestCase):
+    """Unit tests for the verify_migration_freshness function."""
 
     @patch('verify_migration_datestamp.get_changed_migration_files')
     def test_no_migrations_returns_true(self, mock_get_files):

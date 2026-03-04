@@ -68,6 +68,49 @@ def get_current_time():
     return datetime.now(timezone.utc)
 
 
+def _print_stale_migrations_report(stale_migrations, now):
+    """Print detailed report for stale migrations with fix suggestions."""
+    print(f"\nSTALE MIGRATIONS ({len(stale_migrations)}):")
+    for filepath, _filename, datestamp, age_days in stale_migrations:
+        print(f"  - {filepath}")
+        print(f"    Date: {datestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"    Age: {age_days} days (max allowed: {MAX_AGE_DAYS} days)")
+
+    print("\n" + "=" * 70)
+    print(" MIGRATION DATESTAMP CHECK FAILED")
+    print("=" * 70)
+    print(f"\nMigrations must be ≤{MAX_AGE_DAYS} days old to prevent out-of-order execution.")
+    print("\nTo fix, rename the file with today's datestamp:")
+    for filepath, filename, _datestamp, _age_days in stale_migrations:
+        migration_type = os.path.basename(os.path.dirname(filepath))
+        description = filename.split('_', 1)[1] if '_' in filename else 'description.py'
+        new_datestamp = now.strftime(DATESTAMP_FORMAT)
+        new_filename = f"{new_datestamp}_{description}"
+        new_path = f"migration/migrator/migrations/{migration_type}/{new_filename}"
+        print(f"  git mv {filepath} {new_path}")
+
+    print("\nMore info: https://submitty.org/developer/development_instructions/migrations\n")
+
+
+def _print_summary(valid_migrations, invalid_migrations, stale_migrations, now):
+    """Print summary of migration verification results."""
+    print("=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+
+    if valid_migrations:
+        print(f"\nValid migrations: {len(valid_migrations)}")
+
+    if invalid_migrations:
+        print(f"\nINVALID FORMAT ({len(invalid_migrations)}):")
+        for filepath, _filename in invalid_migrations:
+            print(f"  - {filepath}")
+        print("\nExpected format: YYYYMMDDHHMMSS_description.py")
+
+    if stale_migrations:
+        _print_stale_migrations_report(stale_migrations, now)
+
+
 def verify_migration_freshness():
     """Checks all changed migrations and reports stale or invalid files."""
     changed_files = get_changed_migration_files()
@@ -111,45 +154,11 @@ def verify_migration_freshness():
 
         print()
 
-    print("=" * 70)
-    print("SUMMARY")
-    print("=" * 70)
+    _print_summary(valid_migrations, invalid_migrations, stale_migrations, now)
 
-    if valid_migrations:
-        print(f"\nValid migrations: {len(valid_migrations)}")
-
-    if invalid_migrations:
-        print(f"\nINVALID FORMAT ({len(invalid_migrations)}):")
-        for filepath, _filename in invalid_migrations:
-            print(f"  - {filepath}")
-        print("\nExpected format: YYYYMMDDHHMMSS_description.py")
-
-    if stale_migrations:
-        print(f"\nSTALE MIGRATIONS ({len(stale_migrations)}):")
-        for filepath, _filename, datestamp, age_days in stale_migrations:
-            print(f"  - {filepath}")
-            print(f"    Date: {datestamp.strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"    Age: {age_days} days (max allowed: {MAX_AGE_DAYS} days)")
-
-        print("\n" + "=" * 70)
-        print(" MIGRATION DATESTAMP CHECK FAILED")
-        print("=" * 70)
-        print(f"\nMigrations must be ≤{MAX_AGE_DAYS} days old to prevent out-of-order execution.")
-        print("\nTo fix, rename the file with today's datestamp:")
-        for filepath, filename, _datestamp, _age_days in stale_migrations:
-            migration_type = os.path.basename(os.path.dirname(filepath))
-            description = filename.split('_', 1)[1] if '_' in filename else 'description.py'
-            new_datestamp = now.strftime(DATESTAMP_FORMAT)
-            new_filename = f"{new_datestamp}_{description}"
-            new_path = f"migration/migrator/migrations/{migration_type}/{new_filename}"
-            print(f"  git mv {filepath} {new_path}")
-
-        print("\nMore info: https://submitty.org/developer/development_instructions/migrations\n")
-
-        return False
-
-    if invalid_migrations:
-        print("\nPlease fix the invalid migration filename format.")
+    if stale_migrations or invalid_migrations:
+        if invalid_migrations and not stale_migrations:
+            print("\nPlease fix the invalid migration filename format.")
         return False
 
     print("\nAll migration files have fresh datestamps!")
@@ -157,5 +166,5 @@ def verify_migration_freshness():
 
 
 if __name__ == "__main__":
-    success = verify_migration_freshness()
-    sys.exit(0 if success else 1)
+    result = verify_migration_freshness()
+    sys.exit(0 if result else 1)
