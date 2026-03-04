@@ -166,5 +166,4 @@ def verify_migration_freshness():
 
 
 if __name__ == "__main__":
-    result = verify_migration_freshness()
-    sys.exit(0 if result else 1)
+    sys.exit(0 if verify_migration_freshness() else 1)
