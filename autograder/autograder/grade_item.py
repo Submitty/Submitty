@@ -11,10 +11,11 @@ from . execution_environments import jailed_sandbox
 
 
 def get_item_from_item_pool(complete_config_obj, item_name):
-    for item in complete_config_obj['item_pool']:
-        if item['item_name'] == item_name:
-            return item
-    return None
+    if '_item_pool_lookup' not in complete_config_obj:
+        complete_config_obj['_item_pool_lookup'] = {
+            item['item_name']: item for item in complete_config_obj['item_pool']
+        }
+    return complete_config_obj['_item_pool_lookup'].get(item_name)
 
 
 def get_testcases(
