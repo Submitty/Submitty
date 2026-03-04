@@ -380,7 +380,7 @@ class ForumThreadView extends AbstractView {
             "total_attachments" => $GLOBALS['totalAttachments'],
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
             "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-            "show_reply_announcement" => ($thread->isPinned() && $user->accessFullGrading()) ? true : false,
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading(),
             "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ];
         if ($render) {
