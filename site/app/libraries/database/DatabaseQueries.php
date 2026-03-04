@@ -3210,6 +3210,30 @@ ORDER BY user_id ASC"
         return $this->submitty_db->getRowCount();
     }
 
+    public function updateCourseSectionId(string $section_id, string $course_id): void {
+        $term = $this->core->getConfig()->getTerm();
+        $course   = $this->core->getConfig()->getCourse();
+
+        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE term=? AND course=? AND registration_section_id = ?", [$course_id, $term, $course, $section_id]);
+
+        $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?", [$course_id, $section_id]);
+    }
+
+    public function courseIdExists(string $course_id, string $section_id): bool {
+        $this->course_db->query(
+            "SELECT 1 FROM sections_registration WHERE
+            course_section_id = :course_id
+            AND sections_registration_id != :section_id
+            LIMIT 1",
+            [
+                $course_id,
+                $section_id
+            ]
+        );
+
+        return $this->course_db->getRowCount() > 0;
+    }
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", [$gradeable_id]);
         foreach ($graders as $grader => $sections) {
@@ -5417,12 +5441,13 @@ AND gc_id IN (
     /**
      * Get 10 most recent Notification objects in a course
      * @param string $user_id
-     * @param string $semester
+     * @param string $term
      * @param string $course_name
      * @param object $course_db
+     * @param string $course_display_name
      * @return array<int, Notification>
      */
-    public function getRecentUserNotifications($user_id, $semester, $course_name, $course_db) {
+    public function getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name) {
         $query = "
             SELECT id, component, metadata, content,
                 (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
@@ -5447,8 +5472,9 @@ AND gc_id IN (
                     'seen' => $row['seen'],
                     'elapsed_time' => $row['elapsed_time'],
                     'created_at' => $row['created_at'],
-                    'semester' => $semester,
+                    'term' => $term,
                     'course' => $course_name,
+                    'course_name' => $course_display_name,
                 ]
             );
         }

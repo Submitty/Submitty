@@ -59,11 +59,13 @@ class HomePageController extends AbstractController {
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
-            foreach (['archived_courses', 'unarchived_courses'] as $var) {
-                $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
-                });
-            }
+            $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
+
+            $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
         }
 
         $self_rejoin_tester = new SelfRejoinController($this->core);
@@ -168,7 +170,8 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseConfig($term, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db));
+            $course_display_name = $course->getDisplayName();
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name));
             $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
@@ -411,13 +414,9 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
-        $term_names = $this->core->getSubmittyEntityManager()
-            ->createQueryBuilder()
-            ->select('term.name')
-            ->from(Term::class, 'term')
-            ->orderBy('term.name', 'ASC')
-            ->getQuery()
-            ->getSingleColumnResult();
+        $terms = $this->core->getSubmittyEntityManager()
+            ->getRepository(Term::class)
+            ->findBy([], ['name' => 'DESC']);
 
         return new MultiResponse(
             null,
@@ -426,7 +425,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $term_names,
+                $terms,
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -496,8 +495,8 @@ class HomePageController extends AbstractController {
                 $term = new Term(
                     $term_id,
                     $term_name,
-                    $start_date,
-                    $end_date,
+                    new \DateTime($start_date),
+                    new \DateTime($end_date),
                 );
                 $em->persist($term);
                 $em->flush();
