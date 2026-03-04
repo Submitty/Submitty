@@ -276,13 +276,13 @@ int main() {\n\
               }
           ],
           "testcases" : [
-              { "title":"C++ Code for Primes -- Compilation", "testcase_label":"prime_cpp_compilation",
+              { "title":"C++ Code for Primes -- Compilation", "testcase_label":"cpp_prime_compilation",
                 "type" : "Compilation",
                 "command" : "clang++ -Wall -o cpp_prime.out cpp_codebox.cpp",
                 "points":1,
                 "executable_name" : "cpp_prime.out"
               },
-              { "title":"C++ Code for Primes -- Testing", "testcase_label":"prime_cpp_testing",
+              { "title":"C++ Code for Primes -- Testing", "testcase_label":"cpp_prime_testing",
                 "points":4,
                 "command" : "./cpp_prime.out",
                 "validation":[ { "method":"diff", "actual_file":"STDOUT.txt", "expected_file":"prime_answer.txt",
