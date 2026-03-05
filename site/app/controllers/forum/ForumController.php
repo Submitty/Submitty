@@ -222,7 +222,22 @@ class ForumController extends AbstractController {
         if (!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
             if ($this->core->getUser()->accessAdmin() && !empty($_POST["visibleDate"])) {
-                $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                $visible_date_input = trim($_POST['visibleDate']);
+                if ($visible_date_input === "") {
+                    $visibleDate = null;
+                }
+                else {
+                    // Validate format is YYYY-MM-DD before parsing
+                    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visible_date_input)) {
+                        return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
+                    }
+                    try {
+                        $visibleDate = DateUtils::parseDateTime($visible_date_input, $this->core->getUser()->getUsableTimeZone());
+                    }
+                    catch (\InvalidArgumentException $e) {
+                        return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
+                    }
+                }
             }
             else {
                 $visibleDate = null;
@@ -304,12 +319,21 @@ class ForumController extends AbstractController {
             }
         }
         if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
-            if ($_POST["visibleDate"] === "    ") {
-                $category_visible_date = "";
+            $visible_date_input = trim($_POST['visibleDate']);
+            if ($visible_date_input === "") {
+                $category_visible_date = null;
             }
             else {
-                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
-                //ASSUME NO ISSUE
+                // Validate format is YYYY-MM-DD before parsing
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visible_date_input)) {
+                    return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
+                }
+                try {
+                    $category_visible_date = DateUtils::parseDateTime($visible_date_input, $this->core->getUser()->getUsableTimeZone());
+                }
+                catch (\InvalidArgumentException $e) {
+                    return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
+                }
             }
         }
         else {
@@ -701,7 +725,12 @@ class ForumController extends AbstractController {
         if (is_null($thread_access)) {
             return JsonResponse::getFailResponse("Failed to mark post unread: thread access not found.");
         }
-        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
+        try {
+            $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
+        }
+        catch (\InvalidArgumentException $e) {
+            return JsonResponse::getFailResponse("Invalid timestamp format.");
+        }
         $thread_access->setTimestamp($last_viewed_timestamp);
         $this->core->getCourseEntityManager()->flush();
 
@@ -1009,19 +1038,35 @@ class ForumController extends AbstractController {
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
             if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
-                $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
+                $lock_thread_date_trimmed = trim($lock_thread_date_input);
+                if ($lock_thread_date_trimmed !== "") {
+                    try {
+                        $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_trimmed, $user->getUsableTimeZone()));
+                    }
+                    catch (\InvalidArgumentException $e) {
+                        // Invalid date format, set to null
+                        $thread->setLockDate(null);
+                    }
+                }
+                else {
+                    $thread->setLockDate(null);
+                }
             }
             else {
                 $thread->setLockDate(null);
             }
 
             $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW);
-            if ($expiration_input !== false) {
-                $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
-            }
-            else {
-                print($expiration_input);
-                return false;
+            if ($expiration_input !== false && $expiration_input !== "") {
+                $expiration_input_trimmed = trim($expiration_input);
+                if ($expiration_input_trimmed !== "") {
+                    try {
+                        $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input_trimmed, $user->getUsableTimeZone()));
+                    }
+                    catch (\InvalidArgumentException $e) {
+                        // Invalid date format, skip setting expiration
+                    }
+                }
             }
         }
         return true;
