@@ -4924,12 +4924,12 @@ AND gc_id IN (
         $params = array_values($grader_ids);
         $params[] = $gradeable_id;
         $this->course_db->query(
-            "SELECT grader_id, COUNT(*) as cnt FROM peer_assign WHERE grader_id IN {$place_holders} AND g_id=? GROUP BY grader_id",
+            "SELECT grader_id, COUNT(*) as count FROM peer_assign WHERE grader_id IN {$place_holders} AND g_id=? GROUP BY grader_id",
             $params
         );
         $result = [];
         foreach ($this->course_db->rows() as $row) {
-            $result[$row['grader_id']] = intval($row['cnt']);
+            $result[$row['grader_id']] = intval($row['count']);
         }
         return $result;
     }
@@ -4949,7 +4949,7 @@ AND gc_id IN (
         $params = array_values($grader_ids);
         $params[] = $gradeable_id;
         $this->course_db->query(
-            "SELECT gcd.gcd_grader_id, COUNT(*) as cnt
+            "SELECT gcd.gcd_grader_id, COUNT(*) as count
 FROM gradeable_component_data as gcd
 WHERE gcd.gcd_grader_id IN {$place_holders}
 AND gc_id IN (
@@ -4962,7 +4962,7 @@ GROUP BY gcd.gcd_grader_id",
         );
         $result = [];
         foreach ($this->course_db->rows() as $row) {
-            $result[$row['gcd_grader_id']] = intval($row['cnt']);
+            $result[$row['gcd_grader_id']] = intval($row['count']);
         }
         return $result;
     }
