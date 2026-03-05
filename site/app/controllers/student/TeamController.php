@@ -551,8 +551,7 @@ class TeamController extends AbstractController {
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
         $seeking_partner = false;
 
-        // Batch-fetch all needed users in a single query instead of
-        // calling getUserById() per user inside loops (N+1 pattern)
+        // Batch-fetch all needed users in a single query
         $all_user_ids = array_merge(
             $team !== null ? $team->getMembers() : [],
             $users_seeking_team
