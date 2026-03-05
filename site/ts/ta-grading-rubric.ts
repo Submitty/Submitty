@@ -2708,24 +2708,21 @@ export async function toggleComponent(component_id: number, saveChanges: boolean
 window.open_overall_comment_tab = function (user: string) {
     const textarea = $(`#overall-comment-${user}`);
 
-    // Find the logged-in user's comment area (the one with MarkdownArea Vue component,
-    // not a markdown-preview). This should always stay visible.
-    const loggedInUserElement = $('#overall-comments [id^="overall-comment-"]:not(.markdown-preview)');
-    const loggedInUserWrapper = loggedInUserElement.closest('#overall-comments > div');
-
-    // Hide only OTHER graders' comment previews, keep logged-in user's area visible
-    $('#overall-comments').children().not(loggedInUserWrapper).hide();
-
+    $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
     $(`#overall-comment-tab-${user}`).addClass('active-btn');
 
-    // If clicking on another grader's tab, show their comment preview
     if (textarea.hasClass('markdown-preview')) {
         textarea.show();
     }
+    else {
+        // Find and show the Vue wrapper containing the textarea
+        $('#overall-comments').children().each(function () {
+            if ($(this).find(`#overall-comment-${user}`).length > 0) {
+                $(this).show();
+            }
+        });
 
-    // Ensure the logged-in user's textarea is visible (unless in preview mode)
-    if (!textarea.hasClass('markdown-preview')) {
         if ($(`#overall-comment-markdown-preview-${user}`).is(':hidden')) {
             textarea.show();
         }
