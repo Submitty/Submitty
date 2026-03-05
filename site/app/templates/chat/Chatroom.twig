@@ -3,14 +3,21 @@
     <div class="chatroom-container">
         <div class="chatroom-header">
             <span class="chatroom-title" data-testid="chat-title" title="{{ chatroom.getTitle() }}"> {{ chatroom.getTitle() | length > 40 ? chatroom.getTitle() | slice(0, 40) ~ '...' : chatroom.getTitle() }} </span>
+            {% if user_admin %}
+                <button class="btn btn-warning regenerate-anon-btn" data-testid="regenerate-anon-btn" title="Assign all anonymous users new names">
+                    <i class="fas fa-sync-alt"></i> Regenerate Names
+                </button>
+            {% endif %}
             <a href="{{ base_url }}" class="leave-room btn btn-danger" data-testid="leave-chat">Leave</a>
         </div>
         <div class="chatroom-content">
             <div class="messages-area"></div>
-            <div class="input-container">
-                <textarea name="content" class="message-input" placeholder="Enter your message here" maxlength=1500 data-testid="msg-input"></textarea>
-                <button class="send-message-btn btn btn-primary" data-testid="send-btn">Send</button>
-            </div>
+            {% if not isReadOnly %}
+                <div class="input-container">
+                    <textarea name="content" class="message-input" placeholder="Enter your message here" maxlength=1500 data-testid="msg-input"></textarea>
+                    <button class="send-message-btn btn btn-primary" data-testid="send-btn">Send</button>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -21,6 +28,7 @@
         "userId": "{{ user_id }}",
         "displayName": "{{ user_display_name }}",
         "user_admin": "{{ user_admin }}",
-        "isAnonymous": "{{ anonymous }}"
+        "isAnonymous": "{{ anonymous }}",
+        "read_only": {{isReadOnly ? 'true' : 'false' }}
     }
 </script>

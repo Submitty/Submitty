@@ -6,6 +6,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\entities\chat\Chatroom;
+use app\entities\chat\ChatroomParticipant;
 use app\entities\chat\Message;
 use app\entities\UserEntity;
 use app\libraries\routers\AccessControl;
@@ -17,6 +18,30 @@ use WebSocket;
 
 #[Enabled(feature: "chat")]
 class ChatroomController extends AbstractController {
+    /**
+     * Retrieves the ChatroomParticipant record for the current user in the given chatroom,
+     * creating and persisting one (with a fresh random salt) if none exists yet.
+     */
+    private function getOrCreateParticipant(Chatroom $chatroom): ChatroomParticipant {
+        $em = $this->core->getCourseEntityManager();
+        $user = $this->core->getUser();
+
+        $participant = $em->getRepository(ChatroomParticipant::class)->findOneBy([
+            'chatroom' => $chatroom,
+            'user' => $user->getId(),
+        ]);
+
+        if ($participant === null) {
+            $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
+            $participant = new ChatroomParticipant($chatroom, $userEntity);
+            $em->persist($participant);
+            // Flush immediately so the salt is saved before name resolution.
+            $em->flush();
+        }
+
+        return $participant;
+    }
+
     /**
      * Send a message over WebSocket.
      *
@@ -96,6 +121,7 @@ class ChatroomController extends AbstractController {
         $user = $this->core->getUser();
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
+        $allow_read_only_after_end = isset($_POST['allow_read_only_after_end']);
 
         $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
 
@@ -109,6 +135,7 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
         $chatroom = new Chatroom($userEntity, $title, $description);
+        $chatroom->setAllowReadOnlyAfterEnd($allow_read_only_after_end);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
@@ -141,7 +168,11 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
-        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
+        if (
+            !$chatroom->isActive()
+            && !$chatroom->allowReadOnlyAfterEnd()
+            && !$this->core->getUser()->accessAdmin()
+        ) {
             $this->core->addErrorMessage("Chatroom not enabled");
             return new RedirectResponse(
                 $this->core->buildCourseUrl(['chat'])
@@ -188,6 +219,9 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
+        $chatroom->setAllowReadOnlyAfterEnd(
+            isset($_POST['allow_read_only_after_end'])
+        );
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         if (trim($title) === '') {
@@ -229,9 +263,14 @@ class ChatroomController extends AbstractController {
             $msg_array['type'] = 'chat_close';
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
-            $indiv_msg_array['type'] = 'chat_close';
-            $indiv_msg_array['chatroom_id'] = $chatroom->getId();
-            $this->sendSocketMessage($indiv_msg_array, true);
+            $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
+
+            if (!$chatroom->allowReadOnlyAfterEnd()) {
+                $indiv_msg_array = [];
+                $indiv_msg_array['type'] = 'chat_close';
+                $indiv_msg_array['chatroom_id'] = $chatroom->getId();
+                $this->sendSocketMessage($indiv_msg_array, true);
+            }
         }
         $this->sendSocketMessage($msg_array);
         $chatroom->setSessionStartedAt($chatroom->isActive() ? null : new \DateTime("now"));
@@ -272,6 +311,10 @@ class ChatroomController extends AbstractController {
             return JsonResponse::getFailResponse("Chatroom not found");
         }
         if (!$chatroom->isActive() && !$user->accessAdmin()) {
+            if ($chatroom->allowReadOnlyAfterEnd()) {
+                return JsonResponse::getFailResponse("This chatroom is read-only.");
+            }
+
             return JsonResponse::getFailResponse("This chatroom is not enabled");
         }
         if (strcmp($_POST['content'], "") === 0) {
@@ -283,7 +326,8 @@ class ChatroomController extends AbstractController {
         $msg_array['user_id'] = $isAnonymous ? 'null' : $user->getId();
         $display_name = '';
         if ($chatroom->isAllowAnon() && $isAnonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId());
+            $participant = $this->getOrCreateParticipant($chatroom);
+            $display_name = $chatroom->resolveAnonName($participant);
         }
         else {
             if ($user->accessAdmin()) {
@@ -327,5 +371,28 @@ class ChatroomController extends AbstractController {
             $this->sendSocketMessage($msg_array, true);
         }
         return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
+    }
+
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonNames", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonNames", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
+    public function regenerateAnonNames(string $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
+
+        if ($chatroom === null) {
+            return JsonResponse::getFailResponse("Chatroom not found");
+        }
+
+        $chatroom->regenerateAnonNames();
+        $em->flush();
+
+        $msg_array = [
+            'type'        => 'anon_names_regenerated',
+            'chatroom_id' => $chatroom->getId(),
+        ];
+        $this->sendSocketMessage($msg_array, true);
+
+        return JsonResponse::getSuccessResponse("Anonymous names regenerated");
     }
 }
