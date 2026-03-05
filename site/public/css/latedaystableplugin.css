@@ -12,9 +12,131 @@
     content: attr(data-before-content);
 }
 
+/* Keep this table in real tabular layout at all widths so sticky columns can work */
+#late-day-table,
+#late-day-table thead,
+#late-day-table tbody,
+#late-day-table tr,
+#late-day-table th,
+#late-day-table td {
+    display: table;
+}
+
+#late-day-table thead {
+    display: table-header-group;
+}
+
+#late-day-table tbody {
+    display: table-row-group;
+}
+
+#late-day-table tr {
+    display: table-row;
+}
+
+#late-day-table th,
+#late-day-table td {
+    display: table-cell;
+    box-sizing: border-box !important;
+}
+
+#late-day-table {
+    margin: 1em 0 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    table-layout: fixed;
+
+    --ld-col-1-width: 120px;
+    --ld-col-2-width: 150px;
+    --ld-col-3-width: 180px;
+    --ld-col-4-width: 110px;
+}
+
+#late-day-table tr > th:nth-child(1),
+#late-day-table tr > td:nth-child(1) {
+    min-width: var(--ld-col-1-width);
+    width: var(--ld-col-1-width);
+}
+
+#late-day-table tr > th:nth-child(2),
+#late-day-table tr > td:nth-child(2) {
+    min-width: var(--ld-col-2-width);
+    width: var(--ld-col-2-width);
+}
+
+#late-day-table tr > th:nth-child(3),
+#late-day-table tr > td:nth-child(3) {
+    min-width: var(--ld-col-3-width);
+    width: var(--ld-col-3-width);
+}
+
+#late-day-table tr > th:nth-child(4),
+#late-day-table tr > td:nth-child(4) {
+    min-width: var(--ld-col-4-width);
+    width: var(--ld-col-4-width);
+}
+
+/* Freeze first four columns only */
+#late-day-table tr > th:nth-child(1),
+#late-day-table tr > td:nth-child(1) {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 2 !important;
+}
+
+#late-day-table tr > th:nth-child(2),
+#late-day-table tr > td:nth-child(2) {
+    position: sticky !important;
+    left: var(--ld-col-1-width) !important;
+    z-index: 2 !important;
+}
+
+#late-day-table tr > th:nth-child(3),
+#late-day-table tr > td:nth-child(3) {
+    position: sticky !important;
+    left: calc(var(--ld-col-1-width) + var(--ld-col-2-width)) !important;
+    z-index: 2 !important;
+}
+
+#late-day-table tr > th:nth-child(4),
+#late-day-table tr > td:nth-child(4) {
+    position: sticky !important;
+    left: calc(var(--ld-col-1-width) + var(--ld-col-2-width) + var(--ld-col-3-width)) !important;
+    z-index: 2 !important;
+    border-right: 2px solid var(--standard-medium-gray);
+}
+
+/* Keep sticky column backgrounds opaque while scrolling */
+#late-day-table thead tr > th:nth-child(-n + 4) {
+    z-index: 3;
+    background: var(--standard-hover-light-gray);
+}
+
+#late-day-table tbody tr:nth-child(odd) td:nth-child(-n + 4) {
+    background: var(--default-white);
+}
+
+#late-day-table tbody tr:nth-child(even) td:nth-child(-n + 4) {
+    background: var(--standard-hover-light-gray);
+}
+
+/* Ensure non-frozen columns scroll normally */
+#late-day-table tr > th:nth-child(n + 5),
+#late-day-table tr > td:nth-child(n + 5) {
+    position: static !important;
+    left: auto !important;
+}
+
 @media (min-width: 831px) {
-    #late-day-table {
-        margin: 1em 0 0;
+    .column-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .page-content {
+        overflow-x: auto;
     }
 
     #late-day-table thead tr {
@@ -30,3 +152,4 @@
         content: none !important;
     }
 }
+

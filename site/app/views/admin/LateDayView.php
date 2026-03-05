@@ -41,7 +41,6 @@ class LateDayView extends AbstractView {
     public function displayLateDayCache($students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
-        $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalCss('table.css');
@@ -139,3 +138,4 @@ class LateDayView extends AbstractView {
         ]);
     }
 }
+
