@@ -305,7 +305,6 @@ class ElectronicGraderController extends AbstractController {
                 $student_array = [];
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
                 // Batch-fetch which students have submissions in a single query
-                // instead of calling getUserHasSubmission() per student (N+1 pattern)
                 $all_student_ids = array_map(fn($s) => $s->getId(), $students);
                 $submitted_set = $submit_before_grading
                     ? array_flip($this->core->getQueries()->getUsersWithSubmissions($gradeable, $all_student_ids))
@@ -350,7 +349,6 @@ class ElectronicGraderController extends AbstractController {
         $student_list = [];
         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
         // Batch-fetch which students have submissions in a single query
-        // instead of calling getUserHasSubmission() per student (N+1 pattern)
         $all_student_ids = array_map(fn($s) => $s->getId(), $students);
         $submitted_set = $submit_before_grading
             ? array_flip($this->core->getQueries()->getUsersWithSubmissions($gradeable, $all_student_ids))
