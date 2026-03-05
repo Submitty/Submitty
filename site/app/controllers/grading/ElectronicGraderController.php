@@ -1465,8 +1465,7 @@ class ElectronicGraderController extends AbstractController {
             $team_names[$team_id] = $team_name;
         }
 
-        // Batch-fetch all users from the CSV in a single query instead of
-        // calling getUserById() per row for validation (N+1 pattern)
+        // Batch-fetch all users from the CSV in a single query
         $all_users_map = !empty($all_csv_user_ids)
             ? $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids))
             : [];
