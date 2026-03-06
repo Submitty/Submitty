@@ -61,7 +61,7 @@ describe('testing grade override', () => {
                 cy.logout();
                 cy.login('student');
                 cy.visit(['sample', 'gradeable', gradeable]);
-                cy.get('[data-testid="overridden-grades-student-banner"]', { timeout: 10000 }).should('be.visible');
+                cy.get('[data-testid="overridden-grades-student-banner"]').should('be.visible');
                 cy.logout();
                 cy.login();
             }
