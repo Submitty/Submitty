@@ -266,7 +266,7 @@
                     {% if viewing_inactive_version %}
                         <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
                     {% else %}
-                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                        <p>Maximum <strong>{{ max_file_uploads }} files</strong> allowed per submission. <em>This limit applies only to the number of files in a single submission and does not affect the number of submission attempts.</em></p>
                     {% endif %}
                 </div>
             {% endfor %}
