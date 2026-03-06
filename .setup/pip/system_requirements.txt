@@ -9,7 +9,7 @@
 # Submitty util module depends on:
 
 # For QR bulk upload
-opencv-python-headless==4.12.0.88
+opencv-python-headless==4.13.0.92
 
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
 requests==2.32.5
