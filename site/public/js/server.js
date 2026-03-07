@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup buildCourseUrl */
+   markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
