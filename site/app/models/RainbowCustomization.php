@@ -138,7 +138,11 @@ class RainbowCustomization extends AbstractModel {
                 $bucket = $json_bucket->type;
 
                 // Filter out removed gradeables or updated gradeable buckets
-                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                $existing_bucket_data = $this->customization_data[$bucket] ?? [];
+                if (!is_array($existing_bucket_data)) {
+                    $existing_bucket_data = [];
+                }
+                $this->customization_data[$bucket] = array_values(array_filter($existing_bucket_data, function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
                     $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
                     return !$removed && !$swapped;
