@@ -1255,11 +1255,10 @@ function enableTabsInTextArea(jQuerySelector) {
             return false;
         }
         else if (!event.shiftKey && event.code === 'Tab') { // TAB was pressed without SHIFT, text indent
-            const text = this.value;
             const beforeCurse = this.selectionStart;
-            const afterCurse = this.selectionEnd;
-            this.value = `${text.substring(0, beforeCurse)}\t${text.substring(afterCurse)}`;
+            this.setRangeText('\t', this.selectionStart, this.selectionEnd, 'end');
             this.selectionStart = this.selectionEnd = beforeCurse + 1;
+            this.dispatchEvent(new Event('input', { bubbles: true }));
             return false;
         }
         // No need to test for SHIFT+TAB as it is not being redefined.
