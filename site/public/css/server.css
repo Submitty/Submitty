@@ -1393,6 +1393,7 @@ end of styles used in the admin gradeable page
 }
 
 .file-viewer a:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #6db7ff;
     text-decoration: none;
 }
@@ -1710,9 +1711,9 @@ end of styles used in the admin gradeable page
 .black-btn:hover,
 .black-btn:hover > i,
 .black-btn > i:hover {
-    /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line declaration-no-important, color-no-hex */
     color: #405e90 !important;
-    /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line declaration-no-important, color-no-hex */
     border-color: #405e90 !important;
 }
 
@@ -1777,6 +1778,7 @@ end of styles used in the admin gradeable page
 .notification-badge {
     background-color: var(--danger-red);
     padding: 1px 5px;
+    /* stylelint-disable-next-line color-named */
     color: white;
     font-weight: bold;
     border-radius: 2px;
