@@ -1912,8 +1912,14 @@ class AdminGradeableController extends AbstractController {
                 $success = false;
             }
         }
-        $gradeable->setDates($dates);
-        $this->core->getQueries()->updateGradeable($gradeable);
+        try{
+            $gradeable->setDates($dates);
+            $this->core->getQueries()->updateGradeable($gradeable);
+        }
+        catch(ValidationException $e){
+            $this->core->addErrorMessage("Failed to update dates for " . $gradeable_id . ": date validation failed. Please edit the gradeable to fix inconstistent dates.");
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
         if ($success === true) {
             $this->core->addSuccessMessage($message . $gradeable_id);
         }
