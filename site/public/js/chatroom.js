@@ -21,16 +21,13 @@ function loadChatroomTemplate(chatroomId) {
     });
 }
 
-function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon, allowReadOnlyAfterEnd, isAdmin, isActive, base_url) {
-    const isReadOnly = !isActive && allowReadOnlyAfterEnd;
-
+function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon, isAdmin, isActive, base_url) {
     return Twig.twig({ ref: 'ChatroomRow' }).render({
         id: chatroomId,
         description: description,
         title: title,
         hostName: hostName,
         isAllowAnon: isAllowAnon,
-        isReadOnly: allowReadOnlyAfterEnd,
         isAdmin: isAdmin,
         isActive: isActive,
         baseUrl: base_url,
@@ -170,22 +167,8 @@ function initChatroomSocketClient(chatroomId) {
                 socketChatMessageHandler(msg);
                 break;
             case 'chat_close':
-                if (msg.allow_read_only_after_end) {
-                    const messageInput = document.querySelector('.message-input');
-                    const sendButton = document.querySelector('.send-message-btn');
-
-                    messageInput.disabled = true;
-                    messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
-                    sendButton.disabled = true;
-                }
-                else {
-                    window.alert('Chatroom has been closed by the instructor.');
-                    window.location.href = buildCourseUrl(['chat']);
-                }
-                break;
-            case 'anon_names_regenerated':
-                // Reload the page so the current user gets their new anonymous name.
-                window.location.reload();
+                window.alert('Chatroom has been closed by the instructor.');
+                window.location.href = buildCourseUrl(['chat']);
                 break;
             case 'message_delete': {
                 const msgElement = document.getElementById(msg.message_id);
@@ -207,7 +190,6 @@ function initChatroomListSocketClient(user_admin, base_url) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         const isActive = msg.type === 'chat_open';
-
         switch (msg.type) {
             case 'chat_open':
             case 'chat_close':
@@ -230,14 +212,13 @@ function newChatroomForm() {
     document.getElementById('chatroom-allow-anon').checked = true;
 }
 
-function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon, readOnly) {
+function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) {
     const form = $('#edit-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
     document.getElementById('chatroom-title-input').value = title;
     document.getElementById('chatroom-description-input').value = description;
     document.getElementById('chatroom-anon-allow').checked = allow_anon;
-    document.getElementById('edit-chatroom-read-only-allow').checked = readOnly;
 }
 
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
@@ -301,7 +282,7 @@ function handleChatStateChange(msg, user_admin, isActive, base_url) {
     }
 
     removeChatroomRow(msg.chatroom_id);
-    const rowHtml = renderChatroomRow(msg.chatroom_id, msg.description, msg.title, msg.host_name, msg.allow_anon, msg.allow_read_only_after_end, user_admin, isActive, base_url);
+    const rowHtml = renderChatroomRow(msg.chatroom_id, msg.description, msg.title, msg.host_name, msg.allow_anon, user_admin, isActive, base_url);
     // This should be safe because the Twig template escapes all passed variables.
     // eslint-disable-next-line no-unsanitized/method
     tableBody.insertAdjacentHTML('beforeend', rowHtml);
@@ -350,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { chatroomId, userId, displayName, user_admin, isAnonymous, read_only } = pageData;
+        const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
 
@@ -369,34 +350,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        if (!read_only) {
-            messageInput.addEventListener('keypress', (event) => {
-                if (event.keyCode === 13 && !event.shiftKey) {
-                    event.preventDefault();
-                    sendButton.click();
-                }
-            });
-        }
-        if (!read_only) {
-            sendButton.addEventListener('click', (event) => {
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.keyCode === 13 && !event.shiftKey) {
                 event.preventDefault();
-                const messageContent = messageInput.value.trim();
-                if (messageContent === '') {
-                    alert('Please enter a message.');
-                    return;
-                }
+                sendButton.click();
+            }
+        });
+
+        sendButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const messageContent = messageInput.value.trim();
+            if (messageContent === '') {
+                alert('Please enter a message.');
+                return;
+            }
 
                 const role = user_admin ? 'instructor' : 'student';
                 sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
 
-                messageInput.value = '';
-            });
-        }
-        if (read_only) {
-            messageInput.disabled = true;
-            messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
-            sendButton.disabled = true;
-        }
+            messageInput.value = '';
+        });
     }
     const chatroomsTable = document.getElementById('chatrooms-table');
     const allChatroomData = document.getElementById('all-chatroom-data');

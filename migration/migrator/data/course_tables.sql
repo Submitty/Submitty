@@ -776,6 +776,40 @@ ALTER SEQUENCE public.chatroom_messages_id_seq OWNED BY public.chatroom_messages
 
 
 --
+-- Name: chatroom_participants; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatroom_participants (
+    id integer NOT NULL,
+    chatroom_id integer NOT NULL,
+    user_id character varying NOT NULL,
+    anon_salt character varying(64) NOT NULL,
+    session_snapshot character varying(32) DEFAULT NULL::character varying,
+    anon_name character varying(64) DEFAULT NULL::character varying
+);
+
+
+--
+-- Name: chatroom_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chatroom_participants_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chatroom_participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chatroom_participants_id_seq OWNED BY public.chatroom_participants.id;
+
+
+--
 -- Name: chatrooms; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2126,6 +2160,13 @@ ALTER TABLE ONLY public.chatroom_messages ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
+-- Name: chatroom_participants id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_participants ALTER COLUMN id SET DEFAULT nextval('public.chatroom_participants_id_seq'::regclass);
+
+
+--
 -- Name: chatrooms id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2355,6 +2396,14 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.chatroom_messages
     ADD CONSTRAINT chatroom_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: chatroom_participants chatroom_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_participants
+    ADD CONSTRAINT chatroom_participants_pkey PRIMARY KEY (id);
 
 
 --
@@ -2814,6 +2863,14 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
+-- Name: chatroom_participants unique_participant; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_participants
+    ADD CONSTRAINT unique_participant UNIQUE (chatroom_id, user_id);
+
+
+--
 -- Name: student_favorites user_and_thread_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3040,6 +3097,22 @@ ALTER TABLE ONLY public.chatroom_messages
 
 
 --
+-- Name: chatroom_participants chatroom_participants_chatroom_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_participants
+    ADD CONSTRAINT chatroom_participants_chatroom_id_fkey FOREIGN KEY (chatroom_id) REFERENCES public.chatrooms(id) ON DELETE CASCADE;
+
+
+--
+-- Name: chatroom_participants chatroom_participants_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_participants
+    ADD CONSTRAINT chatroom_participants_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: chatrooms chatrooms_host_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3128,19 +3201,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3850,4 +3923,6 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict 3cdKqak14NZ2Ot8MJdJeLfM7AabzHzuCwb5RZ0dOzY4rlof5rWd1RNC0hrmZhL3
 

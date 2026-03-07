@@ -50,24 +50,11 @@ class ChatroomView extends AbstractView {
     public function showAllChatrooms(array $chatrooms): string {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
 
-        $chatroom_rows = [];
-        foreach ($chatrooms as $chatroom) {
-            $chatroom_rows[] = [
-                'id' => $chatroom->getId(),
-                'title' => $chatroom->getTitle(),
-                'description' => $chatroom->getDescription(),
-                'hostName' => $chatroom->getHostName(),
-                'isAllowAnon' => $chatroom->isAllowAnon(),
-                'isActive' => $chatroom->isActive(),
-                'isReadOnly' => $chatroom->isReadOnly(),
-                'allowReadOnlyAfterEnd' => $chatroom->allowReadOnlyAfterEnd()
-            ];
-        }
         return $this->core->getOutput()->renderTwigTemplate("chat/AllChatroomsPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
             'semester' => $this->core->getConfig()->getTerm(),
-            'chatrooms' => $chatroom_rows,
+            'chatrooms' => $chatrooms,
             'user_admin' => $this->core->getUser()->accessAdmin(),
         ]);
     }
@@ -106,8 +93,7 @@ class ChatroomView extends AbstractView {
             'user_admin' => $this->core->getUser()->accessAdmin(),
             'user_id' => $this->core->getUser()->getId(),
             'user_display_name' => $display_name,
-            'anonymous' => $anonymous,
-            'isReadOnly' => $chatroom->isReadOnly()
+            'anonymous' => $anonymous
         ]);
     }
 }
