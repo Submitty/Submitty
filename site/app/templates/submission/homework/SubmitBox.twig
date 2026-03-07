@@ -347,23 +347,23 @@
         {% endif %}
 
         <script>
-            $(function() {
-                setButtonStatus({{ viewing_inactive_version }});
-                initMaxNoFiles({{ max_file_uploads }});
-            });
-
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
             if (typeof num_parts === "undefined"){
                 var num_parts = {{ part_names|length }};
             }
-            createArray(num_parts);
             var assignment_version = {{ display_version }};
             var highest_version = {{ highest_version }};
-            {% if not viewing_inactive_version %}
-                for (var i = 1; i <= num_parts; i++ ){
-                    initializeDropZone("upload" + String(i));
-                }
-            {% endif %}
+
+            $(function() {
+                setButtonStatus({{ viewing_inactive_version }});
+                initMaxNoFiles({{ max_file_uploads }});
+                createArray(num_parts);
+                {% if not viewing_inactive_version %}
+                    for (var i = 1; i <= num_parts; i++ ){
+                        initializeDropZone("upload" + String(i));
+                    }
+                {% endif %}
+            });
 
 
             $("#startnew").click(function(e){ // Clear all the selected files in the buckets
