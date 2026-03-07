@@ -101,22 +101,18 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/api/courses/{_semester}/{_course}/config", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/config", methods: ["POST"])]
-    public function updateConfiguration(): MultiResponse {
+    public function updateConfiguration(): JsonResponse {
         if (!isset($_POST['name'])) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Name of config value not provided')
-            );
+            return JsonResponse::getFailResponse('Name of config value not provided');
         }
         $name = $_POST['name'];
 
         if (!isset($_POST['entry'])) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Name of config entry not provided')
-            );
+            return JsonResponse::getFailResponse('Name of config entry not provided');
         }
         $entry = $_POST['entry'];
 
@@ -127,21 +123,15 @@ class ConfigurationController extends AbstractController {
                 $gradeable_ids[] = $option['g_id'];
             }
             if (!in_array($entry, $gradeable_ids)) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Invalid gradeable chosen for seating')
-                );
+                return JsonResponse::getFailResponse('Invalid gradeable chosen for seating');
             }
         }
         elseif (in_array($name, ['default_hw_late_days', 'default_student_late_days'])) {
             if (!ctype_digit($entry)) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Must enter a number for this field')
-                );
+                return JsonResponse::getFailResponse('Must enter a number for this field');
             }
             if ($entry > 10000) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('Value must be less than or equal to 10000')
-                );
+                return JsonResponse::getFailResponse('Value must be less than or equal to 10000');
             }
             $entry = intval($entry);
         }
@@ -165,16 +155,12 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse($entry . ' is not a valid URL')
-                );
+                return JsonResponse::getFailResponse($entry . ' is not a valid URL');
             }
         }
         elseif ($name === 'course_repo_url') {
             if (preg_match('/\s/', $entry)) {
-                return new MultiResponse(
-                    JsonResponse::getFailResponse('Repository URL cannot contain whitespace')
-                );
+                return JsonResponse::getFailResponse('Repository URL cannot contain whitespace');
             }
         }
         elseif ($name === 'course_repo_branch') {
@@ -183,9 +169,7 @@ class ConfigurationController extends AbstractController {
                 $entry = 'main';
             }
             if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $entry) || str_contains($entry, '..') || str_starts_with($entry, '/')) {
-                return new MultiResponse(
-                    JsonResponse::getFailResponse('Invalid repository branch name')
-                );
+                return JsonResponse::getFailResponse('Invalid repository branch name');
             }
         }
         elseif ($name === 'course_repo_subdirectory') {
@@ -194,14 +178,10 @@ class ConfigurationController extends AbstractController {
                 $entry = '';
             }
             if (str_contains($entry, '..')) {
-                return new MultiResponse(
-                    JsonResponse::getFailResponse('Repository subdirectory cannot contain ".."')
-                );
+                return JsonResponse::getFailResponse('Repository subdirectory cannot contain ".."');
             }
             if ($entry !== '' && !preg_match('/^[A-Za-z0-9._\/-]+$/', $entry)) {
-                return new MultiResponse(
-                    JsonResponse::getFailResponse('Invalid repository subdirectory')
-                );
+                return JsonResponse::getFailResponse('Invalid repository subdirectory');
             }
         }
         elseif ($name === 'auto_rainbow_grades') {
@@ -227,16 +207,12 @@ class ConfigurationController extends AbstractController {
             && !str_contains($name, 'self_registration')
             && $name !== 'default_section_id'
         ) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Not a valid config name')
-            );
+            return JsonResponse::getFailResponse('Not a valid config name');
         }
         $config_json['course_details'][$name] = $entry;
 
         if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Could not save config file')
-            );
+            return JsonResponse::getFailResponse('Could not save config file');
         }
 
         // All late day cache now invalid
@@ -244,19 +220,15 @@ class ConfigurationController extends AbstractController {
             $this->core->getQueries()->flushAllLateDayCache();
         }
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse(null)
-        );
+        return JsonResponse::getSuccessResponse(null);
     }
 
     #[Route("/api/courses/{_semester}/{_course}/config/course_repository/pull", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/config/course_repository/pull", methods: ["POST"])]
-    public function pullCourseRepository(): MultiResponse {
+    public function pullCourseRepository(): JsonResponse {
         $repo_url = trim($this->core->getConfig()->getCourseRepoUrl());
         if ($repo_url === '') {
-            return new MultiResponse(
-                JsonResponse::getFailResponse('Set a Course Repository URL before pulling')
-            );
+            return JsonResponse::getFailResponse('Set a Course Repository URL before pulling');
         }
 
         $queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue');
@@ -265,15 +237,11 @@ class ConfigurationController extends AbstractController {
         $processing_file = FileUtils::joinPaths($queue_dir, "PROCESSING_{$job_filename}");
 
         if (is_file($processing_file)) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse('A repository pull is already in progress')
-            );
+            return JsonResponse::getFailResponse('A repository pull is already in progress');
         }
 
         if (is_file($queue_file)) {
-            return new MultiResponse(
-                JsonResponse::getSuccessResponse(['queue_status' => 'queued'])
-            );
+            return JsonResponse::getSuccessResponse(['queue_status' => 'queued']);
         }
 
         $job_data = [
@@ -284,19 +252,15 @@ class ConfigurationController extends AbstractController {
         ];
 
         if (!FileUtils::writeJsonFile($queue_file, $job_data)) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse('Unable to queue course repository pull')
-            );
+            return JsonResponse::getFailResponse('Unable to queue course repository pull');
         }
 
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse(['queue_status' => 'queued'])
-        );
+        return JsonResponse::getSuccessResponse(['queue_status' => 'queued']);
     }
 
     #[Route("/api/courses/{_semester}/{_course}/config/course_repository/status", methods: ["GET"])]
     #[Route("/courses/{_semester}/{_course}/config/course_repository/status", methods: ["GET"])]
-    public function courseRepositoryStatus(): MultiResponse {
+    public function courseRepositoryStatus(): JsonResponse {
         $queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue');
         $job_filename = "sync_course_repo__{$this->core->getConfig()->getTerm()}__{$this->core->getConfig()->getCourse()}.json";
         $queue_file = FileUtils::joinPaths($queue_dir, $job_filename);
@@ -319,12 +283,10 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse([
-                'queue_status' => $queue_status,
-                'last_sync' => $last_sync,
-            ])
-        );
+        return JsonResponse::getSuccessResponse([
+            'queue_status' => $queue_status,
+            'last_sync' => $last_sync,
+        ]);
     }
 
     private function getGradeableSeatingOptions(): array {

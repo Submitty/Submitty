@@ -1354,15 +1354,6 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
-			rawMessage: '''
-				Call to deprecated method JsonOnlyResponse() of class app\libraries\response\MultiResponse:
-				should not be used, just return JsonResponse directly
-			'''
-			identifier: staticMethod.deprecated
-			count: 9
-			path: app/controllers/admin/ConfigurationController.php
-
-		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 3
