@@ -2297,3 +2297,30 @@ main#main.full-screen-mode .content {
 main#main.full-screen-mode #exit-full-screen-btn {
     display: block;
 }
+/* Global Full Screen Mode Styles */
+main#main.full-screen-mode {
+    z-index: 999;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    overflow: auto;
+}
+
+main#main.full-screen-mode .content {
+    margin: 0;
+    padding: 20px 40px;
+}
+
+#exit-full-screen-btn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 1001; /* Above the full screen mode */
+}
+
+main#main.full-screen-mode #exit-full-screen-btn {
+    display: block;
+}

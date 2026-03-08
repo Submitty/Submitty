@@ -28,10 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
 
-    const isFullScreen = localStorage.getItem('globalFullScreenMode') === 'true';
-    if (isFullScreen) {
-        document.getElementById('main').classList.add('full-screen-mode');
+    // Clean up stale full-screen state from previous versions
+    localStorage.removeItem('globalFullScreenMode');
+    const mainEl = document.getElementById('main');
+    if (mainEl) {
+        mainEl.classList.remove('full-screen-mode');
     }
+    document.body.style.overflow = '';
 });
 function loadInBreadcrumbLinks() {
     mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $('#home-button').attr('href');
@@ -99,7 +102,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     }
     // Insert actual and expected one at a time
     let url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
-    }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
+        }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
     const assertSuccess = function (data) {
         if (data.status === 'fail') {
@@ -126,7 +129,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             // eslint-disable-next-line no-restricted-syntax
             $(expected_div).html(response.data.html);
             url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
-            }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
+                }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
             $.getJSON({
                 url: url,
                 success: function (response) {
@@ -2026,7 +2029,6 @@ document.addEventListener('DOMContentLoaded', scorePillDark);
 
 /**
  * Toggles the global full screen mode by adding or removing the .full-screen-mode class on the main element.
- * Also saves the state to localStorage so it persists across pages.
  */
 function toggleGlobalFullScreenMode() {
     const mainMain = document.getElementById('main');
@@ -2034,6 +2036,5 @@ function toggleGlobalFullScreenMode() {
         return;
     }
     mainMain.classList.toggle('full-screen-mode');
-    const isFullScreen = mainMain.classList.contains('full-screen-mode');
-    localStorage.setItem('globalFullScreenMode', isFullScreen);
+    document.body.style.overflow = mainMain.classList.contains('full-screen-mode') ? 'hidden' : '';
 }
