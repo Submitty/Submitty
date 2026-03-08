@@ -53,4 +53,38 @@ class SimpleStatTester extends BaseUnitTest {
         $this->assertEquals($details['active_grade_inquiry_count'], $simple_stat->getActiveGradeInquiryCount());
         $this->assertEquals($average_grader_scores, $simple_stat->getGraderInfo());
     }
+
+    public function testNonComponentConstructor() {
+        $details = [
+            'max' => 50.0,
+            'avg_score' => 40.0,
+            'std_dev' => 3.1,
+            'count' => 10
+        ];
+        $stat = new SimpleStat($this->core, $details);
+        $this->assertFalse($stat->getComponent());
+        $this->assertEquals(50.0, $stat->getMaxValue());
+        $this->assertEquals(40.0, $stat->getAverageScore());
+        $this->assertEquals(3.1, $stat->getStandardDeviation());
+        $this->assertEquals(10, $stat->getCount());
+        $this->assertNull($stat->getTitle());
+        $this->assertNull($stat->getOrder());
+        $this->assertNull($stat->getIsPeerComponent());
+        $this->assertNull($stat->getActiveGradeInquiryCount());
+        $this->assertNull($stat->getGraderInfo());
+    }
+
+    public function testDefaultConstructor() {
+        $stat = new SimpleStat($this->core, []);
+        $this->assertFalse($stat->getComponent());
+        $this->assertEquals(0, $stat->getMaxValue());
+        $this->assertEquals(0, $stat->getAverageScore());
+        $this->assertEquals(0, $stat->getStandardDeviation());
+        $this->assertEquals(0, $stat->getCount());
+        $this->assertNull($stat->getTitle());
+        $this->assertNull($stat->getOrder());
+        $this->assertNull($stat->getIsPeerComponent());
+        $this->assertNull($stat->getActiveGradeInquiryCount());
+        $this->assertNull($stat->getGraderInfo());
+    }
 }
