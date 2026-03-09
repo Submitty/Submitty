@@ -7,7 +7,7 @@
         <a id = 'open_file_{{ file.name|url_encode }}' onclick='openSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab" class="key_to_click" tabindex="0"><i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></a>
         <a onclick='downloadFile("{{ file.path|url_encode }}", "attachments")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         {% if can_modify %}
-        <a onclick='deleteAttachment(this, "{{ file.name|url_encode }}")' aria-label="Delete the file" class="key_to_click" tabindex="0"><i class="fas fa-trash" title="Delete the file"></i></a>
+        <a onclick='deleteAttachment(this, "{{ file.name|url_encode }}"{% if uploader_id is defined %}, "{{ uploader_id|url_encode }}"{% endif %})' aria-label="Delete the file" class="key_to_click" tabindex="0"><i class="fas fa-trash" title="Delete the file"></i></a>
         {% endif %}
     </div>
     <div id="file_viewer_{{ id }}" data-file_name="{{ file.name }}" data-file_url="{{ file.path }}"></div>
