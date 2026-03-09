@@ -202,6 +202,7 @@
 }
 
 .category-color-picker {
+    /* stylelint-disable-next-line color-named */
     color: white;
     font-size: 14px;
     height: 18px;
@@ -252,6 +253,7 @@
     display: inline-block;
     color: var(--standard-tangerine-yellow);
     -webkit-text-stroke-width: 1px;
+    /* stylelint-disable-next-line color-named */
     -webkit-text-stroke-color: black;
 }
 
@@ -260,6 +262,7 @@
     display: inline-block;
     color: var(--submitty-logo-blue);
     -webkit-text-stroke-width: 1px;
+    /* stylelint-disable-next-line color-named */
     -webkit-text-stroke-color: black;
 }
 
@@ -286,6 +289,7 @@
 }
 
 .not-active-thread-announcement:hover {
+    /* stylelint-disable-next-line color-named */
     text-shadow: gold 0 0 5px;
 }
 
