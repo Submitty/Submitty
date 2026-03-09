@@ -855,8 +855,9 @@ class ForumController extends AbstractController {
                 $type = "thread";
             }
             $metadata = json_encode([]);
-            $subject = "Deleted: " . $post->getContent();
-            $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
+            $preview = $this->previewText($post->getContent(), 120);
+            $subject = "Deleted: " . $preview;
+            $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $preview . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->sendSocketMessage(array_merge(
