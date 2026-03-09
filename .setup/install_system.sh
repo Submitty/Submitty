@@ -113,13 +113,9 @@ if [ ${WORKER} == 1 ]; then
     COMMAND=--worker
 fi
 
-if [ ${DEV_VM} == 1 ]; then
-    python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
-fi
+python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
 
-if [ ${DEV_VM} == 0 ]; then
-    python3 ${CURRENT_DIR}/validate_configs.py ${COMMAND} 
-fi
+python3 ${CURRENT_DIR}/validate_configs.py ${COMMAND}
 
 
 if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
