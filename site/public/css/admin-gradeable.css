@@ -580,6 +580,7 @@ pre.CodeMirror-line {
     font-size: 14px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 #gradeable-config-edit-bar .CodeMirror-cursor {
     border-left: 2px solid var(--text-black);
 }
