@@ -2371,7 +2371,17 @@ class Gradeable extends AbstractModel {
         }
 
         // If the gradeable has NO open submission date and TA view start date is in the future
-        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+
+        // If the gradeable is open to grading (regardless of the TA view date), it should be only visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() <= $date && !$user->accessGrading()) {
+            return false;
+        }
+
+        // If the gradeable is open to ta beta testing, it should only be visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() <= $date && !$user->accessGrading()) {
             return false;
         }
 
