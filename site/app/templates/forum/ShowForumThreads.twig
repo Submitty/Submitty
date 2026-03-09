@@ -1,4 +1,5 @@
 <script>
+    window.forumThreadBaseUrl = {{ forum_thread_base_url | json_encode | raw }};
 
     $( document ).ready(function(){
         saveScrollLocationOnRefresh('posts_list');
