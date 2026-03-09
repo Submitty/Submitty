@@ -1466,9 +1466,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Batch-fetch all users from the CSV in a single query
-        $all_users_map = !empty($all_csv_user_ids)
-            ? $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids))
-            : [];
+        $all_users_map = $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids)) ?? [];
 
         // Validate that all user IDs exist
         foreach ($all_csv_user_ids as $uid) {
