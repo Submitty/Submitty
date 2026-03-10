@@ -354,8 +354,15 @@ class SubmissionController extends AbstractController {
     /**
     * WIP function to generate a "blank" pdf for grading all students,
     * called from bulk gradeable submission side.
-    * My understanding of ajax is that it can work in the background? how to implement??
+    *
     * I still need to figure out how to call this function in the .twig or whatever
+    * How to implement this s.t. it can work in the background, (does it already)
+    * submitting for all students could take time
+    * 
+    * ajax ... ? other bulk upload functions use it. 
+    * but they are different in implementation from this. would need to learn
+    * 
+    * 
     * Copied the route from nearby function -- is it correct? I don't understand it. 
     * Add JSON rendering for error checking??
     */
