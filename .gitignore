@@ -51,3 +51,5 @@ Pipfile.lock
 
 .env
 .github_actions_ci_flag
+
+.claude

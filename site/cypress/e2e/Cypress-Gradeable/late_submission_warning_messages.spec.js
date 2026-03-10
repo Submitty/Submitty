@@ -28,9 +28,9 @@ const getServerDateComponents = (date = new Date()) => {
         day: '2-digit',
     }).formatToParts(date);
     return {
-        year: parseInt(parts.find((p) => p.type === 'year').value),
-        month: parseInt(parts.find((p) => p.type === 'month').value),
-        day: parseInt(parts.find((p) => p.type === 'day').value),
+        year: parseInt(parts.find((part) => part.type === 'year').value),
+        month: parseInt(parts.find((part) => part.type === 'month').value),
+        day: parseInt(parts.find((part) => part.type === 'day').value),
     };
 };
 
@@ -326,12 +326,11 @@ describe('Test warning messages for non team gradeable', () => {
         cy.get('[data-testid=late-days]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.get('[data-testid=submission-due-date]').clear();
-        // Use getDueDateString to set noon in the server timezone, avoiding UTC/EST boundary issues
         cy.get('[data-testid=submission-due-date]').type(getDueDateString(2));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
-        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day → 2 late days consumed
+        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day, 2 late days consumed
         SubmitAndCheckMessage('non_team', 'upload_file1', 'valid_usage', '2_days_late+extension', 3, 1);
     });
     it('Warning message for the second submission with 0 valid remaining late day ', () => {
@@ -341,7 +340,6 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=submission-due-date]').clear();
-        // Use getDueDateString to set noon in the server timezone, avoiding UTC/EST boundary issues
         cy.get('[data-testid=submission-due-date]').type(getDueDateString(3));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
@@ -402,17 +400,15 @@ describe('Test warning messages for team gradeable', () => {
         // The first submission will be done 2 days after the due date and use 2 valid late days for each team member
         cy.login('instructor');
         giveExtensions(team_gradeable);
-        // Use getMorningDateString so grants (6 AM) are before the noon due date in the server timezone
         giveLateDays(getMorningDateString(3), 'student', 3); // this is important for part 2/2
         giveLateDays(getMorningDateString(3), 'aphacker', 2);
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=submission-due-date]').clear();
-        // Use getDueDateString to set noon in the server timezone, avoiding UTC/EST boundary issues
         cy.get('[data-testid=submission-due-date]').type(getDueDateString(2));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
-        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day → 2 late days consumed
+        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day, 2 late days consumed
         SubmitAndCheckMessage('team', 'upload_file1', 'valid_usage', '2_days_late+extension', 3, 1);
     });
 
@@ -423,12 +419,11 @@ describe('Test warning messages for team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=submission-due-date]').clear();
-        // Use getDueDateString to set noon in the server timezone, avoiding UTC/EST boundary issues
         cy.get('[data-testid=submission-due-date]').type(getDueDateString(3));
         cy.get('[data-testid=submission-due-date]').type('{enter}');
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
-        // Due 3 days ago: server reports 3+1=4 days late; 1 extension day → 3 late days consumed
+        // Due 3 days ago: server reports 3+1=4 days late; 1 extension day, 3 late days consumed
         SubmitAndCheckMessage('team', 'upload_file2', 'both_messages', 'both_messages', 4, 1);
     });
 
