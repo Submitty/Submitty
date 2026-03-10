@@ -843,8 +843,9 @@ class ForumController extends AbstractController {
                 }
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Restored: " . $post->getContent();
-                $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
+                $preview = $this->previewText($post->getContent(), 120);                
+                $subject = "Restored: " . $preview;
+                $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $preview;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             }
         }
