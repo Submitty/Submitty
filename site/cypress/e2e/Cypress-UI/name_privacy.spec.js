@@ -1,5 +1,3 @@
-Cypress.on('uncaught:exception', () => false);
-
 describe('Legal name privacy tests', () => {
     before(() => {
         cy.login('student');
