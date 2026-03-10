@@ -28,9 +28,9 @@ const getServerDateComponents = (date = new Date()) => {
         day: '2-digit',
     }).formatToParts(date);
     return {
-        year: parseInt(parts.find(p => p.type === 'year').value),
-        month: parseInt(parts.find(p => p.type === 'month').value),
-        day: parseInt(parts.find(p => p.type === 'day').value),
+        year: parseInt(parts.find((p) => p.type === 'year').value),
+        month: parseInt(parts.find((p) => p.type === 'month').value),
+        day: parseInt(parts.find((p) => p.type === 'day').value),
     };
 };
 
