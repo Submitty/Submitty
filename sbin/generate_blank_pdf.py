@@ -4,7 +4,7 @@ from reportlab.lib.pagesizes import letter
 def generate_template():
     path = "/var/local/submitty/courses/placeholder.pdf"
     c = canvas.Canvas(path, pagesize=letter)
-    c.setFont("Helvetica", 12)
+    c.setFont("Times-Roman", 20)
     c.drawString(72, 700, "This is a Submitty-generated pdf for grading purposes.")
     c.showPage()
     c.save()

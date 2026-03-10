@@ -354,13 +354,14 @@ class SubmissionController extends AbstractController {
     /**
     * WIP function to generate a "blank" pdf for grading all students,
     * called from bulk gradeable submission side.
-    * My understanding of calling via ajax is that it can work in the background?
+    * My understanding of ajax is that it can work in the background? how to implement??
     * I still need to figure out how to call this function in the .twig or whatever
     * Copied the route from nearby function -- is it correct? I don't understand it. 
+    * Add JSON rendering for error checking??
     */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods: ["POST"])]
-    public function ajaxGenerateBlankSubmissions(Gradeable $gradeable) {
+    public function generateBlankSubmissions(Gradeable $gradeable) {
 
         $gradable_id = $gradeable->getId();
         $section = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
@@ -397,17 +398,15 @@ class SubmissionController extends AbstractController {
                     $timestamp = date("Y-m-d H:i:s");
                     $this->core->getQueries()->insertVersionDetails($gradable_id, $user_id, null, $next_version, $timestamp);
                     $this->core->getQueries()->updateActiveVersion($gradable_id, $user_id, null, $next_version);
-                    //start the grading ??
+                    //WIP: start the autograding ??
 
                     $success_count++;
                 }
             }
         }
 
-        return JsonResponse::getSuccessResponse([
-            "message" => "Successfully submitted blank PDF for all $success_count students.",
-            "count" => $success_count
-        ]);
+        $result = "Successfully submitted blank PDF for all $success_count students.";
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**
