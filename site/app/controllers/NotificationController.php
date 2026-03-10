@@ -114,6 +114,10 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
+        //add "available courses" for the twig
+        $available_courses = $this->core->getQueries()->getCoursesForUser($this->core->getUser()->getId());
+
+
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
@@ -124,12 +128,37 @@ class NotificationController extends AbstractController {
         );
     }
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
-    #[Route("/courses/{_semester}/{_course}/notifications/settings", methods:["GET"])]
-    public function syncNotificationSettings(): MultiResponse {
-        
+    #[Route("/courses/{_semester}/{_course}/notifications/sync", methods: ["POST"])]
+public function syncSettings(): JsonResponse {
+    $user_id = $this->core->getUser()->getId();
+    //courses selected in Twig (select multiple)
+    $course_ids = $_POST['sync_course_ids'] ?? [];
+    if(!is_array($course_ids) || count($course_ids) === 0){
+        return JsonResponse::getFailResponse('No courses selected.');
     }
+    //remove fields not stored
+    unset($_POST['csrf_token'], $_POST['sync_course_ids']);
+    $new_settings = $_POST;
+    if(!$this->validateNotificationSettings(array_keys($new_settings))){
+        return JsonResponse::getFailResponse('Invalid notification payload.');
+    }
+    //fill in unchecked boxes as false
+    $values_not_sent = array_diff($this->selections, array_keys($new_settings));
+    foreach ($values_not_sent as $value) {
+        $new_settings[$value] = 'false';
+    }
+    //apply settings to each selected course
+    foreach ($course_ids as $course_id) {
+        $this->core->getQueries()->updateNotificationSettingsForCourse(
+            $user_id,
+            $course_id,
+            $new_settings
+        );
+    }
+    return JsonResponse::getSuccessResponse('Settings synced successfully.');
+}
 
     /**
      * @return MultiResponse
