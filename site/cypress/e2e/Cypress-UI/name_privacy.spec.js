@@ -1,44 +1,41 @@
 Cypress.on('uncaught:exception', () => false);
 
 describe('Legal name privacy tests', () => {
-    const legalTokens = [
-        'LegalStudentFirst', 'LegalStudentLast',
-        'LegalTaFirst', 'LegalTaLast',
-        'LegalGraderFirst', 'LegalGraderLast',
-        'LegalInstructorFirst', 'LegalInstructorLast',
-    ];
+    before(() => {
+        cy.login('student');
+        cy.visit('/user_profile');
+        cy.get('.popup-form#edit-username-form').invoke('show').within(() => {
+            cy.get('#user-givenname-change').clear().type('PreferredFirst');
+            cy.get('#user-familyname-change').clear().type('PreferredLast');
+        });
+        cy.get('.popup-form#edit-username-form .form-buttons input[type="submit"]').click();
+        cy.logout();
+    });
 
     const checkNoLegalNames = () => {
-        legalTokens.forEach(token => {
-            cy.document().then(doc => {
-                expect(doc.documentElement.innerHTML).to.not.include(token);
-            });
+        cy.document().then(doc => {
+            expect(doc.documentElement.innerHTML).to.not.include('Joe');
         });
     };
 
-    it('Legal names should not appear on the users page', () => {
-        cy.visit(['sample', 'users']);
+    it('Legal names should not appear on any page', () => {
         cy.login('instructor');
-        checkNoLegalNames();
+        const pages = ['users', 'graders', 'student_photos', 'forum', 'navigation'];
+        pages.forEach(page => {
+            cy.visit(['sample', page]);
+            checkNoLegalNames();
+        });
+        cy.logout();
     });
 
-    it('Legal names should not appear on the graders page', () => {
-        cy.visit(['sample', 'graders']);
-        checkNoLegalNames();
-    });
-
-    it('Legal names should not appear on the student photos page', () => {
-        cy.visit(['sample', 'student_photos']);
-        checkNoLegalNames();
-    });
-
-    it('Legal names should not appear on the forum page', () => {
-        cy.visit(['sample', 'forum']);
-        checkNoLegalNames();
-    });
-
-    it('Legal names should not appear on the navigation page', () => {
-        cy.visit(['sample', 'navigation']);
-        checkNoLegalNames();
+    after(() => {
+        cy.login('student');
+        cy.visit('/user_profile');
+        cy.get('.popup-form#edit-username-form').invoke('show').within(() => {
+            cy.get('#user-givenname-change').clear();
+            cy.get('#user-familyname-change').clear();
+        });
+        cy.get('.popup-form#edit-username-form .form-buttons input[type="submit"]').click();
+        cy.logout();
     });
 });
