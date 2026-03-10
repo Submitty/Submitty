@@ -31,6 +31,10 @@
     }
 }
 
-.content > :not(:first-child)   {
+.late-count {
     margin-top: 0.5rem;
+}
+
+.late-description{
+    margin: 0.5rem, 0, 0.5rem, 0; 
 }
