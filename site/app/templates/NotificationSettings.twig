@@ -70,7 +70,7 @@
                     <select name="sync_course_ids[]" id="sync_course_ids"
                         class="form-control"
                         multiple size="6">
-                    {% for course in available_courses %}
+                    {% for course in core.getUser().getCourses()%}
                         <option value="{{ course.id }}">
                             {{ course.semester }} — {{ course.title }}
                         </option>
@@ -434,6 +434,9 @@
                 data: $('#form_notification_settings').serialize(),
                 success: function(data){
                     displaySuccessMessage("Synced to all courses.");
+                }
+                error: function(){
+                    displayErrorMessage("Failed to sync settings.");
                 }
             });
         }
