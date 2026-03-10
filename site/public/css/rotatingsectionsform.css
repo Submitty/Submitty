@@ -41,8 +41,7 @@ table caption .subcaption {
 }
 
 .add-section-row {
-    margin-top: 20px;
-    padding: 12px 0;
+    padding: 10px 0;
     gap: 10px;
 }
 
@@ -51,5 +50,6 @@ table caption .subcaption {
 }
 
 .add-section-row .btn {
-    padding: 10px 16px;
+    padding-bottom: 10px;
+    padding-left: 8px;
 }
