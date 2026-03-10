@@ -2,16 +2,20 @@
     /* stylelint-disable-next-line color-named */
     background-color: red;
 }
+
 #empty-table {
     margin: 10px auto;
     padding: 1.6em 1em;
     text-align: center;
     border-radius: 8px;
 }
+
 .mobile-table {
-    width: 100%;
+    min-width: 100%;
+    width: auto;
     text-align: center;
 }
+
 .mobile-table caption {
     padding: 0.5em;
     font-weight: bold;
@@ -19,15 +23,24 @@
     width: 100%;
     display: block;
 }
-.mobile-table th, .mobile-table td {
+
+.mobile-table th {
     padding: 5px;
-    box-sizing: border-box;
 }
+
+.mobile-table th,
+.mobile-table td {
+    box-sizing: border-box;
+    min-width: 80px;
+}
+
+
 .section-break {
     border-top: 1px solid var(--standard-hover-light-gray);
     font-weight: normal;
     padding: 0.5em;
 }
+
 @media (max-width: 830px) {
     table.mobile-table,
     .mobile-table thead,
@@ -38,10 +51,14 @@
         display: block;
         border: none;
     }
+
     .mobile-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
+
+    /* Hide table headers */
     .mobile-table thead tr {
         position: absolute;
         width: 1px;
@@ -52,6 +69,7 @@
         clip-path: inset(50%);
         border: 0;
     }
+
     .mobile-table td {
         display: flex;
         justify-content: space-between;
@@ -59,76 +77,103 @@
         padding: 2px 8px;
         margin: 2px 0;
     }
+
     .mobile-table tr:nth-child(even) td {
         background: var(--standard-hover-light-gray);
     }
+
     .mobile-table tr:nth-child(odd) td {
         background: var(--standard-light-gray);
     }
+
     .mobile-table td::before {
         padding-right: 1em;
         font-weight: bold;
     }
-    .sticky-col {
-        position: static;
-        left: auto;
-        z-index: auto;
-        background: none;
-    }
 }
+
 @media (min-width: 831px) {
     .mobile-table {
         border: 1px solid var(--standard-hover-light-gray);
     }
+
     .mobile-table caption {
         display: table-caption;
     }
+
     .section-break {
         padding: 0;
     }
+
     .mobile-table td::before {
         content: none !important;
     }
+
     .mobile-table td:first-child,
     .mobile-table th:first-child {
         padding-left: 15px;
     }
+
     .mobile-table td:last-child,
     .mobile-table th:last-child {
         padding-right: 15px;
     }
 }
+
 .peer-table-data {
     width: 50px;
 }
+
 .peer-table-header {
     width: 80px;
 }
+
 .peer-table-title-data {
     text-align: left;
 }
+
 .table-scroll {
     overflow-x: auto;
     width: 100%;
 }
+
 .sticky-col {
     position: sticky;
     background: var(--default-white);
     box-sizing: border-box;
 }
-.sticky-col-1 { width: 120px; left: 0px;   z-index: 10; }
-.sticky-col-2 { width: 120px; left: 120px; z-index: 9;  }
-.sticky-col-3 { width: 120px; left: 240px; z-index: 8;  }
-.sticky-col-4 { width: 100px; left: 360px; z-index: 7;  }
+
+:root {
+    --col1-width: 120px;
+    --col2-width: 120px;
+    --col3-width: 120px;
+    --col4-width: 70px;
+}
+
+.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); left: 0;   z-index: 10; }
+.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 9;  }
+.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 8;  }
+.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 7;  }
+
 #late-day-table thead th {
     position: sticky;
     top: 0;
     background: var(--default-white);
     z-index: 20;
+    width: var(--col2-width);
+    min-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 #late-day-table thead th.sticky-col {
     z-index: 30;
 }
+#late-day-table thead th.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); left: 0;   z-index: 35; }
+#late-day-table thead th.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 34; }
+#late-day-table thead th.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 33; }
+#late-day-table thead th.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 32; }
+
 #late-day-table tbody tr {
     background: var(--default-white);
 }
@@ -141,3 +186,8 @@
 #late-day-table tbody tr:nth-child(odd) .sticky-col {
     background: var(--default-white);
 }
+
+#late-day-table tbody td.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); white-space: nowrap; left: 0; z-index: 25; }
+#late-day-table tbody td.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 24; }
+#late-day-table tbody td.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 23; }
+#late-day-table tbody td.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 22; }
