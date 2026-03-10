@@ -772,12 +772,13 @@ class ForumController extends AbstractController {
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
         if ($did_edit_thread) {
             $subject = "Thread Edited: " . $thread->getTitle();
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $this->previewText($post->getContent(), 100);
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . $post->getContent();
-            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $post_preview = $this->previewText($post->getContent(), 100);
+            $subject = "Post Edited: " . $post_preview;
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post_preview;
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
@@ -843,8 +844,9 @@ class ForumController extends AbstractController {
                 }
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Restored: " . $post->getContent();
-                $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
+                $post_preview = $this->previewText($post->getContent(), 100);
+                $subject = "Restored: " . $post_preview;
+                $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post_preview;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             }
         }
@@ -855,8 +857,9 @@ class ForumController extends AbstractController {
                 $type = "thread";
             }
             $metadata = json_encode([]);
-            $subject = "Deleted: " . $post->getContent();
-            $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
+            $post_preview = $this->previewText($post->getContent(), 100);
+            $subject = "Deleted: " . $post_preview;
+            $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post_preview . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->sendSocketMessage(array_merge(
