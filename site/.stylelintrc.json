@@ -1,6 +1,8 @@
 {
   "extends": "stylelint-config-standard",
   "rules": {
+    "color-named": "never",
+    "color-no-hex": true,
     "color-hex-length": "long",
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
@@ -23,5 +25,16 @@
     "public/css/pdf/pdf_embedded.css",
     "public/css/select2-override.css",
     "public/css/highlightjs/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "public/css/colors.css"
+      ],
+      "rules": {
+        "color-named": null,
+        "color-no-hex": null
+      }
+    }
   ]
 }
