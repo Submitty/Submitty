@@ -2,11 +2,11 @@ describe('Legal name privacy tests', () => {
     before(() => {
         cy.login('student');
         cy.visit('/user_profile');
-        cy.get('.popup-form#edit-username-form').invoke('show').within(() => {
+        cy.get('[data-testid="edit-preferred-name-form"]').invoke('show').within(() => {
             cy.get('#user-givenname-change').clear().type('PreferredFirst');
             cy.get('#user-familyname-change').clear().type('PreferredLast');
         });
-        cy.get('.popup-form#edit-username-form .form-buttons input[type="submit"]').click();
+        cy.get('[data-testid="edit-preferred-name-submit"]').click();
         cy.logout();
     });
 
@@ -29,11 +29,11 @@ describe('Legal name privacy tests', () => {
     after(() => {
         cy.login('student');
         cy.visit('/user_profile');
-        cy.get('.popup-form#edit-username-form').invoke('show').within(() => {
+        cy.get('[data-testid="edit-preferred-name-form"]').invoke('show').within(() => {
             cy.get('#user-givenname-change').clear();
             cy.get('#user-familyname-change').clear();
         });
-        cy.get('.popup-form#edit-username-form .form-buttons input[type="submit"]').click();
+        cy.get('[data-testid="edit-preferred-name-submit"]').click();
         cy.logout();
     });
 });
