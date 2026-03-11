@@ -1466,7 +1466,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Batch-fetch all users from the CSV in a single query
-        $all_users_map = $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids)) ?? [];
+        $all_users_map = $this->core->getQueries()->getUsersById(array_unique($all_csv_user_ids));
 
         // Validate that all user IDs exist
         foreach ($all_csv_user_ids as $uid) {
@@ -1489,7 +1489,7 @@ class ElectronicGraderController extends AbstractController {
         foreach ($new_teams_members as $team_id => $members) {
             $leader_id = $members[0];
 
-            // Use pre-fetched user map instead of calling getUserById() per team (N+1 pattern)
+            // Use pre-fetched user map
             $leader = $all_users_map[$leader_id] ?? null;
             $member_users = [];
             foreach (array_slice($members, 1) as $member_id) {
