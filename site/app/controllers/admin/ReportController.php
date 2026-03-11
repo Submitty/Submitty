@@ -278,6 +278,10 @@ class ReportController extends AbstractController {
         /** @var User $current_user */
         $current_user = null;
         $results = [];
+        $registration_timestamps = $this->core->getQueries()->getCourseRegistrationTimestamps(
+            $this->core->getConfig()->getTerm(),
+            $this->core->getConfig()->getCourse()
+        );
 
         // get all gradeables and cache team graded gradeables
         [$all_gradeables, $user_gradeables, $team_gradeables] = $this->getSplitGradeables($gradeable_sort_keys);
@@ -297,7 +301,8 @@ class ReportController extends AbstractController {
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
 
         // Method to call the callback with the required parameters
-        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days) {
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days, $registration_timestamps) {
+            $current_user->setRegistrationTimestamp($registration_timestamps[$current_user->getId()] ?? null);
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
             $late_days = new LateDays($this->core, $current_user, $ggs, $all_late_days[$current_user->getId()] ?? []);
             return $per_user_callback($current_user, $ggs, $late_days);
@@ -324,6 +329,7 @@ class ReportController extends AbstractController {
             foreach ($this->core->getQueries()->getAllUsers() as $u) {
                 if (!isset($results[$u->getId()])) {
                     // This user had no results, so generate results
+                    $u->setRegistrationTimestamp($registration_timestamps[$u->getId()] ?? null);
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
                     $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
                     $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days);
@@ -395,6 +401,7 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['registration_timestamp'] = $this->formatIso8601Timestamp($user->getRegistrationTimestamp());
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
@@ -404,6 +411,19 @@ class ReportController extends AbstractController {
         }
 
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
+    }
+
+    private function formatIso8601Timestamp(?string $timestamp): ?string {
+        if ($timestamp === null || $timestamp === '') {
+            return null;
+        }
+
+        try {
+            return (new \DateTime($timestamp, $this->core->getConfig()->getTimezone()))->format('c');
+        }
+        catch (\Exception) {
+            return null;
+        }
     }
 
     /**

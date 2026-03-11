@@ -5,6 +5,8 @@ namespace tests\app\controllers\admin;
 use app\controllers\admin\ReportController;
 use app\libraries\response\JsonResponse;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\LateDays;
+use app\models\User;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
 
@@ -63,7 +65,7 @@ class ReportControllerTester extends BaseUnitTest {
             'omit_section_from_stats' => ['1'],
             'display_benchmark' => ['average', 'lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
             'messages' => ['Instructor Message'],
-            'display' => ['grade_summary', 'grade_details', 'final_cutoff'],
+            'display' => ['grade_summary', 'grade_details', 'final_cutoff', 'registration_timestamp'],
             'benchmark_percent' => ['lowest_a-' => 0.9, 'lowest_b-' => 0.8, 'lowest_c-' => 0.7, 'lowest_d' => 0.6, 'average' => 0.5],
             'final_cutoff' => ['A' => 93, 'A-' => 90, 'B+' => 87, 'B' => 83, 'B-' => 80, 'C+' => 77, 'C' => 73, 'C-' => 70, 'D+' => 67, 'D' => 60],
             'gradeables' => [
@@ -225,5 +227,38 @@ class ReportControllerTester extends BaseUnitTest {
         // Test the addition of a gradeable in an unused bucket, leading to no changes
         $this->gradeables[] = $this->createMockGradeable('lab1', 'Lab 1', 'lab', 100, '2025-01-01 23:59:59-0500');
         $this->submitCustomization($content);
+    }
+
+    public function testSaveUserToFileIncludesRegistrationTimestamp(): void {
+        $base_path = $this->course_path . '/reports/all_grades';
+        FileUtils::createDir($base_path, true);
+
+        $core = $this->createMockCore([
+            'course_path' => $this->course_path,
+        ], [
+            'access_admin' => true,
+        ]);
+        $core->getConfig()->method('getDefaultStudentLateDays')->willReturn(2);
+
+        $controller = new ReportController($core);
+        $user = new User($core, [
+            'user_id' => 'student123',
+            'user_givenname' => 'Student',
+            'user_familyname' => 'Example',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => 'student@example.com',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => '1',
+            'registration_timestamp' => '2025-03-22 14:30:00',
+        ]);
+        $late_days = $this->createMock(LateDays::class);
+
+        $this->invokeMethod($controller, 'saveUserToFile', $base_path, $user, [], $late_days);
+
+        $saved = json_decode(file_get_contents($base_path . '/student123_summary.json'), true);
+        $this->assertSame('2025-03-22T14:30:00-04:00', $saved['registration_timestamp']);
     }
 }

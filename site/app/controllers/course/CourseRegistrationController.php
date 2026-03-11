@@ -78,7 +78,7 @@ class CourseRegistrationController extends AbstractController {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         if ($this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
             $this->core->getUser()->setRegistrationSection($default_section);
-            $this->core->getQueries()->updateUser($user, $term, $course);
+            $this->core->getQueries()->selfRegisterCourseUser($user, $term, $course);
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
