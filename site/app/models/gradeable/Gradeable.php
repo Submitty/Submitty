@@ -2292,7 +2292,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $this->getVcsSubdirectory());
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $this->getVcsSubdirectory(), $config->getSubmittyPath());
         }
     }
 
