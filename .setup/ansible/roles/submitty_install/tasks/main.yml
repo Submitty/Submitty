@@ -40,7 +40,6 @@
     src: "{{ submitty_install_config_location }}"
     dest: /usr/local/submitty/config/
     mode: "0644"
-    remote_src: true
 
 - name: Run install_system.sh script
   ansible.builtin.shell:
