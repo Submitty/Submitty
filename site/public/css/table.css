@@ -150,10 +150,30 @@
     --col4-width: 70px;
 }
 
-.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); left: 0;   z-index: 10; }
-.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 9;  }
-.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 8;  }
-.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 7;  }
+.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    left: 0;
+    z-index: 10;
+}
+.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 9;
+}
+.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 8;
+}
+.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 7;
+}
 
 #late-day-table thead th {
     position: sticky;
@@ -169,10 +189,30 @@
 #late-day-table thead th.sticky-col {
     z-index: 30;
 }
-#late-day-table thead th.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); left: 0;   z-index: 35; }
-#late-day-table thead th.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 34; }
-#late-day-table thead th.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 33; }
-#late-day-table thead th.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 32; }
+#late-day-table thead th.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    left: 0;
+    z-index: 35;
+}
+#late-day-table thead th.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 34;
+}
+#late-day-table thead th.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 33;
+}
+#late-day-table thead th.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 32;
+}
 
 #late-day-table tbody tr {
     background: var(--default-white);
@@ -187,7 +227,28 @@
     background: var(--default-white);
 }
 
-#late-day-table tbody td.sticky-col-1 { width: var(--col1-width); min-width: var(--col1-width); white-space: nowrap; left: 0; z-index: 25; }
-#late-day-table tbody td.sticky-col-2 { width: var(--col2-width); min-width: var(--col2-width); left: var(--col1-width); z-index: 24; }
-#late-day-table tbody td.sticky-col-3 { width: var(--col3-width); min-width: var(--col3-width); left: calc(var(--col1-width) + var(--col2-width)); z-index: 23; }
-#late-day-table tbody td.sticky-col-4 { width: var(--col4-width); min-width: var(--col4-width); left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width)); z-index: 22; }
+#late-day-table tbody td.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    white-space: nowrap;
+    left: 0;
+    z-index: 25;
+}
+#late-day-table tbody td.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 24;
+}
+#late-day-table tbody td.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 23;
+}
+#late-day-table tbody td.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 22;
+}
