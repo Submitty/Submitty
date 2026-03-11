@@ -2278,7 +2278,8 @@ class SubmissionController extends AbstractController {
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
             implode('/', $path_parts),
-            $g->getVcsSubdirectory()
+            $g->getVcsSubdirectory(),
+            $this->core->getConfig()->getSubmittyPath()
         );
 
         $this->core->addSuccessMessage("Repository creation requested.");
