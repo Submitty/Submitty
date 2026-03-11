@@ -556,9 +556,7 @@ class TeamController extends AbstractController {
             $team !== null ? $team->getMembers() : [],
             $users_seeking_team
         );
-        $users_map = !empty($all_user_ids)
-            ? $this->core->getQueries()->getUsersById(array_unique($all_user_ids))
-            : [];
+        $users_map = $this->core->getQueries()->getUsersById(array_unique($all_user_ids));
 
         if ($team !== null) {
             //List team members
