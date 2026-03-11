@@ -61,7 +61,7 @@ describe('testing grade override', () => {
                 cy.logout();
                 cy.login('student');
                 cy.visit(['sample', 'gradeable', gradeable]);
-                cy.get('[data-testid="overridden-grades-student-banner"]').should('be.visible');
+                cy.get('[data-testid="overridden-grades-student-banner"]').should('be.visible').and('contain.text', 'NOTE: The numeric score for this assignment has been overridden by your instructor.').and('contain.text', 'Please see your instructor if you have questions about your grade for this assignment.');
                 cy.logout();
                 cy.login();
             }
