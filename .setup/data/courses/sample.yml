@@ -67,7 +67,7 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    g_ta_view_start_date: 9994-12-31 3:59:59
+    g_ta_view_start_date: 9994-12-31 23:59:59
     eg_submission_open_date: 9995-12-31 23:59:59
     eg_submission_due_date: 9996-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
