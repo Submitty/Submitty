@@ -1,6 +1,8 @@
-config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
-config['submitty_repository'] = SUBMITTY_REPOSITORY
-config['submitty_data_dir'] = SUBMITTY_DATA_DIR
-config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['site_log_path'] = TAGRADING_LOG_PATH
-"worker": true 
+{
+  "submitty_install_dir": "/usr/local/submitty",
+  "submitty_repository": "/usr/local/submitty/GIT_CHECKOUT/Submitty",
+  "submitty_data_dir": "/var/local/submitty",
+  "autograding_log_path": "/var/local/submitty/logs/autograding",
+  "site_log_path": "/var/local/submitty/logs",
+  "worker": true
+}
