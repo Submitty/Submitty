@@ -775,11 +775,8 @@ class ReportController extends AbstractController {
 
         // Create path to new jobs queue json
 
-        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $path = FileUtils::joinPaths($daemon_job_queue_path, 'auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
 
         // Place in queue
         file_put_contents($path, $job_json);
@@ -922,17 +919,10 @@ class ReportController extends AbstractController {
     #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
-        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $jobs_file = FileUtils::joinPaths($daemon_job_queue_path, 'auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
         // Create path to 'processing' file in jobs queue
-        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $processing_jobs_file = FileUtils::joinPaths($daemon_job_queue_path, 'PROCESSING_auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
 
         // Get the max time to wait before timing out
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
