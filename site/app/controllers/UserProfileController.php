@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\authentication\DatabaseAuthentication;
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
@@ -92,13 +93,21 @@ class UserProfileController extends AbstractController {
             && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']
         ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
+
+            if (!Utils::isValidPassword($_POST['new_password'])) {
+                $this->core->addErrorMessage("Password does not meet the requirements.");
+            }
+            else {
+                $user->setPassword($_POST['new_password']);
+                $this->core->getQueries()->updateUser($user);
+                $this->core->addSuccessMessage("Updated password");
+            }
+
         }
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
+
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))
         );
