@@ -3,12 +3,12 @@ describe('Legal name privacy tests', () => {
         cy.login('student');
         cy.visit('/user_profile');
         cy.get('[data-testid="edit-preferred-name-form"]').invoke('show').within(() => {
-        cy.get('[data-testid="preferred-givenname-input"]').clear();
-        cy.get('[data-testid="preferred-givenname-input"]').type('PreferredFirst');
-        cy.get('[data-testid="preferred-familyname-input"]').clear();
-        cy.get('[data-testid="preferred-familyname-input"]').type('PreferredLast');
+        cy.get('[data-testid="preferred-givenname-input"]').clear({force: true});
+        cy.get('[data-testid="preferred-givenname-input"]').type('PreferredFirst',{force: true});
+        cy.get('[data-testid="preferred-familyname-input"]').clear({force: true});
+        cy.get('[data-testid="preferred-familyname-input"]').type('PreferredLast',{force: true});
         });
-        cy.get('[data-testid="edit-preferred-name-submit"]').click();
+        cy.get('[data-testid="edit-preferred-name-submit"]').click({force: true});
         cy.logout();
     });
 
@@ -32,10 +32,10 @@ describe('Legal name privacy tests', () => {
         cy.login('student');
         cy.visit('/user_profile');
         cy.get('[data-testid="edit-preferred-name-form"]').invoke('show').within(() => {
-            cy.get('[data-testid="preferred-givenname-input"]').clear();
-            cy.get('[data-testid="preferred-familyname-input"]').clear();
+            cy.get('[data-testid="preferred-givenname-input"]').clear({force: true});
+            cy.get('[data-testid="preferred-familyname-input"]').clear({force: true});
         });
-        cy.get('[data-testid="edit-preferred-name-submit"]').click();
+        cy.get('[data-testid="edit-preferred-name-submit"]').click({force: true});
         cy.logout();
     });
 });
