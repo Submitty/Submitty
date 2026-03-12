@@ -8,7 +8,7 @@ use app\views\AbstractView;
 use app\libraries\DateUtils;
 
 class CourseMaterialsView extends AbstractView {
-    public function listCourseMaterials(array $course_materials_db) {
+    public function listCourseMaterials(array $course_materials_db, array $viewed_materials) {
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
@@ -155,7 +155,7 @@ class CourseMaterialsView extends AbstractView {
 
         $this->removeEmptyFolders($final_structure);
 
-        $this->setSeen($final_structure, $seen, $base_course_material_path);
+        $this->setSeen($final_structure, $seen, $base_course_material_path, $viewed_materials);
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
         $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
@@ -197,12 +197,12 @@ class CourseMaterialsView extends AbstractView {
         return $is_empty;
     }
 
-    private function setSeen(array $course_materials, array &$seen, string $cur_path): bool {
+    private function setSeen(array $course_materials, array &$seen, string $cur_path, array $viewed_materials): bool {
         $has_unseen = false;
         foreach ($course_materials as $path => $course_material) {
             /** @var CourseMaterial $course_material */
             if (is_array($course_material)) {
-                if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path))) {
+                if ($this->setSeen($course_material, $seen, FileUtils::joinPaths($cur_path, $path), $viewed_materials)) {
                     $seen[FileUtils::joinPaths($cur_path, $path)] = false;
                     $has_unseen = true;
                 }
@@ -211,7 +211,7 @@ class CourseMaterialsView extends AbstractView {
                 }
             }
             else {
-                $seen[$course_material->getPath()] = $course_material->userHasViewed($this->core->getUser()->getId());
+                $seen[$course_material->getPath()] = in_array($course_material->getId(), $viewed_materials);
                 $reg_sec = $this->core->getUser()->getRegistrationSection();
                 if ($reg_sec !== null && !$course_material->isSectionAllowed($reg_sec)) {
                     $seen[$course_material->getPath()] = true;
