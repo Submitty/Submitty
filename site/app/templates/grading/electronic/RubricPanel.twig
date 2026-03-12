@@ -85,6 +85,42 @@
                         </div>
                     {% endif %}
                 {% endfor %}
+
+                {# ── Submission Similarity Clustering Panel ── #}
+                <div id="cluster-panel" style="margin-top: 18px; border: 1px solid #ccd4e0; border-radius: 4px; overflow: hidden;">
+                    <div class="row row-wrap vertical-center" style="padding: 8px 12px; background: #eef2ff; border-bottom: 1px solid #ccd4e0;">
+                        <span class="col grading_label" style="font-weight: bold; font-size: 0.95em;">
+                            &#128202; Submission Similarity Groups
+                        </span>
+                        <div class="col-no-gutters">
+                            <input
+                                id="cluster-run-btn"
+                                type="button"
+                                class="btn btn-default key_to_click mx-1"
+                                tabindex="0"
+                                value="Analyze Groups"
+                                title="Group similar submissions using AI to help bulk grading"
+                            />
+                        </div>
+                    </div>
+
+                    <div id="cluster-loading"
+                         style="display:none; text-align:center; padding: 12px; color: #666; font-style: italic;">
+                        Analyzing submissions, please wait&hellip;
+                    </div>
+
+                    <div id="cluster-output" style="display:none; padding: 10px 12px;">
+                        <p id="cluster-summary"
+                           style="font-size: 0.85em; color: #555; margin: 0 0 8px 0;"></p>
+                        <div id="cluster-list"></div>
+                    </div>
+
+                    <div id="cluster-error"
+                         style="display:none; padding: 10px 12px; color: #c0392b; font-size: 0.85em;">
+                    </div>
+                </div>
+                {# ── End Similarity Clustering Panel ── #}
+
             </div>
         {% else %}
             <div id="no-manual-grading-container">
@@ -93,3 +129,101 @@
         {% endif %}
     </div>
 </div>
+
+{# ── Clustering Script (only loaded for TA grading) ── #}
+{% if is_ta_grading %}
+<script>
+(function () {
+    'use strict';
+
+    var btn     = document.getElementById('cluster-run-btn');
+    var loading = document.getElementById('cluster-loading');
+    var output  = document.getElementById('cluster-output');
+    var summary = document.getElementById('cluster-summary');
+    var list    = document.getElementById('cluster-list');
+    var errBox  = document.getElementById('cluster-error');
+
+    if (!btn) { return; }
+
+    btn.addEventListener('click', function () {
+        btn.disabled          = true;
+        loading.style.display = 'block';
+        output.style.display  = 'none';
+        errBox.style.display  = 'none';
+        list.innerHTML        = '';
+
+        var url = "{{ base_url }}/courses/{{ semester }}/{{ course }}"
+                + "/gradeable/{{ gradeable_id }}/clusters";
+
+        fetch(url, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) {
+            if (!r.ok) {
+                throw new Error('Server returned ' + r.status);
+            }
+            return r.json();
+        })
+        .then(function (data) {
+            loading.style.display = 'none';
+            btn.disabled          = false;
+
+            if (data.status !== 'success') {
+                errBox.textContent   = 'Clustering failed: ' + (data.message || 'Unknown error');
+                errBox.style.display = 'block';
+                return;
+            }
+
+            var clusters = data.data.clusters;
+            var total    = data.data.total_submissions;
+            var n        = data.data.n_clusters;
+
+            summary.textContent  =
+                total + ' submissions grouped into ' + n + ' similarity cluster(s).';
+            output.style.display = 'block';
+
+            Object.entries(clusters).forEach(function (entry, i) {
+                var members = entry[1];
+
+                var preview = members.slice(0, 3).join(', ');
+                if (members.length > 3) {
+                    preview += ' (+' + (members.length - 3) + ' more)';
+                }
+
+                var card = document.createElement('div');
+                card.style.cssText =
+                    'border: 1px solid #dce0f0;'
+                    + 'border-radius: 4px;'
+                    + 'padding: 8px 10px;'
+                    + 'margin: 5px 0;'
+                    + 'background: #fafbff;';
+
+                card.innerHTML =
+                    '<strong>Group ' + (i + 1) + '</strong>'
+                    + '<span style="'
+                    +     'background: #4a6fa5;'
+                    +     'color: #fff;'
+                    +     'border-radius: 10px;'
+                    +     'padding: 1px 8px;'
+                    +     'font-size: 0.78em;'
+                    +     'margin-left: 8px;">'
+                    + members.length + ' students'
+                    + '</span>'
+                    + '<div style="font-size: 0.82em; color: #555; margin-top: 4px;">'
+                    + preview
+                    + '</div>';
+
+                list.appendChild(card);
+            });
+        })
+        .catch(function (err) {
+            loading.style.display = 'none';
+            btn.disabled          = false;
+            errBox.textContent    = 'Request failed: ' + err.message;
+            errBox.style.display  = 'block';
+        });
+    });
+}());
+</script>
+{% endif %}
