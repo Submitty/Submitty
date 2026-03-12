@@ -35,7 +35,7 @@
     state: directory
     mode: "0755"
 
-- name: Copy configuration files
+- name: Copy pre-configured configuration files # By default, the same as running generate_configs.py
   ansible.builtin.copy:
     src: "{{ submitty_install_config_location }}"
     dest: /usr/local/submitty/config/

@@ -113,7 +113,10 @@ if [ ${WORKER} == 1 ]; then
     COMMAND=--worker
 fi
 
-python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
+
+if [ ${DEV_VM} == 1 ]
+    python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
+fi 
 
 python3 ${CURRENT_DIR}/validate_configs.py ${COMMAND}
 

@@ -50,7 +50,7 @@ for item in os.listdir(CONFIG_REPOSITORY):
                 if len(difference) > 0:
                     raise KeyError(f'Required key(s) {difference} not present in {item}.')
             except FileNotFoundError as error:
-                raise FileNotFoundError(f'Required file {destination_path} not found.') from error
+                raise FileNotFoundError(f'Required file {destination_path} not found. Run generate_configs.py to generate the file, then add your information to it.') from error
 
 # Create INSTALL_SUBMITTY.sh file that was created by CONFIGURE_SUBMITTY.py
 os.makedirs(INSTALL_SETUP_DIR, exist_ok=True)
