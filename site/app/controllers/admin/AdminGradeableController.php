@@ -1407,7 +1407,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $repo_name,
-                $subdir
+                $subdir,
+                $this->core->getConfig()->getSubmittyPath()
             );
         }
 
@@ -1715,8 +1716,7 @@ class AdminGradeableController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "BuildConfig",
@@ -1734,9 +1734,8 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory, string $submittyPath) {
+        $config_build_file = FileUtils::joinPaths($submittyPath, "daemon_job_queue", "generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "RunGenerateRepos",

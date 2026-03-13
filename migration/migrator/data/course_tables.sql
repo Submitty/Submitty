@@ -787,7 +787,8 @@ CREATE TABLE public.chatrooms (
     is_active boolean DEFAULT false NOT NULL,
     allow_anon boolean DEFAULT true NOT NULL,
     session_started_at timestamp with time zone,
-    is_deleted boolean DEFAULT false NOT NULL
+    is_deleted boolean DEFAULT false NOT NULL,
+    allow_read_only_after_end boolean DEFAULT false NOT NULL
 );
 
 
