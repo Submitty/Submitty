@@ -1095,7 +1095,7 @@ class SubmissionController extends AbstractController {
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
         $user_id = $this->core->getUser()->getId();
-        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
+        if ($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR) {
             $user_id = $_GET['user_id'] ?? $user_id;
         }
 
