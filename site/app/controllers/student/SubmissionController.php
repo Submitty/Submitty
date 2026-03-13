@@ -493,7 +493,7 @@ class SubmissionController extends AbstractController {
          }
 
         $result = "Successfully submitted placeholder PDF for all $success_count students.";
-        return $this->core->getOutput()->renderJsonSuccess($result);
+        return $this->uploadResult($result);
     }
 
     /**
