@@ -74,7 +74,7 @@
 }
 
 #gradeable-submission-cont #submit {
-    /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line declaration-no-important, color-named */
     color: white !important;
 }
 
@@ -226,6 +226,7 @@
 
 /* Image file clickable styles for annotator */
 .image-file {
+    /* stylelint-disable-next-line color-no-hex */
     color: #0066cc;
     font-weight: bold;
 }

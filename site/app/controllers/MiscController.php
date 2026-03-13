@@ -709,7 +709,7 @@ class MiscController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")]
     public function checkBulkProgress($gradeable_id) {
-        $job_path = "/var/local/submitty/daemon_job_queue/";
+        $job_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue") . "/";
         $result = [];
         $found = false;
         $job_data = null;
