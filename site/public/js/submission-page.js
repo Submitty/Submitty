@@ -64,10 +64,7 @@ function syncWithServer(criticalSync) {
                 }
                 curTime = data.current_time;
                 deadline = data.deadline;
-                if (isTimed && user_deadline !== 0 && startTime !== 0 && allowedTime !== 0 && deadline !== 0) {
-                    const max_minutes_until_due_at_start = Math.max(0, Math.ceil((deadline - startTime) / 1000 / 60));
-                    allowedTime = Math.min(allowedTime, max_minutes_until_due_at_start);
-                    user_deadline = startTime + (allowedTime * 60 * 1000);
+                if (isTimed && user_deadline !== 0) {
                     user_deadline = Math.min(user_deadline, deadline);
                 }
                 updateTime();
@@ -172,13 +169,8 @@ function updateTime() {
                     mins = Math.floor(time / 60) % 60;
                     hours = Math.floor(time / 3600) % 24;
                     days = Math.floor(time / (3600 * 24));
-                    let percent_used = 0;
-                    if (allowedTime > 0 && startTime > 0) {
-                        percent_used = ((Date.now() - startTime) / 1000 / 60) / allowedTime;
-                    }
-                    percent_used = Math.min(1, Math.max(0, percent_used));
+                    const percent_used = Math.min(1, Math.max(0, ((Date.now() - startTime) / 1000 / 60) / allowedTime));
                     width = (percent_used * 95) + 5;
-                    width = Math.min(100, Math.max(0, width));
                     if (width > 75 && width < 90) {
                         document.getElementById('gradeable-progress-bar').style.backgroundColor = 'var(--standard-vibrant-yellow)';
                     }
