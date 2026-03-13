@@ -114,7 +114,7 @@ if [ ${WORKER} == 1 ]; then
 fi
 
 
-if [ ${DEV_VM} == 1 ]
+if [ ${DEV_VM} == 1 ]; then
     python3 ${CURRENT_DIR}/generate_configs.py ${COMMAND}
 fi 
 
