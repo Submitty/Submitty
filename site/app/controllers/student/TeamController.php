@@ -552,10 +552,7 @@ class TeamController extends AbstractController {
         $seeking_partner = false;
 
         // Batch-fetch all needed users in a single query
-        $all_user_ids = array_merge(
-            $team !== null ? $team->getMembers() : [],
-            $users_seeking_team
-        );
+        $all_user_ids = array_merge($team?->getMembers() ?? [], $users_seeking_team);
         $users_map = $this->core->getQueries()->getUsersById(array_unique($all_user_ids));
 
         if ($team !== null) {
