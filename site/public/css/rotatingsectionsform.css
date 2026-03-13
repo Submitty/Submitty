@@ -34,3 +34,8 @@ table caption {
 table caption .subcaption {
     font-size: 1rem;
 }
+
+.delete-section-cell {
+    width: 5px;
+    text-align: center;
+}
