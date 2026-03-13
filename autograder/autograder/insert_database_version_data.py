@@ -226,12 +226,13 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 """
 Build the rows for complete autograding test results
 """
-def build_testcase_rows(testcases, results_testcases):
+def build_testcase_rows(user_id, testcases, results_testcases):
     rows = []
     for i in range(min(len(testcases), len(results_testcases))):
         spec = testcases[i]
         res = results_testcases[i]
         rows.append({
+            "user_id": user_id,
             "testcase_id": spec["testcase_id"],
             "testcase_order": i,
             "hidden": spec["hidden"],
