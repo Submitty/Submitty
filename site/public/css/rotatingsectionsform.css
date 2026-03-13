@@ -36,20 +36,50 @@ table caption .subcaption {
 }
 
 .delete-section-cell {
-    width: 5px;
-    text-align: center;
+    text-align: left;
 }
 
 .add-section-row {
-    padding: 10px 0;
-    gap: 10px;
-}
-
-.add-section-row input[type="text"] {
     width: 140px;
 }
 
-.add-section-row .btn {
-    padding-bottom: 10px;
-    padding-left: 8px;
+.reg-section-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.reg-section-table th:first-child,
+.reg-section-table td:first-child {
+    width: 60px;
+}
+
+.reg-section-table th:not(:first-child),
+.reg-section-table td:not(:first-child) {
+    width: calc((100% - 60px) / 3);
+    text-align: left;
+}
+
+.reg-section-container {
+    position: relative;
+}
+
+.reg-header-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.reg-section-title {
+    margin: 0;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+
+.add-section-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 8px; 
 }
