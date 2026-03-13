@@ -7571,11 +7571,7 @@ AND gc_id IN (
             "SELECT DISTINCT user_id FROM electronic_gradeable_data WHERE user_id IN {$place_holders} AND g_id=?",
             $params
         );
-        $result = [];
-        foreach ($this->course_db->rows() as $row) {
-            $result[] = $row['user_id'];
-        }
-        return $result;
+        return array_column($this->course_db->rows(), 'user_id');
     }
 
     /**
