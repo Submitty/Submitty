@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -390,7 +391,8 @@ class HomePageController extends AbstractController {
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new MultiResponse(
