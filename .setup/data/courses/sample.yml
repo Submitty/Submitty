@@ -241,6 +241,7 @@ gradeables:
     eg_has_release_date: true
     g_bucket: homework
     eg_bulk_test: true
+    eg_max_random_submissions: 0
 
   - g_id: open_peer_homework
     eg_peer_grading: true
