@@ -52,7 +52,8 @@ for item in os.listdir(CONFIG_REPOSITORY):
             except FileNotFoundError as error:
                 raise FileNotFoundError(
                     f'Required file {destination_path} not found. '
-                    f'Run generate_configs.py to generate the file, then add your information to it.'
+                    f'Run generate_configs.py to generate the file, '
+                    f'then add your information to it.'
                 ) from error
 
 # Create INSTALL_SUBMITTY.sh file that was created by CONFIGURE_SUBMITTY.py
