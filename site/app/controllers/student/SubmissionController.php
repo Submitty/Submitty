@@ -352,7 +352,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-    * WIP function to generate a "blank" pdf for grading all students,
+    * WIP function to use a "blank" pdf for grading all students,
     * called from bulk gradeable submission side.
     *
     * I still need to figure out how to call this function in the .twig or whatever
@@ -365,47 +365,48 @@ class SubmissionController extends AbstractController {
     * 
     * Copied the route from nearby function -- is it correct? I don't understand it. 
     * Add JSON rendering for error checking??
+    * 
+    * build course url in twig or javascript file
+    * 
+    * url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions'])
+    * 
+    * see ajaxUploadSubmission for inspiration on how to submit for a student!
     */
     #[AccessControl(role: "INSTRUCTOR")]
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
     public function generateBlankSubmissions(Gradeable $gradeable) {
 
-        $gradable_id = $gradeable->getId();
-        $section = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
-        $all_students = $this->core->getQueries()->getAllUsers($section); //how to do for just on a single gradeable
-        $pdf_path = "/var/local/submitty/courses/placeholder.pdf"; 
-
-        if (!file_exists($pdf_path)) {
-            exec("python3 /usr/local/submitty/sbin/generate_blank_pdf.py " . escapeshellarg($pdf_path));
-        }
+        $gradeable_id = $gradeable->getId();
+        $all_users = $this->core->getQueries()->getUsersNotFullyGraded($gradeable); //hopefully everyone...
+        //$pdf_path = "/var/local/submitty/courses/placeholder.pdf"; old
+        $pdf_path = "/usr/Submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf";
 
         $success_count = 0;
-        foreach ($all_students as $student) {
-            $user_id = $student->getId();
+        foreach ($all_users as $user) {
+            $user_id = $user->getId();
         
-            //need to figure out how to get gradeable version number (number of submissions), the current function returns a bool
-            $user_id = $student->getId();
-            $submissions = $this->core->getQueries()->getSubmission($gradable_id, $user_id);
-            $next_version = count($submissions) + 1;
+            //need to figure out how to get gradeable version number (number of submissions) if it is possible for students to submit
+            $submissions = 0;
+            $version = 1;
 
-            //create directory
+            //#### NEXT BLOCK HANDLES SUBMISSION, NEEDS UPDATE ####
+
+            //create submission directory
             $submission_path = FileUtils::joinPaths(
                 $this->core->getConfig()->getCoursePath(), 
                 "submissions", 
-                $gradable_id, 
+                $gradeable_id, 
                 $user_id, 
-                $next_version
+                $version
             );
 
             if (FileUtils::createDir($submission_path, true)) {
                 $dest_path = FileUtils::joinPaths($submission_path, "placeholder.pdf");
             
-                // Copy the template PDF to the student's submission folder and set as active version
+                // WIP: Copy the template PDF to the student's submission folder and set as active version
                 if (copy($pdf_path, $dest_path)) {
-                    $timestamp = date("Y-m-d H:i:s");
-                    $this->core->getQueries()->insertVersionDetails($gradable_id, $user_id, null, $next_version, $timestamp);
-                    $this->core->getQueries()->updateActiveVersion($gradable_id, $user_id, null, $next_version);
-                    //WIP: start the autograding ??
+                    $this->core->getQueries()->updateActiveVersion($gradeable_id, $user_id, null, $version);
+                    //WIP: start the autograding ?? is the version properly set?? is there a better way to make a submission for a student??
 
                     $success_count++;
                 }
