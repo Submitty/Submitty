@@ -111,7 +111,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('body').type('{enter}');
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Autograde');
         cy.get('body').should('not.contain', 'went wrong');
-        cy.contains('[data-testid="score-pill-badge"]', '9 / 10', { timeout: 100000 })
-        .should('exist');
+        cy.contains('[data-testid="score-pill-badge"]', '9 / 10', { timeout: 100000 }).should('exist');
     });
 });
