@@ -191,7 +191,7 @@ describe('navigation page', () => {
 
         const sections = {
             future: 4,
-            beta: 3,
+            beta: 4,
             open: 8,
             closed: 4,
             items_being_graded: 10,
@@ -286,7 +286,7 @@ describe('navigation page', () => {
         cy.visit(['sample']);
 
         const sections = {
-            beta: 3,
+            beta: 4,
             open: 8,
             closed: 4,
             items_being_graded: 10,
