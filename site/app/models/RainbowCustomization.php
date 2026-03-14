@@ -137,6 +137,11 @@ class RainbowCustomization extends AbstractModel {
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
 
+                // Skip buckets from the JSON that no longer exist in the current syllabus
+                if (!isset($this->customization_data[$bucket]) || !is_array($this->customization_data[$bucket])) {
+                    continue;
+                }
+
                 // Filter out removed gradeables or updated gradeable buckets
                 $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
@@ -144,7 +149,7 @@ class RainbowCustomization extends AbstractModel {
                     return !$removed && !$swapped;
                 }));
 
-                if ($json_bucket->count > $this->bucket_counts[$bucket]) {
+                if ($json_bucket->count > ($this->bucket_counts[$bucket] ?? 0)) {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
                 $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
@@ -187,6 +192,9 @@ class RainbowCustomization extends AbstractModel {
                 }
 
                 // Assign percents to customization_data gradeables by matching ids
+                if (!isset($this->customization_data[$c_bucket]) || !is_array($this->customization_data[$c_bucket])) {
+                    continue;
+                }
                 foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
                     if (isset($percent_map[$c_gradeable['id']])) {
                         $c_gradeable['override_percent'] = true;
