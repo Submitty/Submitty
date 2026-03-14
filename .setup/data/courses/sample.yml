@@ -230,9 +230,9 @@ gradeables:
           - gcm_note: Question 1 Mark 1
             gcm_points: -5
     g_ta_view_start_date: 1970-01-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
-    eg_submission_due_date: 9998-06-01 23:59:59
-    g_grade_start_date: 9998-12-01 23:59:59
+    eg_submission_open_date: 9995-12-31 23:59:59
+    eg_submission_due_date: 9996-12-31 23:59:59
+    g_grade_start_date: 9997-12-31 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
@@ -241,7 +241,6 @@ gradeables:
     eg_has_release_date: true
     g_bucket: homework
     eg_bulk_test: true
-    eg_max_random_submissions: 0
 
   - g_id: open_peer_homework
     eg_peer_grading: true
@@ -302,7 +301,7 @@ gradeables:
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
     eg_submission_due_date: 9996-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
@@ -370,7 +369,7 @@ gradeables:
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
     eg_submission_due_date: 9996-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
@@ -438,7 +437,7 @@ gradeables:
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
     eg_submission_due_date: 9996-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
@@ -464,7 +463,7 @@ gradeables:
           - gcm_note: Full Credit
             gcm_points: 0
     eg_submission_due_date: 9997-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     eg_has_due_date: false
     eg_has_release_date: false
     g_grade_due_date: 9998-12-31 23:59:59
@@ -532,7 +531,7 @@ gradeables:
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
     eg_submission_due_date: 9996-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
@@ -602,7 +601,7 @@ gradeables:
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
     eg_submission_due_date: 9996-12-31 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
@@ -671,11 +670,11 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
@@ -746,11 +745,11 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
@@ -820,8 +819,8 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
@@ -895,15 +894,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-08 23:59:59
     eg_grade_inquiry_due_date: 1974-01-13 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Released Peer PDF Homework
     gradeable_config: multiple_pdf_annotations
@@ -970,8 +969,8 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-08 23:59:59
@@ -980,7 +979,7 @@ gradeables:
     eg_has_release_date: true
     eg_team_assignment: true
     eg_max_team_size: 3
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Released Peer Team PDF Homework
     gradeable_config: multiple_pdf_annotations
@@ -1043,8 +1042,8 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
@@ -1113,8 +1112,8 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
@@ -1203,15 +1202,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Grading Homework
     gradeable_config: python_simple_homework
@@ -1230,15 +1229,15 @@ gradeables:
         gc_max_value: 5
         gc_upper_clamp: 5
         gc_title: Question 2
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-01 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Grades Released Homework
     gradeable_config: python_simple_homework
@@ -1491,15 +1490,15 @@ gradeables:
         marks:
           - gcm_note: Full Credit
             gcm_points: 0
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: TA Grade Only Homework (Upload Only)
     gradeable_config: upload_only
@@ -1560,15 +1559,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Autograde Only Homework (Simple Python)
     gradeable_config: 01_simple_python
@@ -1629,15 +1628,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Autograde and TA Homework (C System Calls)
     gradeable_config: 12_system_calls
@@ -1697,15 +1696,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Autograder Hidden and Extra Credit (C++ Hidden Tests)
     gradeable_config: cpp_hidden_tests
@@ -1765,15 +1764,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Grading Homework PDF
     gradeable_config: pdf_word_count
@@ -1833,8 +1832,8 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
     g_grade_released_date: 9998-12-31 23:59:59
     eg_grade_inquiry_start_date: 9999-01-01 23:59:59
@@ -1843,7 +1842,7 @@ gradeables:
     eg_has_release_date: true
     eg_team_assignment: true
     eg_max_team_size: 3
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: Grading Homework Team PDF
     gradeable_config: pdf_word_count
@@ -1904,15 +1903,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: TA Only w/ Extra Credit (Upload Only)
     gradeable_config: upload_only
@@ -1972,15 +1971,15 @@ gradeables:
             gcm_points: 2
           - gcm_note: Extra credit is acceptable
             gcm_points: 5
-    eg_submission_due_date: 9998-06-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     g_grade_due_date: 1974-01-01 23:59:59
     g_grade_released_date: 1974-01-01 23:59:59
     eg_grade_inquiry_start_date: 1974-01-02 23:59:59
     eg_grade_inquiry_due_date: 1974-01-08 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_grade_start_date: 9998-12-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
     g_title: TA Only w/ Penalty (Upload Only)
     gradeable_config: upload_only
@@ -1997,7 +1996,7 @@ gradeables:
           - gcm_note: Full Credit
             gcm_points: 0
     g_ta_view_start_date: 1970-01-01 23:59:59
-    eg_submission_open_date: 9998-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
     eg_submission_due_date: 9996-12-31 23:59:59
     g_grade_start_date: 9997-12-31 23:59:59
     g_grade_due_date: 9998-12-31 23:59:59
