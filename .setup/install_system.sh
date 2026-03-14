@@ -877,6 +877,9 @@ fi
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
 
+## Create a preserve_files directory
+jq -n '$ARGS.positional' --args "/usr/local/submitty/config/footer_links.json" "/usr/local/submitty/config/login.md" > /usr/local/submitty/config/preserve_file_list.json
+
 
 echo "
 #####################################################################

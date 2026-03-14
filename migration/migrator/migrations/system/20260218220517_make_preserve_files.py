@@ -11,7 +11,7 @@ def up(config):
     :type config: migrator.config.Config
     """
 
-    preserve_path = "/usr/local/submitty/config/preserve_files_list.json"
+    preserve_path = "/usr/local/submitty/config/preserve_file_list.json"
 
     paths_to_preserve = [
         "/usr/local/submitty/config/footer_links.json",
