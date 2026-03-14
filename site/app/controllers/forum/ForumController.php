@@ -725,12 +725,7 @@ class ForumController extends AbstractController {
         if (is_null($thread_access)) {
             return JsonResponse::getFailResponse("Failed to mark post unread: thread access not found.");
         }
-        try {
-            $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
-        }
-        catch (\InvalidArgumentException $e) {
-            return JsonResponse::getFailResponse("Invalid timestamp format.");
-        }
+        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
         $thread_access->setTimestamp($last_viewed_timestamp);
         $this->core->getCourseEntityManager()->flush();
 
@@ -1038,35 +1033,19 @@ class ForumController extends AbstractController {
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
             if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
-                $lock_thread_date_trimmed = trim($lock_thread_date_input);
-                if ($lock_thread_date_trimmed !== "") {
-                    try {
-                        $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_trimmed, $user->getUsableTimeZone()));
-                    }
-                    catch (\InvalidArgumentException $e) {
-                        // Invalid date format, set to null
-                        $thread->setLockDate(null);
-                    }
-                }
-                else {
-                    $thread->setLockDate(null);
-                }
+                $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
                 $thread->setLockDate(null);
             }
 
             $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW);
-            if ($expiration_input !== false && $expiration_input !== "") {
-                $expiration_input_trimmed = trim($expiration_input);
-                if ($expiration_input_trimmed !== "") {
-                    try {
-                        $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input_trimmed, $user->getUsableTimeZone()));
-                    }
-                    catch (\InvalidArgumentException $e) {
-                        // Invalid date format, skip setting expiration
-                    }
-                }
+            if ($expiration_input !== false) {
+                $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
+            }
+            else {
+                print($expiration_input);
+                return false;
             }
         }
         return true;
