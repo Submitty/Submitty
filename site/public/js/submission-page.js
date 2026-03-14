@@ -157,6 +157,10 @@ function updateTime() {
             }
         }
         if (user_deadline !== 0) {
+            const gradeable_timer = document.getElementById('gradeable-time-remaining-text');
+            if (gradeable_timer !== null) {
+                gradeable_timer.style.visibility = 'hidden';
+            }
             if (document.getElementById('time-remaining-text') !== null) {
                 if (curTime > user_deadline) {
                     document.getElementById('time-remaining-text').textContent = 'Your Time Remaining: Past Due';
