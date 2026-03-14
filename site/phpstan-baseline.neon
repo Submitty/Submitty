@@ -9850,7 +9850,7 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
-			rawMessage: 'Call to function is_subclass_of() with object and ''app\\ModelsGǪ'' will always evaluate to false.'
+			rawMessage: 'Call to function is_subclass_of() with object and ''app\\Models…'' will always evaluate to false.'
 			identifier: function.impossibleType
 			count: 1
 			path: app/models/AbstractModel.php
@@ -10982,6 +10982,12 @@ parameters:
 			identifier: constructor.missingParentCall
 			count: 1
 			path: app/models/QueueItem.php
+
+		-
+			rawMessage: 'Argument of an invalid type $this(app\models\RainbowCustomizationJSON) supplied for foreach, only iterables are supported.'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
 
 		-
 			rawMessage: Variable property access on object.
