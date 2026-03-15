@@ -26,7 +26,6 @@ let isTimed = false;
 
 function buildCourseUrlSafe(parts = []) {
     // Fallback in case server.js isn't loaded yet.
-    // eslint-disable-next-line no-undef
     if (typeof buildCourseUrl === 'function') {
         // eslint-disable-next-line no-undef
         return buildCourseUrl(parts);
