@@ -27,6 +27,7 @@ use app\libraries\FileUtils;
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
  * @method array getCourseDatabaseParams()
+ * @method array getCourseDatabaseReadonlyParams()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -246,6 +247,10 @@ class Config extends AbstractModel {
     /** @prop
      * @var array */
     protected $course_database_params = [];
+
+    /** @prop
+     * @var array */
+    protected $course_database_readonly_params = [];
 
     /** @prop
      * @var array */
@@ -606,6 +611,15 @@ class Config extends AbstractModel {
             'username' => $database_json['database_course_user'],
             'password' => $database_json['database_course_password']
         ];
+
+        $this->course_database_readonly_params = [
+            'dbname' => $this->course_json['database_details']['dbname'],
+            'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
+            'username' => $database_json['database_readonly_user'],
+            'password' => $database_json['database_readonly_password']
+        ];
+
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',

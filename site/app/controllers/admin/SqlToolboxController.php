@@ -66,15 +66,15 @@ class SqlToolboxController extends AbstractController {
         }
 
         try {
-            $this->core->getCourseDB()->beginTransaction();
-            $this->core->getCourseDB()->query($query);
-            return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
+            $this->core->getCourseReadonlyDB()->beginTransaction();
+            $this->core->getCourseReadonlyDB()->query($query);
+            return JsonResponse::getSuccessResponse($this->core->getCourseReadonlyDB()->rows());
         }
         catch (DatabaseException $exc) {
             return JsonResponse::getFailResponse("Error running query: " . $exc->getMessage());
         }
         finally {
-            $this->core->getCourseDB()->rollback();
+            $this->core->getCourseReadonlyDB()->rollback();
         }
     }
 
