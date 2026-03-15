@@ -56,15 +56,6 @@ class SqlToolboxController extends AbstractController {
     public function runQuery(): JsonResponse {
         $query = trim($_POST['sql']);
 
-        if (QueryIdentifier::identify($query) !== QueryIdentifier::SELECT) {
-            return JsonResponse::getFailResponse('Invalid query, can only run SELECT queries.');
-        }
-
-        $semiColonCount = substr_count($query, ';');
-        if ($semiColonCount > 1 || ($semiColonCount === 1 && substr($query, -1) !== ';')) {
-            return JsonResponse::getFailResponse('Detected multiple queries, not running.');
-        }
-
         try {
             $this->core->getCourseReadonlyDB()->beginTransaction();
             $this->core->getCourseReadonlyDB()->query($query);
