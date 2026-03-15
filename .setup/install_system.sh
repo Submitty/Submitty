@@ -219,6 +219,12 @@ DB_COURSE_USER=submitty_course_dbuser
 DB_COURSE_PASSWORD=submitty_dbuser
 
 #################################################################
+# VENV SETUP
+#################
+
+python3 -m venv /usr/local/submitty/venv
+
+#################################################################
 # DISTRO SETUP
 #################
 
