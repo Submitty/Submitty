@@ -20,14 +20,13 @@ class TeamView extends AbstractView {
      * @param bool $lock
      * @return string
      */
-    public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, bool $seeking_partner, bool $lock): string {
+    public function showTeamPage(Gradeable $gradeable, ?Team $team, $members, $seekers, $invites_received, bool $seeking_partner, bool $lock): string {
         $gradeable_id = $gradeable->getId();
 
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
         $vcs_repo_exists = false;
-        $team ? $gradeable_team = $team->getId() : $gradeable_team = null;
-        if ($gradeable->isVcs()) {
+        if ($gradeable->isVcs() && $team !== null) {
             $path = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
                 'vcs',
@@ -35,7 +34,7 @@ class TeamView extends AbstractView {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $gradeable->getId(),
-                $gradeable_team
+                $team->getId()
             );
             $vcs_repo_exists = file_exists($path);
         }
@@ -45,7 +44,7 @@ class TeamView extends AbstractView {
             "seeking_enabled" => $this->core->getConfig()->isSeekMessageEnabled(),
             "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
-            "team_name" => $team == null ? null : $team->getTeamName(),
+            "team_name" => $team !== null ? $team->getTeamName() : null,
             "team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
             "user" => $this->core->getUser(),
