@@ -39,10 +39,6 @@ table caption .subcaption {
     text-align: left;
 }
 
-.add-section-row {
-    width: 140px;
-}
-
 .reg-section-table {
     table-layout: fixed;
     width: 100%;
@@ -59,10 +55,6 @@ table caption .subcaption {
     text-align: left;
 }
 
-.reg-section-container {
-    position: relative;
-}
-
 .reg-header-row {
     display: flex;
     justify-content: space-between;
@@ -75,11 +67,6 @@ table caption .subcaption {
     flex: 1 1 auto;
 }
 
-.add-section-controls {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+.add-registration-section-btn {
     margin-bottom: 8px;
 }

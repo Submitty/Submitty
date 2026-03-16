@@ -1,0 +1,48 @@
+{% extends 'generic/Popup.twig' %}
+
+{% block popup_id %}add-registration-section-form{% endblock %}
+
+{% block title %}
+    Create New Registration Section
+{% endblock %}
+
+{% block body %}
+    <p class="std-margin">
+        Enter a new section ID and an optional course ID.
+    </p>
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+    <div class="edit_user_row">
+        <label for="new-section-id">Section ID:&emsp;</label>
+        <input
+            id="new-section-id"
+            name="section_id"
+            type="text"
+            required
+        />
+    </div>
+    <br></br>
+    <div class="edit_user_row">
+        <label for="new-course-id">Course ID:&emsp;</label>
+        <input
+            id="new-course-id"
+            name="course_id"
+            type="text"
+            pattern="\d{5}"
+            maxlength="5"
+            required
+        />
+    </div>
+{% endblock %}
+
+{% block form %}
+    <form method="post" onsubmit="return addRegistrationSection()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Add Section" />
+{% endblock %}

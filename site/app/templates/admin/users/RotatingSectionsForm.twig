@@ -50,18 +50,13 @@
             <div class="col-md-7 reg-section-container">
                 <div class="reg-header-row">
                     <h2 class="reg-section-title mb-2">Current Registration Section Counts</h2>
-                    <div class="add-section-controls">
-                        <label for="add_reg_section" class="fw-bold">Add Section</label>
-                        <input
-                            type="text"
-                            name="add_reg_section"
-                            id="add_reg_section"
-                            class="form-control me-2"
-                            style="width:90px"
-                            placeholder="Eg: 3"
-                        />
-                        <input type="submit" class="btn btn-primary" value="Submit" />
-                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary add-registration-section-btn"
+                        onclick="showAddSectionPopup()"
+                    >
+                        Add Registration Section
+                    </button>
                 </div>
                 {# This is a data table #}
                 <table class="table table-bordered table-striped reg-section-table">
@@ -152,6 +147,9 @@
                     </tbody>
                 </table>
             </div>
+                <input type="hidden" name="add_reg_section" id="add_reg_section">
+                <input type="submit" id="add_reg_section_submit" style="display:none;">
+                <input type="hidden" name="add_course_id" id="add_course_id_hidden">
                 <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
                 <input type="submit" id="delete_reg_section_submit" style="display:none;" />
         </div>
@@ -358,6 +356,40 @@
             $('.popup-form').css('display', 'none');
             return false;
         }
+        
+        function addRegistrationSection() {
+            const form = $('#add-registration-section-form');
+            const section = form.find('#new-section-id').val().trim();
+            const course  = form.find('#new-course-id').val().trim();
+
+            if (!section) {
+                displayErrorMessage('Missing section');
+                return false;
+            }
+
+            if (existingCourseIds.has(course)) {
+                displayErrorMessage('That Course ID already exists.');
+                return false;
+            }
+
+            $('#add_reg_section').val(section);
+            $('#add_course_id_hidden').val(course);
+            $('#add_reg_section_submit').click();
+
+            return false;
+        }
+        
+        function showAddSectionPopup() {
+            $('.popup-form').css('display', 'none');
+            const form = $('#add-registration-section-form');
+            showPopup('#add-registration-section-form');
+            form.find('#new-section-id').val('');
+            form.find('#new-course-id').val('');
+            form.find('.form-body').scrollTop(0);
+
+            $('#new-section-id').focus();
+        }
     </script>
 </div>
 {% include 'EditCourseIDForm.twig' %}
+{% include 'AddRegistrationSectionForm.twig' %}

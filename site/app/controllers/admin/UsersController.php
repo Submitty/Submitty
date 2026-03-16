@@ -555,6 +555,23 @@ class UsersController extends AbstractController {
                     $this->core->addErrorMessage("Registration Section {$_POST['add_reg_section']} already present");
                 }
                 else {
+                     if (isset($_POST['add_course_id']) && trim($_POST['add_course_id']) !== '') {
+                        $course_id = trim($_POST['add_course_id']);
+                        if (preg_match('/^\d{5}$/', $course_id)) {
+                            if ($this->core->getQueries()->courseIdExists($course_id, $_POST['add_reg_section']) == 0) {
+                                $this->core->getQueries()->updateCourseSectionId(
+                                    $_POST['add_reg_section'],
+                                    $course_id
+                                );
+                            }
+                            else {
+                                $this->core->addErrorMessage("Course ID {$course_id} already in use");
+                            }
+                        }
+                        else {
+                            $this->core->addErrorMessage("Course ID must be a 5-digit number");
+                        }
+                    }
                     $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
                 }
             }
