@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 use app\controllers\SelfRejoinController;
+use app\entities\CourseUser;
+use app\entities\UserEntity;
 
 /**
  * Class UsersController
@@ -365,7 +367,9 @@ class UsersController extends AbstractController {
 
         $user->setPronouns(trim($_POST['user_pronouns']));
 
-        $user->setDisplayPronouns($_POST['display_pronouns']);
+        if (isset($_POST['display_pronouns'])) {
+            $user->setDisplayPronouns($_POST['display_pronouns']);
+        }
 
         $user->setEmail(trim($_POST['user_email']));
 
@@ -410,20 +414,25 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
-            $submitty_user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-            if ($submitty_user === null) {
+            $em = $this->core->getSubmittyEntityManager();
+            if ($user === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
+
                 if ($authentication instanceof SamlAuthentication) {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
                 }
-                $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+
+                $user_entity = $em->find(UserEntity::class, $_POST['user_id']);
+                $course_user = new CourseUser($semester, $course, $user_entity);
+                $em->persist($course_user);
+                $em->flush();
+                $this->core->getQueries()->updateUserInCourse($user);
+                $this->core->addSuccessMessage("Added user {$user->getId()} to course $course");
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $user->setEmailBoth($submitty_user->getEmailBoth());
+                $user->setEmailBoth($user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -928,7 +937,12 @@ class UsersController extends AbstractController {
                                 $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
                             }
                         }
-                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        $em = $this->core->getSubmittyEntityManager();
+                        $user_entity = $this->core->getCourseEntityManager()->find(UserEntity::class, $user->getId());
+                        $course_user = new CourseUser($semester, $course, $user_entity);
+                        $em->persist($course_user);
+                        $em->flush();
+                        $this->core->getQueries()->updateUserInCourse($user);
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);
