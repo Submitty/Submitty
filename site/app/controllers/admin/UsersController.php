@@ -558,7 +558,7 @@ class UsersController extends AbstractController {
                     if (isset($_POST['add_course_id']) && trim($_POST['add_course_id']) !== '') {
                         $course_id = trim($_POST['add_course_id']);
                         if (preg_match('/^\d{5}$/', $course_id)) {
-                            if ($this->core->getQueries()->courseIdExists($course_id, $_POST['add_reg_section']) == 0) {
+                            if (!$this->core->getQueries()->courseIdExists($course_id, $_POST['add_reg_section'])) {
                                 $this->core->getQueries()->updateCourseSectionId(
                                     $_POST['add_reg_section'],
                                     $course_id
