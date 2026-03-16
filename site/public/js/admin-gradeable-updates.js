@@ -440,6 +440,32 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
+
+    const ta_beta_testing_start_date = $('#date_ta_view').val();
+    const submission_open_date = $('#date_submit').val();
+    const manual_grading_start_date = $('#date_grade').val();
+
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
+    }
+    else {
+        // hide/show element when ta beta testing date is after the grade start date
+        if (ta_beta_testing_start_date > manual_grading_start_date) {
+            $('#ta-beta-testing-after-grading-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-grading-dates-warning').hide();
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
