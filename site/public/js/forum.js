@@ -2646,6 +2646,7 @@ $(() => {
         setupForumAutosave();
     }
     $('form#thread_form').submit(updateThread);
+    enableTabsInTextArea('.thread_post_content');
 });
 
 // When the user uses tab navigation on the thread list, this function
@@ -2750,4 +2751,17 @@ function highlightAndScrollToCurrentThread() {
             scrollThreadListTo(activeThread[0]);
         }
     }
+}
+function enableTabsInTextArea(selector) {
+    $(selector).on('keydown', (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const text = e.target.value;
+            // Use template literal and const to satisfy linter
+            e.target.value = `${text.substring(0, start)}\t${text.substring(end)}`;
+            e.target.selectionStart = e.target.selectionEnd = start + 1;
+        }
+    });
 }
