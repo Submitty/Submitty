@@ -229,7 +229,7 @@
         {% else %}
             data-student="simple-grade-active"
         {% endif %}
-        {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
+        {% if not grade.getSubmitter().isTeam() and (grade.getSubmitter().getUser().accessGrading() or grade.getSubmitter().getUser().getRegistrationType() == 'staff') %}
             class="highlighted-row"
         {% endif %}
     >
