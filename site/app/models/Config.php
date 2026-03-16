@@ -616,8 +616,8 @@ class Config extends AbstractModel {
             'dbname' => $this->course_json['database_details']['dbname'],
             'host' => $database_json['database_host'],
             'port' => $database_json['database_port'],
-            'username' => 'database_readonly_user',
-            'password' => 'database_readonly_user'
+            'username' => $database_json['database_readonly_user'],
+            'password' => $database_json['database_readonly_password']
         ];
 
 
