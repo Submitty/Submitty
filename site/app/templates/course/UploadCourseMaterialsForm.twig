@@ -107,7 +107,7 @@
                 </table>
             </div>
           </div>
-          <p>Total files cannot exceed {{file_upload_limit_mb}} MB.</p>
+          <p>Combined files size cannot exceed {{file_upload_limit_mb}} MB.</p>
         {% endif %}
           {% if current_course_materials_storage_used_mb < max_course_materials_storage_limit_mb %}
             {% if current_course_materials_storage_used_mb >= 900 %}

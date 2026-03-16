@@ -177,7 +177,6 @@ class CourseMaterialsView extends AbstractView {
         //Rounds the value to 2 decimals
         $current_course_materials_storage_used_mb = round($current_course_materials_storage_bytes / 1024 / 1024, 2);
 
-        
         $folder_paths = $this->compileAllFolderPaths($final_structure);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
