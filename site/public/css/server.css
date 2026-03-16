@@ -896,6 +896,8 @@ tbody.collapse.in {
 
 .dropdown-item {
     display: block;
+    width: max-content;
+    min-width: 100%;
     padding: 3px 20px;
     text-decoration: none;
     clear: both;
