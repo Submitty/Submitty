@@ -1370,7 +1370,21 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $grader->getId(), $_POST["attachment"]);
+        // Use the uploader's grader ID to locate the file.
+        // If a specific uploader ID is provided, validate the requesting user
+        // has sufficient privileges (instructor or full-access grader) to delete
+        // another grader's attachment.
+        $uploader_grader_id = $_POST['uploader_grader_id'] ?? $grader->getId();
+        if (strpos($uploader_grader_id, "..") !== false) {
+            $this->core->getOutput()->renderJsonFail('Invalid path.');
+            return;
+        }
+        if ($uploader_grader_id !== $grader->getId() && $grader->getGroup() > User::GROUP_FULL_ACCESS_GRADER) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete another grader\'s attachment.');
+            return;
+        }
+
+        $attachment_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'attachments', $gradeable->getId(), $submitter_id, $uploader_grader_id, $_POST["attachment"]);
         if (is_file($attachment_path)) {
             if (@unlink($attachment_path)) {
                 $this->core->getOutput()->renderJsonSuccess();
