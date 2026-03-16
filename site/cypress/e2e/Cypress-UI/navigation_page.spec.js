@@ -190,11 +190,11 @@ describe('navigation page', () => {
         cy.visit(['sample']);
 
         const sections = {
-            future: 5,
-            beta: 3,
+            future: 4,
+            beta: 4,
             open: 8,
             closed: 4,
-            items_being_graded: 9,
+            items_being_graded: 10,
             graded: 11,
         };
         const gradeable_id = 'future_no_tas_homework';
@@ -286,10 +286,10 @@ describe('navigation page', () => {
         cy.visit(['sample']);
 
         const sections = {
-            beta: 3,
+            beta: 4,
             open: 8,
             closed: 4,
-            items_being_graded: 9,
+            items_being_graded: 10,
             graded: 11,
         };
         validate_navigation_page_sections(sections);
