@@ -24,6 +24,16 @@ let ticks_till_update = 600000;
 let popUpTimerStarted = false;
 let isTimed = false;
 
+function buildCourseUrlSafe(parts = []) {
+    // Fallback in case server.js isn't loaded yet.
+    if (typeof buildCourseUrl === 'function') {
+        // eslint-disable-next-line no-undef
+        return buildCourseUrl(parts);
+    }
+    const base = document.body?.dataset?.courseUrl || window.courseUrl || '';
+    return base ? `${base}/${parts.join('/')}` : parts.join('/');
+}
+
 function initializeTimer(gradeableID, is_timed) {
     gradeable_id = gradeableID;
     isTimed = is_timed;
@@ -31,8 +41,7 @@ function initializeTimer(gradeableID, is_timed) {
 }
 
 function syncWithServer(criticalSync) {
-    // eslint-disable-next-line no-undef
-    const url = buildCourseUrl(['gradeable', gradeable_id, 'time_remaining_data']);
+    const url = buildCourseUrlSafe(['gradeable', gradeable_id, 'time_remaining_data']);
     $.ajax({
         url,
         type: 'GET',
