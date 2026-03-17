@@ -1,4 +1,4 @@
-/* global pdfjsLib, csrfToken, jspdf */
+/* global pdfjsLib, csrfToken, jspdf, container, zoomIn, zoomOut */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
 window.RENDER_OPTIONS = {
@@ -157,6 +157,17 @@ function renderPage(pageNumber, renderOptions) {
         const totalRotation = (rotate + pdfPage.rotate) % 360;
         const viewport = pdfPage.getViewport({ scale: scale, rotation: totalRotation });
         const transform = scalePage(pageNumber, viewport, canvasContext);
+        container.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    zoomIn();
+                }
+                else {
+                    zoomOut();
+                }
+            }
+        }, { passive: false });
 
         // Render the page
         return pdfPage.render({ canvasContext, viewport, transform }).promise.then(() => {
