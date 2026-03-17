@@ -1,0 +1,23 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}sync-notification-popup{% endblock %}
+{% block title %}Sync Notification Settings{% endblock %}
+{% block body %}
+<p>Select courses to copy the current notification settings to:</p>
+<select id="sync_course_ids"
+        name="sync_course_ids[]"
+        class="form-control"
+        multiple
+        size="8">
+    {% for course in core.getUser().getCourses() %}
+        <option value="{{ course.id }}">
+            {{course.semester}}—{{course.title}}
+        </option>
+    {% endfor %}
+</select>
+{% endblock %}
+{% block buttons %}
+<button class="btn btn-primary" onclick="syncNotificationSettings()">
+    Sync Settings
+</button>
+{{block('close_button')}}
+{% endblock %}

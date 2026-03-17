@@ -27,7 +27,7 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)" data-testid="unsubscribe-all-optional-emails">Unsubscribe from all optional emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
                             {#add a button#}
-                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="setNotification(this)" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="showPopup('sync-notification-popup')" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -466,4 +466,5 @@
             });
         });
     </script>
+{% include 'Notification/SyncSettingsPopup.twig' %}
 </div>
