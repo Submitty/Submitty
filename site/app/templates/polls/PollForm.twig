@@ -9,6 +9,7 @@
             <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
         {% endif %}
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" id="response-count" name="response_count" value="{{ poll is not null ? (poll.getOptions() | length) : 0 }}" />
 
         <label for="poll-name" class="option-title">
             Poll Name:
@@ -207,6 +208,19 @@
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
     let poll_type = "{{ poll is not null ? poll.getQuestionType() : 'poll-type-single-response-survey' }}";
+    // numeric key used for naming new option inputs to ensure uniqueness
+    function computeNextOptionKey() {
+        let max = -1;
+        $('.option_id').each(function(i, el) {
+            const val = $(el).val();
+            const num = parseInt(val === "" ? i : val, 10);
+            if (!isNaN(num)) {
+                max = Math.max(max, num);
+            }
+        });
+        return max + 1;
+    }
+    let nextOptionKey = computeNextOptionKey();
     
     flatpickr("#poll-date", {
             plugins: [ShortcutButtonsPlugin(
@@ -305,12 +319,7 @@
 
     function addResponse() {
         let count = $(".option_id").length;
-        let curr_max_id = -1;
-        for (let i = 0; i < count; i++) {
-            const option_id = $($(".option_id")[i]).val();
-            curr_max_id = Math.max(parseInt(option_id === "" ? i : option_id, 10), curr_max_id);
-        }
-        const first_free_id = curr_max_id + 1;
+        const first_free_id = nextOptionKey++;
         let hidden_style = "";
         let is_checked = "";
         if ($("#poll-type-single-response-survey").is(":checked")
@@ -340,6 +349,8 @@
             </div>
         `);
         setEventHandlers();
+        // keep the hidden response count in sync after adding a new response
+        $("#response-count").val($("#responses .response-container").length);
     }
 
     function submitErrorChecks() {
@@ -466,6 +477,8 @@
                             $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper");
                         }
                         my_this.parent().remove();
+                        // update hidden response count after deletion
+                        $("#response-count").val($("#responses .response-container").length);
                     }
                 },
                 error: function(e) {
@@ -481,6 +494,8 @@
 
         let submit_form = false;
         $("#new-poll-form").submit(function(event) {
+            // ensure response count is accurate before submitting
+            $("#response-count").val($("#responses .response-container").length);
             if (!submit_form && {{ poll is not null ? "true" : "false" }} && !$(`#poll-type-${ poll_type }`).is(':checked')) {
                 // don't submit yet
                 event.preventDefault();

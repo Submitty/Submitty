@@ -7,7 +7,7 @@ use app\models\DockerUI;
 use app\views\AbstractView;
 
 class DockerView extends AbstractView {
-    public function displayDockerPage(DockerUI $docker_ui): string {
+    public function displayDockerPage(DockerUI $docker_ui, bool $is_faculty): string {
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
@@ -34,6 +34,7 @@ class DockerView extends AbstractView {
                 "is_super_user" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 "user_id" => $this->core->getUser()->getId(),
                 "update_needed" => $docker_ui->isUpdateNeeded(),
+                "is_faculty" => $is_faculty,
             ]
         );
     }

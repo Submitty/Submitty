@@ -65,39 +65,40 @@
             </div>
         </div>
     </div>
-    {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
-    {% endif %}
-    {% if not is_instructor %}
-        <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
-    {% endif %}
-    {% if can_regrade %}
-        <div class="btn-group">
-            <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
-            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">Regrade All Versions for All students</a>
+    <div class="student-info-btns-container">
+        {% if not is_student %}
+            <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
+        {% endif %}
+        {% if not is_instructor %}
+            <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
+        {% endif %}
+        {% if can_regrade %}
+            <div>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-testid="regrade-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Regrade All Students <span style="margin-left: 6px" class="sr-only"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item regrade-btn-all" data-testid="regrade-all" onclick="ajaxCountRegrade(0,event,confirmMessage);">Active Versions Only</a>
+                    <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">All Versions</a>
+                </div>
             </div>
-        </div>
-    {% endif %}
-    <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
-    {% include 'Vue.twig' with {
-        'type': 'component',
-        'name': 'ToggleColumns',
-        'style': 'display: inline;',
-        'args': {
-            'columns': all_columns|map(column => column.function),
-            'labels': all_columns|map(column => column.title),
-            'forced': [
-                'grading'
-            ],
-            'cookie': 'grading_details_columns',
-            'format': 'json',
-        },
-    } %}
+        {% endif %}
+        <button type="button" class="btn btn-primary" onclick="toggleAllSections()" id="toggle-all-sections-btn" data-testid="toggle-all-sections">Collapse All Sections</button>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'ToggleColumns',
+            'style': 'display: inline;',
+            'args': {
+                'columns': all_columns|map(column => column.function),
+                'labels': all_columns|map(column => column.title),
+                'forced': [
+                    'grading'
+                ],
+                'cookie': 'grading_details_columns',
+                'format': 'json',
+            },
+        } %}
+    </div>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
