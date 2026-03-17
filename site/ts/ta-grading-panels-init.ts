@@ -310,6 +310,27 @@ function readCookies() {
                 });
             }
         });
+
+        // Fallback: if no files were opened by name matching and the student
+        // submitted a single file, auto-open it.
+        // Exclude dot-files (e.g. .submit.timestamp, .user_assignment_access.json)
+        // which are system-generated and are not student submissions.
+        const openedFiles = $('#file-container div[id^=file_viewer_].shown');
+        if (openedFiles.length === 0) {
+            const submissionFiles = $('#file-container div[id^=file_viewer_]').filter(function () {
+                return !$(this)[0].dataset.file_name?.startsWith('.');
+            });
+            if (submissionFiles.length === 1) {
+                const singleFile = submissionFiles.first();
+                if (!singleFile.hasClass('open')) {
+                    openFrame(
+                        singleFile[0].dataset.file_name!,
+                        singleFile[0].dataset.file_url!,
+                        singleFile.attr('id')!.split('_')[2],
+                    );
+                }
+            }
+        }
     }
     for (let x = 0; x < testcases.length; x++) {
         if (testcases[x] !== '[' && testcases[x] !== ']') {
