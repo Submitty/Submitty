@@ -15586,7 +15586,13 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
+			rawMessage: 'Method app\views\superuser\GradeablesView::showGradeablesList() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/views/superuser/GradeablesView.php
 
+		-
+			rawMessage: 'Method app\views\superuser\SamlManagerView::renderPage() has parameter $invalid_users with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/superuser/SamlManagerView.php
