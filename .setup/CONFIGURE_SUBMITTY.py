@@ -657,6 +657,15 @@ user_id_requirements = {
     ]
 }
 
+password_requirements = {
+    "min_length": 12,
+    "max_length": 255,
+    "require_uppercase": True,
+    "require_lowercase": True,
+    "require_numbers": True,
+    "require_special_chars": True
+}
+
 
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
@@ -682,6 +691,7 @@ if not args.worker:
     config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
     config['user_create_account'] = USER_CREATE_ACCOUNT
     config['user_id_requirements'] = user_id_requirements
+    config['password_requirements'] = password_requirements
     
 config['worker'] = True if args.worker == 1 else False
 
