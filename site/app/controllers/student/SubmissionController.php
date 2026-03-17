@@ -375,7 +375,9 @@ class SubmissionController extends AbstractController {
         }
 
         $pdf_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyPath(),
+            "/usr",
+            "local",
+            "submitty",
             "more_autograding_examples",
             "pdf_exam",
             "submissions",

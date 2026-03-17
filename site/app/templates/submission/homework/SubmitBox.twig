@@ -92,6 +92,10 @@
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
+                    <label style="text-align:center;margin:420px;padding:5px;">
+                        <button type="button" id="bulk_submit_all" class="btn btn-default" data-testid="bulk-submit-all" tabindex="0" onclick="blankSubmitAll()">"Blank" Submit All
+                        </button>
+                    </label>
                 {% endif %}
             </fieldset>
             <div id="user-id-input" class="hide">
@@ -568,6 +572,30 @@
             e.stopPropagation();
         });
     });
+
+    function blankSubmitAll(){
+        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm("This will create a placeholder submission for ALL STUDENTS on this gradeable.")){
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    displayMessage(success);
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
 
