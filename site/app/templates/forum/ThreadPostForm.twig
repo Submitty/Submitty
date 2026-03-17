@@ -189,7 +189,7 @@
             {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
-            <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            <input type="checkbox" id="Announcement" data-testid="announce-thread" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
