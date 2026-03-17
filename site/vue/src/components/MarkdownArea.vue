@@ -28,6 +28,7 @@ interface Props {
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
     toggleButtonId?: string;
+    chatMode?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -379,7 +380,7 @@ function syncMarkdownToggle() {
         :class="[props.class]"
         :name="markdownAreaName"
         :placeholder="placeholder"
-        rows="10"
+        :rows="chatMode ? 2 : 10"
         cols="30"
         :maxlength="maxLength"
         :required="required"

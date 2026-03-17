@@ -117,7 +117,14 @@ function appendMessage(displayName, role, ts, content, msgID) {
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
     messageContent.setAttribute('data-testid', 'message-content');
-    messageContent.innerText = content;
+    messageContent.id = `message-content-${msgID}`;
+
+    window.submitty.render(
+        messageContent,
+        'component',
+        'Markdown',
+        { content: content }
+    );
 
     message.appendChild(messageHeader);
     message.appendChild(messageContent);
@@ -328,36 +335,37 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMessages(chatroomId);
 
         const sendButton = document.querySelector('.send-message-btn');
-        const messageInput = document.querySelector('.message-input');
 
-        if (!read_only) {
-            messageInput.addEventListener('keypress', (event) => {
-                if (event.keyCode === 13 && !event.shiftKey) {
-                    event.preventDefault();
-                    sendButton.click();
-                }
-            });
-        }
-        if (!read_only) {
-            sendButton.addEventListener('click', (event) => {
+        // The MarkdownArea Vue component renders a <textarea> with this ID asynchronously
+        const getMessageInput = () => document.getElementById('chat-markdown-input');
+
+        document.body.addEventListener('keypress', (event) => {
+            if (!read_only && event.target && event.target.id === 'chat-markdown-input' && event.keyCode === 13 && !event.shiftKey) {
                 event.preventDefault();
-                const messageContent = messageInput.value.trim();
-                if (messageContent === '') {
-                    alert('Please enter a message.');
-                    return;
-                }
+                sendButton.click();
+            }
+        });
+        sendButton.addEventListener('click', (event) => {
+            if (read_only) return;
+            event.preventDefault();
+            const messageInput = getMessageInput();
+            if (!messageInput) {
+                return;
+            }
 
-                const role = user_admin ? 'instructor' : 'student';
-                sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+            const messageContent = messageInput.value.trim();
+            if (messageContent === '') {
+                alert('Please enter a message.');
+                return;
+            }
 
-                messageInput.value = '';
-            });
-        }
-        if (read_only) {
-            messageInput.disabled = true;
-            messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
-            sendButton.disabled = true;
-        }
+            const role = user_admin ? 'instructor' : 'student';
+            sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+
+            messageInput.value = '';
+            // Trigger input event so Vue's v-model stays in sync
+            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
     }
     const chatroomsTable = document.getElementById('chatrooms-table');
     const allChatroomData = document.getElementById('all-chatroom-data');

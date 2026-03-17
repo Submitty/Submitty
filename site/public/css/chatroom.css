@@ -88,6 +88,12 @@
     min-width: 0;
 }
 
+.message-input-vue-wrapper {
+    flex: 1;
+    margin-right: 0.5rem;
+    min-width: 0;
+}
+
 .message-input:focus {
     background-color: var(--standard-hover-light-gray);
 }
