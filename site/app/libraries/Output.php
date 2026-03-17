@@ -135,7 +135,7 @@ class Output {
         }));
 
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
-            return call_user_func_array('self::renderTemplate', $args);
+            return $this->renderTemplate(...$args);
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
@@ -151,7 +151,7 @@ HTML;
         }, ["is_safe" => ["html"]]));
 
         $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
-            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+            $this->addInternalModuleTwigJs($name);
         }));
 
         if ($full_load) {
