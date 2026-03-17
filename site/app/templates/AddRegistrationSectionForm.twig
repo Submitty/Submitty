@@ -10,6 +10,10 @@
     <p class="std-margin">
         Enter a new section ID and an optional course ID.
     </p>
+    <strong>Section:</strong> Alphanumeric, underscores, hyphens, with no space and maximum 20 characters.<br>
+    <strong>Course:</strong> Unique 5 digit number.<br>
+    <br></br>
+
 
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
@@ -19,6 +23,8 @@
             id="new-section-id"
             name="section_id"
             type="text"
+            pattern="[a-zA-Z0-9-_]{1,20}"
+            placeholder="E.g. Staff"
             required
         />
     </div>
@@ -31,7 +37,7 @@
             type="text"
             pattern="\d{5}"
             maxlength="5"
-            required
+            placeholder="E.g. 12345"
         />
     </div>
 {% endblock %}

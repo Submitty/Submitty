@@ -360,7 +360,7 @@
         function addRegistrationSection() {
             const form = $('#add-registration-section-form');
             const section = form.find('#new-section-id').val().trim();
-            const course  = form.find('#new-course-id').val().trim();
+            const course  = form.find('#new-course-id-num').val().trim();
 
             if (!section) {
                 displayErrorMessage('Missing section');
@@ -372,8 +372,12 @@
                 return false;
             }
 
+            if (course){
+                $('#add_course_id_hidden').val(course);
+
+            }
+            
             $('#add_reg_section').val(section);
-            $('#add_course_id_hidden').val(course);
             $('#add_reg_section_submit').click();
 
             return false;
