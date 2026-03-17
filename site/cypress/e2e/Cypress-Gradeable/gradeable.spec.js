@@ -77,6 +77,9 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Team Homework');
         cy.get('body').should('not.contain', 'went wrong');
 
+        cy.screenshot('team-debug-score');
+        cy.get('body').then($b => console.log($b.text()));
+
         cy.contains('[data-testid="score-pill-badge"]', '7 / 10', { timeout: 200000 }).should('exist');
 
         cy.login('wisoza');
@@ -111,6 +114,10 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('body').type('{enter}');
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Autograde');
         cy.get('body').should('not.contain', 'went wrong');
+        
+        cy.screenshot('nonteam-debug-score');
+        cy.get('body').then($b => console.log($b.text()));
+
         cy.contains('[data-testid="score-pill-badge"]', '9 / 10', { timeout: 200000 }).should('exist');
     });
 });
