@@ -192,6 +192,11 @@
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
         {% endif %}
+        {% if show_reply_announcement is defined and show_reply_announcement and core.getUser().accessFullGrading() %}
+            {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
+            <input type="checkbox" id="replyAnnouncement" name="replyAnnouncement" value="replyAnnouncement" data-ays-ignore="true"/>
+            <label class="inline-block" for="replyAnnouncement">{{ announcement_text }} (pinned thread reply)</label>
+        {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
             <div id="pin-expiration-date">
               <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
@@ -250,6 +255,15 @@
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $("#pin-expiration-date").hide();
+            }
+        });
+
+        $("#replyAnnouncement").click(function (){
+            if($("#replyAnnouncement").prop("checked")){
+                var confirmed = confirm("This will send an email/notification to ALL students in the course. Only use this for important corrections or updates to the pinned thread. Continue?");
+                if(!confirmed) {
+                    $("#replyAnnouncement").prop("checked", false);
+                }
             }
         });
 
