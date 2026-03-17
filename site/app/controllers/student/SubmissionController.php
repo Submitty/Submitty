@@ -352,18 +352,12 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-    * WIP function to use a "blank" pdf for grading all students,
-    * called from bulk gradeable submission side.
-    *
-    * I still need to figure out how to call this function in the .twig or whatever
+    * Function to submit the same "blank" pdf for all active students on a specific gradeable. 
     * 
-    * Added JSON rendering for error checking??
+    * The file that is submitted can be found here:
+    * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
     * 
-    * build course url in twig or javascript file
-    * 
-    * url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions'])
-    * 
-    * used ajaxUploadSubmission for inspiration on how to submit for a student!
+    * JSON error checking works similarly to ajaxUpload... or similar type functions. 
     */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]

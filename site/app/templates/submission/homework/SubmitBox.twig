@@ -586,7 +586,7 @@
                 },
                 success: function(data){
                     const response = JSON.parse(data);
-                    displayMessage(success);
+                    displayMessage(response.data);
                     setTimeout(() => location.reload(), 1500);
                 },
                 error: function(){
