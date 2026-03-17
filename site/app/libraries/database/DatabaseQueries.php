@@ -7554,6 +7554,27 @@ AND gc_id IN (
     }
 
     /**
+     * Returns the set of user IDs that have submissions for a gradeable
+     *
+     * @param  Gradeable $gradeable
+     * @param  string[]  $user_ids
+     * @return string[] User IDs that have submissions
+     */
+    public function getUsersWithSubmissions(Gradeable $gradeable, array $user_ids): array {
+        if (count($user_ids) === 0) {
+            return [];
+        }
+        $place_holders = $this->createParameterList(count($user_ids));
+        $params = array_values($user_ids);
+        $params[] = $gradeable->getId();
+        $this->course_db->query(
+            "SELECT DISTINCT user_id FROM electronic_gradeable_data WHERE user_id IN {$place_holders} AND g_id=?",
+            $params
+        );
+        return array_column($this->course_db->rows(), 'user_id');
+    }
+
+    /**
      * Get the active version for all given submitter ids. If they do not have an active version,
      * their version will be zero.
      *
