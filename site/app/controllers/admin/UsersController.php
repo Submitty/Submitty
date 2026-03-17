@@ -1364,8 +1364,13 @@ class UsersController extends AbstractController {
                             // Ignore Rotation Section column from exported lists.
                             break;
                         case "Registration Section":
+                            // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                            // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
                             if ($list_type == 'classlist') {
-                                $user->setRegistrationSection($value);
+                                if (!empty($row[$col_num])) {
+                                    $this->core->getQueries()->insertNewRegistrationSection($row[$col_num]);
+                                    $user->setRegistrationSection($row[$col_num]);
+                                }
                             } elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
                                 $grading_assignments = explode(',', $row[$col_num]);
                                 sort($grading_assignments);
