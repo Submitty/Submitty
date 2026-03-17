@@ -584,8 +584,9 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
+                $parent_preview = $this->previewText($parent_post_content, 100);
                 $subject = "New Reply: " . $thread_title;
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . $parent_post_content . "\n\nNew Reply:\n\n" . $post_content;
+                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -618,6 +619,18 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * Returns the full text if short, otherwise a preview capped at $limit characters.
+     * Adds "...(truncated)" when truncated.
+     */
+    private function previewText(string $text, int $limit = 300): string {
+        $text = str_replace("\r", "", $text);
+        if (mb_strlen($text, 'UTF-8') <= $limit) {
+            return $text;
+        }
+        return mb_substr($text, 0, $limit, 'UTF-8') . "...(truncated)";
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]

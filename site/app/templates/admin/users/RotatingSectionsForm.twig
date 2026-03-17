@@ -39,7 +39,8 @@
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
     <p>
-        The 'default section' is assigned to students who have self-registered for this course.
+        The 'default section' is assigned to students who have self-registered for this course. <br>
+        Note: Sections can only be deleted if they contain no students.
     </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -50,6 +51,7 @@
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
@@ -61,58 +63,76 @@
                     <tbody>
                         {% for section in reg_sections %}
                             {% if 'sections_registration_id' in section|keys %}
-                            {% if section['sections_registration_id'] in reg_sections_count|keys and
-                                reg_sections_count[section['sections_registration_id']] %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }} </td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
-                                {% if is_self_register %}
-                                    <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                <tr>
+                                    <td class="delete-section-cell">
+                                        {% if section['sections_registration_id'] not in reg_sections_count|keys or
+                                            reg_sections_count[section['sections_registration_id']] == 0 %}
+                                            <button
+                                                type="button"
+                                                class="icon"
+                                                data-section-id="{{ section['sections_registration_id'] }}"
+                                                onclick="deleteRegistrationSection(this)"
+                                                title="Delete Registration Section"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        {% endif %}
                                     </td>
-                                {% endif %}
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td> {{ section['course_section_id'] }} </td>
-                                <td>0</td>
-                                {% if is_self_register %}
                                     <td>
-                                        <input 
-                                            type="radio" 
-                                            name="default_section" 
-                                            value="{{ section['sections_registration_id'] }}" 
-                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
-                                        />
+                                        {{ section['sections_registration_id'] }}
                                     </td>
-                                {% endif %}
-                            </tr>
-                            {% endif %}
+                                    <td class="course-id-cell">
+                                        <button
+                                            type="button"
+                                            class="icon"
+                                            data-section-id="{{ section['sections_registration_id'] }}"
+                                            data-course-id="{{ section['course_section_id'] }}"
+                                            title="Edit Course ID"
+                                            onclick="showEditCourseIdPopup(this)"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+
+                                        <span id="course-id-{{ section['sections_registration_id'] }}"
+                                            class="course-id-text">
+                                            {{ section['course_section_id'] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if section['sections_registration_id'] in reg_sections_count|keys %}
+                                            {{ reg_sections_count[section['sections_registration_id']] }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    {% if is_self_register %}
+                                        <td>
+                                            <input
+                                                type="radio"
+                                                name="default_section"
+                                                value="{{ section['sections_registration_id'] }}"
+                                                {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                            />
+                                        </td>
+                                    {% endif %}
+                                </tr>
                             {% endif %}
                         {% endfor %}
-                        {% if reg_sections_count['NULL'] %}
                         <tr>
-                            <td>Section NULL</td>
+                            <td></td>
                             <td>NULL</td>
-                            <td>{{ reg_sections_count['NULL'] }}</td>
+                            <td>NULL</td>
+                            <td>
+                                {% if reg_sections_count['NULL'] %}
+                                    {{ reg_sections_count['NULL'] }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
                             {% if is_self_register %}
                                 <td></td>
                             {% endif %}
                         </tr>
-                        {% else %}
-                        <tr>
-                            <td>Section NULL</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -132,16 +152,8 @@
                     </div>
                 </div>
                 <div class="option">
-                    <div class="option-input"><input type="text" name="delete_reg_section" id="delete_reg_section" value="" placeholder="Eg: 3" /></div>
-                    <div class="option-desc">
-            <label for="delete_reg_section">
-							<span class="option-title">Delete a Registration Section</span>
-              <br>
-							<span class="option-alt">
-								Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
-							</span>
-						</label>
-                    </div><br />
+                    <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
+                    <input type="submit" id="delete_reg_section_submit" style="display:none;" />
                     <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
                 </div>
             </div>
@@ -263,4 +275,92 @@
             </div>
         </div>
     </form>
+    <script>
+        function deleteRegistrationSection(button) {
+            const sectionId = button.dataset.sectionId;
+            if (!confirm(`Delete registration section ${sectionId}?`)) {
+                return;
+            }
+            const deleteInput = document.getElementById('delete_reg_section');
+            deleteInput.value = sectionId;
+            deleteInput.closest('form').submit();
+        }
+
+        const existingCourseIds = new Set([
+            {% for section in reg_sections %}
+                {% if section['course_section_id'] is not empty %}
+                    "{{ section['course_section_id'] }}"{% if not loop.last %},{% endif %}
+                {% endif %}
+            {% endfor %}
+        ]);
+
+        function showEditCourseIdPopup(button) {
+            $('.popup-form').css('display', 'none');
+            const form = $('#edit-courseid-form');
+            showPopup('#edit-courseid-form');
+            const section_id = button.getAttribute('data-section-id');
+            const course_id  = button.getAttribute('data-course-id');
+            form.find('input[name="section_id"]').val(section_id);
+            form.find('#new-course-id').val(course_id);
+            form.data('original-course-id', course_id);
+            form.find('.form-body').scrollTop(0);
+            $('#new-course-id').focus();
+        }
+
+        function updateCourseID() {
+            const form = $('#edit-courseid-form');
+            const course_id = $('#new-course-id').val();
+            const section_id = form.find('input[name="section_id"]').val();
+            const originalCourseId = form.data('original-course-id');
+
+            if (!course_id || !section_id) {
+                displayErrorMessage('Missing course ID or section ID');
+                return false;
+            }
+
+            if (course_id !== originalCourseId && existingCourseIds.has(course_id)) {
+                displayErrorMessage('That Course ID already exists. Please choose a unique one.');
+                return false;
+            }
+
+            const data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('course_id', course_id);
+            data.append('section_id', section_id);
+
+            $.ajax({
+                url: "{{ update_course_id_url }}",
+                type: 'POST',
+                data: data,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (response) {
+
+                    if (response.status === 'success') {
+                        const { data } = response;
+                        displaySuccessMessage(data.message);
+                        document.getElementById("course-id-" + section_id).textContent = data.course_id;
+                        existingCourseIds.clear();
+                        document.querySelectorAll('.course-id-text').forEach(span => {
+                            existingCourseIds.add(span.textContent.trim());
+                        });
+
+                        closePopup();
+                    }
+                    else {
+                        displayErrorMessage(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    displayErrorMessage('Unexpected server error');
+                }
+            });
+
+            $('.popup-form').css('display', 'none');
+            return false;
+        }
+    </script>
 </div>
+{% include 'EditCourseIDForm.twig' %}

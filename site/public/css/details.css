@@ -40,6 +40,12 @@
     justify-content: space-between;
 }
 
+.student-info-btns-container {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 6px;
+}
+
 .details-action-box {
     padding: 10px 0;
     display: flex;
