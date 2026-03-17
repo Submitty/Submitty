@@ -4866,29 +4866,29 @@ SQL;
         return $return;
     }
 
-    public function getCourseStatus($semester, $course) {
-        $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);
+    public function getCourseStatus($term, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$term, $course]);
         return $this->submitty_db->row()['status'];
     }
 
     /**
      * Set the status of a course (1 = active, 2 = archived)
-     * @param string $semester
+     * @param string $term
      * @param string $course
      * @param int $status
      */
-    public function setCourseStatus(string $semester, string $course, int $status): void {
-        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $semester, $course]);
+    public function setCourseStatus(string $term, string $course, int $status): void {
+        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $term, $course]);
     }
 
     /**
      * Check if a course is marked as unarchivable
-     * @param string $semester
+     * @param string $term
      * @param string $course
      * @return bool
      */
-    public function isCourseUnarchivable(string $semester, string $course): bool {
-        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$semester, $course]);
+    public function isCourseUnarchivable(string $term, string $course): bool {
+        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$term, $course]);
         $result = $this->submitty_db->row();
         return $result !== null && $result['unarchivable'];
     }
