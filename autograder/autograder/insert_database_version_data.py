@@ -110,6 +110,34 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             )
             db.commit()
 
+    autograding_testcase_results = Table('autograding_testcase_results', metadata, autoload_with=engine)
+    testcase_rows = build_testcase_rows(
+        user_id=user_id,
+        team_id=team_id,
+        g_id=gradeable_id,
+        g_version=version,
+        testcases=testcases,
+        results_testcases=results['testcases'],
+    )
+    existing = db.execute(
+        select(func.count()).select_from(autograding_testcase_results)
+        .where(autograding_testcase_results.c.g_id == gradeable_id)
+        .where(autograding_testcase_results.c.user_id == user_id)
+        .where(autograding_testcase_results.c.team_id == team_id)
+        .where(autograding_testcase_results.c.g_version == version)
+    ).scalar()
+    if existing:
+        db.execute(
+            delete(autograding_testcase_results)
+            .where(autograding_testcase_results.c.g_id == gradeable_id)
+            .where(autograding_testcase_results.c.user_id == user_id)
+            .where(autograding_testcase_results.c.team_id == team_id)
+            .where(autograding_testcase_results.c.g_version == version)
+        )
+    if testcase_rows:
+        db.execute(insert(autograding_testcase_results), testcase_rows)
+    db.commit()
+
     submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
@@ -220,30 +248,71 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         )
 
     db.commit()
+
+    try:
+        autograding_testcase_results = Table(
+            'autograding_testcase_results', metadata, autoload_with=engine
+        )
+        rows = build_testcase_rows(
+            user_id=user_id,
+            team_id=team_id,
+            g_id=gradeable_id,
+            g_version=version,
+            testcases=testcases,
+            results_testcases=results['testcases'],
+        )
+        upsert_testcase_results(db, autograding_testcase_results, rows,
+                                gradeable_id, user_id, team_id, version)
+        db.commit()
+    except Exception as e:
+        print(f"WARNING: could not write autograding_testcase_results: {e}")
+
     db.close()
     engine.dispose()
 
 """
-Build the rows for complete autograding test results
+Build the rows for full autograding results
 """
-def build_testcase_rows(user_id, testcases, results_testcases):
+def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_testcases):
     rows = []
-    for i in range(min(len(testcases), len(results_testcases))):
+    for i in range(len(testcases)):
         spec = testcases[i]
-        res = results_testcases[i]
+        res  = results_testcases[i]
         rows.append({
-            "user_id": user_id,
-            "testcase_id": spec["testcase_id"],
-            "testcase_order": i,
-            "hidden": spec["hidden"],
-            "extra_credit": spec["extra_credit"],
-            "points_possible": res["total_points"],
-            "points_earned": res["points"],
-            "elapsed_time": res["elapsed_time"],
-            "max_rss_size": res["max_rss_size"],
-            "passed": res["points"] >= spec["total_points"]
+            "g_id":            g_id,
+            "user_id":         user_id,
+            "team_id":         team_id,
+            "g_version":       g_version,
+            "testcase_id":     spec["testcase_id"],
+            "testcase_order":  i,
+            "hidden":          spec["hidden"],
+            "extra_credit":    spec["extra_credit"],
+            "points_possible": spec["total_points"],
+            "points_earned":   res["points"],
         })
     return rows
+
+
+
+"""
+Delete all existing testcase rows for this (g_id, user/team, version),
+then insert the new rows (only delete for regrades)
+"""
+def upsert_testcase_results(db, table, rows, g_id, user_id, team_id, g_version):
+    delete_stmt = (
+        delete(table)
+        .where(table.c.g_id      == g_id)
+        .where(table.c.g_version == g_version)
+    )
+    if user_id is not None:
+        delete_stmt = delete_stmt.where(table.c.user_id == user_id)
+    else:
+        delete_stmt = delete_stmt.where(table.c.team_id == team_id)
+
+    db.execute(delete_stmt)
+
+    if rows:
+        db.execute(insert(table), rows)
 
 
 def get_testcases(config, semester, course, g_id, notebook_data):
