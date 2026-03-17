@@ -1508,6 +1508,9 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "Registation Sub-Section":
+                            if (!empty($row[$col_num])) {
+                                $user->setRegistrationSubsection($value);
+                            }
                             break;
                         case "Password":
                             break;
