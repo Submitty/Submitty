@@ -24,6 +24,4 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("""
-        ALTER TABLE courses DROP COLUMN IF EXISTS unarchivable
-    """)
+    pass # no operation to prevent data loss from rollback
