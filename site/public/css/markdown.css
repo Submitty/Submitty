@@ -272,3 +272,64 @@
     background-color: white;
     max-width: 100%;
 }
+
+/* Thread Reference Links */
+.thread-reference {
+    color: var(--submitty-logo-blue);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--submitty-logo-blue);
+}
+
+.thread-reference:hover {
+    text-decoration: underline;
+}
+
+/* Thread Autocomplete Dropdown */
+.thread-autocomplete-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.thread-autocomplete-dropdown {
+    position: absolute;
+    z-index: 1000;
+    background: var(--default-white);
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    width: 300px;
+}
+
+.thread-autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    overflow: hidden;
+}
+
+.thread-autocomplete-item-active {
+    background-color: var(--light-blue);
+}
+
+[data-theme="dark"] .thread-autocomplete-item-active {
+    background-color: var(--submitty-logo-blue);
+    color: var(--default-white);
+}
+
+.thread-autocomplete-id {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--submitty-logo-blue);
+}
+
+.thread-autocomplete-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
