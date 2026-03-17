@@ -163,13 +163,15 @@
             const category_id = item.data('category_id');
             const visible_date_original = item.data('visible_date');
             const visible_date = item.find(".edit-category-date-input").val().trim();
-            item.data('visible_date', visible_date);
             const category_desc = item.data('category_desc');
             if(visible_date != visible_date_original) {
                 editCategory(category_id, category_desc, null, visible_date, 'date', '{{ csrf_token }}');
             }
-            item.find(".categorylistitemdate-editdesc").hide();
-            item.find(".categorylistitemdate-desc").show();
+            else {
+                // No change, just hide the edit box
+                item.find(".categorylistitemdate-editdesc").hide();
+                item.find(".categorylistitemdate-desc").show();
+            }
         });
 
         $(".cancel-date-button").click(function() {
@@ -183,12 +185,14 @@
             const category_id = item.data('category_id');
             const category_desc_original = item.data('category_desc');
             const category_desc = item.find(".edit-category-desc-input").val().trim();
-            item.data('category_desc', category_desc);
             if(category_desc != category_desc_original) {
                 editCategory(category_id, category_desc, null, null, 'desc', '{{ csrf_token }}');
             }
-            item.find(".categorylistitem-editdesc").hide();
-            item.find(".categorylistitem-desc").show();
+            else {
+                // No change, just hide the edit box
+                item.find(".categorylistitem-editdesc").hide();
+                item.find(".categorylistitem-desc").show();
+            }
         });
 
 
