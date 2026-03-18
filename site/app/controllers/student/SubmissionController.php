@@ -352,19 +352,19 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-    * Function to submit the same "blank" pdf for all active students on a specific gradeable. 
-    * 
+    * Function to submit the same "blank" pdf for all active students on a specific gradeable.
+    *
     * The file that is submitted can be found here:
     * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
-    * 
-    * JSON error checking works similarly to ajaxUpload... or similar type functions. 
+    *
+    * JSON error checking works similarly to ajaxUpload... or similar type functions.
     */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
     public function generateBlankSubmissions($gradeable_id) {
 
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
-        if($gradeable === null){
+        if ($gradeable === null) {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
@@ -378,7 +378,7 @@ class SubmissionController extends AbstractController {
             "bulk_upload_placeholder.pdf"
         );
 
-        if(!is_file($pdf_path)){
+        if (!is_file($pdf_path)) {
             return $this->uploadResult("Placeholder PDF not found at '{$pdf_path}'", false);
         }
 
@@ -389,8 +389,8 @@ class SubmissionController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $success_count = 0;
 
-         foreach($students as $student){
-            if($student->getGroup() != User::GROUP_STUDENT || $student->getRegistrationSection() === null){
+        foreach ($students as $student) {
+            if ($student->getGroup() != User::GROUP_STUDENT || $student->getRegistrationSection() === null) {
                 continue;
             }
 
@@ -398,12 +398,12 @@ class SubmissionController extends AbstractController {
 
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
             $highest_version = 0;
-            if($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null){
+            if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
                 $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
             }
             $new_version = $highest_version + 1;
 
-            //user directory 
+            //user directory
             $user_path = FileUtils::joinPaths(
                 $this->core->getConfig()->getCoursePath(),
                 "submissions",
@@ -411,7 +411,7 @@ class SubmissionController extends AbstractController {
                 $user_id
             );
 
-            //path for submission version 
+            //path for submission version
             $version_path = FileUtils::joinPaths(
                 $user_path,
                 $new_version
@@ -421,7 +421,7 @@ class SubmissionController extends AbstractController {
 
             //path for submission directory
             $version_path_submission = FileUtils::joinPaths(
-                $version_path, 
+                $version_path,
                 "bulk_upload_placeholder.pdf"
             );
 
@@ -434,7 +434,8 @@ class SubmissionController extends AbstractController {
                 "user_assignment_settings.json"
             );
             $json = [];
-            if(file_exists($settings_file)){
+
+            if (file_exists($settings_file)) {
                 $json = FileUtils::readJsonFile($settings_file);
             }
             $json["active_version"] = $new_version;
@@ -452,13 +453,13 @@ class SubmissionController extends AbstractController {
 
             //update database
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
-            
+
             //add to grading queue
             $queue_file_helper = implode("__", [
-                $this->core->getConfig()->getTerm(), 
+                $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
-                $gradeable->getId(), 
-                $user_id, 
+                $gradeable->getId(),
+                $user_id,
                 $new_version
             ]);
 
