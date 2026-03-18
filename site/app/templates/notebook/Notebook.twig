@@ -89,9 +89,6 @@
                     data-recent_submission="{{ cell.recent_submission }}"
                     data-version_submission="{{ cell.version_submission }}"
                     onkeyup="handle_input_keypress();"
-                    {% if viewing_inactive_version or is_grader_view %}
-                        style="pointer-events:none;"
-                    {% endif %}
                 >
                 </div>
                 {% if not is_grader_view %}
@@ -132,6 +129,10 @@
                         var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
                         $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
                     }
+
+		    {% if viewing_inactive_version or is_grader_view %}
+                      editor_{{ num_codeboxes }}.setOption("readOnly", true);
+                    {% endif %}
 
                     {# Populate codebox and set state of buttons initially #}
                     {% if highest_version == 0 %}
