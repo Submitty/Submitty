@@ -173,3 +173,63 @@ footer .footer-separator {
 #loading-bar-percentage {
     margin-left: 10px;
 }
+
+/* full screen mode - hides nav and sidebar */
+main#main.full-screen-mode {
+    z-index: 10;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    background: var(--background-blue);
+}
+#global-fullscreen-btn {
+    color: var(--text-black);
+    background: transparent;
+    border: none;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#global-fullscreen-btn:hover {
+    opacity: 0.7;
+}
+
+#fullscreen-exit-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 1em;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    margin: 1rem;
+}
+
+#fullscreen-exit-btn.visible {
+    display: flex;
+}
+.fullscreen-hint {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 9999;
+    font-size: 1em;
+    transition: opacity 1s ease;
+}
