@@ -358,6 +358,9 @@ class SubmissionController extends AbstractController {
     * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
     *
     * JSON error checking works similarly to ajaxUpload... or similar type functions.
+    * 
+    * @param string $gradeable_id
+    * @return array
     */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
