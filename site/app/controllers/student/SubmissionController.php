@@ -487,7 +487,7 @@ class SubmissionController extends AbstractController {
             @file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX);
 
             $success_count++;
-         }
+        }
 
         $result = "Successfully submitted placeholder PDF for all $success_count students.";
         return $this->uploadResult($result);
