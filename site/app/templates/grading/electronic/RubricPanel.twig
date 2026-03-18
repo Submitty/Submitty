@@ -22,7 +22,10 @@
                     {% elseif is_withdrawn_student %}
                         <div class="yellow-message">Withdrawn Student</div>
                     {% elseif has_overridden_grades %}
-                        <div class="yellow-message">Overridden Grades</div>
+                        <div class="yellow-message">Overridden Grades ({{ overridden_grades_score }})</div>
+                        {% if overridden_grades_comment %}
+                            <div class="yellow-message">Reason: {{ overridden_grades_comment }}</div>
+                        {% endif %}
                     {% endif %}
 
                     {# Verify all button #}
