@@ -360,7 +360,7 @@ class SubmissionController extends AbstractController {
     * JSON error checking works similarly to ajaxUpload... or similar type functions.
     *
     * @param string $gradeable_id
-    * @return array
+    * @return JsonResponse
     */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
