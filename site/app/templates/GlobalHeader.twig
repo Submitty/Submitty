@@ -121,7 +121,48 @@
         detectColorScheme();
     </script>
     {% endif %}
+<script>
+    function toggleGlobalFullScreen() {
+        const main = document.querySelector('main#main');
+        const icon = document.getElementById('fullscreen-icon');
+        const exitBtn = document.getElementById('fullscreen-exit-btn');
+        main.classList.toggle('full-screen-mode');
+        if (main.classList.contains('full-screen-mode')) {
+            icon.classList.remove('fa-expand');
+            icon.classList.add('fa-compress');
+            exitBtn.classList.add('visible');
+            showFullscreenHint();
+        } else {
+            icon.classList.remove('fa-compress');
+            icon.classList.add('fa-expand');
+            exitBtn.classList.remove('visible');
+        }
+    }
 
+    function showFullscreenHint() {
+        const hint = document.createElement('div');
+        hint.className = 'fullscreen-hint';
+        hint.innerHTML = 'Press <strong>ESC</strong> or <strong>Shift+F</strong> to exit fullscreen';
+        document.body.appendChild(hint);
+        setTimeout(() => {
+            hint.style.opacity = '0';
+            setTimeout(() => hint.remove(), 1000);
+        }, 2000);
+    }
+
+    // Handle keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        const main = document.querySelector('main#main');
+        const tag = document.activeElement.tagName.toLowerCase();
+        const isTyping = tag === 'input' || tag === 'textarea';
+
+        if (e.key === 'Escape' && main.classList.contains('full-screen-mode')) {
+            toggleGlobalFullScreen();
+        } else if (e.shiftKey && e.key === 'F' && !isTyping) {
+            toggleGlobalFullScreen();
+        }
+    });
+</script>
 </head>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-course-path="{{ course_path }}" data-csrf-token="{{ csrf_token }}" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
@@ -184,6 +225,24 @@
                         {% endfor %}
                     </div>
                 </div>
+                <button 
+    id="global-fullscreen-btn"
+    class="black-btn"
+    onclick="toggleGlobalFullScreen()"
+    title="Toggle Full Screen Mode"
+    aria-label="Toggle Full Screen Mode"
+>
+    <i id="fullscreen-icon" class="fas fa-expand"></i>
+</button>
+<button
+    id="fullscreen-exit-btn"
+    onclick="toggleGlobalFullScreen()"
+    title="Exit Full Screen"
+    aria-label="Exit Full Screen"
+>
+    <i class="fas fa-times"></i>
+</button>
+
                 <div style="display: flex">
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
