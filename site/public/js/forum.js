@@ -2125,6 +2125,7 @@ function showAttachmentsOnload() {
     else {
         $('#toggle-attachments-button').find('.status').text('Show attachments');
     }
+    $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
 }
 
 function updateGlobalAttachmentButtonState() {
