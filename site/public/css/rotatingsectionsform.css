@@ -36,6 +36,37 @@ table caption .subcaption {
 }
 
 .delete-section-cell {
-    width: 5px;
-    text-align: center;
+    text-align: left;
+}
+
+.reg-section-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.reg-section-table th:first-child,
+.reg-section-table td:first-child {
+    width: 60px;
+}
+
+.reg-section-table th:not(:first-child),
+.reg-section-table td:not(:first-child) {
+    width: calc((100% - 60px) / 3);
+    text-align: left;
+}
+
+.reg-header-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.reg-section-title {
+    margin: 0;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+
+.add-registration-section-btn {
+    margin-bottom: 8px;
 }

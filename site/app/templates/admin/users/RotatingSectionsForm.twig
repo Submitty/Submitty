@@ -25,30 +25,41 @@
 
 </script>
 <div class="content">
-    <h1>Manage Registration Sections</h1>
-    <p>
-        Large courses are often split into multiple <em>registration sections</em> for laboratory or recitation class time.<br>
-        Courses that are cross-listed in different departments may have multiple course codes/prefixes.
-    </p>
-    <p>
-        Each student in the course is assigned to one registration section.<br>
-        Students who have dropped the course will be assigned to the <em>NULL</em> registration section.
-    </p>
-    <p>
-        From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
-        Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
-    </p>
-    <p>
-        The 'default section' is assigned to students who have self-registered for this course. <br>
-        Note: Sections can only be deleted if they contain no students.
-    </p>
+    <div>
+        <h1>Manage Registration Sections</h1>
+        <p>
+            Large courses are often split into multiple <em>registration sections</em> for laboratory or recitation class time.<br>
+            Courses that are cross-listed in different departments may have multiple course codes/prefixes.
+        </p>
+        <p>
+            Each student in the course is assigned to one registration section.<br>
+            Students who have dropped the course will be assigned to the <em>NULL</em> registration section.
+        </p>
+        <p>
+            From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
+            Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
+        </p>
+        <p>
+            The 'default section' is assigned to students who have self-registered for this course. <br>
+            Note: Sections can only be deleted if they contain no students.
+        </p>
+    </div>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
-            <div class="box col-md-6">
-                <h2>Current Registration Section Counts</h2>
+            <div class="col-md-7 reg-section-container">
+                <div class="reg-header-row">
+                    <h2 class="reg-section-title mb-2">Current Registration Section Counts</h2>
+                    <button
+                        type="button"
+                        class="btn btn-primary add-registration-section-btn"
+                        onclick="showAddSectionPopup()"
+                    >
+                        Add Registration Section
+                    </button>
+                </div>
                 {# This is a data table #}
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped reg-section-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -56,7 +67,7 @@
                             <th>Course ID</th>
                             <th>Count</th>
                             {% if is_self_register %}
-                                <th>Default Section</td>
+                                <th>Default Section</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -136,27 +147,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="box col-md-6">
-                <br /><br />
-                <div class="option">
-                    <div class="option-input"><input type="text" name="add_reg_section" id="add_reg_section" value="" placeholder="Eg: 3" /></div>
-                    <div class="option-desc">
-            <label for="add_reg_section">
-							<span class="option-title">Add Registration Section</span>
-              <br>
-							<span class="option-alt">
-                            <strong>Format:</strong> Alphanumeric (a-z, A-Z, 0-9), underscores, hyphens, with no space and maximum 20 characters.<br>
-                            Enter a registration section which is not already a registration section.
-                        </span>
-						</label>
-                    </div>
-                </div>
-                <div class="option">
-                    <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
-                    <input type="submit" id="delete_reg_section_submit" style="display:none;" />
-                    <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
-                </div>
-            </div>
+                <input type="hidden" name="add_reg_section" id="add_reg_section">
+                <input type="submit" id="add_reg_section_submit" style="display:none;">
+                <input type="hidden" name="add_course_id" id="add_course_id_hidden">
+                <input type="hidden" name="delete_reg_section" id="delete_reg_section" value="" />
+                <input type="submit" id="delete_reg_section_submit" style="display:none;" />
         </div>
     </form>
 </div>
@@ -361,6 +356,57 @@
             $('.popup-form').css('display', 'none');
             return false;
         }
+
+        function addRegistrationSection() {
+            const form = $('#add-registration-section-form');
+
+            const sectionInput = document.getElementById('new-section-id');
+            const courseInput  = form.find('#new-course-id-num')[0];
+
+            const section = sectionInput.value.trim();
+            const course  = courseInput.value.trim();
+
+            const sectionRegex = /^[A-Za-z0-9_-]+$/;
+
+            if (!section || !sectionRegex.test(section)) {
+                sectionInput.setCustomValidity(
+                    'Please match the requested format.'
+                );
+                sectionInput.reportValidity();
+                return false;
+            }
+
+            sectionInput.setCustomValidity('');
+
+            if (existingCourseIds.has(course)) {
+                displayErrorMessage('That Course ID already exists.');
+                return false;
+            }
+
+            if (course) {
+                $('#add_course_id_hidden').val(course);
+            }
+
+            $('#add_reg_section').val(section);
+            $('#add_reg_section_submit').click();
+
+            return false;
+        }
+        
+        function showAddSectionPopup() {
+            $('.popup-form').css('display', 'none');
+            const form = $('#add-registration-section-form');
+            showPopup('#add-registration-section-form');
+            form.find('#new-section-id').val('');
+            form.find('#new-course-id-num').val('');
+            form.find('.form-body').scrollTop(0);
+
+            $('#new-section-id').focus();
+        }
+        $(document).on('input', '#new-section-id', function () {
+            this.setCustomValidity('');
+        });
     </script>
 </div>
 {% include 'EditCourseIDForm.twig' %}
+{% include 'AddRegistrationSectionForm.twig' %}
