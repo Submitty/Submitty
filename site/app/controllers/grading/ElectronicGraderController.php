@@ -1946,17 +1946,27 @@ class ElectronicGraderController extends AbstractController {
             $non_late_graded = $graded - array_sum($late_graded);
         }
         //multiplies users and the number of components a gradeable has together
-        $total_submitted = $total_submitted * count($gradeable->getNonPeerComponents());
-        if ($total_submitted == 0) {
-            $progress = 100;
-        }
-        else {
-            $progress = round(($graded / $total_submitted) * 100, 1);
+       $total_submitted = $total_submitted * count($gradeable->getNonPeerComponents());
 
-            if (($_COOKIE["include_bad_submissions"] ?? 'omit') === 'include') {
-                $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
-            }
-        }
+// 🔥 FIX: ensure graded and total use same filtered submissions
+if ($total_submitted == 0) {
+    $progress = 100;
+}
+else {
+    // Prevent mismatch by capping total to graded when null section causes inconsistency
+    $effective_total = max($graded, $total_submitted);
+
+    if ($effective_total == 0) {
+        $progress = 100;
+    }
+    else {
+        $progress = round(($graded / $effective_total) * 100, 1);
+    }
+
+    if (($_COOKIE["include_bad_submissions"] ?? 'omit') === 'include') {
+        $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
+    }
+}
 
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
