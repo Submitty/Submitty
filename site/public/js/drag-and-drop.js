@@ -1,7 +1,7 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
+            dropWithMultipleZips, initMaxNoFiles, initMaxTotalUploadSize, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
 /* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, escapeSpecialChars */
 
 /*
@@ -30,6 +30,7 @@ var changed = false; // if files from previous submission changed
 
 let total_files_added = 0;
 let MAX_NUM_OF_FILES;
+let MAX_TOTAL_UPLOAD_SIZE;
 
 // eslint-disable-next-line no-var
 var empty_inputs = true;
@@ -64,6 +65,7 @@ function createArray(num_parts) {
 function readPrevious(filename, part) {
     changed = false;
     previous_files[part - 1].push(filename);
+    validateCurrentUploadState(part);
 }
 
 function setUsePrevious() {
@@ -87,12 +89,72 @@ function draghandle(e) {
 
 // ADD FILES FOR NEW SUBMISSION
 // ========================================================================================
-// check if adding a file is valid (not exceeding the limit)
-function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
-        alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
+function getUploadWarningElement(part) {
+    return document.getElementById(`upload-warning-${part}`);
+}
+
+function showUploadWarning(part, message) {
+    const el = getUploadWarningElement(part);
+    if (el !== null) {
+        el.textContent = message;
+        el.style.display = 'block';
+    }
+}
+
+function clearUploadWarning(part) {
+    const el = getUploadWarningElement(part);
+    if (el !== null) {
+        el.textContent = '';
+        el.style.display = 'none';
+    }
+}
+
+function getCurrentUploadSize(part) {
+    let total = 0;
+    for (const file of file_array[part - 1]) {
+        total += file.size;
+    }
+    for (const file of previous_files[part - 1]) {
+        if (file.size !== undefined) {
+            total += file.size;
+        }
+    }
+    return total;
+}
+
+function validateCurrentUploadState(part) {
+    const currentCount = file_array[part - 1].length + previous_files[part - 1].length;
+
+    if (currentCount > MAX_NUM_OF_FILES) {
+        showUploadWarning(
+            part,
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+        );
         return false;
     }
+
+    if (typeof MAX_TOTAL_UPLOAD_SIZE !== 'undefined' && getCurrentUploadSize(part) > MAX_TOTAL_UPLOAD_SIZE) {
+        showUploadWarning(
+            part,
+            'Selected files are too large. Total upload size exceeds the allowed limit.'
+        );
+        return false;
+    }
+
+    clearUploadWarning(part);
+    return true;
+}
+
+// check if adding a file is valid (not exceeding the limit)
+function addIsValid(files_to_add, total_added_files, part) {
+    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
+        showUploadWarning(
+            part,
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+        );
+        return false;
+    }
+    clearUploadWarning(part);
     return true;
 }
 
@@ -101,12 +163,16 @@ function initMaxNoFiles(max_no_of_files) {
     MAX_NUM_OF_FILES = max_no_of_files;
 }
 
+function initMaxTotalUploadSize(max_total_upload_size) {
+    MAX_TOTAL_UPLOAD_SIZE = max_total_upload_size;
+}
+
 // add files dragged
 function drop(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
+    const part = get_part_number(e);
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part); // check for folders
             total_files_added++;
@@ -118,8 +184,8 @@ function drop(e) {
 function dropWithMultipleZips(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
+    const part = get_part_number(e);
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part, false); // check for folders
             total_files_added++;
@@ -154,7 +220,7 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
-    if (addIsValid(filestream.length, total_files_added)) {
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
             total_files_added++;
@@ -299,6 +365,7 @@ function addFile(file, part, check_duplicate_zip = true) {
     }
 
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 // REMOVE FILES
@@ -320,6 +387,7 @@ function deleteFiles(part) {
     label_array[part - 1] = [];
     changed = true;
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 function deleteSingleFile(filename, part, previous) {
@@ -346,6 +414,7 @@ function deleteSingleFile(filename, part, previous) {
         }
     }
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 function setButtonStatus(inactive_version = false) {
@@ -498,6 +567,15 @@ function isValidSubmission() {
     }
 
     return false;
+}
+
+function canSubmitAllParts() {
+    for (let part = 1; part <= file_array.length; part++) {
+        if (!validateCurrentUploadState(part)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 /**
@@ -968,6 +1046,10 @@ function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, re
  */
 function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, min_team_member_late_days_exception, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous = false, clobber = false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
+    if (!canSubmitAllParts()) {
+        $('#submit').prop('disabled', false);
+        return false;
+    }
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
     let message = '';

@@ -625,6 +625,7 @@ class HomeworkView extends AbstractView {
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
+            'max_submission_size' => $gradeable->getAutogradingConfig()->getMaxSubmissionSize(),
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
