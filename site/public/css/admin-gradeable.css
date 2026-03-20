@@ -79,6 +79,7 @@ select {
     top: -96px;
     left: -313px;
 }
+
 /* stylelint-disable-next-line selector-class-pattern */
 .ui_tpicker_unit_hide {
     display: none;
@@ -567,23 +568,21 @@ pre.CodeMirror-line {
     /* The below instances of !important are identical to those used in gradeable-notebook.css.
     It appears to be the only way to override the CodeMirror styling */
     /* stylelint-disable-next-line declaration-no-important */
-    background-color: var(--standard-input-background) !important;
+    background-color: var(--standard-input-background);
     /* stylelint-disable-next-line declaration-no-important */
-    border: 1px solid var(--standard-light-gray) !important;
+    border: 1px solid var(--standard-light-gray);
     /* stylelint-disable-next-line declaration-no-important */
-    border-radius: 4px !important;
+    border-radius: 4px;
     /* stylelint-disable-next-line declaration-no-important */
-    color: var(--text-black) !important;
-    /* stylelint-disable-next-line declaration-no-important */
-    vertical-align: middle !important;
+    color: var(--text-black);
     min-height: 500px;
-    overflow: hidden;
-    margin-top: 0.75em;
-    margin-bottom: 0.75em;
-    resize: vertical;
+    margin: 0.75em 0;
     font-size: 14px;
-    line-height: normal;
-    padding: 4px 8px;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+#gradeable-config-edit-bar .CodeMirror-cursor {
+    border-left: 2px solid var(--text-black);
 }
 
 .underlying-textarea {
