@@ -10,7 +10,7 @@
     <p class="std-margin">
         Enter a new section ID and an optional course ID.
     </p>
-    <strong>Section:</strong> Alphanumeric, underscores, hyphens, with no space and maximum 20 characters.<br>
+    <strong>Section:</strong> Alphanumeric, underscores, hyphens, and no spaces.<br>
     <strong>Course:</strong> Unique 5 digit number.<br>
     <br></br>
 
@@ -23,8 +23,9 @@
             id="new-section-id"
             name="section_id"
             type="text"
-            pattern="[a-zA-Z0-9-_]{1,20}"
+            pattern="[A-Za-z0-9_-]+"
             placeholder="E.g. Staff"
+            maxlength="20"
             required
         />
     </div>

@@ -356,27 +356,37 @@
             $('.popup-form').css('display', 'none');
             return false;
         }
-        
+
         function addRegistrationSection() {
             const form = $('#add-registration-section-form');
-            const section = form.find('#new-section-id').val().trim();
-            const course  = form.find('#new-course-id-num').val().trim();
 
-            if (!section) {
-                displayErrorMessage('Missing section');
+            const sectionInput = document.getElementById('new-section-id');
+            const courseInput  = form.find('#new-course-id-num')[0];
+
+            const section = sectionInput.value.trim();
+            const course  = courseInput.value.trim();
+
+            const sectionRegex = /^[A-Za-z0-9_-]+$/;
+
+            if (!section || !sectionRegex.test(section)) {
+                sectionInput.setCustomValidity(
+                    'Please match the requested format.'
+                );
+                sectionInput.reportValidity();
                 return false;
             }
+
+            sectionInput.setCustomValidity('');
 
             if (existingCourseIds.has(course)) {
                 displayErrorMessage('That Course ID already exists.');
                 return false;
             }
 
-            if (course){
+            if (course) {
                 $('#add_course_id_hidden').val(course);
-
             }
-            
+
             $('#add_reg_section').val(section);
             $('#add_reg_section_submit').click();
 
@@ -388,11 +398,14 @@
             const form = $('#add-registration-section-form');
             showPopup('#add-registration-section-form');
             form.find('#new-section-id').val('');
-            form.find('#new-course-id').val('');
+            form.find('#new-course-id-num').val('');
             form.find('.form-body').scrollTop(0);
 
             $('#new-section-id').focus();
         }
+        $(document).on('input', '#new-section-id', function () {
+            this.setCustomValidity('');
+        });
     </script>
 </div>
 {% include 'EditCourseIDForm.twig' %}
