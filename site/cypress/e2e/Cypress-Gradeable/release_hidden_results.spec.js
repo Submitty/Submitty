@@ -14,13 +14,14 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             day = 1,
             hour = 23,
             minute = 59,
-            second = 59
+            second = 59,
         ) => {
             cy.get(selector).then(($el) => {
                 const fp = $el[0]._flatpickr;
                 if (fp && typeof fp.setDate === 'function') {
                     fp.setDate(new Date(year, month, day, hour, minute, second), true);
-                } else {
+                }
+                else {
                     cy.wrap($el).clear();
                     cy.wrap($el).type(`${year}-01-01 23:59:59`);
                 }
