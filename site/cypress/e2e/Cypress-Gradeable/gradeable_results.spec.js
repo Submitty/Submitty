@@ -67,5 +67,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('.loading-tools-in-progress').first().click(); // cancel
             cy.get('#testcase_1').should('not.be.visible');
         });
+
     });
 });
