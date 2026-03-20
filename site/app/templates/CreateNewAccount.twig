@@ -1,6 +1,10 @@
 {% set user_id_reqs = requirements["user_id_requirements"] %}
 {% set name_reqs = requirements["user_id_requirements"]["name_requirements"] %}
 {% set email_reqs = requirements["user_id_requirements"]["email_requirements"] %}
+<script>
+    var acceptedEmails = {{ requirements["accepted_emails"] | json_encode | raw }};
+    var userIdRequirements = {{ user_id_reqs | json_encode | raw }};
+</script>
 <div class="content shadow" id="login-box">
     <div id="login-guest">
         <h1> Sign Up <a target=_blank href="https://submitty.org/student/self_account_creation">
@@ -78,6 +82,10 @@
             Confirm Password
             <input type="password" name="confirm_password" data-testid="confirm-password" required id="confirm-password-input" onblur="checkPasswordsMatch()" />
         </div>
-        <input type="submit" name="signup" value="Sign Up" class="btn signup-btn btn-primary" data-testid="sign-up-button" />
+        <input type="submit" name="signup" value="Sign Up" class="btn signup-btn btn-primary" data-testid="sign-up-button" onclick="
+            if (!validateSignupForm(acceptedEmails, userIdRequirements)) {
+                event.preventDefault();
+            }
+        " />
     </form>
 </div>
