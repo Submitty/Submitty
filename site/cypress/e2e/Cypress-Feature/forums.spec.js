@@ -604,18 +604,27 @@ describe('Should test Search functionality', () => {
     });
 });
 
-it('Should handle invalid date format when editing categories', () => {
-    cy.get('[data-testid="more-dropdown"]').click();
-    cy.contains('Edit Categories').click();
+describe('Should handle invalid date format in forum categories', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+        verifyWebSocketStatus();
+    });
 
-    cy.get('.edit-category-date-button').first().click();
+    it('Should handle invalid date format when editing categories', () => {
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.contains('Edit Categories').click();
 
-    cy.get('.edit-category-date-input').should('be.visible').first().as('dateInput');
+        cy.get('.edit-category-date-button').first().click();
 
-    cy.get('@dateInput').clear({ force: true });
-    cy.get('@dateInput').type('invalid-date', { force: true });
+        cy.get('.edit-category-date-input').should('be.visible').first().as('dateInput');
 
-    cy.get('.save-date-button').first().click();
+        cy.get('@dateInput').clear({ force: true });
+        cy.get('@dateInput').type('invalid-date', { force: true });
 
-    cy.contains('Invalid date format provided.').should('be.visible');
+        cy.get('.save-date-button').first().click();
+
+        cy.contains('Invalid date format provided.').should('be.visible');
+    });
 });
