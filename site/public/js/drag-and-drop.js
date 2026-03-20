@@ -20,7 +20,7 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 // eslint-disable-next-line no-var
 var file_array = []; // contains files uploaded for this submission
 // eslint-disable-next-line no-var
-var previous_files = []; // contains names of files selected from previous submission
+var previous_files = []; // contains metadata for files selected from previous submission
 // eslint-disable-next-line no-var
 var label_array = [];
 // eslint-disable-next-line no-var
@@ -62,9 +62,12 @@ function createArray(num_parts) {
 }
 
 // read in name of previously submitted file
-function readPrevious(filename, part) {
+function readPrevious(filename, size, part) {
     changed = false;
-    previous_files[part - 1].push(filename);
+    previous_files[part - 1].push({
+        name: filename,
+        size: size
+    });
     validateCurrentUploadState(part);
 }
 
@@ -109,23 +112,35 @@ function clearUploadWarning(part) {
     }
 }
 
-function getCurrentUploadSize(part) {
+function getPartUploadSize(part) {
     let total = 0;
     for (const file of file_array[part - 1]) {
         total += file.size;
     }
+    return total;
+}
+
+function getPartPreviousSize(part) {
+    let total = 0;
     for (const file of previous_files[part - 1]) {
-        if (file.size !== undefined) {
-            total += file.size;
-        }
+        total += file.size;
+    }
+    return total;
+}
+
+function getTotalSubmissionSize() {
+    let total = 0;
+    for (let part = 1; part <= file_array.length; part++) {
+        total += getPartUploadSize(part);
+        total += getPartPreviousSize(part);
     }
     return total;
 }
 
 function validateCurrentUploadState(part) {
-    const currentCount = file_array[part - 1].length + previous_files[part - 1].length;
+    const currentUploadedCount = file_array[part - 1].length;
 
-    if (currentCount > MAX_NUM_OF_FILES) {
+    if (currentUploadedCount > MAX_NUM_OF_FILES) {
         showUploadWarning(
             part,
             `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
@@ -133,7 +148,7 @@ function validateCurrentUploadState(part) {
         return false;
     }
 
-    if (typeof MAX_TOTAL_UPLOAD_SIZE !== 'undefined' && getCurrentUploadSize(part) > MAX_TOTAL_UPLOAD_SIZE) {
+    if (getTotalSubmissionSize() > MAX_TOTAL_UPLOAD_SIZE) {
         showUploadWarning(
             part,
             'Selected files are too large. Total upload size exceeds the allowed limit.'
@@ -288,7 +303,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
 // Second element: index of the file with the same name (if found)
 function fileExists(filename, part) {
     for (let i = 0; i < previous_files[part - 1].length; i++) {
-        if (previous_files[part - 1][i] === filename) {
+        if (previous_files[part - 1][i].name === filename) {
             return [1, i];
         }
     }
@@ -355,7 +370,7 @@ function addFile(file, part, check_duplicate_zip = true) {
         }
     }
     else { // file in previous submission
-        if (confirm(`Note: ${previous_files[part - 1][i[1]]} was in your previous submission. Do you want to replace it?`)) {
+        if (confirm(`Note: ${previous_files[part - 1][i[1]].name} was in your previous submission. Do you want to replace it?`)) {
             file_array[part - 1].push(file);
             previous_files[part - 1].splice(i[1], 1);
             removeLabel(file.name, part);
@@ -394,7 +409,7 @@ function deleteSingleFile(filename, part, previous) {
     // Remove files from previous submission
     if (previous) {
         for (let i = 0; i < previous_files[part - 1].length; i++) {
-            if (previous_files[part - 1][i] === filename) {
+            if (previous_files[part - 1][i].name === filename) {
                 previous_files[part - 1].splice(i, 1);
                 label_array[part - 1].splice(i, 1);
                 changed = true;
@@ -1138,7 +1153,8 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
             }
         }
         // Files from previous submission
-        formData.append('previous_files', JSON.stringify(previous_files));
+        const previousFileNames = previous_files.map((partFiles) => partFiles.map((file) => file.name));
+        formData.append('previous_files', JSON.stringify(previousFileNames));
     }
 
     // check if filesize greater than 1,25 MB, then turn on the progressbar

@@ -319,7 +319,7 @@
                         setUsePrevious();
                         {% for file in old_files %}
                             addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                            readPrevious('{{ file.name }}', {{ file.part }});
+                            readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
@@ -387,7 +387,7 @@
                 $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
+                        readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
