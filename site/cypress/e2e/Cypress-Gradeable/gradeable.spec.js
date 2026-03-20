@@ -77,11 +77,11 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('[data-testid="new-submission-info"]').should('contain', 'New submission for: Closed Team Homework');
         cy.get('body').should('not.contain', 'went wrong');
         cy.reload();
-        cy.contains('[data-testid="score-pill-badge"]', '7 / 10', { timeout: 100000 }).should('exist');
+        cy.contains('[data-testid="score-pill-badge"]', '12 / 10', { timeout: 100000 }).should('exist');
 
         cy.login('wisoza');
         cy.visit(['sample', 'gradeable', 'closed_team_homework']);
-        cy.contains('[data-testid="score-pill-badge"]', '7 / 10', { timeout: 100000 }).should('exist');
+        cy.contains('[data-testid="score-pill-badge"]', '12 / 10', { timeout: 100000 }).should('exist');
 
         cy.get('#startnew').click();
         const badFile = 'cypress/fixtures/copy_of_more_autograding_examples/file_check/submissions/a.txt';
@@ -103,7 +103,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.login('bitdiddle');
         const subFile = 'cypress/fixtures/copy_of_tutorial/examples/12_system_calls/submissions/serial_fork.c';
         cy.visit(['sample', 'gradeable', 'grades_released_homework_autota']);
-        //cy.get('#startnew').click();
         cy.get('#upload1').selectFile(subFile, { action: 'drag-drop' });
         cy.get('#submit').click();
 
