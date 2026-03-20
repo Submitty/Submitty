@@ -17,7 +17,7 @@
             {% set student_rank_section = loop.index0 > user_index - 4 and loop.index0 <= user_index %}
             {% if normal_leaderboard_section or student_rank_section %}
                 <tr class="
-                    {% if entry["user_group"] <= grader_value %} leaderboard-grader {% endif %}
+                   {% if entry["user_group"] <= grader_value %} leaderboard-grader {% endif %}
                     {% if user_id == entry['user_id'] %} leaderboard-you {% endif %}
                     ">
                     <td scope="row" class="row_number">
