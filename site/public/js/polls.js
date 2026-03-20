@@ -278,17 +278,20 @@ function clearResponses() {
 }
 
 function updateHistogram(updates) {
-    // Fetch the global histogram variables and corresponding element
     const { data, layout, responseIndices } = window.histogram;
     const container = $('#chartContainer')[0];
+    if (!container) return;
 
     for (const option of Object.keys(updates)) {
-        // Update the current y value for the option based on the updates (-1, 0, 1)
-        data[0].y[responseIndices[option]] += Number(updates[option]);
+        const index = responseIndices[option];
+        const change = Number(updates[option]) || 0;
+
+        if (index !== undefined && data[0].y[index] !== undefined) {
+            data[0].y[index] = Math.max(0, data[0].y[index] + change);
+        }
     }
 
-    // Re-render the histogram based on the current layout
-    Plotly.newPlot(container, data, layout);
+    Plotly.react(container, data, layout);
 }
 
 function initializeInstructorSocketClient(poll_id) {
