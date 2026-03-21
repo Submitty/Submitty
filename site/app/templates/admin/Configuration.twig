@@ -32,9 +32,18 @@
             <label for="forum-enabled">
                 <span class="option-title">Enable Discussion Forum</span>
                 <br>
-                <span class="option-alt">Choose whether to enable a forum for this course.</span>
-                <br>
-                <a id="forum-enabled-message" href="{{ manage_categories_url }}" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
+                <span class="option-alt">
+Choose whether to enable a forum for this course.<br>
+Suggested categories:
+- Homework (HW1, HW2, etc.)
+- Quizzes / Exams
+- Programming Languages (Python, C++, etc.)
+- Debugging / General Help
+</span>
+<br>
+<a id="forum-enabled-message" href="{{ manage_categories_url }}">
+    Customize categories.
+</a>
             </label>
         </div>
         <label for="create-thread-message" class="config-row">
