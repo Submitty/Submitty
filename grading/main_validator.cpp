@@ -536,7 +536,7 @@ std::vector<TestCase> getTestcasesForSubmission(nlohmann::json& config_json) {
         continue;
       }
 
-      if(item_testcases->find("points") == item_testcases->end()) {
+      if((*item_testcases)[0].find("points") == (*item_testcases)[0].end()) {
         (*item_testcases)[0]["points"] = points;
       }
 
