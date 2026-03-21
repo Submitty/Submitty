@@ -58,7 +58,7 @@
             clearCreateThreadAutosave();
         });
         $("#thread_form").submit(createThread);
-        $("form").areYouSure();
+        $("form").not('#forum-search-form').areYouSure();
 
         cleanupAutosaveHistory('-create-autosave');
         restoreCreateThreadFromLocal();

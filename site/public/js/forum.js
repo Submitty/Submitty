@@ -1203,6 +1203,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 
     const unread_select_value = $('#unread').is(':checked');
     const search_query = $('#search-content').val();
+    const previous_search_query = $('#thread_list').data('search-query') ?? '';
     // eslint-disable-next-line eqeqeq
     categories_value = (categories_value == null) ? '' : categories_value.join('|');
     // eslint-disable-next-line eqeqeq
@@ -1211,14 +1212,13 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
         && thread_status_value === Cookies.get('forum_thread_status')
-        && search_query === Cookies.get('search_query')) {
+        && search_query === previous_search_query) {
         return;
     }
 
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    Cookies.set('search_query', search_query, { path: '/' });
     const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
@@ -1227,6 +1227,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            search_query: search_query,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: csrfToken,
@@ -1254,6 +1255,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             }
 
             $('#num_filtered').text(threadCount);
+            $('#thread_list').data('search-query', search_query);
 
             dynamicScrollLoadIfScrollVisible(jElement);
             loadThreadHandler();
@@ -2224,6 +2226,7 @@ function clearForumFilter() {
         $('#filter_unread_btn').click();
     }
     $('#search-content').val('').trigger('change');
+    $('#search-clear').hide();
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
@@ -2233,7 +2236,7 @@ function clearForumFilter() {
 
 function updateClearFilterButton() {
     if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0) {
-        clearForumFilter();
+        $('#clear_filter_button').css('visibility', 'hidden');
     }
     else {
         $('#clear_filter_button').css('visibility', 'visible');
@@ -2280,6 +2283,7 @@ function loadFilterHandlers() {
 
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('').trigger('change');
+        $('#search-clear').hide();
         updateClearFilterButton();
         updateThreads(true, saveFilterState);
         return true;
@@ -2296,6 +2300,7 @@ function loadFilterHandlers() {
         setFilterState(e.state);
     };
 
+    $('#search-clear').toggle($('#search-content').val() !== '');
     updateClearFilterButton();
 }
 
