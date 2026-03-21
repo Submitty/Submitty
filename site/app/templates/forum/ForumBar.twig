@@ -91,7 +91,7 @@
 			{% endif %}
 		</div>
 		<div>
-			<a class="btn btn-default key_to_click toolbar-right-btn" tabindex="0" onclick="toggleGlobalFullScreenMode()" aria-label="Toggle Full Screen" title="Toggle Full Screen"><i class="fas fa-expand"></i></a>
+			<a class="btn btn-default key_to_click toolbar-right-btn" data-fullscreen-toggle tabindex="0" onclick="toggleGlobalFullScreenMode()" aria-label="Toggle Full Screen" title="Toggle Full Screen"><i class="fas fa-expand"></i></a>
 			{% for button in forum_bar_buttons_right %}
 				{% if user_group <= button.required_rank %}
 					{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}

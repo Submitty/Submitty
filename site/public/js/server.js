@@ -27,14 +27,6 @@ var desktopHomeLink = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadInBreadcrumbLinks();
     adjustBreadcrumbLinks();
-
-    // Clean up stale full-screen state from previous versions
-    localStorage.removeItem('globalFullScreenMode');
-    const mainEl = document.getElementById('main');
-    if (mainEl) {
-        mainEl.classList.remove('full-screen-mode');
-    }
-    document.body.style.overflow = '';
 });
 function loadInBreadcrumbLinks() {
     mobileHomeLink = mobileHomeLink !== null ? mobileHomeLink : $('#home-button').attr('href');
@@ -102,7 +94,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     }
     // Insert actual and expected one at a time
     let url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
-        }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
+    }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
     const assertSuccess = function (data) {
         if (data.status === 'fail') {
@@ -129,7 +121,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             // eslint-disable-next-line no-restricted-syntax
             $(expected_div).html(response.data.html);
             url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
-                }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
+            }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
             $.getJSON({
                 url: url,
                 success: function (response) {
@@ -845,7 +837,7 @@ function check_server(url, anon_id = '') {
     $.get(url, { anon_id: anon_id },
         (data) => {
             try {
-                // if the response bool is true, reload the page
+            // if the response bool is true, reload the page
                 const refresh_bool = JSON.parse(data).data;
                 if (refresh_bool === true) {
                     location.reload();
@@ -1696,7 +1688,7 @@ function keyToClickKeyup(event) {
 function enableKeyToClick() {
     const key_to_click = document.getElementsByClassName('key_to_click');
     for (let i = 0; i < key_to_click.length; i++) {
-        // In case this function is run multiple times, we need to remove the old event listeners
+    // In case this function is run multiple times, we need to remove the old event listeners
         key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
         key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
 
@@ -1893,7 +1885,7 @@ function previewMarkdown(mode) {
         throw new TypeError(`Expected type 'string' for 'mode'. Got '${typeof mode}'`);
     }
     if (!(typeof data === 'object')) {
-        throw new TypeError(`Expected type 'object' for 'data'. Got '${typeof data}'`);
+        throw new TypeError (`Expected type 'object' for 'data'. Got '${typeof data}'`);
     }
     if (!markdown_area.length) {
         throw new Error('Could not obtain markdown_area.');
@@ -2032,13 +2024,20 @@ function scorePillDark() {
 document.addEventListener('DOMContentLoaded', scorePillDark);
 
 /**
- * Toggles the global full screen mode by adding or removing the .full-screen-mode class on the main element.
+ * Toggles full screen mode by adding/removing the .full-screen-mode class on the main element.
+ * Also toggles the icon between fa-expand and fa-compress on the triggering button.
  */
 function toggleGlobalFullScreenMode() {
-    const mainMain = document.getElementById('main');
-    if (!mainMain) {
+    const mainEl = document.getElementById('main');
+    if (!mainEl) {
         return;
     }
-    mainMain.classList.toggle('full-screen-mode');
-    document.body.style.overflow = mainMain.classList.contains('full-screen-mode') ? 'hidden' : '';
+    mainEl.classList.toggle('full-screen-mode');
+    document.body.style.overflow = mainEl.classList.contains('full-screen-mode') ? 'hidden' : '';
+
+    // Toggle the icon on all full-screen toggle buttons
+    document.querySelectorAll('[data-fullscreen-toggle] i').forEach((icon) => {
+        icon.classList.toggle('fa-expand');
+        icon.classList.toggle('fa-compress');
+    });
 }

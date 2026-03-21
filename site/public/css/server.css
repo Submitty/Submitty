@@ -78,7 +78,6 @@ a.btn-primary > i.far,
 a.btn-danger > i.far {
     color: var(--btn-text-white);
 }
-
 /* stylelint-enable no-duplicate-selectors */
 
 a.btn-default,
@@ -489,9 +488,7 @@ td > a.active-sort {
 
 .clear {
     clear: both;
-    border-bottom: 1px solid var(--standard-light-gray);
-
-    /* same color, saw no need to make 2 vars */
+    border-bottom: 1px solid var(--standard-light-gray); /* same color, saw no need to make 2 vars */
     padding-top: 20px;
 }
 
@@ -1429,9 +1426,7 @@ end of styles used in the admin gradeable page
 .grading-example-circle {
     width: 15px;
     height: 15px;
-    border-radius: 50%;
-
-    /* Makes the element a circle */
+    border-radius: 50%; /* Makes the element a circle */
     display: inline-block;
 }
 
@@ -1455,24 +1450,18 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    background-color: var(--standard-plum-purple);
-
-    /* purple */
+    background-color: var(--standard-plum-purple); /* purple */
 }
 
 /* color for a limited access grader */
 .grader-3 {
-    background-color: var(--important-post);
-
-    /* yellow */
+    background-color: var(--important-post); /* yellow */
 }
 
 /* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
-    background-color: var(--standard-vibrant-green);
-
-    /* green */
+    background-color: var(--standard-vibrant-green); /* green */
 }
 
 .hide-highlights {
@@ -1481,9 +1470,7 @@ end of styles used in the admin gradeable page
 
 /* color for double graded */
 .grader-double {
-    background-color: var(--standard-vibrant-dark-blue);
-
-    /* dark blue */
+    background-color: var(--standard-vibrant-dark-blue); /* dark blue */
 }
 
 .grader-grade-inquiry {
@@ -1951,25 +1938,18 @@ header > * {
     height: 120px;
     align-content: center;
     animation: spin 2s linear infinite;
-    position: fixed;
-
-    /* Sit on top of the page content */
-    background-color: var(--black-moderately-transparent);
-
-    /* Black background with opacity */
-    z-index: 999;
-
-    /* Specify a stack order in case you're using a different order for other elements */
-    cursor: pointer;
-
-    /* Add a pointer on hover */
+    position: fixed; /* Sit on top of the page content */
+    background-color: var(
+        --black-moderately-transparent
+    ); /* Black background with opacity */
+    z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
 }
 
 @keyframes spin {
     0% {
         transform: rotate(0deg);
     }
-
     100% {
         transform: rotate(360deg);
     }
@@ -2257,6 +2237,7 @@ End of slider switch
     color: var(--external-link-blue);
 }
 
+/* Full Screen Mode */
 main#main.full-screen-mode {
     z-index: 999;
     position: fixed;
@@ -2270,59 +2251,5 @@ main#main.full-screen-mode {
 
 main#main.full-screen-mode .content {
     margin: 0;
-}
-
-#exit-full-screen-btn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    font-size: 1.5em;
-    cursor: pointer;
-    background: var(--standard-medium-dark-blue);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    box-shadow: var(--default-box-shadow);
-    opacity: 0.6;
-    transition:
-        opacity 0.2s ease-in-out,
-        background 0.2s ease-in-out;
-}
-
-#exit-full-screen-btn:hover {
-    background: var(--standard-medium-blue);
-    opacity: 1;
-}
-
-main#main.full-screen-mode #exit-full-screen-btn {
-    display: block;
-}
-/* Global Full Screen Mode Styles */
-main#main.full-screen-mode {
-    z-index: 999;
-    position: fixed;
-    height: 100vh;
-    width: 100vw;
-    top: 0;
-    left: 0;
-    overflow: auto;
-}
-
-main#main.full-screen-mode .content {
-    margin: 0;
     padding: 20px 40px;
-}
-
-#exit-full-screen-btn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 30px;
-    z-index: 1001; /* Above the full screen mode */
-}
-
-main#main.full-screen-mode #exit-full-screen-btn {
-    display: block;
 }
