@@ -295,7 +295,9 @@ bool isNumber(const std::string &str) {
   std::string stripped_str = isolateAlphanumAndNumberPunctuation(str);
   bool atLeastOneDigit = false;
   bool dotFound = false;
-  for (char const &c : stripped_str) {
+  bool minusFound = false;
+  for (size_t i = 0; i < stripped_str.length(); i++) {
+    char c = stripped_str[i];
     if (std::isdigit(c)) {
       atLeastOneDigit = true;
     }
@@ -304,6 +306,16 @@ bool isNumber(const std::string &str) {
         return false;
       }
       dotFound = true;
+    }
+    else if (c == '-') {
+      // Minus is only valid at the very beginning of the parsed number string
+      if (i > 0) {
+        return false;
+      }
+      if (minusFound) {
+        return false;
+      }
+      minusFound = true;
     }
     else {
       return false;
@@ -315,7 +327,7 @@ bool isNumber(const std::string &str) {
 /* METHOD: isolateAlphanumAndNumberPunctuation
  * ARGS: str: string
  * RETURN: string
- * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ * PURPOSE: remove non-alphanum, non-dot, non-minus characters from around a string
  */
 std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
   if (str.empty())
@@ -323,15 +335,15 @@ std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
     return str;
   }
   std::string::const_iterator begin = str.begin();
-  while (!isalnum(*begin) && !(*begin == '.')) {
+  while (begin != str.end() && !isalnum(*begin) && !(*begin == '.') && !(*begin == '-')) {
     begin++;
-    if (begin == str.end())
-    {
-      return "";
-    }
+  }
+  if (begin == str.end())
+  {
+    return "";
   }
   std::string::const_reverse_iterator end = str.rbegin();
-  while (!isalnum(*end) && !(*end == '.')) {
+  while (end != str.rend() && !isalnum(*end) && !(*end == '.')) {
     end++;
   }
   return std::string(begin, end.base());
