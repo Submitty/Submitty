@@ -48,7 +48,16 @@
                 "markdownAreaId" : "create-thread-message",
                 "class" : "config-row",
                 "markdownAreaName" : "forum_create_thread_message",
-                "markdownAreaValue" : fields['forum_create_thread_message'],
+                "markdownAreaValue" : fields['forum_create_thread_message'] ?: "Please give your thread a clear and descriptive title.
+
+Guidelines:
+- Use a meaningful title that summarizes your question
+- Choose the correct category
+- Provide enough detail so others can understand your problem
+
+Example:
+Good: \"Error in recursion base case for HW2\"
+Bad: \"Help!!!\"",
                 "previewDivId" : "create-thread-message-preview",
                 "renderHeader" : true
             }
