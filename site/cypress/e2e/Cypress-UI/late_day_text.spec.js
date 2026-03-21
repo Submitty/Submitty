@@ -8,7 +8,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
                 const fp = $el[0]._flatpickr;
                 if (fp && typeof fp.setDate === 'function') {
                     fp.setDate(new Date(year, month, dayToUse, hour, minute, second), true);
-                } 
+                }
                 else {
                     cy.wrap($el).clear();
                     const monthStr = String(month + 1).padStart(2, '0');
