@@ -1478,6 +1478,7 @@ class SubmissionController extends AbstractController {
                     for ($i = 1; $i <= $num_parts; $i++) {
                         if (isset($uploaded_files[$i])) {
                             $current_files_set = array_flip($uploaded_files[$i]["name"]);
+                            $current_files_base_set = array_map(fn($name) => pathinfo($name, PATHINFO_FILENAME), $uploaded_files[$i]["name"]);
                             $previous_files_src[$i] = [];
                             $previous_files_dst[$i] = [];
                             $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
@@ -1486,7 +1487,8 @@ class SubmissionController extends AbstractController {
                             foreach ($filenames as $filename) {
                                 $file_base_name = basename($filename);
                                 $previous_files_src[$i][$j] = $file_base_name;
-                                if (!$clobber && isset($current_files_set[$file_base_name])) {
+                                $old_file_base = pathinfo($file_base_name, PATHINFO_FILENAME);
+                                if (!$clobber && (isset($current_files_set[$file_base_name]) || in_array($old_file_base, $current_files_base_set))) {
                                     $parts = explode(".", $file_base_name);
                                     $parts[0] .= "_version_" . $highest_version;
                                     $file_base_name = implode(".", $parts);
