@@ -99,7 +99,6 @@ textarea.sa-box {
 img {
     margin-top: 10px;
 }
-
 /* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
     /* stylelint-disable-next-line declaration-no-important */
@@ -112,20 +111,28 @@ img {
     vertical-align: middle !important;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+.notebook .CodeMirror {
+    height: auto !important;
+    resize: vertical !important;
+    overflow: hidden !important;
+}
+
+.notebook .CodeMirror-scroll {
+    overflow: auto !important;
+    max-height: 500px;
+}
+
 .small-mirror .CodeMirror {
     resize: horizontal;
     min-width: 150px;
     max-width: 50em;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .large-mirror .CodeMirror {
     resize: vertical;
     min-height: 30px;
     max-height: 80vh;
 }
-
 /* Fixes Safari spacing issue */
 .notebook fieldset legend {
     -webkit-margin-top-collapse: separate;
