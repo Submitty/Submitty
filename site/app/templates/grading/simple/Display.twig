@@ -229,10 +229,11 @@
         {% else %}
             data-student="simple-grade-active"
         {% endif %}
-        {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
-            class="highlighted-row"
-        {% endif %}
-    >
+        {% if not grade.getSubmitter().isTeam() 
+    and grade.getSubmitter().getUser() 
+    and grade.getSubmitter().getUser().accessGrading() %}
+    class="highlighted-row"
+{% endif %}
         <td class=""></td>
         <td class="">{{ grade.getSubmitter().getUser().getRegistrationSection() }}
             {% if grade.getSubmitter().getUser().getRegistrationSubsection() is not empty %}
