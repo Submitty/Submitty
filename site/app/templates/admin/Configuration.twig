@@ -228,8 +228,16 @@
             <br>
             <span class="option-alt">Input the warning message show to students while submitting a grade inquiry.</span>
         </label>
-        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4">{{ fields['grade_inquiry_message'] }}</textarea>
+        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="6">
+{{ fields['grade_inquiry_message'] ?: "Please clearly explain why you believe your grade is incorrect.
 
+Good examples:
+- My solution was marked incorrect for not using a loop, but I used recursion as allowed in the problem.
+- Points were deducted for missing justification, but I included it on page 2.
+
+Poor example:
+- My grade should be higher" }}
+</textarea>
         {# TODO: Not sure what this is
             <label for="zero_rubric_grades">
                 <div class="option-title">Zero Rubric Grading</div>
