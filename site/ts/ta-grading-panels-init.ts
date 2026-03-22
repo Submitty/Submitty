@@ -311,6 +311,24 @@ function readCookies() {
             }
         });
     }
+
+    // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
+    if (autoscroll === 'on') {
+        const openFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
+        const totalFiles = $('#file-container .openable-element-submissions').length;
+        if (openFiles === 0 && totalFiles === 1) {
+            const $elem = $('#file-container .openable-element-submissions').first();
+            const fileName = $elem[0].dataset.file_name!;
+            const fileUrl = decodeURIComponent($elem.attr('file-url')!);
+            if ($elem.hasClass('image-file')) {
+                viewFileFullPanel(fileName, fileUrl);
+            } else {
+                const viewerId = $elem.attr('data-viewer_id')!;
+                openFrame(fileName, fileUrl, viewerId);
+            }
+        }
+    }
+
     for (let x = 0; x < testcases.length; x++) {
         if (testcases[x] !== '[' && testcases[x] !== ']') {
             openAutoGrading(testcases[x]);
