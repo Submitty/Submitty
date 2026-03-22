@@ -372,23 +372,19 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'submit_url' => $submit_url,
-            'gradeable' => $gradeable,
-            'vcs_subdirectory' => '',
-            'using_subdirectory' => false,
-            'action' => $gradeable !== null ? 'template' : 'new',
-            'template_list' => $template_list,
-            'syllabus_buckets' => self::syllabus_buckets,
-            'vcs_base_url' => $vcs_base_url,
-            'vcs_partial_path' => '',
-            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
-            'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken(),
-            'score_notifications_sent' => 0,
-            'score_notifications_pending' => 0,
-            'release_notifications_sent' => false
-        ]);
+        $this->core->getOutput()->addInternalJs('admin-gradeable-common.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-general.js');
+
+        $data = $this->getGradeableEditorData($gradeable);
+        $data['submit_url'] = $submit_url;
+        $data['vcs_subdirectory'] = '';
+        $data['using_subdirectory'] = false;
+        $data['action'] = $gradeable !== null ? 'template' : 'new';
+        $data['template_list'] = $template_list;
+        $data['vcs_base_url'] = $vcs_base_url;
+        $data['vcs_partial_path'] = '';
+
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', $data);
     }
 
     //view the page with pulled data from the gradeable to be edited
@@ -553,72 +549,61 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
+        $this->core->getOutput()->addInternalJs('admin-gradeable-common.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-general.js');
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-autograding.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-rubric.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-graders.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-graders.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'num_checkpoints' => $num_checkpoints,
-            'num_text_components' => $num_text,
-            'gradeable' => $gradeable,
-            'action' => 'edit',
-            'nav_tab' => $nav_tab,
-            'semester' => $semester,
-            'course' => $course,
-            'date_format' => 'Y-m-d H:i:s',
-            'syllabus_buckets' => self::syllabus_buckets,
-            'gradeable_components_enc' => json_encode($gradeable_components_enc),
-            'grade_inquiry_allowed' => $gradeable->isGradeInquiryAllowed(),
-            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
-            'electronic' => $gradeable->getType() === GradeableType::ELECTRONIC_FILE,
-            // Non-Gradeable-model data
-            'gradeable_section_history' => $gradeable_section_history,
-            'num_rotating_sections' => $num_rotating_sections,
-            'no_rotating_sections' => $no_rotating_sections,
-            'rotating_gradeables' => $rotating_gradeables,
-            'graders_from_usertypes' => $graders_from_usertypes,
-            //'inherit_teams_list' => $inherit_teams_list
-            'default_late_days' => $default_late_days,
-            'vcs_base_url' => $vcs_base_url,
-            'vcs_partial_path' => $gradeable->getVcsPartialPath(),
-            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
-            'download_url' => $this->core->buildCourseUrl([$gradeable->getId(), 'download']),
-            'using_subdirectory' => $gradeable->isUsingSubdirectory(),
-            'is_pdf_page' => $gradeable->isPdfUpload(),
-            'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
-            'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
-            'itempool_options' => json_encode($itempool_options),
-            'num_numeric' => $gradeable->getNumNumeric(),
-            'num_text' => $gradeable->getNumText(),
-            'type_string' => $type_string,
-            'gradeable_type_strings' => self::gradeable_type_strings,
-            'show_edit_warning' => $gradeable->anyManualGrades(),
-            'isDiscussionPanel' => $gradeable->isDiscussionBased(),
-            // Config selection data
-            'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
-            'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
-            'repository_error_messages' => $repository_error_messages,
-            'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
-            'selected_autograding_configuration_path' => $gradeable->getAutogradingConfigPath(),
 
-            'timezone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
+        $data = $this->getGradeableEditorData($gradeable);
+        $data['action'] = 'edit';
+        $data['nav_tab'] = $nav_tab;
+        $data['num_checkpoints'] = $num_checkpoints;
+        $data['num_text_components'] = $num_text;
+        $data['gradeable_components_enc'] = json_encode($gradeable_components_enc);
+        $data['gradeable_section_history'] = $gradeable_section_history;
+        $data['num_rotating_sections'] = $num_rotating_sections;
+        $data['no_rotating_sections'] = $no_rotating_sections;
+        $data['rotating_gradeables'] = $rotating_gradeables;
+        $data['graders_from_usertypes'] = $graders_from_usertypes;
+        $data['default_late_days'] = $default_late_days;
+        $data['vcs_base_url'] = $vcs_base_url;
+        $data['vcs_partial_path'] = $gradeable->getVcsPartialPath();
+        $data['vcs_subdirectory'] = $gradeable->getVcsSubdirectory();
+        $data['download_url'] = $this->core->buildCourseUrl([$gradeable->getId(), 'download']);
+        $data['using_subdirectory'] = $gradeable->isUsingSubdirectory();
+        $data['is_pdf_page'] = $gradeable->isPdfUpload();
+        $data['is_pdf_page_student'] = $gradeable->isStudentPdfUpload();
+        $data['itempool_available'] = isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options);
+        $data['itempool_options'] = json_encode($itempool_options);
+        $data['num_numeric'] = $gradeable->getNumNumeric();
+        $data['num_text'] = $gradeable->getNumText();
+        $data['type_string'] = $type_string;
+        $data['show_edit_warning'] = $gradeable->anyManualGrades();
+        $data['isDiscussionPanel'] = $gradeable->isDiscussionBased();
+        $data['all_config_paths'] = array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths);
+        $data['all_nonuploaded_config_paths'] = array_merge($default_config_paths, $all_repository_config_paths);
+        $data['repository_error_messages'] = $repository_error_messages;
+        $data['currently_valid_repository'] = $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath());
+        $data['selected_autograding_configuration_path'] = $gradeable->getAutogradingConfigPath();
+        $data['upload_config_url'] = $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId();
+        $data['rebuild_url'] = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']);
+        $data['peer'] = $gradeable->hasPeerComponent();
+        $data['peer_grader_pairs'] = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+        $data['notebook_builder_url'] = $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]);
+        $data['hidden_files'] = $gradeable->getStringHiddenFiles() ?? "";
+        $data['gradeable_max_points'] = $gradeable_max_points;
+        $data['allow_custom_marks'] = $gradeable->getAllowCustomMarks();
+        $data['has_custom_marks'] = $hasCustomMarks;
+        $data['is_bulk_upload'] = $gradeable->isBulkUpload();
+        $data['rainbow_grades_summary'] = $this->core->getConfig()->displayRainbowGradesSummary();
+        $data['config_files'] = $config_files;
+        $data['release_notifications_sent'] = $gradeable->getReleaseNotificationsSent();
 
-            'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
-            'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
-            'csrf_token' => $this->core->getCsrfToken(),
-            'peer' => $gradeable->hasPeerComponent(),
-            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
-            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getStringHiddenFiles() ?? "",
-            'template_list' => $template_list,
-            'gradeable_max_points' =>  $gradeable_max_points,
-            'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
-            'has_custom_marks' => $hasCustomMarks,
-            'is_bulk_upload' => $gradeable->isBulkUpload(),
-            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
-            'config_files' => $config_files,
-            'score_notifications_sent' => $gradeable->getScoreNotificationsSent(),
-            'score_notifications_pending' => $this->core->getQueries()->getPendingGradeableScoreNotifications($gradeable->getId()),
-            'release_notifications_sent' => $gradeable->getReleaseNotificationsSent()
-        ]);
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', $data);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableEditPeersForm', $gradeable);
@@ -2241,5 +2226,30 @@ class AdminGradeableController extends AbstractController {
         }
 
         $this->core->getOutput()->renderJsonFail("Unknown action.");
+    }
+
+    private function getGradeableEditorData(Gradeable $gradeable = null) {
+        $notifications_pending = 0;
+        if ($gradeable !== null) {
+            $notifications_pending = $this->core->getQueries()->getPendingGradeableScoreNotifications($gradeable->getId());
+        }
+
+        return [
+            'gradeable' => $gradeable,
+            'date_format' => 'Y-m-d H:i:s',
+            'semester' => $this->core->getConfig()->getSemester(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'grade_inquiry_allowed' => ($gradeable !== null) ? $gradeable->isGradeInquiryAllowed() : false,
+            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
+            'syllabus_buckets' => self::syllabus_buckets,
+            'gradeable_type_strings' => self::gradeable_type_strings,
+            'csrf_token' => $this->core->getCsrfToken(),
+            'score_notifications_sent' => ($gradeable !== null) ? $gradeable->getScoreNotificationsSent() : 0,
+            'score_notifications_pending' => $notifications_pending,
+            'release_notifications_sent' => false,
+            'electronic' => ($gradeable !== null) ? ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) : true,
+            'timezone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
+            'template_list' => $this->core->getQueries()->getAllGradeablesIdsAndTitles()
+        ];
     }
 }

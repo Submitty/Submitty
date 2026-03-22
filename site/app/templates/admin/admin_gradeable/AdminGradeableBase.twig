@@ -144,6 +144,7 @@
             adminGradeableNavTab = {{ nav_tab == -1 ? (gradeable.getType() == 0 ? 1 : 2) : nav_tab }};
         {% else %}
             adminGradeableNavTab = 0;
+            onGradeableTypeChange();
         {% endif %}
 
         updateNavItemsStatus();

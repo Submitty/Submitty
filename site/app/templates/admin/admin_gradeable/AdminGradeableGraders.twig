@@ -8,13 +8,15 @@ Macros
     {% for grader in graders %}
         <tr class="{{ prefix }}">
             <th>{{ grader[1] ~ " " ~ grader[2] ~ "(" ~ grader[0] ~ ")" }}</th>
-            <td><input class="key_to_click" tabindex="0" type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
+            <td><input class="key_to_click grader-all-checkbox" tabindex="0" type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
                        aria-label="all rotating sections"
+                       data-prefix="{{ prefix }}" data-grader-id="{{ grader[0] }}"
                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", 0)'/></td>
             {% for rs in section_numbers %}
-                <td><input class="key_to_click" tabindex="0" type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                <td><input class="key_to_click grader-checkbox" tabindex="0" type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         id="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         aria-label="rotating section {{ rs }}"
+                        data-prefix="{{ prefix }}" data-grader-id="{{ grader[0] }}" data-section="{{ rs }}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", {{ rs }});'
                         {{ (rs in history[grader[0]][g_id]) ? 'checked' : '' }}/></td>
             {% endfor %}
@@ -228,103 +230,7 @@ Form
 </div>
 
 <script>
-
-    // Updates the checkboxes for all sections for a student
-    //  This feature purely a front-end convenience.
-    function updateCheckBoxes(prefix, id, section) {
-        var base_cb_name = '#grader_' + prefix + '_';
-        var base_all_cb_name = '#' + prefix + '_';
-
-        // User pressed the "all" box ...
-        if(section === 0) {
-            // ... so update all check boxes for that user with the "all" box state
-            var check = $(base_all_cb_name + 'all_' + id).is(':checked');
-            {% for rs in section_numbers %}
-                $(base_cb_name + {{ rs }} + '_' + id).prop('checked', check);
-            {% endfor %}
-        }
-        else {
-            // if all boxes are checked, then check the 'all' box
-            var all_checked = true
-            {% for rs in section_numbers %}
-                && $(base_cb_name + {{ rs }} + '_' + id).is(':checked')
-            {% endfor %}
-            ;
-
-            $(base_all_cb_name + 'all_' + id).prop('checked', all_checked);
-        }
-    }
-
-    function onSectionTypeChange() {
-
-        disableElementChildren('#doc_all_access', true);
-        disableElementChildren('#doc_registration', true);
-
-        if ($('#rotating_section').is(':checked')) {
-            disableElementChildren('#rotating_data', false);
-            disableElementChildren('#grader-warning',false);
-        }
-        else if ($('#all_access').is(':checked')) {
-            disableElementChildren('#doc_all_access', false);
-            disableElementChildren('#rotating_data', true);
-            disableElementChildren('#grader-warning',false);
-        }
-        else {
-            disableElementChildren('#doc_registration', false);
-            disableElementChildren('#rotating_data', true);
-            disableElementChildren('#grader-warning',true);
-        }
-    }
-
-    function onMinGraderChange() {
-        // $('.g1').show();
-        // $('.g2').show();
-
-        //used by rotating sections tables and radio buttons on page documentation
-        disableElementChildren('.g2', false);
-        disableElementChildren('.g3', false);
-
-        switch ($('#minimum_grading_group').val()) {
-            case '1': // Instructor only?
-                // $('.g1').hide();
-                disableElementChildren('.g2', true);
-            case '2': // Instructors and TA's
-                // $('.g2').hide();
-                disableElementChildren('.g3', true);
-            case '3': // Everyone
-                break;
-            default:
-                alert('Error!  Invalid Minimum Grader!');
-                break;
-        }
-    }
-
     $(document).ready(function() {
-        // Hide rotating sections settings if on registration sections
-        onSectionTypeChange();
-        $('[name="grader_assignment_method"]').change(onSectionTypeChange);
-
-        // Only show the graders who should have grade access to the assignment
-        onMinGraderChange();
-        $('#minimum_grading_group').change(onMinGraderChange);
-
-        // update "all" check boxes
-        {% if 1 in graders_from_usertypes|keys %}
-        {% for grader in graders_from_usertypes[1] %}
-        updateCheckBoxes('g1', "{{ grader[0] }}", 1);
-        {% endfor %}
-        {% endif %}
-        {% if 2 in graders_from_usertypes|keys %}
-        {% for grader in graders_from_usertypes[2] %}
-        updateCheckBoxes('g2', "{{ grader[0] }}", 1);
-        {% endfor %}
-        {% endif %}
-        {% if 3 in graders_from_usertypes|keys %}
-        {% for grader in graders_from_usertypes[3] %}
-        updateCheckBoxes('g3', "{{ grader[0] }}", 1);
-        {% endfor %}
-        {% endif %}
-
+        initAdminGradeableGraders();
     });
-
 </script>

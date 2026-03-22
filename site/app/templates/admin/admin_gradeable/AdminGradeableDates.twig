@@ -11,7 +11,7 @@
 
     <div class="electronic_file electronic_file_dates">
         <div class="team_yes team_yes_dates">
-            <input data-testid="team_lock_date" name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format, timezone_string) }}">
+            <input data-testid="team_lock_date" name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format, timezone_string) }}" data-team-assignment="{{ gradeable is not null and gradeable.isTeamAssignment() ? 'true' : 'false' }}">
             <label for="date_team_lock">Team Lock Date (Instructors can still manually manage teams)</label>
 
             <br />
@@ -133,69 +133,7 @@
 </div>
 
 <script>
-    var is_electronic = {% if electronic %}true{% else %}false{% endif %};
-
-    function showAllDates() {
-        $('#gradeable-dates').find('div,input').show();
-        if (!is_electronic) {
-            $('#release_toggle_container').hide();
-        }
-        $('#gray_date_warning').show();
-        $('#hide_dates').show();
-        $('#show_all_dates').hide();
-    }
-
-    // This hides the dates by calling the event handlers that do that automatically
-    function hideDates() {
-        $('#gray_date_warning').hide();
-        onGradeableTypeChange();
-        onTeamAssignmentChange();
-        onManualGradingChange();
-        onIsGradeInquiryAllowedChange();
-        onLateSubmissionAllowedChanged();
-        if (is_electronic) {
-            onHasReleaseDate();
-            onHasDueDate();
-        }
-    }
-
     $(document).ready(function() {
-        flatpickr(".date_picker", {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Now"
-                            },
-                            {
-                                label: "End of time"
-                            }
-                        ],
-                        label: "or",
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0:
-                                    date = new Date();
-                                    break;
-                                case 1:
-                                    date = new Date("9998-01-01T00:00:00");
-                                    break;
-                            }
-                            fp.setDate(date, true);
-                        }
-                    }
-                )],
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
-            }
-        });
+        initAdminGradeableDates();
     });
-
 </script>
