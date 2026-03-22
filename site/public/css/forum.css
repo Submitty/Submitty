@@ -436,6 +436,27 @@
     margin-bottom: 10px;
 }
 
+.create-thread-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 15px;
+}
+
+.create-thread-header .create-thread-title {
+    margin: 0;
+}
+
+.thread-list-empty {
+    margin: 10px;
+    padding: 12px;
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    background: var(--standard-pale-gray);
+    color: var(--default-black);
+    text-align: center;
+}
+
 .content.create-thread-message {
     border: solid var(--standard-tangerine-yellow) 4px;
     margin: 15px;

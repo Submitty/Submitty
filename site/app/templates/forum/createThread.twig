@@ -1,16 +1,6 @@
 {%  include "forum/CategoriesForm.twig" with {"categories": categories, "category_colors": category_colors} %}
 
 <div class="content forum_content">
-
-    {%  include "forum/ForumBar.twig" with {
-        "forum_bar_buttons_right" : buttons,
-        "forum_bar_buttons_left" : [],
-        "show_threads" : false,
-        "thread_exists" : thread_exists,
-        "show_more" : false,
-        "show_filter": false,
-        "activeThread": null
-    } %}
     {% if not create_thread_message is empty %}
         {% include "Vue.twig" with {
             type: "component",
@@ -22,7 +12,14 @@
         } only %}
     {% endif %}
 
-    <h3 class="create-thread-title"> Create Thread </h3>
+    <div class="create-thread-header">
+        <h3 class="create-thread-title">Create Thread</h3>
+        {% if buttons is not empty and buttons[0].link[0] %}
+            <a class="btn btn-primary" href="{{ buttons[0].link[1] }}" title="Back to threads" data-testid="back-to-threads-button">
+                Back to Threads
+            </a>
+        {% endif %}
+    </div>
 
     <form id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">
 

@@ -1080,6 +1080,7 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     let categories_value = readCategoryValues();
     let thread_status_value = readThreadStatusValues();
+    const search_query = $('#search-content').val();
 
     // var thread_status_value = $("#thread_status_select").val();
     const unread_select_value = $('#unread').is(':checked');
@@ -1094,6 +1095,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            search_query: search_query,
             scroll_down: atEnd,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
@@ -1237,6 +1239,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             const page_number = parseInt(x.page_number);
             const threadCount = parseInt(x.count);
             x = x.html;
+            if (threadCount === 0) {
+                x = '<div class="thread-list-empty">No threads found.</div>';
+            }
             x = `${x}`;
             const jElement = $('#thread_list');
             jElement.children(':not(.fas)').remove();
