@@ -2287,8 +2287,9 @@ function loadFilterHandlers() {
         $('#search-clear').toggle($('#search-content').val() !== '');
     });
 
-    $('#search-clear').on('mousedown', (e) => {
+$('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('').trigger('change');
+        $('#search-clear').hide(); // <--- ADD THIS LINE to hide the X after clicking
         updateClearFilterButton();
         updateThreads(true, saveFilterState);
         return true;

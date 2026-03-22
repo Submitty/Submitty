@@ -987,6 +987,24 @@
     font-size: 14px;
 }
 
+/* Wrapper to hold the input and the clear button */
+.search-input-container {
+    position: relative;
+    display: inline-block;
+}
+
+
 #search-clear {
+    display: none; /* Keeps it hidden on load (Fixes Issue #1 & #2) */
+    position: absolute; /* Floats it inside the input box (Fixes Issue #4) */
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
+    z-index: 10;
+}
+
+
+#search-content {
+    padding-right: 30px;
 }
