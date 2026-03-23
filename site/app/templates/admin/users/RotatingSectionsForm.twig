@@ -25,29 +25,27 @@
 
 </script>
 <div class="content">
-    <div>
-        <h1>Manage Registration Sections</h1>
-        <p>
-            Large courses are often split into multiple <em>registration sections</em> for laboratory or recitation class time.<br>
-            Courses that are cross-listed in different departments may have multiple course codes/prefixes.
-        </p>
-        <p>
-            Each student in the course is assigned to one registration section.<br>
-            Students who have dropped the course will be assigned to the <em>NULL</em> registration section.
-        </p>
-        <p>
-            From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
-            Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
-        </p>
-        <p>
-            The 'default section' is assigned to students who have self-registered for this course. <br>
-            Note: Sections can only be deleted if they contain no students.
-        </p>
-    </div>
+    <h1>Manage Registration Sections</h1>
+    <p>
+        Large courses are often split into multiple <em>registration sections</em> for laboratory or recitation class time.<br>
+        Courses that are cross-listed in different departments may have multiple course codes/prefixes.
+    </p>
+    <p>
+        Each student in the course is assigned to one registration section.<br>
+        Students who have dropped the course will be assigned to the <em>NULL</em> registration section.
+    </p>
+    <p>
+        From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
+        Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
+    </p>
+    <p>
+        The 'default section' is assigned to students who have self-registered for this course. <br>
+        Note: Sections can only be deleted if they contain no students.
+    </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
-            <div class="col-md-7 reg-section-container">
+            <div class="reg-section-container">
                 <div class="reg-header-row">
                     <h2 class="reg-section-title mb-2">Current Registration Section Counts</h2>
                     <button

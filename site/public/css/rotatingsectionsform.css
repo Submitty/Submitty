@@ -49,22 +49,15 @@ table caption .subcaption {
     width: 60px;
 }
 
-.reg-section-table th:not(:first-child),
-.reg-section-table td:not(:first-child) {
-    width: calc((100% - 60px) / 3);
-    text-align: left;
-}
-
 .reg-header-row {
     display: flex;
+    flex-wrap: flex;
     justify-content: space-between;
     width: 100%;
 }
 
 .reg-section-title {
-    margin: 0;
-    white-space: nowrap;
-    flex: 1 1 auto;
+    flex-wrap: flex;
 }
 
 .add-registration-section-btn {
