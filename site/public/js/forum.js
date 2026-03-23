@@ -421,8 +421,12 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 return;
             }
         },
-        error: function (a, b) {
-            window.alert('Something went wrong when adding new thread. Please refresh the page.');
+        error: function (jqXHR, textStatus, errorThrown) {
+            // Firefox will abort requests during page reloads (often showing up as status 0 or textStatus 'error' with empty errorThrown)
+            if (textStatus === 'abort' || jqXHR.status === 0) {
+                return;
+            }
+            displayErrorMessage('Something went wrong when adding new thread. Please refresh the page.');
         },
     });
 }
@@ -2124,6 +2128,14 @@ function showAttachmentsOnload() {
     $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
 }
 
+function updateGlobalAttachmentButtonState() {
+    const anyVisible = $('.attachment-well').is(':visible');
+    const newState = anyVisible ? 'true' : 'false';
+    Cookies.set('show_forum_attachments', newState, { expires: 365, path: '/' });
+    const buttonText = `${anyVisible ? 'Hide' : 'Show'} attachments`;
+    $('#toggle-attachments-button').find('.status').text(buttonText);
+}
+
 function loadAllInlineImages(open_override = false) {
     if (open_override) {
         $('.attachment-btn').each(function (i) {
@@ -2176,6 +2188,7 @@ function loadInlineImages(encoded_data) {
             attachment_well.append(title);
         }
     }
+    updateGlobalAttachmentButtonState();
 }
 
 function openInWindow(img) {
