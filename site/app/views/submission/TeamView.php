@@ -25,9 +25,8 @@ class TeamView extends AbstractView {
 
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
-        $is_vcs_gradeable = $gradeable->isVcs();
         $vcs_repo_exists = false;
-        if ($is_vcs_gradeable) {
+        if ($gradeable->isVcs()) {
             $path = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
                 'vcs',
@@ -67,7 +66,6 @@ class TeamView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
             'vcs_repo_exists' => $vcs_repo_exists,
-            'is_vcs_gradeable' => $is_vcs_gradeable,
             'git_auth_token_required' => $this->core->getAuthentication() instanceof SamlAuthentication
         ]);
     }
