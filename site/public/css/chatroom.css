@@ -99,7 +99,11 @@
 }
 
 .send-message-btn {
-    margin-right: 0.5rem;
+    align-self: stretch;
+}
+
+.message-input-vue-wrapper textarea {
+    overflow-y: auto !important;
 }
 
 .chatroom-toast {
@@ -131,8 +135,4 @@
 #chatrooms-table td {
     text-align: left;
     padding-left: 12px;
-}
-
-.readonly-badge {
-    margin-left: -4px;
 }

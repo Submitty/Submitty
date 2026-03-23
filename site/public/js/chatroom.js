@@ -49,7 +49,9 @@ function fetchMessages(chatroomId) {
                     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
                 });
                 const messages_area = document.querySelector('.messages-area');
-                messages_area.scrollTop = messages_area.scrollHeight;
+                setTimeout(() => {
+                    messages_area.scrollTop = messages_area.scrollHeight;
+                }, 100);
             }
         },
         error: function () {
