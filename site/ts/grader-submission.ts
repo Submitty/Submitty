@@ -14,6 +14,7 @@ declare global {
         addFile(file: File, part: number, check_duplicate_zip: boolean): void;
         loadPreviousFilesOnDropBoxes(): void;
         gradeable_id: string;
+        blankSubmitAll(): void;
     }
 }
 
@@ -63,6 +64,16 @@ function init() {
         }
         else if (prevSetting === 'bulk-upload') {
             document.getElementById('radio-bulk')!.click();
+        }
+        else if(prevSetting === 'placeholder'){
+            setTimeout(() => {
+                const RadioPlaceholder = document.getElementById('radio-placeholder') as HTMLInputElement;
+                RadioPlaceholder.checked = true;
+                const SubmitButton = document.getElementById('submit') as HTMLButtonElement;
+                SubmitButton!.removeAttribute('disabled');
+                SubmitButton!.classList.remove('disable-submit');
+                RadioPlaceholder!.click();
+            }, 0);
         }
     }
 
@@ -120,8 +131,18 @@ function changeSubmissionMode(event: Event) {
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const SubmitButton = document.getElementById('submit');
+    const placeholderOpts = document.getElementById('placeholder-opts');
+    const uploadBoxes = document.getElementById('upload-boxes');
+    const uploadMessages = document.querySelectorAll('.upload-message');
 
     [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach((element) => element!.style.display = 'none');
+
+    if (uploadBoxes) uploadBoxes.style.display = 'block';
+    if (SubmitButton) SubmitButton.style.display = 'inline-block';
+    uploadMessages.forEach((msg) => (msg as HTMLElement).style.display = 'block');
+
+    SubmitButton!.onclick = null;
+
     useQRCheckBox.checked = false;
     if (useScanIdsCheckBox !== null) {
         useScanIdsCheckBox.checked = false;
@@ -156,6 +177,7 @@ function changeSubmissionMode(event: Event) {
             break;
         case 'radio-bulk':
             bulkUploadOpts!.style.display = 'block';
+            uploadBoxes!.style.display = 'block';
             SubmitButton!.innerText = 'Bulk Upload';
 
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'bulk-upload');
@@ -174,6 +196,21 @@ function changeSubmissionMode(event: Event) {
                     scanIdsOpts.style.display = 'none';
                 }
             }
+            break;
+        case 'radio-placeholder':
+            sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'placeholder');
+            message = 'Warning: Uploading placeholder submission for all students on this gradeable!';
+            uploadBoxes!.style.display = 'none';
+            const bulkProgressBox = document.getElementById('bulk_progress_box');
+            bulkProgressBox!.style.display = 'none';
+            SubmitButton!.innerText = 'Submit All with Placeholder';
+            SubmitButton!.removeAttribute('disabled');
+            SubmitButton!.classList.remove('disable-submit');
+            SubmitButton!.onclick = function() {
+                window.blankSubmitAll();
+            }
+            uploadMessages.forEach((msg) => (msg as HTMLElement).style.display = 'none');
+            break;
     }
 
     if (warning_banner) {

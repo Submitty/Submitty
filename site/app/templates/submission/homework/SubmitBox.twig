@@ -92,9 +92,9 @@
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
-                    <label style="text-align:center;margin:10px;padding:5px;">
-                        <button type="button" id="bulk_submit_all" class="btn btn-default" data-testid="bulk-submit-all" tabindex="0" onclick="blankSubmitAll()">Submit All with Placeholder
-                        </button>
+                    <label for="radio-placeholder">
+                        <input type='radio' id="radio-placeholder" name="submission-type" checked="checked">
+                        Submit All with Placeholder
                     </label>
                 {% endif %}
             </fieldset>
@@ -573,7 +573,7 @@
         });
     });
 
-    function blankSubmitAll(){
+    window.blankSubmitAll = function(){
         const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
         const csrf_token = "{{ csrf_token }}";
         if(confirm("This will create a placeholder submission for ALL STUDENTS on this gradeable.")){
