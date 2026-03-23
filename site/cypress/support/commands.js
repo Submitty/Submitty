@@ -33,20 +33,24 @@ import { buildUrl } from './utils.js';
 *
 * @param {String} [username=instructor] - username & password of who to log in as
 */
+// Improved login command: fetch CSRF token from login page
 Cypress.Commands.add('login', (username = 'instructor', password = username) => {
-    cy.url({ decode: true }).then(($url) => {
+    cy.request('/authentication/login').then((resp) => {
+        // Extract CSRF token from the login page HTML
+        const csrfToken = resp.body.match(/name="__csrf" value="([^"]+)"/)[1];
         cy.request({
             method: 'POST',
-            url: '/authentication/check_login'.concat('?', $url.split('?')[1]),
+            url: '/authentication/check_login',
             form: true,
             followRedirect: false,
             body: {
                 user_id: username,
                 password: password,
-                __csrf: username,
+                __csrf: csrfToken,
             },
         }).then((response) => {
-            cy.visit(response.redirectedToUrl);
+            // If login is successful, redirect to the home page or wherever needed
+            cy.visit(response.redirectedToUrl || '/');
         });
     });
 });

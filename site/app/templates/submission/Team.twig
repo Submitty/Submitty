@@ -52,25 +52,27 @@
         {# /Team invitations status #}
 
         {# Repository status #}
-        {% if vcs_repo_exists %}
-            <br />
-            <h3>To access your Team Repository:</h3>
-            <span>
-                <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
-            <br />
-            </span>
-            <br />
-            <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
-            if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
-            <br><br>
-            {% if git_auth_token_required %}
-                <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
+        {% if is_vcs_gradeable %}
+            {% if vcs_repo_exists %}
+                <br />
+                <h3>To access your Team Repository:</h3>
+                <span>
+                    <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
+                <br />
+                </span>
+                <br />
+                <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
+                if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
+                <br><br>
+                {% if git_auth_token_required %}
+                    <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
+                {% endif %}
+                <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
+            {% else %}
+                <br />
+                <h3>Your repository does not exist.</h3>
+                <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
             {% endif %}
-            <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
-        {% else %}
-            <br />
-            <h3>Your repository does not exist.</h3>
-            <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
         {% endif %}
         {# /Repository status #}
 

@@ -145,6 +145,7 @@ watch(() => props.content, () => {
     updateContent();
 });
 
+
 onMounted(() => {
     updateContent();
 });
@@ -157,5 +158,4 @@ onMounted(() => {
     :data-testid="testId"
     v-html="resolvedContent"
   />
-  <!-- eslint-enable vue/no-v-html -->
 </template>

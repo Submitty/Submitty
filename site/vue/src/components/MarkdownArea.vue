@@ -265,9 +265,15 @@ async function fetchThreadSuggestions(query: string): Promise<void> {
 }
 
 function checkAutocomplete(): void {
+    console.log('checkAutocomplete called');
+    // Only show autocomplete in markdown mode (edit mode)    
+    if (mode.value !== 'edit') {
+      closeAutocomplete();
+      return;
+    }
     const textarea = textareaRef.value;
     if (!textarea) {
-        return;
+      return;
     }
     const cursorPos = textarea.selectionStart;
     const text = textarea.value.substring(0, cursorPos);
@@ -275,20 +281,20 @@ function checkAutocomplete(): void {
     // Find # that triggers autocomplete: must be at start of text or preceded by whitespace/punctuation
     const match = /(?:^|[\s(])#(\d*)$/.exec(text);
     if (match) {
-        autocompleteStartPos.value = cursorPos - match[1].length - 1; // position of #
-        autocompleteQuery.value = match[1];
-        autocompleteIndex.value = 0;
-        showAutocomplete.value = true;
+      autocompleteStartPos.value = cursorPos - match[1].length - 1; // position of #
+      autocompleteQuery.value = match[1];
+      autocompleteIndex.value = 0;
+      showAutocomplete.value = true;
 
-        if (autocompleteDebounce) {
-            clearTimeout(autocompleteDebounce);
-        }
-        autocompleteDebounce = setTimeout(() => {
-            fetchThreadSuggestions(match[1]);
-        }, 200);
+      if (autocompleteDebounce) {
+        clearTimeout(autocompleteDebounce);
+      }
+      autocompleteDebounce = setTimeout(() => {
+        fetchThreadSuggestions(match[1]);
+      }, 200);
     }
     else {
-        closeAutocomplete();
+      closeAutocomplete();
     }
 }
 
@@ -375,6 +381,166 @@ onBeforeUnmount(() => {
       @click="toggleMarkdown"
     >
       <i class="fab fa-markdown fa-2x" />
+    </div>
+    <a
+      target="_blank"
+      href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/"
+      aria-label="Markdown Info"
+    ><i
+      style="font-style:normal;"
+      class="far fa-question-circle disabled"
+    /></a>
+  </div>
+  <div
+    :class="[rootClass]"
+    class="markdown-area fill-available"
+    @click="syncMarkdownToggle"
+  >
+    <div
+      v-if="showHeader"
+      :id="markdownHeaderId ?? undefined"
+      class="markdown-area-header"
+      :data-mode="mode"
+    >
+      <div
+        class="markdown-mode-buttons"
+      >
+        <button
+          title="Edit Markdown"
+          type="button"
+          class="markdown-mode-tab markdown-write-mode"
+          :class="{ active: mode === 'edit' }"
+          data-testid="markdown-mode-tab-write"
+          @click="setMode('edit')"
+        >
+          Write
+        </button>
+        <button
+          title="Preview Markdown"
+          type="button"
+          class="markdown-mode-tab markdown-preview-mode"
+          :class="{ active: mode === 'preview' }"
+          tabindex="0"
+          :data-initialize-preview="initializePreview"
+          data-testid="markdown-mode-tab-preview"
+          @click="setMode('preview')"
+        >
+          Preview
+        </button>
+      </div>
+      <div
+        v-if="mode === 'edit'"
+        class="markdown-area-toolbar"
+      >
+        <a
+          target="_blank"
+          href="https://submitty.org/student/communication/markdown"
+        >
+          <i
+            style="font-style: normal"
+            class="fa-question-circle"
+          />
+        </a>
+        <button
+          type="button"
+          title="Insert a link"
+          class="btn btn-default btn-markdown btn-markdown-link"
+          tabindex="0"
+          @click="addMarkdown('link')"
+        >
+          Link <i class="fas fa-link fa-1x" />
+        </button>
+        <button
+          title="Insert a code segment"
+          type="button"
+          class="btn btn-default btn-markdown btn-markdown-code"
+          tabindex="0"
+          @click="addMarkdown('code')"
+        >
+          Code <i class="fas fa-code fa-1x" />
+        </button>
+        <button
+          title="Insert bold text"
+          type="button"
+          class="btn btn-default btn-markdown btn-markdown-bold"
+          tabindex="0"
+          @click="addMarkdown('bold')"
+        >
+          Bold <i class="fas fa-bold fa-1x" />
+        </button>
+        <button
+          title="Insert italic text"
+          type="button"
+          class="btn btn-default btn-markdown btn-markdown-italic"
+          tabindex="0"
+          @click="addMarkdown('italic')"
+        >
+          Italics <i class="fas fa-italic fa-1x" />
+        </button>
+        <button
+          title="Insert blockquote text"
+          type="button"
+          class="btn btn-default btn-markdown btn-markdown-blockquote"
+          tabindex="0"
+          @click="addMarkdown('blockquote')"
+        >
+          Blockquote <i class="fas fa-quote-left fa-1x" />
+        </button>
+      </div>
+    </div>
+    <div class="markdown-area-body">
+      <div
+        v-if="isPreviewLoading || isLoadingPreview"
+        class="markdown-preview-load-spinner"
+      />
+      <label
+        :for="markdownAreaId"
+        tabindex="-1"
+        class="screen-reader"
+      >{{ markdownAreaId }}</label>
+      <div class="thread-autocomplete-wrapper">
+        <textarea
+          v-show="mode === 'edit'"
+          :id="markdownAreaId"
+          ref="textareaRef"
+          v-model="content"
+          :data-testid="markdownAreaId"
+          class="markdown-textarea fill-available"
+          :class="[props.class]"
+          :name="markdownAreaName"
+          :placeholder="placeholder"
+          rows="10"
+          cols="30"
+          :maxlength="maxLength"
+          :required="required"
+          :data-previous-comment="dataPreviousComment"
+          @keyup="handleKeyup"
+          @keydown="(e: KeyboardEvent) => { handleAutocompleteKeydown(e); handleKeydown(e); }"
+          @paste="handlePaste"
+          @change="handleChange"
+          @input="(e: Event) => { checkAutocomplete(); handleInput(e); }"
+        />
+        <div
+          v-if="showAutocomplete && autocompleteItems.length > 0"
+          ref="autocompleteDropdownRef"
+          class="thread-autocomplete-dropdown"
+          data-testid="thread-autocomplete-dropdown"
+        >
+          <div
+            v-for="(item, index) in autocompleteItems"
+            :key="item.id"
+            class="thread-autocomplete-item"
+            :class="{ 'thread-autocomplete-item-active': index === autocompleteIndex }"
+            :data-testid="`thread-autocomplete-item-${item.id}`"
+            @mousedown.prevent="selectAutocompleteSuggestion(item)"
+            @mouseenter="autocompleteIndex = index"
+          >
+            <span class="thread-autocomplete-id">#{{ item.id }}</span>
+            <span class="thread-autocomplete-title">{{ item.title }}</span>
+          </div>
+        </div>
+      </div>
+a-markdown fa-2x" />
     </div>
     <a
       target="_blank"

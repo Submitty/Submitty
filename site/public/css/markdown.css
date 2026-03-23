@@ -297,7 +297,7 @@
     background: var(--default-white);
     border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     max-height: 200px;
     overflow-y: auto;
     width: 300px;
@@ -317,9 +317,13 @@
     background-color: var(--light-blue);
 }
 
+
 [data-theme="dark"] .thread-autocomplete-item-active {
     background-color: var(--submitty-logo-blue);
     color: var(--default-white);
+}
+[data-theme="dark"] .thread-autocomplete-item-active .thread-autocomplete-id {
+    color: #fff !important;
 }
 
 .thread-autocomplete-id {

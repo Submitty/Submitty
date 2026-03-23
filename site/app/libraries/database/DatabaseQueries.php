@@ -886,6 +886,35 @@ SQL;
         return count($rows) > 0 ? $rows[0]['title'] : null;
     }
 
+    public function searchThreads(string $search_query, int $limit = 20): array {
+        $limit = min(max($limit, 1), 50);
+        if (strlen($search_query) > 0 && ctype_digit($search_query)) {
+            $this->course_db->query(
+                "SELECT id, title FROM threads WHERE deleted = false AND merged_thread_id = -1 AND (CAST(id AS TEXT) LIKE ? OR LOWER(title) LIKE LOWER(?)) ORDER BY id DESC LIMIT ?",
+                [$search_query . '%', '%' . $search_query . '%', $limit]
+            );
+        }
+        elseif (strlen($search_query) > 0) {
+            $this->course_db->query(
+                "SELECT id, title FROM threads WHERE deleted = false AND merged_thread_id = -1 AND LOWER(title) LIKE LOWER(?) ORDER BY id DESC LIMIT ?",
+                ['%' . $search_query . '%', $limit]
+            );
+        }
+        else {
+            $this->course_db->query(
+                "SELECT id, title FROM threads WHERE deleted = false AND merged_thread_id = -1 ORDER BY id DESC LIMIT ?",
+                [$limit]
+            );
+        }
+        return $this->course_db->rows();
+    }
+
+    public function getThreadTitleIfExists(int $thread_id): ?string {
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? AND deleted = false", [$thread_id]);
+        $rows = $this->course_db->rows();
+        return count($rows) > 0 ? $rows[0]['title'] : null;
+    }
+
     public function setAnnouncement(int $thread_id, bool $onOff) {
         $expireTime = $onOff ? date("Y-m-d H:i:s", strtotime('+7 days')) : '1900-01-01 00:00:00';
         $this->course_db->query("UPDATE threads SET pinned_expiration = ? WHERE id = ?", [$expireTime, $thread_id]);
