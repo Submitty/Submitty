@@ -51,13 +51,13 @@ table caption .subcaption {
 
 .reg-header-row {
     display: flex;
-    flex-wrap: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     width: 100%;
 }
 
 .reg-section-title {
-    flex-wrap: flex;
+    flex-wrap: wrap;
 }
 
 .add-registration-section-btn {
