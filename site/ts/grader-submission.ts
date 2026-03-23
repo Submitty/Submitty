@@ -200,7 +200,7 @@ function changeSubmissionMode(event: Event) {
                 }
             }
             break;
-        case 'radio-placeholder':
+        case 'radio-placeholder': {
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'placeholder');
             message = 'Warning: Uploading placeholder submission for all students on this gradeable!';
             uploadBoxes!.style.display = 'none';
@@ -211,9 +211,10 @@ function changeSubmissionMode(event: Event) {
             SubmitButton!.classList.remove('disable-submit');
             SubmitButton!.onclick = function () {
                 window.blankSubmitAll();
-            }
+            };
             uploadMessages.forEach((msg) => (msg as HTMLElement).style.display = 'none');
             break;
+        }
     }
 
     if (warning_banner) {
