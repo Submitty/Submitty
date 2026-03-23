@@ -1,3 +1,5 @@
+/* global showPopup, closePopup, displayErrorMessage, displaySuccessMessage */
+
 $(() => {
     $('[name=\'rotating_assignment_type\']').change(function () {
         const val = $(this).val();
