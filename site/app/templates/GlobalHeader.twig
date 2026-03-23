@@ -236,22 +236,26 @@
                 {% endif %}
             </nav>
         {% endif %}
-        <noscript class="system-message danger">
-            You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
+        <noscript class="alert-banner alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.</div>
         </noscript>
         {% if system_message is not null and system_message|length > 0 %}
-            <div class="system-message warning">
-                {{ system_message }}
+            <div class="alert-banner alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>{{ system_message }}</div>
             </div>
         {% endif %}
-        <div class="system-message warning" id="server-time-not-aligned" hidden>
-            Warning: The server time is not aligned with the browser time. 
-            Please check your system time settings.
+        <div class="alert-banner alert-warning" id="server-time-not-aligned" hidden>
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>Warning: The server time is not aligned with the browser time. 
+            Please check your system time settings.</div>
         </div>
-        <div class="system-message warning" id="socket-server-system-message" hidden>
-            Warning: Failed to connect to websocket server. This page will not dynamically update.
+        <div class="alert-banner alert-warning" id="socket-server-system-message" hidden>
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>Warning: Failed to connect to websocket server. This page will not dynamically update.
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
-            sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
+            sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}</div>
         </div>
         {% include 'Vue.twig' with {
             'type': 'component',
