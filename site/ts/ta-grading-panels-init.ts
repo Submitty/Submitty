@@ -1,4 +1,5 @@
 import { initializeResizablePanels } from './resizable-panels';
+import { viewFileFullPanel } from './ta-grading';
 import {
     taLayoutDet,
     resetSinglePanelLayout,
