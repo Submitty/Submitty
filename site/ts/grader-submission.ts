@@ -65,14 +65,14 @@ function init() {
         else if (prevSetting === 'bulk-upload') {
             document.getElementById('radio-bulk')!.click();
         }
-        else if(prevSetting === 'placeholder'){
+        else if (prevSetting === 'placeholder') {
             setTimeout(() => {
                 const RadioPlaceholder = document.getElementById('radio-placeholder') as HTMLInputElement;
                 RadioPlaceholder.checked = true;
                 const SubmitButton = document.getElementById('submit') as HTMLButtonElement;
-                SubmitButton!.removeAttribute('disabled');
-                SubmitButton!.classList.remove('disable-submit');
-                RadioPlaceholder!.click();
+                SubmitButton.removeAttribute('disabled');
+                SubmitButton.classList.remove('disable-submit');
+                RadioPlaceholder.click();
             }, 0);
         }
     }
@@ -131,14 +131,17 @@ function changeSubmissionMode(event: Event) {
     const useScanIdsCheckBox = document.getElementById('use-ocr') as HTMLInputElement | null;
     const scanIdsOpts = document.getElementById('toggle-id-scan');
     const SubmitButton = document.getElementById('submit');
-    const placeholderOpts = document.getElementById('placeholder-opts');
     const uploadBoxes = document.getElementById('upload-boxes');
     const uploadMessages = document.querySelectorAll('.upload-message');
 
     [submitForStudentOpts, bulkUploadOpts, qrUploadOpts, numericUploadOpts].forEach((element) => element!.style.display = 'none');
 
-    if (uploadBoxes) uploadBoxes.style.display = 'block';
-    if (SubmitButton) SubmitButton.style.display = 'inline-block';
+    if (uploadBoxes) {
+        uploadBoxes.style.display = 'block';
+    }
+    if (SubmitButton) {
+        SubmitButton.style.display = 'inline-block';
+    }
     uploadMessages.forEach((msg) => (msg as HTMLElement).style.display = 'block');
 
     SubmitButton!.onclick = null;
@@ -206,7 +209,7 @@ function changeSubmissionMode(event: Event) {
             SubmitButton!.innerText = 'Submit All with Placeholder';
             SubmitButton!.removeAttribute('disabled');
             SubmitButton!.classList.remove('disable-submit');
-            SubmitButton!.onclick = function() {
+            SubmitButton!.onclick = function () {
                 window.blankSubmitAll();
             }
             uploadMessages.forEach((msg) => (msg as HTMLElement).style.display = 'none');
