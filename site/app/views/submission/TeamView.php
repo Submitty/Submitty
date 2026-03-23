@@ -26,7 +26,6 @@ class TeamView extends AbstractView {
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
         $vcs_repo_exists = false;
-        $team ? $gradeable_team = $team->getId() : $gradeable_team = null;
         if ($gradeable->isVcs()) {
             $path = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
@@ -35,7 +34,7 @@ class TeamView extends AbstractView {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $gradeable->getId(),
-                $gradeable_team
+                $team?->getId()
             );
             $vcs_repo_exists = file_exists($path);
         }
