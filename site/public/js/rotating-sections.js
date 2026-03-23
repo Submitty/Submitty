@@ -1,30 +1,27 @@
-$(function() {
+$(() => {
+    $('[name=\'rotating_assignment_type\']').change(function () {
+        const val = $(this).val();
 
-    $("[name='rotating_assignment_type']").change(function() {
-        var val = $(this).val();
-
-        if (val !== "redo") {
+        if (val !== 'redo') {
             $('#redo-data').hide();
         }
         else {
             $('#redo-data').show();
         }
 
-        if (val !== "fewest"){
+        if (val !== 'fewest') {
             $('#fewest-exclude').hide();
         }
-        else{
+        else {
             $('#fewest-exclude').show();
         }
     });
 });
 
-
-$(document).ready(function() {
+$(document).ready(() => {
     $('#redo-data').hide();
     $('#fewest-exclude').hide();
 });
-
 
 function deleteRegistrationSection(button) {
     const sectionId = button.dataset.sectionId;
@@ -36,14 +33,13 @@ function deleteRegistrationSection(button) {
     deleteInput.closest('form').submit();
 }
 
-
 function showEditCourseIdPopup(button) {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-courseid-form');
     showPopup('#edit-courseid-form');
 
     const section_id = button.getAttribute('data-section-id');
-    const course_id  = button.getAttribute('data-course-id');
+    const course_id = button.getAttribute('data-course-id');
 
     form.find('input[name="section_id"]').val(section_id);
     form.find('#new-course-id').val(course_id);
@@ -53,9 +49,7 @@ function showEditCourseIdPopup(button) {
     $('#new-course-id').focus();
 }
 
-
 function updateCourseID() {
-
     const form = $('#edit-courseid-form');
 
     const course_id = $('#new-course-id').val();
@@ -85,18 +79,16 @@ function updateCourseID() {
         contentType: false,
         dataType: 'json',
         success: function (response) {
-
             if (response.status === 'success') {
-
                 const { data } = response;
 
                 displaySuccessMessage(data.message);
 
-                document.getElementById("course-id-" + section_id).textContent = data.course_id;
+                document.getElementById(`course-id-${section_id}`).textContent = data.course_id;
 
                 window.existingCourseIds.clear();
 
-                document.querySelectorAll('.course-id-text').forEach(span => {
+                document.querySelectorAll('.course-id-text').forEach((span) => {
                     window.existingCourseIds.add(span.textContent.trim());
                 });
 
@@ -109,23 +101,21 @@ function updateCourseID() {
         error: function (xhr) {
             console.error(xhr.responseText);
             displayErrorMessage('Unexpected server error');
-        }
+        },
     });
 
     $('.popup-form').css('display', 'none');
     return false;
 }
 
-
 function addRegistrationSection() {
-
     const form = $('#add-registration-section-form');
 
     const sectionInput = document.getElementById('new-section-id');
-    const courseInput  = form.find('#new-course-id-num')[0];
+    const courseInput = form.find('#new-course-id-num')[0];
 
     const section = sectionInput.value.trim();
-    const course  = courseInput.value.trim();
+    const course = courseInput.value.trim();
 
     const sectionRegex = /^[A-Za-z0-9_-]+$/;
 
@@ -152,9 +142,7 @@ function addRegistrationSection() {
     return false;
 }
 
-
 function showAddSectionPopup() {
-
     $('.popup-form').css('display', 'none');
 
     const form = $('#add-registration-section-form');
@@ -167,7 +155,6 @@ function showAddSectionPopup() {
 
     $('#new-section-id').focus();
 }
-
 
 $(document).on('input', '#new-section-id', function () {
     this.setCustomValidity('');
