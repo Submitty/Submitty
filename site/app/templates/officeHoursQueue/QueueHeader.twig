@@ -1,12 +1,16 @@
 {% if viewer.getQueueMessage() | length > 0 %}
-    {% include 'Vue.twig' with {
-        type: "component",
-        name: "Markdown",
-        args: {
-            content: viewer.getQueueMessage()
-        },
-        class: "content gradeable_message",
-    } only %}
+    <div class="alert-banner alert-info">
+        <i class="fas fa-info-circle"></i>
+        <div style="width: 100%;">
+            {% include 'Vue.twig' with {
+                type: "component",
+                name: "Markdown",
+                args: {
+                    content: viewer.getQueueMessage()
+                }
+            } only %}
+        </div>
+    </div>
 {% endif %}
 
 <div class="content">
