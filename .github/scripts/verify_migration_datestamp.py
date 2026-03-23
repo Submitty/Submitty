@@ -119,7 +119,7 @@ def verify_migration_freshness():
         print("No new or modified migration files to verify")
         return True
 
-    print(f"🔍 Checking {len(changed_files)} migration file(s) for freshness...\n")
+    print(f"Checking {len(changed_files)} migration file(s) to ensure they are up to date\n")
 
     now = get_current_time()
     max_age_threshold = now - timedelta(days=MAX_AGE_DAYS)

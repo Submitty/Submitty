@@ -33,5 +33,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    # No rollback necessary - column can remain if migration is reverted
     pass
