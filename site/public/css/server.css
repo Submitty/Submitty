@@ -2,8 +2,8 @@
 @import url("google/inconsolata.css");
 
 .alert-banner {
-    background-color: var(--alert-banner-bg) !important;
-    color: var(--alert-banner-text) !important;
+    background-color: var(--alert-banner-bg);
+    color: var(--alert-banner-text);
     padding: 15px 20px;
     margin: 10px 10px;
     border-radius: 4px;
@@ -11,7 +11,13 @@
     display: flex;
     align-items: center;
     border: 1px solid transparent;
-    border-left: 5px solid transparent !important;
+    border-left: 5px solid var(--alert-banner-info);
+    position: relative;
+    z-index: 1000;
+}
+
+.alert-banner[hidden] {
+    display: none;
 }
 
 .alert-banner .fas, .alert-banner .far {
@@ -19,25 +25,29 @@
     font-size: 1.2em;
 }
 
-.alert-danger {
+.alert-banner.alert-danger, .alert-danger {
+    background-color: var(--alert-banner-bg);
     border-color: var(--alert-banner-error) !important;
 }
-.alert-danger .fas, .alert-danger .far { color: var(--alert-banner-error); }
+.alert-banner.alert-danger .fas, .alert-banner.alert-danger .far { color: var(--alert-banner-error); }
 
-.alert-warning {
+.alert-banner.alert-warning, .alert-warning {
+    background-color: var(--alert-banner-bg);
     border-color: var(--alert-banner-warning) !important;
 }
-.alert-warning .fas, .alert-warning .far { color: var(--alert-banner-warning); }
+.alert-banner.alert-warning .fas, .alert-banner.alert-warning .far { color: var(--alert-banner-warning); }
 
-.alert-success {
+.alert-banner.alert-success, .alert-success {
+    background-color: var(--alert-banner-bg);
     border-color: var(--alert-banner-success) !important;
 }
-.alert-success .fas, .alert-success .far { color: var(--alert-banner-success); }
+.alert-banner.alert-success .fas, .alert-banner.alert-success .far { color: var(--alert-banner-success); }
 
-.alert-info {
+.alert-banner.alert-info, .alert-info {
+    background-color: var(--alert-banner-bg);
     border-color: var(--alert-banner-info) !important;
 }
-.alert-info .fas, .alert-info .far { color: var(--alert-banner-info); }
+.alert-banner.alert-info .fas, .alert-banner.alert-info .far { color: var(--alert-banner-info); }
 
 
 /* stylelint-disable no-descending-specificity */

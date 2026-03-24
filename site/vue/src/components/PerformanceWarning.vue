@@ -12,8 +12,9 @@ const isVisible = ref(props.performanceWarning);
   <div
     v-if="isVisible"
     id="performance-warning-system-message"
-    class="system-message warning performance-warning"
+    class="alert-banner alert-warning performance-warning"
   >
+    <i class="fas fa-exclamation-triangle"></i>
     <span id="performance-warning-system-message-text">
       Developer Warning: Excessive or duplicate database queries observed: {{ submittyQueries.length + courseQueries.length }} queries executed. Click "Show Page Details" at the bottom of the page for more info.
     </span>
