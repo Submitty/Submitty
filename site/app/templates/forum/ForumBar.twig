@@ -163,7 +163,7 @@
 	$( document ).ready(function() {
 		loadFilterHandlers();
 
-		// FIX (Issue #3): Clear search cookie if coming from a non-forum page
+		
 		if (!document.referrer.includes('forum')) {
 			Cookies.set('search_query', '', { path: '/' });
 		}
