@@ -3,8 +3,8 @@ showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUp
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, csrfToken, updateSidebarPreference, CollapseSidebarOnNarrowView, DisableAutomaticCollapse,
-  updateTheme, displayWarningMessage */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, closePopup, csrfToken, updateSidebarPreference, CollapseSidebarOnNarrowView, DisableAutomaticCollapse,
+    updateTheme, displayWarningMessage */
 
 // This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
