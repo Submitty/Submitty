@@ -995,8 +995,8 @@
 
 
 #search-clear {
-    display: none; /* Keeps it hidden on load (Fixes Issue #1 & #2) */
-    position: absolute; /* Floats it inside the input box (Fixes Issue #4) */
+    display: none; 
+    position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
