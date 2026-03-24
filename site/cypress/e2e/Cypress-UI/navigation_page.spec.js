@@ -194,7 +194,7 @@ describe('navigation page', () => {
             beta: 4,
             open: 8,
             closed: 4,
-            items_being_graded: 10,
+            items_being_graded: 9,
             graded: 11,
         };
         const gradeable_id = 'future_no_tas_homework';
@@ -289,7 +289,7 @@ describe('navigation page', () => {
             beta: 4,
             open: 8,
             closed: 4,
-            items_being_graded: 10,
+            items_being_graded: 9,
             graded: 11,
         };
         validate_navigation_page_sections(sections);
