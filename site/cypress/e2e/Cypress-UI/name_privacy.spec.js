@@ -1,21 +1,32 @@
 describe('Legal name privacy tests', () => {
+    // Add all tested user types and their legal given names
+    const users = [
+        { role: 'student', legalGiven: 'Joe' },
+        { role: 'instructor', legalGiven: 'Quinn' },
+        { role: 'ta', legalGiven: 'Jill' },
+    ];
+
     before(() => {
-        cy.login('student');
-        cy.visit('/user_profile');
-        cy.get('[data-testid="givenname-row"] button').first().click();
-        cy.get('[data-testid="edit-preferred-name-form"]').within(() => {
-            cy.get('[data-testid="preferred-givenname-input"]').clear();
-            cy.get('[data-testid="preferred-givenname-input"]').type('PreferredFirst');
-            cy.get('[data-testid="preferred-familyname-input"]').clear();
-            cy.get('[data-testid="preferred-familyname-input"]').type('PreferredLast');
+        users.forEach((user) => {
+            cy.login(user.role);
+            cy.visit('/user_profile');
+            cy.get('[data-testid="givenname-row"] button').first().click();
+            cy.get('[data-testid="edit-preferred-name-form"]').within(() => {
+                cy.get('[data-testid="preferred-givenname-input"]').clear();
+                cy.get('[data-testid="preferred-givenname-input"]').type(`Pref${user.role}`);
+                cy.get('[data-testid="preferred-familyname-input"]').clear();
+                cy.get('[data-testid="preferred-familyname-input"]').type(`PrefLast${user.role}`);
+            });
+            cy.get('[data-testid="edit-preferred-name-submit"]').click();
+            cy.logout();
         });
-        cy.get('[data-testid="edit-preferred-name-submit"]').click();
-        cy.logout();
     });
 
     const checkNoLegalNames = () => {
         cy.document().then((doc) => {
-            expect(doc.documentElement.innerHTML).to.not.include('Joe');
+            users.forEach((user) => {
+                expect(doc.documentElement.innerHTML).to.not.include(user.legalGiven);
+            });
         });
     };
 
@@ -30,14 +41,16 @@ describe('Legal name privacy tests', () => {
     });
 
     after(() => {
-        cy.login('student');
-        cy.visit('/user_profile');
-        cy.get('[data-testid="givenname-row"] button').first().click();
-        cy.get('[data-testid="edit-preferred-name-form"]').within(() => {
-            cy.get('[data-testid="preferred-givenname-input"]').clear();
-            cy.get('[data-testid="preferred-familyname-input"]').clear();
+        users.forEach((user) => {
+            cy.login(user.role);
+            cy.visit('/user_profile');
+            cy.get('[data-testid="givenname-row"] button').first().click();
+            cy.get('[data-testid="edit-preferred-name-form"]').within(() => {
+                cy.get('[data-testid="preferred-givenname-input"]').clear();
+                cy.get('[data-testid="preferred-familyname-input"]').clear();
+            });
+            cy.get('[data-testid="edit-preferred-name-submit"]').click();
+            cy.logout();
         });
-        cy.get('[data-testid="edit-preferred-name-submit"]').click();
-        cy.logout();
     });
 });
