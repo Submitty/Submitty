@@ -110,6 +110,7 @@ main {
     width: 100%;
     min-width: 0;
     position: relative;
+    z-index: 1;
 }
 
 footer {
