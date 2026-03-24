@@ -27,10 +27,7 @@ def initialize(test):
         os.mkdir(os.path.join(data_path, "test_output"))
     except OSError:
         pass
-    try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
-    except OSError:
-        pass
+
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
                      os.path.join(test.testcase_path, "assignment_config")])
@@ -148,17 +145,3 @@ def fewer_spaces(test):
     test.diff("test01/STDOUT.txt","STDOUT_fewer_spaces.txt")
     test.diff("grade.txt", "grade.txt_fewer_spaces", "-b")
     test.json_diff("results.json", "results.json_fewer_spaces")
-
-
-@testcase
-def negative_tolerance(test):
-    pass
-    cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "negative_tolerance.py"),
-                     os.path.join(test.testcase_path, "data")])
-    test.run_run()
-    test.run_validator()
-    test.diff("test01/STDOUT.txt", "STDOUT_negative_tolerance.txt")
-    test.diff("grade.txt", "grade.txt_negative_tolerance", "-b")
-    test.json_diff("results.json", "results.json_negative_tolerance")

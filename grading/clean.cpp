@@ -343,7 +343,7 @@ std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
     return "";
   }
   std::string::const_reverse_iterator end = str.rbegin();
-  while (end != str.rend() && !isalnum(*end) && !(*end == '.')) {
+  while (end != str.rend() && !isalnum(*end) && !(*end == '.') && !(*end == '-')) {
     end++;
   }
   return std::string(begin, end.base());
