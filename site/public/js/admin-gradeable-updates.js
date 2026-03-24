@@ -1405,6 +1405,8 @@ function loadCodeMirror() {
         },
     );
     updateEditorIcons();
+    codeMirrorInstance.refresh();
+    codeMirrorInstance.focus();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
