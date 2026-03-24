@@ -22,17 +22,6 @@ set_permissions () {
     esac
 }
 
-set_mjs_permission () {
-    for file in $1/*; do
-        if [ -d "$file" ]; then
-            chmod 551 $file
-            set_mjs_permission $file
-        else
-            set_permissions $file
-        fi
-    done
-}
-
 echo -e "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
@@ -195,3 +184,4 @@ for entry in "${result_array[@]}"; do
 done
 
 echo "Copy done"
+

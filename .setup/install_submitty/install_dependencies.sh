@@ -109,7 +109,7 @@ fi
 
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
-chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock || true
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
 if echo "${result}" | grep -E -q "package(-lock)?.json"; then
     if [ ! -d "${SUBMITTY_INSTALL_DIR}/site/node_modules" ]; then
@@ -130,6 +130,8 @@ if echo "${result}" | grep -E -q "package(-lock)?.json"; then
 
     echo "Copy NPM packages into place"
     rm -rf ${VENDOR_FOLDER}
+
+    
     mkdir ${VENDOR_FOLDER}
     mkdir ${VENDOR_FOLDER}/fontawesome
     mkdir ${VENDOR_FOLDER}/fontawesome/css
@@ -206,41 +208,22 @@ if echo "${result}" | grep -E -q "package(-lock)?.json"; then
     find ${VENDOR_FOLDER} -type f | while read file; do set_permissions "$file"; done
 fi
 
-chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json || true
-chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json || true
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+chmod 444 ${SUBMITTY_INSTALL_DIR}/site/public/manifest.json
 
-chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin || true
-chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/* || true
-chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend || true
+chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
+chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 mkdir -p "${NODE_FOLDER}/.vue-global-types"
 chown -R "${PHP_USER}:${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
-echo "Running esbuild"
-chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild || true
-chmod a+x ${NODE_FOLDER}/typescript/bin/tsc || true
-chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js || true
-chmod -R u+rw ${NODE_FOLDER}/.vue-global-types || true
-chmod a+x ${NODE_FOLDER}/vite/bin/vite.js || true
-chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build" || true
-chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build" || true
-chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue" || true
-su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build" || true
-chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue" || true
-chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild || true
-chmod a-x ${NODE_FOLDER}/typescript/bin/tsc || true
-chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js || true
-chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build" || true
-chmod a-x ${NODE_FOLDER}/vite/bin/vite.js || true
-chmod -R u-rw ${NODE_FOLDER}/.vue-global-types || true
-chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build" || true
+chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
-chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs || true
-set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs || true
-
-find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \; || true
+find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 set +e
