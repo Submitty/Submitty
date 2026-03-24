@@ -708,10 +708,18 @@ class User extends AbstractModel implements \JsonSerializable {
                 // "Student"
                 // "Limited Access Grader (Mentor)"
                 // "Full Access Grader (Grad TA)"
-                if ($data === "Instructor") return TRUE;
-                if ($data === "Student") return TRUE;
-                if ($data === "Limited Access Grader (Mentor)") return TRUE;
-                if ($data === "Full Access Grader (Grad TA)") return TRUE;
+                if ($data === "Instructor") {
+                    return true;
+                }
+                if ($data === "Student") {
+                    return true;
+                }
+                if ($data === "Limited Access Grader (Mentor)") {
+                    return true;
+                }
+                if ($data === "Full Access Grader (Grad TA)") {
+                    return true;
+                }
 
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
             case 'registration_section':

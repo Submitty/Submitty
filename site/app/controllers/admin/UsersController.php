@@ -973,14 +973,14 @@ class UsersController extends AbstractController {
         $column_titles = array_shift($uploaded_data);
 
         // Find the column containing usernames
-        $username_column = array_search("User ID", $column_titles, TRUE);
-        if ($username_column === FALSE) {
+        $username_column = array_search("User ID", $column_titles, true);
+        if ($username_column === false) {
             $this->core->addErrorMessage('Missing "User ID" column in uploaded CSV');
             $this->core->redirect($return_url);
         }
 
         // Find the column containing whether to autofill data
-        $autofill_data_column = array_search("Autofill Data", $column_titles, TRUE);
+        $autofill_data_column = array_search("Autofill Data", $column_titles, true);
 
         // Validation and error checking.
         $bad_row_details = [];
@@ -1121,7 +1121,8 @@ class UsersController extends AbstractController {
                                     $bad_columns[] = 'registration_section';
                                 }
                             }
-                        } elseif ($list_type == "graderlist") {
+                        }
+                        elseif ($list_type == "graderlist") {
                             /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
                             Automatically validate if not set (this field is optional). */
                             if ($list_type === 'graderlist' && !(empty($vals[$col_num]))) {
@@ -1226,24 +1227,6 @@ class UsersController extends AbstractController {
                 }
             }
 
-            // if (count($vals) === 1) {
-            //     if (!User::validateUserData('user_id', $vals[0])) {
-            //         $bad_rows[] = ($row_num + 1);
-            //     }
-            //     continue;
-            // }
-            // // Bounds check to ensure minimum required number of rows is present.
-            // if (count($vals) < 5 || count($vals) > 10) {
-            //     $bad_row_details[$row_num + 1][] = 'column Count';
-            //     if (!in_array('column_count', $bad_columns)) {
-            //         $bad_columns[] = 'column_count';
-            //     }
-            // }
-            
-            
-            
-            
-            
             // Ensure changes to $vals (which is an alias to a row in $uploaded_data) reflects in actual $uploaded_data.
             $uploaded_data[$row_num] = $vals;
         }
@@ -1294,7 +1277,7 @@ class UsersController extends AbstractController {
 
         foreach ($users_to_add as $key => $row) {
             // Remove the rows in which wrong or incorrect user_id is passed (only for row containing user_id)
-            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE" && is_null($this->core->getQueries()->getSubmittyUser($row[$username_column]))) {
+            if ($autofill_data_column !== false && $row[$autofill_data_column] === "TRUE" && is_null($this->core->getQueries()->getSubmittyUser($row[$username_column]))) {
                 $users_not_found[] = $row[$username_column];
                 unset($users_to_add[$key]);
             }
@@ -1305,7 +1288,7 @@ class UsersController extends AbstractController {
         }
         foreach ($users_to_add as $row) {
             // Auto-populate user detail if only user_id is given
-            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE") {
+            if ($autofill_data_column !== false && $row[$autofill_data_column] === "TRUE") {
                 $user = $this->core->getQueries()->getUserById($row[$username_column]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
                 $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
@@ -1371,7 +1354,8 @@ class UsersController extends AbstractController {
                                     $this->core->getQueries()->insertNewRegistrationSection($row[$col_num]);
                                     $user->setRegistrationSection($row[$col_num]);
                                 }
-                            } elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
+                            }
+                            elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
                                 $grading_assignments = explode(',', $row[$col_num]);
                                 sort($grading_assignments);
                                 $user->setGradingRegistrationSections($grading_assignments);
@@ -1410,7 +1394,8 @@ class UsersController extends AbstractController {
                         case "Registration Type":
                             if ($list_type === 'classlist') {
                                 $user->setRegistrationType($row[$col_num] ?? 'graded');
-                            } elseif ($list_type === 'graderlist') {
+                            }
+                            elseif ($list_type === 'graderlist') {
                                 $user->setRegistrationType('staff');
                             }
                             break;
@@ -1424,7 +1409,7 @@ class UsersController extends AbstractController {
                             break;
                     }
                 }
-                
+
                 $insert_or_update_user_function('insert', $user);
             }
         }
@@ -1433,7 +1418,7 @@ class UsersController extends AbstractController {
         foreach ($users_to_update as $row) {
             $user = $this->core->getQueries()->getUserById($row[$username_column]);
             //Update registration section (student) or group (grader)
-            if ($autofill_data_column !== FALSE && $row[$autofill_data_column] === "TRUE") {
+            if ($autofill_data_column !== false && $row[$autofill_data_column] === "TRUE") {
                 // set group as 'limited access grader' if upload is meant for graderlist, otherwise don't change it
                 if ($list_type === 'graderlist') {
                     $user->setGroup(User::GROUP_LIMITED_ACCESS_GRADER);
@@ -1481,7 +1466,8 @@ class UsersController extends AbstractController {
                                     $this->core->getQueries()->insertNewRegistrationSection($row[$col_num]);
                                     $user->setRegistrationSection($row[$col_num]);
                                 }
-                            } elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
+                            }
+                            elseif ($list_type === 'graderlist' && !empty($row[$col_num])) {
                                 $grading_assignments = explode(',', $row[$col_num]);
                                 sort($grading_assignments);
                                 $user->setGradingRegistrationSections($grading_assignments);
@@ -1532,7 +1518,6 @@ class UsersController extends AbstractController {
                             break;
                     }
                 }
-                
             }
             $insert_or_update_user_function('update', $user);
         }
