@@ -1887,13 +1887,13 @@ parameters:
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
-			count: 17
+			count: 19
 			path: app/controllers/admin/UsersController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 24
+			count: 26
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -1905,7 +1905,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 3
 			path: app/controllers/admin/UsersController.php
 
 		-

@@ -1108,14 +1108,13 @@ class UsersController extends AbstractController {
                         // Ignore Rotation Section column from exported lists.
                         break;
                     case "Registration Section":
-                        if ($list_type == "classlist") {
+                        if ($list_type === "classlist") {
                             /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,- .
                             Registration section is optional for graders, so automatically validate if not set.*/
                             if (isset($vals[$col_num]) && strtolower($vals[$col_num]) === "null") {
                                 $vals[$col_num] = null;
                             }
-                            $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$col_num]));
-                            if (!($unset_grader_registration_section || User::validateUserData('registration_section', $vals[$col_num]))) {
+                            if (!User::validateUserData('registration_section', $vals[$col_num])) {
                                 $bad_row_details[$row_num + 1][] = 'Registration section';
                                 if (!in_array('registration_section', $bad_columns)) {
                                     $bad_columns[] = 'registration_section';
@@ -1125,7 +1124,7 @@ class UsersController extends AbstractController {
                         elseif ($list_type == "graderlist") {
                             /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
                             Automatically validate if not set (this field is optional). */
-                            if ($list_type === 'graderlist' && !(empty($vals[$col_num]))) {
+                            if (!empty($vals[$col_num])) {
                                 if (!User::validateUserData('grading_assignments', $vals[$col_num])) {
                                     // Regex check for comma-separated registration sections.
                                     $bad_row_details[$row_num + 1][] = 'grading assignments format';
@@ -1349,7 +1348,7 @@ class UsersController extends AbstractController {
                         case "Registration Section":
                             // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                             // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                            if ($list_type == 'classlist') {
+                            if ($list_type === 'classlist') {
                                 if (!empty($row[$col_num])) {
                                     $this->core->getQueries()->insertNewRegistrationSection($row[$col_num]);
                                     $user->setRegistrationSection($row[$col_num]);
@@ -1404,7 +1403,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
+                            $this->core->addErrorMessage('Column ' . $col_num . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
@@ -1461,7 +1460,7 @@ class UsersController extends AbstractController {
                         case "Registration Section":
                             // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                             // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                            if ($list_type == 'classlist') {
+                            if ($list_type === 'classlist') {
                                 if (!empty($row[$col_num])) {
                                     $this->core->getQueries()->insertNewRegistrationSection($row[$col_num]);
                                     $user->setRegistrationSection($row[$col_num]);
@@ -1513,7 +1512,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
+                            $this->core->addErrorMessage('Column ' . $col_num . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
