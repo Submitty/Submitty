@@ -27,7 +27,7 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)" data-testid="unsubscribe-all-optional-emails">Unsubscribe from all optional emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
                             {#add a button#}
-                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="showPopup('sync-notification-popup')" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="showSyncPopup()" data-testid="Sync Notification settings to other courses">Sync Notification settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -409,7 +409,7 @@
             }
             $('#form_notification_settings').trigger("change");
         }
-
+        //twig will call
         {#create setNotification#}
         function setNotification(button){
             const container = $('#sync-course-container');
@@ -441,6 +441,19 @@
             });
         }
 
+
+        //put example function here
+        //will call twig, which twig will then call above function
+        function showSyncPopup() {
+            $('.popup-form').css('display', 'none');
+            const form = $('#edit-display-name-order-form');
+            form.css('display', 'block');
+            form.find('.form-body').scrollTop(0);
+            if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
+                document.getElementById('display-name-order-change').value = displayNameOrderLast;
+            }
+        }
+
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
             var url = f.attr('action');
@@ -466,5 +479,5 @@
             });
         });
     </script>
-{% include 'SyncSettingsPopup.twig' %}
 </div>
+{% include 'SyncSettingsPopup.twig' %}
