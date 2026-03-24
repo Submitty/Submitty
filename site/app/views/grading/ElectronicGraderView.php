@@ -503,8 +503,8 @@ HTML;
      * @param string $sort
      * @param string $direction
      * @param bool $anon_mode
-    * @param array<int, string> $overrides
-    * @param array<string, array{marks: int|float|string, comment: string}> $override_data
+     * @param array<int, string> $overrides
+     * @param array<string, array{marks: int|float|string, comment: string}> $override_data
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
      * @param array<string,bool> $grading_details_columns
