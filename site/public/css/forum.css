@@ -452,8 +452,8 @@
     padding: 12px;
     border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
-    background: var(--standard-pale-gray);
-    color: var(--default-black);
+    background: var(--always-default-white);
+    color: #000000;
     text-align: center;
 }
 
