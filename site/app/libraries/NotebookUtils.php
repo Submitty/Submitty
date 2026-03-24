@@ -21,7 +21,7 @@ class NotebookUtils {
     /**
      * Accepts a path to a .ipynb file and returns an array in the Submitty notebook format.
      *
-     * @return array<int,array<string,mixed>>
+     * @return array{cells: array<int, array<string, mixed>>, size_exceeded: bool, skipped_content_count: int, skipped_output_count: int}
      */
     public static function jupyterToSubmittyNotebook(string $filepath): array {
         // Check the total file size before doing any processing
