@@ -70,10 +70,12 @@
 .input-container {
     display: flex;
     align-items: center;
+    background-color: var(--default-white);
     box-shadow: 0 -2px 10px 0 rgb(0 0 0 / 5%);
     padding: 0.5rem;
     flex-shrink: 0;
     width: 100%;
+    z-index: 10;
 }
 
 .message-input {
@@ -141,4 +143,3 @@
 .readonly-badge {
     margin-left: -4px;
 }
-
