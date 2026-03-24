@@ -57,6 +57,13 @@ describe('testing grade override', () => {
                 cy.get('[data-testid="grade-table"]').eq(12).should('contain', 'Overridden');
                 cy.get('[data-testid="grade-button"]').eq(12).click();
                 cy.get('[data-testid="bar-banner"]').should('contain', 'Overridden grades');
+                // Student should also see the overridden banner on submission page
+                cy.logout();
+                cy.login('student');
+                cy.visit(['sample', 'gradeable', gradeable]);
+                cy.get('[data-testid="overridden-grades-student-banner"]').should('be.visible').and('contain.text', 'NOTE: The numeric score for this assignment has been overridden by your instructor.').and('contain.text', 'Please see your instructor if you have questions about your grade for this assignment.');
+                cy.logout();
+                cy.login();
             }
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
