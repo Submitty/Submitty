@@ -1893,13 +1893,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 26
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: Implicit array creation is not allowed - variable $bad_rows might not exist.
-			identifier: variable.implicitArray
-			count: 1
+			count: 25
 			path: app/controllers/admin/UsersController.php
 
 		-

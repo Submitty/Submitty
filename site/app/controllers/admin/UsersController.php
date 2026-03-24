@@ -1121,7 +1121,7 @@ class UsersController extends AbstractController {
                                 }
                             }
                         }
-                        elseif ($list_type == "graderlist") {
+                        elseif ($list_type === "graderlist") {
                             /* Grading assignments for graderlist uploads must be valid, comma-separated course registration sections.
                             Automatically validate if not set (this field is optional). */
                             if (!empty($vals[$col_num])) {
@@ -1220,7 +1220,7 @@ class UsersController extends AbstractController {
                         break;
                     default:
                         // Unrecognized column name, exit immediatly.
-                        $this->core->addErrorMessage('Column ' . $i . ' has invalid title "' . $column_titles[$col_num] . '"');
+                        $this->core->addErrorMessage('Column ' . $col_num . ' has invalid title "' . $column_titles[$col_num] . '"');
                         $this->core->redirect($return_url);
                         break;
                 }
