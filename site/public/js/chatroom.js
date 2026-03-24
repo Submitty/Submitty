@@ -135,8 +135,10 @@ function appendMessage(displayName, role, ts, content, msgID) {
 
     // automatically scroll to bottom for new messages, if close to bottom
     const distanceFromBottom = messages_area.scrollHeight - messages_area.scrollTop - messages_area.clientHeight;
-    if (distanceFromBottom < 110) {
-        messages_area.scrollTop = messages_area.scrollHeight;
+    if (distanceFromBottom < 250) {
+        setTimeout(() => {
+            messages_area.scrollTop = messages_area.scrollHeight;
+        }, 100);
     }
 }
 
@@ -393,4 +395,3 @@ document.addEventListener('DOMContentLoaded', () => {
         initChatroomListSocketClient(user_admin, base_url);
     }
 });
-

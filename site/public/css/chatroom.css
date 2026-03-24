@@ -34,6 +34,7 @@
     overflow-y: auto;
     margin-left: 1rem;
     flex: 1;
+    min-height: 0;
 }
 
 .message-container {
@@ -135,5 +136,9 @@
 #chatrooms-table td {
     text-align: left;
     padding-left: 12px;
+}
+
+.readonly-badge {
+    margin-left: -4px;
 }
 
