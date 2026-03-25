@@ -6,7 +6,7 @@ $(document).ready(() => {
         if ($(this).hasClass('no-autosave')) {
             return;
         }
-        
+
         const elem = this;
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
