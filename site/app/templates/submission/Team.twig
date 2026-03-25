@@ -68,9 +68,10 @@
             {% endif %}
             <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
         {% else %}
-            <br />
-            <h3>Your repository does not exist.</h3>
-            <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
+          {% if gradeable.isVcs() %}
+          <br />
+          <h3>Your repository does not exist.</h3>
+          <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
         {% endif %}
         {# /Repository status #}
 
