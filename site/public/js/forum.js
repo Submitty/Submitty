@@ -230,6 +230,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             cancelDeferredSave(autosaveKeyFor(form));
             clearReplyBoxAutosave(form);
 
+            form.trigger('reinitialize.areYouSure');
             window.location.href = json['data']['next_page'];
         },
         error: function () {
@@ -807,6 +808,7 @@ function modifyOrSplitPost(e) {
                 return;
             }
 
+            form.trigger('reinitialize.areYouSure');
             // modify
             if (form.attr('id') === 'thread_form') {
                 window.location.reload();
@@ -2378,6 +2380,7 @@ function updateThread(e) {
                 response = JSON.parse(response);
                 if (response.status === 'success') {
                     displaySuccessMessage('Thread post updated successfully!');
+                    form.trigger('reinitialize.areYouSure');
                 }
                 else {
                     displayErrorMessage('Failed to update thread post');
