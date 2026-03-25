@@ -452,9 +452,15 @@
     padding: 12px;
     border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
-    background: var(--always-default-white);
-    color: #000000;
+    background: var(--standard-pale-gray);
+    color: var(--default-black);
     text-align: center;
+}
+
+[data-theme="dark"] .thread-list-empty {
+    background: var(--default-white);
+    color: var(--default-black);
+    border-color: var(--standard-medium-gray);
 }
 
 .content.create-thread-message {
