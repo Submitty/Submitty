@@ -2680,14 +2680,14 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to combine grade overridden marks within averages
         if (!$is_team && $override === 'include') {
-            $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
+            $include = " UNION ALL SELECT gd.gd_id, grade_override.marks::numeric AS g_score, grade_override.marks::numeric AS max, 1 as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
                 AND u.user_id IS NOT NULL
                 LEFT JOIN gradeable_data as gd ON u.user_id = gd.gd_user_id
                 AND grade_override.g_id = gd.g_id
                 WHERE grade_override.g_id=?
-                GROUP BY gd.gd_id, marks";
+                ";
             $params[] = $g_id;
         }
 

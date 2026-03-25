@@ -127,6 +127,9 @@
                     <b>Number of grade overrides:</b>
                     {{ override_count_with_submission + override_count_without_submission }}
                     ({{ override_count_with_submission }} with submissions, {{ override_count_without_submission }} without submissions)
+                    {% if include_grade_override != 'include' %}
+                        (currently excluded from averages/counts by filter)
+                    {% endif %}
                 </p>
             {% endif %}
 
