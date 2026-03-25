@@ -120,6 +120,16 @@
                 {% endif %}
             {% endif %}
 
+            {% if not peer %}
+                <br/>
+                <br/>
+                <p>
+                    <b>Number of grade overrides:</b>
+                    {{ override_count_with_submission + override_count_without_submission }}
+                    ({{ override_count_with_submission }} with submissions, {{ override_count_without_submission }} without submissions)
+                </p>
+            {% endif %}
+
             {% if grade_inquiry_allowed and not peer %}
                 <br/>
                 <br/>
