@@ -337,8 +337,8 @@ function updateUserProfilePhoto() {
             displayErrorMessage('Some went wrong while updating profile photo!');
         },
     });
-    // hide the form from view
-    $('.popup-form').css('display', 'none');
+    // hide the modal and restore document scrolling
+    closePopup('edit-profile-photo-form');
     $('#user-image-button').val(null);
     return false;
 }

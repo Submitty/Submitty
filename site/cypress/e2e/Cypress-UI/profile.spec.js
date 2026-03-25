@@ -126,6 +126,8 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
         cy.get('[data-testid="popup-message"]').next().next().next().should('contain.text', 'Profile photo updated successfully!');
+        // Assert that scrolling is not disabled after upload
+        cy.get('body').should('not.have.class', 'no-scroll');
     });
 
     it('Flagging an innapropriate photo', () => {
