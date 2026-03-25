@@ -280,11 +280,13 @@ function clearResponses() {
 function updateHistogram(updates) {
     const { data, layout, responseIndices } = window.histogram;
     const container = $('#chartContainer')[0];
-    if (!container) return;
-
+    if (!container) {
+        return;
+    }
     for (const option of Object.keys(updates)) {
         const index = responseIndices[option];
-        const change = Number(updates[option]) || 0;
+        const rawValue = Number(updates[option]);
+        const change = rawValue || 0;
 
         if (index !== undefined && data[0].y[index] !== undefined) {
             data[0].y[index] = Math.max(0, data[0].y[index] + change);
