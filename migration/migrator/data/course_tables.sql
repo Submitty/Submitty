@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict DGIgZogsmlAVqYk5fgsdNkoYlNnT0MDURLtOmbsXb5ucgsZjHnfbrkjf4oN0O8h
+\restrict ok7sZFTJaYmgnPq0YxmKAYJ1f1ZcmZbiQPk1fiymc1qAd25FnAtDh1GYDlOK6ff
 
 
 SET statement_timeout = 0;
@@ -1161,7 +1161,8 @@ CREATE TABLE public.gradeable (
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date))
+    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
+    CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
 );
 
 
@@ -3854,5 +3855,5 @@ ALTER TABLE ONLY public.viewed_responses
 -- PostgreSQL database dump complete
 --
 
-\unrestrict DGIgZogsmlAVqYk5fgsdNkoYlNnT0MDURLtOmbsXb5ucgsZjHnfbrkjf4oN0O8h
+\unrestrict ok7sZFTJaYmgnPq0YxmKAYJ1f1ZcmZbiQPk1fiymc1qAd25FnAtDh1GYDlOK6ff
 
