@@ -416,7 +416,6 @@ class Gradeable extends AbstractModel {
      */
     const date_validated_properties = [
         'team_lock_date',
-        'submission_open_date',
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
@@ -438,17 +437,8 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_elec_ta = [
-        'submission_open_date',
         'grade_start_date',
         'grade_due_date'
-    ];
-
-    /**
-     * All \DateTime properties for ELECTRONIC gradeables with no ta grading
-     * Note: this is in validation order
-     */
-    const date_properties_elec_no_ta = [
-        'submission_open_date'
     ];
 
     public function toArray() {
@@ -729,12 +719,12 @@ class Gradeable extends AbstractModel {
                 $result = self::date_properties_elec_ta;
             }
             else {
-                $result = self::date_properties_elec_no_ta;
+                $result = [];
             }
             // Add in submission due date
             if ($this->hasDueDate()) {
-                // Make sure we insert the due date into the correct location (after the open date)
-                array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
+                // Make sure we insert the due date into the correct location (at the beginning since its the first date with constraints)
+                array_unshift($result, 'submission_due_date');
             }
 
             if ($this->hasReleaseDate()) {

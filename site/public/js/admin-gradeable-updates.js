@@ -443,7 +443,7 @@ function checkWarningBanners() {
 
     const ta_beta_testing_start_date = $('#date_ta_view').val();
     const submission_open_date = $('#date_submit').val();
-    const submission_due_date = $('#date_due').vale();
+    const submission_due_date = $('#date_due').val();
     const manual_grading_start_date = $('#date_grade').val();
 
     if ($('#radio_electronic_file').is(':checked')) {
