@@ -4866,8 +4866,8 @@ SQL;
         return $return;
     }
 
-    public function getCourseStatus($term, $course) {
-        $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$term, $course]);
+    public function getCourseStatus($semester, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);
         return $this->submitty_db->row()['status'];
     }
 

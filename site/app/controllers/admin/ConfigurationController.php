@@ -214,61 +214,51 @@ class ConfigurationController extends AbstractController {
 
     /**
      * Archive a course
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
     #[Route("/api/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
-    public function archiveCourse(): MultiResponse {
+    public function archiveCourse(): JsonResponse {
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         // Only instructors can archive their own course
         if (!$this->core->getUser()->accessFaculty()) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Only instructors can archive a course')
-            );
+            return JsonResponse::getFailResponse('Only instructors can archive a course');
         }
 
         $this->core->getQueries()->setCourseStatus($term, $course, Course::ARCHIVED_STATUS);
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse([
-                'message' => 'Course archived successfully'
-            ])
-        );
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course archived successfully'
+        ]);
     }
 
     /**
      * Unarchive a course
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
     #[Route("/api/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
-    public function unarchiveCourse(): MultiResponse {
+    public function unarchiveCourse(): JsonResponse {
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
         // Only instructors can unarchive their own course
         if (!$this->core->getUser()->accessFaculty()) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Only instructors can unarchive a course')
-            );
+            return JsonResponse::getFailResponse('Only instructors can unarchive a course');
         }
 
         // Check if course is marked as unarchivable
         if ($this->core->getQueries()->isCourseUnarchivable($term, $course)) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('This course is marked as unarchivable by a system administrator')
-            );
+            return JsonResponse::getFailResponse('This course is marked as unarchivable by a system administrator');
         }
 
         $this->core->getQueries()->setCourseStatus($term, $course, Course::ACTIVE_STATUS);
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse([
-                'message' => 'Course unarchived successfully'
-            ])
-        );
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course unarchived successfully'
+        ]);
     }
 
     private function getGradeableSeatingOptions(): array {
