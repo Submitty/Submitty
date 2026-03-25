@@ -21,6 +21,15 @@ describe('Test Rainbow Grading', () => {
             }
         });
 
+        cy.window().its('rainbowGradesGeneratedManually').then((rainbowGradesGeneratedManually) => {
+            if (rainbowGradesGeneratedManually === true) {
+                cy.get('[data-testid="manual-generation-warning-banner"]').should('be.visible');
+            }
+            else {
+                cy.get('[data-testid="manual-generation-warning-banner"]').should('not.exist');
+            }
+        });
+
         // Ensure all checkboxes work and toggle visibility of related elements
         checkCheckbox('[data-testid="display-grade-summary"]');
         checkCheckbox('[data-testid="display-grade-details"]');

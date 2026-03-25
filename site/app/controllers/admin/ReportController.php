@@ -35,6 +35,7 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
+    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
 
@@ -189,6 +190,82 @@ class ReportController extends AbstractController {
 
         //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
+    }
+
+    /**
+     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     *
+     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
+     * suggests the reports were manually generated and copied in.
+     */
+    private function isRainbowGradesLikelyManuallyGenerated(): bool {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
+        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+
+        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
+            $summary_html_dir,
+            function (string $file_path): bool {
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
+            }
+        );
+
+        if ($latest_individual_html_timestamp === null) {
+            return false;
+        }
+
+        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
+            $build_dir,
+            function (string $file_path): bool {
+                return str_contains(strtolower(basename($file_path)), 'meta');
+            }
+        );
+
+        if ($latest_build_meta_timestamp === null) {
+            return true;
+        }
+
+        return ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+    }
+
+    /**
+     * Get the most recent file modification timestamp in a directory tree.
+     *
+     * @param string $directory
+     * @param callable(string):bool|null $file_filter
+     * @return int|null
+     */
+    private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
+        if (!is_dir($directory)) {
+            return null;
+        }
+
+        $latest_timestamp = null;
+        $flags = \FilesystemIterator::SKIP_DOTS;
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, $flags));
+            foreach ($iterator as $file_info) {
+                if (!$file_info->isFile()) {
+                    continue;
+                }
+
+                $file_path = $file_info->getPathname();
+                if ($file_filter !== null && !$file_filter($file_path)) {
+                    continue;
+                }
+
+                $file_mtime = $file_info->getMTime();
+                if ($latest_timestamp === null || $file_mtime > $latest_timestamp) {
+                    $latest_timestamp = $file_mtime;
+                }
+            }
+        }
+        catch (\UnexpectedValueException $e) {
+            return null;
+        }
+
+        return $latest_timestamp;
     }
 
     /**
@@ -697,6 +774,7 @@ class ReportController extends AbstractController {
             $grade_summaries_last_run = $this->getGradeSummariesLastRun();
             $show_warning = false;
             $days_since_run = null;
+            $rainbow_grades_generated_manually = $this->isRainbowGradesLikelyManuallyGenerated();
 
             if ($grade_summaries_last_run !== 'Never') {
                 // Make string parsable
@@ -752,6 +830,7 @@ class ReportController extends AbstractController {
                 'is_nightly_enabled' => $is_nightly_enabled,
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
+                'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
             ]);
         }
 
