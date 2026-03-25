@@ -41,7 +41,10 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
-    window.open(url, '_blank');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (newWindow !== null) {
+        newWindow.opener = null;
+    }
 }
 
 function isValidForumAttachment(file) {
@@ -109,7 +112,14 @@ function uploadImageAttachments(attachment_box) {
             }
         }
         const preview = document.createElement('div');
-        if (file_object.type === 'application/pdf') {
+        const isPdf =
+            file_object &&
+            (
+                file_object.type === 'application/pdf' ||
+                (file_object.name && /\.pdf$/i.test(file_object.name))
+            );
+
+        if (isPdf) {
             $(preview).addClass('thumbnail thumbnail-pdf');
             $(preview).text('PDF');
         }
@@ -2166,7 +2176,7 @@ function loadInlineImages(encoded_data) {
             const attachment = data[i];
             const attachmentDiv = $('<div class="attachment-preview"></div>');
             const url = attachment[0];
-            const name = decodeURI(attachment[2]);
+            const name = decodeURIComponent(attachment[2]);
             const type = attachment[3] || 'image';
             const title = $(`<p>${escapeSpecialChars(name)}</p>`);
 
