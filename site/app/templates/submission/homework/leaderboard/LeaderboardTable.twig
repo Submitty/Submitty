@@ -18,12 +18,12 @@
         {% set starting_dots_set = false %}
         {% for entry in leaderboard %}
             {% if not (entry["user_group"] <= grader_value) %}
-                {% if (entry.points != prev_points) or (entry.time != prev_time) or (entry.memory != prev_memory) %}
+                {% if (entry.points != prev_points) or ((entry.time | round(1)) != prev_time) or (((entry.memory / 1000) | round) != prev_memory) %}
                     {% set display_rank = rank %}
                 {% endif %}
                 {% set prev_points = entry.points %}
-                {% set prev_time = entry.time %}
-                {% set prev_memory = entry.memory %}
+                {% set prev_time = entry.time | round(1) %}
+                {% set prev_memory = (entry.memory / 1000) | round %}
             {% endif %}
 
             {% set normal_leaderboard_section = rank <= top_visible_students or top_visible_students == 0 or accessFullGrading %}
