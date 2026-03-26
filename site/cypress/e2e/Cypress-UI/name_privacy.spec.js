@@ -1,5 +1,4 @@
 describe('Legal name privacy tests', () => {
-    // Add all tested user types and their legal given names
     const users = [
         { role: 'student', legalGiven: 'Joe' },
         { role: 'instructor', legalGiven: 'Quinn' },
@@ -30,9 +29,29 @@ describe('Legal name privacy tests', () => {
         });
     };
 
-    it('Legal names should not appear on any page', () => {
+    it('Legal names should not appear on instructor pages', () => {
         cy.login('instructor');
         const pages = ['users', 'graders', 'student_photos', 'forum', 'navigation'];
+        pages.forEach((page) => {
+            cy.visit(['sample', page]);
+            checkNoLegalNames();
+        });
+        cy.logout();
+    });
+
+    it('Legal names should not appear on TA pages', () => {
+        cy.login('ta');
+        const pages = ['graders', 'forum', 'navigation'];
+        pages.forEach((page) => {
+            cy.visit(['sample', page]);
+            checkNoLegalNames();
+        });
+        cy.logout();
+    });
+
+    it('Legal names should not appear on student pages', () => {
+        cy.login('student');
+        const pages = ['forum', 'navigation'];
         pages.forEach((page) => {
             cy.visit(['sample', page]);
             checkNoLegalNames();
