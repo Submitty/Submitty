@@ -2,6 +2,7 @@
 .table-calendar {
     text-align: left;
     border: 1px solid var(--default-black);
+    table-layout: fixed;
 }
 
 /* the title at the top of the calendar table, showing month, year */
@@ -16,6 +17,7 @@
     flex-direction: column;
     align-items: center;
     margin-top: 5px;
+    gap: 6px;
 }
 
 .cal-month-title {
@@ -24,7 +26,7 @@
     font-weight: 600;
     width: auto;
     height: 50px;
-    background: 1px solid var(--standard-light-gray);
+    border: 1px solid var(--standard-light-gray);
     padding: 0;
     font-family: "Source Sans Pro", sans-serif;
     color: var(--text-black);
@@ -34,9 +36,9 @@
     text-align: center;
     font-size: 20px;
     font-weight: 600;
-    width: 65px;
+    width: auto;
     height: 50px;
-    background: 1px solid var(--standard-light-gray);
+    border: 1px solid var(--standard-light-gray);
     padding: 0;
     font-family: "Source Sans Pro", sans-serif;
     color: var(--text-black);
@@ -81,11 +83,13 @@ a.cal-btn:focus {
 }
 
 #prev-month-switch {
-    text-align: right;
+    text-align: left;
+    padding-left: 1vw;
 }
 
 #next-month-switch {
-    text-align: left;
+    text-align: right;
+    padding-right: 1vw;
 }
 
 #calendar-item-type-edit {
@@ -103,40 +107,14 @@ a.cal-btn:focus {
 }
 
 /* the row of Monday, Tuesday, ... */
-.cal-week-title-row {
-    margin-bottom: 20px;
-}
-
-.cal-week-title {
-    padding-left: 3px;
-}
-
-.cal-week-title-sun {
-    width: 12%;
-}
-
-.cal-week-title-mon {
-    width: 15%;
-}
-
-.cal-week-title-tue {
-    width: 15%;
-}
-
-.cal-week-title-wed {
-    width: 16%;
-}
-
-.cal-week-title-thu {
-    width: 15%;
-}
-
-.cal-week-title-fri {
-    width: 15%;
-}
-
+.cal-week-title-sun,
+.cal-week-title-mon,
+.cal-week-title-tue,
+.cal-week-title-wed,
+.cal-week-title-thu,
+.cal-week-title-fri,
 .cal-week-title-sat {
-    width: 12%;
+    width: 14.2857%;
 }
 
 /* the day number in each cell */
@@ -380,3 +358,4 @@ div.legend-color {
         display: none;
     }
 }
+
