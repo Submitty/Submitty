@@ -144,7 +144,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param double $max_size
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true, bool $has_unseen_grading_notification = false) {
+    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true, bool $has_unseen_gradeable_notification = false) {
         $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($student_view) {
             $submission_open_date->sub(new \DateInterval('PT1H'));
@@ -201,7 +201,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'any_manual_grades' => false,
             'score_notifications_sent' => 0,
             'release_notifications_sent' => false,
-            'has_unseen_grading_notification' => $has_unseen_grading_notification
+            'has_unseen_gradeable_notification' => $has_unseen_gradeable_notification
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
@@ -363,7 +363,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @preserveGlobalState disabled
      */
     public function testShowHomeworkPageMarksNotificationAsSeenWhenUnseen(): void {
-        $gradeable = $this->createMockGradeable(has_unseen_grading_notification: true);
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: true);
         $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
 
         $database_queries = $this->createMock(DatabaseQueries::class);
@@ -384,7 +384,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @preserveGlobalState disabled
      */
     public function testShowHomeworkPageSkipsMarkSeenWhenNoUnseenNotification(): void {
-        $gradeable = $this->createMockGradeable(has_unseen_grading_notification: false);
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: false);
         $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
 
         $database_queries = $this->createMock(DatabaseQueries::class);

@@ -6080,11 +6080,11 @@ AND gc_id IN (
                   AND n.to_user_id = ?
                   AND n.component = 'grading'
                   AND n.seen_at IS NULL
-            ) AS has_unseen_grading_notification,";
+            ) AS has_unseen_gradeable_notification,";
             $unseen_notif_param = [$for_user_id];
         }
         else {
-            $unseen_notif_select = "FALSE AS has_unseen_grading_notification,";
+            $unseen_notif_select = "FALSE AS has_unseen_gradeable_notification,";
             $unseen_notif_param = [];
         }
 
