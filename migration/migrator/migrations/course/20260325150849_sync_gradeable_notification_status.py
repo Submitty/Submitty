@@ -27,10 +27,11 @@ def up(config, database, semester, course):
         WHERE gradeable_id IS NOT NULL AND seen_at IS NULL
         """
     )
-    # Backfill gradeable_id for pre-existing grading notifications by matching
-    # their content against gradeable titles. Both notification formats are handled:
-    #   gradeable_release: "Submissions Open: {title} | Due ..."
-    #   grades_release:    "Grade Available for {title}"
+
+    # Backfill gradeable_id for pre-existing gradeable notifications by matching
+    # their content against gradeable titles:
+    #   grades_release:    "Grade Available for <title>"
+    #   gradeable_release: "Submissions Open: <title> | Due ..."
     database.execute(
         """
         UPDATE notifications n

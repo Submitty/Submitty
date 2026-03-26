@@ -125,7 +125,7 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        // Mark unseen grading notifications as seen
+        // Mark unseen grading notifications as seen, if applicable
         if ($gradeable->hasUnseenGradingNotification()) {
             $this->core->getQueries()->markNotificationAsSeenByGradeableId($user_id, $gradeable->getId());
         }

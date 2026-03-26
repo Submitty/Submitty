@@ -5534,7 +5534,8 @@ AND gc_id IN (
      * @param string $gradeable_id
      */
     public function markNotificationAsSeenByGradeableId(string $user_id, string $gradeable_id): void {
-        $this->course_db->query("
+        $this->course_db->query(
+            "
             UPDATE notifications
             SET seen_at = current_timestamp
             WHERE to_user_id = ?
@@ -6081,7 +6082,8 @@ AND gc_id IN (
                   AND n.seen_at IS NULL
             ) AS has_unseen_grading_notification,";
             $unseen_notif_param = [$for_user_id];
-        } else {
+        }
+        else {
             $unseen_notif_select = "FALSE AS has_unseen_grading_notification,";
             $unseen_notif_param = [];
         }
