@@ -114,10 +114,16 @@ class SubmissionController extends AbstractController {
             return ['error' => true, 'message' => 'No gradeable with that id.'];
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $user_id = $this->core->getUser()->getId();
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id);
         $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
+        }
+
+        // Mark any unseen grading notifications (submission open or grade release) as seen
+        if ($graded_gradeable === null || $graded_gradeable->hasUnseenGradingNotification()) {
+            $this->core->getQueries()->markNotificationAsSeenByGradeableId($user_id, $gradeable->getId());
         }
 
         if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {

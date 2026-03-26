@@ -61,6 +61,10 @@ class GradedGradeable extends AbstractModel {
      * @var array<array<int, string>> The timestamps for the active graders this graded gradeable */
     protected $active_graders_timestamps;
 
+    /** @prop
+     * @var bool Whether an unseen grading notification exists for this gradeable/user */
+    protected bool $has_unseen_grading_notification = false;
+
     /**
      * GradedGradeable constructor.
      * @param Core $core
@@ -92,9 +96,26 @@ class GradedGradeable extends AbstractModel {
 
         $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
 
+        $this->has_unseen_grading_notification = (bool) ($details['has_unseen_grading_notification'] ?? false);
+
         $this->active_graders = $active_graders;
         $this->active_graders_timestamps = $active_graders_timestamps;
         $this->active_graders_names = $active_graders_names;
+    }
+
+
+    /**
+     * Returns true if an unseen grading notification exists for this gradeable
+     */
+    public function hasUnseenGradingNotification(): bool {
+        return $this->has_unseen_grading_notification;
+    }
+
+    /**
+     * @param bool $value Whether an unseen grading notification exists
+     */
+    public function setHasUnseenGradingNotification(bool $value): void {
+        $this->has_unseen_grading_notification = $value;
     }
 
     /**

@@ -5348,11 +5348,11 @@ AND gc_id IN (
      */
     public function insertNotifications(array $flattened_notifications, int $notification_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
+        $row_string = "(?, ?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
         $this->course_db->query(
             "
-            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id, gradeable_id)
             VALUES " . $value_param_string,
             $flattened_notifications
         );
@@ -5523,6 +5523,25 @@ AND gc_id IN (
             "UPDATE notifications SET seen_at = current_timestamp
                 WHERE to_user_id = ? and seen_at is NULL and {$id_query}",
             $parameters
+        );
+    }
+
+    /**
+     * Marks all unseen grading notifications for a given gradeable and user as seen, which only
+     * runs when an unseen notification exists (GradedGradeable::getUnseenNotificationId())
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     */
+    public function markNotificationAsSeenByGradeableId(string $user_id, string $gradeable_id): void {
+        $this->course_db->query("
+            UPDATE notifications
+            SET seen_at = current_timestamp
+            WHERE to_user_id = ?
+               AND gradeable_id = ?
+               AND component = 'grading'
+               AND seen_at IS NULL",
+            [$user_id, $gradeable_id]
         );
     }
 
@@ -8405,6 +8424,24 @@ WHERE current_state IN
         $submitter_type = $team ? 'team_id' : 'user_id';
         $submitter_type_ext = $team ? 'team.team_id' : 'u.user_id';
 
+        // Build an optional scalar subquery to detect unseen grading notifications for the given user
+        // TODO: handle team gradeable edge case
+        $for_user_id = count($users) === 1 ? $users[0] : null;
+        if ($for_user_id !== null) {
+            $unseen_notification = "
+            EXISTS (
+                SELECT 1 FROM notifications n
+                WHERE n.gradeable_id = g.g_id
+                    AND n.to_user_id = ?
+                    AND n.component = 'grading'
+                    AND n.seen_at IS NULL
+            ) AS has_unseen_grading_notification,";
+            $unseen_notification_param = [$for_user_id];
+        } else {
+            $unseen_notification = "FALSE AS has_unseen_grading_notification,";
+            $unseen_notification_param = [];
+        }
+
         // Generate a logical expression from the provided parameters
         $selector_union_list = [];
         $selector_union_list[] = strval($this->course_db->convertBoolean($all));
@@ -8621,6 +8658,8 @@ WHERE current_state IN
              gc.ag_graders AS ag_graders,
              gc.ag_timestamps AS ag_timestamps,
              gc.ag_graders_names AS ag_graders_names,
+
+              {$unseen_notification}
 
               {$submitter_data_inject}
 
@@ -8847,7 +8886,8 @@ WHERE current_state IN
                 new Submitter($this->core, $submitter),
                 [
                     'late_day_exceptions' => $late_day_exceptions,
-                    'reasons_for_exceptions' => $reasons_for_exceptions
+                    'reasons_for_exceptions' => $reasons_for_exceptions,
+                    'has_unseen_grading_notification' => $row['has_unseen_grading_notification'] ?? false,
                 ],
                 json_decode($row['ag_graders'], true),
                 json_decode($row['ag_timestamps'], true),
@@ -9034,6 +9074,7 @@ WHERE current_state IN
         return $this->course_db->queryIterator(
             $query,
             array_merge(
+                $unseen_notification_param,
                 $param,
                 array_keys($gradeables_by_id)
             ),
