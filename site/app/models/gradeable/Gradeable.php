@@ -270,7 +270,7 @@ class Gradeable extends AbstractModel {
      * @var bool if gradeable release notifications have been sent*/
     protected $release_notifications_sent = false;
     /** @prop
-     * @var bool Whether an unseen grading notification exists for this gradeable/user */
+     * @var bool Whether an unseen grading notification exists for a specific user */
     protected bool $has_unseen_gradeable_notification = false;
 
     /**

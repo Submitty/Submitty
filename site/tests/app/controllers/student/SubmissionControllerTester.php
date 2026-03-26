@@ -358,7 +358,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Visiting a gradeable page with an unseen grading notification should mark the
+     * Visiting a gradeable page with an unseen gradeable notification should mark the
      * tied notification as seen.
      *
      * @runInSeparateProcess
@@ -381,7 +381,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Visiting a gradeable page without any unseen grading notifications should not
+     * Visiting a gradeable page without any unseen gradeable notifications should not
      * mark any notifications as seen.
      *
      * @runInSeparateProcess

@@ -5541,8 +5541,8 @@ AND gc_id IN (
             WHERE to_user_id = ?
                AND gradeable_id = ?
                AND component = 'grading'
-               AND seen_at IS NULL
-            ", [$user_id, $gradeable_id]
+               AND seen_at IS NULL",
+            [$user_id, $gradeable_id]
         );
     }
 
@@ -6034,7 +6034,7 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id
-     * @param  string|null $for_user_id The user id to get the gradeable for
+     * @param  string|null $for_user_id The user's id
      * @return \app\models\gradeable\Gradeable
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
@@ -6051,7 +6051,7 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
-     * @param  string|null          $for_user_id The user id to get the gradeable for
+     * @param  string|null          $for_user_id The user's id
      * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
@@ -6080,9 +6080,9 @@ AND gc_id IN (
                 EXISTS (
                     SELECT 1 FROM notifications n
                     WHERE n.gradeable_id = g.g_id
-                    AND n.to_user_id = ?
-                    AND n.component = 'grading'
-                    AND n.seen_at IS NULL
+                        AND n.to_user_id = ?
+                        AND n.component = 'grading'
+                        AND n.seen_at IS NULL
                     ) AS has_unseen_gradeable_notification,";
             $unseen_notification_param = [$for_user_id];
         }
