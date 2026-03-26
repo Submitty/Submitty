@@ -616,15 +616,15 @@ describe('Should handle invalid date format in forum categories', () => {
         cy.get('[data-testid="more-dropdown"]').click();
         cy.contains('Edit Categories').click();
 
-        cy.get('.edit-category-date-button').first().click();
+        cy.get('[data-testid="edit-category-date-button"]').first().click();
 
-        cy.get('.edit-category-date-input').should('be.visible').first().as('dateInput');
+        cy.get('[data-testid="edit-category-date-input"]').first().should('be.visible').as('dateInput');
 
-        cy.get('@dateInput').clear({ force: true });
-        cy.get('@dateInput').type('invalid-date', { force: true });
+        cy.get('@dateInput').clear();
+        cy.get('@dateInput').type('invalid-date');
 
-        cy.get('.save-date-button').first().click();
+        cy.get('[data-testid="save-date-button"]').first().click();
 
-        cy.contains('Invalid date format provided.').should('be.visible');
+        cy.get('[data-testid="popup-message"]').should('contain', 'Invalid date format provided.');
     });
 });
