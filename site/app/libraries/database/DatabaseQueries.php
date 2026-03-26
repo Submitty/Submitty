@@ -5528,7 +5528,7 @@ AND gc_id IN (
 
     /**
      * Marks all unseen notifications for a given gradeable and user as seen, which should only
-     * be invoked when an unseen notification exists (GradedGradeable::getUnseenNotificationId())
+     * be invoked when an unseen notification exists (GradedGradeable::getUnseenNotificationId()).
      *
      * @param string $user_id
      * @param string $gradeable_id
