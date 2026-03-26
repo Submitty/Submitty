@@ -126,6 +126,39 @@ class DatabaseQueries {
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
     }
 
+    public function insertLoginAttempt(string $user_id, string $ip_address, bool $was_successful): void {
+        $this->submitty_db->query(
+            "INSERT INTO login_attempts (user_id, ip_address, attempted_at, was_successful) VALUES (?, ?, NOW(), ?)",
+            [$user_id, $ip_address, $this->submitty_db->convertBoolean($was_successful)]
+        );
+    }
+
+    public function getRecentFailedLoginAttempts(string $user_id, int $window_seconds): int {
+        $this->submitty_db->query(
+            "SELECT COUNT(*) AS cnt FROM login_attempts
+             WHERE user_id = ? AND was_successful = FALSE AND attempted_at > NOW() - INTERVAL '{$window_seconds} seconds'",
+            [$user_id]
+        );
+        return (int) $this->submitty_db->row()['cnt'];
+    }
+
+    public function getEarliestRecentFailureTimestamp(string $user_id, int $window_seconds): ?string {
+        $this->submitty_db->query(
+            "SELECT MIN(attempted_at) AS earliest FROM login_attempts
+             WHERE user_id = ? AND was_successful = FALSE AND attempted_at > NOW() - INTERVAL '{$window_seconds} seconds'",
+            [$user_id]
+        );
+        $row = $this->submitty_db->row();
+        return $row['earliest'] ?? null;
+    }
+
+    public function clearLoginAttempts(string $user_id): void {
+        $this->submitty_db->query(
+            "DELETE FROM login_attempts WHERE user_id = ?",
+            [$user_id]
+        );
+    }
+
     /**
      * Update a user's time zone string in the master database.
      *

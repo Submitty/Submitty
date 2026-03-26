@@ -18,6 +18,7 @@ use app\views\AuthenticationView;
 use app\models\User;
 use app\models\Email;
 use app\repositories\VcsAuthTokenRepository;
+use app\services\LoginThrottleService;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -123,12 +124,27 @@ class AuthenticationController extends AbstractController {
                     new RedirectResponse($old)
                 );
             }
+            $throttle = new LoginThrottleService($this->core);
+            if ($throttle->isLocked($_POST['user_id'])) {
+                $remaining = $throttle->getRemainingLockoutSeconds($_POST['user_id']);
+                $msg = "Account temporarily locked. Try again in {$remaining} seconds.";
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getFailResponse($msg),
+                    null,
+                    new RedirectResponse($old)
+                );
+            }
             $this->core->getAuthentication()->setUserId($_POST['user_id']);
             $this->core->getAuthentication()->setPassword($_POST['password']);
         }
         if ($this->core->authenticate($_POST['stay_logged_in'] || $is_saml_auth) === true) {
             if ($is_saml_auth && isset($_POST['RelayState']) && str_starts_with($_POST['RelayState'], $this->core->getConfig()->getBaseUrl())) {
                 $old = $_POST['RelayState'];
+            }
+            if (!$is_saml_auth) {
+                $throttle = new LoginThrottleService($this->core);
+                $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], true);
             }
             Logger::logAccess($this->core->getAuthentication()->getUserId(), $_COOKIE['submitty_token'], "login");
             $msg = "Successfully logged in as " . htmlentities($this->core->getAuthentication()->getUserId());
@@ -146,6 +162,8 @@ class AuthenticationController extends AbstractController {
                 $msg = "Could not login";
             }
             else {
+                $throttle = new LoginThrottleService($this->core);
+                $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], false);
                 $msg = "Could not login using that user id or password";
                 $this->core->addErrorMessage($msg);
             }
@@ -168,13 +186,21 @@ class AuthenticationController extends AbstractController {
             $msg = 'Cannot leave user id or password blank';
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
+        $throttle = new LoginThrottleService($this->core);
+        if ($throttle->isLocked($_POST['user_id'])) {
+            $remaining = $throttle->getRemainingLockoutSeconds($_POST['user_id']);
+            $msg = "Account temporarily locked. Try again in {$remaining} seconds.";
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         $token = $this->core->authenticateJwt();
         if ($token) {
+            $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], true);
             return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['token' => $token]));
         }
         else {
+            $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], false);
             $msg = "Could not login using that user id or password";
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
@@ -225,6 +251,13 @@ class AuthenticationController extends AbstractController {
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
 
+        $throttle = new LoginThrottleService($this->core);
+        if ($throttle->isLocked($_POST['user_id'])) {
+            $remaining = $throttle->getRemainingLockoutSeconds($_POST['user_id']);
+            $msg = "Account temporarily locked. Try again in {$remaining} seconds.";
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+
         $token_login_success = false;
         $em = $this->core->getSubmittyEntityManager();
         /** @var VcsAuthTokenRepository $repo */
@@ -242,10 +275,12 @@ class AuthenticationController extends AbstractController {
             $this->core->getAuthentication()->setUserId($_POST['user_id']);
             $this->core->getAuthentication()->setPassword($_POST['password']);
             if ($this->core->getAuthentication()->authenticate() !== true) {
+                $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], false);
                 $msg = "Could not login using that user id or password";
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
             }
         }
+        $throttle->recordAttempt($_POST['user_id'], $_SERVER['REMOTE_ADDR'], true);
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
         if ($user === null) {
