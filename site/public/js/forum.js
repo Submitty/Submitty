@@ -112,12 +112,7 @@ function uploadImageAttachments(attachment_box) {
             }
         }
         const preview = document.createElement('div');
-        const isPdf =
-            file_object &&
-            (
-                file_object.type === 'application/pdf' ||
-                (file_object.name && /\.pdf$/i.test(file_object.name))
-            );
+        const isPdf = file_object && (file_object.type === 'application/pdf' || (file_object.name && /\.pdf$/i.test(file_object.name)));
 
         if (isPdf) {
             $(preview).addClass('thumbnail thumbnail-pdf');

@@ -226,7 +226,7 @@ class Utils {
         return false;
     }
 
-    public static function checkUploadedImageOrPdfFile($id) {
+    public static function checkUploadedImageOrPdfFile(string $id): bool {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name) && !self::isValidUploadedImageOrPdf($file_name)) {
