@@ -6037,8 +6037,8 @@ AND gc_id IN (
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfig($id) {
-        foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
+    public function getGradeableConfig($id, ?string $for_user_id = null) {
+        foreach ($this->getGradeableConfigs([$id], ['id'], $for_user_id) as $gradeable) {
             return $gradeable;
         }
         throw new \InvalidArgumentException('Gradeable does not exist!');
@@ -6053,7 +6053,7 @@ AND gc_id IN (
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id'], ?string $for_user_id = null) {
         if ($ids === []) {
             return new \EmptyIterator();
         }
@@ -6070,6 +6070,21 @@ AND gc_id IN (
 
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
+
+        // Build optional EXISTS subquery to detect unseen grading notifications for the given user
+        if ($for_user_id !== null) {
+            $unseen_notif_select = "EXISTS (
+                SELECT 1 FROM notifications n
+                WHERE n.gradeable_id = g.g_id
+                  AND n.to_user_id = ?
+                  AND n.component = 'grading'
+                  AND n.seen_at IS NULL
+            ) AS has_unseen_grading_notification,";
+            $unseen_notif_param = [$for_user_id];
+        } else {
+            $unseen_notif_select = "FALSE AS has_unseen_grading_notification,";
+            $unseen_notif_param = [];
+        }
 
         $query = "
             SELECT
@@ -6092,6 +6107,7 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               r.*,
+              {$unseen_notif_select}
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6362,7 +6378,7 @@ AND gc_id IN (
 
         return $this->course_db->queryIterator(
             $query,
-            $ids,
+            array_merge($unseen_notif_param, $ids),
             $gradeable_constructor
         );
     }
@@ -8424,24 +8440,6 @@ WHERE current_state IN
         $submitter_type = $team ? 'team_id' : 'user_id';
         $submitter_type_ext = $team ? 'team.team_id' : 'u.user_id';
 
-        // Build an optional scalar subquery to detect unseen grading notifications for the given user
-        // TODO: handle team gradeable edge case
-        $for_user_id = count($users) === 1 ? $users[0] : null;
-        if ($for_user_id !== null) {
-            $unseen_notification = "
-            EXISTS (
-                SELECT 1 FROM notifications n
-                WHERE n.gradeable_id = g.g_id
-                    AND n.to_user_id = ?
-                    AND n.component = 'grading'
-                    AND n.seen_at IS NULL
-            ) AS has_unseen_grading_notification,";
-            $unseen_notification_param = [$for_user_id];
-        } else {
-            $unseen_notification = "FALSE AS has_unseen_grading_notification,";
-            $unseen_notification_param = [];
-        }
-
         // Generate a logical expression from the provided parameters
         $selector_union_list = [];
         $selector_union_list[] = strval($this->course_db->convertBoolean($all));
@@ -8658,8 +8656,6 @@ WHERE current_state IN
              gc.ag_graders AS ag_graders,
              gc.ag_timestamps AS ag_timestamps,
              gc.ag_graders_names AS ag_graders_names,
-
-              {$unseen_notification}
 
               {$submitter_data_inject}
 
@@ -8887,7 +8883,6 @@ WHERE current_state IN
                 [
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions,
-                    'has_unseen_grading_notification' => $row['has_unseen_grading_notification'] ?? false,
                 ],
                 json_decode($row['ag_graders'], true),
                 json_decode($row['ag_timestamps'], true),
@@ -9074,7 +9069,6 @@ WHERE current_state IN
         return $this->course_db->queryIterator(
             $query,
             array_merge(
-                $unseen_notification_param,
                 $param,
                 array_keys($gradeables_by_id)
             ),
