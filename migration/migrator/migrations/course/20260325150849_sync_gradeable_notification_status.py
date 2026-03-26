@@ -29,7 +29,7 @@ def up(config, database, semester, course):
     )
 
     # Backfill gradeable_id for pre-existing gradeable notifications by matching
-    # their content against gradeable titles:
+    # their content against the possible titles:
     #   grades_release:    "Grade Available for <title>"
     #   gradeable_release: "Submissions Open: <title> | Due ..."
     database.execute(

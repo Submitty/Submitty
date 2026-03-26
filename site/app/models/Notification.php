@@ -111,14 +111,6 @@ class Notification extends AbstractModel implements \JsonSerializable {
         parent::__construct($core);
     }
 
-    public function getGradeableId(): ?string {
-        return $this->gradeable_id;
-    }
-
-    public function setGradeableId(?string $gradeable_id): void {
-        $this->gradeable_id = $gradeable_id;
-    }
-
     public static function createNotification(Core $core, array $event) {
         $instance = new self($core);
         $instance->setComponent($event['component']);
@@ -269,5 +261,13 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'gradeable_id' => $this->gradeable_id,
             'url' => $url
         ];
+    }
+
+    public function getGradeableId(): ?string {
+        return $this->gradeable_id;
+    }
+
+    public function setGradeableId(?string $gradeable_id): void {
+        $this->gradeable_id = $gradeable_id;
     }
 }

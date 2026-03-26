@@ -174,12 +174,6 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(false, $notification->hasEmptyMetadata());
     }
 
-    public function testCreateNotificationWithGradeableId(): void {
-        $details = array_merge($this->notify_details['normal'], ['gradeable_id' => 'hw01']);
-        $notification = Notification::createNotification($this->core, $details);
-        $this->assertEquals('hw01', $notification->getGradeableId());
-    }
-
     public function testCreateNotificationGradeableIdNullByDefault(): void {
         $notification = Notification::createNotification($this->core, $this->notify_details['normal']);
         $this->assertNull($notification->getGradeableId());

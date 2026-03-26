@@ -2952,9 +2952,6 @@ class Gradeable extends AbstractModel {
         return $this->release_notifications_sent;
     }
 
-    /**
-     * Returns true if an unseen grading notification exists for this gradeable/user
-     */
     public function hasUnseenGradeableNotification(): bool {
         return $this->has_unseen_gradeable_notification;
     }

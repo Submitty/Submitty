@@ -97,7 +97,6 @@ class GradedGradeable extends AbstractModel {
         $this->active_graders_names = $active_graders_names;
     }
 
-
     /**
      * Gets the active graders for this graded gradeable
      * @return array<array<int, string>>

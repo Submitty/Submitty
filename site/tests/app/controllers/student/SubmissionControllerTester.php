@@ -358,7 +358,9 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Visiting a gradeable page with an unseen grading notification calls markNotificationAsSeenByGradeableId.
+     * Visiting a gradeable page with an unseen grading notification should mark the
+     * tied notification as seen.
+     *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
@@ -379,7 +381,9 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Visiting a gradeable page with no unseen grading notification does NOT call markNotificationAsSeenByGradeableId.
+     * Visiting a gradeable page without any unseen grading notifications should not
+     * mark any notifications as seen.
+     *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */

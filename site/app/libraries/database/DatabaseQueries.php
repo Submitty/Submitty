@@ -5527,8 +5527,8 @@ AND gc_id IN (
     }
 
     /**
-     * Marks all unseen grading notifications for a given gradeable and user as seen, which only
-     * runs when an unseen notification exists (GradedGradeable::getUnseenNotificationId())
+     * Marks all unseen notifications for a given gradeable and user as seen, which should only
+     * be invoked when an unseen notification exists (GradedGradeable::getUnseenNotificationId())
      *
      * @param string $user_id
      * @param string $gradeable_id
@@ -5541,8 +5541,8 @@ AND gc_id IN (
             WHERE to_user_id = ?
                AND gradeable_id = ?
                AND component = 'grading'
-               AND seen_at IS NULL",
-            [$user_id, $gradeable_id]
+               AND seen_at IS NULL
+            ", [$user_id, $gradeable_id]
         );
     }
 
@@ -6034,6 +6034,7 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id
+     * @param  string|null $for_user_id The user id to get the gradeable for
      * @return \app\models\gradeable\Gradeable
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
@@ -6050,6 +6051,7 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
+     * @param  string|null          $for_user_id The user id to get the gradeable for
      * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
@@ -6072,20 +6074,21 @@ AND gc_id IN (
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
 
-        // Build optional EXISTS subquery to detect unseen grading notifications for the given user
+        // Detect potential unseen grading notifications for the given user
         if ($for_user_id !== null) {
-            $unseen_notif_select = "EXISTS (
-                SELECT 1 FROM notifications n
-                WHERE n.gradeable_id = g.g_id
-                  AND n.to_user_id = ?
-                  AND n.component = 'grading'
-                  AND n.seen_at IS NULL
-            ) AS has_unseen_gradeable_notification,";
-            $unseen_notif_param = [$for_user_id];
+            $unseen_notification_select = "
+                EXISTS (
+                    SELECT 1 FROM notifications n
+                    WHERE n.gradeable_id = g.g_id
+                    AND n.to_user_id = ?
+                    AND n.component = 'grading'
+                    AND n.seen_at IS NULL
+                    ) AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [$for_user_id];
         }
         else {
-            $unseen_notif_select = "FALSE AS has_unseen_gradeable_notification,";
-            $unseen_notif_param = [];
+            $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [];
         }
 
         $query = "
@@ -6109,7 +6112,7 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               r.*,
-              {$unseen_notif_select}
+              {$unseen_notification_select}
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6380,7 +6383,7 @@ AND gc_id IN (
 
         return $this->course_db->queryIterator(
             $query,
-            array_merge($unseen_notif_param, $ids),
+            array_merge($unseen_notification_param, $ids),
             $gradeable_constructor
         );
     }
@@ -8884,7 +8887,7 @@ WHERE current_state IN
                 new Submitter($this->core, $submitter),
                 [
                     'late_day_exceptions' => $late_day_exceptions,
-                    'reasons_for_exceptions' => $reasons_for_exceptions,
+                    'reasons_for_exceptions' => $reasons_for_exceptions
                 ],
                 json_decode($row['ag_graders'], true),
                 json_decode($row['ag_timestamps'], true),
