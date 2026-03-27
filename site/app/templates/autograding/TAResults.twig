@@ -31,7 +31,13 @@ $( document ).ready(function() {
             <div class="box submission-page-total-header" data-testid="ta-total-score">
                 <div class="box-title-total key_to_click" tabindex="0">
 
-                    {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
+                    <div id="score-box-app"
+                        data-gradeable-id="{{ gradeable_id }}"
+                        data-user-id="{{ user_id }}"
+                        data-initial-score="{{ ta_score }}"
+                        data-max="{{ ta_max }}">
+                    </div>
+                    <script src="/js/score-box-app.js"></script>
                     <h4>TA / Instructor Grading Total</h4>
                 </div>
             </div>
