@@ -270,10 +270,11 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-"""
-Build the rows for full autograding results
-"""
+
 def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_testcases):
+    """
+    Build the rows for full autograding results
+    """
     rows = []
     for i in range(len(testcases)):
         spec = testcases[i]
@@ -291,7 +292,6 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_te
             "points_earned":   res["points"],
         })
     return rows
-
 
 
 def upsert_testcase_results(db, table, rows, g_id, user_id, team_id, g_version):
@@ -405,4 +405,3 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
             result_details['submission_time'] = a.strftime('%Y-%m-%d %H:%M:%S%z')
     return result_details
-    
