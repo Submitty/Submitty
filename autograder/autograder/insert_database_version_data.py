@@ -270,7 +270,6 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-
 def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_testcases):
     """
     Build the rows for full autograding results
