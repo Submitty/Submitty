@@ -11,7 +11,6 @@ class ChatroomView extends AbstractView {
         parent::__construct($core, $output);
         $this->core->getOutput()->addBreadcrumb("Live Chat", $this->core->buildCourseUrl(['chat']));
         $this->core->getOutput()->addInternalCss('chatroom.css');
-        $this->core->getOutput()->addInternalJs('chatroom.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
     }
 
@@ -48,7 +47,6 @@ class ChatroomView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
-        $roomId = $chatroom->getId();
         if ($anonymous) {
             $display_name = $chatroom->calcAnonName($user->getId());
         }
@@ -58,17 +56,20 @@ class ChatroomView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("chat/Chatroom.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/chat',
-            'semester' => $this->core->getConfig()->getTerm(),
-            'course' => $this->core->getConfig()->getCourse(),
-            'chatroom' => $chatroom,
-            'user_admin' => $this->core->getUser()->accessAdmin(),
-            'user_id' => $this->core->getUser()->getId(),
-            'user_display_name' => $display_name,
-            'anonymous' => $anonymous,
-            'isReadOnly' => $chatroom->isReadOnly()
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "page",
+            "name" => "ChatroomPage",
+            "args" => [
+                "chatroomId" => $chatroom->getId(),
+                "chatroomTitle" => $chatroom->getTitle(),
+                "baseUrl" => $this->core->buildCourseUrl() . '/chat',
+                "csrfToken" => $this->core->getCsrfToken(),
+                "userId" => $user->getId(),
+                "displayName" => $display_name,
+                "userAdmin" => $user->accessAdmin(),
+                "isAnonymous" => $anonymous,
+                "readOnly" => $chatroom->isReadOnly()
+            ]
         ]);
     }
 }

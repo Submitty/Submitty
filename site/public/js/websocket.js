@@ -131,4 +131,5 @@ class WebSocketClient {
     }
 }
 
+// Explicitly make it available globally for Vue 3 components
 window.WebSocketClient = WebSocketClient;
