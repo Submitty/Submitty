@@ -136,9 +136,14 @@ class RainbowCustomization extends AbstractModel {
                 // entered a value which was greater than the number of gradeables in the database, we should use the
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
+                if (!array_key_exists($bucket, $this->bucket_counts)) {
+                    $this->bucket_counts[$bucket] = 0;
+                    $this->bucket_remove_lowest[$bucket] = 0;
+                }
+                $bucket_gradeables = $this->getBucketGradeables($bucket);
 
                 // Filter out removed gradeables or updated gradeable buckets
-                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                $this->customization_data[$bucket] = array_values(array_filter($bucket_gradeables, function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
                     $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
                     return !$removed && !$swapped;
@@ -180,19 +185,22 @@ class RainbowCustomization extends AbstractModel {
                 // Create a map from id to percent for this bucket
                 $percent_map = [];
 
-                foreach ($json_bucket->ids as $json_gradeable) {
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
                     if (property_exists($json_gradeable, 'percent')) {
                         $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
                     }
                 }
 
                 // Assign percents to customization_data gradeables by matching ids
-                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                $bucket_gradeables = $this->getBucketGradeables($c_bucket);
+                foreach ($bucket_gradeables as &$c_gradeable) {
                     if (isset($percent_map[$c_gradeable['id']])) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
                     }
                 }
+                unset($c_gradeable);
+                $this->customization_data[$c_bucket] = $bucket_gradeables;
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -210,7 +218,7 @@ class RainbowCustomization extends AbstractModel {
             $json_buckets = $this->RCJSON->getGradeables();
             foreach ($json_buckets as $json_bucket) {
                 if (property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
-                    $json_buckets_gradeables[$json_bucket->type] = $json_bucket->ids;
+                    $json_buckets_gradeables[$json_bucket->type] = $this->getJsonBucketIds($json_bucket);
                 }
             }
         }
@@ -298,7 +306,7 @@ class RainbowCustomization extends AbstractModel {
             foreach ($json_buckets as $json_bucket) {
                 $retArray[$json_bucket->type] = [];
 
-                foreach ($json_bucket->ids as $json_gradeable) {
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
                     if (property_exists($json_gradeable, 'curve')) {
                         $curve_data = $json_gradeable->curve;
                         $curve_data_pos = 0;
@@ -324,6 +332,32 @@ class RainbowCustomization extends AbstractModel {
         }
 
         return $retArray;
+    }
+
+    /**
+     * Normalize stored bucket data so legacy null entries behave like empty buckets.
+     *
+     * @return array<mixed>
+     */
+    private function getBucketGradeables(string $bucket): array {
+        $bucket_gradeables = $this->customization_data[$bucket] ?? [];
+        if (!is_array($bucket_gradeables)) {
+            $bucket_gradeables = [];
+        }
+        return $bucket_gradeables;
+    }
+
+    /**
+     * Normalize legacy JSON buckets whose ids field may be null or malformed.
+     *
+     * @return array<mixed>
+     */
+    private function getJsonBucketIds(object $json_bucket): array {
+        $json_bucket_ids = $json_bucket->ids ?? [];
+        if (!is_array($json_bucket_ids)) {
+            $json_bucket_ids = [];
+        }
+        return $json_bucket_ids;
     }
 
     /**
