@@ -491,7 +491,7 @@ jobs:
 
       - name: Configure Submitty
         run: |
-          configure_submitty() {
+          configure_submitty_main() {
             # $1->MAIN_INSTALL_PATH, $2->MAIN_DATA_PATH, $3->MAIN_REPO_PATH, $4->DB_PORT
             mkdir -vp "$2"          &&  chmod -vR 777 "$2"
             mkdir -vp "$1/config"   &&  chmod -vR 777 "$1/config"
@@ -527,11 +527,37 @@ jobs:
             sudo chmod -vR 777 "$1/sbin"
           }
 
-          configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
-            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
-          configure_submitty "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
-            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
+          configure_submitty_branch() {
+            # $1->MAIN_INSTALL_PATH, $2->MAIN_DATA_PATH, $3->MAIN_REPO_PATH, $4->DB_PORT
+            mkdir -vp "$2"          &&  chmod -vR 777 "$2"
+            mkdir -vp "$1/config"   &&  chmod -vR 777 "$1/config"
+            mkdir -vp "$1/site"     &&  chmod -vR 777 "$1/site"
+            mkdir -vp "$2/courses"  &&  chmod -vR 777 "$2/courses"
 
+            sudo -E python3 "$3/Submitty/.setup/generate_configs.py" \
+                        --install-dir "$1"
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --argjson v $4 '.database_port = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$2" '.submitty_data_dir = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$3/Submitty" '.submitty_repository = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+
+            sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
+                        --install-dir "$1"
+            sudo -E python3 "$3/Submitty/.setup/validate_configs.py" \
+                        --install-dir "$1" --data-dir "$2"
+
+            # Copy necessary files to the installation path
+            cp -vr "$3/Submitty/sbin" "$1"
+            sudo chmod -vR 777 "$1/config"
+            sudo chmod -vR 777 "$1/sbin"
+          }
+
+          configure_submitty_main "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
+            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
+          configure_submitty_branch "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
+            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
 
       - name: Create Databases
         run: |
@@ -667,7 +693,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - uses: ./.github/actions/e2e-Setup-Composite
+      - name: Run setup script
+        uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v5
@@ -905,6 +932,12 @@ jobs:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: submitty.json
+          path: /usr/local/submitty/config/submitty.json
+
 
   Integration:
     name: Integration
@@ -956,11 +989,18 @@ jobs:
           rm -rf /opt/ghc
           rm -rf "$AGENT_TOOLSDIRECTORY"
 
+      - name: Update database values
+        run: |
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "${{ github.WORKSPACE }}/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/database.json"
+            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "${{ github.WORKSPACE }}/.setup/data/configs/authentication.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/authentication.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${{ github.WORKSPACE }}/.setup/data/configs/submitty.json"
+
       - name: Run ansible script
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_config_location=${{ github.WORKSPACE }}/.setup/data/configs/ submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
 
       - name: Set perms
