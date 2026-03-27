@@ -41,3 +41,4 @@ If you have a question, please [contact us](https://submitty.org/index/contact) 
 Submitty is licensed under BSD "3-Clause" which can be viewed in [LICENSE](LICENSE.md)  
 Licenses for the 3rd party components can be viewed in [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 
+Setup done
