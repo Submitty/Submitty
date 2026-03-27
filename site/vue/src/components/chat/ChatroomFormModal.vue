@@ -80,7 +80,9 @@ function submitForm() {
     @toggle="$emit('close')"
     @save="submitForm"
   >
-    <template #trigger />
+    <template #trigger>
+      <span style="display: none" />
+    </template>
     <form
       id="chatroom-modal-form"
       :action="formAction"

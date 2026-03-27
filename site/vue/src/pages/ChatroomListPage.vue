@@ -163,7 +163,7 @@ onMounted(() => {
 <template>
   <div class="content">
     <div class="chatroom-list-header">
-      <h1> Live Chat </h1>
+      <h1>Live Chat</h1>
       <a
         v-if="userAdmin"
         href="javascript:void(0)"
@@ -174,7 +174,7 @@ onMounted(() => {
     </div>
     <hr>
     <div class="chatrooms-table-wrapper table-responsive">
-      <h2> Chatrooms </h2>
+      <h2>Chatrooms</h2>
       <table
         id="chatrooms-table"
         class="table table-striped"
