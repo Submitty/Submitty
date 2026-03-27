@@ -412,16 +412,9 @@
         //twig will call
         {#create setNotification#}
         function setNotification(button){
-            const container = $('#sync-course-container');
+            const selected = $('#sync_course_ids').val();
 
             //first click -> show selector instead of syncing
-            if (container.is(':hidden')) {
-                container.slideDown();
-                return;
-            }
-
-            //ensure at least one course selected
-            const selected = $('#sync_course_ids').val();
             if (!selected || selected.length === 0) {
                 displayErrorMessage("Please select at least one course.");
                 return;
@@ -430,12 +423,13 @@
             //perform sycning
             $.ajax({
                 type: "POST",
-                url: "{{ sync_settings_url }}", 
-                data: $('#form_notification_settings').serialize(),
-                success: function(data){
-                    displaySuccessMessage("Synced to all courses.");
-                }
-                error: function(){
+                url: "{{ sync_settings_url }}",
+                data: $('#form_notification_settings').serialize() + '&' + $.param({sync_course_ids: selected}),
+                success: function () {
+                    displaySuccessMessage("Synced to selected courses.");
+                    $('.popup-form').hide();
+                },
+                error: function () {
                     displayErrorMessage("Failed to sync settings.");
                 }
             });
@@ -445,6 +439,11 @@
         //put example function here
         //will call twig, which twig will then call above function
         function showSyncPopup() {
+            $('.popup-form').hide();
+            $('#sync-notification-popup').show();
+        }
+
+        {# function showSyncPopup() {
             $('.popup-form').css('display', 'none');
             const form = $('#edit-display-name-order-form');
             form.css('display', 'block');
@@ -452,7 +451,7 @@
             if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
                 document.getElementById('display-name-order-change').value = displayNameOrderLast;
             }
-        }
+        } #}
 
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
