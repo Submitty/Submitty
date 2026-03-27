@@ -180,9 +180,6 @@ a.cal-btn:focus {
     padding: 0 0 0 5px;
     display: block;
     width: 98%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
     background-image: none;
     border-radius: 4px;
@@ -204,7 +201,6 @@ a.cal-gradeable-status-text {
     color: var(--text-black);
     padding: 0;
     border: none;
-    -webkit-box-shadow: none;
     box-shadow: none;
     cursor: default;
 }
@@ -228,7 +224,6 @@ a.cal-gradeable-status-ann {
     font-style: italic;
     border-style: solid;
     border-width: 3px;
-    -webkit-box-shadow: none;
     box-shadow: none;
     cursor: default;
 }
@@ -254,7 +249,6 @@ a.cal-gradeable-status-link {
     padding: 0;
     text-decoration: underline;
     border: none;
-    -webkit-box-shadow: none;
     box-shadow: none;
 }
 
@@ -280,7 +274,6 @@ a.cal-gradeable-status-link:focus {
 div.calendar-submit {
     display: grid;
     grid-template-columns: max-content max-content;
-    grid-template-columns: -webkit-max-content -webkit-max-content;
     grid-template-columns: max-content max-content;
     gap: 5px;
 }
