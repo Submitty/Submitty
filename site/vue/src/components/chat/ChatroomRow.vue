@@ -148,7 +148,7 @@ function onClear() {
         class="btn btn-danger"
         @click="toggleChatroom"
       >
-        <i class="fas fa-pause" />
+        <i class="fas fa-pause white-icon" />
         End Session
       </button>
     </td>
@@ -228,3 +228,12 @@ function onClear() {
     </td>
   </tr>
 </template>
+
+<style scoped>
+.white-icon {
+    color: white;
+}
+.readonly-badge {
+    margin-right: 5px;
+}
+</style>

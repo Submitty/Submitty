@@ -123,40 +123,55 @@ function removeChatroomRow(chatroomId: number) {
     }
 }
 
-onMounted(() => {
-    if (typeof (window as any).WebSocketClient === 'undefined') {
-        return;
-    }
-    const socketClient = new (window as any).WebSocketClient();
-    socketClient.onmessage = (msg: any) => {
-        const isActive = msg.type === 'chat_open';
-        switch (msg.type) {
-            case 'chat_open':
-            case 'chat_close':
-            case 'chat_create':
-                handleChatStateChange(msg, isActive);
-                break;
-            case 'chat_delete':
-                removeChatroomRow(msg.chatroom_id);
-                break;
-            default:
-                console.error('Unknown message type:', msg);
+const initWebSocket = (retries = 10) => {
+    try {
+        if (typeof (window as any).WebSocketClient === 'undefined') {
+            if (retries > 0) {
+                setTimeout(() => initWebSocket(retries - 1), 500);
+            }
+            return;
         }
-    };
-    socketClient.open('chatrooms');
+
+        const socketClient = new (window as any).WebSocketClient();
+        socketClient.onmessage = (msg: any) => {
+            const isActive = msg.type === 'chat_open';
+            switch (msg.type) {
+                case 'chat_open':
+                case 'chat_close':
+                case 'chat_create':
+                    handleChatStateChange(msg, isActive);
+                    break;
+                case 'chat_delete':
+                    removeChatroomRow(msg.chatroom_id);
+                    break;
+                default:
+                    // Unknown message type
+            }
+        };
+        socketClient.open('chatrooms');
+    }
+    catch (err) {
+        // Failed to initialize WebSocket
+    }
+};
+
+onMounted(() => {
+    initWebSocket();
 });
 </script>
 
 <template>
   <div class="content">
-    <h1> Live Chat </h1>
-    <a
-      v-if="userAdmin"
-      href="javascript:void(0)"
-      data-testid="new-chatroom-btn"
-      class="btn btn-primary"
-      @click="openCreateModal"
-    >New Chatroom</a>
+    <div class="chatroom-list-header">
+      <h1> Live Chat </h1>
+      <a
+        v-if="userAdmin"
+        href="javascript:void(0)"
+        data-testid="new-chatroom-btn"
+        class="btn btn-primary"
+        @click="openCreateModal"
+      >New Chatroom</a>
+    </div>
     <hr>
     <div class="chatrooms-table-wrapper table-responsive">
       <h2> Chatrooms </h2>
@@ -274,3 +289,12 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style scoped>
+.chatroom-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+</style>
