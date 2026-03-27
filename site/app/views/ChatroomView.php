@@ -5,7 +5,6 @@ namespace app\views;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\entities\chat\Chatroom;
-use app\libraries\FileUtils;
 
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
@@ -19,35 +18,7 @@ class ChatroomView extends AbstractView {
     /**
      * @param Chatroom[] $chatrooms Array of Chatroom objets
      */
-    public function showChatPageInstructor(array $chatrooms): string {
-        return $this->core->getOutput()->renderTwigTemplate("chat/ChatPageIns.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/chat',
-            'semester' => $this->core->getConfig()->getTerm(),
-            'course' => $this->core->getConfig()->getCourse(),
-            'chatrooms' => $chatrooms
-        ]);
-    }
-
-    /**
-     * @param Chatroom[] $chatrooms Array of Chatroom objets
-     */
-    public function showChatPageStudent(array $chatrooms): string {
-        return $this->core->getOutput()->renderTwigTemplate("chat/ChatPageStu.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/chat',
-            'semester' => $this->core->getConfig()->getTerm(),
-            'course' => $this->core->getConfig()->getCourse(),
-            'chatrooms' => $chatrooms
-        ]);
-    }
-
-    /**
-     * @param Chatroom[] $chatrooms Array of Chatroom objets
-     */
     public function showAllChatrooms(array $chatrooms): string {
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-
         $chatroom_rows = [];
         foreach ($chatrooms as $chatroom) {
             $chatroom_rows[] = [
@@ -61,12 +32,15 @@ class ChatroomView extends AbstractView {
                 'allowReadOnlyAfterEnd' => $chatroom->allowReadOnlyAfterEnd()
             ];
         }
-        return $this->core->getOutput()->renderTwigTemplate("chat/AllChatroomsPage.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/chat',
-            'semester' => $this->core->getConfig()->getTerm(),
-            'chatrooms' => $chatroom_rows,
-            'user_admin' => $this->core->getUser()->accessAdmin(),
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "page",
+            "name" => "ChatroomListPage",
+            "args" => [
+                "chatrooms" => $chatroom_rows,
+                "userAdmin" => $this->core->getUser()->accessAdmin(),
+                "baseUrl" => $this->core->buildCourseUrl() . '/chat',
+                "csrfToken" => $this->core->getCsrfToken(),
+            ]
         ]);
     }
 
