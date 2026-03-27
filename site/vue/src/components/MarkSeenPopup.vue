@@ -99,6 +99,7 @@ function markSeen() {
       <button
         class="btn btn-primary"
         @click="toggle"
+        data-testid="mark-seen-btn"
       >
         Mark as seen
       </button>
@@ -128,6 +129,7 @@ function markSeen() {
         <a
           class="btn btn-primary"
           @click="selectAll"
+          data-testid="select-mark-all"
         >
           Select All
         </a>
