@@ -66,14 +66,7 @@ function init() {
             document.getElementById('radio-bulk')!.click();
         }
         else if (prevSetting === 'placeholder') {
-            setTimeout(() => {
-                const RadioPlaceholder = document.getElementById('radio-placeholder') as HTMLInputElement;
-                RadioPlaceholder.checked = true;
-                const SubmitButton = document.getElementById('submit') as HTMLButtonElement;
-                SubmitButton.removeAttribute('disabled');
-                SubmitButton.classList.remove('disable-submit');
-                RadioPlaceholder.click();
-            }, 0);
+            document.getElementById('radio-placeholder')!.click();
         }
     }
 
@@ -115,6 +108,10 @@ function init() {
     if (prevScanSetting) {
         useScanIdsCheckBox!.checked = prevScanSetting === 'true';
     }
+    
+    setTimeout(() => {
+        (document.querySelector('input[name="submission-type"]:checked') as HTMLInputElement)?.click();
+    }, 0);    
 }
 
 /**
@@ -207,7 +204,8 @@ function changeSubmissionMode(event: Event) {
             const bulkProgressBox = document.getElementById('bulk_progress_box');
             bulkProgressBox!.style.display = 'none';
             SubmitButton!.innerText = 'Submit All with Placeholder';
-            SubmitButton!.removeAttribute('disabled');
+            (SubmitButton as HTMLButtonElement).disabled = false;
+            SubmitButton!.classList.remove('disabled');
             SubmitButton!.classList.remove('disable-submit');
             SubmitButton!.onclick = function () {
                 window.blankSubmitAll();
