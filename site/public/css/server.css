@@ -1,6 +1,55 @@
 @import url("reset.css");
 @import url("google/inconsolata.css");
 
+.alert-banner {
+    background-color: var(--alert-banner-bg);
+    color: var(--alert-banner-text);
+    padding: 15px 20px;
+    margin: 10px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px var(--box-shadow-slightly-transparent);
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-left: 5px solid var(--alert-banner-info);
+    max-width: 100%;
+}
+
+.alert-banner[hidden] {
+    display: none;
+}
+
+.alert-banner .fas, .alert-banner .far {
+    margin-right: 15px;
+    font-size: 1.2em;
+}
+
+.alert-banner.alert-danger, .alert-danger {
+    background-color: var(--alert-banner-bg);
+    border-color: var(--alert-banner-error) !important;
+}
+.alert-banner.alert-danger .fas, .alert-banner.alert-danger .far { color: var(--alert-banner-error); }
+
+.alert-banner.alert-warning, .alert-warning {
+    background-color: var(--alert-banner-bg);
+    border-color: var(--alert-banner-warning) !important;
+}
+.alert-banner.alert-warning .fas, .alert-banner.alert-warning .far { color: var(--alert-banner-warning); }
+
+.alert-banner.alert-success, .alert-success {
+    background-color: var(--alert-banner-bg);
+    border-color: var(--alert-banner-success) !important;
+}
+.alert-banner.alert-success .fas, .alert-banner.alert-success .far { color: var(--alert-banner-success); }
+
+.alert-banner.alert-info, .alert-info {
+    background-color: var(--alert-banner-bg);
+    border-color: var(--alert-banner-info) !important;
+}
+.alert-banner.alert-info .fas, .alert-banner.alert-info .far { color: var(--alert-banner-info); }
+
+
 /* stylelint-disable no-descending-specificity */
 
 a,

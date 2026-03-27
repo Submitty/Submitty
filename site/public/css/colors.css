@@ -238,6 +238,22 @@
     --diff-background-expected: #defae1;
     --diff-char-background-actual: #fbc1c0;
     --diff-char-background-expected: #a8edb0;
+
+    /* Clean Alert Banners */
+    --alert-banner-bg: #ffffff;
+    --alert-banner-error: #dc3545;
+    --alert-banner-warning: #ffc107;
+    --alert-banner-success: #28a745;
+    --alert-banner-info: #17a2b8;
+    --alert-banner-text: #000000;
+}
+[data-theme="dark"] {
+    --alert-banner-bg: #2a2a2a;
+    --alert-banner-text: #e0e0e0;
+    --alert-banner-error: #ff6b6b;
+    --alert-banner-warning: #ffd93d;
+    --alert-banner-success: #6bcb77;
+    --alert-banner-info: #4d96ff;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
@@ -369,6 +385,14 @@
     --diff-background-expected: #16261e;
     --diff-char-background-actual: #7a3133;
     --diff-char-background-expected: #29562d;
+
+    /*banner*/
+    --alert-banner-bg: #2b2b2b;
+    --alert-banner-error: #ff7a7a;
+    --alert-banner-warning: #ffc107;
+    --alert-banner-success: #28a745;
+    --alert-banner-info: #17a2b8;
+    --alert-banner-text: #ffffff;
 }
 
 /* Dark Theme Versions of Colors */

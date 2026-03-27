@@ -84,7 +84,7 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
       v-for="message in activeMessages"
       :id="`${message.type}-${message.key}`"
       :key="message.key"
-      :class="`inner-message alert alert-${message.type}`"
+      :class="['inner-message', 'alert-banner', message.type === 'error' ? 'alert-danger' : `alert-${message.type}`]"
       data-testid="popup-message"
     >
       <span>
