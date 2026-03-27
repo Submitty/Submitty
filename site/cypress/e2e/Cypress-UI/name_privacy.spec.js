@@ -73,3 +73,4 @@ describe('Legal name privacy tests', () => {
         });
     });
 });
+
