@@ -657,6 +657,17 @@ void parse_command_line(const std::string &cmd,
 // =====================================================================================
 // =====================================================================================
 
+std::string get_std_outfile(std::string cmd)
+{
+  size_t index = cmd.find("1>");
+  if (index == std::string::npos) return "";
+  std::string file = cmd.substr(index + 2);
+  size_t space_index = file.find(" ");
+  if (space_index != std::string::npos) {
+      file = file.substr(0, space_index);
+  }
+  return file;
+}
 std::string get_std_errfile(std::string cmd)
 {
 	size_t index = cmd.find("2>");
@@ -1012,8 +1023,14 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
       ret = poll(&fds, 1, 100); //.1 second timeout
 
       if (ret > 0){
-        std::getline (std::cin,my_string);
-        std::cout << "Cin received: " << my_string << std::endl;
+       if(std::getline(std::cin,my_string)) {
+         if(!my_string.empty()&& my_string.back()=='\r'){
+           my_string.pop_back();
+         }
+          std::cout << "Cin received: " << my_string << std::endl;
+        }else{
+          continue;
+        }
 
         lock->lock();
         input_queue->push(my_string);
@@ -1286,6 +1303,13 @@ int execute(const std::string &cmd,
               dispatcher_actions_ended = true;
             }else{
               write(dispatcherpipe[1], piped_message, strlen(popped_nl.c_str()));
+              std::string std_outfile = get_std_outfile(cmd);
+              if (std_outfile != "") {
+                std::ofstream student_stdout(std_outfile, std::ios_base::app);
+                if (student_stdout.is_open()) {
+                  student_stdout << popped_nl << std::flush;
+                }
+              }
               std::cout << "Writing to student stdin: " << popped << std::endl;
             }
           }
