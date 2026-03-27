@@ -108,10 +108,10 @@ function init() {
     if (prevScanSetting) {
         useScanIdsCheckBox!.checked = prevScanSetting === 'true';
     }
-    
+
     setTimeout(() => {
         (document.querySelector('input[name="submission-type"]:checked') as HTMLInputElement)?.click();
-    }, 0);    
+    }, 0);
 }
 
 /**
