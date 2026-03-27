@@ -621,7 +621,7 @@ jobs:
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
-          diff --color
+          diff --color \
             -I '^\\\\restrict' \
             -I '^\\\\unrestrict' \
             ${GITHUB_WORKSPACE}/dumped/branch/master.sql \
@@ -633,7 +633,7 @@ jobs:
       - name: Compare Migrated course Database with Provided Dump
         if: always()
         run: |
-          diff --color 
+          diff --color \
             -I '^\\\\restrict' \
             -I '^\\\\unrestrict' \
             ${GITHUB_WORKSPACE}/dumped/branch/course.sql \
