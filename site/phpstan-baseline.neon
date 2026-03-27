@@ -2197,6 +2197,30 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
+			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			identifier: equal.notAllowed
+			count: 2
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
+			identifier: equal.notAllowed
+			count: 2
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			identifier: equal.notAllowed
+			count: 7
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			identifier: equal.notAllowed
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
 			rawMessage: 'Method app\controllers\forum\ForumController::addNewCategory() has no return type specified.'
 			identifier: missingType.return
 			count: 1
