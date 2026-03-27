@@ -35,7 +35,7 @@ class TeamView extends AbstractView {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $gradeable->getId(),
-                $gradeable_team
+                $team?->getId()
             );
             $vcs_repo_exists = file_exists($path);
         }
