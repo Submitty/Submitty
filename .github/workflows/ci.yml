@@ -618,20 +618,27 @@ jobs:
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql                         \
-                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
-            echo "::error:: Wrong provided dump, please check your database dumps"
-            exit 1
-          }
+          diff --color \
+            -I '^\\restrict' \
+            -I '^\\unrestrict' \
+            ${GITHUB_WORKSPACE}/dumped/branch/master.sql \
+            ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql \
+            || {
+              echo "::error:: Wrong provided dump, please check your database dumps"
+              exit 1
+            }
 
       - name: Compare Migrated course Database with Provided Dump
         if: always()
-        run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql                         \
-                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
-            echo "::error:: Wrong provided dump, please check your database dumps"
-            exit 1
-          }
+                diff --color \
+            -I '^\\restrict' \
+            -I '^\\unrestrict' \
+            ${GITHUB_WORKSPACE}/dumped/branch/course.sql \
+            ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql \
+            || {
+              echo "::error:: Wrong provided dump, please check your database dumps"
+              exit 1
+            }
 
       - name: Pack Artifacts
         if: failure()
