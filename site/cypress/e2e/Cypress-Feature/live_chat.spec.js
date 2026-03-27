@@ -251,6 +251,10 @@ const clearChat = (title) => {
     });
 };
 
+const shuffleAnonNames = (title) => {
+    getChatroom(title).find('[data-testid="shuffle-anon-names"]').first().click();
+};
+
 const visitLiveChat = (user) => {
     cy.logout();
     cy.login(user);
@@ -415,6 +419,40 @@ describe('Tests for creating, editing and using tests', () => {
                     enterChat(title1, true);
                     checkChatMessage(anonMsg5, studentAnon, anonStudentMsgId);
                     sendChatMessage(anonMsg6, instructorAnon, finalAnonInstructorMsgId);
+                });
+            });
+        });
+    });
+
+    it('Should test shuffling anonymous names multiple times', () => {
+        createChatroom(title1, description1, true);
+        startChatSession(title1);
+
+        enterChat(title1, true);
+        generateBaseMessageID().then((baseId) => {
+            const anonInstructorMsg1Id = baseId + 1;
+            const anonInstructorMsg2Id = baseId + 2;
+            const anonInstructorMsg3Id = baseId + 3;
+
+            sendChatMessage(anonMsg1, 'Anonymous', anonInstructorMsg1Id);
+            getAnonName().then((initialAnonName) => {
+                leaveChat(title1);
+
+                shuffleAnonNames(title1);
+
+                enterChat(title1, true);
+                sendChatMessage(anonMsg2, 'Anonymous', anonInstructorMsg2Id);
+                getAnonName().then((firstShuffledAnonName) => {
+                    expect(firstShuffledAnonName).to.not.equal(initialAnonName);
+                    leaveChat(title1);
+
+                    shuffleAnonNames(title1);
+
+                    enterChat(title1, true);
+                    sendChatMessage(anonMsg6, 'Anonymous', anonInstructorMsg3Id);
+                    getAnonName().then((secondShuffledAnonName) => {
+                        expect(secondShuffledAnonName).to.not.equal(firstShuffledAnonName);
+                    });
                 });
             });
         });

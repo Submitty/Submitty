@@ -135,6 +135,38 @@ function socketChatMessageHandler(msg) {
     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
+function shuffleAnonName(chatroomId) {
+    $.ajax({
+        url: buildCourseUrl(['chat', chatroomId, 'regenerateAnonName']),
+        type: 'POST',
+        data: {
+            csrf_token: csrfToken,
+        },
+        success: function (response) {
+            const msg = typeof response === 'string' ? JSON.parse(response) : response;
+            if (msg.status === 'success') {
+                displaySuccessMessage('Anonymous names have been shuffled!');
+                const pageDataElement = document.getElementById('page-data');
+                if (pageDataElement) {
+                    const pageData = JSON.parse(pageDataElement.textContent);
+                    if (pageData.isAnonymous) {
+                        pageData.displayName = msg.data.newName;
+                        window.currentChatDisplayName = msg.data.newName;
+                        pageDataElement.textContent = JSON.stringify(pageData);
+                        showJoinMessage(`Your anonymous name is now ${msg.data.newName}.`);
+                    }
+                }
+            }
+            else {
+                displayErrorMessage(msg.message || 'Failed to shuffle anonymous names');
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong with shuffling anonymous names');
+        },
+    });
+}
+
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
@@ -160,6 +192,30 @@ function initChatroomSocketClient(chatroomId) {
                 const msgElement = document.getElementById(msg.message_id);
                 if (msgElement) {
                     msgElement.remove();
+                }
+                break;
+            }
+            case 'anon_names_regenerated': {
+                const messages = document.querySelectorAll('.message-container');
+                let hasAnonymousMessages = false;
+                messages.forEach((messageElement) => {
+                    const senderNameElement = messageElement.querySelector('.sender-name');
+                    if (senderNameElement && senderNameElement.innerText.startsWith('Anonymous')) {
+                        hasAnonymousMessages = true;
+                    }
+                });
+                if (hasAnonymousMessages) {
+                    showJoinMessage('Anonymous names have been shuffled by the instructor.');
+                }
+                const pageDataElement = document.getElementById('page-data');
+                if (pageDataElement) {
+                    const pageData = JSON.parse(pageDataElement.textContent);
+                    if (pageData.isAnonymous) {
+                        pageData.displayName = msg.newName;
+                        window.currentChatDisplayName = msg.newName;
+                        pageDataElement.textContent = JSON.stringify(pageData);
+                        showJoinMessage(`Your anonymous name is now ${msg.newName}.`);
+                    }
                 }
                 break;
             }
@@ -320,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
         const { chatroomId, userId, displayName, user_admin, isAnonymous, read_only } = pageData;
+        window.currentChatDisplayName = displayName;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
 
@@ -348,7 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const role = user_admin ? 'instructor' : 'student';
-                sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+                const activeDisplayName = window.currentChatDisplayName || displayName;
+                sendMessage(chatroomId, userId, activeDisplayName, role, messageContent, isAnonymous);
 
                 messageInput.value = '';
             });
