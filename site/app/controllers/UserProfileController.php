@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -92,9 +93,14 @@ class UserProfileController extends AbstractController {
             && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']
         ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
+            if (!Utils::isValidPassword($_POST['new_password'], $this->core->getConfig()->getPasswordRequirements())) {
+                $this->core->addErrorMessage("Password does not meet the requirements.");
+            }
+            else {
+                $user->setPassword($_POST['new_password']);
+                $this->core->getQueries()->updateUser($user);
+                $this->core->addSuccessMessage("Updated password");
+            }
         }
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
