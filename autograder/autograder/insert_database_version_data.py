@@ -269,6 +269,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     db.close()
     engine.dispose()
 
+
 """
 Build the rows for full autograding results
 """
@@ -276,7 +277,7 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_te
     rows = []
     for i in range(len(testcases)):
         spec = testcases[i]
-        res  = results_testcases[i]
+        res = results_testcases[i]
         rows.append({
             "g_id":            g_id,
             "user_id":         user_id if user_id else None,
@@ -293,14 +294,14 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_te
 
 
 
-"""
-Delete all existing testcase rows for this (g_id, user/team, version),
-then insert the new rows (only delete for regrades)
-"""
 def upsert_testcase_results(db, table, rows, g_id, user_id, team_id, g_version):
+    """
+    Delete all existing testcase rows for this (g_id, user/team, version),
+    then insert the new rows (only delete for regrades)
+    """
     delete_stmt = (
         delete(table)
-        .where(table.c.g_id      == g_id)
+        .where(table.c.g_id == g_id)
         .where(table.c.g_version == g_version)
     )
     if user_id is not None:
@@ -404,3 +405,4 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
             result_details['submission_time'] = a.strftime('%Y-%m-%d %H:%M:%S%z')
     return result_details
+    
