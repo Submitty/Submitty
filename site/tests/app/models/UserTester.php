@@ -31,7 +31,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'course_section_id' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
+            'grading_registration_sections' => [1, 2],
+            'registration_timestamp' => '2025-03-22 14:30:00'
         ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
@@ -48,6 +49,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['rotating_section'], $user->getRotatingSection());
         $this->assertEquals($details['manual_registration'], $user->isManualRegistration());
         $this->assertEquals([1,2], $user->getGradingRegistrationSections());
+        $this->assertEquals($details['registration_timestamp'], $user->getRegistrationTimestamp());
         $this->assertEquals('staff', $user->getRegistrationType());
         $this->assertTrue($user->accessAdmin());
         $this->assertTrue($user->accessFullGrading());
@@ -214,6 +216,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'self_registration_email' => true,
             ],
             'registration_subsection' => '',
+            'registration_timestamp' => null,
             'enforce_single_session' => false,
             'instructor_courses' => false,
         ];
