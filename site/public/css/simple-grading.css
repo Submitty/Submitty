@@ -32,18 +32,14 @@ tr > td:nth-child(3) {
     left: 5.25rem;
 }
 
+
 tr > th:nth-child(4),
 tr > td:nth-child(4) {
     position: sticky;
     left: 10.75rem;
+    border-right: 1px solid var(--standard-medium-gray);  
 }
 
-tr > th:nth-child(5),
-tr > td:nth-child(5) {
-    position: sticky;
-    left: 16.75rem;
-    border-right: 1px solid var(--standard-medium-gray);
-}
 
 .highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
     /* stylelint-disable-next-line declaration-no-important */
