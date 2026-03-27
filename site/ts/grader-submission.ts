@@ -199,11 +199,11 @@ function changeSubmissionMode(event: Event) {
             break;
         case 'radio-placeholder': {
             sessionStorage.setItem(`${window.gradeable_id}-submission_mode`, 'placeholder');
-            message = 'Warning: Uploading placeholder submission for all students on this gradeable!';
+            message = 'Warning: An empty pdf placeholder will be submitted for every student!';
             uploadBoxes!.style.display = 'none';
             const bulkProgressBox = document.getElementById('bulk_progress_box');
             bulkProgressBox!.style.display = 'none';
-            SubmitButton!.innerText = 'Submit All with Placeholder';
+            SubmitButton!.innerText = 'Submit Placeholder for Every Student';
             (SubmitButton as HTMLButtonElement).disabled = false;
             SubmitButton!.classList.remove('disabled');
             SubmitButton!.classList.remove('disable-submit');
