@@ -413,3 +413,11 @@ div:has(.override)
     color: var(--standard-bronze);
     margin-left: 8px;
 }
+
+.manual-generation-warning {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-left: 4px solid var(--standard-vibrant-orange);
+    background-color: var(--alert-warning-yellow);
+    color: var(--warning-brown);
+}
