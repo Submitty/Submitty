@@ -274,7 +274,6 @@ a.cal-gradeable-status-link:focus {
 div.calendar-submit {
     display: grid;
     grid-template-columns: max-content max-content;
-    grid-template-columns: max-content max-content;
     gap: 5px;
 }
 div.calendar-submit label {
@@ -291,7 +290,6 @@ div.filter-courses-menu {
 }
 
 div.options-colors {
-    display: -ms-grid;
     display: grid;
 }
 
