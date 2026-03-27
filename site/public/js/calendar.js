@@ -508,16 +508,8 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     const fragment = document.createDocumentFragment();
 
     // Build first header column
-    const th = document.createElement('th');
-    th.style.width = '100%';
-    th.colSpan = '7';
-
-    // Build the container for the header, which contains the month and year switching buttons and the month/year title
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.justifyContent = 'center';
-    container.style.alignItems = 'end';
-
+    const th1 = document.createElement('th');
+    th1.colSpan = 3;
     let div = document.createElement('div');
     div.classList.add('cal-switch');
     div.id = 'prev-month-switch';
@@ -538,9 +530,11 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     // Append to header
     div.appendChild(a);
-    container.appendChild(div);
+    th1.appendChild(div);
 
     // Build second header column
+    const th2 = document.createElement('th');
+    th2.colSpan = 1;
     div = document.createElement('div');
     div.classList.add('cal-title');
 
@@ -596,9 +590,11 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
     });
     dropdownContainer.append(monthSelect).append(yearSelect);
     div.appendChild(dropdownContainer[0]);
-    container.appendChild(div);
+    th2.appendChild(div);
 
     // Build third header column
+    const th3 = document.createElement('th');
+    th3.colSpan = 3;
     div = document.createElement('div');
     div.classList.add('cal-switch');
     div.id = 'next-month-switch';
@@ -619,13 +615,12 @@ function buildSwitchingHeader(view_year, view_month, view_day, type) {
 
     // Append to header
     div.appendChild(a);
-    container.appendChild(div);
+    th3.appendChild(div);
 
-    // Append the entire header to the first column
-    th.appendChild(container);
-
-    // Append the column to the header row
-    fragment.appendChild(th);
+    // Append all elements to fragment
+    fragment.appendChild(th1);
+    fragment.appendChild(th2);
+    fragment.appendChild(th3);
 
     return fragment;
 }
