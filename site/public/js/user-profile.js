@@ -3,7 +3,8 @@ showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUp
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, csrfToken, updateSidebarPreference, CollapseSidebarOnNarrowView, DisableAutomaticCollapse,
+  updateTheme, displayWarningMessage */
 
 // This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
@@ -116,7 +117,6 @@ function updateUserPronouns(e) {
     else {
         const data = new FormData();
         const isForumDisplayChecked = forumDisplay.prop('checked');
-        // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
         data.append('pronouns-forum-display', isForumDisplayChecked);
@@ -165,7 +165,6 @@ function updateDisplayNameOrder(e) {
     displayNameOrderLast = displayNameOrder.val();
 
     const data = new FormData();
-    // eslint-disable-next-line no-undef
     data.append('csrf_token', csrfToken);
     data.append('display-name-order', displayNameOrder.val());
     const url = buildUrl(['user_profile', 'change_display_name_order']);
@@ -213,7 +212,6 @@ function updateUserPreferredNames() {
     }
     else {
         const data = new FormData();
-        // eslint-disable-next-line no-undef
         data.append('csrf_token', csrfToken);
         data.append('given_name', given_name_field.val());
         data.append('family_name', family_name_field.val());
@@ -355,7 +353,6 @@ function updateUserSecondaryEmail() {
         }
         else {
             const data = new FormData();
-            // eslint-disable-next-line no-undef
             data.append('csrf_token', csrfToken);
             data.append('secondary_email', second_email.val());
             data.append('secondary_email_notify', second_email_notify.get(0).checked);
@@ -416,23 +413,19 @@ function previewUserLastInitialFormat() {
 
 $(document).ready(() => {
     $('#desktop_sidebar_preference').change(() => {
-        // eslint-disable-next-line no-undef
         updateSidebarPreference();
         location.reload();
     });
     if (localStorage.getItem('desktop-sidebar-preference')) {
         if (localStorage.getItem('desktop-sidebar-preference') === 'automatic') {
-            // eslint-disable-next-line no-undef
             CollapseSidebarOnNarrowView();
         }
         else {
-            // eslint-disable-next-line no-undef
             DisableAutomaticCollapse();
         }
     }
 
     $('#theme_change_select').change(() => {
-        // eslint-disable-next-line no-undef
         updateTheme();
         if (JSON.parse(localStorage.getItem('rainbow-mode')) === true) {
             $(document.body).find('#rainbow-mode').remove();
@@ -469,7 +462,6 @@ $(document).ready(() => {
             type: 'POST',
             url: buildUrl(['user_profile', 'change_time_zone']),
             data: {
-                // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
                 time_zone,
             },
@@ -483,7 +475,6 @@ $(document).ready(() => {
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
                     if (response.data.utc_offset !== offset) {
-                        // eslint-disable-next-line no-undef
                         displayWarningMessage('Selected time-zone does not match system time-zone.');
                     }
                 }
@@ -516,7 +507,6 @@ $(document).ready(() => {
             type: 'POST',
             url: buildUrl(['user_profile', 'set_pref_locale']),
             data: {
-                // eslint-disable-next-line no-undef
                 csrf_token: csrfToken,
                 locale: $(this).val(),
             },
