@@ -10,8 +10,13 @@ changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
 let pronounsLastVal = null;
 let displayNameOrderLast = 'GIVEN_F';
 
+function closePopup() {
+    $('.popup-form').hide();
+    $('body').css('overflow', 'auto');
+}
+
 function showUpdatePrefNameForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-username-form');
     showPopup('#edit-username-form');
     form.find('.form-body').scrollTop(0);
@@ -20,7 +25,7 @@ function showUpdatePrefNameForm() {
 }
 
 function showUpdateLastInitialFormatForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-last-initial-format-form');
     showPopup('#edit-last-initial-format-form');
     form.find('.form-body').scrollTop(0);
@@ -29,7 +34,7 @@ function showUpdateLastInitialFormatForm() {
 }
 
 function showUpdatePronounsForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-pronouns-form');
     showPopup('#edit-pronouns-form');
     form.find('.form-body').scrollTop(0);
@@ -39,7 +44,7 @@ function showUpdatePronounsForm() {
 }
 
 function showDisplayNameOrderForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-display-name-order-form');
     form.css('display', 'block');
     form.find('.form-body').scrollTop(0);
@@ -49,7 +54,7 @@ function showDisplayNameOrderForm() {
 }
 
 function showUpdatePasswordForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#change-password-form');
     showPopup('#change-password-form');
     form.find('.form-body').scrollTop(0);
@@ -59,14 +64,14 @@ function showUpdatePasswordForm() {
 }
 
 function showUpdateProfilePhotoForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-profile-photo-form');
     showPopup('#edit-profile-photo-form');
     form.find('.form-body').scrollTop(0);
 }
 
 function showUpdateSecondaryEmailForm() {
-    $('.popup-form').css('display', 'none');
+    closePopup();
     const form = $('#edit-secondary-email-form');
     showPopup('#edit-secondary-email-form');
     form.find('.form-body').scrollTop(0);
@@ -253,7 +258,7 @@ function updateUserPreferredNames() {
         });
     }
     // hide the form form view
-    $('.popup-form').css('display', 'none');
+    closePopup();
     return false;
 }
 
@@ -291,7 +296,7 @@ function updateUserLastInitialFormat() {
         },
     });
     // hide the form form view
-    $('.popup-form').css('display', 'none');
+    closePopup();
     return false;
 }
 
@@ -336,7 +341,7 @@ function updateUserProfilePhoto() {
         },
     });
     // hide the form from view
-    $('.popup-form').css('display', 'none');
+    closePopup();
     $('#user-image-button').val(null);
     return false;
 }
@@ -387,7 +392,7 @@ function updateUserSecondaryEmail() {
             });
         }
     }
-    $('.popup-form').css('display', 'none');
+    closePopup();
     return false;
 }
 

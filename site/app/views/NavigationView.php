@@ -520,9 +520,12 @@ class NavigationView extends AbstractView {
                 $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete()
                 && (
                     !$gradeable->getAutogradingConfig()->anyPoints()
-                    || $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0
-                    && $points_percent >= 0.5
-                )
+                    || $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() == 0
+		    || (
+            		$gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0
+            		&& $points_percent >= 0.5
+        	    )
+		)
                 && $list_section == GradeableList::CLOSED
             ) {
                 $class = "btn-default";
