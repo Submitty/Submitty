@@ -106,61 +106,18 @@
         <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
     </div>
 
-    <div class="raw-config-info">
-        <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
-        <div class="option-title raw-config-info-header">
-            <span>Edit Uploaded Configuration:</span>
-            <p class="not-available-message" id="editor-not-available">
-                Not available for provided configurations.
-            </p>
-            <a class="btn btn-primary editor-toggle-btn" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">
-                Open Editor
-            </a>
-        </div>
-        <div id="gradeable-config-structure">
-            <p class="config-editor-about">
-                Click on a folder to see its contents. Click on a file to view it in the gradeable editor. You can add or delete individual files and folders as needed. 
-                By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files 
-                within it!</i> This feature is intended for <i>small changes</i> to an existing configuration. For larger changes 
-                to the file structure, consider reuploading the full configuration.
-            </p>
-            <div>
-                <div>
-                    <div class="config-folder-view">
-                        <div class="main-folder">
-                            <a class="fas fa-download key_to_click file-action-add" tabindex="0" onclick="downloadConfig('{{ selected_autograding_configuration_path }}')"></a>
-                            <i class="fas fa-folder-plus file-action-add" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
-                            <i class="fas fa-plus file-action-add config-file-icon" onClick="addFile('{{ gradeable.getId() }}', null)"></i>
-                            {% set parts = selected_autograding_configuration_path|split('/') %}
-                            {% set displayFolder = parts|slice(-2)|join('/') %}
-                            <a class="key_to_click" tabindex="0">{{ displayFolder }}</a>
-                        </div>
-                        {{ _self.display_config_files(config_files, gradeable.getId()) }}
-                    </div>
-                </div>
-                <div id="gradeable-config-edit-bar">
-                    <div class="customize-editor-container">
-                        <button type="button"
-                                class="customize-editor-button"
-                                id="toggle-line-nums"
-                                onClick="toggleLineNums()"
-                                title="Toggle line numbers">
-                            <i class="fas fa-list-ol customize-editor-button-icon"></i>
-                        </button>
-                        <button type="button"
-                                class="customize-editor-button"
-                                onClick="toggleTabLength()"
-                                title="Toggle tab length">
-                            <i class="fas fa-2 customize-editor-button-icon" id="toggle-tab-length"></i>
-                        </button>
-                    </div>
-                    <textarea id="gradeable-config-edit" class="underlying-textarea" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
-                    <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
-                    <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="config-editor-root"></div>
+    <script>
+    window.submitty.render(
+        '#config-editor-root',
+        'component',
+        'ConfigEditor',
+        {
+        apiUrl: '/config-editor',
+        context: 'GRADEABLE_CONFIG'
+        }
+    );
+    </script>
 
     <div class="notebook-builder-info">
         <div class="option-title">Notebook Builder:</div>
