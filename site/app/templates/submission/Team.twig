@@ -24,7 +24,7 @@
 
     {% if team %}
         {# Top content box, has team #}
-        <h3>Your Team:</h3> <br />
+        <h3 data-testid="your-team-header">Your Team:</h3> <br />
 
         {# List team members #}
         {% for teammate in members %}
@@ -55,7 +55,7 @@
         {% if is_vcs %}
             {% if vcs_repo_exists %}
                 <br />
-                <h3>To access your Team Repository:</h3>
+                <h3 data-testid="vcs-repository-info">To access your Team Repository:</h3>
                 <span>
                     <samp>git clone {{ gradeable.getRepositoryPath(user, team) }} SPECIFY_TARGET_DIRECTORY</samp>
                 <br />
@@ -70,7 +70,7 @@
                 <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
             {% else %}
                 <br />
-                <h3>Your repository does not exist.</h3>
+                <h3 data-testid="vcs-repository-error">Your repository does not exist.</h3>
                 <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
             {% endif %}
         {% endif %}
