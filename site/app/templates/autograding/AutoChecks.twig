@@ -118,23 +118,36 @@
                     {{ element.src|raw }}
                 </div>
             {% elseif element.type == "sequence_diagram" %}
-              <div class="mermaid" id="div_{{ index }}_{{ check_index }}">
-                sequenceDiagram
-                {{ element.src |escape }}
-              </div>
-              <script>
-                // Unfortunately, mermaid takes in manual css changes as a string by default.
-                var config = {
-                  "startOnLoad":false,
-                  "theme" : "default",
-                  "themeCSS":".messageText{fill: #333;stroke: none;font-size: 12px;}.actor{stroke:var(--standard-light-blue);fill:var(--standard-pale-blue)}text.actor{overflow-wrap:break-word}.actor-line{stroke:var(--standard-medium-dark-gray)}.positive-end{content:'\f00c';font-family:'Font Awesome 5 Free'}.negative-end{content:'\f12a';font-family:'Font Awesome 5 Free'}.labelText{overflow-wrap:break-word}.note{stroke:var(--standard-light-yellow);fill:var(--standard-pale-yellow)}.noteText{overflow-wrap:break-word}",
-                  "useMaxWidth" : false
-                };
-                mermaid.initialize(config);
-                $( document ).ready(function() {
-                    mermaid.init( { "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");
-                });
-              </script>
+  <div class="mermaid" id="div_{{ index }}_{{ check_index }}">
+    sequenceDiagram
+    {{ element.src | escape }}
+  </div>
+  <script>
+    (function() {
+        
+        var config = {
+            "startOnLoad": false,
+            "theme" : "default",
+            "themeCSS": ".messageText{fill: #333;stroke: none;font-size: 12px;}.actor{stroke:var(--standard-light-blue);fill:var(--standard-pale-blue)}text.actor{overflow-wrap:break-word}.actor-line{stroke:var(--standard-medium-dark-gray)}.positive-end{content:'\\f00c';font-family:'Font Awesome 5 Free'}.negative-end{content:'\\f12a';font-family:'Font Awesome 5 Free'}.labelText{overflow-wrap:break-word}.note{stroke:var(--standard-light-yellow);fill:var(--standard-pale-yellow)}.noteText{overflow-wrap:break-word}",
+            "useMaxWidth" : false
+        };
+        
+        $(document).ready(function() {
+          
+            if (typeof mermaid !== 'undefined') {
+                try {
+                    mermaid.initialize(config);
+                    mermaid.init({ "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");
+                } catch (err) {
+                    console.error("Mermaid failed to initialize for #div_{{ index }}_{{ check_index }}", err);
+                }
+            } else {
+               
+                console.warn("Mermaid library not loaded, skipping initialization to prevent page crash.");
+            }
+        });
+    })();
+  </script>
             {% elseif element.type == "notebook" %}
                 <iframe src="{{ element.src }}" width="100%" height="1200px" style="border: 0"></iframe>
             {% endif %}
