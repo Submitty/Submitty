@@ -49,7 +49,7 @@ class CourseMaterial {
         mappedBy: "course_material",
         targetEntity: CourseMaterialAccess::class,
         cascade: ["persist"],
-        fetch: "EAGER",
+        fetch: "EXTRA_LAZY",
         orphanRemoval: true
     )]
     protected Collection $accesses;
@@ -61,7 +61,7 @@ class CourseMaterial {
         mappedBy: "course_material",
         targetEntity: CourseMaterialSection::class,
         cascade: ["persist"],
-        fetch: "EAGER",
+        fetch: "EXTRA_LAZY",
         orphanRemoval: true
     )]
     protected Collection $sections;
