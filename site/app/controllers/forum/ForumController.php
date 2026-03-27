@@ -1278,6 +1278,26 @@ class ForumController extends AbstractController {
         return $colors;
     }
 
+    #[Route("/courses/{_semester}/{_course}/forum/threads/lookup", methods: ["GET"])]
+    public function lookupThread(): void {
+        $thread_id = intval($_GET['thread_id'] ?? 0);
+        if ($thread_id <= 0) {
+            $this->core->getOutput()->renderJsonFail('Invalid thread ID.');
+            return;
+        }
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        /** @var Thread|null $thread */
+        $thread = $repo->find($thread_id);
+        if ($thread === null || $thread->isDeleted()) {
+            $this->core->getOutput()->renderJsonFail('Thread not found.');
+            return;
+        }
+        $this->core->getOutput()->renderJsonSuccess([
+            'id'    => $thread->getId(),
+            'title' => $thread->getTitle(),
+        ]);
+    }
+
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
