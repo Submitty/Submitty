@@ -603,3 +603,28 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Should handle invalid date format in forum categories', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+        verifyWebSocketStatus();
+    });
+
+    it('Should handle invalid date format when editing categories', () => {
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.contains('Edit Categories').click();
+
+        cy.get('[data-testid="edit-category-date-button"]').first().click();
+
+        cy.get('[data-testid="edit-category-date-input"]').first().should('be.visible').as('dateInput');
+
+        cy.get('@dateInput').clear();
+        cy.get('@dateInput').type('invalid-date');
+
+        cy.get('[data-testid="save-date-button"]').first().click();
+
+        cy.get('[data-testid="popup-message"]').should('contain', 'Invalid date format provided.');
+    });
+});
