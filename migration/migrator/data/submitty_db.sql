@@ -2,8 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict HP8giicLs227O94FJmxO0SjMG963V4nF2dLQCq2Ty1n2yAi6VTttlqUpS3XcaGn
-
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
