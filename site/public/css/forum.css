@@ -987,6 +987,24 @@
     font-size: 14px;
 }
 
+/* Wrapper to hold the input and the clear button */
+.search-input-container {
+    position: relative;
+    display: inline-block;
+}
+
+
 #search-clear {
+    display: none; 
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
+    z-index: 10;
+}
+
+
+#search-content {
+    padding-right: 30px;
 }
