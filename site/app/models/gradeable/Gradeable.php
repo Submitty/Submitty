@@ -365,7 +365,29 @@ class Gradeable extends AbstractModel {
         $this->setActiveGradeInquiriesCount($details['active_grade_inquiries_count'] ?? 0);
 
         // Set dates last
-        $this->setDates($details);
+        try {
+            $this->setDates($details);
+        }
+        catch (ValidationException $e) {
+            // Dates in the database are inconsistent (see issue #12204).
+            // Record the error so the navigation page can show a warning
+            // instead of crashing, then load the raw date values without
+            // validation so the rest of the gradeable is still usable.
+            $this->has_date_errors = true;
+            $parsed = $this->parseDates($details);
+            $this->ta_view_start_date = $parsed['ta_view_start_date'];
+            $this->grade_start_date = $parsed['grade_start_date'];
+            $this->grade_due_date = $parsed['grade_due_date'];
+            $this->grade_released_date = $parsed['grade_released_date'];
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $this->team_lock_date = $parsed['team_lock_date'];
+                $this->submission_open_date = $parsed['submission_open_date'];
+                $this->submission_due_date = $parsed['submission_due_date'];
+                $this->late_days = $parsed['late_days'];
+                $this->grade_inquiry_start_date = $parsed['grade_inquiry_start_date'];
+                $this->grade_inquiry_due_date = $parsed['grade_inquiry_due_date'];
+            }
+        }
         $this->modified = false;
     }
 
@@ -1724,6 +1746,14 @@ class Gradeable extends AbstractModel {
             }
         }
         return $this->any_build_errors;
+    }
+
+    /**
+     * Gets if this gradeable was loaded with inconsistent/invalid dates (see issue #12204)
+     * @return bool
+     */
+    public function hasDateErrors(): bool {
+        return $this->has_date_errors;
     }
 
     /**
