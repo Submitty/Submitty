@@ -130,10 +130,6 @@
                         $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
                     }
 
-		    {% if viewing_inactive_version or is_grader_view %}
-                      editor_{{ num_codeboxes }}.setOption("readOnly", true);
-                    {% endif %}
-
                     {# Populate codebox and set state of buttons initially #}
                     {% if highest_version == 0 %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "clear");
