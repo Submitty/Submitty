@@ -2,8 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict Ks6v2Osp9qPzzhctZNKCnTZKHI2PHTKCueusKSziMP2dudRay4ZGJjUa1qD8YNE
-
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -3892,6 +3890,3 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict Ks6v2Osp9qPzzhctZNKCnTZKHI2PHTKCueusKSziMP2dudRay4ZGJjUa1qD8YNE
-
