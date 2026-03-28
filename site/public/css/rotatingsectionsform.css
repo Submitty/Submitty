@@ -36,6 +36,30 @@ table caption .subcaption {
 }
 
 .delete-section-cell {
-    width: 5px;
-    text-align: center;
+    text-align: left;
+}
+
+.reg-section-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.reg-section-table th:first-child,
+.reg-section-table td:first-child {
+    width: 60px;
+}
+
+.reg-header-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.reg-section-title {
+    flex-wrap: wrap;
+}
+
+.add-registration-section-btn {
+    margin-bottom: 8px;
 }
