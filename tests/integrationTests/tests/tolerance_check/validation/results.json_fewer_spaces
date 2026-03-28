@@ -1,0 +1,144 @@
+{
+    "automatic_grading_total": 3,
+    "nonhidden_automatic_grading_total": 3,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "diff",
+                    "difference_file": "test01/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files do not exactly match.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2660
+            },
+            "points_awarded": 0,
+            "test_name": "Require Perfect Character to Character Match"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/STDOUT.txt",
+                    "description": "diff w/ ignoreWhitespace",
+                    "difference_file": "test02/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files have non-whitespace differences.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2680
+            },
+            "points_awarded": 1,
+            "test_name": "Ignore Differences in Whitespace"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/STDOUT.txt",
+                    "description": "diff w/ tolerance=0.05",
+                    "difference_file": "test03/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files have numeric errors > 0.05 or whitespace or text differences.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2692
+            },
+            "points_awarded": 0,
+            "test_name": "Allow Minor Numeric Noise (+/-0.05 Tolerance)"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/STDOUT.txt",
+                    "description": "diff w/ tolerance=4.0",
+                    "difference_file": "test04/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files have numeric errors > 4.0 or whitespace or text differences.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2696
+            },
+            "points_awarded": 0,
+            "test_name": "Allow Numeric Noise (+/-4.0 Tolerance)"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05/STDOUT.txt",
+                    "description": "diff w/ ignoreWhitespace and tolerance=0.05",
+                    "difference_file": "test05/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files have numeric errors > 0.05 or other NON-whitespace text differences.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2676
+            },
+            "points_awarded": 1,
+            "test_name": "Allow Minor Numeric Noise (+/-0.05) AND Ignore Whitespace Differences"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06/STDOUT.txt",
+                    "description": "diff w/ ignoreWhitespace and tolerance=4.0",
+                    "difference_file": "test06/0_diff.json",
+                    "expected_file": "test_output/testassignment/test_output.txt",
+                    "messages": [
+                        {
+                            "message": "These files have numeric errors > 4.0 or other NON-whitespace text differences.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2700
+            },
+            "points_awarded": 1,
+            "test_name": "Allow Numeric Noise (+/- 4.0) AND Ignore Whitespace Differences"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

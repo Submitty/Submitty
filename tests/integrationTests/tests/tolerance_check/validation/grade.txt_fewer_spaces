@@ -1,0 +1,9 @@
+test01: Require Perfect Character to Character Match         0 / 10  
+test02: Ignore Differences in Whitespace                     1 / 10  
+test03: Allow Minor Numeric Noise (+/-0.05 Tolerance)        0 / 10  
+test04: Allow Numeric Noise (+/-4.0 Tolerance)               0 / 10  
+test05: Allow Minor Numeric Noise (+/-0.05) AND Ignore Whitespace Differences   1 / 10  
+test06: Allow Numeric Noise (+/- 4.0) AND Ignore Whitespace Differences   1 / 10  
+SubmissionLimit: Submission Limit                                             
+Automatic grading total:                                          3 / 60
+Non-hidden automatic grading total:                               3 / 60
