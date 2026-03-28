@@ -39,6 +39,8 @@ class ElectronicGraderView extends AbstractView {
      * @param array<string, int> $graders_of_inquiries
      * @param bool $show_warnings
      * @param int $submissions_in_queue
+    * @param int $override_count_with_submission
+    * @param int $override_count_without_submission
      * @return string
      */
     public function statusPage(
@@ -60,7 +62,9 @@ class ElectronicGraderView extends AbstractView {
         int $grade_inquiries,
         array $graders_of_inquiries,
         bool $show_warnings,
-        int $submissions_in_queue
+        int $submissions_in_queue,
+        int $override_count_with_submission,
+        int $override_count_without_submission
     ) {
 
         $peer = $gradeable->hasPeerComponent();
@@ -372,6 +376,8 @@ class ElectronicGraderView extends AbstractView {
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade']),
             "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
+            "override_count_with_submission" => $override_count_with_submission,
+            "override_count_without_submission" => $override_count_without_submission,
             "histograms" => $histogram_data,
             "include_grade_override" => $_COOKIE['include_grade_override'] ?? 'omit',
             "include_bad_submissions" => $_COOKIE['include_bad_submissions'] ?? 'omit',
