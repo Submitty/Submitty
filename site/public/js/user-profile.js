@@ -298,20 +298,16 @@ function updateUserLastInitialFormat() {
 function updateUserProfilePhoto() {
     const data = new FormData();
     const fileInput = $('#user-image-button').prop('files')[0];
-
     // If no file selected → just return safely
     if (!fileInput) {
         displayErrorMessage('Please select an image.');
-        
-        // IMPORTANT: restore scroll even here
+    // IMPORTANT: restore scroll even here
         document.body.style.overflow = "";
         document.documentElement.style.overflow = "";
         return false;
     }
-
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
     data.append('user_image', fileInput);
-
     const url = buildUrl(['user_profile', 'change_profile_photo']);
 
     $.ajax({
@@ -320,24 +316,23 @@ function updateUserProfilePhoto() {
         data,
         processData: false,
         contentType: false,
-
         success: function (res) {
+            // display success message
             const response = JSON.parse(res);
 
             if (response.status === 'success') {
                 const { data } = response;
                 displaySuccessMessage(data.message);
-
                 let updated_element = '<span class="center-img-tag">N/A</span>';
-
+                // create a new image node
                 if (data.image_data && data.image_mime_type) {
                     updated_element = `<img src="data:${data.image_mime_type};base64,${data.image_data}" alt="${data.image_alt_data}"/>`;
                 }
-
+                // check whether the image flag status is updated
                 data.image_flagged_state === 'flagged'
                     ? $('#flagged-message').addClass('show')
                     : $('#flagged-message').removeClass('show');
-
+                // eslint-disable-next-line no-restricted-syntax
                 $('.user-img-cont').html(updated_element);
             }
             else {
@@ -350,6 +345,7 @@ function updateUserProfilePhoto() {
         },
 
         error: function () {
+            // display error message
             displayErrorMessage('Some went wrong while updating profile photo!');
 
             // restore scroll on error
@@ -361,7 +357,6 @@ function updateUserProfilePhoto() {
     // close popup
     $('.popup-form').css('display', 'none');
     $('#user-image-button').val(null);
-
     return false;
 }
 
