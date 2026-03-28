@@ -32,13 +32,13 @@ def up(config, database, semester, course):
         """
         )
     database.execute(
-        "CREATE INDEX idx_autograding_testcase_details_user ON autograding_testcase_details (g_id, user_id, g_version);"
+        "CREATE INDEX IF NOT EXISTS idx_autograding_testcase_details_user ON autograding_testcase_details (g_id, user_id, g_version);"
     )
     database.execute(
-        "CREATE INDEX idx_autograding_testcase_details_team ON autograding_testcase_details (g_id, team_id, g_version);"
+        "CREATE INDEX IF NOT EXISTS idx_autograding_testcase_details_team ON autograding_testcase_details (g_id, team_id, g_version);"
     )
     database.execute(
-        "CREATE INDEX idx_autograding_testcase_details_gradeable ON autograding_testcase_details (g_id, testcase_id);"
+        "CREATE INDEX IF NOT EXISTS idx_autograding_testcase_details_gradeable ON autograding_testcase_details (g_id, testcase_id);"
     )
     pass
 
