@@ -3209,7 +3209,7 @@ ORDER BY user_id ASC"
                 [$semester, $course, $section, $numeric_val]
             );
             if (count($this->submitty_db->rows()) > 0) {
-                return 0; // treat as duplicate — controller will show friendly error
+                return 0; // treat as duplicate - controller will show friendly error
             }
         }
         $this->submitty_db->query("INSERT INTO courses_registration_sections (term, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
