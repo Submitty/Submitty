@@ -524,7 +524,7 @@ class NavigationView extends AbstractView {
                 && (
                     !$gradeable->getAutogradingConfig()->anyPoints()
                     || $total_non_hidden === 0
-                    || ($total_non_hidden !== 0 && $points_percent >= 0.5)
+                    || $points_percent >= 0.5
                 )
                 && $list_section == GradeableList::CLOSED
             ) {
