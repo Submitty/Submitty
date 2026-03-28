@@ -26,7 +26,8 @@ class TeamView extends AbstractView {
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
         $vcs_repo_exists = false;
-        if ($gradeable->isVcs()) {
+        $gradeable_team = ($team !== null) ? $team->getId() : null;
+        if ($gradeable->isVcs() && $gradeable_team !== null) {
             $path = FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyPath(),
                 'vcs',
