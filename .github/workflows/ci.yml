@@ -535,13 +535,15 @@ jobs:
 
       - name: Create Databases
         run: |
-          psql -d postgres -h localhost -U postgres        -p ${{  job.services.postgres-main.ports['5432']  }} \
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
+            -c "CREATE ROLE root WITH SUPERUSER CREATEDB CREATEROLE LOGIN" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
             -c "CREATE DATABASE submitty"
 
           psql -d postgres -h localhost -U postgres        -p ${{ job.services.postgres-branch.ports['5432'] }} \
+            -c "CREATE ROLE root WITH SUPERUSER CREATEDB CREATEROLE LOGIN" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }} \
