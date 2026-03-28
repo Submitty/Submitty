@@ -603,3 +603,31 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Should test Category Date Validation', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+    });
+
+    it('Should show error message when entering invalid date format for category', () => {
+        // Navigate to Edit Categories page
+        cy.get('[data-testid="more-dropdown"]').click();
+        cy.get('[data-testid="edit-categories-link"]').click();
+
+        // Wait for the page to load
+        cy.get('#manage-categories-view').should('be.visible');
+
+        // Find an existing category and click edit date button
+        cy.get('[data-testid="edit-category-date-button"]').first().click();
+
+        // Enter invalid date format
+        cy.get('[data-testid="edit-category-date-input"]').first().clear().type('invalid-date');
+
+        // Click save
+        cy.get('[data-testid="save-category-date-button"]').first().click();
+
+        // Verify error message is displayed
+        cy.get('[data-testid="popup-message"]').should('contain', 'Invalid date format');
+    });
+});
