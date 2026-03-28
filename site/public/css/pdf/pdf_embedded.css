@@ -16,6 +16,7 @@
 
 .pdfViewer .canvasWrapper {
     box-shadow: 0 0 3px var(--standard-light-medium-gray);
+    touch-action: pan-x pan-y;
 }
 
 .pdfViewer .canvasWrapper canvas {
