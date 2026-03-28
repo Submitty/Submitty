@@ -1,84 +1,56 @@
-{# This is a data table #}
-<table id="late-day-table" class="mobile-table">
-    <caption />
-    {# Table header #}
-    <thead>
-        <tr>
-            <th>
-                User ID
-            </th>
-            <th>
-                Given Name
-            </th>
-            <th>
-                Family Name
-            </th>
-            <th>
-                Initial
-            </th>
-
-            {% for title in late_day_cache_header %}
-                <th>
-                    {% if title.timestamp is defined %}
-
-                        {{ title|date('m/d/Y') }}
-                    {% else %}
-                        {{ title }}
-                    {% endif %}
-                </th>
-            {% endfor %}
-
-            <th>
-                Remaining
-            </th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% set index = 0 %}
-        {% for student in students %}
-            <tr id="row-{{ index }}" USER_ID="{{ student.getId() }}" data-row="{{ index }}">
-                <td data-before-content="Student ID">
-                    {{ student.getId() }}
-                </td>
-                <td data-before-content="Name">
-                    {{ student.getDisplayedGivenName() }}
-                </td>
-                 <td data-before-content="Family Name">
-                    {{ student.getDisplayedFamilyName() }}
-                </td>
-                <td initial_ld_id="Initial Late Days">
-                    {{ initial_late_days }}
-                </td>
-
-                {% set user_cache = late_day_cache[student.getId()] ?? null %}   
-
-                {# Late day change for updates and gradeables #}
+<div class="table-scroll">
+    <table id="late-day-table" class="mobile-table">
+        <caption>Bulk Late Days Usage</caption>
+        <thead>
+            <tr>
+                <th class="sticky-col sticky-col-1">User ID</th>
+                <th class="sticky-col sticky-col-2">Given Name</th>
+                <th class="sticky-col sticky-col-3">Family Name</th>
+                <th class="sticky-col sticky-col-4">Initial</th>
                 {% for title in late_day_cache_header %}
-                    {% set title = title.timestamp is defined ? title|date('Y-m-d') : title %}
-
-                    <td id="{{ title }}" USER_ID-content="{{ student.getId() }}">
-                        {% if user_cache is defined and user_cache[title] is defined %}
-                            {% set curr_cache = user_cache[title] %}
-                            {{ ((curr_cache.late_days_change > 0) ? '+' : '') ~ curr_cache.late_days_change }}
+                    <th>
+                        {% if title.timestamp is defined %}
+                            {{ title|date('m/d/Y') }}
+                        {% else %}
+                            {{ title }}
                         {% endif %}
-                    </td>                    
+                    </th>
                 {% endfor %}
-
-                {% set last_title = last_late_day_events[student.getId()] ?? null %}
-                {% set last_title = last_title.timestamp is defined ? last_title|date('Y-m-d') : last_title %}
-                
-                {% if last_title is null %}
-                    {# If there are no late day events yet #}
-                    <td ld_id="Late Days Remaining"> {{ initial_late_days }} </td>
-                {% elseif user_cache[last_title] is defined %}
-                    {# If we have cache data for the last event, we have cache data for all events #}
-                    <td ld_id="Late Days Remaining"> {{ user_cache[last_title].late_days_remaining }} </td>
-                {% else %}
-                    {# Else put cache is incomplete, leave value blank #}
-                    <td ld_id="Late Days Remaining"> </td>
-                {% endif %}
+                <th>Remaining</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr id="row-{{ loop.index0 }}" data-user-id="{{ student.getId() }}" data-row="{{ loop.index0 }}">
+                    <td class="sticky-col sticky-col-1" data-before-content="Student ID">{{ student.getId() }}</td>
+                    <td class="sticky-col sticky-col-2" data-before-content="Name">{{ student.getDisplayedGivenName() }}</td>
+                    <td class="sticky-col sticky-col-3" data-before-content="Family Name">{{ student.getDisplayedFamilyName() }}</td>
+                    <td class="sticky-col sticky-col-4" data-before-content="Initial" data-initial-late-days="{{ initial_late_days }}">{{ initial_late_days }}</td>
+
+                    {% set user_cache = late_day_cache[student.getId()] ?? null %}
+
+                    {% for title in late_day_cache_header %}
+                        {% set formatted_title = title.timestamp is defined ? title|date('Y-m-d') : title %}
+                        <td id="{{ formatted_title }}" data-user-id-content="{{ student.getId() }}">
+                            {% if user_cache is not null and user_cache[formatted_title] is defined %}
+                                {% set curr_cache = user_cache[formatted_title] %}
+                                {{ ((curr_cache.late_days_change > 0) ? '+' : '') ~ curr_cache.late_days_change }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+
+                    {% set last_title = last_late_day_events[student.getId()] ?? null %}
+                    {% set formatted_last_title = last_title is not null and last_title.timestamp is defined ? last_title|date('Y-m-d') : last_title %}
+
+                    {% if formatted_last_title is null %}
+                        <td data-late-days-remaining="{{ initial_late_days }}">{{ initial_late_days }}</td>
+                    {% elseif user_cache is not null and user_cache[formatted_last_title] is defined %}
+                        <td data-late-days-remaining="{{ user_cache[formatted_last_title].late_days_remaining }}">{{ user_cache[formatted_last_title].late_days_remaining }}</td>
+                    {% else %}
+                        <td data-late-days-remaining=""></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

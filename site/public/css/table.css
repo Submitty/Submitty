@@ -11,7 +11,8 @@
 }
 
 .mobile-table {
-    width: 100%;
+    min-width: 100%;
+    width: auto;
     text-align: center;
 }
 
@@ -25,6 +26,12 @@
 
 .mobile-table th {
     padding: 5px;
+}
+
+.mobile-table th,
+.mobile-table td {
+    box-sizing: border-box;
+    min-width: 80px;
 }
 
 .section-break {
@@ -123,4 +130,125 @@
 
 .peer-table-title-data {
     text-align: left;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.sticky-col {
+    position: sticky;
+    background: var(--default-white);
+    box-sizing: border-box;
+}
+
+:root {
+    --col1-width: 120px;
+    --col2-width: 120px;
+    --col3-width: 120px;
+    --col4-width: 70px;
+}
+
+.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    left: 0;
+    z-index: 10;
+}
+.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 9;
+}
+.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 8;
+}
+.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 7;
+}
+
+#late-day-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--default-white);
+    z-index: 20;
+    width: var(--col2-width);
+    min-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#late-day-table thead th.sticky-col {
+    z-index: 30;
+}
+#late-day-table thead th.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    left: 0;
+    z-index: 35;
+}
+#late-day-table thead th.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 34;
+}
+#late-day-table thead th.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 33;
+}
+#late-day-table thead th.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 32;
+}
+
+#late-day-table tbody tr {
+    background: var(--default-white);
+}
+#late-day-table tbody tr:nth-child(even) {
+    background: var(--standard-light-gray);
+}
+#late-day-table tbody tr:nth-child(even) .sticky-col {
+    background: var(--standard-light-gray);
+}
+#late-day-table tbody tr:nth-child(odd) .sticky-col {
+    background: var(--default-white);
+}
+
+#late-day-table tbody td.sticky-col-1 {
+    width: var(--col1-width);
+    min-width: var(--col1-width);
+    white-space: nowrap;
+    left: 0;
+    z-index: 25;
+}
+#late-day-table tbody td.sticky-col-2 {
+    width: var(--col2-width);
+    min-width: var(--col2-width);
+    left: var(--col1-width);
+    z-index: 24;
+}
+#late-day-table tbody td.sticky-col-3 {
+    width: var(--col3-width);
+    min-width: var(--col3-width);
+    left: calc(var(--col1-width) + var(--col2-width));
+    z-index: 23;
+}
+#late-day-table tbody td.sticky-col-4 {
+    width: var(--col4-width);
+    min-width: var(--col4-width);
+    left: calc(var(--col1-width) + var(--col2-width) + var(--col3-width));
+    z-index: 22;
 }
