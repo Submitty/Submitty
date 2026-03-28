@@ -973,7 +973,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     let message = '';
     // check versions used
     if (versions_used >= versions_allowed) {
-        message = `You have already made ${versions_used} submissions.  You are allowed ${versions_allowed} submissions before a small point penalty will be applied. Are you sure you want to continue?`;
+        message = `You have already used ${versions_used} of the allowed ${versions_allowed} submissions. Submitting again may result in a small point penalty. Do you want to continue?`;
         if (!confirm(message)) {
             $('#submit').prop('disabled', false);
             return;
