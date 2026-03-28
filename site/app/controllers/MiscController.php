@@ -200,10 +200,10 @@ class MiscController extends AbstractController {
         $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
-	//Fix BMP image on Chrome/Edge
-	if (str_contains(strtolower($mime_type), 'bmp')) {
-    		$mime_type = 'image/bmp';
-	}
+        //Fix BMP image on Chrome/Edge
+        if (str_contains(strtolower($mime_type), 'bmp')) {
+            $mime_type = 'image/bmp';
+        }
         $file_type = FileUtils::getContentType($file_name);
         if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
             $this->core->getOutput()->useHeader(false);
