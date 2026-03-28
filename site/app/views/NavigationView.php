@@ -197,6 +197,7 @@ class NavigationView extends AbstractView {
                     "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $buttons,
                     "has_build_error" => $gradeable->anyBuildErrors(),
+                    "has_date_errors" => $gradeable->hasDateErrors(),
                     "is_student_view" => $gradeable->isStudentView()
                 ];
 
