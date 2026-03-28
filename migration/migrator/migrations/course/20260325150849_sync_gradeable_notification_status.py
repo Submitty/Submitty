@@ -60,13 +60,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute(
-        """
-        DROP INDEX IF EXISTS notifications_user_gradeable_unseen_index
-        """
-    )
-    database.execute(
-        """
-        ALTER TABLE notifications DROP COLUMN IF EXISTS gradeable_id
-        """
-    )
+    pass
