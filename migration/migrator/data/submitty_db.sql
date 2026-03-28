@@ -1112,6 +1112,3 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict HP8giicLs227O94FJmxO0SjMG963V4nF2dLQCq2Ty1n2yAi6VTttlqUpS3XcaGn
-
