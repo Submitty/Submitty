@@ -1548,6 +1548,39 @@ class ForumController extends AbstractController {
     }
 
 
+    #[Route("/courses/{_semester}/{_course}/forum/threads/search", methods: ["GET"])]
+    public function searchThreads(): JsonResponse {
+        $query = trim($_GET['q'] ?? '');
+        $threads = $this->core->getQueries()->searchThreads($query);
+        $results = [];
+        foreach ($threads as $thread) {
+            $results[] = [
+                'id' => (int) $thread['id'],
+                'title' => $thread['title'],
+            ];
+        }
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/threads/resolve", methods: ["GET"])]
+    public function resolveThreadReferences(): JsonResponse {
+        $ids_param = trim($_GET['ids'] ?? '');
+        if (empty($ids_param)) {
+            return JsonResponse::getSuccessResponse([]);
+        }
+        $ids = array_filter(array_map('intval', explode(',', $ids_param)), function ($id) {
+            return $id > 0;
+        });
+        $results = [];
+        foreach ($ids as $id) {
+            $title = $this->core->getQueries()->getThreadTitleIfExists($id);
+            if ($title !== null) {
+                $results[$id] = $title;
+            }
+        }
+        return JsonResponse::getSuccessResponse($results);
+    }
+
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array<mixed> $msg_array

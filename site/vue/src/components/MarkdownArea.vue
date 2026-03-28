@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import Markdown from './Markdown.vue';
+import { buildCourseUrl } from '../../../ts/utils/server';
 
 interface Props {
     markdownAreaId: string;
@@ -235,6 +236,134 @@ function syncMarkdownToggle() {
         }
     }
 }
+
+// Thread autocomplete state
+interface ThreadSuggestion {
+    id: number;
+    title: string;
+}
+const showAutocomplete = ref(false);
+const autocompleteItems = ref<ThreadSuggestion[]>([]);
+const autocompleteIndex = ref(0);
+const autocompleteQuery = ref('');
+const autocompleteStartPos = ref(0);
+const autocompleteDropdownRef = ref<HTMLDivElement | null>(null);
+let autocompleteDebounce: ReturnType<typeof setTimeout> | null = null;
+
+async function fetchThreadSuggestions(query: string): Promise<void> {
+    try {
+        const url = `${buildCourseUrl(['forum', 'threads', 'search'])}?q=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        const json = await response.json();
+        if (json.status === 'success') {
+            autocompleteItems.value = json.data as ThreadSuggestion[];
+        }
+    }
+    catch {
+        autocompleteItems.value = [];
+    }
+}
+
+function checkAutocomplete(): void {
+    console.log('checkAutocomplete called');
+    // Only show autocomplete in markdown mode (edit mode)    
+    if (mode.value !== 'edit' || !showHeader.value) {
+      closeAutocomplete();
+      return;
+    }
+    const textarea = textareaRef.value;
+    if (!textarea) {
+      return;
+    }
+    const cursorPos = textarea.selectionStart;
+    const text = textarea.value.substring(0, cursorPos);
+
+    // Find # that triggers autocomplete: must be at start of text or preceded by whitespace/punctuation
+    const match = /(?:^|[\s(])#(\d*)$/.exec(text);
+    if (match) {
+      autocompleteStartPos.value = cursorPos - match[1].length - 1; // position of #
+      autocompleteQuery.value = match[1];
+      autocompleteIndex.value = 0;
+      showAutocomplete.value = true;
+
+      if (autocompleteDebounce) {
+        clearTimeout(autocompleteDebounce);
+      }
+      autocompleteDebounce = setTimeout(() => {
+        fetchThreadSuggestions(match[1]);
+      }, 200);
+    }
+    else {
+      closeAutocomplete();
+    }
+}
+
+function closeAutocomplete(): void {
+    showAutocomplete.value = false;
+    autocompleteItems.value = [];
+    autocompleteQuery.value = '';
+    if (autocompleteDebounce) {
+        clearTimeout(autocompleteDebounce);
+        autocompleteDebounce = null;
+    }
+}
+
+function selectAutocompleteSuggestion(suggestion: ThreadSuggestion): void {
+    const textarea = textareaRef.value;
+    if (!textarea) {
+        return;
+    }
+    const before = textarea.value.substring(0, autocompleteStartPos.value);
+    const after = textarea.value.substring(textarea.selectionStart);
+    const insertion = `#${suggestion.id} `;
+    content.value = before + insertion + after;
+    closeAutocomplete();
+
+    nextTick(() => {
+        const newPos = before.length + insertion.length;
+        textarea.focus();
+        textarea.setSelectionRange(newPos, newPos);
+    });
+}
+
+function handleAutocompleteKeydown(event: KeyboardEvent): void {
+    if (!showAutocomplete.value || autocompleteItems.value.length === 0) {
+        return;
+    }
+    if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        autocompleteIndex.value = (autocompleteIndex.value + 1) % autocompleteItems.value.length;
+    }
+    else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        autocompleteIndex.value = (autocompleteIndex.value - 1 + autocompleteItems.value.length) % autocompleteItems.value.length;
+    }
+    else if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        selectAutocompleteSuggestion(autocompleteItems.value[autocompleteIndex.value]);
+    }
+    else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeAutocomplete();
+    }
+}
+
+function handleDocumentClick(event: MouseEvent): void {
+    if (autocompleteDropdownRef.value && !autocompleteDropdownRef.value.contains(event.target as Node)) {
+        closeAutocomplete();
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('click', handleDocumentClick);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleDocumentClick);
+    if (autocompleteDebounce) {
+        clearTimeout(autocompleteDebounce);
+    }
+});
 </script>
 
 <template>
@@ -369,27 +498,48 @@ function syncMarkdownToggle() {
         tabindex="-1"
         class="screen-reader"
       >{{ markdownAreaId }}</label>
-      <textarea
-        v-show="mode === 'edit'"
-        :id="markdownAreaId"
-        ref="textareaRef"
-        v-model="content"
-        :data-testid="markdownAreaId"
-        class="markdown-textarea fill-available"
-        :class="[props.class]"
-        :name="markdownAreaName"
-        :placeholder="placeholder"
-        rows="10"
-        cols="30"
-        :maxlength="maxLength"
-        :required="required"
-        :data-previous-comment="dataPreviousComment"
-        @keyup="handleKeyup"
-        @keydown="handleKeydown"
-        @paste="handlePaste"
-        @change="handleChange"
-        @input="handleInput"
-      />
+      <div class="thread-autocomplete-wrapper">
+        <textarea
+          v-show="mode === 'edit'"
+          :id="markdownAreaId"
+          ref="textareaRef"
+          v-model="content"
+          :data-testid="markdownAreaId"
+          class="markdown-textarea fill-available"
+          :class="[props.class]"
+          :name="markdownAreaName"
+          :placeholder="placeholder"
+          rows="10"
+          cols="30"
+          :maxlength="maxLength"
+          :required="required"
+          :data-previous-comment="dataPreviousComment"
+          @keyup="handleKeyup"
+          @keydown="(e: KeyboardEvent) => { handleAutocompleteKeydown(e); handleKeydown(e); }"
+          @paste="handlePaste"
+          @change="handleChange"
+          @input="(e: Event) => { checkAutocomplete(); handleInput(e); }"
+        />
+        <div
+          v-if="showAutocomplete && autocompleteItems.length > 0"
+          ref="autocompleteDropdownRef"
+          class="thread-autocomplete-dropdown"
+          data-testid="thread-autocomplete-dropdown"
+        >
+          <div
+            v-for="(item, index) in autocompleteItems"
+            :key="item.id"
+            class="thread-autocomplete-item"
+            :class="{ 'thread-autocomplete-item-active': index === autocompleteIndex }"
+            :data-testid="`thread-autocomplete-item-${item.id}`"
+            @mousedown.prevent="selectAutocompleteSuggestion(item)"
+            @mouseenter="autocompleteIndex = index"
+          >
+            <span class="thread-autocomplete-id">#{{ item.id }}</span>
+            <span class="thread-autocomplete-title">{{ item.title }}</span>
+          </div>
+        </div>
+      </div>
       <div
         v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
