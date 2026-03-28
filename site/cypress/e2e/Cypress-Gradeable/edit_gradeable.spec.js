@@ -293,8 +293,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // This should not be allowed, its before the submission open date
-        updateDates('#date_due', past_date, 'Some Changes Failed!');
+        // There should be no constraints on this and it should be allowed
+        updateDates('#date_due', past_date, 'All Changes Saved');
         // Reset to old date
         updateDates('#date_due', future_date, 'All Changes Saved');
 
