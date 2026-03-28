@@ -269,6 +269,9 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var bool if gradeable release notifications have been sent*/
     protected $release_notifications_sent = false;
+    /** @prop
+     * @var bool Whether an unseen gradeable notification exists for a specific user */
+    protected bool $has_unseen_gradeable_notification = false;
 
     /**
      * Gradeable constructor.
@@ -351,6 +354,7 @@ class Gradeable extends AbstractModel {
             $this->setDependsOnPoints($details['depends_on_points']);
             $this->setScoreNotificationsSent($details['score_notifications_sent'] ?? 0);
             $this->setReleaseNotificationsSent($details['release_notifications_sent'] ?? false);
+            $this->has_unseen_gradeable_notification = (bool) ($details['has_unseen_gradeable_notification'] ?? false);
             if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
                 $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }
@@ -2946,6 +2950,10 @@ class Gradeable extends AbstractModel {
 
     public function getReleaseNotificationsSent(): bool {
         return $this->release_notifications_sent;
+    }
+
+    public function hasUnseenGradeableNotification(): bool {
+        return $this->has_unseen_gradeable_notification;
     }
 
     /**
