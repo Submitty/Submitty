@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict 17jDeOhAiQenosPKvpxJnC93rx51n7k5n3U0fbShSv8CUNCFywEWSFjpqTApYwU
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1112,4 +1114,6 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict 17jDeOhAiQenosPKvpxJnC93rx51n7k5n3U0fbShSv8CUNCFywEWSFjpqTApYwU
 
