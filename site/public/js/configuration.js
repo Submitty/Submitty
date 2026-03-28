@@ -194,6 +194,10 @@ $(document).ready(() => {
                 }
                 fetchRepoStatus();
             },
+            error: function () {
+                alert('Unable to queue course repository pull right now.');
+                pullButton.prop('disabled', false);
+            },
         });
     });
 

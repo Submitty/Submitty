@@ -162,6 +162,9 @@ class ConfigurationController extends AbstractController {
             if (preg_match('/\s/', $entry)) {
                 return JsonResponse::getFailResponse('Repository URL cannot contain whitespace');
             }
+            if ($entry !== '' && str_starts_with($entry, '-')) {
+                return JsonResponse::getFailResponse('Repository URL cannot start with "-"');
+            }
         }
         elseif ($name === 'course_repo_branch') {
             $entry = trim($entry);
@@ -229,6 +232,9 @@ class ConfigurationController extends AbstractController {
         $repo_url = trim($this->core->getConfig()->getCourseRepoUrl());
         if ($repo_url === '') {
             return JsonResponse::getFailResponse('Set a Course Repository URL before pulling');
+        }
+        if (str_starts_with($repo_url, '-')) {
+            return JsonResponse::getFailResponse('Repository URL cannot start with "-"');
         }
 
         $queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue');

@@ -350,6 +350,15 @@ class HomePageController extends AbstractController {
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
+        if ($course_repo_url !== '' && str_starts_with($course_repo_url, '-')) {
+            $error = "Repository URL cannot start with \"-\".";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
         if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $course_repo_branch) || str_contains($course_repo_branch, '..') || str_starts_with($course_repo_branch, '/')) {
             $error = "Invalid repository branch name.";
             $this->core->addErrorMessage($error);

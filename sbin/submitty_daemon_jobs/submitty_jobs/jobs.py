@@ -229,6 +229,22 @@ class SyncCourseRepo(CourseJob):
         return SyncCourseRepo._SUBDIR_PATTERN.match(subdirectory) is not None
 
     @staticmethod
+    def _validate_repo_url(repo_url, allow_empty=False):
+        if repo_url == '':
+            return allow_empty
+        if any(ch.isspace() for ch in repo_url):
+            return False
+        return not repo_url.startswith('-')
+
+    @staticmethod
+    def _sanitize_sync_text(text, repo_url):
+        if not isinstance(text, str):
+            return text
+        if repo_url == '':
+            return text
+        return text.replace(repo_url, '<repo_url>')
+
+    @staticmethod
     def _write_json_atomic(path, obj):
         tmp_path = f"{path}.tmp"
         with open(tmp_path, 'w', encoding='utf-8') as outfile:
@@ -713,9 +729,9 @@ class SyncCourseRepo(CourseJob):
             log_lines.append(f"$ {' '.join(shown_command)}")
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             if result.stdout:
-                log_lines.append(result.stdout.rstrip())
+                log_lines.append(self._sanitize_sync_text(result.stdout.rstrip(), repo_url))
             if result.returncode != 0 and not allow_failure:
-                raise RuntimeError(f"Command failed: {' '.join(command)}")
+                raise RuntimeError(f"Command failed: {' '.join(shown_command)}")
             return result
 
         try:
@@ -729,8 +745,8 @@ class SyncCourseRepo(CourseJob):
 
             if repo_url == '':
                 raise RuntimeError('Course repository URL is not set')
-            if any(ch.isspace() for ch in repo_url):
-                raise RuntimeError('Course repository URL cannot contain whitespace')
+            if not self._validate_repo_url(repo_url):
+                raise RuntimeError('Course repository URL is invalid')
             if not self._validate_branch(branch):
                 raise RuntimeError('Course repository branch is invalid')
             if not self._validate_subdirectory(subdirectory):
@@ -833,8 +849,9 @@ class SyncCourseRepo(CourseJob):
                     updated_gradeables=gradeable_sync_info['updated'],
                 )
         except Exception as exc:
-            self._write_sync_status(status_path, 'error', str(exc))
-            log_lines.append(f"ERROR: {exc}")
+            sanitized_error = self._sanitize_sync_text(str(exc), repo_url if 'repo_url' in locals() else '')
+            self._write_sync_status(status_path, 'error', sanitized_error)
+            log_lines.append(f"ERROR: {sanitized_error}")
         finally:
             with open(log_path, 'a', encoding='utf-8') as logfile:
                 logfile.write('\n'.join(log_lines))
@@ -1041,7 +1058,7 @@ class CreateCourse(AbstractJob):
         repo_branch = str(self.job_details.get('course_repo_branch', 'main')).strip() or 'main'
         repo_subdirectory = str(self.job_details.get('course_repo_subdirectory', '')).strip().strip('/')
 
-        if any(ch.isspace() for ch in repo_url):
+        if not SyncCourseRepo._validate_repo_url(repo_url, allow_empty=True):
             return False
         if not SyncCourseRepo._validate_branch(repo_branch):
             return False

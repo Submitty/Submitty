@@ -585,6 +585,23 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('Invalid repository branch name', $response->json_response->json['message']);
     }
 
+    public function testUpdateConfigurationRejectsOptionStyleCourseRepoUrl(): void {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $_POST['name'] = 'course_repo_url';
+        $_POST['entry'] = '--upload-pack=/tmp/pwned';
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->updateConfiguration();
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('Repository URL cannot start with "-"', $response->json_response->json['message']);
+    }
+
     public function testUpdateConfigurationRejectsInvalidCourseRepoSubdirectory(): void {
         $this->setUpConfig();
         $core = new Core();
