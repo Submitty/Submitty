@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup toggleGlobalFullScreenMode */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -2022,3 +2022,22 @@ function scorePillDark() {
     }
 }
 document.addEventListener('DOMContentLoaded', scorePillDark);
+
+/**
+ * Toggles full screen mode by adding/removing the .full-screen-mode class on the main element.
+ * Also toggles the icon between fa-expand and fa-compress on the triggering button.
+ */
+function toggleGlobalFullScreenMode() {
+    const mainEl = document.getElementById('main');
+    if (!mainEl) {
+        return;
+    }
+    mainEl.classList.toggle('full-screen-mode');
+    document.body.style.overflow = mainEl.classList.contains('full-screen-mode') ? 'hidden' : '';
+
+    // Toggle the icon on all full-screen toggle buttons
+    document.querySelectorAll('[data-fullscreen-toggle] i').forEach((icon) => {
+        icon.classList.toggle('fa-expand');
+        icon.classList.toggle('fa-compress');
+    });
+}
