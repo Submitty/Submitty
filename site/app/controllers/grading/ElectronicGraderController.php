@@ -7,6 +7,7 @@ use app\libraries\DiffViewer;
 use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\FeatureFlag;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -27,6 +28,9 @@ use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
+    private const AI_GROUPING_FEATURE_FLAG = 'ta_grading_ai_grouping_poc';
+    private const AI_GROUPING_BUCKET_SIZE = 20;
+
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
      * @param  string $option
@@ -990,6 +994,221 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Build deterministic, read-only grouping suggestions for TA grading.
+     *
+     * @param Gradeable $gradeable
+     * @param GradedGradeable[] $graded_gradeables
+     * @param string $sort
+     * @param string $direction
+     * @return array{
+     *    group_count: int,
+     *    submitter_count: int,
+     *    generated_at: string,
+     *    groups: array<int, array{
+     *      group_id: string,
+     *      label: string,
+     *      status: string,
+     *      size: int,
+     *      confidence: float,
+     *      top_signals: array<int, string>,
+     *      member_anon_ids: array<int, string>,
+     *      members: array<int, array{
+     *        anon_id: string,
+     *        submitter_id: string,
+     *        active_version: int,
+     *        autograding_points: float,
+     *        autograding_percent: float|null,
+     *        has_active_grade_inquiry: bool,
+     *        jump_url: string
+     *      }>,
+     *      example_submission: array{
+     *        anon_id: string,
+     *        submitter_id: string,
+     *        active_version: int,
+     *        autograding_points: float,
+     *        autograding_percent: float|null,
+     *        has_active_grade_inquiry: bool,
+     *        jump_url: string
+     *      }|null
+     *    }>
+     * }
+     */
+    private function buildAiGroupingSuggestions(Gradeable $gradeable, array $graded_gradeables, string $sort, string $direction): array {
+        $autograding_max = 0.0;
+        if ($gradeable->hasAutogradingConfig()) {
+            $autograding_max = floatval($gradeable->getAutogradingConfig()->getTotalNonExtraCredit());
+        }
+        $course_base_path = '/courses/' . $this->core->getConfig()->getTerm() . '/' . $this->core->getConfig()->getCourse();
+        $grouped = [];
+
+        foreach ($graded_gradeables as $graded_gradeable) {
+            $submitter = $graded_gradeable->getSubmitter();
+            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+
+            $autograding_points = 0.0;
+            $autograding_percent = null;
+            if ($auto_graded_gradeable->hasSubmission() && $auto_graded_gradeable->getActiveVersion() !== 0) {
+                $autograding_points = floatval($graded_gradeable->getAutoGradingScore());
+                if ($autograding_max > 0.0) {
+                    $autograding_percent = max(0.0, min(100.0, ($autograding_points / $autograding_max) * 100.0));
+                }
+            }
+
+            $status = $this->getAiGroupingStatus($graded_gradeable);
+            $bucket = $this->getAiAutogradingBucket($autograding_percent);
+            $group_key = "{$status}|{$bucket}";
+
+            if (!array_key_exists($group_key, $grouped)) {
+                $grouped[$group_key] = [
+                    'status' => $status,
+                    'auto_bucket' => $bucket,
+                    'members' => []
+                ];
+            }
+
+            $grouped[$group_key]['members'][] = [
+                'anon_id' => $submitter->getAnonId($gradeable->getId()),
+                'submitter_id' => $submitter->getId(),
+                'active_version' => $auto_graded_gradeable->getActiveVersion(),
+                'autograding_points' => $autograding_points,
+                'autograding_percent' => $autograding_percent,
+                'has_active_grade_inquiry' => $graded_gradeable->hasActiveGradeInquiry(),
+                'jump_url' => $course_base_path . '/gradeable/' . $gradeable->getId() . '/grading/grade?' . http_build_query([
+                    'who_id' => $submitter->getAnonId($gradeable->getId()),
+                    'sort' => $sort,
+                    'direction' => $direction
+                ])
+            ];
+        }
+
+        $groups = array_values($grouped);
+        usort($groups, function (array $a, array $b): int {
+            $size_cmp = count($b['members']) <=> count($a['members']);
+            if ($size_cmp !== 0) {
+                return $size_cmp;
+            }
+            return strcmp($a['status'] . $a['auto_bucket'], $b['status'] . $b['auto_bucket']);
+        });
+
+        $formatted_groups = [];
+        foreach ($groups as $index => $group) {
+            $members = $group['members'];
+            usort($members, function (array $a, array $b): int {
+                return strcmp($a['anon_id'], $b['anon_id']);
+            });
+
+            $group_size = count($members);
+            $signals = $this->getAiGroupingStatusSignals($group['status']);
+            if ($group['auto_bucket'] !== 'N/A') {
+                $signals[] = "Autograding {$group['auto_bucket']}";
+            }
+
+            $formatted_groups[] = [
+                'group_id' => 'ai-group-' . ($index + 1),
+                'label' => "{$this->getAiGroupingStatusLabel($group['status'])} ({$group['auto_bucket']})",
+                'status' => $group['status'],
+                'size' => $group_size,
+                'confidence' => $this->getAiGroupingConfidence($group['status'], $group_size),
+                'top_signals' => $signals,
+                'member_anon_ids' => array_values(array_map(function (array $member): string {
+                    return $member['anon_id'];
+                }, $members)),
+                'members' => $members,
+                'example_submission' => $members[0] ?? null
+            ];
+        }
+
+        return [
+            'group_count' => count($formatted_groups),
+            'submitter_count' => count($graded_gradeables),
+            'generated_at' => DateUtils::dateTimeToString($this->core->getDateTimeNow()),
+            'groups' => $formatted_groups
+        ];
+    }
+
+    private function getAiGroupingStatus(GradedGradeable $graded_gradeable): string {
+        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        if (!$auto_graded_gradeable->hasSubmission()) {
+            return 'NO_SUBMISSION';
+        }
+        if ($auto_graded_gradeable->getActiveVersion() === 0) {
+            return 'CANCELLED_SUBMISSION';
+        }
+        if (!$auto_graded_gradeable->isAutoGradingComplete()) {
+            return 'AUTOGRADING_PENDING';
+        }
+        if ($graded_gradeable->getOrCreateTaGradedGradeable()->hasVersionConflict()) {
+            return 'VERSION_CONFLICT';
+        }
+        if ($graded_gradeable->hasActiveGradeInquiry()) {
+            return 'ACTIVE_GRADE_INQUIRY';
+        }
+        if (!$graded_gradeable->hasTaGradingInfo()) {
+            return 'TA_NOT_STARTED';
+        }
+        if (!$graded_gradeable->isTaGradingComplete()) {
+            return 'TA_IN_PROGRESS';
+        }
+        return 'READY_FOR_REVIEW';
+    }
+
+    private function getAiAutogradingBucket(?float $autograding_percent): string {
+        if ($autograding_percent === null || is_nan($autograding_percent)) {
+            return 'N/A';
+        }
+        if ($autograding_percent >= 100.0) {
+            return '100%';
+        }
+        $lower = intval(floor($autograding_percent / self::AI_GROUPING_BUCKET_SIZE) * self::AI_GROUPING_BUCKET_SIZE);
+        $upper = $lower + (self::AI_GROUPING_BUCKET_SIZE - 1);
+        return "{$lower}-{$upper}%";
+    }
+
+    private function getAiGroupingStatusLabel(string $status): string {
+        return match ($status) {
+            'NO_SUBMISSION' => 'No submission',
+            'CANCELLED_SUBMISSION' => 'Cancelled submission',
+            'AUTOGRADING_PENDING' => 'Autograding pending',
+            'VERSION_CONFLICT' => 'Version conflict',
+            'ACTIVE_GRADE_INQUIRY' => 'Active grade inquiry',
+            'TA_NOT_STARTED' => 'TA grading not started',
+            'TA_IN_PROGRESS' => 'TA grading in progress',
+            default => 'Ready for review',
+        };
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getAiGroupingStatusSignals(string $status): array {
+        return match ($status) {
+            'NO_SUBMISSION' => ['No submission uploaded'],
+            'CANCELLED_SUBMISSION' => ['Active version is cancelled'],
+            'AUTOGRADING_PENDING' => ['Autograding queue still running'],
+            'VERSION_CONFLICT' => ['TA grading version differs from active submission'],
+            'ACTIVE_GRADE_INQUIRY' => ['Grade inquiry currently active'],
+            'TA_NOT_STARTED' => ['No TA rubric grading saved yet'],
+            'TA_IN_PROGRESS' => ['TA rubric grading is incomplete'],
+            default => ['Autograding and TA grading are complete'],
+        };
+    }
+
+    private function getAiGroupingConfidence(string $status, int $group_size): float {
+        $base = match ($status) {
+            'NO_SUBMISSION' => 0.97,
+            'CANCELLED_SUBMISSION' => 0.95,
+            'AUTOGRADING_PENDING' => 0.90,
+            'VERSION_CONFLICT' => 0.92,
+            'ACTIVE_GRADE_INQUIRY' => 0.88,
+            'TA_NOT_STARTED' => 0.86,
+            'TA_IN_PROGRESS' => 0.82,
+            default => 0.80,
+        };
+        $size_bonus = min(0.12, max(0, $group_size - 1) * 0.015);
+        return round(min(0.99, $base + $size_bonus), 2);
+    }
+
+    /**
      * Shows the list of submitters
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")]
@@ -1186,6 +1405,67 @@ class ElectronicGraderController extends AbstractController {
 
             $this->core->getOutput()->renderOutput(['grading','ElectronicGrader'], 'randomizeButtonWarning', $gradeable);
         }
+    }
+
+    /**
+     * Route for AI-assisted grouping suggestions on the grading details page.
+     */
+    #[FeatureFlag(flag: self::AI_GROUPING_FEATURE_FLAG)]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/ai_grouping", methods: ["GET"])]
+    public function ajaxGetAiGroupingSuggestions(string $gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            $this->core->getOutput()->renderJsonFail('This gradeable is not an electronic file gradeable');
+            return;
+        }
+        if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get grouping suggestions');
+            return;
+        }
+        if (!$gradeable->isTaGrading()) {
+            $this->core->getOutput()->renderJsonSuccess([
+                'group_count' => 0,
+                'submitter_count' => 0,
+                'generated_at' => DateUtils::dateTimeToString($this->core->getDateTimeNow()),
+                'groups' => []
+            ]);
+            return;
+        }
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderJsonSuccess([
+                'group_count' => 0,
+                'submitter_count' => 0,
+                'generated_at' => DateUtils::dateTimeToString($this->core->getDateTimeNow()),
+                'groups' => []
+            ]);
+            return;
+        }
+
+        $view = $_GET['view'] ?? ($_COOKIE['view'] ?? 'assigned');
+        $sort = $_GET['sort'] ?? ($_COOKIE['sort'] ?? 'id');
+        $direction = $_GET['direction'] ?? ($_COOKIE['direction'] ?? 'ASC');
+        $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
+        $show_all = ($view === 'all') && $can_show_all;
+
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        $order->sort($sort, $direction);
+        $graded_gradeables = [];
+        foreach ($order->getSortedGradedGradeables() as $graded_gradeable) {
+            $graded_gradeables[] = $graded_gradeable;
+        }
+        $inquiry_status = $_GET['inquiry_status'] ?? ($_COOKIE['inquiry_status'] ?? 'off');
+        if ($inquiry_status === 'on') {
+            $graded_gradeables = array_values(array_filter($graded_gradeables, function (GradedGradeable $graded_gradeable): bool {
+                return $graded_gradeable->hasActiveGradeInquiry();
+            }));
+        }
+
+        $this->core->getOutput()->renderJsonSuccess(
+            $this->buildAiGroupingSuggestions($gradeable, $graded_gradeables, $sort, $direction)
+        );
     }
 
     /**
