@@ -219,7 +219,7 @@ function build_homework {
 
     # build (in parallel)
     # quit (don't continue on to build other homeworks) if there is a compile error
-    cmake --build . --parallel $(nproc)
+    cmake --build . --parallel "$(nproc)"
 
     # capture exit code of make
     make_res="$?"
