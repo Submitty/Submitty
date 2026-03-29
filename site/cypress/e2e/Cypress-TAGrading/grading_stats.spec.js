@@ -34,7 +34,7 @@ const applyAdvancedFilter = ({
 
 const assertTaPercentAtMost100 = () => {
     cy.get('#left-grading-stats').invoke('text').then((text) => {
-        const match = text.match(/Current percentage of TA grading done:\s*[^\(]*\(([-\d.]+)%\)/);
+        const match = text.match(/Current percentage of TA grading done:\s*[^()]*(\([-\d.]+%\))/);
         expect(match, 'TA grading percentage text should exist').to.not.be.null;
         const value = Number.parseFloat(match[1]);
         expect(value, 'TA grading percentage').to.be.at.most(100);

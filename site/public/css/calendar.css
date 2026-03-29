@@ -13,15 +13,8 @@
 
 .cal-title {
     text-align: center;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
     flex-direction: column;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
     margin-top: 5px;
 }
@@ -59,9 +52,6 @@
     padding-left: 10px;
     padding-right: 10px;
     vertical-align: middle;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 }
 
@@ -191,16 +181,9 @@ a.cal-btn:focus {
     padding: 0 0 0 5px;
     display: block;
     width: 98%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
     background-image: none;
     border-radius: 4px;
-    -webkit-box-shadow:
-        0 1px 1px 0 var(--box-shadow-very-transparent),
-        0 2px 1px -1px var(--box-shadow-very-transparent),
-        0 1px 3px 0 var(--box-shadow-slightly-transparent);
     box-shadow:
         0 1px 1px 0 var(--box-shadow-very-transparent),
         0 2px 1px -1px var(--box-shadow-very-transparent),
@@ -219,7 +202,6 @@ a.cal-gradeable-status-text {
     color: var(--text-black);
     padding: 0;
     border: none;
-    -webkit-box-shadow: none;
     box-shadow: none;
     cursor: default;
 }
@@ -243,7 +225,6 @@ a.cal-gradeable-status-ann {
     font-style: italic;
     border-style: solid;
     border-width: 3px;
-    -webkit-box-shadow: none;
     box-shadow: none;
     cursor: default;
 }
@@ -269,7 +250,6 @@ a.cal-gradeable-status-link {
     padding: 0;
     text-decoration: underline;
     border: none;
-    -webkit-box-shadow: none;
     box-shadow: none;
 }
 
@@ -293,11 +273,7 @@ a.cal-gradeable-status-link:focus {
 
 /* creating/editing calendar event */
 div.calendar-submit {
-    display: -ms-grid;
     display: grid;
-    -ms-grid-columns: -webkit-max-content 5px -webkit-max-content;
-    -ms-grid-columns: max-content 5px max-content;
-    grid-template-columns: -webkit-max-content -webkit-max-content;
     grid-template-columns: max-content max-content;
     gap: 5px;
 }
@@ -310,13 +286,11 @@ div.calendar-submit label::after {
 
 /* Calendar Options Menu */
 div.filter-courses-menu {
-    display: -ms-inline-grid;
     display: inline-grid;
     line-height: 1.5;
 }
 
 div.options-colors {
-    display: -ms-grid;
     display: grid;
 }
 
@@ -339,8 +313,6 @@ label.course-color-label {
 
 /* Calendar Legend */
 div.cal-legend {
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     margin-top: 0.3rem;
     padding: 0.3rem;
