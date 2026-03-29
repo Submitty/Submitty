@@ -41,7 +41,7 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 function checkForumFileExtensions(post_box_id, files) {
@@ -2152,11 +2152,11 @@ function loadInlineImages(encoded_data) {
         for (let i = 0; i < data.length - 1; i++) {
             const attachment = data[i];
             const url = attachment[0];
-            const img = $(`<img src="${url}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">`);
+            const img = $(`<img src="${url}" alt="Click to view attachment in new tab" title="Click to view attachment in new tab" class="attachment-img">`);
             const title = $(`<p>${escapeSpecialChars(decodeURI(attachment[2]))}</p>`);
             img.click(function () {
                 const url = $(this).attr('src');
-                window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+                window.open(url, '_blank');
             });
             attachment_well.append(img);
             attachment_well.append(title);
@@ -2167,7 +2167,7 @@ function loadInlineImages(encoded_data) {
 
 function openInWindow(img) {
     const url = $(img).attr('src');
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
