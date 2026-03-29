@@ -14,8 +14,8 @@
 
     <div class="create-thread-header">
         <h3 class="create-thread-title">Create Thread</h3>
-        {% if buttons is not empty and buttons[0].link[0] %}
-            <a class="btn btn-primary" href="{{ buttons[0].link[1] }}" title="Back to threads" data-testid="back-to-threads-button">
+        {% if back_to_threads_url is not empty %}
+            <a class="btn btn-primary" href="{{ back_to_threads_url }}" title="Back to threads" data-testid="back-to-threads-button">
                 Back to Threads
             </a>
         {% endif %}
