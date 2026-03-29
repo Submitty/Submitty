@@ -269,9 +269,7 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var bool if gradeable release notifications have been sent*/
     protected $release_notifications_sent = false;
-    /**
-     * @var bool if gradeable was loaded from database with inconsistent dates*/
-    protected $has_date_errors = false;
+    
     /**
      * Gradeable constructor.
      * @param Core $core
