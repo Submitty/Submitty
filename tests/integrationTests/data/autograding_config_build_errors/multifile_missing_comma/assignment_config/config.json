@@ -1,0 +1,15 @@
+{
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+    "autograding": {
+        #include "includes/autograding_paths.jsoninc"
+    },
+    "testcases": [
+        #include "includes/visible_greeting_test.jsoninc"
+        ,
+        #include "includes/broken_hidden_greeting_test.jsoninc"
+    ]
+}
