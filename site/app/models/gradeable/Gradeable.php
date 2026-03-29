@@ -269,7 +269,7 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var bool if gradeable release notifications have been sent*/
     protected $release_notifications_sent = false;
-    
+
     /**
      * Gradeable constructor.
      * @param Core $core
