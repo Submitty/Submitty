@@ -1220,7 +1220,7 @@ class UsersController extends AbstractController {
                         break;
                     default:
                         // Unrecognized column name, exit immediatly.
-                        $this->core->addErrorMessage('Column ' . ($col_num+1) . ' has invalid title "' . $column_titles[$col_num] . '"');
+                        $this->core->addErrorMessage('Column ' . ($col_num + 1) . ' has invalid title "' . $column_titles[$col_num] . '"');
                         $this->core->redirect($return_url);
                         break;
                 }
@@ -1234,7 +1234,7 @@ class UsersController extends AbstractController {
         if (!empty($bad_row_details)) {
             $msg = "Please correct the following errors :- \n";
             array_walk($bad_row_details, function ($errors, $row_num) use (&$msg) {
-                $msg .= "Invalid " . implode(', ', $errors) . " on row number - " . ($row_num+1) . " \n";
+                $msg .= "Invalid " . implode(', ', $errors) . " on row number - " . ($row_num + 1) . " \n";
             });
             // Adding Suggestion for the user tp
             $msg .= "\n Format your data as per following standards";
@@ -1403,7 +1403,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . ($col_num+1) . ' has invalid title "' . $column_titles[$col_num] . '"');
+                            $this->core->addErrorMessage('Column ' . ($col_num + 1) . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
@@ -1512,7 +1512,7 @@ class UsersController extends AbstractController {
                             break;
                         default:
                             // Unrecognized column name, exit immediatly.
-                            $this->core->addErrorMessage('Column ' . ($col_num+1) . ' has invalid title "' . $column_titles[$col_num] . '"');
+                            $this->core->addErrorMessage('Column ' . ($col_num + 1) . ' has invalid title "' . $column_titles[$col_num] . '"');
                             $this->core->redirect($return_url);
                             break;
                     }
