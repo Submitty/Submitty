@@ -16,7 +16,7 @@ sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|/usr/local/submitty|g" /u
 # build the grading library
 cd /usr/local/submitty/src/grading/lib || exit
 cmake ..
-make
+cmake --build . --parallel $(nproc)
 
 # set the permissions
 chown -R  root:root /usr/local/submitty/src
