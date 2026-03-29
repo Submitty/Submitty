@@ -2,6 +2,9 @@
  * Visits a gradeable and wait for JS to load so we can see if the clear all files button is enabled.
  * @param {string} gradeableName the name of the gradeable we are visiting
  */
+const AUTOGRADING_RESULTS_TIMEOUT_MS = 300000;
+const AUTOGRADING_RESULTS_POLL_INTERVAL_MS = 5000;
+
 function visitGradeable(gradeableName) {
     const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
@@ -69,6 +72,38 @@ function submitGradeable(versionNumber) {
 };
 
 /**
+ * Waits until autograding totals are visible, periodically refreshing the page while results are still pending.
+ * @param {number} deadlineMs absolute timestamp (in ms) after which we should fail
+ * @returns {Cypress.Chainable}
+ */
+function waitForAutogradingResults(deadlineMs) {
+    return cy.get('body').then(($body) => {
+        const totalSelector = '[data-testid="autograding-total-no-hidden"]';
+        if ($body.find(totalSelector).length > 0) {
+            return;
+        }
+
+        const queueText = $body.find('.auto-results-queue-msg').text().trim();
+        const incompleteText = $body.find('h4:contains("Autograding Results Incomplete")').text().trim();
+        const dockerErrorText = $body.find('.error-header').text().trim();
+
+        if (dockerErrorText.includes('Docker Image not present on machine')) {
+            throw new Error(`Autograding failed due to a docker image error: ${dockerErrorText}`);
+        }
+
+        if (Date.now() >= deadlineMs) {
+            const statusText = [queueText, incompleteText, dockerErrorText].filter((text) => text.length > 0).join(' | ');
+            throw new Error(`Timed out waiting for autograding totals. Current status: ${statusText || 'No autograding state message found.'}`);
+        }
+
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- intentional polling delay while waiting for autograding queue to advance
+        cy.wait(AUTOGRADING_RESULTS_POLL_INTERVAL_MS);
+        cy.reload();
+        return waitForAutogradingResults(deadlineMs);
+    });
+}
+
+/**
  * Checks non hidden test results
  * @param {string} gradeableName the name of the gradeable we are checking
  * @param {number} versionNumber version number that we should check the grades against
@@ -80,8 +115,7 @@ function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, ful
     expect(expectedScores.length).to.eq(fullScores.length);
     // after 20 submissions we start having penalties
     expect(versionNumber).to.be.lessThan(20);
-    // wait for autograding results for two minutes
-    cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 120000 });
+    waitForAutogradingResults(Date.now() + AUTOGRADING_RESULTS_TIMEOUT_MS);
 
     // we should only check total if we do not have a non-deterministic score
     if (!fullScores.includes('?')) {
