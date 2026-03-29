@@ -10,6 +10,37 @@ const ApplyFilter = (toggle_bad_submissions, toggle_null_section) => {
     cy.get('#apply_changes').click();
 };
 
+const applyAdvancedFilter = ({
+    toggle_override = false,
+    toggle_bad_submissions = false,
+    toggle_null_section = false,
+    toggle_withdrawn = false,
+} = {}) => {
+    cy.get('a.edit-filters-button').click();
+    if (toggle_override) {
+        cy.get('#toggle-filter-include-grade-override').click();
+    }
+    if (toggle_bad_submissions) {
+        cy.get('#toggle-filter-include-bad-submissions').click();
+    }
+    if (toggle_null_section) {
+        cy.get('#toggle-filter-include-null-section').click();
+    }
+    if (toggle_withdrawn) {
+        cy.get('#toggle-filter-include-withdrawn-student').click();
+    }
+    cy.get('#apply_changes').click();
+};
+
+const assertTaPercentAtMost100 = () => {
+    cy.get('#left-grading-stats').invoke('text').then((text) => {
+        const match = text.match(/Current percentage of TA grading done:\s*[^()]*(\([-\d.]+%\))/);
+        expect(match, 'TA grading percentage text should exist').to.not.be.null;
+        const value = Number.parseFloat(match[1]);
+        expect(value, 'TA grading percentage').to.be.at.most(100);
+    });
+};
+
 describe('Test cases for grading stats', () => {
     ['instructor', 'ta', 'grader'].forEach((user) => {
         beforeEach(() => {
@@ -162,6 +193,35 @@ describe('Test cases for grading stats', () => {
             cy.get('@right-chunk-grader-info').should('contain', 'instructor (count 98 - avg 3.15 - stddev 2.12)');
             // Default, omit both filter
             ApplyFilter(true, true);
+        });
+
+        it(`${user} should keep TA grading percentage <= 100 with override/withdrawn filters.`, () => {
+            cy.visit(['sample', 'gradeable', 'grades_released_homework', 'grading', 'status']);
+            assertTaPercentAtMost100();
+
+            // Enable override filter only
+            applyAdvancedFilter({ toggle_override: true });
+            assertTaPercentAtMost100();
+
+            // Also include withdrawn students
+            applyAdvancedFilter({ toggle_withdrawn: true });
+            assertTaPercentAtMost100();
+
+            // Also include bad submissions
+            applyAdvancedFilter({ toggle_bad_submissions: true });
+            assertTaPercentAtMost100();
+
+            // Also include null sections
+            applyAdvancedFilter({ toggle_null_section: true });
+            assertTaPercentAtMost100();
+
+            // Restore defaults
+            applyAdvancedFilter({
+                toggle_override: true,
+                toggle_withdrawn: true,
+                toggle_bad_submissions: true,
+                toggle_null_section: true,
+            });
         });
     });
 });
