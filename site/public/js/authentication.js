@@ -31,17 +31,13 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
     const emailDomain = emailParts[1].toLowerCase();
     const acceptedLower = acceptedEmails.map((e) => e.toLowerCase());
     if (!acceptedLower.includes(emailDomain)) {
-        displayErrorMessage('This email domain is not accepted.');
+        displayErrorMessage('This email is not accepted.');
         return false;
     }
 
     // Validate user ID length
-    if (userId.length < userIdRequirements.min_length) {
-        displayErrorMessage(`User ID must be at least ${userIdRequirements.min_length} characters.`);
-        return false;
-    }
-    if (userId.length > userIdRequirements.max_length) {
-        displayErrorMessage(`User ID must be at most ${userIdRequirements.max_length} characters.`);
+    if (userId.length < userIdRequirements.min_length || userId.length > userIdRequirements.max_length) {
+        displayErrorMessage('This user id does not meet the requirements.');
         return false;
     }
 
