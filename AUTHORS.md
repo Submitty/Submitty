@@ -1,4 +1,4 @@
-## Admins / Project Managers
+## Admins / Project Managers  
 
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
 [Matthew Peveler](http://mpeveler.com/) 2014-current  
