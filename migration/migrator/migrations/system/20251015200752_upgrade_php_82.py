@@ -111,6 +111,12 @@ def up(config):
     # Remove existing PHP packages
     env = os.environ.copy()
     env['DEBIAN_FRONTEND'] = 'noninteractive'
+
+    subprocess.run(
+        ["apt-get", "update", "-qqy"],
+        env=env
+    )
+
     subprocess.run(
         ["apt-get", "remove", "-qqy", "php8.1"] + installed_php_packages,
         env=env
