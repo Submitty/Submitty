@@ -174,6 +174,7 @@ function build_homework {
     py_res="$?"
     if (( "$py_res" != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
+        echo "ERROR: The preprocessed config used for this build is $hw_build_path/complete_config.json"
         popd > /dev/null
         return 1
     fi
@@ -194,12 +195,12 @@ function build_homework {
 
     if (( "$configure_res" != 0 )); then
         echo -e "\nFailed to create a complete_config.json"
+        echo "ERROR: The preprocessed config used for this build is $hw_build_path/complete_config.json"
         popd > /dev/null
         return 1
     fi
 
-    # Remove the intermediate config
-    rm complete_config.json
+    # Keep the preprocessed config so instructors can inspect generated line numbers.
 
 
     # build the configuration, compilation, runner, and validation executables
