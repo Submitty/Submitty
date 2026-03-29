@@ -1250,9 +1250,6 @@ function enableTabsInTextArea(jQuerySelector) {
     t.trigger('input');
 }
 
-
-
-
 // Use event delegation to handle TAB/ESC for all forum textareas,
 // including those dynamically added when switching threads or loading
 // new posts, ensuring consistent behavior regardless of how the
