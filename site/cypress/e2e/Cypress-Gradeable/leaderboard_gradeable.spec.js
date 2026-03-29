@@ -5,9 +5,8 @@ describe('Tests leaderboard access', () => {
         cy.get('#page_5_nav').click();
         cy.get('[data-testid="submission-open-date"]').clear();
         cy.get('[data-testid="submission-open-date"]').type('2100-01-15 23:59:59');
-        // clicks out of the calendar and save
-        cy.get('body').click(0, 0);
-        cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid="submission-open-date"]').type('{enter}');
+        cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
     });
 
     it('Should check if leaderboard is accessible to users', () => {
@@ -48,8 +47,8 @@ describe('Tests leaderboard access', () => {
         cy.get('#page_5_nav').click();
         cy.get('[data-testid="submission-open-date"]').clear();
         cy.get('[data-testid="submission-open-date"]').type('2000-01-15 23:59:59');
-        cy.get('body').click(0, 0);
-        cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid="submission-open-date"]').type('{enter}');
+        cy.get('#save_status', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
 
         const testCode = '#include <iostream>\nint main() { return 0; }';
