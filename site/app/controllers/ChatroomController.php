@@ -117,6 +117,14 @@ class ChatroomController extends AbstractController {
         $em->persist($chatroom);
         $em->flush();
 
+        $msg_array = [];
+        $msg_array['type'] = 'chat_edit';
+        $msg_array['chatroom_id'] = $chatroom->getId();
+        $msg_array['title'] = $chatroom->getTitle();
+        $msg_array['description'] = $chatroom->getDescription();
+        $msg_array['allow_anon'] = $chatroom->isAllowAnon();
+        $msg_array['socket'] = "chatrooms";
+        $this->sendSocketMessage($msg_array);
         $this->core->addSuccessMessage("Chatroom successfully added");
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }

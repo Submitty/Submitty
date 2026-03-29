@@ -139,32 +139,19 @@ function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
-            case 'chat_message':
-                socketChatMessageHandler(msg);
-                break;
+            case 'chat_open':
             case 'chat_close':
-                if (msg.allow_read_only_after_end) {
-                    const messageInput = document.querySelector('.message-input');
-                    const sendButton = document.querySelector('.send-message-btn');
+            case 'chat_create':
+            case 'chat_edit':   // ✅ ADD THIS LINE
+                handleChatStateChange(msg, user_admin, isActive, base_url);
+                break;
 
-                    messageInput.disabled = true;
-                    messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
-                    sendButton.disabled = true;
-                }
-                else {
-                    window.alert('Chatroom has been closed by the instructor.');
-                    window.location.href = buildCourseUrl(['chat']);
-                }
+            case 'chat_delete':
+                removeChatroomRow(msg.chatroom_id);
                 break;
-            case 'message_delete': {
-                const msgElement = document.getElementById(msg.message_id);
-                if (msgElement) {
-                    msgElement.remove();
-                }
-                break;
-            }
+
             default:
-                console.error(msg);
+                console.error('Unknown message type:', msg);
         }
     };
     window.socketClient.open('chatrooms', {
