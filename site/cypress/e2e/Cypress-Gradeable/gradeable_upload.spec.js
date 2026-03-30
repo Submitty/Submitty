@@ -17,6 +17,8 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             });
         });
 
+        cy.login('instructor');
+
         cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
         cy.get('body').should('contain.text', 'Edit Gradeable');
         cy.get('[data-testid="download-gradeable-btn"]').click();
@@ -33,9 +35,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             expect(test_json.rubric).to.eql(rubric);
             expect(test_json.dates.has_release_date).to.eql(false);
         });
-
-
-        cy.login('instructor');
 
         const testfile1 = 'cypress/fixtures/json_ui.json';
 
@@ -56,7 +55,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
         cy.get('[data-testid="has_release_date_no"]').should('not.be.checked');
         cy.get('[data-testid="has_release_date_yes"]').should('be.checked');
-
     });
 
     it('Should get error JSON responses', () => {
