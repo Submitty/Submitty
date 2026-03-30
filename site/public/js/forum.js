@@ -2257,9 +2257,12 @@ function loadFilterHandlers() {
         }
     });
 
-    $('#search-content').on('input', (e) => {
-        $('#search-clear').toggle($('#search-content').val() !== '');
-    });
+    function updateSearchClearButton() {
+    const hasText = $('#search-content').val().trim().length > 0;
+    $('#search-clear').toggle(hasText);
+
+    updateClearFilterButton();
+}
 
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('').trigger('change');
