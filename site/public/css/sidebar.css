@@ -68,6 +68,10 @@ aside {
         color: #790000;
     }
 
+    aside li .nav-row:hover {
+        background-color: var(--hover-nav-sidebar);
+    }
+
     aside li .selected {
         background-color: var(--selected-nav-sidebar);
     }
