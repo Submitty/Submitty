@@ -36,6 +36,8 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
         cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
+        cy.get('[data-testid="has_release_date_no"]').should('be.checked');
+        cy.get('[data-testid="has_release_date_yes"]').should('not.be.checked');
 
         cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
         cy.get('body').should('contain.text', 'Edit Gradeable');
