@@ -2,6 +2,9 @@ When loading a sample configuration into the vagrant box for a course, it will t
 submissions with the files taken from the (and in the tutorial repo) folders for the given sample assignment. It
 determines what to submit by following these steps:
 
+For an instructor-facing example of splitting a gradeable configuration across multiple files with
+`#include`, see `multifile_config_python_greeting`.
+
 Is there a directory that gradeable in sample_submissions, is there files in that folder, and is there a submissions.yml
 file?
 
