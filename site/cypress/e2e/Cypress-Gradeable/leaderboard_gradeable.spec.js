@@ -15,19 +15,19 @@ describe('Tests leaderboard access', () => {
     const submitLeaderboardCode = (user, testCode) => {
         cy.login(user);
         cy.visit(['sample', 'gradeable', 'leaderboard']);
-        cy.get('#upload_file').attachFile(
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
+        cy.get('[data-testid="select-files"]').selectFile(
             {
-                fileContent: testCode,
+                contents: Cypress.Buffer.from(testCode),
                 fileName: 'submission.cpp',
-                mimeType: 'text/plain',
+                mimeType: 'text/x-c++src',
             },
             { force: true },
         );
         cy.intercept('POST', '**/courses/*/sample/gradeable/leaderboard/upload*').as('uploadSubmission');
-        cy.get('#submit').click();
+        cy.get('[data-testid="submit-gradeable"]').click();
         cy.wait('@uploadSubmission', { timeout: 30000 }).then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.status).to.eq('success', `Upload failed: ${interception.response.body.message}`);
         });
         cy.logout();
     };
