@@ -22,6 +22,11 @@ function clearErrorMessages() {
  * @returns {boolean} - True if validation passes, false otherwise
  */
 function validateSignupForm(acceptedEmails, userIdRequirements) {
+    // If no validation data available, let server handle it
+    if (!acceptedEmails || !userIdRequirements) {
+        return true;
+    }
+
     const email = $('input[name="email"]').val().trim();
     const userId = $('input[name="user_id"]').val().trim();
     const password = $('#password-input').val();
@@ -30,24 +35,28 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
     const errors = [];
 
     // Validate email format and domain
-    const emailParts = email.split('@');
-    if (emailParts.length !== 2 || emailParts[0].length === 0 || emailParts[1].length === 0) {
-        errors.push('Please enter a valid email address.');
-    } else {
-        const emailDomain = emailParts[1].toLowerCase();
-        const acceptedLower = acceptedEmails.map((e) => e.toLowerCase());
-        if (!acceptedLower.includes(emailDomain)) {
-            errors.push('This email is not accepted.');
+    if (email) {
+        const emailParts = email.split('@');
+        if (emailParts.length !== 2 || emailParts[0].length === 0 || emailParts[1].length === 0) {
+            errors.push('Please enter a valid email address.');
+        } else {
+            const emailDomain = emailParts[1].toLowerCase();
+            const acceptedLower = acceptedEmails.map((e) => e.toLowerCase());
+            if (!acceptedLower.includes(emailDomain)) {
+                errors.push('This email is not accepted.');
+            }
         }
     }
 
     // Validate user ID length
-    if (userId.length < userIdRequirements.min_length || userId.length > userIdRequirements.max_length) {
-        errors.push('This user id does not meet the requirements.');
+    if (userId && userIdRequirements.min_length && userIdRequirements.max_length) {
+        if (userId.length < userIdRequirements.min_length || userId.length > userIdRequirements.max_length) {
+            errors.push('This user id does not meet the requirements.');
+        }
     }
 
     // Check passwords match before submitting
-    if (password !== confirmPassword) {
+    if (password && confirmPassword && password !== confirmPassword) {
         errors.push('Passwords do not match.');
     }
 
