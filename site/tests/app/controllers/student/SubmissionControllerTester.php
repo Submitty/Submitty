@@ -845,7 +845,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $files = [];
-        foreach (new FilesystemIterator($tmp) as $file) {
+        foreach (new \FilesystemIterator($tmp) as $file) {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
@@ -868,7 +868,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
         $files = [];
-        foreach (new FilesystemIterator($tmp) as $file) {
+        foreach (new \FilesystemIterator($tmp) as $file) {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
             if ($file->getFilename() === 'answers.pdf') {

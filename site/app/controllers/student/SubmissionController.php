@@ -1486,7 +1486,7 @@ class SubmissionController extends AbstractController {
                                 $file_base_name = basename($filename);
                                 $previous_files_src[$i][$j] = $file_base_name;
                                 $old_file_base = pathinfo($file_base_name, PATHINFO_FILENAME);
-                                if (!$clobber && (isset($current_files_set[$file_base_name]) || in_array($old_file_base, $current_files_base_set))) {
+                                if (!$clobber && (isset($current_files_set[$file_base_name]) || in_array($old_file_base, $current_files_base_set, true))) {
                                     $parts = explode(".", $file_base_name);
                                     $parts[0] .= "_version_" . $highest_version;
                                     $file_base_name = implode(".", $parts);
