@@ -45,9 +45,10 @@
             </label>
         </fieldset>
         <input class="btn btn-primary" type="submit" value="Submit" data-testid="grade-override-submit">
-        <p id="empty-table" class="warning" data-testid="grade-override-message-box">
-            No gradeable has been selected
-        </p>
+        <div id="empty-table" class="alert-banner alert-warning" data-testid="grade-override-message-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>No gradeable has been selected</div>
+        </div>
         <div id="load-overridden-grades" class="d-none" data-testid="load-overridden-grades">
             {# This is a data table #}
             <table id="grade-override-table" class="table table-striped table-bordered persist-area mobile-table">

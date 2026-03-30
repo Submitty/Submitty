@@ -57,7 +57,10 @@
     </form>
     {# This is a data table #}
     {% if not users or (users|length < 1) %}
-        <p id="empty-table" class="warning">No late days are currently entered</p>
+        <div id="empty-table" class="alert-banner alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>No late days are currently entered</div>
+        </div>
     {% else %}
         <table id="late-day-table" class="table table-striped mobile-table">
             <caption>Late Days Allowed</caption>

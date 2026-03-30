@@ -68,13 +68,16 @@
         </fieldset>
     </form>
     {% if current_exceptions is null %}
-        <p id="empty-table" class="warning">
+        <div id="empty-table" class="alert-banner alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
             {% if current_gradeable is null %}
                 No gradeable has been selected
             {% else %}
                 No extensions are currently entered for this gradeable
             {% endif %}
-        </p>
+            </div>
+        </div>
     {% else %}
         {# This is a data table #}
         <table id="extensions-table" class="table table-striped mobile-table">
