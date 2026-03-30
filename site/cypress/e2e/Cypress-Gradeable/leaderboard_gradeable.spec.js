@@ -1,7 +1,7 @@
 describe('Tests leaderboard access', () => {
     const updateSubmissionOpenDate = (date) => {
         cy.intercept('POST', '**/courses/*/sample/gradeable/leaderboard/update').as('saveGradeableUpdate');
-        cy.get('[data-testid="submission-open-date"]').clear({ force: true }).invoke('val', date).trigger('change', { force: true });
+        cy.get('[data-testid="submission-open-date"]').clear().invoke('val', date).trigger('change');
         cy.get('body').click(0, 0);
         cy.wait('@saveGradeableUpdate', { timeout: 30000 }).then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
@@ -77,7 +77,7 @@ describe('Tests leaderboard access', () => {
         cy.get('#page_5_nav').click();
         // Keep date ordering valid before moving submission-open-date into the past.
         cy.intercept('POST', '**/courses/*/sample/gradeable/leaderboard/update').as('saveGradeableUpdateTA');
-        cy.get('[data-testid="ta-view-start-date"]').clear({ force: true }).invoke('val', '1999-01-15 23:59:59').trigger('change', { force: true });
+        cy.get('[data-testid="ta-view-start-date"]').clear().invoke('val', '1999-01-15 23:59:59').trigger('change');
         cy.get('body').click(0, 0);
         cy.wait('@saveGradeableUpdateTA', { timeout: 30000 }).its('response.statusCode').should('eq', 200);
         cy.wait(1000);
