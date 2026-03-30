@@ -10,7 +10,14 @@
 
 # Usage
 
-System instructions located at [https://submitty.org/](https://submitty.org/)
+For new users, it is recommended to begin with the official documentation website, which provides detailed guidance on installation, configuration, and usage of Submitty.
+
+# Getting Started
+- Visit the official documentation: https://submitty.org/
+- Follow the installation and setup instructions
+- Explore features and usage guides for instructors and students
+
+This will help new users quickly understand how to set up and use Submitty effectively.
 
 # Background
 
