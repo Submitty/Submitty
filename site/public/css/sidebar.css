@@ -59,21 +59,17 @@ aside {
         color: var(--nav-sidebar-text);
     }
 
-    aside a .icon-title:hover {
-        color: var(--sidebar-hover-text);
-    }
-
     aside a .icon-title:active {
         /* stylelint-disable-next-line color-no-hex */
         color: #790000;
     }
 
     aside li .nav-row:hover {
-        background-color: var(--standard-hover-light-gray);
+        background-color: var(--subtle-grey-background);
     }
 
     [data-theme="dark"] aside li .nav-row:hover {
-        background-color: var(--btn-default-hover);
+    background-color: var(--standard-hover-light-gray);
     }
 
     aside li .selected {
