@@ -133,12 +133,12 @@
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 1px;
+    margin-top: 1px;
 }
 
 .markdown-mode-buttons {
     display: flex;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
 .markdown-mode-tab {
@@ -218,6 +218,7 @@
 
 .btn-markdown {
     margin-left: 5px;
+    margin-top: 5px;
 }
 
 /* Preview Loading Spinner */
