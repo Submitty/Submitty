@@ -630,7 +630,8 @@ jobs:
 
       - name: Compare Migrated course Database with Provided Dump
         if: always()
-                diff --color \
+        run: |
+          diff --color \
             -I '^\\restrict' \
             -I '^\\unrestrict' \
             ${GITHUB_WORKSPACE}/dumped/branch/course.sql \
