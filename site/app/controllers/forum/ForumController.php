@@ -1440,6 +1440,45 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
+    private function initializeForumStatsUser(array &$users, string $user): void {
+        if (isset($users[$user])) {
+            return;
+        }
+
+        $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+        $users[$user] = [
+            "given_name" => htmlspecialchars($user_obj->getDisplayedGivenName()),
+            "family_name" => htmlspecialchars($user_obj->getDisplayedFamilyName()),
+            "posts" => [],
+            "id" => [],
+            "timestamps" => [],
+            "thread_id" => [],
+            "thread_title" => [],
+            "total_threads" => 0,
+            "num_deleted_posts" => 0,
+            "total_upducks" => 0,
+        ];
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function getDeletedForumPostCounts(): array {
+        $this->core->getCourseDB()->query("
+            SELECT author_user_id, COUNT(*) AS num_deleted_posts
+            FROM posts
+            WHERE deleted = TRUE
+            GROUP BY author_user_id
+        ");
+
+        $deleted_post_counts = [];
+        foreach ($this->core->getCourseDB()->rows() as $row) {
+            $deleted_post_counts[$row['author_user_id']] = (int) $row['num_deleted_posts'];
+        }
+
+        return $deleted_post_counts;
+    }
+
     // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
@@ -1447,22 +1486,12 @@ class ForumController extends AbstractController {
         $num_posts = count($posts);
         $upducks = $this->core->getQueries()->getUpDucks();
         $num_users_with_upducks = count($upducks);
+        $deleted_post_counts = $this->getDeletedForumPostCounts();
         $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
-            if (!isset($users[$user])) {
-                $users[$user] = [];
-                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
-                $users[$user]["posts"] = [];
-                $users[$user]["id"] = [];
-                $users[$user]["timestamps"] = [];
-                $users[$user]["total_threads"] = 0;
-                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
-                $users[$user]["total_upducks"] = 0;
-            }
+            $this->initializeForumStatsUser($users, $user);
             if ($posts[$i]["parent_id"] == -1) {
                 $users[$user]["total_threads"]++;
             }
@@ -1474,16 +1503,15 @@ class ForumController extends AbstractController {
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
-            // user has only upducks and no posts, need to set some information
-            if (!isset($users[$user])) {
-                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
-                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
-                $users[$user]["total_threads"] = 0;
-            }
+            $this->initializeForumStatsUser($users, $user);
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
+
+        foreach ($deleted_post_counts as $user => $num_deleted_posts) {
+            $this->initializeForumStatsUser($users, $user);
+            $users[$user]["num_deleted_posts"] = $num_deleted_posts;
+        }
+
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
