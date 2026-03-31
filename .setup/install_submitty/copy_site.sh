@@ -43,6 +43,9 @@ set_mjs_permission () {
 printf '%s\n' "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+# THIS_DIR is relative, submitty_install_site is meant to be run in /usr/local/submitty,
+# shellcheck is run in /usr/local/submitty/GIT_CHECKOUT/Submitty
+# shellcheck disable=SC1091 
 source "${THIS_DIR}/../bin/versions.sh"
 
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../../../config"
@@ -73,6 +76,9 @@ if [ -z "${SUBMITTY_CONFIG_DIR:-}" ]; then
 	exit 1
 fi
 
+# THIS_DIR is relative, submitty_install_site is meant to be run in /usr/local/submitty,
+# shellcheck is run in /usr/local/submitty/GIT_CHECKOUT/Submitty
+# shellcheck disable=SC1091 
 source "${THIS_DIR}/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/public"
