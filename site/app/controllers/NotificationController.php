@@ -130,6 +130,7 @@ class NotificationController extends AbstractController {
     /**
      * @return JsonResponse
      */
+<<<<<<< Updated upstream
     #[Route("/courses/{_semester}/{_course}/notifications/sync", methods: ["POST"])]
 public function syncSettings(): JsonResponse {
     $user_id = $this->core->getUser()->getId();
@@ -159,6 +160,9 @@ public function syncSettings(): JsonResponse {
     }
     return JsonResponse::getSuccessResponse('Settings synced successfully.');
 }
+=======
+    
+>>>>>>> Stashed changes
 
     /**
      * @return MultiResponse
