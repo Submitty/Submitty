@@ -1,26 +1,37 @@
 #!/usr/bin/env bash
 
 set_permissions () {
-	local fullpath=$1
-	filename=$(basename -- "$fullpath")
-	extension="${filename##*.}"
-	# filename="${filename%.*}"
-	case "${extension}" in
-		css|otf|jpg|png|mp3|ico|txt|twig|map)
-			chmod 444 ${fullpath}
-			;;
-		bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
-			chmod 445 ${fullpath}
-			;;
-		html)
-			if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
-				chmod 440 ${fullpath}
-			fi
-			;;
-		*)
-			chmod 440 ${fullpath}
-			;;
-	esac
+    local fullpath=$1
+    filename=$(basename -- "$fullpath")
+    extension="${filename##*.}"
+    # filename="${filename%.*}"
+    case "${extension}" in
+        css|otf|jpg|png|mp3|ico|txt|twig|map)
+            chmod 444 ${fullpath}
+            ;;
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
+            chmod 445 ${fullpath}
+            ;;
+        html)
+            if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+                chmod 440 ${fullpath}
+            fi
+            ;;
+        *)
+            chmod 440 ${fullpath}
+            ;;
+    esac
+}
+
+set_mjs_permission () {
+    for file in $1/*; do
+        if [ -d "$file" ]; then
+            chmod 551 $file
+            set_mjs_permission $file
+        else
+            set_permissions $file
+        fi
+    done
 }
 
 echo -e "Copy the submission website"
@@ -32,12 +43,12 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
+NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
 VAGRANT=0
-
 if [ -d "${THIS_DIR}/../../.vagrant" ]; then
 	VAGRANT=1
 fi
@@ -186,3 +197,27 @@ for entry in "${result_array[@]}"; do
 		fi
 	fi
 done
+
+echo "Running esbuild"
+chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
+su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
+chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
+chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+
+chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+
+rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html
