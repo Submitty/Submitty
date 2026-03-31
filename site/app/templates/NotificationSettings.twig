@@ -60,7 +60,7 @@
                 {% endif %}
             </div>
 
-            {# add page changes for button#}
+            {# add page changes for button
             <div class="row row-spacing" id="sync-course-container" style="display:none;">
                 <div class="heading col-md-12">
                     <h3>Select Courses to Sync To</h3>
@@ -77,7 +77,7 @@
                     {% endfor %}
                     </select>
                 </div>
-            </div>
+            </div> #}
 
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -411,7 +411,7 @@
         }
         //twig will call
         {#create setNotification#}
-        function setNotification(button){
+        function setNotification(){
             const selected = $('#sync_course_ids').val();
 
             //first click -> show selector instead of syncing
@@ -427,7 +427,7 @@
                 data: $('#form_notification_settings').serialize() + '&' + $.param({sync_course_ids: selected}),
                 success: function () {
                     displaySuccessMessage("Synced to selected courses.");
-                    $('.popup-form').hide();
+                    $('#sync-notification-popup').hide();
                 },
                 error: function () {
                     displayErrorMessage("Failed to sync settings.");
@@ -439,8 +439,8 @@
         //put example function here
         //will call twig, which twig will then call above function
         function showSyncPopup() {
-            $('.popup-form').hide();
-            $('#sync-notification-popup').show();
+            //$('.popup-form').hide();
+            $('#sync-notification-popup').css('display','block');
         }
 
         {# function showSyncPopup() {
