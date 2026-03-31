@@ -435,7 +435,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id, $gradeable->getVcsSubdirectory());
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id, $gradeable->getVcsSubdirectory(), $this->core->getConfig()->getSubmittyPath());
                 }
             }
         }
@@ -555,6 +555,23 @@ class UsersController extends AbstractController {
                     $this->core->addErrorMessage("Registration Section {$_POST['add_reg_section']} already present");
                 }
                 else {
+                    if (isset($_POST['add_course_id']) && trim($_POST['add_course_id']) !== '') {
+                        $course_id = trim($_POST['add_course_id']);
+                        if (preg_match('/^\d{5}$/', $course_id)) {
+                            if (!$this->core->getQueries()->courseIdExists($course_id, $_POST['add_reg_section'])) {
+                                $this->core->getQueries()->updateCourseSectionId(
+                                    $_POST['add_reg_section'],
+                                    $course_id
+                                );
+                            }
+                            else {
+                                $this->core->addErrorMessage("Course ID {$course_id} already in use");
+                            }
+                        }
+                        else {
+                            $this->core->addErrorMessage("Course ID must be a 5-digit number");
+                        }
+                    }
                     $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
                 }
             }
@@ -604,6 +621,32 @@ class UsersController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sections/update_course_id", methods: ["POST"])]
+    public function updateCourseId(): JsonResponse {
+        $section_id = $_POST['section_id'] ?? null;
+        $course_id  = trim($_POST['course_id'] ?? '');
+
+        if ($section_id === null || $course_id === '') {
+            return JsonResponse::getErrorResponse('Invalid input');
+        }
+
+        if (!preg_match('/^\d{5}$/', $course_id)) {
+            return JsonResponse::getErrorResponse('Course ID must be a 5-digit number');
+        }
+
+        if ($this->core->getQueries()->courseIdExists($course_id, $section_id) > 0) {
+            return JsonResponse::getErrorResponse('That Course ID is already in use.');
+        }
+
+        $this->core->getQueries()->updateCourseSectionId($section_id, $course_id);
+
+        return JsonResponse::getSuccessResponse([
+            'message'    => 'Course ID updated successfully',
+            'section_id' => $section_id,
+            'course_id'  => $course_id,
+        ]);
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
