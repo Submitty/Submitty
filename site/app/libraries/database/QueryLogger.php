@@ -25,7 +25,7 @@ class QueryLogger extends AbstractLogger {
         if ($level === LogLevel::DEBUG && isset($context['sql'])) {
             $this->queries[] = [
                 $context['sql'],
-                $context['params'] ?? []
+                array_values($context['params'] ?? [])
             ];
         }
     }
