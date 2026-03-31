@@ -114,10 +114,6 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
-        //add "available courses" for the twig
-        $available_courses = $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId());
-
-
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
