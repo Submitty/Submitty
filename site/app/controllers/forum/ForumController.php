@@ -304,12 +304,17 @@ class ForumController extends AbstractController {
             }
         }
         if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
-            if ($_POST["visibleDate"] === "    ") {
+            $visible_date_raw = trim($_POST["visibleDate"]);
+            if ($visible_date_raw === "") {
                 $category_visible_date = "";
             }
             else {
-                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
-                //ASSUME NO ISSUE
+                try {
+                    $category_visible_date = DateUtils::parseDateTime($visible_date_raw, $this->core->getUser()->getUsableTimeZone());
+                }
+                catch (\InvalidArgumentException $e) {
+                    return $this->core->getOutput()->renderJsonFail("Invalid date format for category visible date.");
+                }
             }
         }
         else {
