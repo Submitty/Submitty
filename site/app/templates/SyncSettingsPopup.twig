@@ -12,7 +12,7 @@
             multiple
             size="8"
             style="width:100%;">
-        {% for course in core.getUser().getCourses() %}
+        {% for course in courses %}
             <option value="{{ course.id }}">
                 {{course.semester}} — {{course.title}}
             </option>

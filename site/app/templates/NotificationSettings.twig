@@ -444,7 +444,8 @@
         }
 
         {# function showSyncPopup() {
-            $('.popup-form').css('display', 'none');
+            //$('.popup-form').css('display', 'none');
+            $('#sync-notification-popup').css('display', 'none');
             const form = $('#edit-display-name-order-form');
             form.css('display', 'block');
             form.find('.form-body').scrollTop(0);
@@ -479,4 +480,5 @@
         });
     </script>
 </div>
-{% include 'SyncSettingsPopup.twig' %}
+{% set courses = core.getUser().getCourses() %}
+{% include 'SyncSettingsPopup.twig' with { courses: courses } %}
