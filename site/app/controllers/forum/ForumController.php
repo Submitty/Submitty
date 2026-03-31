@@ -1440,15 +1440,27 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $users
+     */
     private function initializeForumStatsUser(array &$users, string $user): void {
         if (isset($users[$user])) {
             return;
         }
 
         $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+
+        $given_name = htmlspecialchars($user);
+        $family_name = '';
+
+        if ($user_obj !== null) {
+            $given_name = htmlspecialchars($user_obj->getDisplayedGivenName());
+            $family_name = htmlspecialchars($user_obj->getDisplayedFamilyName());
+        }
+
         $users[$user] = [
-            "given_name" => htmlspecialchars($user_obj->getDisplayedGivenName()),
-            "family_name" => htmlspecialchars($user_obj->getDisplayedFamilyName()),
+            "given_name" => $given_name,
+            "family_name" => $family_name,
             "posts" => [],
             "id" => [],
             "timestamps" => [],
