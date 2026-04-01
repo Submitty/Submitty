@@ -1,10 +1,13 @@
 /* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
-/* global csrfToken, displayErrorMessage, displaySuccessMessage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
 * @param {string} btn_id id of the button calling this function
 */
+
+var csrfToken = window.csrfToken;
+var displayErrorMessage = window.displayErrorMessage;
+var displaySuccessMessage = window.displaySuccessMessage;
 function collapseSection(id, btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
