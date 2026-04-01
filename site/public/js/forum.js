@@ -1,8 +1,8 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars, updateThreads, getFileExtension,
-    deleteSingleFile, removeLabel, get_part_number, file_array, previous_files,
-    label_array, cancelDeferredSave, captureTabInModal, WebSocketClient,
-    removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
+    displayErrorMessage, escapeSpecialChars, updateThreads, enableTabsInTextArea,
+    getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
+    previous_files, label_array, cancelDeferredSave, captureTabInModal,
+    WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
     cleanupAutosaveHistory */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */

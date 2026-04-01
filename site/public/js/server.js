@@ -1270,8 +1270,6 @@ $(document).on('keydown', 'textarea.thread_post_content', function (event) {
     }
 });
 
-
-
 function confirmBypass(str, redirect) {
     if (confirm(str)) {
         location.href = redirect;
