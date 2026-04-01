@@ -139,7 +139,7 @@ function addMarkdown(type: string) {
 
 function handleKeyup(event: Event) {
     emit('keyup', event);
-
+    // Call global function if specified
     if (
         props.textareaOnKeyup
         && window[props.textareaOnKeyup as keyof Window]
@@ -401,33 +401,25 @@ function syncMarkdownToggle() {
 </template>
 
 <style>
-/* =========================================================
-   STRUCTURAL LAYOUT & RESPONSIVENESS
-   Note: Tab colors are handled by native Submitty CSS
-   ========================================================= */
-
-/* 1. Setup the container query on the main wrapper */
 .markdown-area {
   container-type: inline-size;
   container-name: markdownarea;
   width: 100%;
 }
 
-/* 2. The Header Row */
 .markdown-area-header {
   display: flex;
-  justify-content: space-between; /* Pushes tabs left, toolbar right */
-  align-items: flex-end; /* Keeps them bottom-aligned */
-  flex-wrap: nowrap; /* FORCES them to stay on one line */
+  justify-content: space-between; 
+  align-items: flex-end; 
+  flex-wrap: nowrap; 
   width: 100%;
-  overflow: hidden; /* Prevents awkward bleeding if it gets too tight */
+  overflow: hidden; 
 }
 
-/* 3. The Toolbar */
 .markdown-area-toolbar {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap; /* FORCES buttons to stay on one line */
+  flex-wrap: nowrap;
   gap: 4px;
   padding-bottom: 2px;
 }
@@ -436,17 +428,11 @@ function syncMarkdownToggle() {
   margin-right: 4px;
 }
 
-/* =========================================================
-   RESPONSIVE TEXT HIDING (Triggers when panel is narrow)
-   ========================================================= */
-
 @container markdownarea (max-width: 650px) {
-  /* Hide the text inside the formatting buttons */
   .md-btn-text {
     display: none;
   }
   
-  /* Make the remaining icon buttons square and compact */
   .markdown-area-toolbar .btn-markdown {
     padding-left: 10px !important;
     padding-right: 10px !important;
@@ -454,7 +440,6 @@ function syncMarkdownToggle() {
 }
 
 @container markdownarea (max-width: 350px) {
-  /* Extreme case: if the TA panel is tiny, shrink the gaps */
   .markdown-area-toolbar {
     gap: 2px;
   }
