@@ -85,13 +85,13 @@
                     <div style="float: right;width: auto;">
                         <span class="categorylistitemdate-desc">
                             <span class="categorylistitem-desc-text" style="overflow-wrap: break-word;"> {{ category.visibleDate }}</span>
-                            <i class="fas fa-edit category-button edit-category-date-button"></i>
+                            <i class="fas fa-edit category-button edit-category-date-button" data-testid="edit-category-date-button"></i>
                         </span>
 
 
                         <span class="categorylistitemdate-editdesc" style="display: none;">
-                                <input type="text" aria-label="New Date for Category" placeholder=" {{ category.visibleDate }} " class="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
-                                <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check category-button save-date-button"></i></a>
+                                <input type="text" aria-label="New Date for Category" placeholder=" {{ category.visibleDate }} " class="edit-category-date-input" data-testid="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
+                                <a class="post_button" title="Save Changes" aria-label="Save Changes" data-testid="save-category-date-button"><i class="fas fa-check category-button save-date-button"></i></a>
                                 <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-date-button"></i></a>
                         </span>
 
