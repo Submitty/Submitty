@@ -112,7 +112,7 @@ jobs:
       - run: npm ci
       - run: npm run test
       - name: Upload Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: site/tests/report/jest/clover.xml
           flags: js
@@ -210,7 +210,7 @@ jobs:
       - name: Run php unit tests
         run: php vendor/bin/phpunit
       - name: Upload Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: site/tests/report/clover.xml
           flags: php
@@ -269,7 +269,7 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload submitty python utils Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: python_submitty_utils/coverage.xml
           flags: python_submitty_utils
@@ -283,7 +283,7 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload migrator Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: migration/coverage.xml
           flags: migrator
@@ -297,7 +297,7 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload autograder Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: autograder/coverage.xml
           flags: autograder
@@ -318,7 +318,7 @@ jobs:
           coverage xml -i
 
       - name: Upload submitty_daemon_jobs Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
