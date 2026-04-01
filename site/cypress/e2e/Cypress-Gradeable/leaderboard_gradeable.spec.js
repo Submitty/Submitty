@@ -48,7 +48,7 @@ describe('Tests leaderboard access', () => {
         cy.get('#page_5_nav').click();
         cy.get('[data-testid="submission-open-date"]').clear();
         cy.get('[data-testid="submission-open-date"]').type('2000-01-15 23:59:59{enter}');
-        cy.get('[data-testid="submission-open-date"]').blur();
+        cy.get('#save_status').click();
         cy.get('#save_status', { timeout: 10000 }).should('have.text', 'All Changes Saved');
         cy.logout();
 
