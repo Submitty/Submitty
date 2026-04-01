@@ -10,6 +10,7 @@ Required Parameters:
   - attachments["logged_in_user"]["user_id"],
   - attachments["logged_in_user"]["attachments"] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
   - attachments["other_graders"][<user_id>] = [["file_1", "file_1_path"], ["file_2", "file_2_path"], ...]
+-user_group: the numeric group of the logged-in user (1=instructor, 2=full-access grader, 3=limited grader, 4=student)
 #}
 <div class="box general-comment container key_to_click" tabindex="0">
     <div class="row overall-comment-top-row">
@@ -76,7 +77,8 @@ Required Parameters:
                         file: file,
                         id: "a-0-" ~ loop.index,
                         is_grader_view: true,
-                        can_modify: true
+                        can_modify: true,
+                        uploader_id: attachments["logged_in_user"]["user_id"]
                     } only %}
                 {% endfor %}
                 </div>
@@ -87,7 +89,8 @@ Required Parameters:
                             file: file,
                             id: "a-" ~ loop.parent.loop.index ~ "-" ~ loop.index,
                             is_grader_view: true,
-                            can_modify: false
+                            can_modify: user_group is defined and user_group <= 2,
+                            uploader_id: grader
                         } only %}
                     {% endfor %}
                 </div>

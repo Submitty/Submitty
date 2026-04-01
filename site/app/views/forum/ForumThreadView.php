@@ -145,7 +145,8 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT
+                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
+                "forum_thread_base_url" => $this->core->buildCourseUrl(['forum']),
             ]);
         }
         else {
