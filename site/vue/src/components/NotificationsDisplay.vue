@@ -132,14 +132,15 @@ function markAllSeen(courses: Record<string, unknown>[]) {
           v-if="notifications.length !== 0 && !props.course"
           @mark-all="({ courses }) => markAllSeen(courses)"
         />
-        <a
+        <button
           v-if="props.course"
-          class="btn btn-primary notification-settings-btn"
+          class="btn btn-primary"
           :href="buildCourseUrl(['notifications', 'settings'])"
           data-testid="notification-settings-button"
+          @click="() => window.location.href = buildCourseUrl(['notifications', 'settings'])"
         >
           Settings
-        </a>
+        </button>
       </div>
     </div>
     <p
@@ -218,9 +219,6 @@ function markAllSeen(courses: Record<string, unknown>[]) {
   flex-shrink: 0;
 }
 
-.notification-settings-btn {
-  font-family: arial, sans-serif;
-}
 .unseen-count-p {
   padding-top: 10px;
   font-weight: 600;
