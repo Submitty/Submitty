@@ -247,7 +247,6 @@
 {% include 'AddRegistrationSectionForm.twig' %}
 
 <script>
-    window.csrfToken = "{{ csrf_token }}";
     window.updateCourseIdUrl = "{{ update_course_id_url }}";
 
     window.existingCourseIds = new Set([
