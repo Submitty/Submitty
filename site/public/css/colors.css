@@ -395,3 +395,63 @@
     --category-color-19: #e57fcf;
     --category-color-20: #c0c246;
 }
+
+/* SUBMITTY ALERT BANNERS DESIGN TOKENS */
+/* design-tokens.css */
+
+:root {
+  /* Info (Blue) */
+  --alert-info-bg: rgba(0, 114, 178, 0.08); 
+  --alert-info-border: #0072B2; 
+  --alert-info-text: #003a5c;
+  --alert-info-icon: #0072B2;
+  --alert-info-glow: rgba(0, 114, 178, 0.10);
+  
+  /* Success (Bluish Green) */
+  --alert-success-bg: rgba(0, 158, 115, 0.08); 
+  --alert-success-border: #009E73; 
+  --alert-success-text: #00523b;
+  --alert-success-icon: #009E73;
+  --alert-success-glow: rgba(0, 158, 115, 0.10);
+  
+  /* Warning (Orange/Yellow) */
+  --alert-warning-bg: rgba(230, 159, 0, 0.08); 
+  --alert-warning-border: #d98200; 
+  --alert-warning-text: #7a4f00;
+  --alert-warning-icon: #d98200;
+  --alert-warning-glow: rgba(230, 159, 0, 0.10);
+  
+  /* Error (Dark Red) */
+  --alert-error-bg: rgba(185, 28, 28, 0.08); /* Tailwind red-700 */
+  --alert-error-border: #991b1b; /* Tailwind red-800 */
+  --alert-error-text: #450a0a; /* Tailwind red-950 */
+  --alert-error-icon: #b91c1c; /* Tailwind red-700 */
+  --alert-error-glow: rgba(185, 28, 28, 0.10);
+}
+
+/* Dark Mode Overrides (High Contrast) */
+.dark {
+  --alert-info-bg: rgba(0, 114, 178, 0.15); /* Glassy tint */
+  --alert-info-border: #56B4E9; /* Sky Blue */
+  --alert-info-text: #e6f4fc;
+  --alert-info-icon: #56B4E9;
+  --alert-info-glow: rgba(86, 180, 233, 0.2);
+  
+  --alert-success-bg: rgba(0, 158, 115, 0.15);
+  --alert-success-border: #009E73;
+  --alert-success-text: #d9f2e6;
+  --alert-success-icon: #4ade80; /* Brighter for dark mode */
+  --alert-success-glow: rgba(0, 158, 115, 0.2);
+  
+  --alert-warning-bg: rgba(230, 159, 0, 0.15);
+  --alert-warning-border: #F0E442;
+  --alert-warning-text: #fef8cc;
+  --alert-warning-icon: #F0E442;
+  --alert-warning-glow: rgba(240, 228, 66, 0.2);
+
+  --alert-error-bg: rgba(220, 38, 38, 0.15); /* Tailwind red-600 */
+  --alert-error-border: #dc2626; /* Tailwind red-600 */
+  --alert-error-text: #fecaca; /* Tailwind red-200 */
+  --alert-error-icon: #ef4444; /* Tailwind red-500 */
+  --alert-error-glow: rgba(220, 38, 38, 0.2);
+}

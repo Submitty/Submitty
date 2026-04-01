@@ -2238,3 +2238,75 @@ End of slider switch
 .fas:hover {
     color: var(--external-link-blue);
 }
+
+/* SUBMITTY ALERT BANNERS SERVER STYLES */
+/* server.css - Global styles for Submitty components */
+.submitty-alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: 12px;
+  border-left-width: 5px;
+  border-left-style: solid;
+  /* Premium Glassmorphism & Depth */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover elevation effect */
+.submitty-alert:hover {
+  transform: translateY(-2px);
+}
+
+/* Dynamic Mapping from OKABE-ITO Colorblind Safe Tokens (imported from colors.css) */
+.alert-info {
+  background-color: var(--alert-info-bg);
+  border-left-color: var(--alert-info-border);
+  color: var(--alert-info-text);
+  box-shadow: 0 10px 25px -5px var(--alert-info-glow), 0 8px 10px -6px var(--alert-info-glow);
+}
+.alert-info .icon-circle {
+  background-color: rgba(0, 114, 178, 0.1);
+  color: var(--alert-info-icon);
+}
+.alert-info .alert-type-label { color: var(--alert-info-icon); }
+
+.alert-success {
+  background-color: var(--alert-success-bg);
+  border-left-color: var(--alert-success-border);
+  color: var(--alert-success-text);
+  box-shadow: 0 10px 25px -5px var(--alert-success-glow), 0 8px 10px -6px var(--alert-success-glow);
+}
+.alert-success .icon-circle {
+  background-color: rgba(0, 158, 115, 0.1);
+  color: var(--alert-success-icon);
+}
+.alert-success .alert-type-label { color: var(--alert-success-icon); }
+
+.alert-warning {
+  background-color: var(--alert-warning-bg);
+  border-left-color: var(--alert-warning-border);
+  color: var(--alert-warning-text);
+  box-shadow: 0 10px 25px -5px var(--alert-warning-glow), 0 8px 10px -6px var(--alert-warning-glow);
+}
+.alert-warning .icon-circle {
+  background-color: rgba(230, 159, 0, 0.1);
+  color: var(--alert-warning-icon);
+}
+.alert-warning .alert-type-label { color: var(--alert-warning-icon); }
+
+.alert-error {
+  background-color: var(--alert-error-bg);
+  border-left-color: var(--alert-error-border);
+  color: var(--alert-error-text);
+  box-shadow: 0 10px 25px -5px var(--alert-error-glow), 0 8px 10px -6px var(--alert-error-glow);
+}
+.alert-error .icon-circle {
+  background-color: rgba(213, 94, 0, 0.1);
+  color: var(--alert-error-icon);
+}
+.alert-error .alert-type-label { color: var(--alert-error-icon); }
