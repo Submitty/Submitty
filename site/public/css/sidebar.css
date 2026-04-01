@@ -69,7 +69,7 @@ aside {
     }
 
     [data-theme="dark"] aside li .nav-row:hover {
-    background-color: var(--standard-hover-light-gray);
+        background-color: var(--standard-hover-light-gray);
     }
 
     aside li .selected {

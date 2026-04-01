@@ -1278,6 +1278,10 @@ function toggleLike(post_id, thread_id, current_user) {
             }
             else {
                 updateLikesDisplay(post_id, json.data);
+                // Provide immediate thread like count update if socket message not received yet
+                if (json.data.threadLikesCount !== undefined) {
+                    updateThreadLikesDisplay(thread_id, { likesCount: json.data.threadLikesCount });
+                }
             }
         },
         error: function (err) {
