@@ -67,7 +67,7 @@
 						{% endfor %}
 						{% if core.getUser().accessGrading() %}
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" >Edit Categories</a>
+							<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" data-testid="edit-categories-link">Edit Categories</a>
 						{% endif %}
 						{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 							<div class="dropdown-divider"></div>
