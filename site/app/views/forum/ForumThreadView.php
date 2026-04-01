@@ -601,7 +601,7 @@ class ForumThreadView extends AbstractView {
                 $pronouns = trim($user_info["pronouns"]);
                 $display_pronouns = $user_info["display_pronouns"];
 
-                if ($first_post->getAuthor()->accessFullGrading()) {
+                if ($first_post->getAuthor()->accessGrading()) {
                     $visible_username = $given_name . " " . $family_name;
                 }
 
@@ -751,11 +751,11 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-        $merged_thread = $thread->isMergedThread() && $user->accessFullGrading();
+        $merged_thread = $thread->isMergedThread() && $user->accessGrading();
 
         $post_button = [];
 
-        if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessFullGrading())) {
+        if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessGrading())) {
             if ($deleted && $user->accessGrading()) {
                 $ud_toggle_status = "false";
                 $ud_button_title = "Restore post";
@@ -803,7 +803,7 @@ class ForumThreadView extends AbstractView {
         $author_display_info = $post->getAuthor()->getDisplayInfo();
         $visible_username = $author_display_info["given_name"] . " " . substr($author_display_info["family_name"], 0, 1) . ".";
 
-        if ($post->getAuthor()->accessFullGrading()) {
+        if ($post->getAuthor()->accessGrading()) {
             $visible_username = $author_display_info["given_name"] . " " . $author_display_info["family_name"];
         }
 
@@ -983,7 +983,7 @@ class ForumThreadView extends AbstractView {
     }
 
     public function statPage($users) {
-        if (!$this->core->getUser()->accessFullGrading()) {
+        if (!$this->core->getUser()->accessGrading()) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
