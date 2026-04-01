@@ -938,7 +938,6 @@ class ForumThreadView extends AbstractView {
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
-            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d'),
             "render_markdown" => isset($_COOKIE['markdown_enabled']) ? $_COOKIE['markdown_enabled'] : 0
