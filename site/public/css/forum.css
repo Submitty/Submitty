@@ -992,11 +992,11 @@
 }
 
 .thread-content {
-    word-break: break-word;   /* replace break-all */
+    word-break: break-word;
     overflow: hidden;
 }
 
 .post_content > div {
     flex-grow: 1;
-    min-width: 0;   /* 🔥 VERY IMPORTANT */
+    min-width: 0;
 }
