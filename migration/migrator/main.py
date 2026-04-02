@@ -358,6 +358,28 @@ def migrate_environment(database, environment, args, all_missing_migrations):
     args.fake = args.set_fake if 'set_fake' in args else False
     if args.direction == 'up':
         keys = list(migrations.keys())
+
+        # --- 6-MONTH SAFETY CHECK ---
+        unapplied_keys = [k for k in keys if migrations[k]['status'] == 0]
+        if unapplied_keys:
+            from datetime import datetime
+            oldest_id = unapplied_keys[0]
+            newest_id = keys[-1]
+            try:
+                oldest_date = datetime.strptime(oldest_id[:8], '%Y%m%d')
+                newest_date = datetime.strptime(newest_id[:8], '%Y%m%d')
+                
+                if (newest_date - oldest_date).days > 180:
+                    raise SystemExit(
+                        f"\nMigrator Error: System upgrade halted for '{environment}'.\n"
+                        f"The oldest unapplied migration ({oldest_id}) is more than 6 months older\n"
+                        f"than the newest update ({newest_id}).\n"
+                        f"Please update your system to an intermediate release first to ensure data integrity.\n"
+                    )
+            except ValueError:
+                pass
+        # --- 6-MONTH SAFETY CHECK ---
+
         if args.initial is True:
             key = keys.pop(0)
             if not changes:
