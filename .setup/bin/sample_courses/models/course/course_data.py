@@ -203,6 +203,7 @@ class Course_data:
                     release_histogram=poll["release_histogram"],
                 )
             )
+            self.conn.commit()
             for i in range(len(poll["responses"])):
                 self.conn.execute(
                     insert(poll_options_table).values(
@@ -212,7 +213,7 @@ class Course_data:
                         correct=(i in poll["correct_responses"]),
                     )
                 )
-        self.conn.commit()
+            self.conn.commit()
 
         # generate responses to the polls
         poll_responses_data = []

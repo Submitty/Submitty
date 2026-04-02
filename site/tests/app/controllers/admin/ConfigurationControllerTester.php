@@ -349,13 +349,11 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $core = new Core();
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertNull($response->web_response);
-        $this->assertNull($response->redirect_response);
         $expected = [
             'status' => 'fail',
             'message' => 'Name of config value not provided'
         ];
-        $this->assertEquals($expected, $response->json_response->json);
+        $this->assertEquals($expected, $response->json);
     }
 
     public function testUpdateConfigurationNoEntry() {
@@ -363,13 +361,11 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['name'] = 'foo';
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertNull($response->web_response);
-        $this->assertNull($response->redirect_response);
         $expected = [
             'status' => 'fail',
             'message' => 'Name of config entry not provided'
         ];
-        $this->assertEquals($expected, $response->json_response->json);
+        $this->assertEquals($expected, $response->json);
     }
 
     public function testUpdateConfigFile() {
@@ -383,13 +379,11 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['entry'] = '2';
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertNull($response->web_response);
-        $this->assertNull($response->redirect_response);
         $expected = [
             'status' => 'success',
             'data' => null
         ];
-        $this->assertEquals($expected, $response->json_response->json);
+        $this->assertEquals($expected, $response->json);
     }
 
     public function testUpdateConfigNonWriteable() {
@@ -405,13 +399,11 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             $_POST['entry'] = '2';
             $controller = new ConfigurationController($core);
             $response = $controller->updateConfiguration();
-            $this->assertNull($response->web_response);
-            $this->assertNull($response->redirect_response);
             $expected = [
                 'status' => 'fail',
                 'message' => 'Could not save config file'
             ];
-            $this->assertEquals($expected, $response->json_response->json);
+            $this->assertEquals($expected, $response->json);
         }
         finally {
             chmod($this->course_config, 0600);
@@ -449,8 +441,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'status' => 'success',
             'data' => null
         ];
-        $this->assertNotNull($response->json_response);
-        $this->assertEquals($expected, $response->json_response->json);
+        $this->assertEquals($expected, $response->json);
     }
 
     public function testUpdateConfigurationEnableForumWithCategories() {
@@ -483,8 +474,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'status' => 'success',
             'data' => null
         ];
-        $this->assertNotNull($response->json_response);
-        $this->assertEquals($expected, $response->json_response->json);
+        $this->assertEquals($expected, $response->json);
     }
 
     public function testPullCourseRepositoryQueuesJob(): void {
@@ -507,8 +497,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $controller->updateConfiguration();
 
         $response = $controller->pullCourseRepository();
-        $this->assertEquals('success', $response->json_response->json['status']);
-        $this->assertEquals('queued', $response->json_response->json['data']['queue_status']);
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertEquals('queued', $response->json['data']['queue_status']);
 
         $job_file = FileUtils::joinPaths(
             $this->test_dir,
@@ -534,10 +524,10 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $controller = new ConfigurationController($core);
         $response = $controller->pullCourseRepository();
 
-        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('fail', $response->json['status']);
         $this->assertEquals(
             'Set a Course Repository URL before pulling',
-            $response->json_response->json['message']
+            $response->json['message']
         );
     }
 
@@ -563,9 +553,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $controller = new ConfigurationController($core);
         $response = $controller->courseRepositoryStatus();
-        $this->assertEquals('success', $response->json_response->json['status']);
-        $this->assertEquals('queued', $response->json_response->json['data']['queue_status']);
-        $this->assertEquals('success', $response->json_response->json['data']['last_sync']['status']);
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertEquals('queued', $response->json['data']['queue_status']);
+        $this->assertEquals('success', $response->json['data']['last_sync']['status']);
     }
 
     public function testUpdateConfigurationRejectsInvalidCourseRepoBranch(): void {
@@ -581,8 +571,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertEquals('fail', $response->json_response->json['status']);
-        $this->assertEquals('Invalid repository branch name', $response->json_response->json['message']);
+        $this->assertEquals('fail', $response->json['status']);
+        $this->assertEquals('Invalid repository branch name', $response->json['message']);
     }
 
     public function testUpdateConfigurationRejectsOptionStyleCourseRepoUrl(): void {
@@ -598,8 +588,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertEquals('fail', $response->json_response->json['status']);
-        $this->assertEquals('Repository URL cannot start with "-"', $response->json_response->json['message']);
+        $this->assertEquals('fail', $response->json['status']);
+        $this->assertEquals('Repository URL cannot start with "-"', $response->json['message']);
     }
 
     public function testUpdateConfigurationRejectsInvalidCourseRepoSubdirectory(): void {
@@ -615,8 +605,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();
-        $this->assertEquals('fail', $response->json_response->json['status']);
-        $this->assertEquals('Repository subdirectory cannot contain ".."', $response->json_response->json['message']);
+        $this->assertEquals('fail', $response->json['status']);
+        $this->assertEquals('Repository subdirectory cannot contain ".."', $response->json['message']);
     }
 
     public function testPullCourseRepositoryFailsWhenAlreadyProcessing(): void {
@@ -646,7 +636,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         file_put_contents($processing_file, '{}');
 
         $response = $controller->pullCourseRepository();
-        $this->assertEquals('fail', $response->json_response->json['status']);
-        $this->assertEquals('A repository pull is already in progress', $response->json_response->json['message']);
+        $this->assertEquals('fail', $response->json['status']);
+        $this->assertEquals('A repository pull is already in progress', $response->json['message']);
     }
 }
