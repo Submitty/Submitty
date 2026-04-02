@@ -169,3 +169,20 @@ form {
 .break-above {
     margin-top: 1.5em;
 }
+
+.poll-view-wrapper {
+    min-width: 0;
+}
+
+.poll-view-wrapper.info-wrapper {
+    word-break: break-word;
+    overflow: hidden;
+}
+
+.poll-view-table {
+    gap: 10px;
+}
+
+.poll-view-wrapper.histogram-wrapper {
+    min-width: 0;
+}
