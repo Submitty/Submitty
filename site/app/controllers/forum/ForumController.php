@@ -1351,7 +1351,7 @@ class ForumController extends AbstractController {
             ]);
             $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $version->getEditAuthor()->getDisplayInfo();
-            $tmp['is_staff_post'] = $version->getEditAuthor()->accessFullGrading();
+            $tmp['is_staff_post'] = $version->getEditAuthor()->accessGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             $output[] = $tmp;
             $edit_id++;
@@ -1378,7 +1378,7 @@ class ForumController extends AbstractController {
             ]);
             $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $post->getAuthor()->getDisplayInfo();
-            $tmp['is_staff_post'] = !$emptyAuthor && $post->getAuthor()->accessFullGrading();
+            $tmp['is_staff_post'] = !$emptyAuthor && $post->getAuthor()->accessGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             $output[] = $tmp;
         }
@@ -1386,7 +1386,7 @@ class ForumController extends AbstractController {
     }
 
     public function modifyAnonymous($author) {
-        return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
+        return $this->core->getUser()->accessGrading() || $this->core->getUser()->getId() === $author;
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/posts/get", methods: ["POST"])]
