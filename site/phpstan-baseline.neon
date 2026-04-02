@@ -10984,6 +10984,12 @@ parameters:
 			path: app/models/QueueItem.php
 
 		-
+			rawMessage: 'Argument of an invalid type $this(app\models\RainbowCustomizationJSON) supplied for foreach, only iterables are supported.'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
 			rawMessage: Variable property access on object.
 			identifier: property.dynamicName
 			count: 3
@@ -15572,12 +15578,6 @@ parameters:
 			identifier: ternary.condNotBoolean
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between app\models\Team|null and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/TeamView.php
 
 		-
 			rawMessage: 'Method app\views\superuser\GradeablesView::showGradeablesList() has no return type specified.'
