@@ -49,7 +49,9 @@ function fetchMessages(chatroomId) {
                     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
                 });
                 const messages_area = document.querySelector('.messages-area');
-                messages_area.scrollTop = messages_area.scrollHeight;
+                setTimeout(() => {
+                    messages_area.scrollTop = messages_area.scrollHeight;
+                }, 100);
             }
         },
         error: function () {
@@ -117,7 +119,14 @@ function appendMessage(displayName, role, ts, content, msgID) {
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
     messageContent.setAttribute('data-testid', 'message-content');
-    messageContent.innerText = content;
+    messageContent.id = `message-content-${msgID}`;
+
+    window.submitty.render(
+        messageContent,
+        'component',
+        'Markdown',
+        { content: content }
+    );
 
     message.appendChild(messageHeader);
     message.appendChild(messageContent);
@@ -126,8 +135,10 @@ function appendMessage(displayName, role, ts, content, msgID) {
 
     // automatically scroll to bottom for new messages, if close to bottom
     const distanceFromBottom = messages_area.scrollHeight - messages_area.scrollTop - messages_area.clientHeight;
-    if (distanceFromBottom < 110) {
-        messages_area.scrollTop = messages_area.scrollHeight;
+    if (distanceFromBottom < 250) {
+        setTimeout(() => {
+            messages_area.scrollTop = messages_area.scrollHeight;
+        }, 100);
     }
 }
 
@@ -328,34 +339,50 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchMessages(chatroomId);
 
         const sendButton = document.querySelector('.send-message-btn');
-        const messageInput = document.querySelector('.message-input');
 
-        if (!read_only) {
-            messageInput.addEventListener('keypress', (event) => {
+        // The MarkdownArea Vue component renders a <textarea> with this ID asynchronously
+        const getMessageInput = () => document.getElementById('chat-markdown-input');
+
+        // Use event delegation since the textarea may not exist yet at DOMContentLoaded
+        document.body.addEventListener('keypress', (event) => {
+            if (!read_only && event.target && event.target.id === 'chat-markdown-input') {
                 if (event.keyCode === 13 && !event.shiftKey) {
                     event.preventDefault();
                     sendButton.click();
                 }
-            });
-        }
-        if (!read_only) {
-            sendButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                const messageContent = messageInput.value.trim();
-                if (messageContent === '') {
-                    alert('Please enter a message.');
-                    return;
-                }
+            }
+        });
 
-                const role = user_admin ? 'instructor' : 'student';
-                sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+        sendButton.addEventListener('click', (event) => {
+            if (read_only) {
+                return;
+            }
+            event.preventDefault();
+            const messageInput = getMessageInput();
+            if (!messageInput) {
+                return;
+            }
 
-                messageInput.value = '';
-            });
-        }
+            const messageContent = messageInput.value.trim();
+            if (messageContent === '') {
+                alert('Please enter a message.');
+                return;
+            }
+
+            const role = user_admin ? 'instructor' : 'student';
+            sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
+
+            messageInput.value = '';
+            // Trigger input event so Vue's v-model stays in sync
+            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
         if (read_only) {
-            messageInput.disabled = true;
-            messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+            const messageInput = getMessageInput();
+            if (messageInput) {
+                messageInput.disabled = true;
+                messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+            }
             sendButton.disabled = true;
         }
     }
