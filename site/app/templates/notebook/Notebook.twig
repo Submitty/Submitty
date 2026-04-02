@@ -16,7 +16,33 @@
             <button class="btn btn-primary" onclick="closePopupSubmit()">Close</button>
             <button class="btn btn-danger" onclick="dontShowPopupSubmit()">Don't Ask Me Again</button>
         </div>
+    {% endif %}      
+    {% if notebook_size_exceeded %}
+        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <div>
+                <strong>Notebook Not Rendered:</strong>
+                This notebook exceeds the 10MB size limit.
+                Please download the notebook to view its contents.
+            </div>
+        </div>
+    {% elseif notebook_skipped_content > 0 or notebook_skipped_output > 0 %}
+        <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <div>
+                <strong>Notebook rendered with skipped content.</strong>
+                Some content was skipped due to size limits.
+                {% if notebook_skipped_content > 0 %}
+                    Skipped {{ notebook_skipped_content }} attachment(s).
+                {% endif %}
+                {% if notebook_skipped_output > 0 %}
+                    Skipped {{ notebook_skipped_output }} output(s).
+                {% endif %}
+                Please download the notebook to view full content.
+            </div>
+        </div>
     {% endif %}
+
     {% for cell in notebook %}
         <div id="content_{{ loop.index0 }}" class="{{ cell.type }} notebook-cell" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
