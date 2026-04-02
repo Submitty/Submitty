@@ -13,10 +13,7 @@ from datetime import timedelta
 import threading 
 import time
 import html
-try:
-  import cchardet as chardet
-except ImportError:
-  chardet = None
+import chardet
 
 class submitty_router():
   '''
@@ -85,13 +82,12 @@ class submitty_router():
 
     if isinstance(message, bytes):
         try:
-            if chardet is not None:
-                encoding_prediction = chardet.detect(message)
-                encoding = encoding_prediction.get('encoding')
-                confidence = encoding_prediction.get('confidence', 0)
+            encoding_prediction = chardet.detect(message)
+            encoding = encoding_prediction.get('encoding')
+            confidence = encoding_prediction.get('confidence', 0)
 
-                if encoding and confidence > 0.8:
-                    return message.decode(encoding, errors='replace')
+            if encoding and confidence > 0.8:
+                return message.decode(encoding, errors='replace')
 
             return message.decode('utf-8', errors='replace')
 
