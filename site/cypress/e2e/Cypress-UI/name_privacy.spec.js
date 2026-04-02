@@ -29,30 +29,29 @@ describe('Legal name privacy tests', () => {
         });
     };
 
-    it('Legal names should not appear on instructor pages', () => {
+    it('Should show preferred names not legal names', () => {
+        // Instructor pages
         cy.login('instructor');
-        const pages = ['users', 'graders', 'student_photos', 'forum', 'navigation'];
-        pages.forEach((page) => {
+        const instructorPages = ['users', 'graders', 'student_photos', 'forum', 'navigation'];
+        instructorPages.forEach((page) => {
             cy.visit(['sample', page]);
             checkNoLegalNames();
         });
         cy.logout();
-    });
 
-    it('Legal names should not appear on TA pages', () => {
+        // TA pages
         cy.login('ta');
-        const pages = ['graders', 'forum', 'navigation'];
-        pages.forEach((page) => {
+        const taPages = ['graders', 'forum', 'navigation'];
+        taPages.forEach((page) => {
             cy.visit(['sample', page]);
             checkNoLegalNames();
         });
         cy.logout();
-    });
 
-    it('Legal names should not appear on student pages', () => {
+        // Student pages
         cy.login('student');
-        const pages = ['forum', 'navigation'];
-        pages.forEach((page) => {
+        const studentPages = ['forum', 'navigation'];
+        studentPages.forEach((page) => {
             cy.visit(['sample', page]);
             checkNoLegalNames();
         });
