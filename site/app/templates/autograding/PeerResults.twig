@@ -274,7 +274,7 @@ function switch_feedback_modes() {
                         {{file.name}} :
                     </p>
                     <p>
-                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View Popup <i class="fas fa-window-restore"></i>
+                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View in New Tab <i class="fas fa-external-link-alt"></i>
                         </a>
                     </p>
                 {% endif %}

@@ -46,7 +46,7 @@ $(document).ready(() => {
                 if ($(this).data('type') === 'post' || $(this).data('type') === 'thread') {
                     const id = $(this).data('thread_id');
                     const url = buildCourseUrl(['forum', 'threads', id]);
-                    window.open(url);
+                    window.open(url, '_blank');
                 }
             });
         }
