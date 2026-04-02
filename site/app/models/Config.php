@@ -59,6 +59,9 @@ use app\libraries\FileUtils;
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
+ * @method string getCourseRepoUrl()
+ * @method string getCourseRepoBranch()
+ * @method string getCourseRepoSubdirectory()
  * @method string getRoomSeatingGradeableId()
  * @method void setRoomSeatingGradeableId(string $gradeable_id)
  * @method bool isSeatingOnlyForInstructor()
@@ -299,6 +302,15 @@ class Config extends AbstractModel {
     /** @prop
      * @var string */
     protected $private_repository;
+    /** @prop
+     * @var string */
+    protected $course_repo_url = "";
+    /** @prop
+     * @var string */
+    protected $course_repo_branch = "main";
+    /** @prop
+     * @var string */
+    protected $course_repo_subdirectory = "";
     /** @prop
      * @var array */
     protected $hidden_details;
@@ -622,6 +634,17 @@ class Config extends AbstractModel {
         }
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
+
+        // Optional fields used by the course repository sync workflow.
+        if (isset($this->course_json['course_details']['course_repo_url'])) {
+            $this->course_repo_url = strval($this->course_json['course_details']['course_repo_url']);
+        }
+        if (isset($this->course_json['course_details']['course_repo_branch'])) {
+            $this->course_repo_branch = strval($this->course_json['course_details']['course_repo_branch']);
+        }
+        if (isset($this->course_json['course_details']['course_repo_subdirectory'])) {
+            $this->course_repo_subdirectory = strval($this->course_json['course_details']['course_repo_subdirectory']);
+        }
 
         if (isset($this->course_json['hidden_details'])) {
             $this->hidden_details = $this->course_json['hidden_details'];
