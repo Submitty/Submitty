@@ -1,7 +1,7 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
+            dropWithMultipleZips, initMaxNoFiles, initMaxTotalUploadSize, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
 /* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, escapeSpecialChars */
 
 /*
@@ -20,7 +20,7 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 // eslint-disable-next-line no-var
 var file_array = []; // contains files uploaded for this submission
 // eslint-disable-next-line no-var
-var previous_files = []; // contains names of files selected from previous submission
+var previous_files = []; // contains metadata for files selected from previous submission
 // eslint-disable-next-line no-var
 var label_array = [];
 // eslint-disable-next-line no-var
@@ -30,6 +30,7 @@ var changed = false; // if files from previous submission changed
 
 let total_files_added = 0;
 let MAX_NUM_OF_FILES;
+let MAX_TOTAL_UPLOAD_SIZE;
 
 // eslint-disable-next-line no-var
 var empty_inputs = true;
@@ -61,9 +62,13 @@ function createArray(num_parts) {
 }
 
 // read in name of previously submitted file
-function readPrevious(filename, part) {
+function readPrevious(filename, size, part) {
     changed = false;
-    previous_files[part - 1].push(filename);
+    previous_files[part - 1].push({
+        name: filename,
+        size: size
+    });
+    validateCurrentUploadState(part);
 }
 
 function setUsePrevious() {
@@ -87,12 +92,84 @@ function draghandle(e) {
 
 // ADD FILES FOR NEW SUBMISSION
 // ========================================================================================
-// check if adding a file is valid (not exceeding the limit)
-function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
-        alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
+function getUploadWarningElement(part) {
+    return document.getElementById(`upload-warning-${part}`);
+}
+
+function showUploadWarning(part, message) {
+    const el = getUploadWarningElement(part);
+    if (el !== null) {
+        el.textContent = message;
+        el.style.display = 'block';
+    }
+}
+
+function clearUploadWarning(part) {
+    const el = getUploadWarningElement(part);
+    if (el !== null) {
+        el.textContent = '';
+        el.style.display = 'none';
+    }
+}
+
+function getPartUploadSize(part) {
+    let total = 0;
+    for (const file of file_array[part - 1]) {
+        total += file.size;
+    }
+    return total;
+}
+
+function getPartPreviousSize(part) {
+    let total = 0;
+    for (const file of previous_files[part - 1]) {
+        total += file.size;
+    }
+    return total;
+}
+
+function getTotalSubmissionSize() {
+    let total = 0;
+    for (let part = 1; part <= file_array.length; part++) {
+        total += getPartUploadSize(part);
+        total += getPartPreviousSize(part);
+    }
+    return total;
+}
+
+function validateCurrentUploadState(part) {
+    const currentUploadedCount = file_array[part - 1].length;
+
+    if (currentUploadedCount > MAX_NUM_OF_FILES) {
+        showUploadWarning(
+            part,
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+        );
         return false;
     }
+
+    if (getTotalSubmissionSize() > MAX_TOTAL_UPLOAD_SIZE) {
+        showUploadWarning(
+            part,
+            'Selected files are too large. Total upload size exceeds the allowed limit.'
+        );
+        return false;
+    }
+
+    clearUploadWarning(part);
+    return true;
+}
+
+// check if adding a file is valid (not exceeding the limit)
+function addIsValid(files_to_add, total_added_files, part) {
+    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
+        showUploadWarning(
+            part,
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+        );
+        return false;
+    }
+    clearUploadWarning(part);
     return true;
 }
 
@@ -101,12 +178,16 @@ function initMaxNoFiles(max_no_of_files) {
     MAX_NUM_OF_FILES = max_no_of_files;
 }
 
+function initMaxTotalUploadSize(max_total_upload_size) {
+    MAX_TOTAL_UPLOAD_SIZE = max_total_upload_size;
+}
+
 // add files dragged
 function drop(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
+    const part = get_part_number(e);
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part); // check for folders
             total_files_added++;
@@ -118,8 +199,8 @@ function drop(e) {
 function dropWithMultipleZips(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
+    const part = get_part_number(e);
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part, false); // check for folders
             total_files_added++;
@@ -154,7 +235,7 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
-    if (addIsValid(filestream.length, total_files_added)) {
+    if (addIsValid(filestream.length, total_files_added, part)) {
         for (let i = 0; i < filestream.length; i++) {
             addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
             total_files_added++;
@@ -222,7 +303,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
 // Second element: index of the file with the same name (if found)
 function fileExists(filename, part) {
     for (let i = 0; i < previous_files[part - 1].length; i++) {
-        if (previous_files[part - 1][i] === filename) {
+        if (previous_files[part - 1][i].name === filename) {
             return [1, i];
         }
     }
@@ -289,7 +370,7 @@ function addFile(file, part, check_duplicate_zip = true) {
         }
     }
     else { // file in previous submission
-        if (confirm(`Note: ${previous_files[part - 1][i[1]]} was in your previous submission. Do you want to replace it?`)) {
+        if (confirm(`Note: ${previous_files[part - 1][i[1]].name} was in your previous submission. Do you want to replace it?`)) {
             file_array[part - 1].push(file);
             previous_files[part - 1].splice(i[1], 1);
             removeLabel(file.name, part);
@@ -299,6 +380,7 @@ function addFile(file, part, check_duplicate_zip = true) {
     }
 
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 // REMOVE FILES
@@ -320,13 +402,14 @@ function deleteFiles(part) {
     label_array[part - 1] = [];
     changed = true;
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 function deleteSingleFile(filename, part, previous) {
     // Remove files from previous submission
     if (previous) {
         for (let i = 0; i < previous_files[part - 1].length; i++) {
-            if (previous_files[part - 1][i] === filename) {
+            if (previous_files[part - 1][i].name === filename) {
                 previous_files[part - 1].splice(i, 1);
                 label_array[part - 1].splice(i, 1);
                 changed = true;
@@ -346,6 +429,7 @@ function deleteSingleFile(filename, part, previous) {
         }
     }
     setButtonStatus();
+    validateCurrentUploadState(part);
 }
 
 function setButtonStatus(inactive_version = false) {
@@ -498,6 +582,15 @@ function isValidSubmission() {
     }
 
     return false;
+}
+
+function canSubmitAllParts() {
+    for (let part = 1; part <= file_array.length; part++) {
+        if (!validateCurrentUploadState(part)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 /**
@@ -968,6 +1061,10 @@ function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, re
  */
 function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, min_team_member_late_days_exception, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous = false, clobber = false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
+    if (!canSubmitAllParts()) {
+        $('#submit').prop('disabled', false);
+        return false;
+    }
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
     let message = '';
@@ -1056,7 +1153,8 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
             }
         }
         // Files from previous submission
-        formData.append('previous_files', JSON.stringify(previous_files));
+        const previousFileNames = previous_files.map((partFiles) => partFiles.map((file) => file.name));
+        formData.append('previous_files', JSON.stringify(previousFileNames));
     }
 
     // check if filesize greater than 1,25 MB, then turn on the progressbar

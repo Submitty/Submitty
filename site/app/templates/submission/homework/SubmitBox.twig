@@ -267,7 +267,7 @@
                     {% if viewing_inactive_version %}
                         <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
                     {% else %}
-                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+                        <div id="upload-warning-{{ loop.index }}" class="upload-warning" style="display:none; color:#9f3a38; background:#fff6f6; border:1px solid #e0b4b4; padding:0.75rem; margin-top:0.75rem;" role="alert" aria-live="polite"></div>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -299,6 +299,7 @@
             <button type="button" id="submit" data-testid="submit-gradeable" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
+            
             {% if is_notebook %}
             <button class = "btn btn-default" id = "printing" onclick="window.print()">Print Quiz as PDF</button>
             {% endif %}
@@ -319,7 +320,7 @@
                         setUsePrevious();
                         {% for file in old_files %}
                             addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                            readPrevious('{{ file.name }}', {{ file.part }});
+                            readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
@@ -351,6 +352,7 @@
             $(function() {
                 setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
+                initMaxTotalUploadSize({{ max_submission_size|default(100000) }});
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
@@ -386,7 +388,7 @@
                 $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
+                        readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
@@ -571,5 +573,3 @@
     });
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
-
-
