@@ -273,3 +273,53 @@
     background-color: white;
     max-width: 100%;
 }
+
+.markdown-area-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.markdown-mode-tab {
+    padding: 6px 10px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    min-width: fit-content;   /* key change */
+}
+
+.markdown-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.markdown-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.markdown-mode-tab.active {
+    background: #ddd;
+    border-bottom: 2px solid #000;
+    font-weight: 600;
+}
+
+.markdown-preview {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.markdown-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.markdown-toolbar button {
+    margin: 2px;
+}
