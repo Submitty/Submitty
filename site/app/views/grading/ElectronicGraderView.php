@@ -503,7 +503,8 @@ HTML;
      * @param string $sort
      * @param string $direction
      * @param bool $anon_mode
-     * @param array<string, bool> $overrides
+     * @param array<int, string> $overrides
+     * @param array<string, array{marks: int|float|string, comment: string}> $override_data
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
      * @param array<string,bool> $grading_details_columns
@@ -516,7 +517,7 @@ HTML;
      * }>> $active_graders
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -961,6 +962,7 @@ HTML;
             "message" => $message,
             "message_warning" => $message_warning,
             "overrides" => $overrides,
+            "override_data" => $override_data,
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "active_graders" => $active_graders,
@@ -1061,9 +1063,15 @@ HTML;
             ];
         }
         if ($graded_gradeable->hasOverriddenGrades()) {
+            $total_possible = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() + $gradeable->getManualGradingPoints();
+            $overridden_message = "Overridden grades: " . $graded_gradeable->getTotalScore() . " / " . $total_possible;
+            $overridden_comment = trim($graded_gradeable->getOverriddenComment());
+            if ($overridden_comment !== "") {
+                $overridden_message .= " (Reason: " . $overridden_comment . ")";
+            }
             $error_message = [
                 "color" => "var(--standard-vibrant-yellow)", // canary yellow
-                "message" => "Overridden grades"
+                "message" => $overridden_message
             ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) {

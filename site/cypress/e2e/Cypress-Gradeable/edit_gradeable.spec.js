@@ -265,7 +265,21 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // Reset to old date
+        // Set the due date to the past (SHOULD WORK since Ta beta testing and submission open dates have no constraints)
+        updateDates('#date_due', past_date, 'All Changes Saved');
+
+        // The gradeable should be visible to all levels and be shown as "past due"
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
+        // Reset due date to old date
+        updateDates('#date_due', '9996-12-31 23:59:59', 'All Changes Saved');
+
+        // Reset TA testing to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
         // Gradeable should not be visible to students, but visible to TA and graders
@@ -279,8 +293,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
-        // This should not be allowed, its before the submission open date
-        updateDates('#date_due', past_date, 'Some Changes Failed!');
+        // There should be no constraints on this and it should be allowed
+        updateDates('#date_due', past_date, 'All Changes Saved');
         // Reset to old date
         updateDates('#date_due', future_date, 'All Changes Saved');
 
