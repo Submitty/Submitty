@@ -46,6 +46,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
  * @method string getRegistrationType()
+ * @method string|null getRegistrationTimestamp()
+ * @method void setRegistrationTimestamp(?string $timestamp)
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
  * @method void setUserUpdated(bool $flag)
@@ -176,6 +178,9 @@ class User extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
     protected $registration_type;
+    /** @prop
+     * @var string|null Timestamp when the user joined the course */
+    protected $registration_timestamp = null;
 
     /**
      * @prop
@@ -313,6 +318,7 @@ class User extends AbstractModel implements \JsonSerializable {
 
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
+        $this->registration_timestamp = $details['registration_timestamp'] ?? null;
     }
 
     /**
