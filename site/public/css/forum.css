@@ -108,7 +108,7 @@
     margin-right: 5px;
     margin-top: 5px;
     white-space: pre-wrap;
-    overflow-x: auto;
+    overflow-x: hidden;
     padding-bottom: 1em;
 }
 
@@ -989,4 +989,14 @@
 
 #search-clear {
     cursor: pointer;
+}
+
+.thread-content {
+    word-break: break-word;   /* replace break-all */
+    overflow: hidden;
+}
+
+.post_content > div {
+    flex-grow: 1;
+    min-width: 0;   /* 🔥 VERY IMPORTANT */
 }
