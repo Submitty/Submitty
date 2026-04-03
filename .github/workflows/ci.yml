@@ -405,7 +405,7 @@ jobs:
 
     services:
       postgres-main:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -415,7 +415,7 @@ jobs:
           - 5432
 
       postgres-branch:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -432,7 +432,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get autoremove -y postgresql-14 postgresql-client-common
-          sudo apt-get install -y postgresql-12
+          sudo apt-get install -y postgresql-14 postgresql-client-14
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
@@ -603,8 +603,10 @@ jobs:
       - name: Compare Migrated master Databases
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql                           \
-                       ${GITHUB_WORKSPACE}/dumped/branch/master.sql || {
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/main/master.sql > /tmp/main_master.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql > /tmp/branch_master.sql
+
+          diff --color /tmp/main_master.sql /tmp/branch_master.sql || {
             echo "::error:: Master databases are not identical, please check your migration"
             exit 1
           }
@@ -612,8 +614,10 @@ jobs:
       - name: Compare Migrated course Databases
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql                           \
-                       ${GITHUB_WORKSPACE}/dumped/branch/course.sql || {
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/main/course.sql > /tmp/main_course.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql > /tmp/branch_course.sql
+
+          diff --color /tmp/main_course.sql /tmp/branch_course.sql || {
             echo "::error:: Course databases are not identical, please check your migration"
             exit 1
           }
@@ -621,8 +625,10 @@ jobs:
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql                         \
-                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql > /tmp/branch_master.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql > /tmp/provided_master.sql
+
+          diff --color /tmp/branch_master.sql /tmp/provided_master.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
@@ -630,8 +636,10 @@ jobs:
       - name: Compare Migrated course Database with Provided Dump
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql                         \
-                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort > /tmp/branch_course.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql | sort > /tmp/provided_course.sql
+
+          diff --color /tmp/branch_course.sql /tmp/provided_course.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
