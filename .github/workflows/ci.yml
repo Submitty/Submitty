@@ -637,7 +637,7 @@ jobs:
         if: always()
         run: |
           sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql > /tmp/branch_course.sql
-          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_course_db.sql > /tmp/provided_course.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql > /tmp/provided_course.sql
 
           diff --color /tmp/branch_course.sql /tmp/provided_course.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
