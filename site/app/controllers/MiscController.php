@@ -7,6 +7,7 @@ use app\libraries\CodeMirrorUtils;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\NotebookUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
@@ -47,6 +48,30 @@ class MiscController extends AbstractController {
     #[Route("/server_time")]
     public function getServerTime(): JsonResponse {
         return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
+    }
+
+    /**
+     * Render the AI clustering prototype dashboard used for TA grading workflow exploration.
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/ai_cluster_dashboard", methods: ["GET"])]
+    public function aiClusterDashboard(string $gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return false;
+        }
+
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            $this->core->getOutput()->showError('This gradeable is not an electronic file gradeable');
+            return false;
+        }
+
+        if (!$this->core->getAccess()->canI('grading.electronic.details', ['gradeable' => $gradeable])) {
+            $this->core->getOutput()->showError('Insufficient permissions to view the clustering dashboard');
+            return false;
+        }
+
+        return $this->core->getOutput()->renderOutput('Misc', 'aiClusterDashboard', $gradeable);
     }
 
     /**

@@ -69,6 +69,9 @@
         {% if not is_student %}
             <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
         {% endif %}
+        {% if ai_grouping_enabled %}
+            <a href="{{ ai_cluster_dashboard_url }}" class="btn btn-default" data-testid="ai-cluster-dashboard-link">Cluster Dashboard</a>
+        {% endif %}
         {% if not is_instructor %}
             <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
         {% endif %}

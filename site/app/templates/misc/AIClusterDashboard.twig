@@ -1,0 +1,233 @@
+<div class="ai-cluster-dashboard" data-testid="ai-cluster-dashboard-page" data-gradeable-id="{{ gradeable_id }}">
+    <header class="ai-cluster-hero">
+        <div>
+            <p class="ai-cluster-kicker">AI / ML clustering for TA grading</p>
+            <h1>{{ gradeable_title }} Cluster Dashboard</h1>
+            <p class="ai-cluster-subtitle">
+                A production-style prototype for navigating clusters, previewing feedback, and applying grading decisions faster.
+            </p>
+        </div>
+        <div class="ai-cluster-hero-meta">
+            <div class="ai-cluster-chip">Mock API-backed</div>
+            <div class="ai-cluster-chip">TA workflow prototype</div>
+            <div class="ai-cluster-chip">Dendrogram + grading actions</div>
+        </div>
+    </header>
+
+    <section class="ai-cluster-summary-grid" aria-label="Dashboard summary">
+        <article class="ai-summary-card">
+            <span class="ai-summary-label">Clusters</span>
+            <strong data-summary="cluster-count">0</strong>
+        </article>
+        <article class="ai-summary-card">
+            <span class="ai-summary-label">Submissions</span>
+            <strong data-summary="submission-count">0</strong>
+        </article>
+        <article class="ai-summary-card">
+            <span class="ai-summary-label">Avg pass rate</span>
+            <strong data-summary="avg-pass-rate">0%</strong>
+        </article>
+        <article class="ai-summary-card">
+            <span class="ai-summary-label">Flagged</span>
+            <strong data-summary="flagged-count">0</strong>
+        </article>
+    </section>
+
+    <section class="ai-dashboard-shell">
+        <aside class="ai-sidebar-panel">
+            <div class="ai-panel-header">
+                <div>
+                    <p class="ai-panel-eyebrow">Cluster list</p>
+                    <h2>Available clusters</h2>
+                </div>
+                <div class="ai-panel-filter-group" role="tablist" aria-label="Cluster filters">
+                    <button type="button" class="ai-filter-btn is-active" data-filter="all">All</button>
+                    <button type="button" class="ai-filter-btn" data-filter="normal">Normal</button>
+                    <button type="button" class="ai-filter-btn" data-filter="rejected">Rejected</button>
+                </div>
+            </div>
+
+            <div id="cluster-list" class="ai-cluster-list"></div>
+
+            <div class="ai-action-stack">
+                <button type="button" class="ai-primary-action" data-action="merge">Merge selected</button>
+                <button type="button" class="ai-secondary-action" data-action="split">Split cluster</button>
+                <button type="button" class="ai-danger-action" data-action="reject">Reject cluster</button>
+            </div>
+
+            <section class="ai-inline-panel">
+                <div class="ai-panel-header compact">
+                    <div>
+                        <p class="ai-panel-eyebrow">Smart suggestions</p>
+                        <h3>One-click hypothesis</h3>
+                    </div>
+                </div>
+                <div class="ai-suggestion-row">
+                    <button type="button" class="ai-suggestion-pill" data-suggestion="Likely timeout issue">Likely timeout issue</button>
+                    <button type="button" class="ai-suggestion-pill" data-suggestion="Missing boundary check">Missing boundary check</button>
+                    <button type="button" class="ai-suggestion-pill" data-suggestion="Off-by-one error">Off-by-one error</button>
+                </div>
+            </section>
+        </aside>
+
+        <main class="ai-center-panel">
+            <section class="ai-visual-panel">
+                <div class="ai-panel-header">
+                    <div>
+                        <p class="ai-panel-eyebrow">Dendrogram</p>
+                        <h2>Cluster hierarchy</h2>
+                    </div>
+                    <div class="ai-panel-note">Hover a node for failure details. Click to inspect.</div>
+                </div>
+
+                <div class="ai-dendrogram-wrap">
+                    <svg id="dendrogram-svg" class="ai-dendrogram-svg" viewBox="0 0 980 420" role="img" aria-label="Cluster dendrogram"></svg>
+                    <div id="dendrogram-tooltip" class="ai-tooltip" hidden></div>
+                </div>
+            </section>
+
+            <section class="ai-workflow-grid">
+                <article class="ai-workflow-card">
+                    <div class="ai-panel-header compact">
+                        <div>
+                            <p class="ai-panel-eyebrow">Feedback application</p>
+                            <h3>Template and preview</h3>
+                        </div>
+                    </div>
+
+                    <label class="ai-field">
+                        <span>Feedback template</span>
+                        <select id="feedback-template-select"></select>
+                    </label>
+
+                    <div id="feedback-preview" class="ai-preview-grid"></div>
+
+                    <button type="button" class="ai-primary-action full-width" id="apply-feedback-btn">Apply to Cluster</button>
+                    <div id="editable-feedback-panel" class="ai-feedback-editor" hidden></div>
+                </article>
+
+                <article class="ai-workflow-card">
+                    <div class="ai-panel-header compact">
+                        <div>
+                            <p class="ai-panel-eyebrow">Grading</p>
+                            <h3>Bulk, individual, hybrid</h3>
+                        </div>
+                    </div>
+
+                    <div class="ai-mode-tabs" role="tablist" aria-label="Grading modes">
+                        <button type="button" class="ai-mode-tab is-active" data-mode="bulk">Bulk</button>
+                        <button type="button" class="ai-mode-tab" data-mode="individual">Individual</button>
+                        <button type="button" class="ai-mode-tab" data-mode="hybrid">Hybrid</button>
+                    </div>
+
+                    <div id="grading-mode-panel"></div>
+                </article>
+            </section>
+
+            <section class="ai-comparison-panel">
+                <div class="ai-panel-header">
+                    <div>
+                        <p class="ai-panel-eyebrow">Submission view</p>
+                        <h2>Side-by-side comparison</h2>
+                    </div>
+                    <div class="ai-panel-note">Mock code, test results, and pass-rate context for the selected cluster.</div>
+                </div>
+                <div id="submission-comparison" class="ai-comparison-grid"></div>
+            </section>
+        </main>
+
+        <aside class="ai-details-panel">
+            <section class="ai-details-card">
+                <div class="ai-panel-header compact">
+                    <div>
+                        <p class="ai-panel-eyebrow">Cluster details</p>
+                        <h2 id="selected-cluster-title">Select a cluster</h2>
+                    </div>
+                    <span id="selected-cluster-status" class="ai-status-badge">Normal</span>
+                </div>
+
+                <div class="ai-details-stats">
+                    <div>
+                        <span>Submissions</span>
+                        <strong data-detail="size">0</strong>
+                    </div>
+                    <div>
+                        <span>Pass rate</span>
+                        <strong data-detail="pass-rate">0%</strong>
+                    </div>
+                    <div>
+                        <span>Common issue</span>
+                        <strong data-detail="issue">-</strong>
+                    </div>
+                    <div>
+                        <span>Failure mix</span>
+                        <strong data-detail="failures">-</strong>
+                    </div>
+                </div>
+
+                <div class="ai-details-actions">
+                    <button type="button" class="ai-secondary-action" id="details-split-btn">Split</button>
+                    <button type="button" class="ai-primary-action" id="details-merge-btn">Merge</button>
+                    <button type="button" class="ai-danger-action" id="details-reject-btn">Reject</button>
+                </div>
+
+                <div class="ai-detail-section">
+                    <h3>Cluster signals</h3>
+                    <ul id="signal-list" class="ai-bullet-list"></ul>
+                </div>
+
+                <div class="ai-detail-section">
+                    <h3>Merge selection</h3>
+                    <p class="ai-muted-copy">Check multiple clusters in the list to stage a merge proposal.</p>
+                    <div id="merge-selection-copy" class="ai-selection-copy">No clusters selected.</div>
+                </div>
+
+                <div class="ai-detail-section">
+                    <h3>Split control</h3>
+                    <label class="ai-field">
+                        <span>Cut height</span>
+                        <input type="range" id="split-height" min="12" max="92" value="58">
+                    </label>
+                    <div id="split-preview" class="ai-split-preview"></div>
+                </div>
+
+                <div class="ai-detail-section ai-reject-area" id="reject-panel" hidden>
+                    <h3>Reject cluster</h3>
+                    <label class="ai-field">
+                        <span>Reason</span>
+                        <textarea id="reject-reason" rows="3" placeholder="Example: The cluster appears dominated by a shared timeout rather than a stable concept gap."></textarea>
+                    </label>
+                    <div class="ai-muted-copy">Rejecting marks the cluster with a warning badge and removes it from future merge suggestions.</div>
+                </div>
+            </section>
+        </aside>
+    </section>
+
+    <div id="merge-modal" class="ai-modal" hidden>
+        <div class="ai-modal-card" role="dialog" aria-modal="true" aria-labelledby="merge-modal-title">
+            <h2 id="merge-modal-title">Confirm merge</h2>
+            <p id="merge-modal-copy" class="ai-muted-copy"></p>
+            <div class="ai-modal-actions">
+                <button type="button" class="ai-secondary-action" data-close-modal>Cancel</button>
+                <button type="button" class="ai-primary-action" id="confirm-merge-btn">Merge clusters</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reject-modal" class="ai-modal" hidden>
+        <div class="ai-modal-card" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+            <h2 id="reject-modal-title">Reject cluster</h2>
+            <p class="ai-muted-copy">Provide a short explanation before applying the rejection state.</p>
+            <label class="ai-field">
+                <span>Reason</span>
+                <textarea id="reject-modal-reason" rows="4" placeholder="Example: This group is not a stable behavioral pattern and is too broad for reuse."></textarea>
+            </label>
+            <div class="ai-modal-actions">
+                <button type="button" class="ai-secondary-action" data-close-modal>Cancel</button>
+                <button type="button" class="ai-danger-action" id="confirm-reject-btn">Reject cluster</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ai-toast" class="ai-toast" hidden></div>
+</div>
