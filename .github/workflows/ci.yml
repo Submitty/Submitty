@@ -626,8 +626,8 @@ jobs:
         if: always()
         run: |
           diff --color \
-            <(grep -vE '^(\\restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort) \
-            <(grep -vE '^(\\restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql | sort) \
+            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort) \
+            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql | sort) \
             || {
               echo "::error:: Wrong provided dump, please check your database dumps"
               exit 1
@@ -637,8 +637,8 @@ jobs:
         if: always()
         run: |
           diff --color \
-            <(grep -vE '^(\\restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort) \
-            <(grep -vE '^(\\restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql | sort) \
+            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort) \
+            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql | sort) \
             || {
               echo "::error:: Wrong provided dump, please check your database dumps"
               exit 1
