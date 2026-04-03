@@ -51,6 +51,10 @@
     margin: 0;
 }
 
+#mobile-menu li .nav-row:hover {
+    background-color: rgb(255 255 255 / 15%);
+}
+
 #mobile-menu li .selected,
 #mobile-menu li .selected i {
     background: var(--default-white);

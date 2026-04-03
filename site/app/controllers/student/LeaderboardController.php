@@ -46,8 +46,16 @@ class LeaderboardController extends AbstractController {
             $this->core->addErrorMessage("No leaderboards exist for this gradeable");
             return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
+
         if (is_null($leaderboard_tag)) {
             $leaderboard_tag = $leaderboards[0]->getTag();
+        }
+        else {
+            $requested_leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
+            if (is_null($requested_leaderboard)) {
+                // Fallback invalid leaderboard tags to the first configured leaderboard
+                $leaderboard_tag = $leaderboards[0]->getTag();
+            }
         }
 
         $user_id = $this->core->getUser()->getId();
@@ -86,12 +94,20 @@ class LeaderboardController extends AbstractController {
 
         $autogradingConfig = $gradeable->getAutogradingConfig();
         if (!is_null($autogradingConfig)) {
+            $candidate_leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
+            if (is_null($candidate_leaderboard)) {
+                $leaderboards = $autogradingConfig->getLeaderboards();
+                if (count($leaderboards) > 0) {
+                    $leaderboard_tag = $leaderboards[0]->getTag();
+                    $candidate_leaderboard = $leaderboards[0];
+                }
+            }
+
             $valid_testcases = $autogradingConfig->getTestcasesWithTag($leaderboard_tag);
 
-            $leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
-            if (!is_null($leaderboard)) {
-                $description = $leaderboard->getDescription();
-                $top_visible_students = $leaderboard->getTopVisibleStudents();
+            if (!is_null($candidate_leaderboard)) {
+                $description = $candidate_leaderboard->getDescription();
+                $top_visible_students = $candidate_leaderboard->getTopVisibleStudents();
                 $leaderboard_data = $this->core->getQueries()->getLeaderboard($gradeable_id, true, $valid_testcases);
             }
         }

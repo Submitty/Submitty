@@ -1086,4 +1086,15 @@ $(() => {
     registerKeyHandler({ name: 'Select Mark 9', code: 'Digit9' }, () => {
         checkOpenComponentMark(9);
     });
+
+    // Save and collapse current component when save button is clicked
+    $(document).on('click', '.save-tools-save', () => {
+        const componentId = getFirstOpenComponentId();
+        if (componentId !== NO_COMPONENT_ID) {
+            void closeComponent(componentId, true, false).catch((err) => {
+                console.error(err);
+                alert(`Error saving component: ${(err as Error).message}`);
+            });
+        }
+    });
 });
