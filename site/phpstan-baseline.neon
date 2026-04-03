@@ -2197,12 +2197,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
 			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
@@ -5244,12 +5238,6 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 1
-			path: app/libraries/ForumUtils.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 1
 			path: app/libraries/ForumUtils.php
 
