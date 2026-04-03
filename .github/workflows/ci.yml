@@ -432,7 +432,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get autoremove -y postgresql-14 postgresql-client-common
-          sudo apt-get install -y postgresql-14
+          sudo apt-get install -y postgresql-14 postgresql-client-14
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
@@ -603,29 +603,31 @@ jobs:
       - name: Compare Migrated master Databases
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql                           \
-                       ${GITHUB_WORKSPACE}/dumped/branch/master.sql || {
-            echo "::error:: Master databases are not identical, please check your migration"
-            exit 1
-          }
+          diff --color \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/main/master.sql) \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/branch/master.sql) \
+            || {
+              echo "::error:: Master databases are not identical, please check your migration"
+              exit 1
+            }
 
       - name: Compare Migrated course Databases
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql                           \
-                       ${GITHUB_WORKSPACE}/dumped/branch/course.sql || {
-            echo "::error:: Course databases are not identical, please check your migration"
-            exit 1
-          }
+          diff --color \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/main/course.sql) \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/branch/course.sql) \
+            || {
+              echo "::error:: Course databases are not identical, please check your migration"
+              exit 1
+            }
 
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
           diff --color \
-            -I '^\\restrict' \
-            -I '^\\unrestrict' \
-            ${GITHUB_WORKSPACE}/dumped/branch/master.sql \
-            ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/branch/master.sql) \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql) \
             || {
               echo "::error:: Wrong provided dump, please check your database dumps"
               exit 1
@@ -635,10 +637,8 @@ jobs:
         if: always()
         run: |
           diff --color \
-            -I '^\\restrict' \
-            -I '^\\unrestrict' \
-            ${GITHUB_WORKSPACE}/dumped/branch/course.sql \
-            ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${GITHUB_WORKSPACE}/dumped/branch/course.sql) \
+            <(grep -v '^\\restrict\|^\\unrestrict' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql) \
             || {
               echo "::error:: Wrong provided dump, please check your database dumps"
               exit 1
