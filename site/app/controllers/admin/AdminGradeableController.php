@@ -1897,7 +1897,7 @@ class AdminGradeableController extends AbstractController {
         elseif ($action === "close_submissions") {
             if ($gradeable->hasDueDate()) {
                 if ($dates['submission_due_date'] > $now) {
-                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $dates['submission_due_date'] = $now;
                     $message .= "Closed assignment ";
                     $success = true;
                 }
