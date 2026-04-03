@@ -352,6 +352,151 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+    * Function to submit the same "blank" pdf for all active students on a specific gradeable.
+    *
+    * The file that is submitted can be found here:
+    * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
+    *
+    * JSON error checking works similarly to ajaxUpload... or similar type functions.
+    *
+    * @param string $gradeable_id
+    * @return JsonResponse
+    */
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
+    public function generateBlankSubmissions($gradeable_id) {
+
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
+        }
+
+        $pdf_path = FileUtils::joinPaths(
+            "/usr",
+            "local",
+            "submitty",
+            "more_autograding_examples",
+            "pdf_exam",
+            "submissions",
+            "bulk_upload_placeholder.pdf"
+        );
+
+        if (!is_file($pdf_path)) {
+            return $this->uploadResult("Placeholder PDF not found at '{$pdf_path}'", false);
+        }
+
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+        $current_time_str = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+        $admin_user_id = $this->core->getUser()->getId();
+
+        $students = $this->core->getQueries()->getAllUsers();
+        $success_count = 0;
+
+        foreach ($students as $student) {
+            if ($student->getGroup() !== User::GROUP_STUDENT || $student->getRegistrationSection() === null) {
+                continue;
+            }
+
+            $user_id = $student->getId();
+
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+            $highest_version = 0;
+            if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+                $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            }
+            $new_version = $highest_version + 1;
+
+            //user directory
+            $user_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                "submissions",
+                $gradeable->getId(),
+                $user_id
+            );
+
+            //path for submission version
+            $version_path = FileUtils::joinPaths(
+                $user_path,
+                $new_version
+            );
+
+            FileUtils::createDir($version_path, true);
+
+            //path for submission directory
+            $version_path_submission = FileUtils::joinPaths(
+                $version_path,
+                "bulk_upload_placeholder.pdf"
+            );
+
+            //copy pdf to student version directory
+            @copy($pdf_path, $version_path_submission);
+
+            //write settings file
+            $settings_file = FileUtils::joinPaths(
+                $user_path,
+                "user_assignment_settings.json"
+            );
+            $json = [];
+
+            if (file_exists($settings_file)) {
+                $json = FileUtils::readJsonFile($settings_file);
+            }
+            $json["active_version"] = $new_version;
+            $json["history"][] = [
+                "version" => $new_version,
+                "time" => $current_time_str,
+                "who" => $admin_user_id,
+                "type" => "upload"
+            ];
+
+            @file_put_contents($settings_file, FileUtils::encodeJson($json));
+
+            //write timestamp file
+            @file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_str . "\n");
+
+            //update database
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+
+            //add to grading queue
+            $queue_file_helper = implode("__", [
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $gradeable->getId(),
+                $user_id,
+                $new_version
+            ]);
+
+            $queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                $queue_file_helper
+            );
+
+            $queue_data = [
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                "user" => $user_id,
+                "team" => "",
+                "who" => $user_id,
+                "is_team" => false,
+                "version" => $new_version,
+                "vcs_checkout" => false
+            ];
+
+            @file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX);
+
+            $success_count++;
+        }
+
+        $result = "Successfully submitted placeholder PDF for all $success_count students.";
+        return $this->uploadResult($result);
+    }
+
+    /**
      * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
      * size entered and places in the uploads/split_pdf folder.
      * Its error checking has overlap with ajaxUploadSubmission.
