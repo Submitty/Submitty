@@ -416,7 +416,6 @@ class Gradeable extends AbstractModel {
      */
     const date_validated_properties = [
         'team_lock_date',
-        'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
@@ -720,11 +719,6 @@ class Gradeable extends AbstractModel {
             }
             else {
                 $result = [];
-            }
-            // Add in submission due date
-            if ($this->hasDueDate()) {
-                // Make sure we insert the due date into the correct location (at the beginning since its the first date with constraints)
-                array_unshift($result, 'submission_due_date');
             }
 
             if ($this->hasReleaseDate()) {
