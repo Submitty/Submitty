@@ -83,6 +83,10 @@ function markSeen() {
     }
 }
 
+function goToNotificationSettings() {
+  window.location.href = buildCourseUrl(['notifications', 'settings']);
+}
+
 // mark notification as seen without reloading
 function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
@@ -135,9 +139,8 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="props.course"
           class="btn btn-primary"
-          :href="buildCourseUrl(['notifications', 'settings'])"
           data-testid="notification-settings-button"
-          @click="() => window.location.href = buildCourseUrl(['notifications', 'settings'])"
+          @click="goToNotificationSettings"
         >
           Settings
         </button>
