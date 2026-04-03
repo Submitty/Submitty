@@ -84,7 +84,7 @@ function markSeen() {
 }
 
 function goToNotificationSettings() {
-  window.location.href = buildCourseUrl(['notifications', 'settings']);
+    window.location.href = buildCourseUrl(['notifications', 'settings']);
 }
 
 // mark notification as seen without reloading
