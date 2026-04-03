@@ -478,6 +478,19 @@ function checkWarningBanners() {
         }
     }
 
+    if ($('#radio_electronic_file').is(':checked') && $('#has_due_date_yes').is(':checked')) {
+        if ($('#yes_ta_grade').is(':checked')) {
+            // hide/show element when submission due date is after the manual grading start date
+            if (submission_due_date > manual_grading_start_date) {
+                $('submission-due-after-grading-open-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('submission-due-after-grading-open-dates-warning').hide();
+            }
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
