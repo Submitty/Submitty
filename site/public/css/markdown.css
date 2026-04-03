@@ -111,12 +111,14 @@
 .markdown-area {
     border-radius: 6px;
     border: 1px solid var(--standard-light-gray);
+    container-type: inline-size;
 }
 
 /* header (.markdown-area-header + children) */
 .markdown-area-header {
     display: flex;
     flex-direction: row;
+    align-items: center;
     background-color: var(--standard-pale-gray);
     padding: 0 10px;
     border-radius: 6px 6px 0 0;
@@ -129,16 +131,18 @@
 
 .markdown-area-toolbar {
     display: flex;
+    min-width: 0;
     margin-left: auto;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: hidden;
     margin-bottom: 1px;
 }
 
 .markdown-mode-buttons {
     display: flex;
+    flex-shrink: 0;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
 .markdown-mode-tab {
@@ -217,7 +221,39 @@
 }
 
 .btn-markdown {
+    flex-shrink: 0;
     margin-left: 5px;
+    margin-bottom: 1px;
+}
+
+@container (max-width: 620px) {
+    .markdown-area-toolbar .btn-markdown-blockquote {
+        display: none;
+    }
+}
+
+@container (max-width: 560px) {
+    .markdown-area-toolbar .btn-markdown-italic {
+        display: none;
+    }
+}
+
+@container (max-width: 500px) {
+    .markdown-area-toolbar .btn-markdown-bold {
+        display: none;
+    }
+}
+
+@container (max-width: 440px) {
+    .markdown-area-toolbar .btn-markdown-code {
+        display: none;
+    }
+}
+
+@container (max-width: 380px) {
+    .markdown-area-toolbar .btn-markdown-link {
+        display: none;
+    }
 }
 
 /* Preview Loading Spinner */
