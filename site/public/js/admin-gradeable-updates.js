@@ -482,11 +482,11 @@ function checkWarningBanners() {
         if ($('#yes_ta_grade').is(':checked')) {
             // hide/show element when submission due date is after the manual grading start date
             if (submission_due_date > manual_grading_start_date) {
-                $('submission-due-after-grading-open-dates-warning').show();
+                $('#submission-due-after-grading-open-dates-warning').show();
                 $('#gradeable-dates-warnings-banner').show();
             }
             else {
-                $('submission-due-after-grading-open-dates-warning').hide();
+                $('#submission-due-after-grading-open-dates-warning').hide();
             }
         }
     }
