@@ -270,63 +270,36 @@ export function updatePanelOptions() {
     if (taLayoutDet.numOfPanelsEnabled === 1) {
         return;
     }
-    $('.grade-panel .panel-position-cont').attr(
-        'size',
-        taLayoutDet.numOfPanelsEnabled,
-    );
-    const panelOptions: JQuery<HTMLOptionElement> = $(
-        '.grade-panel .panel-position-cont option',
-    );
-    panelOptions.each((idx) => {
-        if (panelOptions[idx].value === 'leftTop') {
-            if (
-                taLayoutDet.numOfPanelsEnabled === 2
-                || (taLayoutDet.numOfPanelsEnabled === 3
-                    && taLayoutDet.dividedColName === 'RIGHT')
-            ) {
-                panelOptions[idx].text = 'Open as left panel';
-            }
-            else {
-                panelOptions[idx].text = 'Open as top left panel';
-            }
-        }
-        else if (panelOptions[idx].value === 'leftBottom') {
-            if (
-                taLayoutDet.numOfPanelsEnabled === 2
-                || (taLayoutDet.numOfPanelsEnabled === 3
-                    && taLayoutDet.dividedColName === 'RIGHT')
-            ) {
-                panelOptions[idx].classList.add('hide');
-            }
-            else {
-                panelOptions[idx].classList.remove('hide');
-            }
-        }
-        else if (panelOptions[idx].value === 'rightTop') {
-            if (
-                taLayoutDet.numOfPanelsEnabled === 2
-                || (taLayoutDet.numOfPanelsEnabled === 3
-                    && taLayoutDet.dividedColName !== 'RIGHT')
-            ) {
-                panelOptions[idx].text = 'Open as right panel';
-            }
-            else {
-                panelOptions[idx].text = 'Open as top right panel';
-            }
-        }
-        else if (panelOptions[idx].value === 'rightBottom') {
-            if (
-                taLayoutDet.numOfPanelsEnabled === 2
-                || (taLayoutDet.numOfPanelsEnabled === 3
-                    && taLayoutDet.dividedColName !== 'RIGHT')
-            ) {
-                panelOptions[idx].classList.add('hide');
-            }
-            else {
-                panelOptions[idx].classList.remove('hide');
-            }
-        }
-    });
+
+    const panels = taLayoutDet.numOfPanelsEnabled;
+    const dividedRight = taLayoutDet.dividedColName === 'RIGHT';
+    const is2Panel = panels === 2;
+    const is3PanelRight = panels === 3 && dividedRight;
+
+    const showLeftBottom = !is2Panel && !is3PanelRight;
+    const showRightBottom = !is2Panel && (panels === 4 || dividedRight);
+
+    const leftTopText = (is2Panel || is3PanelRight)
+        ? 'Open as left panel'
+        : 'Open as top left panel';
+    const rightTopText = !showRightBottom
+        ? 'Open as right panel'
+        : 'Open as top right panel';
+
+    const newOptions: string[] = [
+        `<option class="panel-position-left" value="leftTop">${leftTopText}</option>`,
+    ];
+    if (showLeftBottom) {
+        newOptions.push('<option class="panel-position-left" value="leftBottom">Open as bottom left panel</option>');
+    }
+    newOptions.push(`<option class="panel-position-right" value="rightTop">${rightTopText}</option>`);
+    if (showRightBottom) {
+        newOptions.push('<option class="panel-position-right" value="rightBottom">Open as bottom right panel</option>');
+    }
+
+    $('.grade-panel .panel-position-cont')
+        .html(newOptions.join(''))
+        .attr('size', newOptions.length);
 }
 
 export function setPanelsVisibilities(
