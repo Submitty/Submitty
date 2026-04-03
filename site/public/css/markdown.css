@@ -273,3 +273,87 @@
     background-color: white;
     max-width: 100%;
 }
+
+/* Thread Reference Links */
+.thread-reference {
+    color: var(--submitty-logo-blue);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--submitty-logo-blue);
+}
+
+.thread-reference:hover {
+    text-decoration: underline;
+}
+
+/* --- Thread Autocomplete Dropdown --- */
+.thread-autocomplete-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.thread-autocomplete-dropdown {
+    position: absolute;
+    z-index: 1000;
+    background: var(--default-white) !important;
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    width: 300px;
+}
+
+[data-theme="dark"] .thread-autocomplete-dropdown {
+    background: var(--standard-deep-dark-gray) !important;
+    border-color: var(--standard-medium-gray);
+}
+
+.thread-autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    overflow: hidden;
+    color: var(--text-black) !important; 
+}
+
+.thread-autocomplete-id {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--submitty-logo-blue) !important;
+}
+
+.thread-autocomplete-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-black) !important;
+}
+
+[data-theme="dark"] .thread-autocomplete-item .thread-autocomplete-title {
+    color: #ffffff !important;
+}
+
+/* --- Active/Hover State (Light Mode) --- */
+.thread-autocomplete-item-active {
+    background-color: var(--light-blue) !important;
+}
+.thread-autocomplete-item-active .thread-autocomplete-title,
+.thread-autocomplete-item-active .thread-autocomplete-id {
+    color: var(--text-black) !important;
+}
+
+/* --- Active/Hover State (Dark Mode) --- */
+[data-theme="dark"] .thread-autocomplete-item-active {
+    background-color: var(--submitty-logo-blue) !important;
+}
+[data-theme="dark"] .thread-autocomplete-item-active .thread-autocomplete-title{
+    color: var(--default-white) !important;
+}
+
+[data-theme="dark"] .thread-autocomplete-item-active .thread-autocomplete-id {
+    color: var(--default-white) !important;
+}

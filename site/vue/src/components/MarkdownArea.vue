@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import Markdown from './Markdown.vue';
+import { buildCourseUrl } from '../../../ts/utils/server';
+
+declare global {
+  interface Window {
+    thread_list: string[];
+  }
+}
 
 interface Props {
     markdownAreaId: string;
@@ -141,14 +148,34 @@ function handleKeyup(event: Event) {
     emit('keyup', event);
 
     // Call global function if specified
-    if (
-        props.textareaOnKeyup
-        && window[props.textareaOnKeyup as keyof Window]
-    ) {
+    if (props.textareaOnKeyup && window[props.textareaOnKeyup as keyof Window]) {
         (window[props.textareaOnKeyup as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
             textareaRef.value,
         );
+    }
+
+    // FIX: Completely exit if we are in the Normal editor
+    if (!showHeader.value) return; 
+
+    // --- Autocomplete Trigger ---
+    const textarea = textareaRef.value;
+    const jq = (window as any).$; 
+    if (textarea && jq && jq.fn.autocomplete) {
+        const e = event as KeyboardEvent;
+        const caret = textarea.selectionStart;
+        const text = textarea.value.substring(0, caret);
+
+        const isTypingNumber = e.key.length === 1 && /[0-9]/.test(e.key);
+        const isHittingBackspace = e.key === 'Backspace';
+        const isAttachedToHash = /#\d*$/.test(text);
+
+        if (e.key === '#' || (isAttachedToHash && (isTypingNumber || isHittingBackspace))) {
+            jq(textarea).autocomplete('search', '');
+        } 
+        else if (e.key === ' ' || e.key === 'Escape' || !isAttachedToHash) {
+            jq(textarea).autocomplete('close');
+        }
     }
 }
 
@@ -226,6 +253,13 @@ function toggleMarkdown() {
     }
 }
 
+watch(showHeader, (isMarkdownEnabled) => {
+    const jq = (window as any).$;
+    if (textareaRef.value && jq && jq.fn.autocomplete) {
+        jq(textareaRef.value).autocomplete(isMarkdownEnabled ? 'enable' : 'disable');
+    }
+});
+
 function syncMarkdownToggle() {
     if (props.markdownStatusId) {
         const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
@@ -235,6 +269,71 @@ function syncMarkdownToggle() {
         }
     }
 }
+onMounted(() => {
+  if (textareaRef.value) {
+    const jq = (window as any).$; 
+    if (!jq || !jq.fn.autocomplete) return;
+
+    // Separate what is SHOWN (label) from what is INSERTED (value)
+    const threadSource = ((window as any).thread_list || []).map((t: any) => ({
+      label: `#${t.id} ${t.title}`,
+      value: `#${t.id}` 
+    }));
+    
+    jq(textareaRef.value).autocomplete({
+      appendTo: jq(textareaRef.value).parent(), 
+      
+      source: function(request: any, response: any) {
+        if (!showHeader.value) return response([]);
+        const textarea = textareaRef.value;
+        if (!textarea) return response([]);
+
+        const caret = textarea.selectionStart;
+        const textToCaret = textarea.value.substring(0, caret);
+
+        const match = textToCaret.match(/#(\d*)$/);
+        if (!match) return response([]);
+
+        const term = match[1] || ''; 
+        // Filter by either the ID or the title text
+        const filtered = threadSource.filter((t: any) => 
+            t.value.startsWith(`#${term}`) || 
+            t.label.toLowerCase().includes(term.toLowerCase())
+        );
+        response(filtered);
+      },
+      minLength: 0,
+      position: { my: 'left top', at: 'left bottom+5' }, // Better positioning below cursor
+      
+      select: function(event: any, ui: any) {
+        const textarea = textareaRef.value;
+        if (!textarea) return false;
+        
+        const caret = textarea.selectionStart;
+        const textToCaret = textarea.value.substring(0, caret);
+        
+        const lastHashIndex = textToCaret.lastIndexOf('#');
+        
+        if (lastHashIndex !== -1) {
+            const before = textarea.value.substring(0, lastHashIndex);
+            const after = textarea.value.substring(caret);
+            
+            textarea.value = before + ui.item.value + ' ' + after;
+            
+            const newPos = before.length + ui.item.value.length + 1;
+            textarea.setSelectionRange(newPos, newPos);
+            textarea.focus();
+            
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        jq(this).autocomplete('close');
+        return false;
+      }
+    });
+    jq(textareaRef.value).autocomplete(showHeader.value ? 'enable' : 'disable');
+  }
+});
 </script>
 
 <template>
@@ -369,27 +468,30 @@ function syncMarkdownToggle() {
         tabindex="-1"
         class="screen-reader"
       >{{ markdownAreaId }}</label>
-      <textarea
-        v-show="mode === 'edit'"
-        :id="markdownAreaId"
-        ref="textareaRef"
-        v-model="content"
-        :data-testid="markdownAreaId"
-        class="markdown-textarea fill-available"
-        :class="[props.class]"
-        :name="markdownAreaName"
-        :placeholder="placeholder"
-        rows="10"
-        cols="30"
-        :maxlength="maxLength"
-        :required="required"
-        :data-previous-comment="dataPreviousComment"
-        @keyup="handleKeyup"
-        @keydown="handleKeydown"
-        @paste="handlePaste"
-        @change="handleChange"
-        @input="handleInput"
-      />
+      <div style="position:relative;">
+        <textarea
+          v-show="mode === 'edit'"
+          :id="markdownAreaId"
+          ref="textareaRef"
+          v-model="content"
+          :data-testid="markdownAreaId"
+          class="markdown-textarea fill-available"
+          :class="[props.class]"
+          :name="markdownAreaName"
+          :placeholder="placeholder"
+          rows="10"
+          cols="30"
+          :maxlength="maxLength"
+          :required="required"
+          :data-previous-comment="dataPreviousComment"
+          @keyup="handleKeyup"
+          @keydown="handleKeydown"
+          @paste="handlePaste"
+          @change="handleChange"
+          @input="handleInput"
+        />
+        <!-- jQuery UI autocomplete handles the dropdown, nothing to render here -->
+      </div>
       <div
         v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
@@ -401,3 +503,51 @@ function syncMarkdownToggle() {
     </div>
   </div>
 </template>
+<style>
+.markdown-area .ui-autocomplete.ui-widget-content {
+  position: absolute;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  background-color: #ffffff !important;
+  border: 1px solid #c0c0c0 !important;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000 !important;
+  list-style: none;
+}
+
+.markdown-area .ui-autocomplete .ui-menu-item-wrapper {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333333 !important;
+  transition: background-color 0.1s ease;
+}
+
+.markdown-area .ui-autocomplete .ui-menu-item-wrapper:hover,
+.markdown-area .ui-autocomplete .ui-state-active {
+  background-color: #007bff !important;
+  color: #ffffff !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete.ui-widget-content {
+  background-color: #2b2b2b !important;
+  border: 1px solid #444444 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-menu-item-wrapper {
+  color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-menu-item-wrapper:hover,
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-state-active {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+</style>
