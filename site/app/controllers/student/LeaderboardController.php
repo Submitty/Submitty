@@ -49,7 +49,8 @@ class LeaderboardController extends AbstractController {
 
         if (is_null($leaderboard_tag)) {
             $leaderboard_tag = $leaderboards[0]->getTag();
-        }else {
+        }
+        else {
             $requested_leaderboard = $autogradingConfig->getLeaderboard($leaderboard_tag);
             if (is_null($requested_leaderboard)) {
                 // Fallback invalid leaderboard tags to the first configured leaderboard
