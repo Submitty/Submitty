@@ -114,15 +114,25 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
-        $courses = $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId());
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
                 $this->core->getUser()->getNotificationSettings(),
-                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),$courses
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
             )
         );
+    }
+    //put master config stuff here
+    #[Route("/courses/{_semester}/{_course}/notifications/notification_courses", methods: ["GET"])]
+    public function getUserNotificationCourses() {
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadMasterConfig();
+        $this->core->loadMasterDatabase();
+        $courses = $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId());
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        return $courses;
     }
     
 
