@@ -2258,11 +2258,11 @@ function loadFilterHandlers() {
     });
 
     function updateSearchClearButton() {
-    const hasText = $('#search-content').val().trim().length > 0;
-    $('#search-clear').toggle(hasText);
+        const hasText = $('#search-content').val().trim().length > 0;
+        $('#search-clear').toggle(hasText);
 
-    updateClearFilterButton();
-}
+        updateClearFilterButton();
+    }
 
     $('#search-clear').on('mousedown', (e) => {
         $('#search-content').val('').trigger('change');
