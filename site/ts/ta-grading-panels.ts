@@ -140,7 +140,7 @@ export function toggleFullScreenMode() {
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`#${panel.str}_btn`)
+        const id_str = document.getElementById(`${panel.str}_btn`)
             ? `#${panel.str}_btn`
             : `#${panel.str}-btn`;
 
@@ -183,8 +183,8 @@ function updatePanelLayoutModes() {
             continue;
         }
         // Move all the panels from the left and right buckets to the main panels-container
-        for (let idx = 0; idx < panelCont.length; idx++) {
-            document.querySelector('.panels-container')!.append(panelCont[idx]);
+        while (panelCont.length > 0) {
+            document.querySelector('.panels-container')!.append(panelCont[0]);
         }
     }
 
@@ -297,9 +297,13 @@ export function updatePanelOptions() {
                     && taLayoutDet.dividedColName === 'RIGHT')
             ) {
                 panelOptions[idx].classList.add('hide');
+                panelOptions[idx].hidden = true;
+                panelOptions[idx].disabled = true;
             }
             else {
                 panelOptions[idx].classList.remove('hide');
+                panelOptions[idx].hidden = false;
+                panelOptions[idx].disabled = false;
             }
         }
         else if (panelOptions[idx].value === 'rightTop') {
@@ -321,9 +325,13 @@ export function updatePanelOptions() {
                     && taLayoutDet.dividedColName !== 'RIGHT')
             ) {
                 panelOptions[idx].classList.add('hide');
+                panelOptions[idx].hidden = true;
+                panelOptions[idx].disabled = true;
             }
             else {
                 panelOptions[idx].classList.remove('hide');
+                panelOptions[idx].hidden = false;
+                panelOptions[idx].disabled = false;
             }
         }
     });
