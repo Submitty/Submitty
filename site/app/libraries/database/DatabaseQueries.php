@@ -4909,6 +4909,64 @@ AND gc_id IN (
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * Returns the count of peer assignments per grader for a gradeable
+     *
+     * @param  string   $gradeable_id
+     * @param  string[] $grader_ids
+     * @return int[] grader_id => assignment count
+     */
+    public function getBulkPeerAssignmentCounts($gradeable_id, array $grader_ids) {
+        if (count($grader_ids) === 0) {
+            return [];
+        }
+        $place_holders = $this->createParameterList(count($grader_ids));
+        $params = array_values($grader_ids);
+        $params[] = $gradeable_id;
+        $this->course_db->query(
+            "SELECT grader_id, COUNT(*) as count FROM peer_assign WHERE grader_id IN {$place_holders} AND g_id=? GROUP BY grader_id",
+            $params
+        );
+        $result = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['grader_id']] = intval($row['count']);
+        }
+        return $result;
+    }
+
+    /**
+     * Returns the count of graded peer components per grader for a gradeable
+     *
+     * @param  string   $gradeable_id
+     * @param  string[] $grader_ids
+     * @return int[] grader_id => graded component count
+     */
+    public function getBulkNumGradedPeerComponents($gradeable_id, array $grader_ids) {
+        if (count($grader_ids) === 0) {
+            return [];
+        }
+        $place_holders = $this->createParameterList(count($grader_ids));
+        $params = array_values($grader_ids);
+        $params[] = $gradeable_id;
+        $this->course_db->query(
+            "SELECT gcd.gcd_grader_id, COUNT(*) as count
+FROM gradeable_component_data as gcd
+WHERE gcd.gcd_grader_id IN {$place_holders}
+AND gc_id IN (
+  SELECT gc_id
+  FROM gradeable_component
+  WHERE gc_is_peer='t' AND g_id=?
+)
+GROUP BY gcd.gcd_grader_id",
+            $params
+        );
+        $result = [];
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['gcd_grader_id']] = intval($row['count']);
+        }
+        return $result;
+    }
+
     public function getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections = []) {
         $where = "";
         $params = [];
