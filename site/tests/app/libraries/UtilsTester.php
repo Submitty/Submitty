@@ -37,18 +37,61 @@ class UtilsTester extends BaseUnitTest {
     }
 
     public function testValidPassword() {
+        $requirements = [
+            'min_length' => 12,
+            'max_length' => 255,
+            'require_uppercase' => true,
+            'require_lowercase' => true,
+            'require_numbers' => true,
+            'require_special_chars' => true
+        ];
         $good_password = 'GoodPassword#123';
-        $this->assertTrue(Utils::isValidPassword($good_password));
+        $this->assertTrue(Utils::isValidPassword($good_password, $requirements));
         $bad_password_length = 'Bad#123';
-        $this->assertFalse(Utils::isValidPassword($bad_password_length));
+        $this->assertFalse(Utils::isValidPassword($bad_password_length, $requirements));
         $bad_password_numbers = 'BadPasswordWithoutNumbers@';
-        $this->assertFalse(Utils::isValidPassword($bad_password_numbers));
+        $this->assertFalse(Utils::isValidPassword($bad_password_numbers, $requirements));
         $bad_password_special = 'BadPasswordWithoutSpecialCharacter123';
-        $this->assertFalse(Utils::isValidPassword($bad_password_special));
+        $this->assertFalse(Utils::isValidPassword($bad_password_special, $requirements));
         $bad_password_capital = 'badpasswordwithoutcapital#123';
-        $this->assertFalse(Utils::isValidPassword($bad_password_capital));
+        $this->assertFalse(Utils::isValidPassword($bad_password_capital, $requirements));
         $bad_password_lowercase = 'BADPASSWORDWITHOUTLOWERCASE#123';
-        $this->assertFalse(Utils::isValidPassword($bad_password_lowercase));
+        $this->assertFalse(Utils::isValidPassword($bad_password_lowercase, $requirements));
+    }
+
+    public function testValidPasswordWithCustomRequirements() {
+        $requirements = [
+            'min_length' => 8,
+            'max_length' => 255,
+            'require_uppercase' => false,
+            'require_lowercase' => true,
+            'require_numbers' => true,
+            'require_special_chars' => false
+        ];
+        $this->assertTrue(Utils::isValidPassword('simple8pass1', $requirements));
+        $this->assertTrue(Utils::isValidPassword('alllower1', $requirements));
+        $this->assertFalse(Utils::isValidPassword('short1', $requirements));
+        $this->assertFalse(Utils::isValidPassword('NOLOWERCASE1', [
+            'min_length' => 8,
+            'max_length' => 255,
+            'require_uppercase' => false,
+            'require_lowercase' => true,
+            'require_numbers' => false,
+            'require_special_chars' => false
+        ]));
+    }
+
+    public function testValidPasswordMaxLength() {
+        $requirements = [
+            'min_length' => 1,
+            'max_length' => 10,
+            'require_uppercase' => false,
+            'require_lowercase' => false,
+            'require_numbers' => false,
+            'require_special_chars' => false
+        ];
+        $this->assertTrue(Utils::isValidPassword('short', $requirements));
+        $this->assertFalse(Utils::isValidPassword('toolongpassword', $requirements));
     }
 
     public function testAcceptedEmail() {
