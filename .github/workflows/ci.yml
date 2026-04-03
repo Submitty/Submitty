@@ -603,46 +603,46 @@ jobs:
       - name: Compare Migrated master Databases
         if: always()
         run: |
-          diff --color \
-            <(grep -vE '^(\\restrict|\\unrestrict)|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/main/master.sql | sort) \
-            <(grep -vE '^(\\restrict|\\unrestrict)|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort) \
-            || {
-              echo "::error:: Master databases are not identical, please check your migration"
-              exit 1
-            }
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/main/master.sql | sort > /tmp/main_master.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort > /tmp/branch_master.sql
+
+          diff --color /tmp/main_master.sql /tmp/branch_master.sql || {
+            echo "::error:: Master databases are not identical, please check your migration"
+            exit 1
+          }
 
       - name: Compare Migrated course Databases
         if: always()
         run: |
-          diff --color \
-            <(grep -vE '^(\\restrict|\\unrestrict)|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/main/course.sql | sort) \
-            <(grep -vE '^(\\restrict|\\unrestrict)|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort) \
-            || {
-              echo "::error:: Course databases are not identical, please check your migration"
-              exit 1
-            }
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/main/course.sql | sort > /tmp/main_course.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort > /tmp/branch_course.sql
+
+          diff --color /tmp/main_course.sql /tmp/branch_course.sql || {
+            echo "::error:: Course databases are not identical, please check your migration"
+            exit 1
+          }
 
       - name: Compare migrated master database with provided dump
         if: always()
         run: |
-          diff --color \
-            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort) \
-            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql | sort) \
-            || {
-              echo "::error:: Wrong provided dump, please check your database dumps"
-              exit 1
-            }
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql | sort > /tmp/branch_master.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql | sort > /tmp/provided_master.sql
 
-      - name: Compare Migrated course Database with Provided Dump
+          diff --color /tmp/branch_master.sql /tmp/provided_master.sql || {
+            echo "::error:: Wrong provided dump, please check your database dumps"
+            exit 1
+          }
+
+      - name: Compare migrated courses database with provided dump
         if: always()
         run: |
-          diff --color \
-            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort) \
-            <(grep -vE '^[[:space:]]*\\(restrict|\\unrestrict)$|^[[:space:]]*$' ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql | sort) \
-            || {
-              echo "::error:: Wrong provided dump, please check your database dumps"
-              exit 1
-            }
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql | sort > /tmp/branch_course.sql
+          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_course_db.sql | sort > /tmp/provided_course.sql
+
+          diff --color /tmp/branch_course.sql /tmp/provided_course.sql || {
+            echo "::error:: Wrong provided dump, please check your database dumps"
+            exit 1
+          }
 
       - name: Pack Artifacts
         if: failure()
