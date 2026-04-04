@@ -163,11 +163,13 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    height: fit-content;
 }
 
 .multiple-choice-config {
     display: flex;
     align-items: center;
+    height: fit-content;
 }
 
 .multiple-choice-config fieldset {
