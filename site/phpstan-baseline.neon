@@ -2677,22 +2677,22 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::RandomizePeers() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::RandomizePeers() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::RandomizePeers() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::RandomizePeers() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::addNewMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::addNewMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::adminTeamSubmit() has no return type specified.'
@@ -2707,64 +2707,64 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxAddComponent() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxAddComponent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxAddComponent() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxAddComponent() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxAddNewMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxAddNewMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxAddNewMark() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxAddNewMark() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxClearPeerMarks() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::ajaxClearPeerMarks() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxClearPeerMarks() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::ajaxClearPeerMarks() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxDeleteComponent() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxDeleteComponent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxDeleteComponent() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxDeleteComponent() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxDeleteMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxDeleteMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxDeleteMark() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxDeleteMark() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetAttachments() has no return type specified.'
@@ -2779,34 +2779,34 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetComponent() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetComponent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetComponent() has parameter $component_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetComponent() has parameter $component_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetComponent() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetComponent() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetGradeableRubric() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetGradeableRubric() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetGradeableRubric() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetGradeableRubric() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetGradedComponent() has no return type specified.'
@@ -2857,16 +2857,16 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetMarkStats() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetMarkStats() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetMarkStats() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxGetMarkStats() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxGetOverallComment() has no return type specified.'
@@ -2953,40 +2953,40 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponent() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponent() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponent() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponentOrder() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponentOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponentOrder() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponentOrder() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponentPages() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponentPages() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveComponentPages() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveComponentPages() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveGradedComponent() has no return type specified.'
@@ -3001,28 +3001,28 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveMark() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveMark() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveMarkOrder() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveMarkOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveMarkOrder() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::ajaxSaveMarkOrder() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSaveOverallComment() has no return type specified.'
@@ -3037,22 +3037,22 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSetPeerFeedback() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::ajaxSetPeerFeedback() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxSetPeerFeedback() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::ajaxSetPeerFeedback() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxVerifyComponent() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\GradeVerificationController::ajaxVerifyComponent() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/GradeVerificationController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::amIBlindGrading() has no return type specified.'
@@ -3091,10 +3091,10 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::deleteMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::deleteMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::exportTeams() has no return type specified.'
@@ -3109,16 +3109,16 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::generateHistogramData() return type has no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\GradingStatusController::generateHistogramData() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/GradingStatusController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getGradeableRubric() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::getGradeableRubric() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getGradedGradeable() has no return type specified.'
@@ -3139,10 +3139,10 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getMarkStats() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::getMarkStats() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getSolutionTaNotesForGradeable() has parameter $submitter_itempool_map with no value type specified in iterable type array.'
@@ -3157,22 +3157,22 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getStats() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::getStats() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getStats() has parameter $total_graded with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::getStats() has parameter $total_graded with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::getStats() has parameter $total_total with no type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::getStats() has parameter $total_total with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::importTeams() has no return type specified.'
@@ -3205,34 +3205,34 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveComponentOrder() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveComponentOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveComponentOrder() has parameter $orders with no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveComponentOrder() has parameter $orders with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveComponentPages() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveComponentPages() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveComponentPages() has parameter $pages with no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveComponentPages() has parameter $pages with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveComponentsPage() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveComponentsPage() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveGradedComponent() has no return type specified.'
@@ -3247,22 +3247,22 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveMark() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveMark() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveMarkOrder() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveMarkOrder() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveMarkOrder() has parameter $orders with no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\ComponentGradingController::saveMarkOrder() has parameter $orders with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/ComponentGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::saveOverallComment() has no return type specified.'
@@ -3271,28 +3271,28 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::setAllGradAllGrading() has parameter $student_array with no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::setAllGradAllGrading() has parameter $student_array with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::setAllGradAllGrading() return type has no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::setAllGradAllGrading() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::setRandomizedGraders() has parameter $student_array with no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::setRandomizedGraders() has parameter $student_array with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::setRandomizedGraders() return type has no value type specified in iterable type array.'
+			rawMessage: 'Method app\controllers\grading\PeerGradingController::setRandomizedGraders() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/PeerGradingController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::showDetails() has no return type specified.'
@@ -3355,16 +3355,16 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::showStatus() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\GradingStatusController::showStatus() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/GradingStatusController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::showStatus() has parameter $gradeable_id with no type specified.'
+			rawMessage: 'Method app\controllers\grading\GradingStatusController::showStatus() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
+			path: app/controllers/grading/GradingStatusController.php
 
 		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::updateSolutionTaNotes() has parameter $gradeable_id with no type specified.'
