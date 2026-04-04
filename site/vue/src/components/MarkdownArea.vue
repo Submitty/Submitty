@@ -154,6 +154,7 @@ function handleKeyup(event: Event) {
 function handleKeydown(event: Event) {
     emit('keydown', event);
 
+  // Call global function if specified
     if (
         props.textareaOnkeydown
         && window[props.textareaOnkeydown as keyof Window]
@@ -168,6 +169,7 @@ function handleKeydown(event: Event) {
 function handlePaste(event: Event) {
     emit('paste', event);
 
+  // Call global function if specified
     if (
         props.textareaOnPaste
         && window[props.textareaOnPaste as keyof Window]
@@ -182,6 +184,7 @@ function handlePaste(event: Event) {
 function handleChange(event: Event) {
     emit('change', event);
 
+  // Call global function if specified
     if (
         props.textareaOnChange
         && window[props.textareaOnChange as keyof Window]
@@ -413,13 +416,30 @@ function syncMarkdownToggle() {
   align-items: flex-end; 
   flex-wrap: nowrap; 
   width: 100%;
-  overflow: hidden; 
+  overflow: hidden;
+  gap: 8px;
+}
+
+.markdown-mode-buttons {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  min-width: max-content;
+}
+
+.markdown-mode-tab {
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .markdown-area-toolbar {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
   gap: 4px;
   padding-bottom: 2px;
 }
@@ -439,6 +459,30 @@ function syncMarkdownToggle() {
   }
 }
 
+@container markdownarea (max-width: 500px) {
+  .btn-markdown-blockquote {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 460px) {
+  .btn-markdown-italic {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 420px) {
+  .btn-markdown-bold {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 380px) {
+  .btn-markdown-code {
+    display: none;
+  }
+}
+
 @container markdownarea (max-width: 350px) {
   .markdown-area-toolbar {
     gap: 2px;
@@ -446,6 +490,19 @@ function syncMarkdownToggle() {
   .markdown-area-toolbar .btn-markdown {
     padding-left: 6px !important;
     padding-right: 6px !important;
+  }
+}
+
+@container markdownarea (max-width: 330px) {
+  .btn-markdown-link {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 300px) {
+  .markdown-help-icon {
+    display: none;
+    margin-right: 0;
   }
 }
 </style>
