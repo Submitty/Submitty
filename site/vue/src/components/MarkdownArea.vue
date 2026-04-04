@@ -139,7 +139,6 @@ function addMarkdown(type: string) {
 
 function handleKeyup(event: Event) {
     emit('keyup', event);
-
     // Call global function if specified
     if (
         props.textareaOnKeyup
@@ -155,7 +154,7 @@ function handleKeyup(event: Event) {
 function handleKeydown(event: Event) {
     emit('keydown', event);
 
-    // Call global function if specified
+  // Call global function if specified
     if (
         props.textareaOnkeydown
         && window[props.textareaOnkeydown as keyof Window]
@@ -170,7 +169,7 @@ function handleKeydown(event: Event) {
 function handlePaste(event: Event) {
     emit('paste', event);
 
-    // Call global function if specified
+  // Call global function if specified
     if (
         props.textareaOnPaste
         && window[props.textareaOnPaste as keyof Window]
@@ -185,7 +184,7 @@ function handlePaste(event: Event) {
 function handleChange(event: Event) {
     emit('change', event);
 
-    // Call global function if specified
+  // Call global function if specified
     if (
         props.textareaOnChange
         && window[props.textareaOnChange as keyof Window]
@@ -262,6 +261,7 @@ function syncMarkdownToggle() {
       class="far fa-question-circle disabled"
     /></a>
   </div>
+  
   <div
     :class="[rootClass]"
     class="markdown-area fill-available"
@@ -273,9 +273,7 @@ function syncMarkdownToggle() {
       class="markdown-area-header"
       :data-mode="mode"
     >
-      <div
-        class="markdown-mode-buttons"
-      >
+      <div class="markdown-mode-buttons">
         <button
           title="Edit Markdown"
           type="button"
@@ -299,6 +297,7 @@ function syncMarkdownToggle() {
           Preview
         </button>
       </div>
+
       <div
         v-if="mode === 'edit'"
         class="markdown-area-toolbar"
@@ -306,6 +305,7 @@ function syncMarkdownToggle() {
         <a
           target="_blank"
           href="https://submitty.org/student/communication/markdown"
+          class="markdown-help-icon"
         >
           <i
             style="font-style: normal"
@@ -319,46 +319,47 @@ function syncMarkdownToggle() {
           tabindex="0"
           @click="addMarkdown('link')"
         >
-          Link <i class="fas fa-link fa-1x" />
+          <span class="md-btn-text">Link </span><i class="fas fa-link fa-1x" />
         </button>
         <button
-          title="Insert a code segment"
           type="button"
+          title="Insert a code segment"
           class="btn btn-default btn-markdown btn-markdown-code"
           tabindex="0"
           @click="addMarkdown('code')"
         >
-          Code <i class="fas fa-code fa-1x" />
+          <span class="md-btn-text">Code </span><i class="fas fa-code fa-1x" />
         </button>
         <button
-          title="Insert bold text"
           type="button"
+          title="Insert bold text"
           class="btn btn-default btn-markdown btn-markdown-bold"
           tabindex="0"
           @click="addMarkdown('bold')"
         >
-          Bold <i class="fas fa-bold fa-1x" />
+          <span class="md-btn-text">Bold </span><i class="fas fa-bold fa-1x" />
         </button>
         <button
-          title="Insert italic text"
           type="button"
+          title="Insert italic text"
           class="btn btn-default btn-markdown btn-markdown-italic"
           tabindex="0"
           @click="addMarkdown('italic')"
         >
-          Italics <i class="fas fa-italic fa-1x" />
+          <span class="md-btn-text">Italics </span><i class="fas fa-italic fa-1x" />
         </button>
         <button
-          title="Insert blockquote text"
           type="button"
+          title="Insert blockquote text"
           class="btn btn-default btn-markdown btn-markdown-blockquote"
           tabindex="0"
           @click="addMarkdown('blockquote')"
         >
-          Blockquote <i class="fas fa-quote-left fa-1x" />
+          <span class="md-btn-text">Blockquote </span><i class="fas fa-quote-left fa-1x" />
         </button>
       </div>
     </div>
+    
     <div class="markdown-area-body">
       <div
         v-if="isPreviewLoading || isLoadingPreview"
@@ -401,3 +402,107 @@ function syncMarkdownToggle() {
     </div>
   </div>
 </template>
+
+<style>
+.markdown-area {
+  container-type: inline-size;
+  container-name: markdownarea;
+  width: 100%;
+}
+
+.markdown-area-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: flex-end; 
+  flex-wrap: nowrap; 
+  width: 100%;
+  overflow: hidden;
+  gap: 8px;
+}
+
+.markdown-mode-buttons {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  min-width: max-content;
+}
+
+.markdown-mode-tab {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.markdown-area-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+.markdown-help-icon {
+  margin-right: 4px;
+}
+
+@container markdownarea (max-width: 650px) {
+  .md-btn-text {
+    display: none;
+  }
+  
+  .markdown-area-toolbar .btn-markdown {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@container markdownarea (max-width: 500px) {
+  .btn-markdown-blockquote {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 460px) {
+  .btn-markdown-italic {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 420px) {
+  .btn-markdown-bold {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 380px) {
+  .btn-markdown-code {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 350px) {
+  .markdown-area-toolbar {
+    gap: 2px;
+  }
+  .markdown-area-toolbar .btn-markdown {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+}
+
+@container markdownarea (max-width: 330px) {
+  .btn-markdown-link {
+    display: none;
+  }
+}
+
+@container markdownarea (max-width: 300px) {
+  .markdown-help-icon {
+    display: none;
+    margin-right: 0;
+  }
+}
+</style>
