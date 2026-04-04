@@ -33,6 +33,7 @@
     /* stylelint-disable-next-line color-named */
     background-color: white;
     justify-content: space-around;
+    height: fit-content;
 }
 
 .widget-controls input[type="button"] {
