@@ -33,6 +33,7 @@
     /* stylelint-disable-next-line color-named */
     background-color: white;
     justify-content: space-around;
+    height: fit-content;
 }
 
 .widget-controls input[type="button"] {
@@ -155,6 +156,7 @@
 .mc-table .entered-description-input {
     width: 95%;
     height: 80px;
+    resize: vertical;
 }
 
 .mc-table .mc-buttons {
