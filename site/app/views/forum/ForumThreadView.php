@@ -871,10 +871,6 @@ class ForumThreadView extends AbstractView {
             "thread_announced" => $thread->isAnnounced(),
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
-            "debug_thread_id" => $thread->getId(),
-            "debug_is_pinned" => $thread->isPinned() ? "YES" : "NO",
-            "debug_access" => $user->accessFullGrading() ? "YES" : "NO",
-            "debug_first" => $first ? "YES" : "NO"
         ];
 
         if ($render) {
