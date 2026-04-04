@@ -72,6 +72,11 @@ aside {
         background-color: var(--selected-nav-sidebar);
     }
 
+    aside li .nav-row:hover {
+    background-color: var(--selected-nav-sidebar);
+    cursor: pointer;
+}
+
     aside a.selected .icon-title {
         color: var(--text-black);
         font-weight: bold;
