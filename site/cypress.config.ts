@@ -40,6 +40,19 @@ export default defineConfig({
         specPattern: 'cypress/e2e/**/*.spec.js',
         projectId: 'es51qa',
     },
+    component: {
+        devServer: {
+            framework: 'vue',
+            bundler: 'vite',
+            viteConfig: async () => {
+                const config = await import('./vue/vite.config.mts');
+                return config.default;
+            },
+        },
+        indexHtmlFile: 'cypress/support/component-index.html',
+        specPattern: 'vue/src/**/*.cy.ts',
+        supportFile: 'cypress/support/component.ts',
+    },
     env: {
         browserPermissions: {
             notifications: 'allow',

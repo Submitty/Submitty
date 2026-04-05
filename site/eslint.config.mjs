@@ -162,7 +162,7 @@ export default tseslint.config(
     },
     {
         name: 'Options for cypress files',
-        files: ['cypress/**/*.{js,ts}'],
+        files: ['cypress/**/*.{js,ts}', '**/*.cy.{js,ts}'],
         extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
