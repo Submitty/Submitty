@@ -331,8 +331,7 @@ describe('test office hours queue', () => {
         ensureStudentOutOfQueue();
         studentJoinQueue(queueName, queueCode);
         cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(1000); // Allow server/db to process join before logout
+        cy.get('[data-testid="leave-queue"]').should('exist'); // Ensure DOM has updated before logout
 
         switchUser('instructor');
         // Ensure the queue filter is enabled (newly created queues might be hidden)
