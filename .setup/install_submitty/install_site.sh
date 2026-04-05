@@ -114,28 +114,31 @@ chmod 755 ${SUBMITTY_DATA_DIR}/run
 chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
 chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 
-# Delete all typescript code to prevent deleted files being left behind and potentially
-# causing compilation errors
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
-fi
-
-# Delete all vue code to prevent deleted vue files from being rendered
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
-fi
-
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-result=$(rsync -rtz -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+result=$(rsync -rt -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
 if [ ${VAGRANT} == 1 ]; then
-    rsync -rtz -i ${SUBMITTY_REPOSITORY}/site/tests ${SUBMITTY_REPOSITORY}/site/phpunit.xml ${SUBMITTY_INSTALL_DIR}/site > /dev/null
+    rsync -rt -i ${SUBMITTY_REPOSITORY}/site/tests ${SUBMITTY_REPOSITORY}/site/phpunit.xml ${SUBMITTY_INSTALL_DIR}/site > /dev/null
     chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/tests
     chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/tests
     chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
     chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
 fi
+
+# IMPORTANT: Check for frontend changes BEFORE adding artificial dependency entries
+# so that the build skip optimization works correctly on subsequent runs.
+# Parse rsync itemized output entries directly to avoid regex false positives.
+FRONTEND_CHANGED=0
+while IFS= read -r entry; do
+    path="${entry:12}"
+    case "${path}" in
+        site/ts/*|site/vue/*|site/package.json|site/package-lock.json|site/vite.config.js|site/vite.config.mjs|site/vite.config.ts)
+            FRONTEND_CHANGED=1
+            break
+            ;;
+    esac
+done <<< "${result}"
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -195,10 +198,8 @@ fi
 # create lang cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
 
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
-fi
-# create output dir for esbuild
+# Ensure the esbuild output directory exists. We intentionally do not clear
+# it when frontend inputs are unchanged so existing build artifacts remain.
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # Update ownership to PHP_USER for affected files and folders
@@ -255,8 +256,9 @@ else
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+# Use chmod -R for bulk operations (much faster than find -exec on Vagrant shared folders)
+chmod -R 551 ${SUBMITTY_INSTALL_DIR}/site/vendor
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -print0 | xargs -0 chmod 440
 
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
@@ -417,23 +419,28 @@ mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 echo "Running esbuild"
-chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
-chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
-chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
-chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
-chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
-chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
-su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
-chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
-chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
-chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
-chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
-chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
-chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+if [ ${FRONTEND_CHANGED} == 1 ]; then
+    chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+    chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+    chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+    chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
+    chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+    chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
+    chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+    chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
+    chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+    chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+    chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+    chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+    chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
+    chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+else
+    echo "Skipping esbuild (no frontend changes detected)"
+fi
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
