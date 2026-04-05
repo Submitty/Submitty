@@ -1000,3 +1000,18 @@
     flex-grow: 1;
     min-width: 0;
 }
+
+/* Fix dark mode textarea and preview box */
+[data-theme="dark"] textarea,
+[data-theme="dark"] .thread-content textarea {
+    background-color: var(--standard-dark-gray);
+    color: var(--text-white);
+    border: 1px solid var(--standard-light-medium-gray);
+}
+
+/* Fix preview box in dark mode */
+[data-theme="dark"] .preview-content,
+[data-theme="dark"] .markdown-preview {
+    background-color: var(--standard-dark-gray);
+    color: var(--text-white);
+}
