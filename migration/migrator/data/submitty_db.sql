@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict f8WSp3pVLL40wW4yijeKqc6T52mApAJCml3BDErXnUxRM7qjcmdMQWa270s6uiC
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1112,4 +1114,6 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict f8WSp3pVLL40wW4yijeKqc6T52mApAJCml3BDErXnUxRM7qjcmdMQWa270s6uiC
 

@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict 1lLf5phQFIgbKngLiGYmhRPzACNGHDmqt3vltfrmKJpv3YE1T3qTSJ3rlnjehfe
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -671,6 +673,25 @@ CREATE TABLE public.autograding_metrics (
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
     CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
     CONSTRAINT sloc_non_negative CHECK ((source_lines_of_code >= 0))
+);
+
+
+--
+-- Name: autograding_testcase_details; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase_details (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_version integer NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    testcase_order integer NOT NULL,
+    hidden boolean DEFAULT false NOT NULL,
+    extra_credit boolean DEFAULT false NOT NULL,
+    points_possible numeric(10,2) NOT NULL,
+    points_earned numeric(10,2) NOT NULL,
+    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) <> (team_id IS NOT NULL)))
 );
 
 
@@ -2914,6 +2935,27 @@ CREATE INDEX grading_registration_user_id_index ON public.grading_registration U
 
 
 --
+-- Name: idx_autograding_testcase_details_gradeable; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_gradeable ON public.autograding_testcase_details USING btree (g_id, testcase_id);
+
+
+--
+-- Name: idx_autograding_testcase_details_team; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_team ON public.autograding_testcase_details USING btree (g_id, team_id, g_version);
+
+
+--
+-- Name: idx_autograding_testcase_details_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_user ON public.autograding_testcase_details USING btree (g_id, user_id, g_version);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3127,19 +3169,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3849,4 +3891,6 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict 1lLf5phQFIgbKngLiGYmhRPzACNGHDmqt3vltfrmKJpv3YE1T3qTSJ3rlnjehfe
 
