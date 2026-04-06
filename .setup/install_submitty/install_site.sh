@@ -117,7 +117,7 @@ chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-result=$(rsync -rt -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+result=$(rsync -rt --delete -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
 if [ ${VAGRANT} == 1 ]; then
     rsync -rt -i ${SUBMITTY_REPOSITORY}/site/tests ${SUBMITTY_REPOSITORY}/site/phpunit.xml ${SUBMITTY_INSTALL_DIR}/site > /dev/null
     chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/tests
@@ -131,7 +131,18 @@ fi
 # Parse rsync itemized output entries directly to avoid regex false positives.
 FRONTEND_CHANGED=0
 while IFS= read -r entry; do
-    path="${entry:12}"
+    if [ -z "${entry}" ]; then
+        continue
+    fi
+
+    if [[ ${entry} =~ ^\*deleting[[:space:]]+(.+)$ ]]; then
+        path="${BASH_REMATCH[1]}"
+    elif [ ${#entry} -ge 13 ]; then
+        path="${entry:12}"
+    else
+        continue
+    fi
+
     case "${path}" in
         site/ts/*|site/vue/*|site/package.json|site/package-lock.json|site/vite.config.js|site/vite.config.mjs|site/vite.config.ts)
             FRONTEND_CHANGED=1
@@ -205,6 +216,9 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
+    if [ -z "${entry}" ] || [[ ${entry} =~ ^\*deleting[[:space:]]+ ]]; then
+        continue
+    fi
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
@@ -224,18 +238,16 @@ fi
 # so apache can properly handle them
 echo "Set permissions"
 for entry in "${result_array[@]}"; do
+    if [ -z "${entry}" ] || [[ ${entry} =~ ^\*deleting[[:space:]]+ ]]; then
+        continue
+    fi
+
     if echo ${entry} | grep -E -q "^.d"; then
-        if [ ! -z "${entry}" ]; then
-            chmod 551 ${SUBMITTY_INSTALL_DIR}/${entry:12}
-        fi
+        chmod 551 ${SUBMITTY_INSTALL_DIR}/${entry:12}
     elif echo ${entry} | grep -E -q "site/public"; then
-        if [ ! -z "${entry}" ]; then
-            set_permissions "${SUBMITTY_INSTALL_DIR}/${entry:12}"
-        fi
+        set_permissions "${SUBMITTY_INSTALL_DIR}/${entry:12}"
     elif echo ${entry} | grep -E -q "^.f"; then
-        if [ ! -z "${entry}" ]; then
-            chmod 440 ${SUBMITTY_INSTALL_DIR}/${entry:12}
-        fi
+        chmod 440 ${SUBMITTY_INSTALL_DIR}/${entry:12}
     fi
 done
 
