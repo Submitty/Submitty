@@ -227,11 +227,20 @@ find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
+COMPOSER_CHANGED=0
+if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
+    COMPOSER_CHANGED=1
+fi
+
 # set the mask for composer so that it'll run properly and be able to delete/modify
 # files under it
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
     chmod 640 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
-    chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor
+    if [ ${COMPOSER_CHANGED} == 1 ]; then
+        chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor
+    else
+        chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
+    fi
 fi
 
 # Set proper read/execute for "other" on files with certain extensions
@@ -268,9 +277,15 @@ else
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 
-# Use chmod -R for bulk operations (much faster than find -exec on Vagrant shared folders)
-chmod -R 551 ${SUBMITTY_INSTALL_DIR}/site/vendor
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -print0 | xargs -0 chmod 440
+# Use chmod -R for bulk operations when dependencies were updated.
+# Otherwise, keep the lighter vendor/composer-only path from #12692.
+if [ ${COMPOSER_CHANGED} == 1 ]; then
+    chmod -R 551 ${SUBMITTY_INSTALL_DIR}/site/vendor
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -print0 | xargs -0 chmod 440
+else
+    chmod -R 551 ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type f -print0 | xargs -0 chmod 440
+fi
 
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
