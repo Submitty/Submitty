@@ -144,7 +144,7 @@ while IFS= read -r entry; do
     fi
 
     case "${path}" in
-        site/ts/*|site/vue/*|site/package.json|site/package-lock.json|site/vite.config.js|site/vite.config.mjs|site/vite.config.ts)
+        site/ts/*|site/vue/*|site/package.json|site/package-lock.json|site/vite.config.js|site/vite.config.mjs|site/vite.config.ts|site/.build.js|site/tsconfig.json)
             FRONTEND_CHANGED=1
             break
             ;;
