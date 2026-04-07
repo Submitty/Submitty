@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 
 /**
  * Class RainbowCustomization
@@ -61,6 +62,8 @@ class RainbowCustomization extends AbstractModel {
         'project',
         'participation', 'note',
         'none'];
+
+    const allowed_show_notes = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
 
 
     public function __construct(Core $main_core) {
@@ -122,7 +125,9 @@ class RainbowCustomization extends AbstractModel {
                 "manual_grading_points" => $manual_grading_points,
                 "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override_percent" => false
+                "override_percent" => false,
+                "show_notes" => 'never',
+                "show_notes_applicable" => in_array($gradeable->getType(), [GradeableType::NUMERIC_TEXT, GradeableType::CHECKPOINTS], true)
             ];
         }
         // Determine which 'buckets' exist in the customization.json
@@ -191,6 +196,20 @@ class RainbowCustomization extends AbstractModel {
                     if (isset($percent_map[$c_gradeable['id']])) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
+                    }
+                }
+
+                // Assign show_notes to customization_data gradeables by matching ids
+                $show_notes_map = [];
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'show_notes') && in_array($json_gradeable->show_notes, self::allowed_show_notes, true)) {
+                        $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
+                    }
+                }
+
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($show_notes_map[$c_gradeable['id']])) {
+                        $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
                     }
                 }
             }

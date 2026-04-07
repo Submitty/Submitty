@@ -269,31 +269,33 @@ function getGradeableBuckets() {
             $(selector).children('.gradeable-li').each(function () {
                 const gradeable = {};
 
-                const children = $(this).children();
-                // children[0] represents <div id="gradeable-pts-div-*">
-                // children[1] represents <div id="gradeable-percents-div-*">
-                // replace divs with inputs
-                children[0] = children[0].querySelector('.max-score'); // can be either 1st, 2nd, or 3rd child
-                children[1] = children[1].children[0];
+                const maxScore = $(this).find('.max-score')[0];
+                const perGradeablePercentInput = $(this).find('div[id^="gradeable-percents-div-"] input')[0];
 
                 // Get max points
-                gradeable.max = parseFloat(children[0].dataset.maxScore);
+                gradeable.max = parseFloat(maxScore.dataset.maxScore);
 
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(`#per-gradeable-percents-checkbox-${type}`).is(':checked')) {
-                    gradeable.percent = parseFloat(children[1].value) / 100.0;
+                    gradeable.percent = parseFloat(perGradeablePercentInput.value) / 100.0;
                 }
 
                 // Get gradeable release date
-                gradeable.release_date = children[0].dataset.gradeReleaseDate;
+                gradeable.release_date = maxScore.dataset.gradeReleaseDate;
 
                 // Get gradeable id
-                gradeable.id = $(children).find('.gradeable-id')[0].innerHTML;
+                gradeable.id = $(this).find('.gradeable-id')[0].innerHTML;
+
+                // Get show_notes selection for numeric-text/checkpoint gradeables
+                const showNotesInput = $(this).find('select.gradeable-show-notes-select');
+                if (showNotesInput.length > 0) {
+                    gradeable.show_notes = showNotesInput.val();
+                }
 
                 // Get per-gradeable curve data
                 const curve_points_selected = getSelectedCurveBenchmarks();
 
-                $(children).find('.gradeable-li-curve input').each(function () {
+                $(this).find('.gradeable-li-curve input').each(function () {
                     const benchmark = this.getAttribute('data-benchmark').toString();
 
                     if (curve_points_selected.includes(benchmark) && this.value) {
@@ -815,6 +817,9 @@ $(document).ready(() => {
     $('#extra_credit_checkbox').change(() => {
         saveChanges();
     });
+    $('.gradeable-show-notes-select').change(() => {
+        saveChanges();
+    });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
@@ -1041,6 +1046,7 @@ $(document).ready(() => {
         $('button[id^="per-gradeable-percents-reset-"]').hide();
         $('div[id^="gradeable-percents-div-"]').hide();
         $('i[id^="per-gradeable-percents-warning-"]').hide();
+        $('.gradeable-show-notes-config').hide();
 
         $('#config-toggle').change(() => {
             configVisible = !configVisible;
@@ -1075,6 +1081,7 @@ $(document).ready(() => {
                         ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
                     }
                 });
+                $('.gradeable-show-notes-config').show();
             }
             else {
                 // Hide Extra Credit
@@ -1088,6 +1095,7 @@ $(document).ready(() => {
                 $('button[id^="per-gradeable-percents-reset-"]').hide();
                 $('div[id^="gradeable-percents-div-"]').hide();
                 $('i[id^="per-gradeable-percents-warning-"]').hide();
+                $('.gradeable-show-notes-config').hide();
             }
         });
     });
