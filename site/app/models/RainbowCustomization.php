@@ -212,6 +212,7 @@ class RainbowCustomization extends AbstractModel {
                         $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
                     }
                 }
+                unset($c_gradeable);
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
