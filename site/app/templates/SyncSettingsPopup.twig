@@ -1,43 +1,32 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}sync-notification-popup{% endblock %}
-{% block title %}
-    Sync Notification Settings
-{% endblock %}
+{% block title %}Sync Notification Settings{% endblock %}
 {% block body %}
-<div class="form-group mt-3">
-    <label class="font-weight-bold text-dark">
-        Select courses to copy the current notification settings to:
-    </label>
-    <div class="border rounded p-2 bg-white text-dark"
-         style="max-height: 250px; overflow-y: auto;">
-        {% if courses is empty %}
-            <div class="text-muted">
-                No courses available.
+<div class="form-group" style="margin-top: 15px;">
+    <label>Select courses to copy the current notification settings to:</label>
+    <div style="
+        max-height: 250px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        background: #fff;
+        color: #000;
+    ">
+        {% for course in courses %}
+            <div style="margin-bottom: 5px;">
+                <label>
+                    <input type="checkbox" name="sync_course_ids[]" value="{{ course.getCourse() }}">
+                    {{ course.getCourse() }} ({{ course.getTerm() }}) — {{ course.getTitle() }}
+                </label>
             </div>
-        {% else %}
-            {% for course in courses %}
-                <div class="form-check mb-1">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        name="sync_course_ids[]"
-                        value="{{ course.getCourse() ~ '_' ~ course.getTerm() }}"
-                        id="course_{{ loop.index }}"
-                    >
-                    <label class="form-check-label" for="course_{{ loop.index }}">
-                        {{ course.getCourse() }} ({{ course.getTerm() }})
-                        — {{ course.getTitle() }}
-                    </label>
-                </div>
-            {% endfor %}
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
 {% block buttons %}
-<button class="btn btn-primary" onclick="setNotification()">
+<button class="btn btn-primary" onclick="setNotification(this)">
     Sync Settings
 </button>
-
-{{ block('close_button') }}
+    {{block('close_button')}}
 {% endblock %}
