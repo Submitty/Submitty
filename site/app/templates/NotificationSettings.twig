@@ -414,13 +414,11 @@
         function setNotification(){
             const selected = $('input[name="sync_course_ids[]"]:checked').map(function () { return this.value; }).get();
 
-            //first click -> show selector instead of syncing
             if (!selected || selected.length === 0) {
                 displayErrorMessage("Please select at least one course.");
                 return;
             }
 
-            //perform sycning
             $.ajax({
                 type: "POST",
                 url: "{{ sync_settings_url }}",
