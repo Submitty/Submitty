@@ -3,12 +3,17 @@ import { getApiKey } from '../../support/utils';
 import { gradeable_json, rubric, bad_rubric } from '../../support/api_testing_json';
 describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
+        const gradeableId = `api_testing_${Date.now()}`;
+
         // // API
         getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'POST',
                 url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
-                body: gradeable_json,
+                body: {
+                    ...gradeable_json,
+                    id: gradeableId,
+                },
                 headers: {
                     Authorization: key,
                 },
@@ -19,14 +24,14 @@ describe('Tests cases revolving around gradeable access and submission', () => {
 
         cy.login('instructor');
 
-        cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
+        cy.visit(['sample', 'gradeable', gradeableId, 'update']);
         cy.get('body').should('contain.text', 'Edit Gradeable');
         cy.get('[data-testid="download-gradeable-btn"]').click();
 
-        cy.readFile('cypress/downloads/api_testing.json').then((test_json) => {
+        cy.readFile(`cypress/downloads/${gradeableId}.json`).then((test_json) => {
             expect(test_json.title).to.eql('API Testing');
             expect(test_json.type).to.eql('Electronic File');
-            expect(test_json.id).to.eql('api_testing');
+            expect(test_json.id).to.eql(gradeableId);
             expect(test_json.instructions_url).to.eql('');
             expect(test_json.syllabus_bucket).to.eql('homework');
             expect(test_json.bulk_upload).to.eql(false);
