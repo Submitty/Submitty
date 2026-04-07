@@ -70,7 +70,7 @@ class Course_create_gradeables:
                         anon_id=anon_id
                     )
                 )
-                self.conn.commit()
+            self.conn.commit()
             random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
@@ -202,7 +202,6 @@ class Course_create_gradeables:
                                         g_id=gradeable.id, user_id=None, team_id=team_id,
                                         g_version=version, submission_time=current_time_string
                                     ))
-                                    self.conn.commit()
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version).values(
@@ -210,7 +209,6 @@ class Course_create_gradeables:
                                                 active_version=active_version, g_notification_sent=g_notification_sent
                                             )
                                         )
-                                        self.conn.commit()
                                     json_history["team_history"] = json_team_history[team_id]
                                 else:
                                     self.conn.execute(
@@ -218,14 +216,13 @@ class Course_create_gradeables:
                                                 g_id=gradeable.id, user_id=user.id, g_version=version, submission_time=current_time_string
                                             )
                                     )
-                                    self.conn.commit()
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version).values(
                                                 g_id=gradeable.id, user_id=user.id, active_version=active_version, g_notification_sent=g_notification_sent
                                             )
                                         )
-                                        self.conn.commit()
+                                self.conn.commit()
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
@@ -350,7 +347,6 @@ class Course_create_gradeables:
                                 if skip_grading > 0.3 and random.random() > 0.01:
                                     ins = insert(self.gradeable_data_overall_comment).values(**overall_comment_values)
                                     res = self.conn.execute(ins)
-                                    self.conn.commit()
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         # This is used to simulate unfinished grading.
@@ -369,7 +365,6 @@ class Course_create_gradeables:
                                             gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit
                                         )
                                     )
-                                    self.conn.commit()
                                     first = True
                                     first_set = False
                                     for mark in component.marks:
@@ -383,6 +378,7 @@ class Course_create_gradeables:
                                             if(first):
                                                 first_set = True
                                         first = False
+                                self.conn.commit()
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system(f"chown -R submitty_php:{self.code}_tas_www {submission_path}")
@@ -393,7 +389,6 @@ class Course_create_gradeables:
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                         res = self.conn.execute(insert(self.gradeable_data).values({"g_id": gradeable.id, "gd_user_id": user.id }))
-                        self.conn.commit()
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
@@ -412,7 +407,7 @@ class Course_create_gradeables:
                                     gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1
                                 )
                             )
-                            self.conn.commit()
+                        self.conn.commit()
 
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':
