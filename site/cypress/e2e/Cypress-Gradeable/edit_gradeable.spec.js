@@ -312,8 +312,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // Reset to old date
         updateDates('#date_due', future_date, 'All Changes Saved');
 
-        // This should not be allowed, its before the due date
-        updateDates('#date_grade', past_date, 'Some Changes Failed!');
+        // There should be no constraints on this and it should be allowed
+        updateDates('#date_grade', past_date, 'All Changes Saved');
         // Reset to valid date
         updateDates('#date_grade', future_date, 'All Changes Saved');
 
