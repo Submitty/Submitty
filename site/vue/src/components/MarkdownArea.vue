@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import Markdown from './Markdown.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
 
 declare global {
   interface Window {
-    thread_list: string[];
+    thread_list?: Array<{ id?: number | string; title?: string } | string>;
   }
 }
 
@@ -269,71 +269,163 @@ function syncMarkdownToggle() {
         }
     }
 }
-onMounted(() => {
-  if (textareaRef.value) {
-    const jq = (window as any).$; 
-    if (!jq || !jq.fn.autocomplete) return;
 
-    // Separate what is SHOWN (label) from what is INSERTED (value)
-    const threadSource = ((window as any).thread_list || []).map((t: any) => ({
-      label: `#${t.id} ${t.title}`,
-      value: `#${t.id}` 
-    }));
-    
-    jq(textareaRef.value).autocomplete({
-      appendTo: jq(textareaRef.value).parent(), 
-      
-      source: function(request: any, response: any) {
-        if (!showHeader.value) return response([]);
-        const textarea = textareaRef.value;
-        if (!textarea) return response([]);
+  function parseThreadListEntry(entry: { id?: number | string; title?: string } | string): { id: number; title: string } | null {
+    if (typeof entry === 'string') {
+      const idMatch = entry.match(/#(\d+)/);
+      if (!idMatch) {
+        return null;
+      }
+      const id = parseInt(idMatch[1], 10);
+      if (Number.isNaN(id) || id <= 0) {
+        return null;
+      }
+      const title = entry.replace(/<\s*#\d+\s*>/g, '').trim();
+      return { id, title };
+    }
 
-        const caret = textarea.selectionStart;
-        const textToCaret = textarea.value.substring(0, caret);
+    const parsedId = parseInt(String(entry.id ?? ''), 10);
+    if (Number.isNaN(parsedId) || parsedId <= 0) {
+      return null;
+    }
+    return {
+      id: parsedId,
+      title: String(entry.title ?? '').trim(),
+    };
+  }
 
+  function getThreadSource(): Array<{ label: string; value: string }> {
+    const normalizedThreads: Array<{ id: number; title: string }> = [];
+    const globalList = (window as Window).thread_list;
+
+    if (Array.isArray(globalList)) {
+      for (const entry of globalList) {
+        const parsed = parseThreadListEntry(entry);
+        if (parsed !== null) {
+          normalizedThreads.push(parsed);
+        }
+      }
+    }
+
+    // Fallback for partial page updates where inline scripts do not run.
+    if (normalizedThreads.length === 0) {
+      const threadLinks = document.querySelectorAll<HTMLAnchorElement>('.thread_box_link[data-thread_id]');
+      threadLinks.forEach((link) => {
+        const id = parseInt(link.dataset.thread_id ?? '', 10);
+        if (!Number.isNaN(id) && id > 0) {
+          normalizedThreads.push({
+            id,
+            title: (link.dataset.thread_title ?? '').trim(),
+          });
+        }
+      });
+    }
+
+    const seen = new Set<number>();
+    return normalizedThreads
+      .filter((thread) => {
+        if (seen.has(thread.id)) {
+          return false;
+        }
+        seen.add(thread.id);
+        return true;
+      })
+      .map((thread) => ({
+        label: `#${thread.id} ${thread.title}`.trim(),
+        value: `#${thread.id}`,
+      }));
+  }
+
+  function destroyAutocomplete(): void {
+    const jq = (window as any).$;
+    const textarea = textareaRef.value;
+    if (!jq || !jq.fn.autocomplete || !textarea) {
+      return;
+    }
+    if (jq(textarea).data('ui-autocomplete')) {
+      jq(textarea).autocomplete('destroy');
+    }
+  }
+
+  function initializeAutocomplete(): void {
+    const jq = (window as any).$;
+    const textarea = textareaRef.value;
+    if (!jq || !jq.fn.autocomplete || !textarea) {
+      return;
+    }
+
+    destroyAutocomplete();
+    jq(textarea).autocomplete({
+      appendTo: jq(textarea).parent(),
+      source: function (_request: any, response: any) {
+        if (!showHeader.value) {
+          response([]);
+          return;
+        }
+        const localTextarea = textareaRef.value;
+        if (!localTextarea) {
+          response([]);
+          return;
+        }
+
+        const caret = localTextarea.selectionStart;
+        const textToCaret = localTextarea.value.substring(0, caret);
         const match = textToCaret.match(/#(\d*)$/);
-        if (!match) return response([]);
+        if (!match) {
+          response([]);
+          return;
+        }
 
-        const term = match[1] || ''; 
-        // Filter by either the ID or the title text
-        const filtered = threadSource.filter((t: any) => 
-            t.value.startsWith(`#${term}`) || 
-            t.label.toLowerCase().includes(term.toLowerCase())
+        const term = match[1] || '';
+        const filtered = getThreadSource().filter((item) =>
+          item.value.startsWith(`#${term}`) || item.label.toLowerCase().includes(term.toLowerCase()),
         );
         response(filtered);
       },
       minLength: 0,
-      position: { my: 'left top', at: 'left bottom+5' }, // Better positioning below cursor
-      
-      select: function(event: any, ui: any) {
-        const textarea = textareaRef.value;
-        if (!textarea) return false;
-        
-        const caret = textarea.selectionStart;
-        const textToCaret = textarea.value.substring(0, caret);
-        
+      position: { my: 'left top', at: 'left bottom+5' },
+      select: function (_event: any, ui: any) {
+        const localTextarea = textareaRef.value;
+        if (!localTextarea) {
+          return false;
+        }
+
+        const caret = localTextarea.selectionStart;
+        const textToCaret = localTextarea.value.substring(0, caret);
         const lastHashIndex = textToCaret.lastIndexOf('#');
-        
+
         if (lastHashIndex !== -1) {
-            const before = textarea.value.substring(0, lastHashIndex);
-            const after = textarea.value.substring(caret);
-            
-            textarea.value = before + ui.item.value + ' ' + after;
-            
-            const newPos = before.length + ui.item.value.length + 1;
-            textarea.setSelectionRange(newPos, newPos);
-            textarea.focus();
-            
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+          const before = localTextarea.value.substring(0, lastHashIndex);
+          const after = localTextarea.value.substring(caret);
+          localTextarea.value = before + ui.item.value + ' ' + after;
+
+          const newPos = before.length + ui.item.value.length + 1;
+          localTextarea.setSelectionRange(newPos, newPos);
+          localTextarea.focus();
+          localTextarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
         jq(this).autocomplete('close');
         return false;
-      }
+      },
     });
-    jq(textareaRef.value).autocomplete(showHeader.value ? 'enable' : 'disable');
+    jq(textarea).autocomplete(showHeader.value ? 'enable' : 'disable');
   }
+
+onMounted(() => {
+    syncMarkdownToggle();
+    initializeAutocomplete();
 });
+
+  watch(textareaRef, () => {
+    nextTick(() => {
+      initializeAutocomplete();
+    });
+  });
+
+  onBeforeUnmount(() => {
+    destroyAutocomplete();
+  });
 </script>
 
 <template>
