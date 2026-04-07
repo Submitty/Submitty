@@ -198,6 +198,7 @@ class RainbowCustomization extends AbstractModel {
                         $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
                     }
                 }
+                unset($c_gradeable);
 
                 // Assign show_notes to customization_data gradeables by matching ids
                 $show_notes_map = [];
