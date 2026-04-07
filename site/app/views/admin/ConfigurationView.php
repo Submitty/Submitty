@@ -30,7 +30,8 @@ class ConfigurationView extends AbstractView {
             "csrf_token" => $csrf_token,
             "sections_url" => $this->core->buildCourseUrl(['sections']),
             "rainbowCustomizationExists" => $rainbowCustomizationExists,
-            "all_self_register" => ConfigurationController::ALL_SELF_REGISTER
+            "all_self_register" => ConfigurationController::ALL_SELF_REGISTER,
+            "request_self_register" => ConfigurationController::REQUEST_SELF_REGISTER
         ]);
     }
 }

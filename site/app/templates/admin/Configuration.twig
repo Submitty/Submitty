@@ -335,10 +335,18 @@
 
         <br/>
         <br/>
-        <div class="danger">
-            <h2> Danger Zone</h2>
+        <div class="danger block">
+            <h2>Danger Zone</h2>
             <hr>
-                <div class="config-row checkbox-row">
+
+            <div class="config-row">
+                <span class="option-title">Enable Self Registration</span>
+                <br />
+                <span class="option-alt">Choose how users can self-register for this course.</span>
+            </div>
+
+            <div class="config-row checkbox-row">
+                <label for="all-self-registration">
                     <input 
                         type="checkbox"
                         name="all_self_registration"
@@ -348,35 +356,46 @@
                         {{ fields['self_registration_type'] == all_self_register ? 'checked' : '' }}
                         onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
                     />
-                    <div>
-                        <label for="all-self-registration">
-                            <span class="option-title">Enable Self Registration</span>
-                        </label>
-                        <br/>
-                        <span>WARNING: This allows ANY user who has access to Submitty to register for this course</span>
-                        <br/>
-                        <span>
-                            In order to allow self registration, you must have at least one <a href='{{ sections_url }}'>registration section</a>
-                        </span>
-                        <br/>
-                        <span class="option-title">Default Section</span>
-                        <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
-                            {% if fields['default_section'] is null %}
-                                <option value="" selected> NULL </option>
-                            {% endif %}
-                            {% for section in fields['registration_sections'] %}
-                                <option 
-                                    value="{{ section['sections_registration_id'] }}" 
-                                    {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}
-                                >
-                                    Section: {{ section['sections_registration_id'] }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <br/>
-                    </div>
+                    <span class="option-title">Unrestricted Self Registration</span>
+                </label>
+
+                <label for="request-self-registration">
+                    <input 
+                        type="checkbox"
+                        name="request_self_registration"
+                        id="request-self-registration"
+                        data-testid="request-self-registration"
+                        value="true"
+                        {{ fields['self_registration_type'] == request_self_register ? 'checked' : '' }}
+                        onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
+                    />
+                    <span class="option-title">Request Only Self Registration</span>
+                </label>
+            </div>
+
+            <div class="config-row">
+                <span class="red-message">WARNING: This allows ANY user who has access to Submitty to register for this course</span>
+            </div>
+
+            <div class="config-row">
+                <span class="option-alt">In order to allow self registration, you must have at least one <a href='{{ sections_url }}'>registration section</a></span>
+            </div>
+
+            <div class="config-row">
+                <label class="option-title" for="default-section-id">Default Section</label>
+                <div class="option-input">
+                    <select name="default_section_id" id="default-section-id" data-testid="default-section-id">
+                        {% if fields['default_section'] is null %}
+                            <option value="" selected> NULL </option>
+                        {% endif %}
+                        {% for section in fields['registration_sections'] %}
+                            <option value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}>
+                                Section: {{ section['sections_registration_id'] }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </hr>
+            </div>
         </div>
     </div>
 </div>

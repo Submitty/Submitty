@@ -53,6 +53,8 @@ class ErrorView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "self_registration_type" => $self_registration_type,
             "all_self_register" => ConfigurationController::ALL_SELF_REGISTER,
+            "request_self_register" => ConfigurationController::REQUEST_SELF_REGISTER,
+            "no_self_register" => ConfigurationController::NO_SELF_REGISTER,
             "default_section_id" => $default_section_id
         ]);
     }

@@ -39,14 +39,17 @@ class CourseRegistrationController extends AbstractController {
     public function selfRegister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
-
-        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
+        $self_registration_type = $this->core->getQueries()->getSelfRegistrationType($term, $course);
+        if ($self_registration_type === ConfigurationController::NO_SELF_REGISTER) {
             $this->core->addErrorMessage('Self registration is not allowed.');
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
         elseif ($this->core->getQueries()->getDefaultRegistrationSection($term, $course) === null) {
             $this->core->addErrorMessage('Default section ID is not set, alert your instructor.');
             return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+        elseif ($self_registration_type === ConfigurationController::REQUEST_SELF_REGISTER) {
+            $this->requestRegistration($term, $course);
         }
         else {
             $this->registerCourseUser($term, $course);

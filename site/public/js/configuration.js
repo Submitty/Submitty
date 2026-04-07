@@ -9,7 +9,7 @@ $(document).ready(() => {
         let default_section;
         if (this.type === 'checkbox') {
             entry = $(elem).is(':checked');
-            if (this.id === 'all-self-registration') {
+            if (this.id === 'all-self-registration' || this.id === 'request-self-registration') {
                 default_section = $('#default-section-id').val();
                 formData.append('default_section', default_section);
             }
@@ -98,6 +98,11 @@ function confirmSelfRegistration(element, needs_reg_sections) {
         alert('You need to select a registration section first');
         return false;
     }
-
-    return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+    if (element.id == "all-self-registration") {
+        $('#request-self-registration').prop('checked', false);
+        return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+    } else {
+        $('#all-self-registration').prop('checked', false);
+        return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to request to be registered for this course.');
+    }
 }

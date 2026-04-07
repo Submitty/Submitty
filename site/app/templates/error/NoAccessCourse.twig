@@ -1,5 +1,5 @@
 <div class="content" data-testid="no-access-message">
-    {% if self_registration_type != all_self_register %}
+    {% if self_registration_type == no_self_register %}
         You don't have access to this course. <br />
         This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
         If you think this is a mistake,
@@ -19,7 +19,7 @@
     {% elseif default_section_id is null %}
         The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration, however the instructor has not set a default section id.
         <br/>Please alert your instructor.
-    {% else %}
+    {% elseif self_registration_type == all_self_register %}
         The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration <br />
         You may select below to add yourself to the course. <br/>
         Your instructor will be notified and can then choose to keep you in the course.
@@ -31,8 +31,24 @@
         </br>
         <form method="POST" action="{{ register_url }}">
             <input type="hidden" name="csrf_token" value={{ csrf_token }}>
+            <input type="hidden" name="all_self_registration">
             <button type="submit" class="btn btn-primary" data-testid="register-button">Register</button>
         </form>
+    {% elseif self_registration_type == request_self_register %}
+        The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration <br />
+            You may click below to request to be added to the course. <br/>
+            Before you can access your course, your instructor will be notified and is responsible for accepting or denying your join request.
+            {% if course_home_url != '' %}
+                </br>   
+                Click <a href="{{ course_home_url }}"> here </a> to visit the course home page.
+            {% endif %}
+            </br>
+            </br>
+            <form method="POST" action="{{ register_url }}">
+                <input type="hidden" name="csrf_token" value={{ csrf_token }}>
+                <input type="hidden" name="request_self_registration">
+                <button type="submit" class="btn btn-primary" data-testid="register-button">Request to Register</button>
+            </form>
     {% endif %}
 
 </div>
