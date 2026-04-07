@@ -268,6 +268,15 @@
     align-items: center;
 }
 
+.gradeable-show-notes-label {
+    margin-left: 12px;
+    margin-right: 4px;
+}
+
+.gradeable-show-notes {
+    max-width: 180px;
+}
+
 .gradeable-id {
     margin-left: 5px;
 }

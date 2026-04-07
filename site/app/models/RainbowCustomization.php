@@ -62,6 +62,13 @@ class RainbowCustomization extends AbstractModel {
         'participation', 'note',
         'none'];
 
+    const allowed_show_notes_options = [
+        'never',
+        'instructor_only',
+        'student_only',
+        'student_and_instructor'
+    ];
+
 
     public function __construct(Core $main_core) {
         parent::__construct($main_core);
@@ -122,7 +129,8 @@ class RainbowCustomization extends AbstractModel {
                 "manual_grading_points" => $manual_grading_points,
                 "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override_percent" => false
+                "override_percent" => false,
+                "show_notes" => 'never'
             ];
         }
         // Determine which 'buckets' exist in the customization.json
@@ -179,10 +187,18 @@ class RainbowCustomization extends AbstractModel {
                 }
                 // Create a map from id to percent for this bucket
                 $percent_map = [];
+                $show_notes_map = [];
 
                 foreach ($json_bucket->ids as $json_gradeable) {
                     if (property_exists($json_gradeable, 'percent')) {
                         $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
+                    }
+
+                    if (
+                        property_exists($json_gradeable, 'show_notes')
+                        && in_array($json_gradeable->show_notes, self::allowed_show_notes_options, true)
+                    ) {
+                        $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
                     }
                 }
 
@@ -191,6 +207,10 @@ class RainbowCustomization extends AbstractModel {
                     if (isset($percent_map[$c_gradeable['id']])) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
+                    }
+
+                    if (isset($show_notes_map[$c_gradeable['id']])) {
+                        $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
                     }
                 }
             }

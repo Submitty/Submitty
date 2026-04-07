@@ -70,6 +70,10 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="buckets-used-list"]').should('be.visible');
         cy.get('[data-testid="buckets-available-list"]').should('be.visible');
         cy.get('[data-testid="gradeable-config"]').should('be.visible');
+        cy.get('[data-testid^="show-notes-"]').first().as('show-notes-select');
+        cy.get('@show-notes-select').should('have.value', 'never');
+        cy.get('@show-notes-select').select('Instructor Only');
+        cy.get('@show-notes-select').should('have.value', 'instructor_only');
 
         // Ensure textboxes have correct initial values and can be modified
         checkTextbox('[data-testid="cust-messages-textarea"]', '', 'message');

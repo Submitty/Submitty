@@ -343,6 +343,18 @@
                                                         <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                                        <label for="show-notes-{{ gradeable['id'] }}" class="gradeable-show-notes-label">Show Notes:</label>
+                                                        <select
+                                                            id="show-notes-{{ gradeable['id'] }}"
+                                                            class="gradeable-show-notes"
+                                                            data-testid="show-notes-{{ gradeable['id'] }}"
+                                                        >
+                                                            {% set show_notes = gradeable['show_notes'] ?? 'never' %}
+                                                            <option value="never" {{ show_notes == 'never' ? 'selected' : '' }}>Never</option>
+                                                            <option value="instructor_only" {{ show_notes == 'instructor_only' ? 'selected' : '' }}>Instructor Only</option>
+                                                            <option value="student_only" {{ show_notes == 'student_only' ? 'selected' : '' }}>Student Only</option>
+                                                            <option value="student_and_instructor" {{ show_notes == 'student_and_instructor' ? 'selected' : '' }}>Student and Instructor</option>
+                                                        </select>
                                                     </div>
                                                     <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
                                                         {# Generate input boxes for each per-gradeable curve input #}
