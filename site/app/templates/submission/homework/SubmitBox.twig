@@ -578,16 +578,14 @@
     });
 
     window.blankSubmitAll = function(){
-        const url;
-        const message;
-        if(is_team_assignment){
-            url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']);
-            message = "This will create a placeholder submission for ALL TEAMS on this gradeable.";
-        }
-        else{
-            url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
-            message = "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
-        }
+        const url = is_team_assignment ? 
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+
+        const message = is_team_assignment ?
+        "This will create a placeholder submission for ALL TEAMS on this gradeable." :
+        "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
+
         const csrf_token = "{{ csrf_token }}";
         if(confirm(message)){
             $.ajax({
