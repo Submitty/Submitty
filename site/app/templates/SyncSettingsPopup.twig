@@ -17,7 +17,7 @@
             <div style="margin-bottom: 5px;">
                 <label>
                     <input type="checkbox" name="sync_course_ids[]" value="{{ course.getCourse() }}">
-                    {{ course.getCourse() }} ({{ course.getTerm() }}) — {{ course.getTitle() }}
+                    {{ course.getCourse() }} ({{ course.term }}) — {{ course.title }}
                 </label>
             </div>
         {% endfor %}

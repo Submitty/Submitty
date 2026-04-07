@@ -413,12 +413,10 @@
         {#create setNotification#}
         function setNotification(){
             const selected = $('input[name="sync_course_ids[]"]:checked').map(function () { return this.value; }).get();
-
             if (!selected || selected.length === 0) {
                 displayErrorMessage("Please select at least one course.");
                 return;
             }
-
             $.ajax({
                 type: "POST",
                 url: "{{ sync_settings_url }}",

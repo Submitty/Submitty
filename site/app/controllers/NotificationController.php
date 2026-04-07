@@ -114,6 +114,7 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
+        //$courses = $this->getUserNotificationCourses()
         $original_config = clone $this->core->getConfig();
         $this->core->loadMasterConfig();
         $this->core->loadMasterDatabase();
