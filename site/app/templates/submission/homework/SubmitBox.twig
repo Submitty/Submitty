@@ -586,7 +586,7 @@
         }
         else{
             url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
-            message = "This will create a placeholder submission for ALL STUDENTS on this gradeable."
+            message = "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
         }
         const csrf_token = "{{ csrf_token }}";
         if(confirm(message)){
