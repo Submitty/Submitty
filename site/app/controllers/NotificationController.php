@@ -114,11 +114,10 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
-        //$courses = $this->getUserNotificationCourses()
         $original_config = clone $this->core->getConfig();
         $this->core->loadMasterConfig();
         $this->core->loadMasterDatabase();
-        $courses = $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId());
+        $courses = $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId());
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
 
@@ -132,9 +131,9 @@ class NotificationController extends AbstractController {
             )
         );
     }
-    //put master config stuff here
+    //change to syncNotification function
     #[Route("/courses/{_semester}/{_course}/notifications/notification_courses", methods: ["GET"])]
-    public function getUserNotificationCourses() {
+    public function syncNotifications() {
         $original_config = clone $this->core->getConfig();
         $this->core->loadMasterConfig();
         $this->core->loadMasterDatabase();

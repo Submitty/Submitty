@@ -10,14 +10,12 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         padding: 10px;
-        background: #fff;
-        color: #000;
     ">
         {% for course in courses %}
             <div style="margin-bottom: 5px;">
                 <label>
                     <input type="checkbox" name="sync_course_ids[]" value="{{ course.getCourse() }}">
-                    {{ course.getCourse() }} ({{ course.term }}) — {{ course.title }}
+                    ({{ course.getTerm() }}) — {{ course.getTitle() }}
                 </label>
             </div>
         {% endfor %}

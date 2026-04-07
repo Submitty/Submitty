@@ -60,25 +60,6 @@
                 {% endif %}
             </div>
 
-            {# add page changes for button
-            <div class="row row-spacing" id="sync-course-container" style="display:none;">
-                <div class="heading col-md-12">
-                    <h3>Select Courses to Sync To</h3>
-                    <p class="option-alt">Choose one or more courses.</p>
-                </div>
-                <div class="col-md-12">
-                    <select name="sync_course_ids[]" id="sync_course_ids"
-                        class="form-control"
-                        multiple size="6">
-                    {% for course in core.getUser().getCourses()%}
-                        <option value="{{ course.id }}">
-                            {{ course.semester }} — {{ course.title }}
-                        </option>
-                    {% endfor %}
-                    </select>
-                </div>
-            </div> #}
-
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <span>
@@ -419,7 +400,7 @@
             }
             $.ajax({
                 type: "POST",
-                url: "{{ sync_settings_url }}",
+                url: "{{ sync_settings_url }}", // url doesnt exist, create it.
                 data: $('#form_notification_settings').serialize() + '&' + $.param({sync_course_ids: selected}),
                 success: function () {
                     displaySuccessMessage("Synced to selected courses.");
@@ -431,7 +412,6 @@
             });
         }
 
-
         //put example function here
         //will call twig, which twig will then call above function
         function showSyncPopup() {
@@ -439,17 +419,6 @@
             //openPopup('sync-notification-popup');
             $('#sync-notification-popup').css('display','block');
         }
-
-        {# function showSyncPopup() {
-            //$('.popup-form').css('display', 'none');
-            $('#sync-notification-popup').css('display', 'none');
-            const form = $('#edit-display-name-order-form');
-            form.css('display', 'block');
-            form.find('.form-body').scrollTop(0);
-            if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
-                document.getElementById('display-name-order-change').value = displayNameOrderLast;
-            }
-        } #}
 
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
