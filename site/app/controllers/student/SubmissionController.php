@@ -537,7 +537,7 @@ class SubmissionController extends AbstractController {
         $success_count = 0;
 
         foreach ($teams as $team) {
-            
+
             $team_id = $team->getId();
 
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $team_id);
