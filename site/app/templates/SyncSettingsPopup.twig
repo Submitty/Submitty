@@ -3,6 +3,7 @@
 {% block title %}Sync Notification Settings{% endblock %}
 {% block body %}
 <div class="form-group">
+    {{ dump(courses[0]|keys) }}
     <label for="sync_course_ids">
         Select courses to copy the current notification settings to:
     </label>
@@ -13,8 +14,9 @@
             size="8"
             style="width:100%;">
         {% for course in courses %}
-            <option value="{{ course.id }}">
-                {{course.semester}} — {{course.title}}
+            {{ dump(courses[0]|keys) }}
+            <option value="{{ course.getCourse() }}">
+                {{ course.getTerm() }} — {{ course.getTitle() }}
             </option>
         {% endfor %}
     </select>

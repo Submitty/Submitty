@@ -441,7 +441,6 @@
         function showSyncPopup() {
             //$('.popup-form').hide();
             $('#sync-notification-popup').css('display','block');
-            
         }
 
         {# function showSyncPopup() {
@@ -481,5 +480,4 @@
         });
     </script>
 </div>
-{% set courses = core.getUser().getCourses() %}
 {% include 'SyncSettingsPopup.twig' with { courses: courses } %}
