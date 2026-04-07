@@ -91,3 +91,14 @@ a.popout-item > .fas:hover {
 .course-materials-imminent {
     color: var(--important-post);
 }
+
+#serious-storage-warning{
+    color: red;
+}
+#exceeded-storage-warning{
+    color: red;
+    font-weight: bold;
+}
+#medium-storage-warning{
+    color: orange;
+}

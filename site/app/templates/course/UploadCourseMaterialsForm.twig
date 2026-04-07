@@ -107,18 +107,19 @@
                 </table>
             </div>
           </div>
-          <p>Combined files size cannot exceed {{file_upload_limit_mb}} MB per upload.</p>
+          <p>Upload Limit: {{file_upload_limit_mb}} MB</p>
         {% endif %}
           {% if current_course_materials_storage_used_mb < max_course_materials_storage_limit_mb %}
             {% if current_course_materials_storage_used_mb >= 900 %}
-            <p style="color: red;">You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p>
+            <p id = 'serious-storage-warning'>You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p>
             {% elseif current_course_materials_storage_used_mb >= 600 %}
-            <p style="color: orange;">You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p>
+            <p id = 'medium-storage-warning'>You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p>
             {% else %}
             <p>You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p>
             {% endif %}
           {% else %}
-            <strong style="color: red;">You have exceeded the maximum storage for Course Materials for this course. Please remove existing course materials before adding any new ones.</strong> 
+            <p id = 'exceeded-storage-warning'>You have exceeded the maximum storage for Course Materials for this course. Please remove existing course materials before adding any new ones.
+            <br>You are currently using {{current_course_materials_storage_used_mb}} / {{max_course_materials_storage_limit_mb}} MB</p> 
           {% endif %}
         </div>
         <div id="url_selection" style="display: none;">

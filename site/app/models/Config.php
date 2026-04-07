@@ -739,13 +739,6 @@ class Config extends AbstractModel {
         return $this->submitty_log_path;
     }
 
-    /**
-     * @return int
-     */
-    public function getMaxCourseMaterialStorageMb(): int {
-        return $this->max_course_material_storage_mb;
-    }
-
     public function saveCourseJson($save): bool {
         return FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
     }
