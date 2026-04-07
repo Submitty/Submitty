@@ -39,7 +39,8 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
         const emailParts = email.split('@');
         if (emailParts.length !== 2 || emailParts[0].length === 0 || emailParts[1].length === 0) {
             errors.push('Please enter a valid email address.');
-        } else {
+        }
+        else {
             const emailDomain = emailParts[1].toLowerCase();
             const acceptedLower = acceptedEmails.map((e) => e.toLowerCase());
             if (!acceptedLower.includes(emailDomain)) {
