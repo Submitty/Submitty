@@ -93,12 +93,12 @@ a.popout-item > .fas:hover {
 }
 
 #serious-storage-warning{
-    color: red;
+    color: #f00;
 }
 #exceeded-storage-warning{
-    color: red;
+    color: #f00;
     font-weight: bold;
 }
 #medium-storage-warning{
-    color: orange;
+    color: #ffa500;
 }
