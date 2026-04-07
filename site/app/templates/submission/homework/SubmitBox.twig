@@ -93,15 +93,13 @@
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
-                    {% if is_team_assignment == false %}
-                        <label for="radio-placeholder">
-                            <input type='radio' id="radio-placeholder" name="submission-type">
-                            No File Rubric Grading
-                            <a aria-label "No File Rubric Grading Help" href = "https://submitty.org/instructor/no_file_rubric_grading" target="_blank">
-                                <i title="No File Rubric Grading Help" class="far fa-question-circle"></i>
-                            </a>
-                        </label>
-                    {% endif %}
+                    <label for="radio-placeholder">
+                        <input type='radio' id="radio-placeholder" name="submission-type">
+                         No File Rubric Grading
+                        <a aria-label "No File Rubric Grading Help" href = "https://submitty.org/instructor/no_file_rubric_grading" target="_blank">
+                            <i title="No File Rubric Grading Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
                 {% endif %}
             </fieldset>
             <div id="user-id-input" class="hide">
@@ -580,9 +578,18 @@
     });
 
     window.blankSubmitAll = function(){
-        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+        const url;
+        const message;
+        if(is_team_assignment){
+            url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']);
+            message = "This will create a placeholder submission for ALL TEAMS on this gradeable.";
+        }
+        else{
+            url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+            message = "This will create a placeholder submission for ALL STUDENTS on this gradeable."
+        }
         const csrf_token = "{{ csrf_token }}";
-        if(confirm("This will create a placeholder submission for ALL STUDENTS on this gradeable.")){
+        if(confirm(message)){
             $.ajax({
                 url: url,
                 type: 'POST',
