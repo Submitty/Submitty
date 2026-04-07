@@ -412,7 +412,7 @@
         //twig will call
         {#create setNotification#}
         function setNotification(){
-            const selected = $('#sync_course_ids').val();
+            const selected = $('input[name="sync_course_ids[]"]:checked').map(function () { return this.value; }).get();
 
             //first click -> show selector instead of syncing
             if (!selected || selected.length === 0) {
@@ -440,6 +440,7 @@
         //will call twig, which twig will then call above function
         function showSyncPopup() {
             //$('.popup-form').hide();
+            //openPopup('sync-notification-popup');
             $('#sync-notification-popup').css('display','block');
         }
 
