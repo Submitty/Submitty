@@ -557,6 +557,7 @@ progress::-webkit-progress-value {
     border-right: 1px solid var(--standard-light-medium-gray);
     padding: 5px 10px 5px 5px;
     flex-shrink: 0;
+    max-height: 85px;
 }
 
 #grading-scroll-message {
