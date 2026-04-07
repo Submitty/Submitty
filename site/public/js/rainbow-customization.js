@@ -1045,6 +1045,8 @@ $(document).ready(() => {
         $('button[id^="per-gradeable-percents-reset-"]').hide();
         $('div[id^="gradeable-percents-div-"]').hide();
         $('i[id^="per-gradeable-percents-warning-"]').hide();
+        $('label.gradeable-show-notes-label').hide();
+        $('select.gradeable-show-notes').hide();
 
         $('#config-toggle').change(() => {
             configVisible = !configVisible;
@@ -1061,6 +1063,8 @@ $(document).ready(() => {
                 $('input[id^="per-gradeable-percents-checkbox-"]').show();
                 $('label[id^="per-gradeable-percents-label-"]').show();
                 $('button[id^="per-gradeable-percents-reset-"]').show();
+                $('label.gradeable-show-notes-label').show();
+                $('select.gradeable-show-notes').show();
                 // Show percents inputs if checkboxes are checked
                 $('input[id^="per-gradeable-percents-checkbox-"]').each(function () {
                     const bucket = this.id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
@@ -1090,6 +1094,8 @@ $(document).ready(() => {
                 $('input[id^="per-gradeable-percents-checkbox-"]').hide();
                 $('label[id^="per-gradeable-percents-label-"]').hide();
                 $('button[id^="per-gradeable-percents-reset-"]').hide();
+                $('label.gradeable-show-notes-label').hide();
+                $('select.gradeable-show-notes').hide();
                 $('div[id^="gradeable-percents-div-"]').hide();
                 $('i[id^="per-gradeable-percents-warning-"]').hide();
             }
