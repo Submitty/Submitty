@@ -268,14 +268,17 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
+
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 else
+    # TODO: We can skip this step in the future by checking whether there are any new files.
     if [ ${VAGRANT} == 1 ]; then
         su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
     else
         su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
-fi
 
 # Use chmod -R for bulk operations when dependencies were updated.
 # Otherwise, keep the lighter vendor/composer-only path from #12692.
