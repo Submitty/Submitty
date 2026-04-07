@@ -578,6 +578,7 @@
     });
 
     window.blankSubmitAll = function(){
+        const is_team_assignment = {{ is_team_assignment ? 'true' : 'false' }};
         const url = is_team_assignment ? 
         buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
         buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
