@@ -27,8 +27,10 @@
 .widget-controls {
     display: flex;
     flex-direction: column;
+    /* stylelint-disable-next-line color-named */
     border: 3px solid white;
     border-radius: 25px;
+    /* stylelint-disable-next-line color-named */
     background-color: white;
     justify-content: space-around;
 }
