@@ -59,8 +59,12 @@ aside {
         color: var(--nav-sidebar-text);
     }
 
-    aside a .icon-title:hover {
-        color: var(--sidebar-hover-text);
+    aside a:hover:not(.selected) {
+        background-color: var(--hover-nav-sidebar);
+    }
+
+    aside a:hover:not(.selected) .icon-title {
+        color: var(--nav-sidebar-text);
     }
 
     aside a .icon-title:active {

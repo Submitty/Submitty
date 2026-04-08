@@ -155,6 +155,7 @@
 
     /* sidebar */
     --selected-nav-sidebar: #d9e1e2;
+    --hover-nav-sidebar: #e7edef;
     --nav-sidebar-text: #006398;
     --sidebar-hover-text: #002334;
 
@@ -328,6 +329,7 @@
 
     /* sidebar */
     --selected-nav-sidebar: #535353;
+    --hover-nav-sidebar: #606060;
     --nav-sidebar-text: #c8c8c8;
     --sidebar-hover-text: #ffffff;
 
