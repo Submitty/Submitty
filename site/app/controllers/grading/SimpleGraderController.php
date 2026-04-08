@@ -254,13 +254,16 @@ class SimpleGraderController extends AbstractController {
         $total = 0;
         $value = null;
 
+        try{
+            $db = $this->core->getDatabase();
+            $db->beginTransaction();
         foreach ($gradeable->getComponents() as $index => $component) {
             if (!array_key_exists($component->getId(), $_POST['scores'])) {
                 continue;
             }
             $data = $_POST['scores'][$component->getId()];
             if (!array_key_exists($component->getId(), $_POST['old_scores'])) {
-                return JsonResponse::getFailResponse("Save error: old score data missing");
+                throw new \Exception("Save error: old score data missing");
             }
             $original_data = $_POST['old_scores'][$component->getId()];
             $removing = $data === '' || (!$component->isText() && $data === '0');
@@ -298,14 +301,14 @@ class SimpleGraderController extends AbstractController {
             else {
                 // Numeric case
                 if (!is_numeric($data) || $data < 0) {
-                    return JsonResponse::getFailResponse("Save error: score must be a positive number");
+                    throw new \Exception("Save error: score must be a positive number");
                 }
                 if ($component->getUpperClamp() < $data) {
-                    return JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp");
+                   throw new \Exception("Save error: score must be a number less than the upper clamp");
                 }
                 $db_data = $component_grade->getTotalScore();
                 if ($original_data != $db_data) {
-                    return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
+                    throw new \Exception("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
                 }
                 $component_grade->setScore($data);
                 $total += $data;
@@ -329,8 +332,12 @@ class SimpleGraderController extends AbstractController {
                 'total' => (float) $total,
             ]);
         }
-
+        $db->commit();
         return JsonResponse::getSuccessResponse($return_data);
+    } catch (\Exception $e) {
+        $db->rollBack();
+        return JsonResponse::getFailResponse($e->getMessage());
+    }
     }
 
     /**
@@ -371,6 +378,10 @@ class SimpleGraderController extends AbstractController {
         }
 
         /** @var GradedGradeable $graded_gradeable */
+        $db = $this->core->getDatabase();
+        $db->beginTransaction();
+
+    try {
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
             for ($j = 0; $j < $arr_length; $j++) {
                 $username = $graded_gradeable->getSubmitter()->getId();
@@ -439,8 +450,12 @@ class SimpleGraderController extends AbstractController {
                 $j = $arr_length; //stops the for loop early to not waste resources
             }
         }
-
+        $db->commit();
         return JsonResponse::getSuccessResponse($return_data);
+    } catch (\Exception $e) {
+    $db->rollBack();
+    return JsonResponse::getFailResponse($e->getMessage());
+    }
     }
 
     /**
