@@ -1415,15 +1415,18 @@ tr.is_publish {
 #file-view {
     height: 100%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .sticky-file-info {
-    position: absolute;
-    right: 5px;
-    left: 5px;
+    position: sticky;
+    top: 0;
+    margin: 0 5px;
     background-color: var(--standard-pale-blue-gray);
     padding: 10px 15px 0;
     z-index: 30;
+    flex: 0 0 auto;
 }
 
 #image-rotate-icons-bar,
@@ -1432,8 +1435,10 @@ tr.is_publish {
     padding: 0 10px;
 }
 
-#file-content {
-    height: 90%;
+#file-content,
+#notebook-file-content {
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
 }
 
