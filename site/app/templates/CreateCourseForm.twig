@@ -99,6 +99,42 @@
             </div>
         </div>
 
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_repo_url">
+                    <span class="option-title block">Course Repository URL</span>
+                    <span class="block">Optional Git URL used for course configuration sync after course creation.</span>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <input type="text" name="course_repo_url" id="course_repo_url" class="auto_save" />
+            </div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_repo_branch">
+                    <span class="option-title block">Course Repository Branch</span>
+                    <span class="block">Optional branch to sync from (defaults to <kbd>main</kbd>).</span>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <input type="text" name="course_repo_branch" id="course_repo_branch" class="auto_save" value="main" />
+            </div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_repo_subdirectory">
+                    <span class="option-title block">Course Repository Subdirectory</span>
+                    <span class="block">Optional path inside the repository containing <kbd>course.json</kbd> and <kbd>gradeables/</kbd>.</span>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <input type="text" name="course_repo_subdirectory" id="course_repo_subdirectory" class="auto_save" />
+            </div>
+        </div>
+
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
         <div class="row">

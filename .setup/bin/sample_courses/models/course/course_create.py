@@ -115,7 +115,7 @@ class Course_create:
                     registration_section_id=str(section)
                 )
             )
-        submitty_conn.commit()
+            submitty_conn.commit()
         table = Table("courses", submitty_metadata, autoload_with=submitty_engine)
         print("(tables loaded)...")
         if self.self_registration_type != 0:
@@ -132,7 +132,7 @@ class Course_create:
         for section in range(1, self.rotating_sections + 1):
             print(f"Create section {section}")
             self.conn.execute(insert(table).values(sections_rotating_id=section))
-        self.conn.commit()
+            self.conn.commit()
 
         print("Create users ", end="")
         submitty_users = Table("courses_users", submitty_metadata, autoload_with=submitty_engine)
@@ -177,6 +177,7 @@ class Course_create:
                 update_query,
                 {"rotating_section": rot_section, "b_user_id": user.id}
             )
+            self.conn.commit()
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(
@@ -194,7 +195,7 @@ class Course_create:
                             sections_registration_id=str(grading_registration_section),
                         )
                     )
-            self.conn.commit()
+                    self.conn.commit()
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:

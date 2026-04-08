@@ -305,6 +305,7 @@ class Course_generate_utils:
                                 state=1,
                             )
                         )
+                        self.conn.commit()
                         team_id_section = team_in_section["team_id"]
                         temp_json_team_history = {
                             "action": "admin_create",
@@ -336,6 +337,7 @@ class Course_generate_utils:
                         state=1,
                     )
                 )
+                self.conn.commit()
                 json_team_history[unique_team_id] = [
                     {
                         "action": "admin_create",
@@ -349,5 +351,4 @@ class Course_generate_utils:
                 ucounter += 1
             res.close()
             anon_team_ids.append(anon_team_id)
-        self.conn.commit()
         return json_team_history
