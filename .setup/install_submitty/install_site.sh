@@ -49,6 +49,35 @@ set_mjs_permission () {
     done
 }
 
+# BEGIN_FRONTEND_BUILD_TRIGGER_PATHS
+FRONTEND_BUILD_TRIGGER_PATHS=(
+    "site/ts/*"
+    "site/vue/*"
+    "site/package.json"
+    "site/package-lock.json"
+    "site/vite.config.js"
+    "site/vite.config.mjs"
+    "site/vite.config.ts"
+    "site/.build.js"
+    "site/tsconfig.json"
+)
+# END_FRONTEND_BUILD_TRIGGER_PATHS
+
+is_frontend_build_trigger_path () {
+    local changed_path=$1
+    local trigger_pattern
+
+    for trigger_pattern in "${FRONTEND_BUILD_TRIGGER_PATHS[@]}"; do
+        case "${changed_path}" in
+            ${trigger_pattern})
+                return 0
+                ;;
+        esac
+    done
+
+    return 1
+}
+
 echo -e "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
@@ -143,12 +172,10 @@ while IFS= read -r entry; do
         continue
     fi
 
-    case "${path}" in
-        site/ts/*|site/vue/*|site/package.json|site/package-lock.json|site/vite.config.js|site/vite.config.mjs|site/vite.config.ts|site/.build.js|site/tsconfig.json)
-            FRONTEND_CHANGED=1
-            break
-            ;;
-    esac
+    if is_frontend_build_trigger_path "${path}"; then
+        FRONTEND_CHANGED=1
+        break
+    fi
 done <<< "${result}"
 
 # check for either of the dependency folders, and if they do not exist, pretend like
@@ -260,7 +287,7 @@ for entry in "${result_array[@]}"; do
     fi
 done
 
-if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
+if [ ${COMPOSER_CHANGED} == 1 ]; then
     # install composer dependencies and generate classmap
     if [ ${VAGRANT} == 1 ]; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --dev --prefer-dist --optimize-autoloader"
@@ -268,9 +295,6 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
-
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 else
     # TODO: We can skip this step in the future by checking whether there are any new files.
     if [ ${VAGRANT} == 1 ]; then
@@ -279,6 +303,7 @@ else
         su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
+fi
 
 # Use chmod -R for bulk operations when dependencies were updated.
 # Otherwise, keep the lighter vendor/composer-only path from #12692.

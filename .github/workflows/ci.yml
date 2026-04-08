@@ -40,6 +40,14 @@ jobs:
         with:
           args: .setup/ansible
 
+  frontend-build-trigger-check:
+    name: Frontend Build Trigger Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate frontend build trigger paths
+        run: bash .github/bin/check_frontend_build_trigger_paths.sh
+
 
   css-lint:
     name: CSS Lint
