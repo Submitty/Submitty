@@ -156,6 +156,59 @@ describe('Test Rainbow Grading', () => {
             expect(gui_json.benchmark_percent).to.exist;
         });
     });
+    it('Show Notes options require both toggles and persist to GUI JSON', () => {
+        const allowedShowNotesValues = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
+
+        // Notes visibility controls should be hidden before toggles are enabled.
+        cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
+
+        // Enable only category/gradeable config toggle first.
+        cy.get('#config-toggle').check({ force: true }).should('be.checked');
+        cy.get('#customize_show_notes_checkbox').should('exist').and('not.be.checked');
+        cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
+
+        // Enable notes customization toggle and verify options become visible.
+        cy.get('#customize_show_notes_checkbox').check({ force: true }).should('be.checked');
+        cy.get('.gradeable-show-notes-config:visible').should('have.length.greaterThan', 0);
+
+        cy.get('.gradeable-show-notes-select:visible').first().as('show-notes-select');
+        cy.get('@show-notes-select').invoke('attr', 'id').then((selectId) => {
+            cy.wrap(selectId.replace('show-notes-', '')).as('gradeable-id');
+        });
+
+        cy.get('@show-notes-select').then(($select) => {
+            const currentValue = String($select.val());
+            const newValue = allowedShowNotesValues.find((value) => value !== currentValue);
+
+            expect(newValue).to.not.equal(undefined);
+            cy.wrap(newValue).as('show-notes-value');
+            cy.wrap($select).select(newValue);
+        });
+
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
+        // Refresh and verify selected value persists.
+        cy.reload();
+        cy.get('#config-toggle').check({ force: true }).should('be.checked');
+        cy.get('#customize_show_notes_checkbox').check({ force: true }).should('be.checked');
+
+        cy.get('@gradeable-id').then((gradeableId) => {
+            cy.get('@show-notes-value').then((showNotesValue) => {
+                cy.get(`#show-notes-${gradeableId}`).should('be.visible').and('have.value', showNotesValue);
+
+                // Download GUI customization and verify the selected show_notes value is present.
+                cy.get('[data-testid="btn-download-gui-customization"]').click();
+                cy.readFile('cypress/downloads/gui_customization.json').then((gui_json) => {
+                    const gradeable = gui_json.gradeables
+                        .flatMap((bucket) => bucket.ids)
+                        .find((entry) => entry.id === gradeableId);
+
+                    expect(gradeable, `Expected to find gradeable ${gradeableId} in downloaded gui_customization.json`).to.exist;
+                    expect(gradeable.show_notes).to.equal(showNotesValue);
+                });
+            });
+        });
+    });
     it('Build Rainbow Grades and View Table', () => {
         // Add grades to numeric gradeable
         const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
