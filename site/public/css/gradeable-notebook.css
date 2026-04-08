@@ -113,19 +113,24 @@ img {
 
 /* stylelint-disable-next-line selector-class-pattern */
 .small-mirror .CodeMirror {
-    resize: both;
+    resize: horizontal;
     min-width: 150px;
     max-width: 50em;
-    overflow: scroll;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .large-mirror .CodeMirror {
     resize: both;
-    min-height: 30px;
-    max-height: 80vh;
-    overflow: scroll;
+    min-width: 20rem;
+    max-width: 60rem;
+    min-height: 8rem;
+    max-height: 32rem;
+    overflow: hidden;
+    box-sizing: border-box;
 }
+
 /* Fixes Safari spacing issue */
 .notebook fieldset legend {
     -webkit-margin-top-collapse: separate;
