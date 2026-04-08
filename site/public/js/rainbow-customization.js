@@ -817,6 +817,10 @@ $(document).ready(() => {
     $('#extra_credit_checkbox').change(() => {
         saveChanges();
     });
+    $('#customize_show_notes_checkbox').change(() => {
+        updateShowNotesVisibility();
+        saveChanges();
+    });
     $('.gradeable-show-notes-select').change(() => {
         saveChanges();
     });
@@ -967,6 +971,11 @@ function setCustomizationItemVisibility(elem) {
     }
 }
 
+function updateShowNotesVisibility() {
+    const shouldShowShowNotes = $('#config-toggle').is(':checked') && $('#customize_show_notes_checkbox').is(':checked');
+    $('.gradeable-show-notes-config').toggle(shouldShowShowNotes);
+}
+
 $(document).ready(() => {
     // Make the per-gradeable curve inputs toggle when the icon is clicked
     $('.fa-gradeable-curve').click(function (event) {
@@ -1038,24 +1047,20 @@ $(document).ready(() => {
         let configVisible = false;
 
         // Initially hide config items
-        $('#extra_credit_checkbox').parent().hide();
-        $('#drop_lowest_checkbox').parent().hide();
+        $('#checkboxControls').hide();
         $('div[id^="dropLowestDiv-"]').hide();
         $('input[id^="per-gradeable-percents-checkbox-"]').hide();
         $('label[id^="per-gradeable-percents-label-"]').hide();
         $('button[id^="per-gradeable-percents-reset-"]').hide();
         $('div[id^="gradeable-percents-div-"]').hide();
         $('i[id^="per-gradeable-percents-warning-"]').hide();
-        $('.gradeable-show-notes-config').hide();
+        updateShowNotesVisibility();
 
         $('#config-toggle').change(() => {
-            configVisible = !configVisible;
+            configVisible = $('#config-toggle').is(':checked');
 
             if (configVisible) {
-                // Show Extra Credit
-                $('#extra_credit_checkbox').parent().show();
-                // Show Remove Lowest
-                $('#drop_lowest_checkbox').parent().show();
+                $('#checkboxControls').show();
                 if ($('#drop_lowest_checkbox').is(':checked')) {
                     $('div[id^="dropLowestDiv-"]').show();
                 }
@@ -1081,13 +1086,10 @@ $(document).ready(() => {
                         ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
                     }
                 });
-                $('.gradeable-show-notes-config').show();
+                updateShowNotesVisibility();
             }
             else {
-                // Hide Extra Credit
-                $('#extra_credit_checkbox').parent().hide();
-                // Hide Remove Lowest
-                $('#drop_lowest_checkbox').parent().hide();
+                $('#checkboxControls').hide();
                 $('div[id^="dropLowestDiv-"]').hide();
                 // Hide Per Gradeable Percents controls
                 $('input[id^="per-gradeable-percents-checkbox-"]').hide();
@@ -1095,7 +1097,7 @@ $(document).ready(() => {
                 $('button[id^="per-gradeable-percents-reset-"]').hide();
                 $('div[id^="gradeable-percents-div-"]').hide();
                 $('i[id^="per-gradeable-percents-warning-"]').hide();
-                $('.gradeable-show-notes-config').hide();
+                updateShowNotesVisibility();
             }
         });
     });
