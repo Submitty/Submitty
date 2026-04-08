@@ -12,9 +12,9 @@ class CourseRegistrationController extends AbstractController {
     /**
      * @param array<string> $instructors
      */
-    private function notifyInstructors(string $user, string $term, string $course, array $instructors): void {
-        $subject = "Self-registration of $user for course $course";
-        $body = "Student $user has self-registered for course $course for term $term.";
+    private function notifyInstructors(string $user, string $term, string $course, array $instructors, array $optionals = []): void {
+        $subject = $optionals['subject'] ?? "Self-registration of $user for course $course";
+        $body = $optionals['body'] ?? "Student $user has self-registered for course $course for term $term.";
         $emails = [];
         $instructors_settings = $this->core->getQueries()->getUsersNotificationSettings($instructors);
 
@@ -31,7 +31,6 @@ class CourseRegistrationController extends AbstractController {
                 );
             }
         }
-
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
@@ -69,6 +68,10 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
         $this->core->addSuccessMessage('You have successfully unregistered from the course.');
         return new RedirectResponse($this->core->buildUrl(['home']));
+    }
+
+    public function requestRegistration(string $term, string $course) {
+
     }
 
     public function registerCourseUser(string $term, string $course): void {
