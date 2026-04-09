@@ -439,6 +439,45 @@ class RainbowCustomization extends AbstractModel {
         return !is_null($this->RCJSON) ? $this->RCJSON->getExtraCredit() : false;
     }
 
+    public function getShowGradeableConfiguration(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getShowGradeableConfiguration()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: when notes customization is enabled,
+        // show the gradeable configuration section on refresh.
+        return $this->getCustomizeShowNotes();
+    }
+
+    public function getCustomizeShowNotes(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getCustomizeShowNotes()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: if any gradeable has non-default show_notes,
+        // enable the toggle so existing custom values are visible on refresh.
+        foreach ($this->RCJSON->getGradeables() as $bucket) {
+            if (!property_exists($bucket, 'ids')) {
+                continue;
+            }
+            foreach ($bucket->ids as $gradeable) {
+                if (property_exists($gradeable, 'show_notes') && $gradeable->show_notes !== 'never') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     /**
      * Get display benchmarks
@@ -690,6 +729,14 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->extra_credit)) {
             $this->RCJSON->setExtraCredit($form_json->extra_credit);
+        }
+
+        if (isset($form_json->show_gradeable_configuration)) {
+            $this->RCJSON->setShowGradeableConfiguration($form_json->show_gradeable_configuration);
+        }
+
+        if (isset($form_json->customize_show_notes)) {
+            $this->RCJSON->setCustomizeShowNotes($form_json->customize_show_notes);
         }
 
         if (isset($form_json->gradeables)) {

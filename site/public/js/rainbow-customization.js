@@ -679,7 +679,9 @@ function buildJSON() {
         final_cutoff: getFinalCutoffPercent(),
         section: getSection(),
         omit_section_from_stats: getOmittedSections(),
+        show_gradeable_configuration: $('#config-toggle').is(':checked'),
         extra_credit: $('#extra_credit_checkbox').is(':checked'),
+        customize_show_notes: $('#customize_show_notes_checkbox').is(':checked'),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -976,6 +978,18 @@ function updateShowNotesVisibility() {
     $('.gradeable-show-notes-config').toggle(shouldShowShowNotes);
 }
 
+function initializeCustomizeShowNotesCheckbox() {
+    // Backward-compatible fallback for existing config files that predate the
+    // customize_show_notes field: if any non-default show_notes value exists,
+    // enable the toggle on load.
+    const hasCustomizedShowNotes = $('.gradeable-show-notes-select').toArray()
+        .some((select) => select.value !== 'never');
+
+    if (hasCustomizedShowNotes) {
+        $('#customize_show_notes_checkbox').prop('checked', true);
+    }
+}
+
 $(document).ready(() => {
     // Make the per-gradeable curve inputs toggle when the icon is clicked
     $('.fa-gradeable-curve').click(function (event) {
@@ -1042,9 +1056,10 @@ $(document).ready(() => {
     $(document).ready(() => {
         $('#rg_web_ui_loading').hide();
         $('#rg_web_ui').show();
+        initializeCustomizeShowNotesCheckbox();
         // Add toggle for Category/Gradeable Configuration
         // Whether config items are visible
-        let configVisible = false;
+        let configVisible = $('#config-toggle').is(':checked');
 
         // Initially hide config items
         $('#checkboxControls').hide();
@@ -1054,6 +1069,31 @@ $(document).ready(() => {
         $('button[id^="per-gradeable-percents-reset-"]').hide();
         $('div[id^="gradeable-percents-div-"]').hide();
         $('i[id^="per-gradeable-percents-warning-"]').hide();
+        if (configVisible) {
+            $('#checkboxControls').show();
+            if ($('#drop_lowest_checkbox').is(':checked')) {
+                $('div[id^="dropLowestDiv-"]').show();
+            }
+            $('input[id^="per-gradeable-percents-checkbox-"]').show();
+            $('label[id^="per-gradeable-percents-label-"]').show();
+            $('button[id^="per-gradeable-percents-reset-"]').show();
+            $('input[id^="per-gradeable-percents-checkbox-"]').each(function () {
+                const bucket = this.id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
+                const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+                const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
+                const isChecked = $(this).is(':checked');
+
+                percentsInputsInBucket.each((index, percentInput) => {
+                    $(percentInput).toggle(isChecked);
+                });
+                resetButtonInBucket.each((index, resetButton) => {
+                    $(resetButton).toggle(isChecked);
+                });
+                if (isChecked) {
+                    ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
+                }
+            });
+        }
         updateShowNotesVisibility();
 
         $('#config-toggle').change(() => {

@@ -230,7 +230,7 @@
                     <div class="switch-container">
                         <h2 class="switch-label">Show Category/Gradeable Configuration</h2>
                         <label class="switch" aria-label="Toggle Category/Gradeable Configuration">
-                            <input type="checkbox" id="config-toggle">
+                            <input type="checkbox" id="config-toggle" {{ show_gradeable_configuration ? 'checked' : '' }}>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -241,7 +241,7 @@
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
                         <label for="drop_lowest_checkbox">Remove Lowest</label><br>
 
-                        <input id="customize_show_notes_checkbox" type="checkbox" name="customize_show_notes">
+                        <input id="customize_show_notes_checkbox" type="checkbox" name="customize_show_notes" {{ customize_show_notes ? 'checked' : '' }}>
                         <label for="customize_show_notes_checkbox">Customize Notes Visibility</label><br>
                     </div>
                     <div id="config-wrapper">
