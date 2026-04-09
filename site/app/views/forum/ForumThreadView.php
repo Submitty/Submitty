@@ -607,7 +607,7 @@ class ForumThreadView extends AbstractView {
 
                 $author_info = [
                     "user_id" => $first_post->getAuthor()->getId(),
-                    "name" => $first_post->isAnonymous() ? "Anonymous" : $visible_username,
+                    "name" => ($first_post->isAnonymous() && !$this->core->getUser()->accessGrading()) ? "Anonymous" : $visible_username,
                     "email" => $email,
                     "full_name" => $given_name . " " . $family_name . " (" . $first_post->getAuthor()->getId() . ")",
                     "pronouns" => $pronouns,
@@ -807,7 +807,7 @@ class ForumThreadView extends AbstractView {
             $visible_username = $author_display_info["given_name"] . " " . $author_display_info["family_name"];
         }
 
-        if ($post->isAnonymous()) {
+        if ($post->isAnonymous() && !$this->core->getUser()->accessGrading()) {
             $visible_username = "Anonymous";
         }
 
