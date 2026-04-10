@@ -1,8 +1,8 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars, updateThreads, getFileExtension,
-    deleteSingleFile, removeLabel, get_part_number, file_array, previous_files,
-    label_array, cancelDeferredSave, captureTabInModal, WebSocketClient,
-    removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
+    displayErrorMessage, escapeSpecialChars, updateThreads, enableTabsInTextArea,
+    getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
+    previous_files, label_array, cancelDeferredSave, captureTabInModal,
+    WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
     cleanupAutosaveHistory */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
@@ -2557,6 +2557,7 @@ function setupForumAutosave() {
     // on the create thread page.
     $('form.reply-box, form.post_reply_form, #thread_form').each((_index, replyBox) => {
         restoreReplyBoxFromLocal(replyBox);
+        enableTabsInTextArea($(replyBox).find('textarea.thread_post_content'));
         $(replyBox).find('textarea.thread_post_content').on('input',
             () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1),
         );

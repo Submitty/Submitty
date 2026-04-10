@@ -14232,7 +14232,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 3
+			count: 2
 			path: app/views/NavigationView.php
 
 		-
