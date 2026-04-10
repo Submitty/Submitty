@@ -163,19 +163,23 @@ describe('Test Rainbow Grading', () => {
         cy.get('#customize_show_notes_checkbox').invoke('prop', 'checked').as('initial-customize-show-notes');
 
         // Start from explicit off-state so initial visibility assertions are deterministic.
-        cy.get('#config-toggle').uncheck({ force: true }).should('not.be.checked');
-        cy.get('#customize_show_notes_checkbox').uncheck({ force: true }).should('not.be.checked');
+        cy.get('#config-toggle').uncheck({ force: true });
+        cy.get('#config-toggle').should('not.be.checked');
+        cy.get('#customize_show_notes_checkbox').uncheck({ force: true });
+        cy.get('#customize_show_notes_checkbox').should('not.be.checked');
         cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
 
         // Notes visibility controls should be hidden before toggles are enabled.
         cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
 
         // Enable only category/gradeable config toggle first.
-        cy.get('#config-toggle').check({ force: true }).should('be.checked');
+        cy.get('#config-toggle').check({ force: true });
+        cy.get('#config-toggle').should('be.checked');
         cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
 
         // Enable notes customization toggle and verify options become visible.
-        cy.get('#customize_show_notes_checkbox').check({ force: true }).should('be.checked');
+        cy.get('#customize_show_notes_checkbox').check({ force: true });
+        cy.get('#customize_show_notes_checkbox').should('be.checked');
         cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
         cy.get('.gradeable-show-notes-config:visible').should('have.length.greaterThan', 0);
 
@@ -199,7 +203,8 @@ describe('Test Rainbow Grading', () => {
 
         // Refresh and verify selected value persists.
         cy.reload();
-        cy.get('#config-toggle').check({ force: true }).should('be.checked');
+        cy.get('#config-toggle').check({ force: true });
+        cy.get('#config-toggle').should('be.checked');
         cy.get('#customize_show_notes_checkbox').then(($checkbox) => {
             if (!$checkbox.is(':checked')) {
                 cy.wrap($checkbox).check({ force: true });
