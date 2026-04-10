@@ -60,11 +60,8 @@ aside {
     }
 
     aside a:hover:not(.selected) {
-        background-color: var(--hover-nav-sidebar);
-    }
-
-    aside a:hover:not(.selected) .icon-title {
-        color: var(--nav-sidebar-text);
+        background-color: var(--standard-hover-light-gray);
+        transition: background-color 0.2s ease-out;
     }
 
     aside a .icon-title:active {
@@ -72,13 +69,13 @@ aside {
         color: #790000;
     }
 
-    aside li .selected {
-        background-color: var(--selected-nav-sidebar);
-    }
-
     aside a.selected .icon-title {
         color: var(--text-black);
         font-weight: bold;
+    }
+
+    aside li .selected {
+        background-color: var(--selected-nav-sidebar);
     }
 
     aside.collapsed {
