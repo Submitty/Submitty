@@ -605,7 +605,7 @@ jobs:
         run: |
           sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql > /tmp/branch_master.sql
 
-          diff --color /tmp/main_master.sql /tmp/branch_master.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql /tmp/branch_master.sql || {
             echo "::error:: Master databases are not identical, please check your migration"
             exit 1
           }
@@ -615,7 +615,7 @@ jobs:
         run: |
           sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql > /tmp/branch_course.sql
 
-          diff --color /tmp/main_course.sql /tmp/branch_course.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql /tmp/branch_course.sql || {
             echo "::error:: Course databases are not identical, please check your migration"
             exit 1
           }
@@ -623,7 +623,7 @@ jobs:
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
-          diff --color /tmp/branch_master.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
@@ -631,7 +631,7 @@ jobs:
       - name: Compare Migrated course Database with Provided Dump
         if: always()
         run: |
-          diff --color /tmp/branch_course.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
