@@ -115,6 +115,22 @@ class MiscController extends AbstractController {
             );
         }
 
+        if ($directory === 'submissions') {
+
+            $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+                $pdf_pages_assigned = $gradeable->isPdfUpload();
+                $blind_grading_enabled = $gradeable->getLimitedAccessBlind() == 2;
+
+                if ($pdf_pages_assigned || $blind_grading_enabled) {
+                    return MultiResponse::JsonOnlyResponse(
+                        JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
+                    );
+                }
+            }
+        }
+
         $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
 
         if (filesize($file_path) > $max_size && $max_size >= 0) {
@@ -199,6 +215,32 @@ class MiscController extends AbstractController {
 
         $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
+
+        if (
+            $dir === 'submissions'
+            && strtolower($file_name) === 'upload.pdf'
+            && $gradeable_id !== null
+            && $user_id !== null
+        ) {
+            $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+
+                $gradeable = $this->tryGetGradeable($gradeable_id, false);
+
+                if ($gradeable !== false) {
+
+                    $pdf_pages_assigned = $gradeable->isPdfUpload();
+                    $blind_grading_enabled = $gradeable->getLimitedAccessBlind() == 2;
+
+                    if ($pdf_pages_assigned || $blind_grading_enabled) {
+                        $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                        return false;
+                    }
+                }
+            }
+        }
+
         $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
         if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
