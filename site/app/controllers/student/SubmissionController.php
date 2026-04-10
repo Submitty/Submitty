@@ -51,7 +51,10 @@ class SubmissionController extends AbstractController {
         }
 
         try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $gradeable = $this->core->getQueries()->getGradeableConfig(
+                $gradeable_id,
+                $this->core->getUser()->getId()
+            );
             $now = $this->core->getDateTimeNow();
 
             if (
@@ -108,16 +111,23 @@ class SubmissionController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements: ["gradeable_version" => "\d+"])]
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
+        $user_id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id);
+
         $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
+        }
+
+        // Mark unseen gradeable notifications as seen, if applicable
+        if ($gradeable->hasUnseenGradeableNotification()) {
+            $this->core->getQueries()->markNotificationAsSeenByGradeableId($user_id, $gradeable->getId());
         }
 
         if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
