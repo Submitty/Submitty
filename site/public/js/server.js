@@ -870,7 +870,7 @@ function downloadTestCaseResult(testcase, name, version, gradeable, user) {
 }
 
 function downloadStudentAnnotations(url) {
-    window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 function downloadSubmissionZip(grade_id, submitter_id, version, origin = null, is_anon = false) {
@@ -1019,7 +1019,7 @@ function toggleCMFolders(open) {
 }
 
 function openUrl(url) {
-    window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
     return false;
 }
 
@@ -1754,14 +1754,11 @@ function openSubmittedFile(html_file, url_file) {
     }
     file_path = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true`;
 
-    // If #submission_browser exists, the view is a grading context and the file should open in a pop-up. Otherwise, it should open in a new tab.
+    // If #submission_browser exists, the view is a grading context and the file should open in a new tab.
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
-        window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
     }
-    else {
-        window.open(file_path, '_blank');
-    }
+    window.open(file_path, '_blank');
     return false;
 }
 
