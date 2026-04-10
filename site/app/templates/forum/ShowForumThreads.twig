@@ -27,6 +27,10 @@
     "attachment_script" : 0,
 } %}
 
+{% if is_instructor is defined and is_instructor %}
+    {% include "forum/BlockUserForm.twig" %}
+{% endif %}
+
 {%  include "forum/HistoryForm.twig" %}
 
 {% include "forum/SplitPostForm.twig" with {

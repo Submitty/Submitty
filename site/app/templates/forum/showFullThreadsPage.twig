@@ -72,3 +72,7 @@
     "categories" : filterFormData.categories,
     "attachment_script" : 1,
 } %}
+
+{% if user_group is defined and user_group == 1 %}
+    {% include "forum/BlockUserForm.twig" %}
+{% endif %}

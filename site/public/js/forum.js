@@ -1849,6 +1849,93 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
+function showBlockUserForm(userId, displayName, csrfToken) {
+    $('#block-user-id').val(userId);
+    $('#block-csrf-token').val(csrfToken);
+    $('#block-user-display-name').text(displayName);
+    $('#block-expiration-date').val('');
+
+    if (!$('#block-expiration-date').hasClass('flatpickr-input')) {
+        $('#block-expiration-date').flatpickr({
+            enableTime: true,
+            dateFormat: 'Y-m-d H:i',
+        });
+    }
+
+    $('#block-user-form').css('display', 'block');
+}
+
+function submitBlockUser() {
+    const userId = $('#block-user-id').val();
+    const csrfToken = $('#block-csrf-token').val();
+    const expirationDate = $('#block-expiration-date').val();
+
+    const url = buildCourseUrl(['forum', 'users', 'block']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            user_id: userId,
+            expiration_date: expirationDate,
+            csrf_token: csrfToken,
+        },
+        success: function (data) {
+            try {
+                // eslint-disable-next-line no-var
+                var json = JSON.parse(data);
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                displayErrorMessage(json['message']);
+                return;
+            }
+            closePopup('block-user-form');
+            displaySuccessMessage('User has been blocked from making forum posts.');
+            location.reload();
+        },
+        error: function () {
+            window.alert('Something went wrong while trying to block the user. Please try again.');
+        },
+    });
+}
+
+function unblockUserFromForum(userId, csrfToken) {
+    const confirm = window.confirm('Are you sure you would like to unblock this user from making forum posts?');
+    if (confirm) {
+        const url = buildCourseUrl(['forum', 'users', 'unblock']);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                user_id: userId,
+                csrf_token: csrfToken,
+            },
+            success: function (data) {
+                try {
+                    // eslint-disable-next-line no-var
+                    var json = JSON.parse(data);
+                }
+                catch (err) {
+                    displayErrorMessage('Error parsing data. Please try again.');
+                    return;
+                }
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+                displaySuccessMessage('User has been unblocked from making forum posts.');
+                location.reload();
+            },
+            error: function () {
+                window.alert('Something went wrong while trying to unblock the user. Please try again.');
+            },
+        });
+    }
+}
+
 function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     const confirm = window.confirm(confirmString);
     if (confirm) {

@@ -352,6 +352,12 @@ class ForumController extends AbstractController {
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
+
+        if (!$this->core->getUser()->accessAdmin() && $this->core->getQueries()->isUserBlockedFromForumPosts($current_user_id)) {
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
+            return $this->core->getOutput()->renderJsonFail("You are currently blocked from making forum posts.", $result);
+        }
+
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -527,6 +533,10 @@ class ForumController extends AbstractController {
         elseif (!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+        }
+        elseif (!$this->core->getUser()->accessAdmin() && $this->core->getQueries()->isUserBlockedFromForumPosts($current_user_id)) {
+            $this->core->addErrorMessage("You are currently blocked from making forum posts.");
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         }
         elseif ($this->core->getQueries()->isThreadLocked(intval($thread_id)) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
@@ -874,6 +884,63 @@ class ForumController extends AbstractController {
         foreach ($post->getChildren() as $child) {
             $this->recursiveDeletePost($child);
         }
+    }
+
+    #[AccessControl(permission: "forum.block_user")]
+    #[Route("/courses/{_semester}/{_course}/forum/users/block", methods: ["POST"])]
+    public function blockUserFromForum(): array {
+        $user_id = $_POST['user_id'] ?? '';
+        $expiration_date_str = $_POST['expiration_date'] ?? '';
+        $current_user_id = $this->core->getUser()->getId();
+
+        if (empty($user_id)) {
+            return $this->core->getOutput()->renderJsonFail("User ID is required.");
+        }
+        if ($user_id === $current_user_id) {
+            return $this->core->getOutput()->renderJsonFail("You cannot block yourself.");
+        }
+
+        $target_user = $this->core->getQueries()->getUserById($user_id);
+        if ($target_user === null) {
+            return $this->core->getOutput()->renderJsonFail("User not found.");
+        }
+        if ($target_user->accessAdmin()) {
+            return $this->core->getOutput()->renderJsonFail("You cannot block an instructor.");
+        }
+
+        $expiration_date = null;
+        if (!empty($expiration_date_str)) {
+            $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone())->format('Y-m-d H:i:sO');
+        }
+
+        $this->core->getQueries()->addBlockAction($user_id, 'no_forum_posts', $expiration_date, $current_user_id);
+        return $this->core->getOutput()->renderJsonSuccess("User has been blocked from making forum posts.");
+    }
+
+    #[AccessControl(permission: "forum.block_user")]
+    #[Route("/courses/{_semester}/{_course}/forum/users/unblock", methods: ["POST"])]
+    public function unblockUserFromForum(): array {
+        $user_id = $_POST['user_id'] ?? '';
+
+        if (empty($user_id)) {
+            return $this->core->getOutput()->renderJsonFail("User ID is required.");
+        }
+
+        $active_blocks = $this->core->getQueries()->getActiveBlockActions($user_id);
+        $block_id = null;
+        foreach ($active_blocks as $block) {
+            if ($block['action'] === 'no_forum_posts') {
+                $block_id = $block['id'];
+                break;
+            }
+        }
+
+        if ($block_id === null) {
+            return $this->core->getOutput()->renderJsonFail("User is not currently blocked from forum posts.");
+        }
+
+        $this->core->getQueries()->deleteBlockAction($block_id);
+        return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
     }
 
     #[AccessControl(permission: "forum.merge_thread")]

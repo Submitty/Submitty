@@ -127,6 +127,13 @@
                     <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread.id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
                 {% endif %}
             {% endif %}
+            {% if userGroup <= 1 and post.author.id != current_user %}
+                {% if is_author_blocked %}
+                    <a class="dropdown-item key_to_click" tabindex="3" onClick="unblockUserFromForum('{{ post.author.id }}', '{{ csrf_token }}')" title="Unblock this user from making forum posts" aria-label="Unblock from Forum">Unblock from Forum</a>
+                {% else %}
+                    <a class="dropdown-item key_to_click" tabindex="3" onClick="showBlockUserForm('{{ post.author.id }}', {{ post_user_info.visible_user_json }}, '{{ csrf_token }}')" title="Block this user from making forum posts" aria-label="Block from Forum">Block from Forum</a>
+                {% endif %}
+            {% endif %}
         </div>
 
     </span>

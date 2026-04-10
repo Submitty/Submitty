@@ -7687,6 +7687,47 @@ AND gc_id IN (
         return $lock_date_time < $current_date;
     }
 
+    public function isUserBlockedFromForumPosts(string $user_id): bool {
+        $this->course_db->query(
+            "SELECT 1 FROM block_user_action WHERE user_id = ? AND action = 'no_forum_posts' AND (expiration_date IS NULL OR expiration_date > NOW())",
+            [$user_id]
+        );
+        return count($this->course_db->rows()) > 0;
+    }
+
+    public function getActiveBlockActions(?string $user_id = null): array {
+        if ($user_id !== null) {
+            $this->course_db->query(
+                "SELECT * FROM block_user_action WHERE user_id = ? AND (expiration_date IS NULL OR expiration_date > NOW()) ORDER BY created_at DESC",
+                [$user_id]
+            );
+        }
+        else {
+            $this->course_db->query(
+                "SELECT * FROM block_user_action WHERE (expiration_date IS NULL OR expiration_date > NOW()) ORDER BY created_at DESC"
+            );
+        }
+        return $this->course_db->rows();
+    }
+
+    public function addBlockAction(string $user_id, string $action, ?string $expiration_date, string $created_by): void {
+        $this->course_db->query(
+            "INSERT INTO block_user_action (user_id, action, expiration_date, created_by) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, action) DO UPDATE SET expiration_date = EXCLUDED.expiration_date, created_by = EXCLUDED.created_by, created_at = CURRENT_TIMESTAMP",
+            [$user_id, $action, $expiration_date, $created_by]
+        );
+    }
+
+    public function updateBlockAction(int $id, ?string $expiration_date): void {
+        $this->course_db->query(
+            "UPDATE block_user_action SET expiration_date = ? WHERE id = ?",
+            [$expiration_date, $id]
+        );
+    }
+
+    public function deleteBlockAction(int $id): void {
+        $this->course_db->query("DELETE FROM block_user_action WHERE id = ?", [$id]);
+    }
+
     /**
      * Returns an array of users in the current course which have not been completely graded for the given gradeable.
      * Excludes users in the null section

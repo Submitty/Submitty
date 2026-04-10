@@ -225,6 +225,7 @@ class Access {
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT;
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
+        $this->permissions["forum.block_user"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
 
         $this->permissions["poll.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARG_POLL;
         $this->permissions["poll.view.histogram"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARG_POLL | self::POLL_CHECK_HISTOGRAM;
