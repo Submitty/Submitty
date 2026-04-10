@@ -279,6 +279,20 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // Reset due date to old date
         updateDates('#date_due', '9996-12-31 23:59:59', 'All Changes Saved');
 
+        // Set the manual grading start date to the past (SHOULD WORK since all previous dates have no constraints)
+        updateDates('#date_grade', past_date, 'All Changes Saved');
+
+        // The gradeable should be visible to all levels and be shown as "grading in progress"
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
+        // Reset grading start date to old date
+        updateDates('#date_grade', '9997-12-31 23:59:59', 'All Changes Saved');
+
         // Reset TA testing to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
@@ -298,8 +312,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // Reset to old date
         updateDates('#date_due', future_date, 'All Changes Saved');
 
-        // This should not be allowed, its before the due date
-        updateDates('#date_grade', past_date, 'Some Changes Failed!');
+        // There should be no constraints on this and it should be allowed
+        updateDates('#date_grade', past_date, 'All Changes Saved');
         // Reset to valid date
         updateDates('#date_grade', future_date, 'All Changes Saved');
 
