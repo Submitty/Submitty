@@ -42,7 +42,7 @@ function sortTableByColumn(sortKey) {
         newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
     }
     else {
-        newDirection = 'ASC';
+        newDirection = sortKey === 'user' ? 'ASC' : 'DESC';
     }
 
     table.dataset.sortKey = sortKey;
@@ -51,6 +51,8 @@ function sortTableByColumn(sortKey) {
     applySort(sortKey, newDirection);
     updateSortIcons(sortKey, newDirection);
 }
+
+window.sortTableByColumn = sortTableByColumn;
 
 function applySort(sortKey, direction) {
     const table = getForumStatsTable();
@@ -87,6 +89,10 @@ function updateSortIcons(activeKey = null, direction = 'ASC') {
         const icon = link.querySelector('i');
         const key = link.dataset.sortKey;
 
+        if (icon === null || key === undefined) {
+            return;
+        }
+
         icon.classList.remove('fa-sort-up', 'fa-sort-down');
         icon.classList.add('fa-sort');
 
@@ -112,7 +118,6 @@ $(document).ready(() => {
         const timestamps = $(this).data('timestamps');
         const thread_ids = $(this).data('thread_id');
         const thread_titles = $(this).data('thread_titles');
-
         if (action === 'expand') {
             let currentRow = button.closest('tr');
             for (let i = 0; i < posts.length; i++) {
@@ -125,7 +130,8 @@ $(document).ready(() => {
                         <td></td>
                         <td>${timestamps[i]}</td>
                         <td style="cursor:pointer;" data-type="thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td>
-                        <td colspan="3" style="cursor:pointer; text-align:left;" data-type="post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td>
+                        <td colspan="2" style="cursor:pointer; text-align:left;" data-type="post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td>
+                        <td></td>
                     </tr>
                 `);
                 currentRow.after(expandedRow);
