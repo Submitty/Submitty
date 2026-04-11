@@ -2,6 +2,8 @@
 -- PostgreSQL database dump
 --
 
+\restrict STiNMS5MGAXfOXr9qCQq9b1y0odi4FE5ICPVOfWKj7MkbPdJ30wVkDGrs8aednP
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -480,6 +482,38 @@ CREATE TABLE public.courses_users (
 
 
 --
+-- Name: default_notification_settings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.default_notification_settings (
+    user_id character varying NOT NULL,
+    merge_threads boolean DEFAULT false NOT NULL,
+    all_new_threads boolean DEFAULT false NOT NULL,
+    all_new_posts boolean DEFAULT false NOT NULL,
+    all_modifications_forum boolean DEFAULT false NOT NULL,
+    reply_in_post_thread boolean DEFAULT false NOT NULL,
+    team_invite boolean DEFAULT true NOT NULL,
+    team_joined boolean DEFAULT true NOT NULL,
+    team_member_submission boolean DEFAULT true NOT NULL,
+    self_notification boolean DEFAULT false NOT NULL,
+    all_released_grades boolean DEFAULT true NOT NULL,
+    all_gradeable_releases boolean DEFAULT true NOT NULL,
+    merge_threads_email boolean DEFAULT false NOT NULL,
+    all_new_threads_email boolean DEFAULT false NOT NULL,
+    all_new_posts_email boolean DEFAULT false NOT NULL,
+    all_modifications_forum_email boolean DEFAULT false NOT NULL,
+    reply_in_post_thread_email boolean DEFAULT false NOT NULL,
+    team_invite_email boolean DEFAULT true NOT NULL,
+    team_joined_email boolean DEFAULT true NOT NULL,
+    team_member_submission_email boolean DEFAULT true NOT NULL,
+    self_notification_email boolean DEFAULT false NOT NULL,
+    self_registration_email boolean DEFAULT true NOT NULL,
+    all_released_grades_email boolean DEFAULT true NOT NULL,
+    all_gradeable_releases_email boolean DEFAULT false NOT NULL
+);
+
+
+--
 -- Name: docker_images; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -848,6 +882,14 @@ ALTER TABLE ONLY public.courses_users
 
 
 --
+-- Name: default_notification_settings default_notification_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.default_notification_settings
+    ADD CONSTRAINT default_notification_settings_pkey PRIMARY KEY (user_id);
+
+
+--
 -- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1054,6 +1096,14 @@ ALTER TABLE ONLY public.courses_users
 
 
 --
+-- Name: default_notification_settings default_notification_settings_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.default_notification_settings
+    ADD CONSTRAINT default_notification_settings_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1112,4 +1162,6 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict STiNMS5MGAXfOXr9qCQq9b1y0odi4FE5ICPVOfWKj7MkbPdJ30wVkDGrs8aednP
 

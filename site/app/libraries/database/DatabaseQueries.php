@@ -700,6 +700,91 @@ SQL;
         );
     }
 
+    public function updateDefaultNotificationSettings($results) {
+        $values = implode(', ', array_fill(0, count($results) + 1, '?'));
+        $keys = implode(', ', array_keys($results));
+        $updates = '';
+
+        foreach ($results as $key => $value) {
+            if ($value != 'false') {
+                $results[$key] = 'true';
+            }
+            $updates .= $key . ' = ?,';
+        }
+
+        $updates = substr($updates, 0, -1);
+        $test = array_merge(array_merge([$this->core->getUser()->getId()], array_values($results)), array_values($results));
+        $this->submitty_db->query(
+            "INSERT INTO default_notification_settings (user_id, $keys)
+                                    VALUES
+                                     (
+                                        $values
+                                     )
+                                    ON CONFLICT (user_id)
+                                    DO
+                                     UPDATE
+                                        SET $updates",
+            $test
+        );
+    }
+
+    public function getDefaultNotificationSettings($user_id) {
+        $this->submitty_db->query("SELECT * FROM default_notification_settings WHERE user_id=?", [$user_id]);
+        return $this->submitty_db->row();
+    }
+
+    public function getUnarchivedCoursesById($user_id) {
+        $this->submitty_db->query("
+            SELECT c.term, c.course FROM courses AS c
+            JOIN courses_users AS cu ON c.term=cu.term AND c.course=cu.course
+            WHERE c.status=1 AND cu.user_id=?
+        ", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * @param string $user_id
+     * @param string $term
+     * @param string $course
+     * @param array $settings
+     * @return bool
+     */
+    public function syncNotificationSettings($user_id, $term, $course, $settings) {
+        $values = implode(', ', array_fill(0, count($settings) + 1, '?'));
+        $keys = implode(', ', array_keys($settings));
+        $updates = '';
+
+        foreach ($settings as $key => $value) {
+            if ($value != 'false') {
+                $settings[$key] = 'true';
+            }
+            $updates .= $key . ' = ?,';
+        }
+
+        $updates = substr($updates, 0, -1);
+        $test = array_merge(array_merge([$user_id], array_values($settings)), array_values($settings));
+
+        try {
+            $params = $this->core->getConfig()->getSubmittyDatabaseParams();
+            $params['dbname'] = "submitty_" . $term . "_" . $course;
+            $factory = new DatabaseFactory($this->core->getConfig()->getDatabaseDriver());
+            $other_db = $factory->getDatabase($params);
+            $other_db->connect();
+            $other_db->query(
+                "INSERT INTO notification_settings (user_id, $keys)
+                                        VALUES ($values)
+                                        ON CONFLICT (user_id)
+                                        DO UPDATE SET $updates",
+                $test
+            );
+            $other_db->disconnect();
+            return true;
+        }
+        catch (\Exception $e) {
+            return false;
+        }
+    }
+
     public function getAuthorOfThread($thread_id) {
         $this->course_db->query("SELECT created_by from threads where id = ?", [$thread_id]);
         return $this->course_db->row()['created_by'];
@@ -1006,6 +1091,12 @@ INSERT INTO courses_users (term, course, user_id, user_group, registration_secti
 VALUES (?,?,?,?,?,?)",
             $params
         );
+
+        $defaults = $this->getDefaultNotificationSettings($user->getId());
+        if ($defaults) {
+            unset($defaults['user_id']);
+            $this->syncNotificationSettings($user->getId(), $semester, $course, $defaults);
+        }
 
         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
         $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);

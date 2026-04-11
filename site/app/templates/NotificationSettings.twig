@@ -28,6 +28,10 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
                         </div>
                     {% endif %}
+                    <div class="button-row" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-primary" onclick="showSyncModal()" data-testid="sync-notifications" style="margin-right: 10px;">Sync to other courses</button>
+                        <button type="button" class="btn btn-primary" onclick="saveDefaultSettings()" data-testid="save-default-notifications">Save as Default</button>
+                    </div>
                 </div>
             </div>
             <div class="row row-spacing">
@@ -356,6 +360,40 @@
             {% endif %}
         </div>
     </form>
+    <div id="sync-modal-wrapper" class="popup-form" style="display: none;">
+        <div id="sync-modal" class="popup-box">
+            <div class="popup-window" style="max-width: 500px;">
+                <div class="form-title">
+                    <h1>Sync Notification Settings</h1>
+                    <button class="btn btn-default close-button key_to_click" tabindex="0" type="button" onclick="hideSyncModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="form-body">
+                    <p style="margin-bottom: 15px;">Select the courses you want to sync these settings to:</p>
+                    <div id="course-selection-list" style="max-height: 250px; overflow-y: auto; text-align: left; padding: 5px; margin-bottom: 15px;">
+                        {% for course in unarchived_courses %}
+                            <div style="margin-bottom: 10px; display: flex; align-items: center;">
+                                <input type="checkbox" class="sync-course-checkbox" id="sync-{{ course.term }}-{{ course.course }}" value="{{ course.term }}:{{ course.course }}" style="margin-right: 12px; cursor: pointer;">
+                                <label for="sync-{{ course.term }}-{{ course.course }}" style="cursor: pointer; margin: 0;">{{ course.term }} &nbsp; <strong>{{ course.course }}</strong></label>
+                            </div>
+                        {% else %}
+                            <p style="text-align: center; color: var(--standard-medium-gray);">No other unarchived courses found.</p>
+                        {% endfor %}
+                    </div>
+                    <p style="font-size: 14px; color: var(--standard-medium-gray); margin-bottom: 25px;"><i>Note: This will overwrite existing settings in the selected courses.</i></p>
+                    <div class="form-buttons">
+                        <div class="form-button-container">
+                            <button type="button" class="btn btn-default" onclick="hideSyncModal()">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="performSync()" {{ unarchived_courses|length == 0 ? 'disabled' : '' }}>Sync Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         function checkAll(button) {
             var selector = $(button).data('selector');
@@ -389,7 +427,75 @@
             $('#form_notification_settings').trigger("change");
         }
 
+        function showSyncModal() {
+            $('#sync-modal-wrapper').show();
+        }
 
+        function hideSyncModal() {
+            $('#sync-modal-wrapper').hide();
+        }
+
+        function saveDefaultSettings() {
+            var f = $('#form_notification_settings');
+            var url = '{{ default_settings_url }}';
+            $.ajax({
+                type: "POST",
+                data: f.serialize(),
+                url: url,
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if(json['status'] == 'fail') {
+                            displayErrorMessage(json['message']);
+                        }
+                        else {
+                            displaySuccessMessage(json['data']);
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error parsing data. Please try again.');
+                    }
+                }
+            });
+        }
+
+        function performSync() {
+            var selectedCourses = [];
+            $('.sync-course-checkbox:checked').each(function() {
+                selectedCourses.push($(this).val());
+            });
+
+            if (selectedCourses.length === 0) {
+                displayErrorMessage('Please select at least one course.');
+                return;
+            }
+
+            var f = $('#form_notification_settings');
+            var url = '{{ sync_settings_url }}';
+            var data = f.serializeArray();
+            selectedCourses.forEach(function(course) {
+                data.push({name: 'target_courses[]', value: course});
+            });
+
+            $.ajax({
+                type: "POST",
+                data: $.param(data),
+                url: url,
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if(json['status'] == 'fail') {
+                            displayErrorMessage(json['message']);
+                        }
+                        else {
+                            displaySuccessMessage(json['data']);
+                            hideSyncModal();
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error parsing data. Please try again.');
+                    }
+                }
+            });
+        }
 
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
