@@ -149,7 +149,7 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
             $values['has_due_date'] = $dates['has_due_date'] ?? true;
-            $values['has_release_date'] = $dates['has_released_date'] ?? true;
+            $values['has_release_date'] = $dates['has_release_date'] ?? true;
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
@@ -1885,7 +1885,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
-                $this->shiftDates($dates, 'submission_open_date', $now);
+                $dates['submission_open_date'] = $now;
                 $message .= "Opened student access to ";
                 $success = true;
             }
@@ -1897,7 +1897,7 @@ class AdminGradeableController extends AbstractController {
         elseif ($action === "close_submissions") {
             if ($gradeable->hasDueDate()) {
                 if ($dates['submission_due_date'] > $now) {
-                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $dates['submission_due_date'] = $now;
                     $message .= "Closed assignment ";
                     $success = true;
                 }
