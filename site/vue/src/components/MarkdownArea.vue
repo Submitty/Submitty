@@ -270,17 +270,25 @@ function syncMarkdownToggle() {
     }
 }
 
+function normalizeThreadTitle(rawTitle: string, id: number): string {
+  let title = rawTitle.trim();
+  // Strip common prefixed id formats from list data to avoid duplicate id display.
+  title = title.replace(new RegExp(`^\\(${id}\\)\\s*`), '');
+  title = title.replace(new RegExp(`^#${id}\\s*`), '');
+  return title.trim();
+}
+
   function parseThreadListEntry(entry: { id?: number | string; title?: string } | string): { id: number; title: string } | null {
     if (typeof entry === 'string') {
       const idMatch = entry.match(/#(\d+)/);
       if (!idMatch) {
         return null;
       }
-      const id = parseInt(idMatch[1], 10);
+      const id = parseInt(idMatch[1] ?? '', 10);
       if (Number.isNaN(id) || id <= 0) {
         return null;
       }
-      const title = entry.replace(/<\s*#\d+\s*>/g, '').trim();
+      const title = normalizeThreadTitle(entry.replace(/<\s*#\d+\s*>/g, ''), id);
       return { id, title };
     }
 
@@ -290,7 +298,7 @@ function syncMarkdownToggle() {
     }
     return {
       id: parsedId,
-      title: String(entry.title ?? '').trim(),
+      title: normalizeThreadTitle(String(entry.title ?? ''), parsedId),
     };
   }
 
@@ -307,19 +315,17 @@ function syncMarkdownToggle() {
       }
     }
 
-    // Fallback for partial page updates where inline scripts do not run.
-    if (normalizedThreads.length === 0) {
-      const threadLinks = document.querySelectorAll<HTMLAnchorElement>('.thread_box_link[data-thread_id]');
-      threadLinks.forEach((link) => {
-        const id = parseInt(link.dataset.thread_id ?? '', 10);
-        if (!Number.isNaN(id) && id > 0) {
-          normalizedThreads.push({
-            id,
-            title: (link.dataset.thread_title ?? '').trim(),
-          });
-        }
-      });
-    }
+    // Always merge current sidebar threads so new threads show without refresh.
+    const threadLinks = document.querySelectorAll<HTMLAnchorElement>('.thread_box_link[data-thread_id]');
+    threadLinks.forEach((link) => {
+      const id = parseInt(link.dataset.thread_id ?? '', 10);
+      if (!Number.isNaN(id) && id > 0) {
+        normalizedThreads.push({
+          id,
+          title: normalizeThreadTitle(link.dataset.thread_title ?? '', id),
+        });
+      }
+    });
 
     const seen = new Set<number>();
     return normalizedThreads

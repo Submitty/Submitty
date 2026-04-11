@@ -575,6 +575,7 @@ class ForumThreadView extends AbstractView {
             $thread_info = [
                 'thread_id' => $thread->getId(),
                 "title" => $titleDisplay,
+                "title_autocomplete" => $thread->getTitle(),
                 "content" => $contentDisplay,
                 "categories" => $categories_content,
                 "link" => $link,
@@ -912,10 +913,6 @@ class ForumThreadView extends AbstractView {
         );
         $list = [];
         foreach ($threads as $thread) {
-            // Exclude current thread if replying within it
-            if ($thread->getId() === $currentThread->getId()) {
-                continue;
-            }
             $list[] = [
                 'id' => $thread->getId(),
                 'title' => $thread->getTitle(),
