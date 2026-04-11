@@ -2619,7 +2619,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 2
+			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -3049,12 +3049,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::ajaxVerifyComponent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::amIBlindGrading() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3391,16 +3385,28 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Parameter #1 $verify_time of method app\models\gradeable\GradedComponent::setVerifyTime() expects string|null, DateTime given.'
-			identifier: argument.type
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			rawMessage: 'Strict comparison using === between mixed and null will always evaluate to false.'
 			identifier: identical.alwaysFalse
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			identifier: notEqual.notAllowed
+			count: 1
+			path: app/controllers/grading/GradeVerificationController.php
+
+		-
+			rawMessage: 'Method app\controllers\grading\GradeVerificationController::ajaxVerifyComponent() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/controllers/grading/GradeVerificationController.php
+
+		-
+			rawMessage: 'Parameter #1 $verify_time of method app\models\gradeable\GradedComponent::setVerifyTime() expects string|null, DateTime given.'
+			identifier: argument.type
+			count: 2
+			path: app/controllers/grading/GradeVerificationController.php
 
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
