@@ -420,7 +420,6 @@ class Gradeable extends AbstractModel {
      */
     const date_validated_properties = [
         'team_lock_date',
-        'grade_start_date',
         'grade_due_date',
         'grade_released_date',
     ];
@@ -430,7 +429,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_simple = [
-        'grade_start_date',
         'grade_due_date',
         'grade_released_date'
     ];
@@ -440,7 +438,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_elec_ta = [
-        'grade_start_date',
         'grade_due_date'
     ];
 
