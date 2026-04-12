@@ -6075,21 +6075,8 @@ AND gc_id IN (
         $order = self::generateOrderByClause($sort_keys, []);
 
         // Detect potential unseen grading notifications for the given user
-        if ($for_user_id !== null) {
-            $unseen_notification_select = "
-                EXISTS (
-                    SELECT 1 FROM notifications n
-                    WHERE n.gradeable_id = g.g_id
-                        AND n.to_user_id = ?
-                        AND n.component = 'grading'
-                        AND n.seen_at IS NULL
-                    ) AS has_unseen_gradeable_notification,";
-            $unseen_notification_param = [$for_user_id];
-        }
-        else {
-            $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
-            $unseen_notification_param = [];
-        }
+        $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
+        $unseen_notification_param = [];
 
         $query = "
             SELECT
