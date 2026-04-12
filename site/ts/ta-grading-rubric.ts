@@ -2707,21 +2707,25 @@ export async function toggleComponent(component_id: number, saveChanges: boolean
 
 window.open_overall_comment_tab = function (user: string) {
     const textarea = $(`#overall-comment-${user}`);
-    const comment_root = textarea.closest('.general-comment-entry');
 
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
-    comment_root.show();
     $(`#overall-comment-tab-${user}`).addClass('active-btn');
 
-    // if the tab is for the main user of the page
-    if (!textarea.hasClass('markdown-preview')) {
+    if (textarea.hasClass('markdown-preview')) {
+        textarea.show();
+    }
+    else {
+        // Find and show the Vue wrapper containing the textarea
+        $('#overall-comments').children().each(function () {
+            if ($(this).find(`#overall-comment-${user}`).length > 0) {
+                $(this).show();
+            }
+        });
+
         if ($(`#overall-comment-markdown-preview-${user}`).is(':hidden')) {
             textarea.show();
         }
-    }
-    else {
-        textarea.show();
     }
 
     const attachmentsListUser = $(`#attachments-list-${user}`);
@@ -2936,7 +2940,7 @@ function scrollToPage(page_num: number) {
                 page_num = Math.min($('#viewer > .page').length, page_num);
                 const page = $(`#pageContainer${page_num}`);
                 if (page.length) {
-                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $('#file-view > .sticky-file-info').first().height()!, 0));
+                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop, 0));
                 }
             }
             else {
