@@ -27,10 +27,11 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, status, number: .content.number}] | .[] | select(.number == \"$PR_ID\").id")"
-          PR_PROJECT_STATUS="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, status, number: .content.number}] | .[] | select(.number == \"$PR_ID\").status")"
-          echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
-          echo "pr-project-status="${PR_PROJECT_STATUS:?}"" >> "$GITHUB_OUTPUT"
+          PR_PROJECT_ITEMS_JSON="$(gh project item-list -L 9999 --owner Submitty 1 --format json)"
+          PR_PROJECT_ID="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .id')"
+          PR_PROJECT_STATUS="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .status')"
+          printf 'pr-project-id=%s\n' "${PR_PROJECT_ID:?}" >> "$GITHUB_OUTPUT"
+          printf 'pr-project-status=%s\n' "${PR_PROJECT_STATUS:?}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
         uses: actions/checkout@v6
