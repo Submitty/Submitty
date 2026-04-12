@@ -25,7 +25,7 @@
                 {# If viewing the active version, show cancel button, otherwise so button to switch active #}
                 {% if display_version > 0 %}
                     {% if display_version == active_version %}
-                        <form method="post" action="{{ cancel_url }}">
+                        <form method="post" action="{{ cancel_url }}" onsubmit='return confirm("Are you sure you want to mark this assignment as Do Not Grade?")'>
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
                             <input type="submit" id="do_not_grade" class="btn btn-default" value="Do Not Grade This Assignment">
                         </form>
