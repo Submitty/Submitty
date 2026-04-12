@@ -1471,7 +1471,8 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
     const dataDOMElement = domElement.find('.graded-component-data');
     let gradedVersion = dataDOMElement.attr('data-graded_version')!;
     if (gradedVersion === '') {
-        gradedVersion = getDisplayVersion().toString();
+        const displayVersion = getDisplayVersion();
+        gradedVersion = isNaN(displayVersion) ? '0' : displayVersion.toString();
     }
     return {
         score: score,
@@ -1875,7 +1876,10 @@ function updateVerifyAllButton() {
  * @returns {boolean}
  */
 function getComponentVersionConflict(graded_component: { graded_version: number } | undefined) {
-    return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
+    if (graded_component === undefined) return false;
+    const displayVersion = getDisplayVersion();
+    if (isNaN(graded_component.graded_version) || isNaN(displayVersion)) return false;
+    return graded_component.graded_version !== displayVersion;
 }
 
 /**
