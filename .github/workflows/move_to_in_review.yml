@@ -24,8 +24,10 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
+          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, status, number: .content.number}] | .[] | select(.number == \"$PR_ID\").id")"
+          PR_PROJECT_STATUS="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, status, number: .content.number}] | .[] | select(.number == \"$PR_ID\").status")"
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
+          echo "pr-project-status="${PR_PROJECT_STATUS:?}"" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
         uses: actions/checkout@v6
@@ -34,7 +36,15 @@ jobs:
         if: ${{ ! github.event.pull_request.draft }}
         env:
           PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
+          PR_PROJECT_STATUS: ${{ steps.get-pr-id.outputs.pr-project-status }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           source .github/bin/board_automation_helper.sh
+
+          # If the reopened PR is already in In Review, no update is required.
+          if [ "$PR_PROJECT_STATUS" = "In Review" ]; then
+            echo "PR is already in In Review; no project status update needed."
+            exit 0
+          fi
+
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$IN_REVIEW_ID"
