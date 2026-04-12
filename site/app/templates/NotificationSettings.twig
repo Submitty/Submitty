@@ -400,7 +400,7 @@
             }
             $.ajax({
                 type: "POST",
-                url: "{{ sync_settings_url }}", // url doesnt exist, create it.
+                url: buildCourseUrl(['notifications','sync']), //url doesnt exist, create it.
                 data: $('#form_notification_settings').serialize() + '&' + $.param({sync_course_ids: selected}),
                 success: function () {
                     displaySuccessMessage("Synced to selected courses.");
