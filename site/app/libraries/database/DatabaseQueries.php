@@ -6074,7 +6074,11 @@ AND gc_id IN (
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
 
-        // Detect potential unseen grading notifications for the given user
+        // Unseen gradeable notification detection is currently disabled in this query path.
+        // Keep returning a constant FALSE so callers receive the expected column without
+        // assuming detection is still implemented here.
+        // TODO: Restore user-specific unseen notification detection and parameters here
+        // once the related migration/feature work is completed.
         $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
         $unseen_notification_param = [];
 
