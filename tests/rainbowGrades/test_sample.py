@@ -60,6 +60,8 @@ def remove_extra_raw_data_fields(raw_line):
         return False
     if 'last_update' in raw_line:
         return False
+    if 'registration_timestamp' in raw_line:
+        return False
     if 'date:' in raw_line:
         return False
     return True

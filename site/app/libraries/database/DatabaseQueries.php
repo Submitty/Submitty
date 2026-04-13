@@ -1013,6 +1013,52 @@ VALUES (?,?,?,?,?,?)",
     }
 
     /**
+     * Re-activate an existing enrollment for a self-registering student and refresh the join timestamp.
+     */
+    public function selfRegisterCourseUser(User $user, string $semester, string $course): void {
+        $params = [
+            $user->getGroup(),
+            $user->getRegistrationSection(),
+            $this->submitty_db->convertBoolean($user->isManualRegistration()),
+            $user->getRegistrationType(),
+            $semester,
+            $course,
+            $user->getId()
+        ];
+        $this->submitty_db->query(
+            "
+UPDATE courses_users
+SET user_group=?,
+    registration_section=?,
+    manual_registration=?,
+    registration_type=?,
+    registration_timestamp=NOW()
+WHERE term=? AND course=? AND user_id=?",
+            $params
+        );
+
+        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
+        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public function getCourseRegistrationTimestamps(string $semester, string $course): array {
+        $this->submitty_db->query(
+            "SELECT user_id, registration_timestamp FROM courses_users WHERE term=? AND course=?",
+            [$semester, $course]
+        );
+
+        $timestamps = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $timestamps[$row['user_id']] = $row['registration_timestamp'];
+        }
+        return $timestamps;
+    }
+
+    /**
      * @param User $user
      * @param string|null $semester
      * @param string|null $course
