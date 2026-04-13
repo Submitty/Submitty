@@ -59,6 +59,17 @@
                         </span>
                     {% endif %}
                 </div>
+                {% if rainbow_grades_generated_manually %}
+                    <div class="card-btn-info manual-generation-warning" data-testid="manual-generation-warning-banner">
+                        <strong>Warning:</strong> Rainbow Grades appears to have been generated manually.
+                        Individual student summary files are newer than server Build metadata files.
+                        This may indicate the reports were generated on a personal device and uploaded manually.
+                        For the automatic server workflow, see
+                        <a href="https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup" target="_blank">Automatic Setup</a>;
+                        for manual workflow details, see
+                        <a href="https://submitty.org/instructor/course_settings/rainbow_grades/manual_setup" target="_blank">Manual Setup</a>.
+                    </div>
+                {% endif %}
             </div>
         </div>
         <!--
@@ -604,6 +615,7 @@ To remove a curve simply blank all boxes."></i>
 
     <script>
         window.manualCustomizationExists = {{ manual_customization_exists ? 'true' : 'false' }};
+        window.rainbowGradesGeneratedManually = {{ rainbow_grades_generated_manually ? 'true' : 'false' }};
 
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
