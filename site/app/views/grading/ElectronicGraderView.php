@@ -1509,11 +1509,14 @@ HTML;
                         }
                     }
                     if (
-                        !$skipping 
+                        !$skipping
                         && !(
-                            $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
-                            ($graded_gradeable->getGradeable()->isPdfUpload() || $graded_gradeable->getGradeable()->getLimitedAccessBlind() == 2) &&
-                            $file["name"] === "upload.pdf"
+                            $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER
+                            && (
+                                $graded_gradeable->getGradeable()->isPdfUpload()
+                                || $graded_gradeable->getGradeable()->getLimitedAccessBlind() == 2
+                            )
+                            && $file["name"] === "upload.pdf"
                         )
                     ) {
                         if ($start_dir_name == "submissions") {
