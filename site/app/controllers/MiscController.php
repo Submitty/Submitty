@@ -116,7 +116,6 @@ class MiscController extends AbstractController {
         }
 
         if ($directory === 'submissions') {
-
             $user = $this->core->getUser();
 
             if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
@@ -225,11 +224,9 @@ class MiscController extends AbstractController {
             $user = $this->core->getUser();
 
             if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
-
                 $gradeable = $this->tryGetGradeable($gradeable_id, false);
 
                 if ($gradeable !== false) {
-
                     $pdf_pages_assigned = $gradeable->isPdfUpload();
                     $blind_grading_enabled = $gradeable->getLimitedAccessBlind() == 2;
 
