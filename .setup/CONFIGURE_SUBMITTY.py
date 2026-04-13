@@ -179,6 +179,7 @@ defaults = {
     'database_port': 5432,
     'database_user': 'submitty_dbuser',
     'database_course_user': 'submitty_course_dbuser',
+    'database_readonly_user': 'database_readonly_user',
     'submission_url': '',
     'supervisor_user': 'submitty',
     'vcs_url': '',
@@ -284,6 +285,18 @@ else:
     if DATABASE_COURSE_PASSWORD == '' and DATABASE_COURSE_USER == defaults['database_course_user'] and 'database_course_password' in defaults:
         DATABASE_COURSE_PASSWORD = defaults['database_course_password']
     print()
+
+    DATABASE_READONLY_USER = get_input('What is the readonly database user/role?', defaults['database_readonly_user'])
+    print()
+
+    default = ''
+    if 'database_readonly_password' in defaults and DATABASE_READONLY_USER == defaults['database_readonly_user']:
+        default = '(Leave blank to use same password)'
+    DATABASE_READONLY_PASSWORD = get_input('What is the password for the readonly database user/role {}? {}'.format(DATABASE_READONLY_USER, default))
+    if DATABASE_READONLY_PASSWORD == '' and DATABASE_READONLY_USER == defaults['database_readonly_user']:
+        DATABASE_READONLY_PASSWORD = defaults['database_readonly_user']
+    print()
+
 
     TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
     print()
@@ -442,6 +455,8 @@ else:
     config['database_password'] = DATABASE_PASS
     config['database_course_user'] = DATABASE_COURSE_USER
     config['database_course_password'] = DATABASE_COURSE_PASSWORD
+    config['database_readonly_user'] = DATABASE_READONLY_USER
+    config['database_readonly_password'] = DATABASE_READONLY_PASSWORD
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
 
@@ -604,6 +619,8 @@ if not args.worker:
     config['database_password'] = DATABASE_PASS
     config['database_course_user'] = DATABASE_COURSE_USER
     config['database_course_password'] = DATABASE_COURSE_PASSWORD
+    config['database_readonly_user'] = DATABASE_READONLY_USER
+    config['database_readonly_password'] = DATABASE_READONLY_PASSWORD
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
     with open(DATABASE_JSON, 'w') as json_file:
