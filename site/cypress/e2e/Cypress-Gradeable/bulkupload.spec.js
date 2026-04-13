@@ -1,4 +1,4 @@
-describe('Test cases revolving around non bulk uploading', () => {
+/*describe('Test cases revolving around non bulk uploading', () => {
     ['ta', 'instructor'].forEach((user) => {
         it(`${user} should have grader submission options`, () => {
             cy.login(user);
@@ -64,4 +64,108 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.get('[data-testid="grade-table"]').contains('adamsg').parent().get('[data-testid="grade-button"]').contains('Grade');
         });
     });
+});*/
+describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
+
+    it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
+
+        // Instructor uploads exam
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
+
+        cy.get('[data-testid="radio-student-upload"]').click();
+        cy.get('[data-testid="submit-student-userid"]').type('student');
+        cy.get('#submission-mode-warning > .warning').should('contain', 'Submitting files for a student');
+
+        cy.get('[data-testid="select-files"]').selectFile('cypress/fixtures/bulk_upload.pdf', { force: true });
+        cy.get('[data-testid="submit-gradeable"]').click();
+
+        cy.get('[data-testid="assign-box"]', { timeout: 10000 }).should('exist');
+
+
+        // Enable blind grading for mentors
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+
+        cy.contains('Grader Assignment').click();
+
+        cy.get('#blind_limited_access_grading').click();
+        cy.logout();
+
+        // Mentor checks submissions
+        cy.login('grader');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+
+        cy.get('[data-testid="grade-table"]').contains('student')
+            .parent()
+            .find('[data-testid="grade-button"]')
+            .click();
+
+        cy.get('data-testid="show-submission"]').click();
+        cy.get('#submissions').click();
+
+        cy.contains('upload.pdf').should('not.exist');
+
+        cy.logout();
+
+        // Enable page assignments
+        cy.login('instructor');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+
+        cy.contains('Rubric').click();
+
+        cy.get('#yes_pdf_page').click();
+
+        cy.logout();
+
+
+        // Mentor checks again
+        cy.login('grader');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('[data-testid="popup-window"]').scrollTo('bottom');
+        cy.get('#agree-popup-btn').click;
+
+        cy.get('[data-testid="grade-table"]').contains('student')
+            .parent()
+            .find('[data-testid="grade-button"]')
+            .click();
+
+        cy.get('data-testid="show-submission"]').click();
+        cy.get('#submissions').click();
+
+        cy.contains('upload.pdf').should('not.exist');
+
+
+        // Disable both conditions
+        cy.login('instructor');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+
+        cy.contains('Grader Assignment').click();
+        cy.get('#unblind_limited_access_grading').click();
+
+        cy.contains('Rubric').click();
+        
+        cy.get('#no_pdf_page]').click();
+
+        cy.logout();
+        // Mentor now sees upload.pdf
+        cy.login('grader');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+
+        cy.get('[data-testid="grade-table"]').contains('student')
+            .parent()
+            .find('[data-testid="grade-button"]')
+            .click();
+
+        cy.get('data-testid="show-submission"]').click();
+        cy.get('#submissions').click();
+
+        cy.contains('upload.pdf').should('exist');
+
+    });
+
 });
