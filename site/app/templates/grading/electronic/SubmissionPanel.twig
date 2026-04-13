@@ -54,7 +54,7 @@
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
                 {% endif %}
                 {% if not anon_mode and not blind_grader %}
-                    {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader, mentor_block_upload_pdf) }}
+                    {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader ) }}
                 {% endif %}
             </div>
             {# /Files #}
@@ -71,10 +71,10 @@
     </div>
 </div>
 
-{% macro display_files(files, id, indent, title, blind_grader, mentor_block_upload_pdf) %}
+{% macro display_files(files, id, indent, title, blind_grader) %}
     {# Files on top #}
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title, blind_grader, mentor_block_upload_pdf) }}
+        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title, blind_grader) }}
     {% endfor %}
 
     {# Directories underneath #}
@@ -99,14 +99,7 @@
                     <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                     {{ dir }}</a> &nbsp;
             {% endif %}
-           {% set is_upload_pdf = dir == 'upload.pdf' %}
-
-            {% if not (blind_grader and is_upload_pdf) %}
-                <a id='open_file_{{ dir|url_encode }}' onclick='openSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Open the file in a pop up" class="key_to_click" tabindex="0">
-                    <i class="fas fa-window-restore" title="Open the file in a pop up"></i>
-                </a>
-            {% endif %}
-
+            <a id = 'open_file_{{ dir|url_encode }}' onclick='openSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Open the file in a pop up" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Open the file in a pop up"></i></a>
             <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
                 <i class="fas fa-download" title="Download the file"></i>

@@ -1508,7 +1508,14 @@ HTML;
                             $skipping = true;
                         }
                     }
-                    if (!$skipping) {
+                    if (
+                        !$skipping &&
+                        !(
+                            $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
+                            ($graded_gradeable->getGradeable()->isPdfUpload() || $graded_gradeable->getGradeable()->getLimitedAccessBlind() == 2) &&
+                            $file["name"] === "upload.pdf"
+                        )
+                    ) {
                         if ($start_dir_name == "submissions") {
                             $file["path"] = $this->setAnonPath($file["path"], $graded_gradeable->getGradeableId());
                         }
@@ -1542,6 +1549,9 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
+            $gradeable = $graded_gradeable->getGradeable();
+            $user = $this->core->getUser();
+
             $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
@@ -1562,15 +1572,6 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        $gradeable = $graded_gradeable->getGradeable();
-        $mentor_block_upload_pdf = false;
-        $user = $this->core->getUser();
-
-        if ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER) {
-            if ($gradeable->isPdfUpload() || $gradeable->getLimitedAccessBlind() == 2) {
-                $mentor_block_upload_pdf = true;
-            }
-        }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1590,7 +1591,6 @@ HTML;
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_assignment_settings_path" => $uas,
-            "mentor_block_upload_pdf" => $mentor_block_upload_pdf
         ]);
     }
 
