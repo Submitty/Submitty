@@ -46,6 +46,8 @@ aside {
 #bar_wrapper {
     box-sizing: content-box;
     padding: 6px 0;
+    display: flex;
+    align-items: center;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -58,7 +60,7 @@ aside {
 }
 
 .navigation-box {
-    margin: 0 auto;
+    margin: 0 0 0 32px;
     display: flex;
     width: max-content;
     max-width: 100%;
@@ -551,11 +553,11 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
-    position: absolute;
     overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
-    left: 5px;
-    top: 5px;
+    padding: 5px 10px 5px 5px;
+    flex-shrink: 0;
+    max-height: 85px;
 }
 
 #grading-scroll-message {
@@ -1421,15 +1423,18 @@ tr.is_publish {
 #file-view {
     height: 100%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .sticky-file-info {
-    position: absolute;
-    right: 5px;
-    left: 5px;
+    position: sticky;
+    top: 0;
+    margin: 0 5px;
     background-color: var(--standard-pale-blue-gray);
     padding: 10px 15px 0;
     z-index: 30;
+    flex: 0 0 auto;
 }
 
 #image-rotate-icons-bar,
@@ -1438,8 +1443,10 @@ tr.is_publish {
     padding: 0 10px;
 }
 
-#file-content {
-    height: 90%;
+#file-content,
+#notebook-file-content {
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
 }
 
