@@ -104,7 +104,7 @@ class MiscController extends AbstractController {
         }
 
         if (!str_starts_with($file_path, $check_path)) {
-            return JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
         }

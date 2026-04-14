@@ -66,9 +66,7 @@ describe('Test cases revolving around bulk uploading', () => {
     });
 });*/
 describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
-
     it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
-
         // Instructor uploads exam
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
@@ -81,7 +79,6 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('[data-testid="submit-gradeable"]').click();
 
         cy.get('[data-testid="assign-box"]', { timeout: 10000 }).should('exist');
-
 
         // Enable blind grading for mentors
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
@@ -96,7 +93,9 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
 
-        cy.get('[data-testid="agree-popup-btn"]').scrollIntoView().click();
+        cy.get('[data-testid="agree-popup-btn"]').scrollIntoView();
+        cy.get('[data-testid="agree-popup-btn"]').click();
+        
         cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
@@ -123,7 +122,6 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.logout();
         cy.wait(5000);
-
 
         // Mentor checks again
         cy.login('grader');
@@ -152,7 +150,7 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('#no_pdf_page').click();
         cy.logout();
         cy.wait(5000);
-        
+
         // Mentor now sees upload.pdf
         cy.login('grader');
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
@@ -168,5 +166,4 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.contains('upload.pdf').should('exist');
 
     });
-
 });
