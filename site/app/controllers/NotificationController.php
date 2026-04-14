@@ -136,9 +136,16 @@ class NotificationController extends AbstractController {
     public function syncNotifications() {
         $course_ids = $_POST['sync_course_ids'] ?? [];
         unset($_POST['csrf_token']);
+        $new_settings = $_POST;
         foreach($course_ids as $course_id){
             $course_id->unset($_POST['csrf_token']);
-            $new_settings = $course_id->$_POST;
+            //
+            $semester = $course_id->getTerm();
+            $course_name = $course_id->getTitle();
+            $course_id->core->loadCourseConfig($semester, $course_name);
+            $course_id->core->loadCourseDatabase();
+            
+            //
             if(!$this->changeSettings($new_settings)){
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
@@ -148,6 +155,7 @@ class NotificationController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse('Notification settings have been saved.')
         );
+    }
 
         // if (empty($course_ids)) {
         //     return MultiResponse::JsonOnlyResponse(
@@ -175,7 +183,6 @@ class NotificationController extends AbstractController {
         // return MultiResponse::JsonOnlyResponse(
         //     JsonResponse::getSuccessResponse('Settings synced successfully.')
         // );
-    }
     
 
     /**
