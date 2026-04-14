@@ -222,7 +222,12 @@ DB_COURSE_PASSWORD=submitty_dbuser
 # DISTRO SETUP
 #################
 
-source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+if [ ${WORKER} == 1 ]; then
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh worker
+else
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+fi
+
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
@@ -872,7 +877,12 @@ if [ ${WORKER} == 0 ]; then
 
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
+else
+
+    systemctl stop apache2.service
+
 fi
+
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
