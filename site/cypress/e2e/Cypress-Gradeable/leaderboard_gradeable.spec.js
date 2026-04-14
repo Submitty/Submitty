@@ -1,7 +1,8 @@
 describe('Tests leaderboard access', () => {
     const updateSubmissionOpenDate = (date) => {
         cy.intercept('POST', '**/courses/*/sample/gradeable/leaderboard/update').as('saveGradeableUpdate');
-        cy.get('[data-testid="submission-open-date"]').clear({ force: true }).invoke('val', date).trigger('change', { force: true });
+        cy.get('[data-testid="submission-open-date"]').clear({ force: true });
+        cy.get('[data-testid="submission-open-date"]').invoke('val', date).trigger('change', { force: true });
         cy.get('body').click(0, 0);
         cy.wait('@saveGradeableUpdate', { timeout: 30000 }).its('response.statusCode').should('eq', 200);
         cy.get('#save_status', { timeout: 10000 }).should('contain', 'All Changes Saved');
@@ -72,11 +73,10 @@ describe('Tests leaderboard access', () => {
         cy.get('#page_5_nav').click();
         // Need to update ta-view-date so setting open date to 2000 does not violate chronological order
         cy.intercept('POST', '**/courses/*/sample/gradeable/leaderboard/update').as('saveGradeableUpdateTA');
-        cy.get('[data-testid="ta-view-start-date"]').clear({ force: true }).invoke('val', '1999-01-15 23:59:59').trigger('change', { force: true });
+        cy.get('[data-testid="ta-view-start-date"]').clear({ force: true });
+        cy.get('[data-testid="ta-view-start-date"]').invoke('val', '1999-01-15 23:59:59').trigger('change', { force: true });
         cy.get('body').click(0, 0);
         cy.wait('@saveGradeableUpdateTA', { timeout: 30000 });
-        // Sometimes wait is needed for the frontend validation to reset
-        cy.wait(1000);
         updateSubmissionOpenDate('2000-01-15 23:59:59');
         cy.logout();
 
