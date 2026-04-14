@@ -98,8 +98,8 @@ function markSeen() {
     <template #trigger>
       <button
         class="btn btn-primary"
-        @click="toggle"
         data-testid="mark-seen-btn"
+        @click="toggle"
       >
         Mark as seen
       </button>
@@ -128,8 +128,8 @@ function markSeen() {
       <div class="select-buttons">
         <a
           class="btn btn-primary"
-          @click="selectAll"
           data-testid="select-mark-all"
+          @click="selectAll"
         >
           Select All
         </a>

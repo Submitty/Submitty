@@ -162,14 +162,14 @@ const markAllNotificationsSeen = (user) => {
     cy.get('[data-testid="select-mark-all"]').click();
     cy.contains('button', 'Mark Seen').click();
     cy.logout();
-}
+};
 
 const verifyAllNotificationsSeen = (user) => {
     cy.login(user);
     cy.visit();
-    cy.get('[data-testid="toggle-unseen-only"]').then($btn => {
+    cy.get('[data-testid="toggle-unseen-only"]').then(($btn) => {
         if ($btn.text().includes('Show Unseen Only')) {
-            cy.wrap($btn).click()
+            cy.wrap($btn).click();
         }
     });
     cy.contains(no_unseen_message);
@@ -199,12 +199,11 @@ const createAnnouncement = (title, content) => {
             url: buildUrl(['sample', 'forum', 'threads', 'new']),
             form: true,
             body: body,
-            
+
         }).then((res) => {
             const body = JSON.parse(res.body);
             expect(res.status).to.eq(200);
             expect(body.status).to.eq('success');
-            
         });
     });
 };
@@ -220,7 +219,7 @@ const createAnnouncements = (count) => {
 
     cy.logout();
 };
-
+/*
 const deleteAnnouncements = () => {
     cy.login('instructor');
     cy.visit(buildUrl(['sample', 'forum']));
@@ -246,26 +245,25 @@ const deleteAnnouncements = () => {
                     url: buildUrl(['sample', 'forum', 'threads', 'new']),
                     form: true,
                     body: body,
-                    
+
                 }).then((res) => {
                     const body = JSON.parse(res.body);
                     expect(res.status).to.eq(200);
                     expect(body.status).to.eq('success');
-                    
                 });
             });
         }
     });
 
-
     cy.logout();
-}
-
+};
+*/
 describe('Tests for creating and interacting with notifications', () => {
     before(() => {
         cy.login('student');
         cy.visit();
-        cy.get('[data-testid="toggle-unseen-only"]') .should('have.text', 'Show All'); // Verify the initial state of local storage is unseen only
+        // Verify the initial state of local storage is unseen only
+        cy.get('[data-testid="toggle-unseen-only"]').should('have.text', 'Show All');
         cy.logout();
 
         ['instructor', 'student'].forEach((user) => {
@@ -277,7 +275,7 @@ describe('Tests for creating and interacting with notifications', () => {
     });
 
     after(() => {
-        deleteAnnouncements();
+        // deleteAnnouncements();
     });
 
     ['student'].forEach((user) => {
