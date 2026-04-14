@@ -1,4 +1,4 @@
-/*describe('Test cases revolving around non bulk uploading', () => {
+describe('Test cases revolving around non bulk uploading', () => {
     ['ta', 'instructor'].forEach((user) => {
         it(`${user} should have grader submission options`, () => {
             cy.login(user);
@@ -64,7 +64,7 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.get('[data-testid="grade-table"]').contains('adamsg').parent().get('[data-testid="grade-button"]').contains('Grade');
         });
     });
-});*/
+});
 describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
     it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
         // Instructor uploads exam
@@ -109,24 +109,24 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.contains('upload.pdf').should('not.exist');
 
         cy.logout();
-        cy.wait(5000);
 
         // Enable page assignments
         cy.login('instructor');
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
-
+        cy.get('body').should('not.contain', 'Login');
         cy.contains('Rubric').click();
 
         cy.get('#yes_pdf_page').click();
 
         cy.logout();
-        cy.wait(5000);
 
         // Mentor checks again
         cy.login('grader');
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('body').should('not.contain', 'Login');
+
         cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
@@ -149,11 +149,12 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.contains('Rubric').click();
         cy.get('#no_pdf_page').click();
         cy.logout();
-        cy.wait(5000);
 
         // Mentor now sees upload.pdf
         cy.login('grader');
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('body').should('not.contain', 'Login');
+
         cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
 
         cy.get('[data-testid="grade-table"]')
