@@ -47,9 +47,12 @@ const emit = defineEmits<{
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const kebabMenuRef = ref<HTMLElement | null>(null);
 const kebabButtonRef = ref<HTMLButtonElement | null>(null);
+const toolbarRef = ref<HTMLElement | null>(null);
 const mode = ref('edit');
 const content = ref(props.markdownAreaValue);
 const isLoadingPreview = ref(false);
+const toolbarWidth = ref(Number.POSITIVE_INFINITY);
+let toolbarResizeObserver: ResizeObserver | null = null;
 
 watch(content, (newValue) => {
     emit('update:modelValue', newValue ?? '');
@@ -244,6 +247,39 @@ function handleMarkdownAction(type: string) {
   closeKebabMenu(true);
 }
 
+const kebabActions = computed(() => {
+  const actions = new Set<string>();
+
+  // Move right-most actions into kebab progressively as width shrinks.
+  if (toolbarWidth.value <= 740) {
+    actions.add('blockquote');
+  }
+  if (toolbarWidth.value <= 680) {
+    actions.add('italic');
+  }
+  if (toolbarWidth.value <= 620) {
+    actions.add('bold');
+  }
+  if (toolbarWidth.value <= 560) {
+    actions.add('code');
+  }
+  if (toolbarWidth.value <= 500) {
+    actions.add('link');
+  }
+
+  return actions;
+});
+
+const hasKebabActions = computed(() => kebabActions.value.size > 0);
+
+function isActionInToolbar(action: string) {
+  return !kebabActions.value.has(action);
+}
+
+function isActionInKebab(action: string) {
+  return kebabActions.value.has(action);
+}
+
 function getKebabItems() {
   if (!kebabMenuRef.value) {
     return [] as HTMLButtonElement[];
@@ -371,6 +407,30 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeKebabOnOutsideClick);
   document.removeEventListener('keydown', closeKebabOnEscape);
+  toolbarResizeObserver?.disconnect();
+  toolbarResizeObserver = null;
+});
+
+watch(hasKebabActions, (hasItems) => {
+  if (!hasItems && isKebabOpen.value) {
+    closeKebabMenu(false);
+  }
+});
+
+onMounted(() => {
+  if (!toolbarRef.value) {
+    return;
+  }
+
+  const updateToolbarWidth = () => {
+    if (toolbarRef.value) {
+      toolbarWidth.value = toolbarRef.value.clientWidth;
+    }
+  };
+
+  updateToolbarWidth();
+  toolbarResizeObserver = new ResizeObserver(updateToolbarWidth);
+  toolbarResizeObserver.observe(toolbarRef.value);
 });
 </script>
 
@@ -438,6 +498,7 @@ onBeforeUnmount(() => {
 
       <div
         v-if="mode === 'edit'"
+        ref="toolbarRef"
         class="markdown-area-toolbar"
       >
         <a
@@ -451,6 +512,7 @@ onBeforeUnmount(() => {
           />
         </a>
         <button
+          v-if="isActionInToolbar('link')"
           type="button"
           title="Insert a link"
           class="btn btn-default btn-markdown btn-markdown-link"
@@ -460,6 +522,7 @@ onBeforeUnmount(() => {
           <span class="md-btn-text">Link </span><i class="fas fa-link fa-1x" />
         </button>
         <button
+          v-if="isActionInToolbar('code')"
           type="button"
           title="Insert a code segment"
           class="btn btn-default btn-markdown btn-markdown-code"
@@ -469,6 +532,7 @@ onBeforeUnmount(() => {
           <span class="md-btn-text">Code </span><i class="fas fa-code fa-1x" />
         </button>
         <button
+          v-if="isActionInToolbar('bold')"
           type="button"
           title="Insert bold text"
           class="btn btn-default btn-markdown btn-markdown-bold"
@@ -478,6 +542,7 @@ onBeforeUnmount(() => {
           <span class="md-btn-text">Bold </span><i class="fas fa-bold fa-1x" />
         </button>
         <button
+          v-if="isActionInToolbar('italic')"
           type="button"
           title="Insert italic text"
           class="btn btn-default btn-markdown btn-markdown-italic"
@@ -487,6 +552,7 @@ onBeforeUnmount(() => {
           <span class="md-btn-text">Italics </span><i class="fas fa-italic fa-1x" />
         </button>
         <button
+          v-if="isActionInToolbar('blockquote')"
           type="button"
           title="Insert blockquote text"
           class="btn btn-default btn-markdown btn-markdown-blockquote"
@@ -498,6 +564,7 @@ onBeforeUnmount(() => {
         
         <!-- Kebab menu for narrow screens -->
         <div
+          v-if="hasKebabActions"
           ref="kebabMenuRef"
           class="markdown-kebab-menu"
         >
@@ -519,6 +586,7 @@ onBeforeUnmount(() => {
             @keydown="handleKebabMenuKeydown"
           >
             <button
+              v-if="isActionInKebab('bold')"
               type="button"
               class="kebab-item"
               tabindex="0"
@@ -527,6 +595,7 @@ onBeforeUnmount(() => {
               <i class="fas fa-bold" /> Bold
             </button>
             <button
+              v-if="isActionInKebab('italic')"
               type="button"
               class="kebab-item"
               tabindex="0"
@@ -535,6 +604,7 @@ onBeforeUnmount(() => {
               <i class="fas fa-italic" /> Italic
             </button>
             <button
+              v-if="isActionInKebab('blockquote')"
               type="button"
               class="kebab-item"
               tabindex="0"
@@ -543,6 +613,7 @@ onBeforeUnmount(() => {
               <i class="fas fa-quote-left" /> Quote
             </button>
             <button
+              v-if="isActionInKebab('code')"
               type="button"
               class="kebab-item"
               tabindex="0"
@@ -551,6 +622,7 @@ onBeforeUnmount(() => {
               <i class="fas fa-code" /> Code
             </button>
             <button
+              v-if="isActionInKebab('link')"
               type="button"
               class="kebab-item"
               tabindex="0"
@@ -653,7 +725,8 @@ onBeforeUnmount(() => {
 
 .markdown-kebab-menu {
   position: relative;
-  display: none;
+  display: inline-flex;
+  align-items: center;
   flex: 0 0 auto;
 }
 
@@ -723,15 +796,6 @@ onBeforeUnmount(() => {
 }
 
 @container markdownarea (max-width: 650px) {
-  .markdown-kebab-menu {
-    display: flex;
-  }
-  
-  /* Hide all individual buttons and help icon */
-  .btn-markdown {
-    display: none !important;
-  }
-  
   .markdown-help-icon {
     display: none;
   }
