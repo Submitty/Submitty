@@ -20,7 +20,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 8.1
+  PHP_VER: 8.2
   NODE_VERSION: 16
   PYTHON_VERSION: "3.10"
 
@@ -50,7 +50,7 @@ runs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.36.0
+    - uses: shivammathur/setup-php@2.37.0
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap

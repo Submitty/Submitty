@@ -1,4 +1,5 @@
 .flagged-row {
+    /* stylelint-disable-next-line color-named */
     background-color: red;
 }
 

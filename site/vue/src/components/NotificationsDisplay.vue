@@ -83,6 +83,10 @@ function markSeen() {
     }
 }
 
+function goToNotificationSettings() {
+    window.location.href = buildCourseUrl(['notifications', 'settings']);
+}
+
 // mark notification as seen without reloading
 function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
@@ -134,14 +138,14 @@ function markAllSeen(courses: Record<string, unknown>[]) {
           v-if="notifications.length !== 0 && !props.course"
           @mark-all="({ courses }) => markAllSeen(courses)"
         />
-        <a
+        <button
           v-if="props.course"
-          class="btn btn-primary notification-settings-btn"
-          :href="buildCourseUrl(['notifications', 'settings'])"
+          class="btn btn-primary"
           data-testid="notification-settings-button"
+          @click="goToNotificationSettings"
         >
           Settings
-        </a>
+        </button>
       </div>
     </div>
     <p
@@ -220,9 +224,6 @@ function markAllSeen(courses: Record<string, unknown>[]) {
   flex-shrink: 0;
 }
 
-.notification-settings-btn {
-  font-family: arial, sans-serif;
-}
 .unseen-count-p {
   padding-top: 10px;
   font-weight: 600;
