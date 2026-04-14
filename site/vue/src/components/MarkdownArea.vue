@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import Markdown from './Markdown.vue';
 
 interface Props {
@@ -45,6 +45,8 @@ const emit = defineEmits<{
 }>();
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const kebabMenuRef = ref<HTMLElement | null>(null);
+const kebabButtonRef = ref<HTMLButtonElement | null>(null);
 const mode = ref('edit');
 const content = ref(props.markdownAreaValue);
 const isLoadingPreview = ref(false);
@@ -215,6 +217,8 @@ onMounted(() => {
 });
 
 const showHeader = ref(!!props.renderHeader);
+const isKebabOpen = ref(false);
+
 function toggleMarkdown() {
     if (props.markdownStatusId) {
         const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
@@ -234,6 +238,140 @@ function syncMarkdownToggle() {
         }
     }
 }
+
+function handleMarkdownAction(type: string) {
+    addMarkdown(type);
+  closeKebabMenu(true);
+}
+
+function getKebabItems() {
+  if (!kebabMenuRef.value) {
+    return [] as HTMLButtonElement[];
+  }
+  return Array.from(kebabMenuRef.value.querySelectorAll('.kebab-item')) as HTMLButtonElement[];
+}
+
+function focusKebabItem(index: number) {
+  const items = getKebabItems();
+  if (!items.length) {
+    return;
+  }
+  const boundedIndex = Math.max(0, Math.min(index, items.length - 1));
+  const item = items[boundedIndex];
+  if (item) {
+    item.focus();
+  }
+}
+
+function openKebabMenu(focusFirst = false) {
+  isKebabOpen.value = true;
+  if (focusFirst) {
+    requestAnimationFrame(() => {
+      focusKebabItem(0);
+    });
+  }
+}
+
+function closeKebabMenu(focusButton = false) {
+  isKebabOpen.value = false;
+  if (focusButton) {
+    requestAnimationFrame(() => {
+      kebabButtonRef.value?.focus();
+    });
+  }
+}
+
+function toggleKebabMenu(event: Event) {
+  event.stopPropagation();
+  if (isKebabOpen.value) {
+    closeKebabMenu();
+  }
+  else {
+    openKebabMenu(false);
+  }
+}
+
+function handleKebabButtonKeydown(event: KeyboardEvent) {
+  if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    openKebabMenu(true);
+  }
+  else if (event.key === 'Escape') {
+    event.preventDefault();
+    closeKebabMenu(true);
+  }
+}
+
+function handleKebabMenuKeydown(event: KeyboardEvent) {
+  if (!isKebabOpen.value) {
+    return;
+  }
+
+  const items = getKebabItems();
+  if (!items.length) {
+    return;
+  }
+
+  const currentIndex = items.findIndex((item) => item === document.activeElement);
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeKebabMenu(true);
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
+    focusKebabItem(nextIndex);
+    return;
+  }
+
+  if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    const prevIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
+    focusKebabItem(prevIndex);
+    return;
+  }
+
+  if (event.key === 'Home') {
+    event.preventDefault();
+    focusKebabItem(0);
+    return;
+  }
+
+  if (event.key === 'End') {
+    event.preventDefault();
+    focusKebabItem(items.length - 1);
+  }
+}
+
+function closeKebabOnOutsideClick(event: Event) {
+  if (!isKebabOpen.value) {
+    return;
+  }
+
+  const target = event.target as Node | null;
+  if (kebabMenuRef.value && target && !kebabMenuRef.value.contains(target)) {
+    closeKebabMenu();
+  }
+}
+
+function closeKebabOnEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && isKebabOpen.value) {
+    closeKebabMenu(true);
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeKebabOnOutsideClick);
+  document.addEventListener('keydown', closeKebabOnEscape);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeKebabOnOutsideClick);
+  document.removeEventListener('keydown', closeKebabOnEscape);
+});
 </script>
 
 <template>
@@ -357,6 +495,71 @@ function syncMarkdownToggle() {
         >
           <span class="md-btn-text">Blockquote </span><i class="fas fa-quote-left fa-1x" />
         </button>
+        
+        <!-- Kebab menu for narrow screens -->
+        <div
+          ref="kebabMenuRef"
+          class="markdown-kebab-menu"
+        >
+          <button
+            ref="kebabButtonRef"
+            type="button"
+            class="btn btn-default btn-kebab"
+            tabindex="0"
+            title="More options"
+            @click="toggleKebabMenu"
+            @keydown="handleKebabButtonKeydown"
+          >
+            <i class="fas fa-ellipsis-v" />
+          </button>
+          <div
+            v-if="isKebabOpen"
+            class="kebab-dropdown"
+            @click.stop
+            @keydown="handleKebabMenuKeydown"
+          >
+            <button
+              type="button"
+              class="kebab-item"
+              tabindex="0"
+              @click="handleMarkdownAction('bold')"
+            >
+              <i class="fas fa-bold" /> Bold
+            </button>
+            <button
+              type="button"
+              class="kebab-item"
+              tabindex="0"
+              @click="handleMarkdownAction('italic')"
+            >
+              <i class="fas fa-italic" /> Italic
+            </button>
+            <button
+              type="button"
+              class="kebab-item"
+              tabindex="0"
+              @click="handleMarkdownAction('blockquote')"
+            >
+              <i class="fas fa-quote-left" /> Quote
+            </button>
+            <button
+              type="button"
+              class="kebab-item"
+              tabindex="0"
+              @click="handleMarkdownAction('code')"
+            >
+              <i class="fas fa-code" /> Code
+            </button>
+            <button
+              type="button"
+              class="kebab-item"
+              tabindex="0"
+              @click="handleMarkdownAction('link')"
+            >
+              <i class="fas fa-link" /> Link
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -416,7 +619,7 @@ function syncMarkdownToggle() {
   align-items: flex-end; 
   flex-wrap: nowrap; 
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   gap: 8px;
 }
 
@@ -439,7 +642,7 @@ function syncMarkdownToggle() {
   justify-content: flex-end;
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   gap: 4px;
   padding-bottom: 2px;
 }
@@ -448,53 +651,88 @@ function syncMarkdownToggle() {
   margin-right: 4px;
 }
 
+.markdown-kebab-menu {
+  position: relative;
+  display: none;
+  flex: 0 0 auto;
+}
+
+.btn-kebab {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #555 !important;
+  border-radius: 4px !important;
+  background: #3a3a3a !important;
+  color: #e8e8e8 !important;
+  padding: 0 !important;
+}
+
+.btn-kebab:hover,
+.btn-kebab:focus {
+  background: #4b4b4b !important;
+  border-color: #666 !important;
+}
+
+.kebab-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  z-index: 1000;
+  min-width: 200px;
+  padding: 4px;
+}
+
+.kebab-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #e8e8e8;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.kebab-item:hover {
+  background-color: #4b4b4b;
+}
+
+.kebab-item i {
+  width: 16px;
+  text-align: center;
+  color: #d0d0d0;
+}
+
+.kebab-item:focus-visible {
+  border-color: #337ab7;
+  outline: 2px solid #337ab7;
+  outline-offset: 0;
+}
+
 @container markdownarea (max-width: 650px) {
-  .md-btn-text {
-    display: none;
+  .markdown-kebab-menu {
+    display: flex;
   }
   
-  .markdown-area-toolbar .btn-markdown {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
+  /* Hide all individual buttons and help icon */
+  .btn-markdown {
+    display: none !important;
   }
-}
-
-@container markdownarea (max-width: 500px) {
-  .btn-markdown-blockquote {
-    display: none;
-  }
-}
-
-@container markdownarea (max-width: 460px) {
-  .btn-markdown-italic {
-    display: none;
-  }
-}
-
-@container markdownarea (max-width: 420px) {
-  .btn-markdown-bold {
-    display: none;
-  }
-}
-
-@container markdownarea (max-width: 380px) {
-  .btn-markdown-code {
-    display: none;
-  }
-}
-
-@container markdownarea (max-width: 350px) {
-  .markdown-area-toolbar {
-    gap: 2px;
-  }
-  .markdown-area-toolbar .btn-markdown {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-  }
-}
-
-@container markdownarea (max-width: 330px) {
-  .btn-markdown-link {
+  
+  .markdown-help-icon {
     display: none;
   }
 }
