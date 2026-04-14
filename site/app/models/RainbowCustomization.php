@@ -44,6 +44,10 @@ class RainbowCustomization extends AbstractModel {
      * @var string[]
      */
     private array $available_buckets;
+    /**
+     * @var string[]
+     */
+    private array $normalization_warnings = [];
     private ?object $RCJSON;                            // This is the customization.json php object, or null if it wasn't found
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
@@ -341,6 +345,9 @@ class RainbowCustomization extends AbstractModel {
      */
     private function getBucketGradeables(string $bucket): array {
         $bucket_gradeables = $this->customization_data[$bucket] ?? [];
+        if (!array_key_exists($bucket, $this->customization_data) || !is_array($bucket_gradeables)) {
+            $this->addNormalizationWarning();
+        }
         if (!is_array($bucket_gradeables)) {
             $bucket_gradeables = [];
         }
@@ -354,10 +361,20 @@ class RainbowCustomization extends AbstractModel {
      */
     private function getJsonBucketIds(object $json_bucket): array {
         $json_bucket_ids = $json_bucket->ids ?? [];
+        if (!property_exists($json_bucket, 'ids') || !is_array($json_bucket_ids)) {
+            $this->addNormalizationWarning();
+        }
         if (!is_array($json_bucket_ids)) {
             $json_bucket_ids = [];
         }
         return $json_bucket_ids;
+    }
+
+    private function addNormalizationWarning(): void {
+        $warning = 'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.';
+        if (!in_array($warning, $this->normalization_warnings, true)) {
+            $this->normalization_warnings[] = $warning;
+        }
     }
 
     /**
@@ -439,6 +456,13 @@ class RainbowCustomization extends AbstractModel {
      */
     public function getUsedBuckets(): array {
         return $this->used_buckets;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getNormalizationWarnings(): array {
+        return $this->normalization_warnings;
     }
 
     /**

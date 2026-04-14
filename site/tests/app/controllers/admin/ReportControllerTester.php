@@ -7,6 +7,7 @@ use app\libraries\response\JsonResponse;
 use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
+use tests\utils\NullOutput;
 
 class ReportControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
@@ -24,6 +25,7 @@ class ReportControllerTester extends BaseUnitTest {
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
+        FileUtils::createDir($this->course_path . '/reports/all_grades', true);
     }
 
     private function setupMockConfigs() {
@@ -50,8 +52,12 @@ class ReportControllerTester extends BaseUnitTest {
                 ['sections_registration_id' => '1'],
                 ['sections_registration_id' => '2'],
             ],
+            'getAllUsers' => [],
+            'getAllGradeablesIdsAndTitles' => [],
+            'checkIsInstructorInCourse' => true,
         ];
-        $this->controller = new ReportController($this->createMockCore($config, $user_config, $queries));
+        $this->core = $this->createMockCore($config, $user_config, $queries);
+        $this->controller = new ReportController($this->core);
     }
 
     private function getSampleCustomizationJson() {
@@ -225,5 +231,35 @@ class ReportControllerTester extends BaseUnitTest {
         // Test the addition of a gradeable in an unused bucket, leading to no changes
         $this->gradeables[] = $this->createMockGradeable('lab1', 'Lab 1', 'lab', 100, '2025-01-01 23:59:59-0500');
         $this->submitCustomization($content);
+    }
+
+    public function testGenerateCustomizationShowsNormalizationWarning(): void {
+        $this->writeCustomization([
+            'gradeables' => [
+                [
+                    'type' => 'Tests',
+                    'count' => 1,
+                    'remove_lowest' => 0,
+                    'percent' => 0.25,
+                    'ids' => null,
+                ],
+            ],
+        ], 'gui_customization.json');
+
+        $this->setupMockConfigs();
+        $output = new NullOutput($this->core);
+        $this->core->method('getOutput')->willReturn($output);
+        $this->controller = new ReportController($this->core);
+
+        $response = $this->controller->generateCustomization();
+
+        $this->assertNull($response);
+        $twig_output = $output->getTwigOutput();
+        $this->assertCount(1, $twig_output);
+        $this->assertSame('admin/RainbowCustomization.twig', $twig_output[0][0]);
+        $this->assertSame([
+            'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.'
+        ], $twig_output[0][1]['normalization_warnings']);
+        $this->assertSame([], $twig_output[0][1]['customization_data']['Tests']);
     }
 }

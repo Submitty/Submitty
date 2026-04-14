@@ -15,6 +15,14 @@
             </div>
         {% endif %}
 
+        {% if normalization_warnings|length > 0 %}
+            <div class="system-message warning" id="rainbow-customization-normalization-warning" data-testid="rainbow-customization-normalization-warning">
+                {% for normalization_warning in normalization_warnings %}
+                    <p>{{ normalization_warning }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="report-title-cont">
             Web interface for creation and customization of Rainbow Grades for this course.
             <a target=_blank

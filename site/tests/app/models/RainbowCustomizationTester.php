@@ -28,7 +28,7 @@ class RainbowCustomizationTester extends BaseUnitTest {
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->rainbow_dir, 'gui_customization.json'), [
             'gradeables' => [
                 [
-                    'type' => 'legacy-bucket',
+                    'type' => 'Tests',
                     'count' => 1,
                     'remove_lowest' => 0,
                     'percent' => 0.25,
@@ -64,11 +64,14 @@ class RainbowCustomizationTester extends BaseUnitTest {
         $customization->buildCustomization();
 
         $customization_data = $customization->getCustomizationData();
-        $this->assertSame([], $customization_data['legacy-bucket']);
+        $this->assertSame([], $customization_data['Tests']);
         $this->assertSame('hw1', $customization_data['homework'][0]['id']);
-        $this->assertSame([], $customization->getPerGradeableCurves()['legacy-bucket']);
+        $this->assertSame([
+            'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.'
+        ], $customization->getNormalizationWarnings());
+        $this->assertSame([], $customization->getPerGradeableCurves()['Tests']);
         $this->assertSame([], $customization->getPerGradeableCurves()['homework']);
-        $this->assertSame(25, $customization->getBucketPercentages()['legacy-bucket']);
+        $this->assertSame(25, $customization->getBucketPercentages()['Tests']);
         $this->assertSame(75, $customization->getBucketPercentages()['homework']);
     }
 }

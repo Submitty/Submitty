@@ -29,7 +29,7 @@ class NullOutput extends Output {
     }
 
     public function renderTwigTemplate(string $filename, array $context = []): string {
-        $this->twigOutput[] = [$filename, $context];
+        $this->twig_output[] = [$filename, $context];
         return '';
     }
 
