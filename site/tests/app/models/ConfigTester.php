@@ -357,6 +357,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "default_locale" => "default",
             "locale" => ['modified' => false],
             'course_material_file_upload_limit_mb' => 100,
+            'max_course_material_storage_mb' => 1000,
         ];
         $actual = $config->toArray();
 
