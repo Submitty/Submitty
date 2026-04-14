@@ -454,7 +454,7 @@ class SubmissionController extends AbstractController {
             //write timestamp file
             @file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_str . "\n");
 
-            //update database
+            //update database / set version number
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
 
             //add to grading queue
@@ -487,7 +487,10 @@ class SubmissionController extends AbstractController {
                 "vcs_checkout" => false
             ];
 
-            @file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX);
+            //add file to directory which will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
 
             $success_count++;
         }
