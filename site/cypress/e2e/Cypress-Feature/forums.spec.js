@@ -220,7 +220,7 @@ const submitCreateThreadRequest = (title, content) => {
         'markdown_status': 0,
         'lock_thread_date': '',
         'thread_post_content': content,
-        'cat[]': '2', // "Question" category
+        'cat[]': '2', // "Homework Help" category
         'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
         'thread_status': -1,
     };
@@ -358,7 +358,7 @@ describe('Should test WebSocket functionality', () => {
             cy.get('@thread').within(() => {
                 cy.get('[data-testid="thread-list-item"]').should('contain', title5);
                 cy.get('.thread-content').should('contain', content4);
-                cy.get('.label_forum').should('contain', 'Question');
+                cy.get('.label_forum').should('contain', 'Homework Help');
             });
 
             // Verify the server response data matches the DOM components

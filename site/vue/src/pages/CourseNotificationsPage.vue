@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
 defineProps<{
@@ -13,7 +12,7 @@ defineProps<{
   >
     <NotificationsDisplay
       :notifications="notifications"
-      :unseenCount="-1"
+      :unseen-count="-1"
       :course="true"
     />
   </div>
