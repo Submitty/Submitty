@@ -1,0 +1,129 @@
+[4mread[24m(2)                      System Calls Manual                     [4mread[24m(2)
+
+[1mNAME[0m
+       read - read from a file descriptor
+
+[1mLIBRARY[0m
+       Standard C library ([4mlibc[24m, [4m-lc[24m)
+
+[1mSYNOPSIS[0m
+       [1m#include <unistd.h>[0m
+
+       [1mssize_t read(int [4m[22mfd[24m[1m, void [4m[22mbuf[24m[1m[.[4m[22mcount[24m[1m], size_t [4m[22mcount[24m[1m);[0m
+
+[1mDESCRIPTION[0m
+       [1mread[22m()  attempts  to  read  up to [4mcount[24m bytes from file descriptor [4mfd[0m
+       into the buffer starting at [4mbuf[24m.
+
+       On files that support seeking, the read operation  commences  at  the
+       file  offset,  and  the  file  offset is incremented by the number of
+       bytes read.  If the file offset is at or past the  end  of  file,  no
+       bytes are read, and [1mread[22m() returns zero.
+
+       If  [4mcount[24m  is zero, [1mread[22m() [4mmay[24m detect the errors described below.  In
+       the absence of any errors, or if [1mread[22m() does not check for errors,  a
+       [1mread[22m() with a [4mcount[24m of 0 returns zero and has no other effects.
+
+       According  to POSIX.1, if [4mcount[24m is greater than [1mSSIZE_MAX[22m, the result
+       is implementation-defined; see NOTES for the upper limit on Linux.
+
+[1mRETURN VALUE[0m
+       On success, the number of bytes read is returned (zero indicates  end
+       of  file),  and  the file position is advanced by this number.  It is
+       not an error if this number is smaller than the number of  bytes  re‐
+       quested; this may happen for example because fewer bytes are actually
+       available  right  now (maybe because we were close to end-of-file, or
+       because we are reading from a pipe, or from a terminal),  or  because
+       [1mread[22m() was interrupted by a signal.  See also NOTES.
+
+       On error, -1 is returned, and [4merrno[24m is set to indicate the error.  In
+       this  case, it is left unspecified whether the file position (if any)
+       changes.
+
+[1mERRORS[0m
+       [1mEAGAIN [22mThe file descriptor [4mfd[24m refers to a file other  than  a  socket
+              and  has  been  marked  nonblocking ([1mO_NONBLOCK[22m), and the read
+              would block.  See [1mopen[22m(2) for further details  on  the  [1mO_NON‐[0m
+              [1mBLOCK [22mflag.
+
+       [1mEAGAIN [22mor [1mEWOULDBLOCK[0m
+              The  file descriptor [4mfd[24m refers to a socket and has been marked
+              nonblocking  ([1mO_NONBLOCK[22m),   and   the   read   would   block.
+              POSIX.1-2001 allows either error to be returned for this case,
+              and  does  not require these constants to have the same value,
+              so a portable application should check for both possibilities.
+
+       [1mEBADF  [4m[22mfd[24m is not a valid file descriptor or is not open for reading.
+
+       [1mEFAULT [4m[22mbuf[24m is outside your accessible address space.
+
+       [1mEINTR  [22mThe call was interrupted by a signal before any data was read;
+              see [1msignal[22m(7).
+
+       [1mEINVAL [4m[22mfd[24m is attached to an object which is unsuitable  for  reading;
+              or  the file was opened with the [1mO_DIRECT [22mflag, and either the
+              address specified in [4mbuf[24m, the value specified in [4mcount[24m, or the
+              file offset is not suitably aligned.
+
+       [1mEINVAL [4m[22mfd[24m was created via a call to [1mtimerfd_create[22m(2) and  the  wrong
+              size  buffer  was  given  to [1mread[22m(); see [1mtimerfd_create[22m(2) for
+              further information.
+
+       [1mEIO    [22mI/O error.  This will happen for example when the  process  is
+              in a background process group, tries to read from its control‐
+              ling  terminal,  and either it is ignoring or blocking [1mSIGTTIN[0m
+              or its process group is orphaned.   It  may  also  occur  when
+              there  is  a  low-level I/O error while reading from a disk or
+              tape.  A further possible cause of [1mEIO [22mon  networked  filesys‐
+              tems  is  when an advisory lock had been taken out on the file
+              descriptor and this lock has been lost.  See  the  [4mLost[24m  [4mlocks[0m
+              section of [1mfcntl[22m(2) for further details.
+
+       [1mEISDIR [4m[22mfd[24m refers to a directory.
+
+       Other errors may occur, depending on the object connected to [4mfd[24m.
+
+[1mSTANDARDS[0m
+       POSIX.1-2008.
+
+[1mHISTORY[0m
+       SVr4, 4.3BSD, POSIX.1-2001.
+
+[1mNOTES[0m
+       On  Linux,  [1mread[22m()  (and  similar system calls) will transfer at most
+       0x7ffff000 (2,147,479,552) bytes, returning the number of bytes actu‐
+       ally transferred.  (This is true on both 32-bit and 64-bit systems.)
+
+       On NFS filesystems, reading small amounts of  data  will  update  the
+       timestamp  only the first time, subsequent calls may not do so.  This
+       is caused by client side attribute caching, because most if  not  all
+       NFS  clients  leave  [4mst_atime[24m  (last file access time) updates to the
+       server, and client side reads satisfied from the client's cache  will
+       not  cause [4mst_atime[24m updates on the server as there are no server-side
+       reads.  UNIX semantics can be obtained by disabling  client-side  at‐
+       tribute  caching,  but in most situations this will substantially in‐
+       crease server load and decrease performance.
+
+[1mBUGS[0m
+       According to POSIX.1-2008/SUSv4 Section XSI 2.9.7  ("Thread  Interac‐
+       tions with Regular File Operations"):
+
+           All  of  the  following functions shall be atomic with respect to
+           each other in the effects specified in POSIX.1-2008 when they op‐
+           erate on regular files or symbolic links: ...
+
+       Among the APIs subsequently listed  are  [1mread[22m()  and  [1mreadv[22m(2).   And
+       among   the  effects  that  should  be  atomic  across  threads  (and
+       processes) are updates of the file  offset.   However,  before  Linux
+       3.14, this was not the case: if two processes that share an open file
+       description  (see [1mopen[22m(2)) perform a [1mread[22m() (or [1mreadv[22m(2)) at the same
+       time, then the I/O operations were not atomic with respect to  updat‐
+       ing  the  file  offset,  with  the  result  that the reads in the two
+       processes might (incorrectly) overlap in the blocks of data that they
+       obtained.  This problem was fixed in Linux 3.14.
+
+[1mSEE ALSO[0m
+       [1mclose[22m(2), [1mfcntl[22m(2),  [1mioctl[22m(2),  [1mlseek[22m(2),  [1mopen[22m(2),  [1mpread[22m(2),  [1mread‐[0m
+       [1mdir[22m(2), [1mreadlink[22m(2), [1mreadv[22m(2), [1mselect[22m(2), [1mwrite[22m(2), [1mfread[22m(3)
+
+Linux man-pages 6.7              2024-03-12                          [4mread[24m(2)

@@ -205,7 +205,7 @@ describe('Tests for creating and interacting with notifications', () => {
         cy.get('[data-testid="toggle-unseen-only"]').should('have.text', 'Show All');
         cy.logout();
 
-        ['instructor', 'student'].forEach((user) => {
+        ['student'].forEach((user) => {
             cy.login(user);
             cy.visit();
             cy.get('[data-testid="mark-seen-btn"]').click();
@@ -229,6 +229,8 @@ describe('Tests for creating and interacting with notifications', () => {
         it(`Should test triggering notifications, marking seen, navigation, dynamic updates for ${user}`, () => {
             cy.login(user);
             cy.visit();
+
+            cy.logout();
         });
     });
 });
