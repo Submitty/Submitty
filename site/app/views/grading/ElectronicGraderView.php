@@ -232,7 +232,7 @@ class ElectronicGraderView extends AbstractView {
                 $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
-                if ($section['total_components'] == 0) {
+                if ($section['total_components'] === 0) {
                     $section['percentage'] = 0;
                     $section['verified_percentage'] = 0;
                 }
@@ -1514,7 +1514,7 @@ HTML;
                             $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER
                             && (
                                 $graded_gradeable->getGradeable()->isPdfUpload()
-                                || $graded_gradeable->getGradeable()->getLimitedAccessBlind() == 2
+                                || $graded_gradeable->getGradeable()->getLimitedAccessBlind() === 2
                             )
                             && $file["name"] === "upload.pdf"
                         )

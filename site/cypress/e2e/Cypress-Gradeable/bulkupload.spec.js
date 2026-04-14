@@ -96,17 +96,21 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
 
-        cy.get('[data-testid="grade-table"]').contains('student')
-            .parent()
+        cy.get('[data-testid="agree-popup-btn"]').scrollIntoView().click();
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
             .click();
 
-        cy.get('data-testid="show-submission"]').click();
+        cy.get('[data-testid="show-submission"]').click();
         cy.get('#submissions').click();
 
         cy.contains('upload.pdf').should('not.exist');
 
         cy.logout();
+        cy.wait(5000);
 
         // Enable page assignments
         cy.login('instructor');
@@ -118,25 +122,23 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('#yes_pdf_page').click();
 
         cy.logout();
+        cy.wait(5000);
 
 
         // Mentor checks again
         cy.login('grader');
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
-        cy.get('[data-testid="popup-window"]').scrollTo('bottom');
-        cy.get('#agree-popup-btn').click;
-
-        cy.get('[data-testid="grade-table"]').contains('student')
-            .parent()
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
             .click();
 
-        cy.get('data-testid="show-submission"]').click();
         cy.get('#submissions').click();
-
         cy.contains('upload.pdf').should('not.exist');
-
+        cy.logout();
 
         // Disable both conditions
         cy.login('instructor');
@@ -147,23 +149,22 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('#unblind_limited_access_grading').click();
 
         cy.contains('Rubric').click();
-        
-        cy.get('#no_pdf_page]').click();
-
+        cy.get('#no_pdf_page').click();
         cy.logout();
+        cy.wait(5000);
+        
         // Mentor now sees upload.pdf
         cy.login('grader');
-
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
 
-        cy.get('[data-testid="grade-table"]').contains('student')
-            .parent()
+        cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
             .click();
 
-        cy.get('data-testid="show-submission"]').click();
         cy.get('#submissions').click();
-
         cy.contains('upload.pdf').should('exist');
 
     });

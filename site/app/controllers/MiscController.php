@@ -104,7 +104,7 @@ class MiscController extends AbstractController {
         }
 
         if (!str_starts_with($file_path, $check_path)) {
-            return MultiResponse::JsonOnlyResponse(
+            return JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
         }
@@ -120,7 +120,7 @@ class MiscController extends AbstractController {
 
             if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
                 $pdf_pages_assigned = $gradeable->isPdfUpload();
-                $blind_grading_enabled = $gradeable->getLimitedAccessBlind() == 2;
+                $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
 
                 if ($pdf_pages_assigned || $blind_grading_enabled) {
                     return MultiResponse::JsonOnlyResponse(
@@ -228,7 +228,7 @@ class MiscController extends AbstractController {
 
                 if ($gradeable !== false) {
                     $pdf_pages_assigned = $gradeable->isPdfUpload();
-                    $blind_grading_enabled = $gradeable->getLimitedAccessBlind() == 2;
+                    $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
 
                     if ($pdf_pages_assigned || $blind_grading_enabled) {
                         $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
