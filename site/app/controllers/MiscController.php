@@ -123,9 +123,7 @@ class MiscController extends AbstractController {
                 $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
 
                 if ($pdf_pages_assigned || $blind_grading_enabled) {
-                    return MultiResponse::JsonOnlyResponse(
-                        JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
-                    );
+                    return JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG);
                 }
             }
         }
