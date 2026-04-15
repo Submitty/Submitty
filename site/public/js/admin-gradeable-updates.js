@@ -440,6 +440,68 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
+
+    const ta_beta_testing_start_date = $('#date_ta_view').val();
+    const submission_open_date = $('#date_submit').val();
+    const submission_due_date = $('#date_due').val();
+    const manual_grading_start_date = $('#date_grade').val();
+    const grades_release_date = $('#date_released').val();
+
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
+    }
+    else {
+        // hide/show element when ta beta testing date is after the grade start date
+        if (ta_beta_testing_start_date > manual_grading_start_date) {
+            $('#ta-beta-testing-after-grading-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-grading-dates-warning').hide();
+        }
+    }
+
+    if ($('#has_due_date_yes').is(':checked')) {
+        // hide/show element when open submission date is after the submission due date
+        if (submission_open_date > submission_due_date) {
+            $('#open-submission-after-submission-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#open-submission-after-submission-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#radio_electronic_file').is(':checked') && $('#has_due_date_yes').is(':checked')) {
+        if ($('#yes_ta_grade').is(':checked')) {
+            // hide/show element when submission due date is after the manual grading start date
+            if (submission_due_date > manual_grading_start_date) {
+                $('#submission-due-after-grading-open-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-open-dates-warning').hide();
+            }
+        }
+        else if ($('#has_release_date_yes').is(':checked')) {
+            // hide/show element when submission due date is after the grades release
+            if (submission_due_date > grades_release_date) {
+                $('#submission-due-after-grading-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-released-dates-warning').hide();
+            }
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
@@ -1379,6 +1441,8 @@ function loadCodeMirror() {
         },
     );
     updateEditorIcons();
+    codeMirrorInstance.refresh();
+    codeMirrorInstance.focus();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
