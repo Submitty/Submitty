@@ -770,14 +770,16 @@ class ForumController extends AbstractController {
         $type = "";
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
+        $edited_post_preview = $this->previewText($post->getContent());
+        $edited_post_subject_preview = $this->previewText($post->getContent(), 100);
         if ($did_edit_thread) {
             $subject = "Thread Edited: " . $thread->getTitle();
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . $post->getContent();
-            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $subject = "Post Edited: " . $edited_post_subject_preview;
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
