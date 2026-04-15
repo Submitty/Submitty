@@ -30,6 +30,27 @@ concurrency:
 
 
 jobs:
+  verify-migration-freshness:
+    name: Verify Migration Datestamp
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Verify migration datestamp freshness
+        run: python .github/scripts/verify_migration_datestamp.py
+        env:
+          MAX_MIGRATION_AGE_DAYS: 7
+
+          
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-22.04
