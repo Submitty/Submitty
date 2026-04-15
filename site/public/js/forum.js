@@ -2084,6 +2084,7 @@ function loadThreadHandler() {
 
                 setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
+                initThreadRefAutocomplete();
 
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
@@ -2345,12 +2346,146 @@ function setFilterState(state) {
     updateThreads(true, null);
 }
 
+function initThreadRefAutocomplete() {
+    if (typeof window.forumThreadBaseUrl === 'undefined') {
+        return;
+    }
+
+    const DROPDOWN_ID = 'thread-ref-autocomplete-dropdown';
+    let debounceTimer = null;
+
+    function removeDropdown() {
+        const existing = document.getElementById(DROPDOWN_ID);
+        if (existing) {
+            existing.remove();
+        }
+    }
+
+    function showDropdown(textarea, threadId, title) {
+        removeDropdown();
+
+        const dropdown = document.createElement('div');
+        dropdown.id = DROPDOWN_ID;
+        dropdown.setAttribute('role', 'listbox');
+        dropdown.style.cssText = 'position:absolute;background:#fff;border:1px solid #ccc;border-radius:4px;'
+            + 'box-shadow:0 2px 6px rgba(0,0,0,.2);padding:4px 0;z-index:9999;min-width:200px;max-width:400px;';
+
+        const item = document.createElement('div');
+        item.setAttribute('role', 'option');
+        item.style.cssText = 'padding:6px 12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+        item.textContent = `#${threadId} — ${title}`;
+
+        item.addEventListener('mouseenter', () => {
+            item.style.background = '#f0f4ff';
+        });
+        item.addEventListener('mouseleave', () => {
+            item.style.background = '';
+        });
+        item.addEventListener('mousedown', (e) => {
+            // Use mousedown so it fires before blur hides the dropdown
+            e.preventDefault();
+            insertThreadRef(textarea, threadId);
+            removeDropdown();
+        });
+
+        dropdown.appendChild(item);
+
+        // Position below the textarea
+        const rect = textarea.getBoundingClientRect();
+        dropdown.style.top = `${rect.bottom + window.scrollY + 2}px`;
+        dropdown.style.left = `${rect.left + window.scrollX}px`;
+
+        document.body.appendChild(dropdown);
+    }
+
+    function insertThreadRef(textarea, threadId) {
+        const val = textarea.value;
+        const pos = textarea.selectionStart;
+        // Replace the trailing #digits being typed
+        const before = val.slice(0, pos);
+        const after = val.slice(pos);
+        const replaced = before.replace(/#\d*$/, `#${threadId}`);
+        textarea.value = replaced + after;
+        const newPos = replaced.length;
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
+        // Trigger input event so autosave picks up the change
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function attachToTextarea(textarea) {
+        if (textarea.dataset.threadRefAutocomplete === '1') {
+            return;
+        }
+        textarea.dataset.threadRefAutocomplete = '1';
+
+        textarea.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const val = textarea.value;
+            const pos = textarea.selectionStart;
+            const textUpToCursor = val.slice(0, pos);
+            const match = textUpToCursor.match(/#(\d+)$/);
+
+            if (!match) {
+                removeDropdown();
+                return;
+            }
+
+            const threadId = parseInt(match[1], 10);
+            if (isNaN(threadId) || threadId <= 0) {
+                removeDropdown();
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                $.ajax({
+                    url: buildCourseUrl(['forum', 'threads', 'lookup']),
+                    type: 'GET',
+                    data: { thread_id: threadId },
+                    success: function (response) {
+                        try {
+                            const json = typeof response === 'string' ? JSON.parse(response) : response;
+                            if (json.status === 'success') {
+                                showDropdown(textarea, json.data.id, json.data.title);
+                            }
+                            else {
+                                removeDropdown();
+                            }
+                        }
+                        catch (e) {
+                            removeDropdown();
+                        }
+                    },
+                    error: function () {
+                        removeDropdown();
+                    },
+                });
+            }, 300);
+        });
+
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                removeDropdown();
+            }
+        });
+
+        textarea.addEventListener('blur', () => {
+            // Small delay so mousedown on dropdown item fires first
+            setTimeout(removeDropdown, 150);
+        });
+    }
+
+    // Attach to all existing forum post textareas
+    document.querySelectorAll('textarea.thread_post_content').forEach(attachToTextarea);
+}
+
 function thread_post_handler() {
     $('.submit_unresolve').click(function (event) {
         const post_box_id = $(this).data('post_box_id');
         $(`#thread_status_input_${post_box_id}`).val(-1);
         return true;
     });
+    initThreadRefAutocomplete();
 }
 
 function forumFilterBar() {
