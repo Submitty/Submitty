@@ -10,12 +10,12 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('body').then(($body) => {
             // Reset the state on BEFORE actions, so reruns are possible.
             if ($body.find('[data-testid="api_testing"] [title="Delete Gradeable"]').length > 0) {
-                    cy.get('[data-testid="api_testing"] [title="Delete Gradeable"]').click();
-                    cy.get('[data-testid="confirm-delete-gradeable').click();
+                cy.get('[data-testid="api_testing"] [title="Delete Gradeable"]').click();
+                cy.get('[data-testid="confirm-delete-gradeable').click();
             }
             if ($body.find('[data-testid="hw-1"] [title="Delete Gradeable"]').length > 0) {
-                    cy.get('[data-testid="hw-1"] [title="Delete Gradeable"]').click();
-                    cy.get('[data-testid="confirm-delete-gradeable').click();
+                cy.get('[data-testid="hw-1"] [title="Delete Gradeable"]').click();
+                cy.get('[data-testid="confirm-delete-gradeable').click();
             }
         });
     });
