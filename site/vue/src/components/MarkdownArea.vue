@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import Markdown from './Markdown.vue';
+import { buildCourseUrl } from '../../../ts/utils/server';
+
+declare global {
+  interface Window {
+    thread_list?: Array<{ id?: number | string; title?: string } | string>;
+  }
+}
 
 interface Props {
     markdownAreaId: string;
@@ -141,14 +148,34 @@ function handleKeyup(event: Event) {
     emit('keyup', event);
 
     // Call global function if specified
-    if (
-        props.textareaOnKeyup
-        && window[props.textareaOnKeyup as keyof Window]
-    ) {
+    if (props.textareaOnKeyup && window[props.textareaOnKeyup as keyof Window]) {
         (window[props.textareaOnKeyup as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
             textareaRef.value,
         );
+    }
+
+    // FIX: Completely exit if we are in the Normal editor
+    if (!showHeader.value) return; 
+
+    // --- Autocomplete Trigger ---
+    const textarea = textareaRef.value;
+    const jq = (window as any).$; 
+    if (textarea && jq && jq.fn.autocomplete) {
+        const e = event as KeyboardEvent;
+        const caret = textarea.selectionStart;
+        const text = textarea.value.substring(0, caret);
+
+        const isTypingNumber = e.key.length === 1 && /[0-9]/.test(e.key);
+        const isHittingBackspace = e.key === 'Backspace';
+        const isAttachedToHash = /#\d*$/.test(text);
+
+        if (e.key === '#' || (isAttachedToHash && (isTypingNumber || isHittingBackspace))) {
+            jq(textarea).autocomplete('search', '');
+        } 
+        else if (e.key === ' ' || e.key === 'Escape' || !isAttachedToHash) {
+            jq(textarea).autocomplete('close');
+        }
     }
 }
 
@@ -226,6 +253,13 @@ function toggleMarkdown() {
     }
 }
 
+watch(showHeader, (isMarkdownEnabled) => {
+    const jq = (window as any).$;
+    if (textareaRef.value && jq && jq.fn.autocomplete) {
+        jq(textareaRef.value).autocomplete(isMarkdownEnabled ? 'enable' : 'disable');
+    }
+});
+
 function syncMarkdownToggle() {
     if (props.markdownStatusId) {
         const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
@@ -235,6 +269,169 @@ function syncMarkdownToggle() {
         }
     }
 }
+
+function normalizeThreadTitle(rawTitle: string, id: number): string {
+  let title = rawTitle.trim();
+  // Strip common prefixed id formats from list data to avoid duplicate id display.
+  title = title.replace(new RegExp(`^\\(${id}\\)\\s*`), '');
+  title = title.replace(new RegExp(`^#${id}\\s*`), '');
+  return title.trim();
+}
+
+  function parseThreadListEntry(entry: { id?: number | string; title?: string } | string): { id: number; title: string } | null {
+    if (typeof entry === 'string') {
+      const idMatch = entry.match(/#(\d+)/);
+      if (!idMatch) {
+        return null;
+      }
+      const id = parseInt(idMatch[1] ?? '', 10);
+      if (Number.isNaN(id) || id <= 0) {
+        return null;
+      }
+      const title = normalizeThreadTitle(entry.replace(/<\s*#\d+\s*>/g, ''), id);
+      return { id, title };
+    }
+
+    const parsedId = parseInt(String(entry.id ?? ''), 10);
+    if (Number.isNaN(parsedId) || parsedId <= 0) {
+      return null;
+    }
+    return {
+      id: parsedId,
+      title: normalizeThreadTitle(String(entry.title ?? ''), parsedId),
+    };
+  }
+
+  function getThreadSource(): Array<{ label: string; value: string }> {
+    const normalizedThreads: Array<{ id: number; title: string }> = [];
+    const globalList = (window as Window).thread_list;
+
+    if (Array.isArray(globalList)) {
+      for (const entry of globalList) {
+        const parsed = parseThreadListEntry(entry);
+        if (parsed !== null) {
+          normalizedThreads.push(parsed);
+        }
+      }
+    }
+
+    // Always merge current sidebar threads so new threads show without refresh.
+    const threadLinks = document.querySelectorAll<HTMLAnchorElement>('.thread_box_link[data-thread_id]');
+    threadLinks.forEach((link) => {
+      const id = parseInt(link.dataset.thread_id ?? '', 10);
+      if (!Number.isNaN(id) && id > 0) {
+        normalizedThreads.push({
+          id,
+          title: normalizeThreadTitle(link.dataset.thread_title ?? '', id),
+        });
+      }
+    });
+
+    const seen = new Set<number>();
+    return normalizedThreads
+      .filter((thread) => {
+        if (seen.has(thread.id)) {
+          return false;
+        }
+        seen.add(thread.id);
+        return true;
+      })
+      .map((thread) => ({
+        label: `#${thread.id} ${thread.title}`.trim(),
+        value: `#${thread.id}`,
+      }));
+  }
+
+  function destroyAutocomplete(): void {
+    const jq = (window as any).$;
+    const textarea = textareaRef.value;
+    if (!jq || !jq.fn.autocomplete || !textarea) {
+      return;
+    }
+    if (jq(textarea).data('ui-autocomplete')) {
+      jq(textarea).autocomplete('destroy');
+    }
+  }
+
+  function initializeAutocomplete(): void {
+    const jq = (window as any).$;
+    const textarea = textareaRef.value;
+    if (!jq || !jq.fn.autocomplete || !textarea) {
+      return;
+    }
+
+    destroyAutocomplete();
+    jq(textarea).autocomplete({
+      appendTo: jq(textarea).parent(),
+      source: function (_request: any, response: any) {
+        if (!showHeader.value) {
+          response([]);
+          return;
+        }
+        const localTextarea = textareaRef.value;
+        if (!localTextarea) {
+          response([]);
+          return;
+        }
+
+        const caret = localTextarea.selectionStart;
+        const textToCaret = localTextarea.value.substring(0, caret);
+        const match = textToCaret.match(/#(\d*)$/);
+        if (!match) {
+          response([]);
+          return;
+        }
+
+        const term = match[1] || '';
+        const filtered = getThreadSource().filter((item) =>
+          item.value.startsWith(`#${term}`) || item.label.toLowerCase().includes(term.toLowerCase()),
+        );
+        response(filtered);
+      },
+      minLength: 0,
+      position: { my: 'left top', at: 'left bottom+5' },
+      select: function (_event: any, ui: any) {
+        const localTextarea = textareaRef.value;
+        if (!localTextarea) {
+          return false;
+        }
+
+        const caret = localTextarea.selectionStart;
+        const textToCaret = localTextarea.value.substring(0, caret);
+        const lastHashIndex = textToCaret.lastIndexOf('#');
+
+        if (lastHashIndex !== -1) {
+          const before = localTextarea.value.substring(0, lastHashIndex);
+          const after = localTextarea.value.substring(caret);
+          localTextarea.value = before + ui.item.value + ' ' + after;
+
+          const newPos = before.length + ui.item.value.length + 1;
+          localTextarea.setSelectionRange(newPos, newPos);
+          localTextarea.focus();
+          localTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        jq(this).autocomplete('close');
+        return false;
+      },
+    });
+    jq(textarea).autocomplete(showHeader.value ? 'enable' : 'disable');
+  }
+
+onMounted(() => {
+    syncMarkdownToggle();
+    initializeAutocomplete();
+});
+
+  watch(textareaRef, () => {
+    nextTick(() => {
+      initializeAutocomplete();
+    });
+  });
+
+  onBeforeUnmount(() => {
+    destroyAutocomplete();
+  });
 </script>
 
 <template>
@@ -369,27 +566,30 @@ function syncMarkdownToggle() {
         tabindex="-1"
         class="screen-reader"
       >{{ markdownAreaId }}</label>
-      <textarea
-        v-show="mode === 'edit'"
-        :id="markdownAreaId"
-        ref="textareaRef"
-        v-model="content"
-        :data-testid="markdownAreaId"
-        class="markdown-textarea fill-available"
-        :class="[props.class]"
-        :name="markdownAreaName"
-        :placeholder="placeholder"
-        rows="10"
-        cols="30"
-        :maxlength="maxLength"
-        :required="required"
-        :data-previous-comment="dataPreviousComment"
-        @keyup="handleKeyup"
-        @keydown="handleKeydown"
-        @paste="handlePaste"
-        @change="handleChange"
-        @input="handleInput"
-      />
+      <div style="position:relative;">
+        <textarea
+          v-show="mode === 'edit'"
+          :id="markdownAreaId"
+          ref="textareaRef"
+          v-model="content"
+          :data-testid="markdownAreaId"
+          class="markdown-textarea fill-available"
+          :class="[props.class]"
+          :name="markdownAreaName"
+          :placeholder="placeholder"
+          rows="10"
+          cols="30"
+          :maxlength="maxLength"
+          :required="required"
+          :data-previous-comment="dataPreviousComment"
+          @keyup="handleKeyup"
+          @keydown="handleKeydown"
+          @paste="handlePaste"
+          @change="handleChange"
+          @input="handleInput"
+        />
+        <!-- jQuery UI autocomplete handles the dropdown, nothing to render here -->
+      </div>
       <div
         v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
@@ -401,3 +601,51 @@ function syncMarkdownToggle() {
     </div>
   </div>
 </template>
+<style>
+.markdown-area .ui-autocomplete.ui-widget-content {
+  position: absolute;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  background-color: #ffffff !important;
+  border: 1px solid #c0c0c0 !important;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000 !important;
+  list-style: none;
+}
+
+.markdown-area .ui-autocomplete .ui-menu-item-wrapper {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333333 !important;
+  transition: background-color 0.1s ease;
+}
+
+.markdown-area .ui-autocomplete .ui-menu-item-wrapper:hover,
+.markdown-area .ui-autocomplete .ui-state-active {
+  background-color: #007bff !important;
+  color: #ffffff !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete.ui-widget-content {
+  background-color: #2b2b2b !important;
+  border: 1px solid #444444 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-menu-item-wrapper {
+  color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-menu-item-wrapper:hover,
+[data-theme="dark"] .markdown-area .ui-autocomplete .ui-state-active {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+</style>

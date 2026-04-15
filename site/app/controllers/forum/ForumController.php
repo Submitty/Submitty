@@ -1191,6 +1191,10 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
+        // Ensure jQuery UI is loaded for autocomplete dropdowns
+        $this->core->getOutput()->addVendorJs('jquery-ui/jquery-ui.min.js');
+        $this->core->getOutput()->addVendorCss('jquery-ui/jquery-ui.min.css');
+
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
         $threads = $repo->getAllThreads(
@@ -1225,6 +1229,10 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        // Ensure jQuery UI is loaded for autocomplete dropdowns
+        $this->core->getOutput()->addVendorJs('jquery-ui/jquery-ui.min.js');
+        $this->core->getOutput()->addVendorCss('jquery-ui/jquery-ui.min.css');
+
         $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
         if (is_null($thread)) {
             $this->core->addErrorMessage("Requested thread does not exist.");
@@ -1257,11 +1265,17 @@ class ForumController extends AbstractController {
             $user,
             $block_number
         );
+
+        // Build thread list for autocomplete: "Thread Title <#thread_id>"
+        $thread_list = array_map(function($t) {
+            return $t->getTitle() . ' <#' . $t->getId() . '>';
+        }, $threads);
+
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true, ['thread_list' => $thread_list]);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, false, ['thread_list' => $thread_list]);
         }
     }
 
@@ -1336,6 +1350,7 @@ class ForumController extends AbstractController {
                             && $post->getAuthor()->getId() == $version->getEditAuthor()->getId()
                             && $post->isAnonymous()) ? '' : $version->getEditAuthor()->getId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "thread_list" => $this->getThreadListForAutocomplete($thread),
                 "post_content" => $version->getContent(),
                 "render_markdown" => false,
                 "post_attachment" => ForumUtils::getForumAttachments(
@@ -1547,6 +1562,39 @@ class ForumController extends AbstractController {
         return JsonResponse::getSuccessResponse(['users' => $users]);
     }
 
+
+    #[Route("/courses/{_semester}/{_course}/forum/threads/search", methods: ["GET"])]
+    public function searchThreads(): JsonResponse {
+        $query = trim($_GET['q'] ?? '');
+        $threads = $this->core->getQueries()->searchThreads($query);
+        $results = [];
+        foreach ($threads as $thread) {
+            $results[] = [
+                'id' => (int) $thread['id'],
+                'title' => $thread['title'],
+            ];
+        }
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/threads/resolve", methods: ["GET"])]
+    public function resolveThreadReferences(): JsonResponse {
+        $ids_param = trim($_GET['ids'] ?? '');
+        if (empty($ids_param)) {
+            return JsonResponse::getSuccessResponse([]);
+        }
+        $ids = array_filter(array_map('intval', explode(',', $ids_param)), function ($id) {
+            return $id > 0;
+        });
+        $results = [];
+        foreach ($ids as $id) {
+            $title = $this->core->getQueries()->getThreadTitleIfExists($id);
+            if ($title !== null) {
+                $results[$id] = $title;
+            }
+        }
+        return JsonResponse::getSuccessResponse($results);
+    }
 
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update

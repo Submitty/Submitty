@@ -1,3 +1,7 @@
+{% set thread_list = thread_list is defined ? thread_list : [] %}
+<script>
+    window.thread_list = {{ thread_list|json_encode|raw }};
+</script>
 <div class="thread-post-form"
     {# {% if post_box_id %} #}
         data-post_box_id="{{ post_box_id }}"
@@ -75,6 +79,7 @@
 
     {% endif %}
     </div>
+    {# thread_list script block removed as it is already set at the top #}
     <div class="form-group row">
         {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
         {% if first_post_id is defined %}
