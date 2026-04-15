@@ -111,16 +111,27 @@
 .markdown-area {
     border-radius: 6px;
     border: 1px solid var(--standard-light-gray);
+    container-type: inline-size;
 }
 
 /* header (.markdown-area-header + children) */
 .markdown-area-header {
     display: flex;
     flex-direction: row;
+    position: relative;
+    align-items: center;
     background-color: var(--standard-pale-gray);
     padding: 0 10px;
     border-radius: 6px 6px 0 0;
-    overflow-x: hidden;
+    overflow: visible;
+}
+
+.markdown-area-header::after {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px 6px 0 0;
+    pointer-events: none;
+    content: "";
 }
 
 [data-theme="dark"] .markdown-area-header {
@@ -129,16 +140,18 @@
 
 .markdown-area-toolbar {
     display: flex;
+    min-width: 0;
     margin-left: auto;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: visible;
     margin-bottom: 1px;
 }
 
 .markdown-mode-buttons {
     display: flex;
+    flex-shrink: 0;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
 .markdown-mode-tab {
@@ -217,7 +230,169 @@
 }
 
 .btn-markdown {
+    flex-shrink: 0;
     margin-left: 5px;
+    margin-bottom: 1px;
+}
+
+.markdown-more-menu {
+    display: none;
+    position: static;
+    margin: 0 0 1px 5px;
+}
+
+.markdown-more-menu summary {
+    list-style: none;
+}
+
+.markdown-more-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.markdown-more-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 34px;
+    min-width: 40px;
+    padding: 6px 10px;
+    margin-left: 0;
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.markdown-more-toggle:hover,
+.markdown-more-toggle:focus,
+.markdown-more-menu[open] .markdown-more-toggle {
+    background: var(--default-white);
+    border-color: var(--standard-light-gray);
+}
+
+[data-theme="dark"] .markdown-more-toggle:hover,
+[data-theme="dark"] .markdown-more-toggle:focus,
+[data-theme="dark"] .markdown-more-menu[open] .markdown-more-toggle {
+    background: var(--standard-medium-dark-gray);
+    border-color: var(--standard-medium-dark-gray);
+}
+
+.markdown-more-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 10px;
+    z-index: 20;
+    display: none;
+    box-sizing: border-box;
+    min-width: 120px;
+    max-width: 120px;
+    flex-direction: column;
+    padding: 4px;
+    background: var(--default-white);
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
+}
+
+[data-theme="dark"] .markdown-more-dropdown {
+    background: var(--standard-deep-dark-gray);
+    border-color: var(--standard-medium-dark-gray);
+}
+
+.markdown-more-menu[open] .markdown-more-dropdown {
+    display: flex;
+}
+
+.markdown-more-item {
+    display: none;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: 26px;
+    padding: 3px 8px;
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    background: var(--standard-pale-gray);
+    color: var(--text-black);
+    text-align: left;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    line-height: 1.2;
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .markdown-more-item {
+    color: var(--text-white);
+    background: var(--standard-medium-dark-gray);
+    border-color: var(--standard-medium-dark-gray);
+}
+
+.markdown-more-item:hover,
+.markdown-more-item:focus {
+    background: var(--default-white);
+}
+
+[data-theme="dark"] .markdown-more-item:hover,
+[data-theme="dark"] .markdown-more-item:focus {
+    background: var(--standard-deep-dark-gray);
+}
+
+.markdown-more-dropdown .markdown-more-item + .markdown-more-item {
+    margin-top: 3px;
+}
+
+@container (max-width: 620px) {
+    .markdown-area-toolbar .btn-markdown-blockquote {
+        display: none;
+    }
+
+    .markdown-more-menu,
+    .markdown-more-blockquote {
+        display: flex;
+    }
+}
+
+@container (max-width: 560px) {
+    .markdown-area-toolbar .btn-markdown-italic {
+        display: none;
+    }
+
+    .markdown-more-italic {
+        display: flex;
+    }
+}
+
+@container (max-width: 500px) {
+    .markdown-area-toolbar .btn-markdown-bold {
+        display: none;
+    }
+
+    .markdown-more-bold {
+        display: flex;
+    }
+}
+
+@container (max-width: 440px) {
+    .markdown-area-toolbar .btn-markdown-code {
+        display: none;
+    }
+
+    .markdown-more-code {
+        display: flex;
+    }
+}
+
+@container (max-width: 380px) {
+    .markdown-area-toolbar .btn-markdown-link {
+        display: none;
+    }
+
+    .markdown-more-link {
+        display: flex;
+    }
 }
 
 /* Preview Loading Spinner */
