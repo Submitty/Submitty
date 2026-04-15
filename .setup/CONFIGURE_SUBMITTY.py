@@ -558,8 +558,7 @@ if not args.worker:
             json.dump(worker_dict, workers_file, indent=4)
 
     if not os.path.isfile(CONTAINERS_JSON):
-        container_dict = {
-            "default":  [
+        default_containers = [
                           "submitty/autograding-default:latest",
                           "submitty/python:latest",
                           "submitty/clang:latest",
@@ -568,7 +567,13 @@ if not args.worker:
                           "submitty/java:latest",
                           "submitty/pdflatex:latest",
                           "submitty/jupyter:latest"
-                        ],
+                        ]
+
+        if args.setup_for_sample_courses:
+            default_containers.append("submitty/verilog:latest")
+
+        container_dict = {
+            "default":  default_containers,
             "python":   [
                           "submitty/autograding-default:latest",
                           "submitty/python:latest"
