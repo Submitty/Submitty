@@ -115,7 +115,7 @@ class MiscController extends AbstractController {
             );
         }
 
-        if ($directory === 'submissions') {
+       if ($directory === 'submissions') {
             $user = $this->core->getUser();
 
             if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
@@ -123,7 +123,9 @@ class MiscController extends AbstractController {
                 $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
 
                 if ($pdf_pages_assigned || $blind_grading_enabled) {
-                    return JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG);
+                    return new MultiResponse(
+                        JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
+                    );
                 }
             }
         }
