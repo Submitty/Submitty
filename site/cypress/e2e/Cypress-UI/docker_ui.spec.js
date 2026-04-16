@@ -37,6 +37,7 @@ describe('Docker UI Test', () => {
         cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
             const json = JSON.stringify(defaultDockerConfiguration, null, 4);
             // inside the vm, the directory exists
+            cy.log(result.code);
             if (result.code === 0) {
                 cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
                 cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
