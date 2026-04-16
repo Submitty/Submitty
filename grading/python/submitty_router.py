@@ -13,6 +13,7 @@ from datetime import timedelta
 import threading 
 import time
 import html
+import chardet
 
 class submitty_router():
   '''
@@ -75,6 +76,24 @@ class submitty_router():
   # All messages will be passed through this function for optional decoding 
   # to string
   def sequence_diagram_message_preprocess(self, message):
+    
+    if isinstance(message, str):
+        return message
+
+    if isinstance(message, bytes):
+        try:
+            encoding_prediction = chardet.detect(message)
+            encoding = encoding_prediction.get('encoding')
+            confidence = encoding_prediction.get('confidence', 0)
+
+            if encoding and confidence > 0.8:
+                return message.decode(encoding, errors='replace')
+
+            return message.decode('utf-8', errors='replace')
+
+        except Exception:
+            return str(message)
+
     return message
 
   def write_sequence_file(self, obj, status, message_type):
