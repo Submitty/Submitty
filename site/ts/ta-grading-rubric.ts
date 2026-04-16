@@ -2944,7 +2944,7 @@ function scrollToPage(page_num: number) {
                 page_num = Math.min($('#viewer > .page').length, page_num);
                 const page = $(`#pageContainer${page_num}`);
                 if (page.length) {
-                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop, 0));
+                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $('#file-view > .sticky-file-info').first().height()!, 0));
                 }
             }
             else {
