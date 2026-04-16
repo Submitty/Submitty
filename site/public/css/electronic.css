@@ -1424,8 +1424,6 @@ tr.is_publish {
     height: 100%;
     width: 100%;
     overflow: hidden;
-}
-
 .sticky-file-info {
     position: sticky;
     top: 0;
