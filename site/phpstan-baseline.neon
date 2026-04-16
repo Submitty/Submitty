@@ -1887,25 +1887,19 @@ parameters:
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
-			count: 17
+			count: 19
 			path: app/controllers/admin/UsersController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 24
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: Implicit array creation is not allowed - variable $bad_rows might not exist.
-			identifier: variable.implicitArray
-			count: 1
+			count: 25
 			path: app/controllers/admin/UsersController.php
 
 		-
 			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 3
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -2193,12 +2187,6 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -5244,12 +5232,6 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 1
-			path: app/libraries/ForumUtils.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 1
 			path: app/libraries/ForumUtils.php
 
@@ -12268,12 +12250,6 @@ parameters:
 			path: app/models/gradeable/GradeInquiry.php
 
 		-
-			rawMessage: 'Call to function array_search() requires parameter #3 to be set.'
-			identifier: function.strict
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 8
@@ -14210,7 +14186,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 3
+			count: 2
 			path: app/views/NavigationView.php
 
 		-

@@ -516,12 +516,15 @@ class NavigationView extends AbstractView {
             }
 
             // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
+            // Also treat all-hidden test cases (no visible points) as gray
+            $total_non_hidden = (int) $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+
             if (
                 $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete()
                 && (
                     !$gradeable->getAutogradingConfig()->anyPoints()
-                    || $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0
-                    && $points_percent >= 0.5
+                    || $total_non_hidden === 0
+                    || $points_percent >= 0.5
                 )
                 && $list_section == GradeableList::CLOSED
             ) {
