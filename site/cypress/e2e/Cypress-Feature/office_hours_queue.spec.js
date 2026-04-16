@@ -121,6 +121,19 @@ const studentJoinQueue = (queueName, queueCode) => {
     cy.get('[data-testid="join-queue-btn"]').click();
 };
 
+const ensureStudentOutOfQueue = () => {
+    cy.get('body').then(($body) => {
+        if ($body.find('[data-testid="leave-queue"]').length > 0) {
+            cy.get('[data-testid="leave-queue"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain', 'Removed from queue');
+        }
+        else if ($body.find('[data-testid="self-finish-help"]').length > 0) {
+            cy.get('[data-testid="self-finish-help"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain', 'Finished helping student');
+        }
+    });
+};
+
 const editAnnouncement = (text = '') => {
     // openAnnouncementSettings
     cy.get('[data-testid="toggle-announcement-settings"]').click();
@@ -306,6 +319,48 @@ describe('test office hours queue', () => {
         cy.get('@sound-switch').click();
         cy.get('@push-enabled').should('equal', false);
         cy.get('@audio-enabled').should('equal', false);
+    });
+
+    it('Verify student ID toggle (eye icon) is non-destructive', () => {
+        // Ensure the queue code is known (independent of previous tests)
+        switchUser('instructor');
+        changeQueueCode(queueName, queueCode);
+
+        // Ensure bitdiddle is in the queue
+        switchUser('bitdiddle');
+        ensureStudentOutOfQueue();
+        studentJoinQueue(queueName, queueCode);
+        cy.get('[data-testid="popup-message"]').should('contain', 'Added to queue');
+        cy.get('[data-testid="leave-queue"]').should('exist'); // Ensure DOM has updated before logout
+
+        switchUser('instructor');
+        // Ensure the queue filter is enabled (newly created queues might be hidden)
+        cy.get('body').then(($body) => {
+            if ($body.find(`.queue_current_${queueName.replace(/\W/g, '_')}:visible`).length === 0) {
+                cy.contains(queueName).click();
+            }
+        });
+
+        cy.reload(); // Force reload to ensure student appears regardless of WebSocket sync
+        // Wait for bitdiddle to appear (with retry)
+        cy.contains('bitdiddle', { timeout: 10000 }).parents('tr').as('bitdiddleRow');
+
+        // Initial state: Name visible, ID hidden
+        cy.get('@bitdiddleRow').find('.full-name').should('be.visible');
+        cy.get('@bitdiddleRow').find('.user-id').should('be.hidden');
+        cy.get('@bitdiddleRow').find('.post-user-info i').should('have.class', 'fa-eye');
+
+        // Toggle to ID
+        cy.get('@bitdiddleRow').find('.post-user-info').click();
+        cy.get('@bitdiddleRow').find('.full-name').should('be.hidden');
+        cy.get('@bitdiddleRow').find('.user-id').should('be.visible').and('contain', '<bitdiddle>');
+        cy.get('@bitdiddleRow').find('.post-user-info i').should('have.class', 'fa-eye-slash');
+
+        // Toggle back to Name
+        cy.get('@bitdiddleRow').find('.post-user-info').click();
+        cy.get('@bitdiddleRow').find('.full-name').should('be.visible');
+        cy.get('@bitdiddleRow').find('.user-id').should('be.hidden');
+        cy.get('@bitdiddleRow').find('.post-user-info i').should('have.class', 'fa-eye');
     });
 
     after(() => {
