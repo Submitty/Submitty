@@ -1876,9 +1876,13 @@ function updateVerifyAllButton() {
  * @returns {boolean}
  */
 function getComponentVersionConflict(graded_component: { graded_version: number } | undefined) {
-    if (graded_component === undefined) return false;
+    if (graded_component === undefined) {
+        return false;
+    }
     const displayVersion = getDisplayVersion();
-    if (isNaN(graded_component.graded_version) || isNaN(displayVersion)) return false;
+    if (isNaN(graded_component.graded_version) || isNaN(displayVersion)) {
+        return false;
+    }
     return graded_component.graded_version !== displayVersion;
 }
 
