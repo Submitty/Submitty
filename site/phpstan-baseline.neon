@@ -133,7 +133,7 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max>|false and int<-8, max> is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/AuthenticationController.php
@@ -217,7 +217,7 @@ parameters:
 			path: app/controllers/GlobalController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/GlobalController.php
@@ -370,13 +370,13 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/MiscController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
 			path: app/controllers/MiscController.php
@@ -574,7 +574,7 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/NavigationController.php
@@ -619,7 +619,7 @@ parameters:
 			path: app/controllers/NotificationController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int<0, max> is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/NotificationController.php
@@ -682,19 +682,13 @@ parameters:
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 2
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/OfficeHoursQueueController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int|false and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
 			path: app/controllers/OfficeHoursQueueController.php
@@ -889,7 +883,7 @@ parameters:
 			path: app/controllers/UserProfileController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and mixed is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/UserProfileController.php
@@ -919,51 +913,15 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\AutogradingConfig|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between app\models\gradeable\Gradeable|bool and false is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
-			identifier: equal.notAllowed
 			count: 3
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
+			count: 9
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
@@ -1384,21 +1342,9 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/AutogradingConfigController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/AutogradingConfigController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string|false and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 4
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
@@ -1429,7 +1375,7 @@ parameters:
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/admin/ConfigurationController.php
@@ -1504,45 +1450,15 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\Team|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/admin/LateController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between app\models\SimpleLateUser|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/LateController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/LateController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/LateController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/LateController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and int<48, 57>|int<256, max>|string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/LateController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and mixed is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 8
 			path: app/controllers/admin/LateController.php
 
 		-
@@ -1624,33 +1540,15 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\User|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between DateTime|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 4
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string|false and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 8
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
@@ -1723,7 +1621,7 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<-2, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/admin/ReportController.php
@@ -1861,7 +1759,7 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 6
 			path: app/controllers/admin/StudentActivityDashboardController.php
@@ -1887,49 +1785,31 @@ parameters:
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
-			count: 19
+			count: 17
 			path: app/controllers/admin/UsersController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 25
+			count: 24
 			path: app/controllers/admin/UsersController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
+			rawMessage: Implicit array creation is not allowed - variable $bad_rows might not exist.
+			identifier: variable.implicitArray
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 3
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<1, max> and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 2
 			path: app/controllers/admin/UsersController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 4
+			count: 8
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -2053,7 +1933,7 @@ parameters:
 			path: app/controllers/admin/WrapperController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/calendar/CalendarController.php
@@ -2071,13 +1951,13 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between array and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between array and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
@@ -2161,12 +2041,6 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			rawMessage: Unable to resolve the template type T in call to function array_values
-			identifier: argument.templateType
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 3
@@ -2179,39 +2053,15 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and int is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 2
 			path: app/controllers/forum/ForumController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/forum/ForumController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 7
-			path: app/controllers/forum/ForumController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 13
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -2563,6 +2413,12 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			rawMessage: Elseif condition is always true.
+			identifier: elseif.alwaysTrue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			rawMessage: Implicit array creation is not allowed - variable $gradeables does not exist.
 			identifier: variable.implicitArray
 			count: 1
@@ -2575,93 +2431,15 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between float and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 2
+			count: 24
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int<1, max> and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between (float|int) and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between app\models\User|null and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between array and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 6
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int<0, max> is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 3
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and mixed is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 17
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -3403,15 +3181,9 @@ parameters:
 			path: app/controllers/grading/ImagesController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ImagesController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string|false and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/controllers/grading/ImagesController.php
 
 		-
@@ -3439,7 +3211,7 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and float is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/grading/SimpleGraderController.php
@@ -3517,27 +3289,15 @@ parameters:
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between (array<string>|string) and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 4
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 4
+			count: 9
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
@@ -3589,51 +3349,15 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\GradedGradeable|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and bool|int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 3
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<min, 1>|int<3, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
+			count: 11
 			path: app/controllers/student/SubmissionController.php
 
 		-
@@ -3871,7 +3595,7 @@ parameters:
 			path: app/controllers/student/TeamController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/controllers/student/TeamController.php
@@ -4018,7 +3742,7 @@ parameters:
 			path: app/controllers/superuser/SuperuserEmailController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 8
 			path: app/controllers/superuser/SuperuserEmailController.php
@@ -4558,7 +4282,7 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and mixed is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/libraries/Access.php
@@ -4612,20 +4336,8 @@ parameters:
 			path: app/libraries/CascadingIterator.php
 
 		-
-			rawMessage: 'Method app\libraries\CascadingIterator::__construct() has parameter $iterators with generic interface Iterator but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/CascadingIterator.php
-
-		-
 			rawMessage: 'Method app\libraries\CascadingIterator::seek() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/libraries/CascadingIterator.php
-
-		-
-			rawMessage: 'Property app\libraries\CascadingIterator::$iterators with generic interface Iterator does not specify its types: TKey, TValue'
-			identifier: missingType.generics
 			count: 1
 			path: app/libraries/CascadingIterator.php
 
@@ -4642,7 +4354,7 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 3
 			path: app/libraries/Core.php
@@ -4804,7 +4516,7 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between app\entities\course\CourseMaterial and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
 			path: app/libraries/CourseMaterialsUtils.php
@@ -4822,7 +4534,7 @@ parameters:
 			path: app/libraries/CourseMaterialsUtils.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between DateTime and DateTime is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/libraries/DateUtils.php
@@ -4864,19 +4576,13 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and (float|int) is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 10
 			path: app/libraries/DiffViewer.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 9
-			path: app/libraries/DiffViewer.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 8
 			path: app/libraries/DiffViewer.php
@@ -5062,7 +4768,7 @@ parameters:
 			path: app/libraries/ExceptionHandler.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<1, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/libraries/ExceptionHandler.php
@@ -5116,33 +4822,15 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 10
 			path: app/libraries/FileUtils.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between bool and false is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 5
-			path: app/libraries/FileUtils.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string|false and false is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string|false and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 8
 			path: app/libraries/FileUtils.php
 
 		-
@@ -5236,6 +4924,12 @@ parameters:
 			path: app/libraries/ForumUtils.php
 
 		-
+			rawMessage: 'Loose comparison via "==" is not allowed.'
+			identifier: equal.notAllowed
+			count: 1
+			path: app/libraries/ForumUtils.php
+
+		-
 			rawMessage: 'Method app\libraries\ForumUtils::checkGoodAttachment() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5308,7 +5002,7 @@ parameters:
 			path: app/libraries/GradingQueue.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
 			path: app/libraries/GradingQueue.php
@@ -5530,15 +5224,9 @@ parameters:
 			path: app/libraries/NotificationFactory.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 2
-			path: app/libraries/NotificationFactory.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
+			count: 3
 			path: app/libraries/NotificationFactory.php
 
 		-
@@ -5626,7 +5314,7 @@ parameters:
 			path: app/libraries/NotificationFactory.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and float is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/libraries/NumberUtils.php
@@ -5650,15 +5338,9 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/libraries/Output.php
 
 		-
@@ -6100,7 +5782,7 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 3
 			path: app/libraries/PollUtils.php
@@ -6154,7 +5836,7 @@ parameters:
 			path: app/libraries/TokenManager.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 4
 			path: app/libraries/Utils.php
@@ -6220,7 +5902,7 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between array and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
@@ -6352,87 +6034,15 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between bool and bool is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 14
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 4
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 5
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between app\models\User and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 6
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 5
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and mixed is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 3
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 4
+			count: 24
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -7548,18 +7158,6 @@ parameters:
 		-
 			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedComponentsCountByTeamGradingSections() has parameter $sections with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedGradeables() return type with generic interface Iterator does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			rawMessage: 'Method app\libraries\database\DatabaseQueries::getGradedGradeablesUserOrTeam() return type with generic interface Iterator does not specify its types: TKey, TValue'
-			identifier: missingType.generics
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -9460,21 +9058,15 @@ parameters:
 			path: app/libraries/database/PostgresqlDatabase.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
-			path: app/libraries/database/PostgresqlDatabase.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
+			count: 4
 			path: app/libraries/database/PostgresqlDatabase.php
 
 		-
@@ -9898,7 +9490,7 @@ parameters:
 			path: app/models/Breadcrumb.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/Button.php
@@ -10294,7 +9886,7 @@ parameters:
 			path: app/models/DockerUI.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/Email.php
@@ -10312,7 +9904,7 @@ parameters:
 			path: app/models/GradeableAutocheck.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 3
 			path: app/models/GradeableAutocheck.php
@@ -10342,7 +9934,7 @@ parameters:
 			path: app/models/GradingOrder.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 17
 			path: app/models/GradingOrder.php
@@ -10402,15 +9994,9 @@ parameters:
 			path: app/models/Notification.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between float and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
-			path: app/models/Notification.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 3
 			path: app/models/Notification.php
 
 		-
@@ -10456,21 +10042,15 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between array|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
-			path: app/models/OfficeHoursQueueModel.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int|false and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 3
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
@@ -10942,7 +10522,7 @@ parameters:
 			path: app/models/QueueItem.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between array|bool and false is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/models/QueueItem.php
@@ -10972,7 +10552,7 @@ parameters:
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/SimpleGradeOverriddenUser.php
@@ -10990,7 +10570,7 @@ parameters:
 			path: app/models/SimpleLateUser.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/SimpleLateUser.php
@@ -11098,15 +10678,9 @@ parameters:
 			path: app/models/User.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int<0, 4> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/models/User.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/models/User.php
 
 		-
@@ -11410,33 +10984,15 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between array|true and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 3
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between float and float is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
@@ -11920,7 +11476,7 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
@@ -12250,6 +11806,12 @@ parameters:
 			path: app/models/gradeable/GradeInquiry.php
 
 		-
+			rawMessage: 'Call to function array_search() requires parameter #3 to be set.'
+			identifier: function.strict
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 8
@@ -12267,7 +11829,17 @@ parameters:
 			count: 2
 			path: app/models/gradeable/Gradeable.php
 
+		-
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
+			identifier: notEqual.notAllowed
+			count: 2
+			path: app/models/gradeable/Gradeable.php
 
+		-
+			rawMessage: 'Loose comparison via "==" is not allowed.'
+			identifier: equal.notAllowed
+			count: 9
+			path: app/models/gradeable/Gradeable.php
 
 		-
 			rawMessage: 'Method app\models\gradeable\Gradeable::__construct() has parameter $details with no value type specified in iterable type array.'
@@ -12774,15 +12346,9 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between DateTime|null and DateTime|null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/GradeableList.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/models/gradeable/GradeableList.php
 
 		-
@@ -12828,7 +12394,7 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between float and float is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
@@ -12936,7 +12502,7 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/models/gradeable/GradedComponentContainer.php
@@ -12984,21 +12550,15 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\Component and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 4
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 5
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
@@ -13122,15 +12682,9 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 0>|int<2, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
@@ -13176,7 +12730,7 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/gradeable/LateDays.php
@@ -13488,7 +13042,7 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 7
 			path: app/models/notebook/Notebook.php
@@ -13584,7 +13138,7 @@ parameters:
 			path: app/models/notebook/SubmissionMultipleChoice.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and true is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 2
 			path: app/models/notebook/SubmissionMultipleChoice.php
@@ -13824,27 +13378,15 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 5
 			path: app/views/AutoGradingView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 4
-			path: app/views/AutoGradingView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<1, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/views/AutoGradingView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int|null and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 2
 			path: app/views/AutoGradingView.php
 
 		-
@@ -14184,45 +13726,15 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 2
-			path: app/views/NavigationView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 14
-			path: app/views/NavigationView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max>|false and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, -1>|int<1, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 2>|int<4, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 4>|int<6, max> and int is not allowed.'
-			identifier: equal.notAllowed
 			count: 3
 			path: app/views/NavigationView.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
+			count: 21
 			path: app/views/NavigationView.php
 
 		-
@@ -14718,13 +14230,13 @@ parameters:
 			path: app/views/admin/WrapperView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
 			path: app/views/calendar/CalendarView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/views/course/CourseMaterialsView.php
@@ -14790,7 +14302,7 @@ parameters:
 			path: app/views/email/EmailStatusView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 4
 			path: app/views/email/EmailStatusView.php
@@ -14838,13 +14350,13 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/views/forum/ForumThreadView.php
@@ -15027,6 +14539,18 @@ parameters:
 			rawMessage: Implicit array creation is not allowed - variable $user_ids does not exist.
 			identifier: variable.implicitArray
 			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
+			identifier: notEqual.notAllowed
+			count: 16
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: 'Loose comparison via "==" is not allowed.'
+			identifier: equal.notAllowed
+			count: 31
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
@@ -15288,7 +14812,7 @@ parameters:
 			path: app/views/grading/ImagesView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
 			path: app/views/grading/SimpleGraderView.php
@@ -15324,39 +14848,15 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\AutoGradedVersion|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "!=" is not allowed.'
 			identifier: notEqual.notAllowed
-			count: 1
+			count: 3
 			path: app/views/submission/HomeworkView.php
 
 		-
-			rawMessage: 'Loose comparison via "!=" between mixed and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between DateTime and DateTime is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
+			count: 4
 			path: app/views/submission/HomeworkView.php
 
 		-
@@ -15396,7 +14896,7 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between app\models\Team|null and null is not allowed.'
+			rawMessage: 'Loose comparison via "==" is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/views/submission/TeamView.php

@@ -1787,15 +1787,15 @@ class Gradeable extends AbstractModel {
         });
     }
 
-    /**
-     * Gets the percent of grading complete for the provided user for this gradeable
-     * @param User $grader
-     * @param bool $include_bad_submissions
-        * @param bool $include_null_section
-     * @param bool $include_withdrawn_students
-     * @param bool $include_grade_override
-     * @return float The percentage (0 to 1) of grading completed or NAN if none required
-     */
+     /**
+      * Gets the percent of grading complete for the provided user for this gradeable
+      * @param User $grader
+      * @param bool $include_bad_submissions
+      * @param bool $include_null_section
+      * @param bool $include_withdrawn_students
+      * @param bool $include_grade_override
+      * @return float The percentage (0 to 1) of grading completed or NAN if none required
+      */
     public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section, bool $include_withdrawn_students, bool $include_grade_override = true) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
