@@ -85,17 +85,20 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.contains('Grader Assignment').click();
 
-        cy.get('#all_access').click().should('be.checked');
-        cy.get('#unblind_limited_access_grading').click().should('be.checked');
+        cy.get('#all_access').click();
+        cy.get('#all_access').should('be.checked');
+        cy.get('#unblind_limited_access_grading').click();
+        cy.get('#unblind_limited_access_grading').should('be.checked');
 
-        cy.get('#blind_limited_access_grading').click().should('be.checked');
-        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved')
+        cy.get('#blind_limited_access_grading').click();
+        cy.get('#blind_limited_access_grading').should('be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.logout();
 
         // Mentor checks submissions
         cy.login('grader');
 
-        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details'], { timeout: 10000});
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details'], { timeout: 10000 });
 
         cy.get('[data-testid="agree-popup-btn"]').scrollIntoView();
         cy.get('[data-testid="agree-popup-btn"]').click();
@@ -121,7 +124,8 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('body').should('not.contain', 'Login');
         cy.contains('Rubric').click();
 
-        cy.get('#yes_pdf_page').click().should('be.checked');
+        cy.get('#yes_pdf_page').click();
+        cy.get('#yes_pdf_page').should('be.checked');
 
         cy.logout();
 
@@ -149,12 +153,15 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.contains('Grader Assignment').click();
 
-        cy.get('#blind_limited_access_grading').click().should('be.checked');
-        cy.get('#unblind_limited_access_grading').click().should('be.checked');
-        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved')
+        cy.get('#blind_limited_access_grading').click();
+        cy.get('#blind_limited_access_grading').should('be.checked');
+        cy.get('#unblind_limited_access_grading').click();
+        cy.get('#unblind_limited_access_grading').should('be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
 
         cy.contains('Rubric').click();
-        cy.get('#no_pdf_page').click().should('be.checked');
+        cy.get('#no_pdf_page').click();
+        cy.get('#no_pdf_page').should('be.checked');
         cy.logout();
 
         // Mentor now sees upload.pdf
