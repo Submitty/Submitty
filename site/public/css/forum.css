@@ -95,6 +95,7 @@
 #posts_list {
     overflow-y: auto;
     max-height: 81vh;
+    height: 100%;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -1024,4 +1025,14 @@
 
 #search-clear {
     cursor: pointer;
+}
+
+/* Global Full Screen Mode Styles for Forum Split View */
+main#main.full-screen-mode #thread_list,
+main#main.full-screen-mode #posts_list {
+    max-height: calc(100vh - 120px);
+}
+
+main#main.full-screen-mode #thread-container {
+    height: calc(100vh - 120px);
 }
