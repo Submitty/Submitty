@@ -115,3 +115,8 @@ th {
 #times-helped-cell {
     background-color: var(--standard-vibrant-green);
 }
+
+.queue-removed-nicknames {
+    margin-top: 1em;
+}
+
