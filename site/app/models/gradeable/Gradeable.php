@@ -1790,8 +1790,8 @@ class Gradeable extends AbstractModel {
     /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
-     * @param bool $include_null_section
      * @param bool $include_bad_submissions
+        * @param bool $include_null_section
      * @param bool $include_withdrawn_students
      * @param bool $include_grade_override
      * @return float The percentage (0 to 1) of grading completed or NAN if none required

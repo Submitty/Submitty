@@ -2140,19 +2140,16 @@ ORDER BY merged_data.{$section_key}
      * @return array<string, int>
      */
     public function getGradeOverrideCountsByGradingSections(string $g_id, array $sections, string $section_key, bool $include_null_section, bool $include_withdrawn_students): array {
-        if (count($sections) === 0) {
-            return [
-                'with_submission' => 0,
-                'without_submission' => 0,
-            ];
-        }
-
         $where_clauses = [
             'go.g_id = ?',
             'go.marks IS NOT NULL',
-            "(u.{$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE",
         ];
-        $params = array_merge([$g_id], $sections);
+        $params = [$g_id];
+
+        if (count($sections) > 0) {
+            $where_clauses[] = "(u.{$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params = array_merge($params, $sections);
+        }
 
         if (!$include_null_section) {
             $where_clauses[] = "u.{$section_key} IS NOT NULL";

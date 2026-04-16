@@ -12,6 +12,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\GradeInquiry;
 use app\models\gradeable\Submitter;
+use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\entities\forum\Thread;
