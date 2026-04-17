@@ -2704,8 +2704,10 @@ class ElectronicGraderController extends AbstractController {
         $is_itempool_linked = $_POST['is_itempool_linked'] ?? false;
         $itempool_option = $_POST['itempool_option'] ?? null;
 
-        // Use 'page_number' since 'page' is used in the router
-        $page = $_POST['page_number'] ?? '';
+        $page_start = $_POST['page_start'] ?? null;
+        $page_end = $_POST['page_end'] ?? null;
+
+        $page = $_POST['page_number'] ?? null;
 
         // Validate required parameters
         if ($lower_clamp === null) {
@@ -2724,9 +2726,6 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Missing upper_clamp parameter');
             return;
         }
-        if ($page === '') {
-            $this->core->getOutput()->renderJsonFail('Missing page parameter');
-        }
         if (!is_numeric($lower_clamp)) {
             $this->core->getOutput()->renderJsonFail('Invalid lower_clamp parameter');
             return;
@@ -2743,8 +2742,33 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Invalid upper_clamp parameter');
             return;
         }
-        if (strval(intval($page)) !== $page) {
-            $this->core->getOutput()->renderJsonFail('Invalid page parameter');
+
+        if ($page_start !== null && $page_end !== null) {
+            if (!is_numeric($page_start) || !is_numeric($page_end)) {
+                $this->core->getOutput()->renderJsonFail('Invalid page range');
+                return;
+            }
+
+            $page_start = intval($page_start);
+            $page_end = intval($page_end);
+
+            if ($page_start < 1 || $page_end < 1 || $page_end < $page_start) {
+                $this->core->getOutput()->renderJsonFail('Invalid page range values');
+                return;
+            }
+        }
+        elseif ($page !== null) {
+            if (strval(intval($page)) !== $page) {
+                $this->core->getOutput()->renderJsonFail('Invalid page parameter');
+                return;
+            }
+
+            $page_start = intval($page);
+            $page_end = intval($page);
+        }
+        else {
+            $this->core->getOutput()->renderJsonFail('Missing page information');
+            return;
         }
 
         // Get the gradeable
@@ -2793,7 +2817,8 @@ class ElectronicGraderController extends AbstractController {
                 'max_value' => $max_value,
                 'upper_clamp' => $upper_clamp
             ]);
-            $component->setPage($page);
+            $component->setPageStart($page_start);
+            $component->setPageEnd($page_end);
             if ($is_notebook_gradeable) {
                 if ($is_itempool_linked === 'true') {
                     $component->setIsItempoolLinked(true);

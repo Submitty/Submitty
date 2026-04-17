@@ -54,6 +54,12 @@ class Component extends AbstractModel {
     /** @prop
      * @var int The pdf page this component will reside in */
     protected $page = -1;
+    /** @prop
+     * @var int|null Starting page for this component */
+    protected $page_start = null;
+    /** @prop
+     * @var int|null Ending page for this component */
+    protected $page_end = null;
 
     /** @prop
      * @var bool Whether this component is linked to some itempool or not */
@@ -591,8 +597,15 @@ class Component extends AbstractModel {
         $this->modified = true;
     }
 
-    public function getPage(): int {
-        return $this->page;
+    public function getPage(): string {
+        $start = $this->getPageStart();
+        $end = $this->getPageEnd();
+
+        if ($start === $end) {
+            return (string)$start;
+        }
+
+        return $start . '-' . $end;
     }
 
     public function setIsItempoolLinked(bool $is_linked): void {
@@ -619,5 +632,28 @@ class Component extends AbstractModel {
      */
     public function getMarks(): array {
         return $this->marks;
+    }
+
+    public function setPageStart(int $page_start) {
+        $this->page_start = max($page_start, -1);
+        $this->modified = true;
+    }
+
+    public function setPageEnd(int $page_end) {
+        $this->page_end = max($page_end, -1);
+        $this->modified = true;
+    }
+    public function getPageStart(): int {
+        if ($this->page_start !== null) {
+            return $this->page_start;
+        }
+        return $this->page;
+    }
+
+    public function getPageEnd(): int {
+        if ($this->page_end !== null) {
+            return $this->page_end;
+        }
+        return $this->page;
     }
 }

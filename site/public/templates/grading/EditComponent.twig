@@ -23,14 +23,36 @@
             <div class="col component-title-container">
                 <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)" data-testid="peer-component-title"/>
             </div>
-            {% if component.page > 0 %}
+            {% set page_start = component.page_start is defined ? component.page_start : component.page %}
+            {% set page_end = component.page_end is defined ? component.page_end : component.page %}
+
+            {% if page_start > 0 %}
                 <div class="col-no-gutters page-label">
-                    <label for="page-number-{{component.id}}">Page #</label>
+                    <label>Pages</label>
                 </div>
                 <div class="col-no-gutters">
-                    <input id="page-number-{{component.id}}" class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
+                    <input id="page-start-{{component.id}}"
+                        class="page-start"
+                        type="number"
+                        step="1"
+                        min="1"
+                        value="{{ page_start }}"
+                        onchange="onComponentPageRangeChange(this)"
+                        onmouseup="onComponentPageRangeChange(this)">
+                    -
+                    <input id="page-end-{{component.id}}"
+                        class="page-end"
+                        type="number"
+                        step="1"
+                        min="1"
+                        value="{{ page_end }}"
+                        onchange="onComponentPageRangeChange(this)"
+                        onmouseup="onComponentPageRangeChange(this)">
                 </div>
             {% else %}
+                <input class="page-start" value="{{ page_start }}" hidden/>
+                <input class="page-end" value="{{ page_end }}" hidden/>
+            {% endif %}
                 <input class="page-number" value="{{ component.page }}" aria-label="page number" hidden/>
             {% endif %}
         </div>

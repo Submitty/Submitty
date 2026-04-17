@@ -26,7 +26,7 @@ declare global {
         onClickCountDown(me: HTMLElement): void;
         onComponentPointsChange(me: HTMLElement): Promise<void>;
         onComponentTitleChange(me: HTMLElement): void;
-        onComponentPageNumberChange(me: HTMLElement): void;
+        onComponentPageRangeChange(me: HTMLElement): void;
         onMarkPublishChange(me: HTMLElement): void;
         setPdfPageAssignment(page: number): Promise<void>;
         reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void>;
@@ -2374,8 +2374,21 @@ window.onComponentTitleChange = function (me: HTMLElement) {
  * Callback for changing the page number for a component
  * @param me DOM element of the input box
  */
-window.onComponentPageNumberChange = function (me: HTMLElement) {
-    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-page-number-text').text($(me).val() as string);
+window.onComponentPageRangeChange = function (me: HTMLElement) {
+    const component = getComponentJQuery(getComponentIdFromDOMElement(me));
+
+    const start = parseInt(component.find('.page-start').val() as string);
+    const end = parseInt(component.find('.page-end').val() as string);
+
+    if (!isNaN(start) && !isNaN(end) && end < start) {
+        alert("End page must be greater than or equal to start page");
+        return;
+    }
+    const display = (!isNaN(start) && !isNaN(end))
+        ? `${start}-${end}`
+        : '';
+
+    component.find('.component-page-number-text').text(display);
 };
 
 /**
