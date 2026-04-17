@@ -126,7 +126,9 @@ class NotificationController extends AbstractController {
                 'Notification',
                 'showNotificationSettings',
                 $this->core->getUser()->getNotificationSettings(),
-                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()), $courses)
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()), 
+                $courses
+            )
         );
     }
     /**
@@ -145,7 +147,7 @@ class NotificationController extends AbstractController {
         foreach ($course_ids as $course_id) {
             $parts = explode('|', $course_id);
             if (count($parts) !== 2) {
-                continue;
+                continue; 
             }
             [$semester, $course_name] = $parts;
             $this->core->loadCourseConfig($semester, $course_name);
@@ -172,12 +174,12 @@ class NotificationController extends AbstractController {
         //Change settings for the current user.
         unset($_POST['csrf_token']);
         $new_settings = $_POST;
-        if($this->changeSettings($new_settings)){
+        if ($this->changeSettings($new_settings)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse('Notification settings have been saved.')
             );
         }
-        else{
+        else {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
             );
