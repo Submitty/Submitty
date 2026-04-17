@@ -881,10 +881,6 @@ if [ ${WORKER} == 0 ]; then
 
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
-else
-
-    systemctl stop apache2.service
-
 fi
 
 
