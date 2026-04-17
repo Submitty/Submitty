@@ -1,45 +1,70 @@
 const docker_ui_path = '/admin/docker';
 
-/**
- * This test is designed for a single run --
- * It will not work if the system is already updated.
- *
- * To revert the states:
- *  - pushd /usr/local/submitty/config
- *  - jq '{default: .default}' autograding_containers.json | sponge autograding_containers.json
- *  - chown submitty_php:submitty_daemonphp autograding_containers.json
- *  - popd
- *
- * If `sponge' command is missing, install `moreutils' package, or edit the file manually:
- * {
- *     "default": [
- *         "submitty/autograding-default:latest",
- *         "submitty/python:latest",
- *         "submitty/clang:latest",
- *         "submitty/gcc:latest",
- *         "submitty/rust:latest",
- *         "submitty/java:latest",
- *         "submitty/pdflatex:latest"
- *     ],
- *     "python": [
- *         "submitty/autograding-default:latest",
- *         "submitty/python:latest"
- *     ],
- *     "cpp": [
- *         "submitty/autograding-default:latest",
- *         "submitty/clang:latest",
- *         "submitty/gcc:latest"
- *     ],
- *     "notebook": [
- *         "submitty/autograding-default:latest"
- *     ]
- * }
- */
+// from .setup/CONFIGURE_SUBMITTY.py
+const defaultDockerConfiguration = {
+    default: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+        'submitty/rust:latest',
+        'submitty/java:latest',
+        'submitty/pdflatex:latest',
+        'submitty/jupyter:latest',
+    ],
+    python: [
+        'submitty/autograding-default:latest',
+        'submitty/python:latest',
+    ],
+    cpp: [
+        'submitty/autograding-default:latest',
+        'submitty/clang:latest',
+        'submitty/gcc:latest',
+    ],
+    notebook: [
+        'submitty/autograding-default:latest',
+    ],
+};
 
 describe('Docker UI Test', () => {
     beforeEach(() => {
         cy.login();
         cy.visit(docker_ui_path);
+    });
+
+    before(() => {
+        // reset to default
+        cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+            const json = JSON.stringify(defaultDockerConfiguration, null, 4);
+            // inside the vm, the directory exists
+            if (result.exitCode === 0) {
+                cy.writeFile('sudo /usr/local/submitty/config/autograding_containers.json', json);
+                cy.exec('sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json');
+            }
+            // outside the vm, need to run commands using vagrant
+            else {
+                const escapedJson = json.replace(/"/g, '\\"');
+                cy.exec(`vagrant ssh -c "echo '${escapedJson}' | sudo tee /usr/local/submitty/config/autograding_containers.json > /dev/null"`).then(() => {
+                    cy.exec('vagrant ssh -c "sudo chown submitty_php:submitty_daemonphp /usr/local/submitty/config/autograding_containers.json"');
+                });
+            }
+        });
+        cy.login();
+        cy.visit(docker_ui_path);
+        // update docker info
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
+
+        // Wait until the system updates
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Up-to-Date');
+                });
+        }, 10000, 500);
     });
 
     it('Should update the machine information', () => {
