@@ -126,7 +126,7 @@ class NotificationController extends AbstractController {
                 'Notification',
                 'showNotificationSettings',
                 $this->core->getUser()->getNotificationSettings(),
-                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()), 
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
                 $courses
             )
         );
@@ -147,7 +147,7 @@ class NotificationController extends AbstractController {
         foreach ($course_ids as $course_id) {
             $parts = explode('|', $course_id);
             if (count($parts) !== 2) {
-                continue; 
+                continue;
             }
             [$semester, $course_name] = $parts;
             $this->core->loadCourseConfig($semester, $course_name);
