@@ -34,10 +34,12 @@ class CourseMaterialsController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
         /** @var CourseMaterialRepository $repo */
         $course_materials = $repo->getCourseMaterials();
+        $viewed_materials = $repo->getCourseMaterialsViewedByUser($this->core->getUser()->getId());
         return new WebResponse(
             CourseMaterialsView::class,
             'listCourseMaterials',
-            $course_materials
+            $course_materials,
+            $viewed_materials
         );
     }
 
@@ -97,7 +99,7 @@ class CourseMaterialsController extends AbstractController {
             ->findBy(['id' => $ids]);
         foreach ($cms as $cm) {
             $cm_access = new CourseMaterialAccess($cm, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
-            $cm->addAccess($cm_access);
+            $this->core->getCourseEntityManager()->persist($cm_access);
         }
         $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse();
@@ -112,7 +114,7 @@ class CourseMaterialsController extends AbstractController {
                 continue;
             }
             $cm_access = new CourseMaterialAccess($cm, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
-            $cm->addAccess($cm_access);
+            $this->core->getCourseEntityManager()->persist($cm_access);
         }
         $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse();
@@ -231,7 +233,7 @@ class CourseMaterialsController extends AbstractController {
                             $isFolderEmptyForMe = false;
                             $zip_stream->addFileFromPath($relativePath, $file_path);
                             $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
-                            $course_material->addAccess($course_material_access);
+                            $this->core->getCourseEntityManager()->persist($course_material_access);
                         }
                     }
                     else {
@@ -240,7 +242,7 @@ class CourseMaterialsController extends AbstractController {
                         $isFolderEmptyForMe = false;
                         $zip_stream->addFileFromPath($relativePath, $file_path);
                         $course_material_access = new CourseMaterialAccess($course_material, $this->core->getUser()->getId(), $this->core->getDateTimeNow());
-                        $course_material->addAccess($course_material_access);
+                        $this->core->getCourseEntityManager()->persist($course_material_access);
                     }
                 }
             }
