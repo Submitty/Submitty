@@ -53,11 +53,11 @@ for name, data in vagrant_workers_data.items():
     os.chown(f"/tmp/worker_keys/{name}", daemon_stat.pw_uid, daemon_stat.pw_gid)
     os.chmod(f"/tmp/worker_keys/{name}", 0o400)
     w = subprocess.call(['su', DAEMON_USER, '-c', f"scp -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no ~/.ssh/id_rsa.pub root@{data['ip_addr']}:/tmp/workerkey"])
-    if w.returncode != 0:
+    if w != 0:
         print("failed to connect to " + name)
         continue
     w = subprocess.call(['su', DAEMON_USER, '-c', f"ssh -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no root@{data['ip_addr']} \"chown {SUPERVISOR_USER}:{SUPERVISOR_USER} /tmp/workerkey && su {SUPERVISOR_USER} -c \\\"mkdir -p ~/.ssh && mv /tmp/workerkey ~/.ssh/authorized_keys\\\"\""])
-    if w.returncode == 0:
+    if w == 0:
         print("Connected to " + name)
         successful_machines.append(name)
         ssh_config += f"Host {name}\n  HostName {data['ip_addr']}\n  IdentityFile ~/.ssh/id_rsa\n  User submitty\n"
