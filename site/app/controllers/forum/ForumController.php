@@ -1148,11 +1148,11 @@ class ForumController extends AbstractController {
             $block_number,
             $scroll_down
         );
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
+        $current_thread_id = array_key_exists('currentThreadId', $_POST) ? (int) $_POST['currentThreadId'] : -1;
+        $is_full_page = $current_thread_id === -1;
+        $html = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', $threads, $is_full_page);
         return $this->core->getOutput()->renderJsonSuccess([
-                "html" => $this->core->getOutput()->getOutput(),
+                "html" => $html,
                 "count" => count($threads),
                 "page_number" => $block_number,
             ]);
@@ -1175,7 +1175,8 @@ class ForumController extends AbstractController {
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         }
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread]);
+        $is_full_page = filter_var($_POST['is_full_page'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread], $is_full_page);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
