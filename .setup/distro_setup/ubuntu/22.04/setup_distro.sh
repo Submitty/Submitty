@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-WORKER=0
-if [ "$1" == "worker" ]; then
-    WORKER=1
-fi
-
-
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"

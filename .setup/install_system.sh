@@ -225,12 +225,7 @@ DB_COURSE_PASSWORD=submitty_dbuser
 # DISTRO SETUP
 #################
 
-if [ ${WORKER} == 1 ]; then
-    source ${CURRENT_DIR}/distro_setup/setup_distro.sh worker
-else
-    source ${CURRENT_DIR}/distro_setup/setup_distro.sh
-fi
-
+source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
