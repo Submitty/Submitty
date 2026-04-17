@@ -21,6 +21,8 @@ if [[ "${output}" != "submitty" ]]; then
         echo "Error: ${SUPERVISOR_USER} user already exists in /etc/passwd"
 fi
 
+# export supervisor env variable so that the worker script can access it.
+export SUPERVISOR_USER
 bash "${GIT_PATH}/.setup/install_system.sh" --worker --vagrant "${@}" 2>&1
 echo "--- FINISHED INSTALLING SYSTEM ---"
 echo "installing worker..."

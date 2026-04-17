@@ -198,7 +198,10 @@ if [ ${WORKER} == 1 ]; then
     if [ ${VAGRANT} == 1 ]; then
         # Setting it up to allow SSH as root by default
         mkdir -p -m 700 /root/.ssh
-        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+        touch /root/.ssh/authorized_keys
+        # we need to append the worker root keys into authorized keys because worker provisioning overwrites the root keys. 
+        cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
 
         sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
     fi
@@ -725,15 +728,17 @@ localhost
     fi
 fi
 
+
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
-    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
+    usersearch=$(cut -d '%' -f 2 /etc/sudoers | grep -w "^${SUPERVISOR_USER}$" | cut -d ' ' -f 1)
+    echo ${usersearch}
+    if [ "${usersearch}" == "${SUPERVISOR_USER}" ]; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "% ${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "% ${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
