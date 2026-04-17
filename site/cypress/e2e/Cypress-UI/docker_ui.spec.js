@@ -34,7 +34,7 @@ describe('Docker UI Test', () => {
 
     before(() => {
         // reset to default
-        cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
+        cy.exec('test -d /usr/local/submitty/config').then((result) => {
             const json = JSON.stringify(defaultDockerConfiguration, null, 4);
             // inside the vm, the directory exists
             cy.log(result.code);
