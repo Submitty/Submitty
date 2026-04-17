@@ -770,14 +770,16 @@ class ForumController extends AbstractController {
         $type = "";
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
+        $edited_post_preview = $this->previewText($post->getContent());
+        $edited_post_subject_preview = $this->previewText($post->getContent(), 100);
         if ($did_edit_thread) {
             $subject = "Thread Edited: " . $thread->getTitle();
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . $post->getContent();
-            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $subject = "Post Edited: " . $edited_post_subject_preview;
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
@@ -1146,11 +1148,11 @@ class ForumController extends AbstractController {
             $block_number,
             $scroll_down
         );
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
+        $current_thread_id = array_key_exists('currentThreadId', $_POST) ? (int) $_POST['currentThreadId'] : -1;
+        $is_full_page = $current_thread_id === -1;
+        $html = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', $threads, $is_full_page);
         return $this->core->getOutput()->renderJsonSuccess([
-                "html" => $this->core->getOutput()->getOutput(),
+                "html" => $html,
                 "count" => count($threads),
                 "page_number" => $block_number,
             ]);
@@ -1173,7 +1175,8 @@ class ForumController extends AbstractController {
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         }
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread]);
+        $is_full_page = filter_var($_POST['is_full_page'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread], $is_full_page);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 

@@ -373,10 +373,11 @@ function socketDeletePostHandler(post_id) {
 }
 
 function socketNewOrEditThreadHandler(thread_id, edit = false) {
+    const isFullThreadsPage = (window.location.origin + window.location.pathname === buildCourseUrl(['forum']));
     $.ajax({
         type: 'POST',
         url: buildCourseUrl(['forum', 'threads', 'single']),
-        data: { thread_id: thread_id, csrf_token: window.csrfToken },
+        data: { thread_id: thread_id, is_full_page: isFullThreadsPage, csrf_token: window.csrfToken },
         success: function (response) {
             try {
                 const new_thread = JSON.parse(response).data;
