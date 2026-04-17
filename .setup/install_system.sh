@@ -723,7 +723,6 @@ localhost
     fi
 fi
 
-
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
     SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -877,7 +876,6 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
 fi
-
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"

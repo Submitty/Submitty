@@ -17,8 +17,6 @@ fi
 # PACKAGE SETUP
 #################
 
-
-
 # Need to change this otherwise it will hang the script in interactive mode
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 
