@@ -966,7 +966,10 @@ HTML;
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "active_graders" => $active_graders,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "ai_grouping_enabled" => $this->core->getConfig()->checkFeatureFlagEnabled('ta_grading_ai_grouping_poc') && $gradeable->isTaGrading(),
+            "ai_grouping_url" => '/courses/' . $this->core->getConfig()->getTerm() . '/' . $this->core->getConfig()->getCourse() . '/gradeable/' . $gradeable->getId() . '/grading/ai_grouping',
+            "ai_cluster_dashboard_url" => '/courses/' . $this->core->getConfig()->getTerm() . '/' . $this->core->getConfig()->getCourse() . '/gradeable/' . $gradeable->getId() . '/grading/ai_cluster_dashboard'
         ]);
     }
 
