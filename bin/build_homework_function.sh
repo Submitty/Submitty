@@ -179,7 +179,7 @@ function build_homework {
     fi
 
     # Add allowed minutes in database from config if exists
-    python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
+    "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
     set_minutes="$?"
 
     if (("$set_minutes" != 0)); then
