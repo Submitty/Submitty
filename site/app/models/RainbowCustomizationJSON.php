@@ -59,6 +59,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var bool
      */
     private bool $extra_credit = false;
+    /**
+     * @var bool
+     */
+    private bool $make_section_sort = false;
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
@@ -271,6 +275,10 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (isset($json->extra_credit)) {
             $this->extra_credit = $json->extra_credit;
         }
+
+        if (isset($json->make_section_sort)) {
+            $this->make_section_sort = $json->make_section_sort;
+        }
     }
 
     /**
@@ -397,6 +405,24 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function setExtraCredit(bool $extra_credit): void {
         $this->extra_credit = $extra_credit;
+    }
+
+    /**
+     * Get make section sort setting
+     *
+     * @return bool
+     */
+    public function getMakeSectionSort(): bool {
+        return $this->make_section_sort;
+    }
+
+    /**
+     * Set make section sort setting
+     *
+     * @param bool $make_section_sort
+     */
+    public function setMakeSectionSort(bool $make_section_sort): void {
+        $this->make_section_sort = $make_section_sort;
     }
 
 

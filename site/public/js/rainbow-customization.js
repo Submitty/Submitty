@@ -678,6 +678,7 @@ function buildJSON() {
         section: getSection(),
         omit_section_from_stats: getOmittedSections(),
         extra_credit: $('#extra_credit_checkbox').is(':checked'),
+        make_section_sort: $('#make_section_sort_checkbox').is(':checked'),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -813,6 +814,9 @@ $(document).ready(() => {
         saveChanges();
     });
     $('#extra_credit_checkbox').change(() => {
+        saveChanges();
+    });
+    $('#make_section_sort_checkbox').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
@@ -1034,6 +1038,7 @@ $(document).ready(() => {
 
         // Initially hide config items
         $('#extra_credit_checkbox').parent().hide();
+        $('#make_section_sort_checkbox').parent().hide();
         $('#drop_lowest_checkbox').parent().hide();
         $('div[id^="dropLowestDiv-"]').hide();
         $('input[id^="per-gradeable-percents-checkbox-"]').hide();
@@ -1048,6 +1053,8 @@ $(document).ready(() => {
             if (configVisible) {
                 // Show Extra Credit
                 $('#extra_credit_checkbox').parent().show();
+                // Show Sort by Section
+                $('#make_section_sort_checkbox').parent().show();
                 // Show Remove Lowest
                 $('#drop_lowest_checkbox').parent().show();
                 if ($('#drop_lowest_checkbox').is(':checked')) {
@@ -1079,6 +1086,8 @@ $(document).ready(() => {
             else {
                 // Hide Extra Credit
                 $('#extra_credit_checkbox').parent().hide();
+                // Hide Sort by Section
+                $('#make_section_sort_checkbox').parent().hide();
                 // Hide Remove Lowest
                 $('#drop_lowest_checkbox').parent().hide();
                 $('div[id^="dropLowestDiv-"]').hide();
