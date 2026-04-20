@@ -63,6 +63,11 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var bool
      */
     private bool $make_section_sort = false;
+    private bool $show_gradeable_configuration = false;
+    /**
+     * @var bool
+     */
+    private bool $customize_show_notes = false;
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
@@ -278,6 +283,12 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->make_section_sort)) {
             $this->make_section_sort = $json->make_section_sort;
+        if (isset($json->show_gradeable_configuration)) {
+            $this->show_gradeable_configuration = $json->show_gradeable_configuration;
+        }
+
+        if (isset($json->customize_show_notes)) {
+            $this->customize_show_notes = $json->customize_show_notes;
         }
     }
 
@@ -423,6 +434,39 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function setMakeSectionSort(bool $make_section_sort): void {
         $this->make_section_sort = $make_section_sort;
+     * Get show gradeable configuration setting
+     *
+     * @return bool
+     */
+    public function getShowGradeableConfiguration(): bool {
+        return $this->show_gradeable_configuration;
+    }
+
+    /**
+     * Set show gradeable configuration setting
+     *
+     * @param bool $show_gradeable_configuration
+     */
+    public function setShowGradeableConfiguration(bool $show_gradeable_configuration): void {
+        $this->show_gradeable_configuration = $show_gradeable_configuration;
+    }
+
+    /**
+     * Get customize show notes setting
+     *
+     * @return bool
+     */
+    public function getCustomizeShowNotes(): bool {
+        return $this->customize_show_notes;
+    }
+
+    /**
+     * Set customize show notes setting
+     *
+     * @param bool $customize_show_notes
+     */
+    public function setCustomizeShowNotes(bool $customize_show_notes): void {
+        $this->customize_show_notes = $customize_show_notes;
     }
 
 
