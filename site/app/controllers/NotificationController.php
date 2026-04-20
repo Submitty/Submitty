@@ -114,31 +114,67 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadMasterConfig();
+        $this->core->loadMasterDatabase();
+        $courses = $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId());
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
                 $this->core->getUser()->getNotificationSettings(),
-                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+                $courses
             )
         );
     }
-
+    /**
+     * @return MultiResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/sync", methods: ["POST"])]
+    public function syncNotifications() {
+        $course_ids = $_POST['sync_course_ids'] ?? [];
+        unset($_POST['csrf_token'], $_POST['sync_course_ids']);
+        $new_settings = $_POST;
+        if (empty($course_ids)) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse("No courses selected.")
+            );
+        }
+        foreach ($course_ids as $course_id) {
+            $parts = explode('|', $course_id);
+            if (count($parts) !== 2) {
+                continue;
+            }
+            [$semester, $course_name] = $parts;
+            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseDatabase();
+            if (!$this->changeSettings($new_settings)) {
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse(
+                        "Failed to sync settings for {$semester} {$course_name}."
+                    )
+                );
+            }
+        }
+        return MultiResponse::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse(
+                "Notification settings have been synced successfully."
+            )
+        );
+    }
     /**
      * @return MultiResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["POST"])]
-    public function changeSettings() {
+    public function changeCourseNotificationSettings() {
         //Change settings for the current user.
         unset($_POST['csrf_token']);
         $new_settings = $_POST;
-
-        if ($this->validateNotificationSettings(array_keys($new_settings))) {
-            $values_not_sent = array_diff($this->selections, array_keys($new_settings));
-            foreach (array_values($values_not_sent) as $value) {
-                $new_settings[$value] = 'false';
-            }
-            $this->core->getQueries()->updateNotificationSettings($new_settings);
+        if ($this->changeSettings($new_settings)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse('Notification settings have been saved.')
             );
@@ -148,6 +184,17 @@ class NotificationController extends AbstractController {
                 JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
             );
         }
+    }
+    private function changeSettings($new_settings) {
+        if ($this->validateNotificationSettings(array_keys($new_settings))) {
+            $values_not_sent = array_diff($this->selections, array_keys($new_settings));
+            foreach (array_values($values_not_sent) as $value) {
+                $new_settings[$value] = 'false';
+            }
+            $this->core->getQueries()->updateNotificationSettings($new_settings);
+            return true;
+        }
+        return false;
     }
 
     private function validateNotificationSettings($columns) {

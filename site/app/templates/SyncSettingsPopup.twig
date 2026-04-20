@@ -1,0 +1,30 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}sync-notification-popup{% endblock %}
+{% block title %}Sync Notification Settings{% endblock %}
+{% block body %}
+<div class="form-group" style="margin-top: 15px;">
+    <label>Select courses to copy the current notification settings to:</label>
+    <div style="
+        max-height: 250px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+    ">
+        {% for course in courses %}
+            <div style="margin-bottom: 5px;">
+                <label>
+                    <input type="checkbox" name="sync_course_ids[]" value="{{ course.getTerm() }}|{{ course.getTitle() }}">
+                    ({{ course.getTerm() }}) — {{ course.getTitle() }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block buttons %}
+<button class="btn btn-primary" onclick="setNotification(this)">
+    Sync Settings
+</button>
+    {{block('close_button')}}
+{% endblock %}
