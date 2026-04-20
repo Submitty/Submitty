@@ -662,10 +662,11 @@ class ElectronicGraderController extends AbstractController {
                 array_push($student_list, ['user_id' => $student->getId()]);
                 array_push($student_array, $student->getId());
             }
-            foreach ($student_array as $student) {
-                $peer_graded_components += $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $student);
-                $peer_components += count($this->core->getQueries()->getPeerAssignment($gradeable_id, $student));
-            }
+            // Batch-fetch peer grading counts for all students
+            $bulk_graded_counts = $this->core->getQueries()->getBulkNumGradedPeerComponents($gradeable_id, $student_array);
+            $bulk_assignment_counts = $this->core->getQueries()->getBulkPeerAssignmentCounts($gradeable_id, $student_array);
+            $peer_graded_components = array_sum($bulk_graded_counts);
+            $peer_components = array_sum($bulk_assignment_counts);
         }
         if ($peer) {
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
