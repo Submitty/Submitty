@@ -48,11 +48,34 @@ const inlineLatex: (TokenizerExtension) = {
         };
     },
 };
+const forumBaseUrl: string = (window as Window & { forumThreadBaseUrl?: string }).forumThreadBaseUrl ?? '';
+
+const threadRef: TokenizerExtension = {
+    name: 'threadRef',
+    level: 'inline',
+    start(src: string) {
+        return src.match(/#\d/)?.index ?? -1;
+    },
+    tokenizer(src: string) {
+        const match = /^#(\d+)/.exec(src);
+        if (!match) {
+            return;
+        }
+        return {
+            type: 'html',
+            raw: match[0],
+            text: forumBaseUrl
+                ? `<a href="${forumBaseUrl}/threads/${match[1]}" class="forum-thread-ref">#${match[1]}</a>`
+                : match[0],
+        };
+    },
+};
+
 const markdownToHtml = (markdown: string | null | undefined): string => {
     if (!markdown) {
         return '';
     }
-    const marked = new Marked({ extensions: [inlineLatex] });
+    const marked = new Marked({ extensions: [inlineLatex, threadRef] });
     return marked.parse(markdown, { async: false });
 };
 
