@@ -277,7 +277,7 @@ async function ajaxGetGradeableRubric(gradeable_id: string) {
  * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
  */
-async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined) {
+async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page_start: number, page_end: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined) {
     let response: Record<string, string> | null;
     try {
         response = await $.ajax({
@@ -291,7 +291,8 @@ async function ajaxSaveComponent(gradeable_id: string | undefined, component_id:
                 title: title,
                 ta_comment: ta_comment,
                 student_comment: student_comment,
-                page_number: page,
+                page_start: page_start,
+                page_end: page_end,
                 lower_clamp: lower_clamp,
                 default: default_value,
                 max_value: max_value,
@@ -3020,9 +3021,18 @@ async function closeComponentInstructorEdit(component_id: number, saveChanges: b
             input.value = 'No Credit';
         }
         await saveMarkList(component_id);
+        const component_jq = getComponentJQuery(component_id);
+        const page_start = parseInt(component_jq.find('.page-start').val() as string);
+        const page_end = parseInt(component_jq.find('.page-end').val() as string);
+
+        if (!isNaN(page_start) && !isNaN(page_end) && page_end < page_start) {
+            alert("End page must be greater than or equal to start page");
+            return;
+        }
+
         // Save the component title and comments
         await ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
-            component.student_comment, component.page, component.lower_clamp,
+            component.student_comment, page_start, page_end, component.lower_clamp,
             component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
     }
     const component_rubric = await ajaxGetComponentRubric(getGradeableId(), component_id);

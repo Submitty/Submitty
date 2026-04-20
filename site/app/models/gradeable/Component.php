@@ -104,7 +104,27 @@ class Component extends AbstractModel {
         $this->setText(Utils::getBooleanValue($details['text']));
         $this->setPeerComponent(Utils::getBooleanValue($details['peer_component']));
         $this->setOrder($details['order']);
-        $this->setPage($details['page']);
+        
+        $page_raw = $details['page'];
+        if (is_string($page_raw) && strpos($page_raw, '-') !== false) {
+            [$start, $end] = explode('-', $page_raw, 2);
+
+            $start = intval($start);
+            $end = intval($end);
+
+            $this->setPageStart($start);
+            $this->setPageEnd($end);
+
+            $this->setPage($start);
+        }
+        else {
+            $page = intval($page_raw);
+            $this->setPage($page);
+
+            $this->setPageStart($page);
+            $this->setPageEnd($page);
+        }
+
         $this->setIsItempoolLinked(Utils::getBooleanValue($details['is_itempool_linked']));
         $this->setItempool($details['itempool'] ?? "");
         $this->any_grades = ($details['any_grades'] ?? false) === true;
@@ -597,15 +617,8 @@ class Component extends AbstractModel {
         $this->modified = true;
     }
 
-    public function getPage(): string {
-        $start = $this->getPageStart();
-        $end = $this->getPageEnd();
-
-        if ($start === $end) {
-            return (string)$start;
-        }
-
-        return $start . '-' . $end;
+    public function getPage(): int {
+        return $this->getPageStart();
     }
 
     public function setIsItempoolLinked(bool $is_linked): void {
