@@ -97,7 +97,15 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'user_create_account' => false,
             "duck_special_effects" => false,
             "default_locale" => "default",
-            "user_id_requirements" => []
+            "user_id_requirements" => [],
+            "password_requirements" => [
+                "min_length" => 12,
+                "max_length" => 255,
+                "require_uppercase" => true,
+                "require_lowercase" => true,
+                "require_numbers" => true,
+                "require_special_chars" => true
+            ]
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -336,6 +344,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => 'Some system message',
             'user_create_account' => false,
             'user_id_requirements' => [],
+            'password_requirements' => [
+                'min_length' => 12,
+                'max_length' => 255,
+                'require_uppercase' => true,
+                'require_lowercase' => true,
+                'require_numbers' => true,
+                'require_special_chars' => true
+            ],
             'accepted_emails' => null,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
