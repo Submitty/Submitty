@@ -201,3 +201,14 @@ img {
         display: none;
     }
 }
+.large-mirror .CodeMirror {
+    min-height: 120px;
+}
+.notebook .short_answer .CodeMirror-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#notebook-view .short_answer .CodeMirror-vscrollbar {
+    display: block;
+    visibility: visible;
+}
