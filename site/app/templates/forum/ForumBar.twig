@@ -131,21 +131,22 @@
 				}
 			{% endfor %}
 		</style>
-		<div id="forum_filter_bar">
-			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
-			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
-				{% for category in categories %}
-					{% if category.visibleDate is null or category.diff >= 0 %}
-						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.id }}" data-cat_id="{{ category.id }}" data-btn-selected="false">{{ category.description }}</button>
-					{% endif %}
-				{% endfor %}
-			</div>
-			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="0" data-btn-selected="false">Comment</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="-1" data-btn-selected="false">Unresolved</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="1" data-btn-selected="false">Resolved</button>
-			</div>
-		</div>
+		{% set forum_filter_categories = [] %}
+		{% for category in categories %}
+			{% set forum_filter_categories = forum_filter_categories | merge([{
+				id: category.id,
+				description: category.description,
+				visibleDate: category.visibleDate is not null ? category.visibleDate|date('c') : null,
+				diff: category.diff,
+			}]) %}
+		{% endfor %}
+		{% include "Vue.twig" with {
+			type: "component",
+			name: "forum/ForumFilterBar",
+			args: {
+				categories: forum_filter_categories,
+			}
+		} only %}
 	{% endif %}
 </div>
 <hr/>
@@ -173,7 +174,7 @@
 		{% endfor %}
 		{% for status in cookie_selected_thread_status %}
 		$('#thread_status_select button[data-sel_id="{{ status }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_status_select button[data-cat_id="{{ status }}"]').text(), function(e) {
+		filters_applied.toggleElement($('#thread_status_select button[data-sel_id="{{ status }}"]').text(), function(e) {
 			return e === $('#thread_status_select button[data-sel_id="{{ status }}"]').text();
 		});
 		{% endfor %}
