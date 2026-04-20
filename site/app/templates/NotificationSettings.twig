@@ -3,6 +3,17 @@
       input[type="checkbox"]:disabled {
           background: gray;
       }
+      .header {
+          position: relative;
+      }
+      .sync-top-right {
+          position: absolute;
+          top: 0;
+          right: 0;
+      }
+      .sync-bottom-row {
+          margin-top: 30px;
+      }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -12,9 +23,22 @@
             {% else %}
                 {% set header = "Notification Settings" %}
             {% endif %}
+            {% set sync_button %}
+                <button type="button"
+                    class="btn btn-primary sync-settings-btn"
+                    onclick="showSyncPopup()"
+                    data-testid="sync-notification-settings-top">
+                    Sync notification settings
+                </button>
+            {% endset %}
             <div class="header">
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
+                {% if email_enabled %}
+                    <div class="sync-top-right">
+                        {{ sync_button|raw }}
+                    </div>
+                {% endif %}
                 <div class="button-group" data-testid="notification-settings-button-group">
                     <div class="button-row">
                         <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".notification-setting-input" onclick="checkAll(this)" data-testid="subscribe-all-notifications">Subscribe to all notifications</button>
@@ -26,7 +50,6 @@
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)" data-testid="subscribe-all-emails">Subscribe to all emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)" data-testid="unsubscribe-all-optional-emails">Unsubscribe from all optional emails</button>
                             <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)" data-testid="reset-email-settings">Reset email settings</button>
-                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="showSyncPopup()" data-testid="Sync Notification settings to other courses">Sync notification settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -355,6 +378,11 @@
                     {% endif %}
                 </div>
             {% endif %}
+            {% if email_enabled %}
+            <div class="sync-bottom-row">
+                {{ sync_button|raw }}
+            </div>
+{% endif %}
         </div>
     </form>
     <script>
