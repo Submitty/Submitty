@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\authentication\SamlAuthentication;
 use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
@@ -556,6 +557,8 @@ class HomeworkView extends AbstractView {
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
+        $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
+
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
             'term' => $this->core->getConfig()->getTerm(),
@@ -618,7 +621,8 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'has_overridden_grades' => $has_overridden_grades,
+            'overridden_grade' => $has_overridden_grades ? $graded_gradeable->getTotalScore() : null,
             'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
@@ -631,7 +635,7 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false,
+            'git_auth_token_required' => $this->core->getAuthentication() instanceof SamlAuthentication,
             'vcs_repo_exists' => $vcs_repo_exists,
             'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);

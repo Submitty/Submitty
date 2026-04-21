@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -390,7 +391,8 @@ class HomePageController extends AbstractController {
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new MultiResponse(
@@ -414,13 +416,9 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
-        $term_names = $this->core->getSubmittyEntityManager()
-            ->createQueryBuilder()
-            ->select('term.name')
-            ->from(Term::class, 'term')
-            ->orderBy('term.name', 'ASC')
-            ->getQuery()
-            ->getSingleColumnResult();
+        $terms = $this->core->getSubmittyEntityManager()
+            ->getRepository(Term::class)
+            ->findBy([], ['name' => 'DESC']);
 
         return new MultiResponse(
             null,
@@ -429,7 +427,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $term_names,
+                $terms,
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -499,8 +497,8 @@ class HomePageController extends AbstractController {
                 $term = new Term(
                     $term_id,
                     $term_name,
-                    $start_date,
-                    $end_date,
+                    new \DateTime($start_date),
+                    new \DateTime($end_date),
                 );
                 $em->persist($term);
                 $em->flush();
