@@ -294,7 +294,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_grade', '9997-12-31 23:59:59', 'All Changes Saved');
 
         // Set the manual grading due date to the past (SHOULD WORK since all previous dates have no constraints)
-        updateDates('#date_grade_due', past_date, 'All Changed Saved');
+        updateDates('#date_grade_due', past_date, 'All Changes Saved');
 
         // The gradeable should be visible to all levels and be shown as "grading in progress"
         ['student', 'grader', 'ta'].forEach((user) => {
@@ -378,10 +378,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_grade', '9997-12-31 23:59:59', 'All Changes Saved');
 
         // Set grading due date to the past (SHOULD work as no previous dates have anymore constraints)
-        updateDates('#date_grade_due', past_date, 'All Changes Saved');
+        updateDates('#date_grade_due', '1970-02-10 23:59:59', 'All Changes Saved');
 
         // Set the TA View date to the future so it does not interfere
-        updateDates('#date_ta_view', future_date, 'All Changes Saved');
+        updateDates('#date_ta_view', '9997-12-31 23:59:59', 'All Changes Saved');
 
         // The gradeable should be visible to graders because the grade due date takes priority over the other dates
         ['grader', 'ta'].forEach((user) => {
