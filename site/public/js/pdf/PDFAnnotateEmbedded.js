@@ -222,8 +222,13 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
             success: (data) => {
                 let pdfData;
                 try {
-                    pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
+                    const b64Data = JSON.parse(data)['data'];
+                    const raw = atob(b64Data);
+                    const rawLength = raw.length;
+                    pdfData = new Uint8Array(new ArrayBuffer(rawLength));
+                    for (let i = 0; i < rawLength; i++) {
+                        pdfData[i] = raw.charCodeAt(i);
+                    }
                 }
                 catch (err) {
                     console.log(err);
@@ -350,13 +355,18 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
 
                 let pdfData;
                 try {
-                    pdfData = JSON.parse(data);
+                    const parsedData = JSON.parse(data);
                     // Checking if the response is a failure due to large file size
-                    if (pdfData.status === 'fail') {
-                        $('#pdf-error-message').text(pdfData.message).show();
+                    if (parsedData.status === 'fail') {
+                        $('#pdf-error-message').text(parsedData.message).show();
                         return;
                     }
-                    pdfData = atob(pdfData['data']);
+                    const raw = atob(parsedData['data']);
+                    const rawLength = raw.length;
+                    pdfData = new Uint8Array(new ArrayBuffer(rawLength));
+                    for (let i = 0; i < rawLength; i++) {
+                        pdfData[i] = raw.charCodeAt(i);
+                    }
                 }
                 catch (err) {
                     console.log(err);
