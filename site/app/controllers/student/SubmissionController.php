@@ -52,7 +52,10 @@ class SubmissionController extends AbstractController {
         }
 
         try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $gradeable = $this->core->getQueries()->getGradeableConfig(
+                $gradeable_id,
+                $this->core->getUser()->getId()
+            );
             $now = $this->core->getDateTimeNow();
 
             if (
@@ -109,16 +112,23 @@ class SubmissionController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements: ["gradeable_version" => "\d+"])]
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
+        $user_id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id);
+
         $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
+        }
+
+        // Mark unseen gradeable notifications as seen, if applicable
+        if ($gradeable->hasUnseenGradeableNotification()) {
+            $this->core->getQueries()->markNotificationAsSeenByGradeableId($user_id, $gradeable->getId());
         }
 
         if ($gradeable->isLocked($this->core->getUser()->getId()) && $this->core->getUser()->accessGrading() === false) {
@@ -350,6 +360,297 @@ class SubmissionController extends AbstractController {
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = ['highest_version' => $highest_version, 'previous_submission' => $highest_version > 0];
         return $this->core->getOutput()->renderJsonSuccess($return);
+    }
+
+    /**
+    * Function to submit the same "blank" pdf for all active students on a specific gradeable.
+    *
+    * The file that is submitted can be found here:
+    * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
+    *
+    * JSON error checking works similarly to ajaxUpload... or similar type functions.
+    *
+    * @param string $gradeable_id
+    * @return JsonResponse
+    */
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions", methods: ["POST"])]
+    public function generateBlankSubmissions($gradeable_id) {
+
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
+        }
+
+        $pdf_path = FileUtils::joinPaths(
+            "/usr",
+            "local",
+            "submitty",
+            "more_autograding_examples",
+            "pdf_exam",
+            "submissions",
+            "bulk_upload_placeholder.pdf"
+        );
+
+        if (!is_file($pdf_path)) {
+            return $this->uploadResult("Placeholder PDF not found at '{$pdf_path}'", false);
+        }
+
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+        $current_time_str = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+        $admin_user_id = $this->core->getUser()->getId();
+
+        $students = $this->core->getQueries()->getAllUsers();
+        $success_count = 0;
+
+        foreach ($students as $student) {
+            if ($student->getGroup() !== User::GROUP_STUDENT || $student->getRegistrationSection() === null) {
+                continue;
+            }
+
+            $user_id = $student->getId();
+
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+            $highest_version = 0;
+            if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+                $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            }
+            $new_version = $highest_version + 1;
+
+            //user directory
+            $user_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                "submissions",
+                $gradeable->getId(),
+                $user_id
+            );
+
+            //path for submission version
+            $version_path = FileUtils::joinPaths(
+                $user_path,
+                $new_version
+            );
+
+            FileUtils::createDir($version_path, true);
+
+            //path for submission directory
+            $version_path_submission = FileUtils::joinPaths(
+                $version_path,
+                "bulk_upload_placeholder.pdf"
+            );
+
+            //copy pdf to student version directory
+            @copy($pdf_path, $version_path_submission);
+
+            //write settings file
+            $settings_file = FileUtils::joinPaths(
+                $user_path,
+                "user_assignment_settings.json"
+            );
+            $json = [];
+
+            if (file_exists($settings_file)) {
+                $json = FileUtils::readJsonFile($settings_file);
+            }
+            $json["active_version"] = $new_version;
+            $json["history"][] = [
+                "version" => $new_version,
+                "time" => $current_time_str,
+                "who" => $admin_user_id,
+                "type" => "upload"
+            ];
+
+            @file_put_contents($settings_file, FileUtils::encodeJson($json));
+
+            //write timestamp file
+            @file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_str . "\n");
+
+            //update database / set version number
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+
+            //add to grading queue
+            $queue_file_helper = implode("__", [
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $gradeable->getId(),
+                $user_id,
+                $new_version
+            ]);
+
+            $queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                $queue_file_helper
+            );
+
+            $queue_data = [
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                "user" => $user_id,
+                "team" => "",
+                "who" => $user_id,
+                "is_team" => false,
+                "version" => $new_version,
+                "vcs_checkout" => false
+            ];
+
+            //add file to directory which will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
+
+            $success_count++;
+        }
+
+        $result = "Successfully submitted placeholder PDF for all $success_count students.";
+        return $this->uploadResult($result);
+    }
+
+    /**
+     * Function to submit the same "blank" pdf for all teams on a specific gradeable.
+     * The file that is submitted can be found here:
+     * /usr/local/submitty/more_autograding_examples/pdf_exam/submissions/bulk_upload_placeholder.pdf
+     * JSON error checking works similarly to ajaxUpload... or similar type functions.
+     * Logic works similarly to generateBlankSubmissions.
+    *
+    * @param string $gradeable_id
+    * @return JsonResponse
+     */
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_blank_submissions_for_teams", methods: ["POST"])]
+    public function generateBlankSubmissionsForTeams($gradeable_id) {
+
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
+        }
+
+        $pdf_path = FileUtils::joinPaths(
+            "/usr",
+            "local",
+            "submitty",
+            "more_autograding_examples",
+            "pdf_exam",
+            "submissions",
+            "bulk_upload_placeholder.pdf"
+        );
+
+        if (!is_file($pdf_path)) {
+            return $this->uploadResult("Placeholder PDF not found at '{$pdf_path}'", false);
+        }
+
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+        $current_time_str = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+        $admin_user_id = $this->core->getUser()->getId();
+
+        $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+        $success_count = 0;
+
+        foreach ($teams as $team) {
+            $team_id = $team->getId();
+
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $team_id);
+            $highest_version = 0;
+            if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+                $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            }
+            $new_version = $highest_version + 1;
+
+            //user directory
+            $team_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                "submissions",
+                $gradeable->getId(),
+                $team_id
+            );
+
+            //path for submission version
+            $version_path = FileUtils::joinPaths(
+                $team_path,
+                $new_version
+            );
+
+            FileUtils::createDir($version_path, true);
+
+            //path for submission directory
+            $version_path_submission = FileUtils::joinPaths(
+                $version_path,
+                "bulk_upload_placeholder.pdf"
+            );
+
+            //copy pdf to student version directory
+            @copy($pdf_path, $version_path_submission);
+
+            //write settings file
+            $settings_file = FileUtils::joinPaths(
+                $team_path,
+                "user_assignment_settings.json"
+            );
+            $json = [];
+
+            if (file_exists($settings_file)) {
+                $json = FileUtils::readJsonFile($settings_file);
+            }
+            $json["active_version"] = $new_version;
+            $json["history"][] = [
+                "version" => $new_version,
+                "time" => $current_time_str,
+                "who" => $admin_user_id,
+                "type" => "upload"
+            ];
+
+            @file_put_contents($settings_file, FileUtils::encodeJson($json));
+
+            //write timestamp file
+            @file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_str . "\n");
+
+            //update database / set version number
+            $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+
+            //add to grading queue
+            $queue_file_helper = implode("__", [
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $gradeable->getId(),
+                $team_id,
+                $new_version
+            ]);
+
+            $queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                $queue_file_helper
+            );
+
+            $queue_data = [
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+                "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+                "queue_time" => $current_time,
+                "user" => null,
+                "team" => $team_id,
+                "who" => $team_id,
+                "is_team" => true,
+                "version" => $new_version,
+                "vcs_checkout" => false
+            ];
+
+            //add file to directory which will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
+
+            $success_count++;
+        }
+
+        $result = "Successfully submitted placeholder PDF for all $success_count teams.";
+        return $this->uploadResult($result);
     }
 
     /**
@@ -977,41 +1278,43 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid user id.", false);
         }
 
-        if (!isset($_POST['regrade']) || !isset($_POST['regrade_all']) || !isset($_POST['regrade_all_students_all'])) {
-            return $this->uploadResult("Invalid user id.", false);
-        }
-        $who_id = "";
-        //grab all graded gradeables for this gradeable
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-        $order->sort("id", "ASC");
-        $graded_gradeables = [];
-        /** @var GradedGradeable $g */
-        foreach ($order->getSortedGradedGradeables() as $g) {
-            if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
-                $graded_gradeables[] = $g;
-            }
-        }
-
+        // regrade - regrade the active version for one selected student ($user_id) who submitted a certain gradeable
+        // regrade_all - regrade every version for one selected student ($user_id) who submitted a certain gradeable
+        // regrade_all_students - regrade the active version for every student who submitted a certain gradeable - default behavior
+        // regrade_all_students_all - regrade every version for every student who submitted a certain gradeable
         $regrade = $_POST['regrade'];
         $regrade_all = $_POST['regrade_all'];
         $regrade_all_students_all = $_POST['regrade_all_students_all'];
         $user_id = $_POST['user_id'];
 
-        $count = 0;
-        foreach ($graded_gradeables as $g) {
-            //if only regrading one student/teams assignments(s), skip gradeables from other submitters
-            if ($regrade === 'true' || $regrade_all === 'true') {
-                if ($gradeable->isTeamAssignment()) {
-                    if ($user_id !== $g->getSubmitter()->getTeam()->getMemberUsers()[0]->getId()) {
-                        continue;
-                    }
-                }
-                else {
-                    if ($user_id !== $g->getSubmitter()->getId()) {
-                        continue;
-                    }
+        if (!isset($regrade) || !isset($regrade_all) || !isset($regrade_all_students_all)) {
+            return $this->uploadResult("Invalid regrade mode.", false);
+        }
+
+        $graded_gradeables = [];
+        // if we are only regrading one user, only get that one gradeable
+        if (Utils::getBooleanValue($regrade) || Utils::getBooleanValue($regrade_all)) {
+            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_id) as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $graded_gradeables[] = $g;
                 }
             }
+        }
+        else {
+            //grab all graded gradeables for this gradeable
+            $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+            $order->sort("id", "ASC");
+            /** @var GradedGradeable $g */
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                if ($g->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                    $graded_gradeables[] = $g;
+                }
+            }
+        }
+
+        $who_id = "";
+        $count = 0;
+        foreach ($graded_gradeables as $g) {
             //determine how many times the next loop should loop
             if ($regrade_all_students_all === 'true' || $regrade_all === 'true') {
                 $limit = $g->getAutoGradedGradeable()->getHighestVersion();

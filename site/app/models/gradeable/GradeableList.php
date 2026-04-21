@@ -300,7 +300,6 @@ class GradeableList extends AbstractModel {
         }
         elseif (
             $gradeable->getType() === GradeableType::ELECTRONIC_FILE
-            && $gradeable->getSubmissionOpenDate() <= $now
             && $gradeable->getSubmissionDueDate() <= $now
         ) {
             return self::CLOSED;
@@ -308,7 +307,6 @@ class GradeableList extends AbstractModel {
         elseif (
             $gradeable->getType() === GradeableType::ELECTRONIC_FILE
             && $gradeable->getSubmissionOpenDate() <= $now
-            && $gradeable->getTaViewStartDate() <= $now
         ) {
             return self::OPEN;
         }
