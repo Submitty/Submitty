@@ -1936,6 +1936,88 @@ function unblockUserFromForum(userId, csrfToken) {
     }
 }
 
+function showBlockedUsersModal() {
+    const url = buildCourseUrl(['forum', 'users', 'blocked']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-blocked-users').show();
+                $('body').addClass('popup-active');
+                captureTabInModal('popup-blocked-users');
+
+                const $body = $('#popup-blocked-users .form-body');
+                $body.empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $body.append('<p>No users are currently blocked from the forum.</p>');
+                }
+                else {
+                    const $table = $('<table class="table table-striped"><thead><tr><th>Name</th><th>User ID</th><th>Expires</th><th></th></tr></thead><tbody></tbody></table>');
+                    const $tbody = $table.find('tbody');
+                    for (const user of users) {
+                        const expiration = user.expiration_date ? user.expiration_date : 'Indefinite';
+                        const $row = $('<tr>');
+                        $row.append($('<td>').text(user.display_name));
+                        $row.append($('<td>').text(user.user_id));
+                        $row.append($('<td>').text(expiration));
+                        const $unblockBtn = $('<a class="btn btn-sm btn-danger key_to_click" tabindex="0">Unblock</a>');
+                        $unblockBtn.on('click', function () {
+                            const confirmUnblock = window.confirm(`Are you sure you would like to unblock ${user.display_name} from making forum posts?`);
+                            if (confirmUnblock) {
+                                $.ajax({
+                                    url: buildCourseUrl(['forum', 'users', 'unblock']),
+                                    type: 'POST',
+                                    data: {
+                                        user_id: user.user_id,
+                                        csrf_token: window.csrfToken,
+                                    },
+                                    success: function (resp) {
+                                        try {
+                                            const json = JSON.parse(resp);
+                                            if (json.status === 'fail') {
+                                                displayErrorMessage(json.message);
+                                                return;
+                                            }
+                                            displaySuccessMessage('User has been unblocked from making forum posts.');
+                                            showBlockedUsersModal();
+                                        }
+                                        catch (err) {
+                                            displayErrorMessage('Error parsing data. Please try again.');
+                                        }
+                                    },
+                                    error: function () {
+                                        window.alert('Something went wrong while trying to unblock the user. Please try again.');
+                                    },
+                                });
+                            }
+                        });
+                        const $btnCell = $('<td>');
+                        $btnCell.append($unblockBtn);
+                        $row.append($btnCell);
+                        $tbody.append($row);
+                    }
+                    $body.append($table);
+                }
+
+                $('#popup-blocked-users .close-button').off('click').on('click', () => {
+                    $('#popup-blocked-users').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage(data.message || 'Failed to load blocked users.');
+            }
+        },
+        error: function () {
+            window.alert('Something went wrong while loading blocked users. Please try again.');
+        },
+    });
+}
+
 function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     const confirm = window.confirm(confirmString);
     if (confirm) {

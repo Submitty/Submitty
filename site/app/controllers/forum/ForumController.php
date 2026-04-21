@@ -943,6 +943,28 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
     }
 
+    #[Route("/courses/{_semester}/{_course}/forum/users/blocked", methods: ["GET"])]
+    public function getBlockedUsers(): JsonResponse {
+        if (!$this->core->getUser()->accessAdmin()) {
+            return JsonResponse::getFailResponse("You do not have permission to view this.");
+        }
+        $active_blocks = $this->core->getQueries()->getActiveBlockActions();
+        $blocked_users = [];
+        foreach ($active_blocks as $block) {
+            if ($block['action'] !== 'no_forum_posts') {
+                continue;
+            }
+            $user = $this->core->getQueries()->getUserById($block['user_id']);
+            $display_name = $user !== null ? $user->getDisplayFullName() : $block['user_id'];
+            $blocked_users[] = [
+                'user_id' => $block['user_id'],
+                'display_name' => $display_name,
+                'expiration_date' => $block['expiration_date'],
+            ];
+        }
+        return JsonResponse::getSuccessResponse(['users' => $blocked_users]);
+    }
+
     #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/threads/merge", methods: ["POST"])]
     public function mergeThread() {

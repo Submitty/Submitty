@@ -269,6 +269,15 @@ class ForumThreadView extends AbstractView {
                     "onclick" => [false, ''],
                     "link" => $this->core->buildCourseUrl(['forum', 'stats']),
                     "required_rank" => 2
+                ],
+                [
+                    "display_text" => 'View Blocked Users',
+                    "id" => 'view_blocked_users',
+                    "optional_class" => [false, ''],
+                    "title" => 'View users blocked from forum posting',
+                    "onclick" => [true, "showBlockedUsersModal()"],
+                    "link" => '#',
+                    "required_rank" => 1
                 ]
             ];
             $other_buttons = [
