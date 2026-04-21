@@ -821,6 +821,8 @@ $(document).ready(() => {
         saveChanges();
     });
     $('#make_section_sort_checkbox').change(() => {
+        saveChanges();
+    });
     $('#customize_show_notes_checkbox').change(() => {
         updateShowNotesVisibility();
         saveChanges();

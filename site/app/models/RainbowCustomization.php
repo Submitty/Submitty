@@ -441,6 +441,7 @@ class RainbowCustomization extends AbstractModel {
 
     public function getMakeSectionSort(): bool {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMakeSectionSort() : false;
+    }
     public function getShowGradeableConfiguration(): bool {
         if (is_null($this->RCJSON)) {
             return false;
@@ -735,6 +736,7 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->make_section_sort)) {
             $this->RCJSON->setMakeSectionSort($form_json->make_section_sort);
+        }
         if (isset($form_json->show_gradeable_configuration)) {
             $this->RCJSON->setShowGradeableConfiguration($form_json->show_gradeable_configuration);
         }

@@ -283,6 +283,7 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->make_section_sort)) {
             $this->make_section_sort = $json->make_section_sort;
+        }
         if (isset($json->show_gradeable_configuration)) {
             $this->show_gradeable_configuration = $json->show_gradeable_configuration;
         }
@@ -434,6 +435,8 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function setMakeSectionSort(bool $make_section_sort): void {
         $this->make_section_sort = $make_section_sort;
+    }
+    /*
      * Get show gradeable configuration setting
      *
      * @return bool
