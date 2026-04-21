@@ -1,6 +1,29 @@
+#rainbow-grades {
+    overflow: auto;
+    max-height: calc(100vh - 200px);
+}
+
 #rainbow-grades > table {
     /* stylelint-disable-next-line color-named */
     color: black;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#rainbow-grades > table tr:first-child > td {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#rainbow-grades > table tr > td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+#rainbow-grades > table tr:first-child > td:first-child {
+    z-index: 3;
 }
 
 #rainbow-grades-header > .btn-wrapper {

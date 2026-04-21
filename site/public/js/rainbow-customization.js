@@ -681,6 +681,7 @@ function buildJSON() {
         omit_section_from_stats: getOmittedSections(),
         show_gradeable_configuration: $('#config-toggle').is(':checked'),
         extra_credit: $('#extra_credit_checkbox').is(':checked'),
+        make_section_sort: $('#make_section_sort_checkbox').is(':checked'),
         customize_show_notes: $('#customize_show_notes_checkbox').is(':checked'),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
@@ -817,6 +818,9 @@ $(document).ready(() => {
         saveChanges();
     });
     $('#extra_credit_checkbox').change(() => {
+        saveChanges();
+    });
+    $('#make_section_sort_checkbox').change(() => {
         saveChanges();
     });
     $('#customize_show_notes_checkbox').change(() => {
@@ -1062,6 +1066,9 @@ $(document).ready(() => {
         let configVisible = $('#config-toggle').is(':checked');
 
         // Initially hide config items
+        $('#extra_credit_checkbox').parent().hide();
+        $('#make_section_sort_checkbox').parent().hide();
+        $('#drop_lowest_checkbox').parent().hide();
         $('#checkboxControls').hide();
         $('div[id^="dropLowestDiv-"]').hide();
         $('input[id^="per-gradeable-percents-checkbox-"]').hide();
@@ -1100,6 +1107,12 @@ $(document).ready(() => {
             configVisible = $('#config-toggle').is(':checked');
 
             if (configVisible) {
+                // Show Extra Credit
+                $('#extra_credit_checkbox').parent().show();
+                // Show Sort by Section
+                $('#make_section_sort_checkbox').parent().show();
+                // Show Remove Lowest
+                $('#drop_lowest_checkbox').parent().show();
                 $('#checkboxControls').show();
                 if ($('#drop_lowest_checkbox').is(':checked')) {
                     $('div[id^="dropLowestDiv-"]').show();
@@ -1129,6 +1142,12 @@ $(document).ready(() => {
                 updateShowNotesVisibility();
             }
             else {
+                // Hide Extra Credit
+                $('#extra_credit_checkbox').parent().hide();
+                // Hide Sort by Section
+                $('#make_section_sort_checkbox').parent().hide();
+                // Hide Remove Lowest
+                $('#drop_lowest_checkbox').parent().hide();
                 $('#checkboxControls').hide();
                 $('div[id^="dropLowestDiv-"]').hide();
                 // Hide Per Gradeable Percents controls

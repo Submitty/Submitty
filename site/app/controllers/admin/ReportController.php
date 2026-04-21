@@ -737,6 +737,7 @@ class ReportController extends AbstractController {
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'extra_credit' => $customization->getExtraCredit(),
+                'make_section_sort' => $customization->getMakeSectionSort(),
                 'show_gradeable_configuration' => $customization->getShowGradeableConfiguration(),
                 'customize_show_notes' => $customization->getCustomizeShowNotes(),
                 'plagiarism' => $customization->getPlagiarism(),
