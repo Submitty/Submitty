@@ -23,8 +23,9 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_SERVER['HTTP_USER_AGENT'] = 'test';
     }
 
-    private function getAuthenticationCore($authenticate = false, $queries = [], $user = "") {
-        $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
+    private function getAuthenticationCore($authenticate = false, $queries = [], $user = "", $throttle_queries = []) {
+        $all_queries = array_merge($queries, $throttle_queries);
+        $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $all_queries);
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);
         $auth->method('setPassword')->willReturn(null);
@@ -345,5 +346,51 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $controller = new AuthenticationController($core);
         $response = $controller->checkLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => "Could not login using that user id or password"], $response);
+    }
+
+    public function testLoginLockedOut() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'wrong';
+        $core = $this->getAuthenticationCore(
+            false,
+            [],
+            '',
+            ['getRecentFailedLoginAttempts' => 5, 'getEarliestRecentFailureTimestamp' => date('Y-m-d H:i:s', time() - 60)]
+        );
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin()->json_response->json;
+        $this->assertEquals('fail', $response['status']);
+        $this->assertStringContainsString('temporarily locked', $response['message']);
+    }
+
+    public function testLoginFailureRecordsAttempt() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'wrong';
+        $core = $this->getAuthenticationCore(
+            false,
+            [],
+            '',
+            ['getRecentFailedLoginAttempts' => 0, 'insertLoginAttempt' => null, 'clearLoginAttempts' => null]
+        );
+        $controller = new AuthenticationController($core);
+        $controller->checkLogin();
+        $this->assertMethodCalled('insertLoginAttempt');
+    }
+
+    public function testLoginSuccessClearsAttempts() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $core = $this->getAuthenticationCore(
+            true,
+            [],
+            'test',
+            ['getRecentFailedLoginAttempts' => 0, 'insertLoginAttempt' => null, 'clearLoginAttempts' => null]
+        );
+        $controller = new AuthenticationController($core);
+        $controller->checkLogin();
+        $this->assertMethodCalled('clearLoginAttempts');
     }
 }
