@@ -174,10 +174,6 @@ function markSeen(course: string, id: number) {
   text-decoration: underline;
 }
 
-.notification.unseen {
-    background-color: var(--viewed-content);
-}
-
 .notification-type {
     margin-right: 1em;
 }

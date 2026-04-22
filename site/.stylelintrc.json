@@ -35,6 +35,10 @@
         "color-named": null,
         "color-no-hex": null
       }
+    },
+    {
+      "files": ["*.vue", "**/*.vue"],
+      "extends": "stylelint-config-standard-vue"
     }
   ]
 }
