@@ -16,13 +16,17 @@
 	<div class="toolbar">
 		<div class="toolbar-left">
 			{% if thread_exists %}
-			<form action="javascript:void(0);">
+			<form id="forum-search-form" action="javascript:void(0);" data-ays-ignore="true">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" />
+				<div class="search-input-wrapper">
+					<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" data-ays-ignore="true" />
+					<button type="button" title="Clear search" id="search-clear" aria-label="Clear search" data-ays-ignore="true">
+						<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+					</button>
+				</div>
 				<div class="search-actions">
-					<i title="Clear search" id="search-clear" class="fa-solid fa-circle-xmark"></i>
-					<button name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
+					<button type="button" name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
 						Search
 					</button>
 
@@ -159,7 +163,6 @@
 
 	$( document ).ready(function() {
 		loadFilterHandlers();
-		$('#search-content').val(Cookies.get('search_query')).trigger('change');
 		updateThreads(true, null);
 		saveFilterState();
 
@@ -183,6 +186,7 @@
 		$('#unread').prop("checked", {{cookie_selected_unread_value}});
 
 		unread_marked = checkUnread();
+		updateClearFilterButton();
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
 			$("#{{display_option }}_label").addClass('active');
