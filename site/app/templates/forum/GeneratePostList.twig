@@ -46,7 +46,8 @@
         "has_history": post_d.has_history,
         "thread_previously_merged": post_d.thread_previously_merged,
         "thread_announced": post_d.thread_announced,
-        "post_up_duck": post_d.post_up_duck
+        "post_up_duck": post_d.post_up_duck,
+        "is_author_blocked": post_d.is_author_blocked is defined ? post_d.is_author_blocked : false
     } only %}
 
 {% endfor %}

@@ -1047,6 +1047,41 @@ CREATE TABLE public.forum_posts_history (
 
 
 --
+-- Name: block_user_action; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.block_user_action (
+    id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    action character varying(255) NOT NULL,
+    expiration_date timestamp with time zone,
+    created_by character varying(255) NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT block_user_action_action_check CHECK (((action)::text = 'no_forum_posts'::text))
+);
+
+
+--
+-- Name: block_user_action_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.block_user_action_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: block_user_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.block_user_action_id_seq OWNED BY public.block_user_action.id;
+
+
+--
 -- Name: forum_upducks; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2119,6 +2154,13 @@ ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nex
 
 
 --
+-- Name: block_user_action id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.block_user_action ALTER COLUMN id SET DEFAULT nextval('public.block_user_action_id_seq'::regclass);
+
+
+--
 -- Name: chatroom_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2347,6 +2389,22 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+
+--
+-- Name: block_user_action block_user_action_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.block_user_action
+    ADD CONSTRAINT block_user_action_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: block_user_action block_user_action_user_id_action_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.block_user_action
+    ADD CONSTRAINT block_user_action_user_id_action_key UNIQUE (user_id, action);
 
 
 --
@@ -3028,6 +3086,22 @@ ALTER TABLE ONLY public.active_graders
 
 ALTER TABLE ONLY public.active_graders
     ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: block_user_action block_user_action_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.block_user_action
+    ADD CONSTRAINT block_user_action_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: block_user_action block_user_action_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.block_user_action
+    ADD CONSTRAINT block_user_action_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
