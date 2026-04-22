@@ -1,7 +1,7 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
     displayErrorMessage, escapeSpecialChars, updateThreads, enableTabsInTextArea,
     getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
-    previous_files, label_array, cancelDeferredSave, captureTabInModal,
+    previous_files, label_array, cancelDeferredSave, captureTabInModal, closePopup,
     WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
     cleanupAutosaveHistory */
 /* exported markForDeletion */
@@ -1879,7 +1879,7 @@ function submitBlockUser() {
             expiration_date: expirationDate,
             csrf_token: csrfToken,
         },
-        success: function (data) {
+        success: (data) => {
             try {
                 // eslint-disable-next-line no-var
                 var json = JSON.parse(data);
@@ -1896,7 +1896,7 @@ function submitBlockUser() {
             displaySuccessMessage('User has been blocked from making forum posts.');
             location.reload();
         },
-        error: function () {
+        error: () => {
             window.alert('Something went wrong while trying to block the user. Please try again.');
         },
     });
@@ -1913,7 +1913,7 @@ function unblockUserFromForum(userId, csrfToken) {
                 user_id: userId,
                 csrf_token: csrfToken,
             },
-            success: function (data) {
+            success: (data) => {
                 try {
                     // eslint-disable-next-line no-var
                     var json = JSON.parse(data);
@@ -1929,7 +1929,7 @@ function unblockUserFromForum(userId, csrfToken) {
                 displaySuccessMessage('User has been unblocked from making forum posts.');
                 location.reload();
             },
-            error: function () {
+            error: () => {
                 window.alert('Something went wrong while trying to unblock the user. Please try again.');
             },
         });
@@ -1942,7 +1942,7 @@ function showBlockedUsersModal() {
         type: 'GET',
         url: url,
         dataType: 'json',
-        success: function (data) {
+        success: (data) => {
             if (data.status === 'success') {
                 $('#popup-blocked-users').show();
                 $('body').addClass('popup-active');
@@ -1965,7 +1965,7 @@ function showBlockedUsersModal() {
                         $row.append($('<td>').text(user.user_id));
                         $row.append($('<td>').text(expiration));
                         const $unblockBtn = $('<a class="btn btn-sm btn-danger key_to_click" tabindex="0">Unblock</a>');
-                        $unblockBtn.on('click', function () {
+                        $unblockBtn.on('click', () => {
                             const confirmUnblock = window.confirm(`Are you sure you would like to unblock ${user.display_name} from making forum posts?`);
                             if (confirmUnblock) {
                                 $.ajax({
@@ -1975,7 +1975,7 @@ function showBlockedUsersModal() {
                                         user_id: user.user_id,
                                         csrf_token: window.csrfToken,
                                     },
-                                    success: function (resp) {
+                                    success: (resp) => {
                                         try {
                                             const json = JSON.parse(resp);
                                             if (json.status === 'fail') {
@@ -1989,7 +1989,7 @@ function showBlockedUsersModal() {
                                             displayErrorMessage('Error parsing data. Please try again.');
                                         }
                                     },
-                                    error: function () {
+                                    error: () => {
                                         window.alert('Something went wrong while trying to unblock the user. Please try again.');
                                     },
                                 });
@@ -2012,7 +2012,7 @@ function showBlockedUsersModal() {
                 displayErrorMessage(data.message || 'Failed to load blocked users.');
             }
         },
-        error: function () {
+        error: () => {
             window.alert('Something went wrong while loading blocked users. Please try again.');
         },
     });

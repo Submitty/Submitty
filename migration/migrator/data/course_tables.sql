@@ -1056,7 +1056,8 @@ CREATE TABLE public.block_user_action (
     action character varying(255) NOT NULL,
     expiration_date timestamp with time zone,
     created_by character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT block_user_action_action_check CHECK (((action)::text = 'no_forum_posts'::text))
 );
 
 
@@ -2404,14 +2405,6 @@ ALTER TABLE ONLY public.block_user_action
 
 ALTER TABLE ONLY public.block_user_action
     ADD CONSTRAINT block_user_action_user_id_action_key UNIQUE (user_id, action);
-
-
---
--- Name: block_user_action block_user_action_action_check; Type: CHECK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.block_user_action
-    ADD CONSTRAINT block_user_action_action_check CHECK (action IN ('no_forum_posts'));
 
 
 --

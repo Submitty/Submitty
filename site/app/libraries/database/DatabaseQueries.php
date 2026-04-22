@@ -7695,6 +7695,9 @@ AND gc_id IN (
         return count($this->course_db->rows()) > 0;
     }
 
+    /**
+     * @return mixed[]
+     */
     public function getActiveBlockActions(?string $user_id = null): array {
         if ($user_id !== null) {
             $this->course_db->query(

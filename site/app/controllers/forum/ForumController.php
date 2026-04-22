@@ -886,6 +886,9 @@ class ForumController extends AbstractController {
         }
     }
 
+    /**
+     * @return mixed[]
+     */
     #[AccessControl(permission: "forum.block_user")]
     #[Route("/courses/{_semester}/{_course}/forum/users/block", methods: ["POST"])]
     public function blockUserFromForum(): array {
@@ -893,7 +896,7 @@ class ForumController extends AbstractController {
         $expiration_date_str = $_POST['expiration_date'] ?? '';
         $current_user_id = $this->core->getUser()->getId();
 
-        if (empty($user_id)) {
+        if ($user_id === '') {
             return $this->core->getOutput()->renderJsonFail("User ID is required.");
         }
         if ($user_id === $current_user_id) {
@@ -909,7 +912,7 @@ class ForumController extends AbstractController {
         }
 
         $expiration_date = null;
-        if (!empty($expiration_date_str)) {
+        if ($expiration_date_str !== '') {
             $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone())->format('Y-m-d H:i:sO');
         }
 
@@ -917,12 +920,15 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess("User has been blocked from making forum posts.");
     }
 
+    /**
+     * @return mixed[]
+     */
     #[AccessControl(permission: "forum.block_user")]
     #[Route("/courses/{_semester}/{_course}/forum/users/unblock", methods: ["POST"])]
     public function unblockUserFromForum(): array {
         $user_id = $_POST['user_id'] ?? '';
 
-        if (empty($user_id)) {
+        if ($user_id === '') {
             return $this->core->getOutput()->renderJsonFail("User ID is required.");
         }
 
