@@ -201,9 +201,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
         file_name: file_name,
         file_path: file_path,
     };
-    // TODO: Replace this with rerender_pdf, only rerender if rerender_pdf is set to true
-    // eslint-disable-next-line no-constant-condition
-    if (true) {
+    if (rerender_pdf) {
         window.RENDER_OPTIONS.documentId = file_name;
         // TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
         window.RENDER_OPTIONS.userId = grader_id;
