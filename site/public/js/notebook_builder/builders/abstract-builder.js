@@ -1,4 +1,4 @@
-/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, FileSubmissionWidget, getBadItemNames, displayErrorMessage */
 /* exported AbstractBuilder */
 
 class AbstractBuilder {
@@ -11,7 +11,7 @@ class AbstractBuilder {
         this.reorderable_widgets_div = document.createElement('div');
         this.itempool_div = document.createElement('div');
 
-        this.selector_options = ['Markdown', 'Multiple Choice', 'Short Answer', 'Image'];
+        this.selector_options = ['Markdown', 'Multiple Choice', 'Short Answer', 'Image', 'File Submission'];
 
         // Handle many of the different button clicks that might occur within the notebook builder
         this.attachment_div.onclick = (event) => {
@@ -28,6 +28,9 @@ class AbstractBuilder {
                         break;
                     case 'Image':
                         this.widgetAdd(new ImageWidget());
+                        break;
+                    case 'File Submission':
+                        this.widgetAdd(new FileSubmissionWidget());
                         break;
                     case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
@@ -92,6 +95,9 @@ class AbstractBuilder {
                         break;
                     case 'item':
                         widget = new ItemWidget();
+                        break;
+                    case 'file_submission':
+                        widget = new FileSubmissionWidget();
                         break;
                     default:
                         break;
