@@ -46,6 +46,8 @@ aside {
 #bar_wrapper {
     box-sizing: content-box;
     padding: 6px 0;
+    display: flex;
+    align-items: center;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -58,7 +60,7 @@ aside {
 }
 
 .navigation-box {
-    margin: 0 auto;
+    margin: 0 0 0 32px;
     display: flex;
     width: max-content;
     max-width: 100%;
@@ -551,11 +553,11 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
-    position: absolute;
     overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
-    left: 5px;
-    top: 5px;
+    padding: 5px 10px 5px 5px;
+    flex-shrink: 0;
+    max-height: 85px;
 }
 
 #grading-scroll-message {
