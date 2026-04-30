@@ -4,21 +4,24 @@
 {% block body %}
 <div class="form-group" style="margin-top: 15px;">
     <label>Select courses to copy the current notification settings to:</label>
-    <div style="
-        max-height: 250px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 10px;
-    ">
+    <div class="sync-course-list">
         {% for course in courses %}
-            <div style="margin-bottom: 5px;">
-                <label>
-                    <input type="checkbox" name="sync_course_ids[]" value="{{ course.getTerm() }}|{{ course.getTitle() }}">
-                    ({{ course.getTerm() }}) — {{ course.getTitle() }}
-                </label>
+            <div class="sync-course-row row">
+              <div class="col-md-12">
+                    <label class="sync-course-label">
+                        <input type="checkbox"
+                            class="sync-course-checkbox"
+                            name="sync_course_ids[]"
+                            value="{{ course.getTerm() }}|{{ course.getTitle() }}">
+                        ({{ course.getTerm() }}) — {{ course.getTitle() }}
+                    </label>
+                </div>
             </div>
         {% endfor %}
+    </div>
+    <div class="sync-controls">
+        <button type="button" class="btn btn-primary" onclick="selectAllSyncCourses()">Select All</button>
+        <button type="button" class="btn btn-primary" onclick="clearAllSyncCourses()">Clear Selection</button>
     </div>
 </div>
 {% endblock %}
