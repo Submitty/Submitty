@@ -2,24 +2,27 @@
 {% block popup_id %}sync-notification-popup{% endblock %}
 {% block title %}Sync Notification Settings{% endblock %}
 {% block body %}
-<div class="form-group" style="margin-top: 15px;">
+<div class="form-group sync-popup-body">
     <label>Select courses to copy the current notification settings to:</label>
+    <hr />
     <div class="sync-course-list">
         {% for course in courses %}
-            <div class="sync-course-row row">
-              <div class="col-md-12">
-                    <label class="sync-course-label">
-                        <input type="checkbox"
-                            class="sync-course-checkbox"
-                            name="sync_course_ids[]"
-                            value="{{ course.getTerm() }}|{{ course.getTitle() }}">
-                        ({{ course.getTerm() }}) — {{ course.getTitle() }}
-                    </label>
+            <div class="sync-course-container"
+                 onclick="toggleSyncRow(this)">
+                <div class="sync-course-grid">
+                    <input type="checkbox"
+                           class="sync-course-checkbox"
+                           name="sync_course_ids[]"
+                           value="{{ course.getTerm() }}|{{ course.getTitle() }}"
+                           onclick="event.stopPropagation(); updateRowHighlight(this)">
+                    <span>({{ course.getTerm() }})</span>
+                    <span>{{ course.getTitle() }}</span>
                 </div>
+                <hr />
             </div>
         {% endfor %}
     </div>
-    <div class="sync-controls">
+    <div class="sync-buttons">
         <button type="button" class="btn btn-primary" onclick="selectAllSyncCourses()">Select All</button>
         <button type="button" class="btn btn-primary" onclick="clearAllSyncCourses()">Clear Selection</button>
     </div>

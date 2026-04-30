@@ -14,7 +14,27 @@
       .sync-bottom-row {
           margin-top: 30px;
       }
-      
+      .sync-course-container {
+          cursor: pointer;
+      }
+      .sync-course-container:hover {
+          background-color: var(--hover-notification);
+      }
+      .sync-course-container.selected-row {
+          background-color: var(--viewed-content);
+      }
+      .sync-course-grid {
+          display: grid;
+          grid-template-columns: 40px 120px 1fr;
+          align-items: center;
+          gap: 32px;
+          padding: 6px;
+      }
+      .sync-buttons {
+          display: flex;
+          gap: 16px;
+          margin-top: 24px;
+      }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -446,6 +466,19 @@
         }
         function clearAllSyncCourses() {
             $('.sync-course-checkbox').prop('checked', false);
+        }
+        function toggleSyncRow(row) {
+            const checkbox = row.querySelector('.sync-course-checkbox');
+            checkbox.checked = !checkbox.checked;
+            updateRowHighlight(checkbox);
+        }
+        function updateRowHighlight(checkbox) {
+            const row = checkbox.closest('.sync-course-container');
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+            } else {
+                row.classList.remove('selected-row');
+            }
         }
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
