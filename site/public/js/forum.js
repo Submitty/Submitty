@@ -42,7 +42,7 @@ function categoriesFormEvents() {
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
     window.open(url, '_blank');
-    
+
     const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
     if (newWindow !== null) {
         newWindow.opener = null;
