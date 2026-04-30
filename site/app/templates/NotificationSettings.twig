@@ -14,7 +14,7 @@
       .sync-bottom-row {
           margin-top: 30px;
       }
-      .sync-course-list {
+      {# .sync-course-list {
           max-height: 250px;
           overflow-y: auto;
           margin-top: 10px;
@@ -35,7 +35,7 @@
           margin-top: 15px;
           display: flex;
           gap: 10px;
-      }
+      } #}
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
