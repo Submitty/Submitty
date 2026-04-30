@@ -13,8 +13,9 @@
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden-message'>
+    <div class='content overridden-message' data-testid='overridden-grades-student-banner'>
         <p>NOTE: The numeric score for this assignment has been overridden by your instructor.</p>
+        <p>Your overridden score for this assignment is {{ overridden_grade }}.</p>
         {% if rainbow_grades_active %} <p>Your numeric score for the assignment will be visible in <a href={{ rainbow_grades_url }}>Rainbow Grades.</a></p> {% endif %}
         <p>Please see your instructor if you have questions about your grade for this assignment.</p>
     </div>
@@ -92,6 +93,13 @@
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
+                    <label for="radio-placeholder">
+                        <input type='radio' id="radio-placeholder" name="submission-type">
+                         No File Rubric Grading
+                        <a aria-label "No File Rubric Grading Help" href = "https://submitty.org/instructor/no_file_rubric_grading" target="_blank">
+                            <i title="No File Rubric Grading Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
                 {% endif %}
             </fieldset>
             <div id="user-id-input" class="hide">
@@ -153,19 +161,19 @@
             or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
             {% if vcs_repo_exists %}
                 <h3>To access your Repository:</h3>
-                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
                 <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-                {# Below will get uncommented once SAML is active #}
-                {# <p>You will need to use an Authentication Token.</p> #}
+                <br><br>
+                <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
+                if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
                 <br><br>
                 {% if git_auth_token_required %}
-                    <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+                    <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
                 {% endif %}
                 <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
                 <br><br>
             {% else %}
                 <h3>Your repository does not exist.</h3>
-                <p>Please click the button below and refresh the page in a minute.</p><br>
+                <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
                 <form method="POST" action="{{ vcs_generate_repo_url }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <button type="submit" class="btn btn-primary">Generate Repository</button>
@@ -197,7 +205,7 @@
             <br><br>
         {% endif %}
         
-        {% if vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1) %}
+        {% if (vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1)) or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>Grade your repository:</h3>
             {% if using_subdirectory %}
             <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
@@ -568,6 +576,37 @@
             e.stopPropagation();
         });
     });
+
+    window.blankSubmitAll = function(){
+        const is_team_assignment = {{ is_team_assignment ? 'true' : 'false' }};
+        const url = is_team_assignment ? 
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+
+        const message = is_team_assignment ?
+        "This will create a placeholder submission for ALL TEAMS on this gradeable." :
+        "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    displayMessage(response.data);
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
 

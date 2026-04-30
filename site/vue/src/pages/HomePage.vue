@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
@@ -20,7 +20,7 @@ type Course = {
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
-    course: boolean;
+    unseenCount: number;
     userId: string;
 }
 
@@ -123,9 +123,12 @@ const buildCourseUrl = (course: Course) => {
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
-            <h3 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'">
+            <h2
+              v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'"
+              class="courses-rank-title"
+            >
               As {{ rank.title }}
-            </h3>
+            </h2>
 
             <div
               v-for="(courses, semester) in groupCoursesBySemester(rank.courses)"
@@ -164,8 +167,8 @@ const buildCourseUrl = (course: Course) => {
     >
       <NotificationsDisplay
         :notifications="notifications"
+        :unseen-count="unseenCount"
         :course="false"
-        :visible-count="10"
       />
     </div>
   </div>
@@ -203,6 +206,10 @@ const buildCourseUrl = (course: Course) => {
 .courses-header {
     margin-bottom: 5px !important; /* Override submitty-vue.css */
     flex-grow: 1;
+}
+
+.courses-rank-title {
+    font-size: 19px;
 }
 
 .archive-toggle-btn {

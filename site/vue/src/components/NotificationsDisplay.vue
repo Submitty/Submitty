@@ -8,18 +8,19 @@ import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
+import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
     notifications: Notification[];
+    unseenCount: number;
     course: boolean;
-    visibleCount: number;
 }>();
 
-const localNotifications = ref<Notification[]>([...props.notifications]);
-
+const showPopup = ref(false);
 const showUnseenOnly = ref(true);
+const localUnseenCount = ref(props.unseenCount);
 
-// Store preference for both home page and course
+// Preference is the same between course and home pages
 onMounted(() => {
     const pref = localStorage.getItem('notification-preference');
     if (pref === 'unseen') {
@@ -38,29 +39,25 @@ function toggleUnseenOnly() {
     );
 }
 
-const visibleNotifications = computed(() =>
-    props.visibleCount === -1
-        ? filteredNotifications.value
-        : filteredNotifications.value.slice(0, props.visibleCount),
-);
+// All notifications that are sent from the backend
+const localNotifications = ref<Notification[]>([...props.notifications]);
 
+// Filter between most recent notifications and most recent unseen notifications based on local storage
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
         ? localNotifications.value.filter((n) => !n.seen)
         : localNotifications.value,
 );
 
-function dynamicMarkSeen({ id, course }: { id: number; course: string }) {
-    const target = localNotifications.value.find(
-        (n) => n.id === id && n.course === course,
-    );
-    if (target) {
-        target.seen = true;
-    }
-}
+// Manage maxumum number of displayed notifications based on course or home page
+const visibleNotifications = computed(() =>
+    props.course
+        ? filteredNotifications.value
+        : filteredNotifications.value.slice(0, 10),
+);
 
-// Courses only
-function markAllAsSeen() {
+function markSeen() {
+    // Course Page
     if (props.course) {
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
@@ -80,7 +77,39 @@ function markAllAsSeen() {
             },
         });
     }
+    // Home Page
+    else {
+        showPopup.value = true;
+    }
 }
+
+function goToNotificationSettings() {
+    window.location.href = buildCourseUrl(['notifications', 'settings']);
+}
+
+// mark notification as seen without reloading
+function markIndividualSeen({ id, course }: { id: number; course: string }) {
+    for (const n of localNotifications.value) {
+        if (n.id === id && n.course === course) {
+            n.seen = true;
+            localUnseenCount.value--;
+            break;
+        }
+    }
+}
+
+// mark specified course notifications as seen without reloading
+function markAllSeen(courses: Record<string, unknown>[]) {
+    for (const { term, course, count } of courses) {
+        localUnseenCount.value = localUnseenCount.value - Number(count);
+        for (const n of localNotifications.value) {
+            if (n.term === term && n.course === course) {
+                n.seen = true;
+            }
+        }
+    }
+}
+
 </script>
 <template>
   <div>
@@ -97,20 +126,24 @@ function markAllAsSeen() {
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
         </button>
         <button
-          v-if="notifications.length !== 0 && course"
+          v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
-          @click="markAllAsSeen"
+          @click="markSeen"
         >
           Mark as seen
         </button>
-        <a
+        <MarkSeenPopup
+          v-if="notifications.length !== 0 && !props.course"
+          @mark-all="({ courses }) => markAllSeen(courses)"
+        />
+        <button
           v-if="props.course"
-          class="btn btn-primary notification-settings-btn"
-          :href="buildCourseUrl(['notifications', 'settings'])"
+          class="btn btn-primary"
           data-testid="notification-settings-button"
+          @click="goToNotificationSettings"
         >
           Settings
-        </a>
+        </button>
       </div>
     </div>
     <p
@@ -121,7 +154,7 @@ function markAllAsSeen() {
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0 && localNotifications.length > 0"
+      v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount <= 0"
       id="no-recent-notifications"
       class="no-recent"
     >
@@ -136,8 +169,26 @@ function markAllAsSeen() {
       <SingleNotification
         :notification="n"
         :course="props.course"
-        @dynamic-update="({ id, course }) => dynamicMarkSeen({ id, course })"
+        @mark-individual="({ id, course }) => markIndividualSeen({ id, course })"
       />
+    </div>
+    <div
+      v-if="!props.course && showUnseenOnly || (visibleNotifications.length === 0 && localNotifications.length > 0) && localUnseenCount > 0"
+    >
+      <!-- Additional notifications in the front-end -->
+      <p
+        v-if="visibleNotifications.length >= 10 && localUnseenCount >= 11"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notification<span v-if="localUnseenCount > 11">s</span>.
+      </p>
+      <!-- Unseen notifications that will not reach the front-end -->
+      <p
+        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10 && (localUnseenCount - visibleNotifications.length) > 0"
+        class="unseen-count-p"
+      >
+        You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
+      </p>
     </div>
   </div>
 </template>
@@ -171,7 +222,12 @@ function markAllAsSeen() {
   flex-shrink: 0;
 }
 
-.notification-settings-btn {
-  font-family: arial, sans-serif;
+.unseen-count-p {
+  padding-top: 10px;
+  font-weight: 600;
+}
+.unseen-count {
+  color: var(--badge-backgroud-red);
+  font-weight: 900;
 }
 </style>

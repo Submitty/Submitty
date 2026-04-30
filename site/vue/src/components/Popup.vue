@@ -114,8 +114,4 @@ watch(
 h1 {
   margin-bottom: 0 !important;
 }
-
-.popup-window {
-  gap: 0.25em;
-}
 </style>

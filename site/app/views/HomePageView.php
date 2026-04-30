@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\entities\Term;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -12,6 +13,7 @@ class HomePageView extends AbstractView {
      * @param array $archived_courses
      * @param array<mixed> $self_registration_courses
      * @param array<array<string, mixed>> $notifications
+     * @param int $unseen_count
      */
     public function showHomePage(
         User $user,
@@ -20,6 +22,7 @@ class HomePageView extends AbstractView {
         array $archived_courses,
         array $self_registration_courses,
         array $notifications,
+        int $unseen_count
     ) {
         $statuses = [];
         $course_types = [
@@ -64,12 +67,22 @@ class HomePageView extends AbstractView {
             "args" => [
                 "statuses" => $statuses,
                 "notifications" => $notifications,
+                "unseenCount" => $unseen_count,
                 "userId" => $user->getId(),
             ]
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token, array $courses) {
+    /**
+     * @param array<User>|null $faculty
+     * @param string $head_instructor
+     * @param array<Term> $terms
+     * @param bool $is_superuser
+     * @param string $csrf_token
+     * @param array $courses
+     * @return string
+     */
+    public function showCourseCreationPage(array|null $faculty, string $head_instructor, array $terms, bool $is_superuser, string $csrf_token, array $courses) {
         $this->output->addBreadcrumb("New Course");
         $course_names = [];
         foreach ($courses as $course) {
@@ -82,7 +95,7 @@ class HomePageView extends AbstractView {
             "head_instructor" => $head_instructor,
             "faculty" => $faculty,
             "is_superuser" => $is_superuser,
-            "semesters" => $semesters,
+            "terms" => $terms,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
             "add_term_url" => $this->output->buildUrl(['term', 'new']),

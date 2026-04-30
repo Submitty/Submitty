@@ -440,6 +440,80 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
+
+    const ta_beta_testing_start_date = $('#date_ta_view').val();
+    const submission_open_date = $('#date_submit').val();
+    const submission_due_date = $('#date_due').val();
+    const manual_grading_start_date = $('#date_grade').val();
+    const manual_grading_due_date = $('#date_grade_due').val();
+    const grades_release_date = $('#date_released').val();
+
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
+    }
+    else {
+        // hide/show element when ta beta testing date is after the grade start date
+        if (ta_beta_testing_start_date > manual_grading_start_date) {
+            $('#ta-beta-testing-after-grading-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-grading-dates-warning').hide();
+        }
+    }
+
+    if ($('#has_due_date_yes').is(':checked')) {
+        // hide/show element when open submission date is after the submission due date
+        if (submission_open_date > submission_due_date) {
+            $('#open-submission-after-submission-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#open-submission-after-submission-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#radio_electronic_file').is(':checked') && $('#has_due_date_yes').is(':checked')) {
+        if ($('#yes_ta_grade').is(':checked')) {
+            // hide/show element when submission due date is after the manual grading start date
+            if (submission_due_date > manual_grading_start_date) {
+                $('#submission-due-after-grading-open-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-open-dates-warning').hide();
+            }
+        }
+        else if ($('#has_release_date_yes').is(':checked')) {
+            // hide/show element when submission due date is after the grades release
+            if (submission_due_date > grades_release_date) {
+                $('#submission-due-after-grading-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-released-dates-warning').hide();
+            }
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        // hide/show element when manual grading open date is after the manual grading due date
+        if (manual_grading_due_date < manual_grading_start_date) {
+            $('#grading-open-after-grading-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#grading-open-after-grading-due-dates-warning').hide();
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
@@ -1056,6 +1130,25 @@ function updateGradeableEditor(g_id, file_path) {
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
     }
+    else {
+        document.querySelectorAll('.key_to_click').forEach((link) => {
+            link.classList.remove('selected');
+        });
+        cancelGradeableConfigEdit();
+    }
+}
+
+function isBinaryPath(path) {
+    const binaryExtensions = [
+        'png', 'jpg', 'jpeg', 'gif',
+        'bmp', 'bin', 'exe', 'dll',
+        'pdf', 'zip', 'tar', 'gz',
+        '7z', 'rar', 'iso',
+        'class', 'o', 'so',
+    ];
+
+    const ext = path.split('.').pop().toLowerCase();
+    return binaryExtensions.includes(ext);
 }
 
 // When you load the editor
@@ -1097,7 +1190,6 @@ function loadGradeableEditor(g_id, file_path) {
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
                 loadCodeMirror();
-                scrollToBottom();
             }
             catch {
                 displayErrorMessage('Error parsing data. File type not supported in the editor.');
@@ -1129,6 +1221,24 @@ function updateEditorButtonStyle() {
 document.addEventListener('DOMContentLoaded', () => {
     updateEditorButtonStyle();
 });
+
+function toggleFolder(id) {
+    const div = document.getElementById(id);
+    const icon = document.getElementById(`${id}-icon`);
+    if (!div) {
+        return;
+    }
+    if (div.style.display === 'none') {
+        div.style.display = 'block';
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+    }
+    else {
+        div.style.display = 'none';
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
+    }
+}
 
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
@@ -1343,6 +1453,8 @@ function loadCodeMirror() {
         },
     );
     updateEditorIcons();
+    codeMirrorInstance.refresh();
+    codeMirrorInstance.focus();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
