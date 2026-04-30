@@ -80,10 +80,10 @@ function markSeen(course: string, id: number) {
       :href="props.notification.url"
     >
       <i
-      v-if="notification.component === 'forum'"
-      class="fas fa-comments notification-type"
-      title="Forum"
-    />
+        v-if="notification.component === 'forum'"
+        class="fas fa-comments notification-type"
+        title="Forum"
+      />
       <i
         v-else-if="notification.component === 'grading'"
         class="fas fa-star notification-type"
@@ -106,7 +106,7 @@ function markSeen(course: string, id: number) {
             <span
               class="course-notification-link"
               title="Go to notifications"
-              @click.stop="goToCourseNotifications(notification.course)"
+              @click.stop.prevent="goToCourseNotifications(notification.course)"
             >
               {{ notification.course_name ? notification.course_name : notification.course }}
             </span>
