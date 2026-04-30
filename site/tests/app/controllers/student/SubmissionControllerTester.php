@@ -144,7 +144,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param double $max_size
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true) {
+    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true, bool $has_unseen_gradeable_notification = false) {
         $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($student_view) {
             $submission_open_date->sub(new \DateInterval('PT1H'));
@@ -200,7 +200,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'allow_custom_marks' => true,
             'any_manual_grades' => false,
             'score_notifications_sent' => 0,
-            'release_notifications_sent' => false
+            'release_notifications_sent' => false,
+            'has_unseen_gradeable_notification' => $has_unseen_gradeable_notification
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
@@ -354,6 +355,51 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $zip->addFile($file_path, substr($file_path, strlen($root_dir) + 1));
             }
         }
+    }
+
+    /**
+     * Visiting a gradeable page with an unseen gradeable notification should mark the
+     * tied notification as seen.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testShowHomeworkPageMarksNotificationAsSeenWhenUnseen(): void {
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: true);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $database_queries->expects($this->once())
+            ->method('markNotificationAsSeenByGradeableId')
+            ->with($this->equalTo('testUser'), $this->equalTo('test'));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $controller->showHomeworkPage('test');
+    }
+
+    /**
+     * Visiting a gradeable page without any unseen gradeable notifications should not
+     * mark any notifications as seen.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testShowHomeworkPageSkipsMarkSeenWhenNoUnseenNotification(): void {
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: false);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $database_queries->expects($this->never())
+            ->method('markNotificationAsSeenByGradeableId');
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $controller->showHomeworkPage('test');
     }
 
     /**
