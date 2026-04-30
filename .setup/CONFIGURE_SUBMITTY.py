@@ -659,7 +659,7 @@ user_id_requirements = {
 
 password_requirements = {
     "min_length": 12,
-    "max_length": 255,
+    "max_length": 72,
     "require_uppercase": True,
     "require_lowercase": True,
     "require_numbers": True,

@@ -103,7 +103,7 @@ class UserProfileController extends AbstractController {
             }
         }
         else {
-            $this->core->addErrorMessage("Must put same password in both boxes.");
+            $this->core->addErrorMessage("Passwords do not match.");
         }
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))

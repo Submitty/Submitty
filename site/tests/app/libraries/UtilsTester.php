@@ -39,7 +39,7 @@ class UtilsTester extends BaseUnitTest {
     public function testValidPassword() {
         $requirements = [
             'min_length' => 12,
-            'max_length' => 255,
+            'max_length' => 72,
             'require_uppercase' => true,
             'require_lowercase' => true,
             'require_numbers' => true,
@@ -62,7 +62,7 @@ class UtilsTester extends BaseUnitTest {
     public function testValidPasswordWithCustomRequirements() {
         $requirements = [
             'min_length' => 8,
-            'max_length' => 255,
+            'max_length' => 72,
             'require_uppercase' => false,
             'require_lowercase' => true,
             'require_numbers' => true,
@@ -73,7 +73,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertFalse(Utils::isValidPassword('short1', $requirements));
         $this->assertFalse(Utils::isValidPassword('NOLOWERCASE1', [
             'min_length' => 8,
-            'max_length' => 255,
+            'max_length' => 72,
             'require_uppercase' => false,
             'require_lowercase' => true,
             'require_numbers' => false,

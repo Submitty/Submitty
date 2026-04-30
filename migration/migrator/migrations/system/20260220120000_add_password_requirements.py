@@ -20,7 +20,7 @@ def up(config):
     if 'password_requirements' not in submitty_config:
         submitty_config['password_requirements'] = {
             "min_length": 12,
-            "max_length": 255,
+            "max_length": 72,
             "require_uppercase": True,
             "require_lowercase": True,
             "require_numbers": True,

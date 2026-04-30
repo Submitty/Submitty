@@ -346,7 +346,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'user_id_requirements' => [],
             'password_requirements' => [
                 'min_length' => 12,
-                'max_length' => 255,
+                'max_length' => 72,
                 'require_uppercase' => true,
                 'require_lowercase' => true,
                 'require_numbers' => true,
