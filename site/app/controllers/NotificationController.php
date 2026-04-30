@@ -131,7 +131,7 @@ class NotificationController extends AbstractController {
             )
         );
     }
-    
+
     /**
      * @return MultiResponse
      */
