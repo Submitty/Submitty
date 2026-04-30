@@ -159,6 +159,23 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
         $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
+        $max_course_materials_storage_limit_mb = $this->core->getConfig()->getMaxCourseMaterialStorageMb();
+
+        //Sums all of the disk storage of all of the files in Course Materials
+        $current_course_materials_storage_bytes = 0;
+        foreach ($course_materials_db as $cm_item) {
+            if ($cm_item->getType() === CourseMaterial::FILE) {
+                $path = $cm_item->getPath();
+                if (is_file($path)) {
+                    $size = @filesize($path);
+                    if ($size !== false) {
+                        $current_course_materials_storage_bytes += $size;
+                    }
+                }
+            }
+        }
+        //Rounds the value to 2 decimals
+        $current_course_materials_storage_used_mb = round($current_course_materials_storage_bytes / 1024 / 1024, 2);
 
         $folder_paths = $this->compileAllFolderPaths($final_structure);
 
@@ -180,7 +197,9 @@ class CourseMaterialsView extends AbstractView {
             "links" => $links,
             "folder_paths" => $folder_paths,
             "beginning_of_time_date" => $beginning_of_time_date,
-            "file_upload_limit_mb" => $file_upload_limit_mb
+            "file_upload_limit_mb" => $file_upload_limit_mb,
+            "max_course_materials_storage_limit_mb" => $max_course_materials_storage_limit_mb,
+            "current_course_materials_storage_used_mb" => $current_course_materials_storage_used_mb
         ]);
     }
 
