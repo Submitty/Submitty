@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/submitty/venv/bin/python3
 
 """
 This script is called to check if a provided name is a valid
