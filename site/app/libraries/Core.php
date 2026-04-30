@@ -14,7 +14,8 @@ use app\models\User;
 use app\entities\Session;
 use app\repositories\SessionRepository;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
+use Doctrine\ORM\Configuration as ORMConfiguration;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -175,12 +176,13 @@ class Core {
     private function createEntityManager(AbstractDatabase $database): EntityManager {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            [FileUtils::joinPaths(__DIR__, '..', 'entities')],
-            $this->config->isDebug(),
-            FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
-            $cache
-        );
+        $config = new ORMConfiguration();
+        $config->setMetadataDriverImpl(new AttributeDriver([FileUtils::joinPaths(__DIR__, '..', 'entities')]));
+        $config->setMetadataCache($cache);
+        $config->setQueryCache($cache);
+        $config->setProxyDir(FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'));
+        $config->setProxyNamespace('DoctrineProxies');
+        $config->setAutoGenerateProxyClasses($this->config->isDebug());
 
         return new EntityManager($database->getConnection(), $config);
     }

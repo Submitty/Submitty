@@ -147,19 +147,21 @@ abstract class AbstractDatabase {
                     }
                 }
             }
-            $statement = $this->conn->prepare($query);
-            $result = $statement->executeQuery($parameters);
 
             $this->row_count = null;
             $identity = QueryIdentifier::identify($query);
             if (
                 in_array($identity, [QueryIdentifier::UPDATE, QueryIdentifier::DELETE, QueryIdentifier::INSERT])
             ) {
-                $this->row_count = $result->rowCount();
+                $this->row_count = $this->conn->executeStatement($query, $parameters);
             }
             elseif ($identity === QueryIdentifier::SELECT) {
+                $result = $this->conn->executeQuery($query, $parameters);
                 $this->results = $result->fetchAllAssociative();
                 $this->row_count = count($this->results);
+            }
+            else {
+                $this->conn->executeStatement($query, $parameters);
             }
         }
         catch (DBALException $dbalException) {
@@ -188,8 +190,7 @@ abstract class AbstractDatabase {
             return true;
         }
         try {
-            $statement = $this->conn->prepare($query);
-            $result = $statement->executeQuery($parameters);
+            $result = $this->conn->executeQuery($query, $parameters);
             $this->row_count = null;
             return new DatabaseRowIterator($result, $callback);
         }
@@ -204,7 +205,8 @@ abstract class AbstractDatabase {
      */
     public function beginTransaction(): void {
         if (!$this->transaction) {
-            $this->transaction = $this->conn->beginTransaction();
+            $this->conn->beginTransaction();
+            $this->transaction = true;
         }
     }
 
@@ -323,7 +325,7 @@ abstract class AbstractDatabase {
      * @return mixed ID of the last inserted row
      */
     public function getLastInsertId($name = null) {
-        return $this->conn->lastInsertId($name);
+        return $this->conn->lastInsertId();
     }
 
     /**
