@@ -4,7 +4,6 @@
 {% block body %}
 <div class="form-group sync-popup-body">
     <label>Select courses to copy the current notification settings to:</label>
-    <hr />
     <div class="sync-course-list">
         {% for course in courses %}
             <div class="sync-course-container"
@@ -15,8 +14,7 @@
                            name="sync_course_ids[]"
                            value="{{ course.getTerm() }}|{{ course.getTitle() }}"
                            onclick="event.stopPropagation(); updateRowHighlight(this)">
-                    <span>({{ course.getTerm() }})</span>
-                    <span>{{ course.getTitle() }}</span>
+                    <span>({{ course.getTerm() }}) — {{ course.getTitle() }}</span>
                 </div>
                 <hr />
             </div>

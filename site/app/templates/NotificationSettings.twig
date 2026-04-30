@@ -25,15 +25,22 @@
       }
       .sync-course-grid {
           display: grid;
-          grid-template-columns: 40px 120px 1fr;
+          grid-template-columns: 1fr 7fr;
           align-items: center;
-          gap: 32px;
-          padding: 6px;
+          gap: 24px;
+          padding: 4px 6px;
+          margin-top: 12px;
       }
       .sync-buttons {
           display: flex;
           gap: 16px;
           margin-top: 24px;
+      }
+      .sync-course-container hr {
+          margin: 0;
+          height: 0;
+          border: 0;
+          border-top: 1px solid var(--standard-light-gray);
       }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
