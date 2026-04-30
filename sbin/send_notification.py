@@ -186,7 +186,8 @@ def construct_notifications(term, course, pending, notification_type):
                 "content": notification_content,
                 "created_at": timestamp,
                 "from_user_id": "submitty-admin",
-                "to_user_id": gradeable['user_id']
+                "to_user_id": gradeable['user_id'],
+                "gradeable_id": gradeable['id']
             })
 
         if gradeable["email_enabled"] is True:
@@ -221,9 +222,10 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
                 """
                 INSERT INTO notifications
                 (component, metadata, content, created_at,
-                 from_user_id, to_user_id)
+                 from_user_id, to_user_id, gradeable_id)
                 VALUES (:component, :metadata, :content,
-                        :created_at, :from_user_id, :to_user_id);
+                        :created_at, :from_user_id, :to_user_id,
+                        :gradeable_id);
                 """), site
             )
 
