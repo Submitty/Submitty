@@ -204,6 +204,7 @@ const buildCourseUrl = (course: Course) => {
 }
 
 .courses-header {
+    /* stylelint-disable-next-line declaration-no-important */
     margin-bottom: 5px !important; /* Override submitty-vue.css */
     flex-grow: 1;
 }

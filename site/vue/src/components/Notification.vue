@@ -164,6 +164,7 @@ function markSeen(course: string, id: number) {
 }
 
 .notification:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
@@ -206,6 +207,7 @@ function markSeen(course: string, id: number) {
 }
 
 .notification-seen-icon {
-  color: var(--text-black) !important; /* Override default style, keep color the same and just update background */
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--text-black) !important; /* Override default style, keep color the same and just update background */
 }
 </style>
