@@ -53,10 +53,11 @@ describe('testing grade override', () => {
             if (gradeable === 'grading_homework') {
                 cy.visit(['sample', 'gradeable', gradeable, 'grading', 'details']);
                 cy.get('[data-testid="view-sections"]').click();
-                cy.get('[data-testid="grade-button"]').eq(12).should('contain', 'Overridden');
+                cy.get('[data-testid="grade-button"]').eq(12).should('contain', 'Overridden (10 / 12)');
+                cy.get('[data-testid="grade-button"]').eq(12).should('have.class', 'btn-warning');
                 cy.get('[data-testid="grade-table"]').eq(12).should('contain', 'Overridden');
                 cy.get('[data-testid="grade-button"]').eq(12).click();
-                cy.get('[data-testid="bar-banner"]').should('contain', 'Overridden grades');
+                cy.get('[data-testid="bar-banner"]').should('contain', 'Overridden grades: 10 / 12');
             }
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
