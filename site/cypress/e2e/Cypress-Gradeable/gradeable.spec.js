@@ -113,4 +113,41 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.reload();
         cy.contains('[data-testid="score-pill-badge"]', '10 / 10', { timeout: 120000 }).should('exist');
     });
+    it('Should test locked gradeable with non-zero depends_on_points', () => {
+        ['smithj', 'student', 'instructor2'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['testing']);
+
+            cy.get('[data-testid="locked_homework_points"]')
+                .find('[data-testid="submit-btn"]')
+                .click();
+
+            cy.on('window:alert', (text) => {
+                expect(text).to.include(
+                    'Please complete Open Homework first with a score of 7 point(s).'
+                );
+            });
+
+            if (user !== 'instructor2') {
+                cy.visit(['testing', 'gradeable', 'locked_homework_points']);
+                cy.get('[data-testid="popup-message"]')
+                    .contains('You have not unlocked this gradeable yet');
+            }
+            cy.logout();
+        });
+
+        // users with 7+ points on open_homework 
+        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['testing']);
+
+            cy.get('[data-testid="locked_homework_points"]')
+                .find('[data-testid="submit-btn"]')
+                .click();
+
+            cy.visit(['testing', 'gradeable', 'locked_homework_points']);
+            cy.get('[data-testid="new-submission-info"]').should('exist');
+            cy.logout();
+        });
+    });
 });
