@@ -1,3 +1,7 @@
+.content-overflow {
+    overflow: visible;
+}
+
 .float-right {
     float: right;
 }
@@ -73,15 +77,6 @@
     gap: 0.5rem;
 }
 
-.clear-filter-button {
-    flex: 0 1 auto;
-    flex-wrap: wrap;
-    min-width: 100px;
-    visibility: hidden;
-    margin-left: 0.5rem;
-    color: var(--actionable-blue);
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {
@@ -115,6 +110,11 @@
     white-space: pre-wrap;
     overflow-x: auto;
     padding-bottom: 1em;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.post_content > div {
+    flex-grow: 1;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -201,6 +201,7 @@
 }
 
 .category-color-picker {
+    /* stylelint-disable-next-line color-named */
     color: white;
     font-size: 14px;
     height: 18px;
@@ -251,6 +252,7 @@
     display: inline-block;
     color: var(--standard-tangerine-yellow);
     -webkit-text-stroke-width: 1px;
+    /* stylelint-disable-next-line color-named */
     -webkit-text-stroke-color: black;
 }
 
@@ -259,6 +261,7 @@
     display: inline-block;
     color: var(--submitty-logo-blue);
     -webkit-text-stroke-width: 1px;
+    /* stylelint-disable-next-line color-named */
     -webkit-text-stroke-color: black;
 }
 
@@ -285,6 +288,7 @@
 }
 
 .not-active-thread-announcement:hover {
+    /* stylelint-disable-next-line color-named */
     text-shadow: gold 0 0 5px;
 }
 
@@ -713,6 +717,41 @@
     box-shadow: 0 0 2px 1px var(--standard-gray-blue);
     cursor: pointer;
 }
+
+.thumbnail-pdf {
+    align-items: center;
+    background: var(--standard-pale-gray);
+    color: var(--text-black);
+    display: flex;
+    font-weight: 600;
+    justify-content: center;
+    height: 100px;
+    width: 100px;
+}
+
+.attachment-preview {
+    margin-bottom: 1rem;
+}
+
+.attachment-pdf {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.attachment-open-btn {
+    align-self: center;
+}
+
+.attachment-pdf-preview {
+    background: var(--always-default-white);
+    border: 1px solid var(--standard-light-gray);
+    border-radius: 4px;
+    height: 32rem;
+    max-width: 100%;
+    width: min(100%, 50rem);
+}
 /* stylelint-disable-next-line selector-id-pattern */
 #forum_filter_bar {
     margin-top: 10px;
@@ -981,4 +1020,8 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+#search-clear {
+    cursor: pointer;
 }

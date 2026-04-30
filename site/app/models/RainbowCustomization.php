@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 
 /**
  * Class RainbowCustomization
@@ -61,6 +62,8 @@ class RainbowCustomization extends AbstractModel {
         'project',
         'participation', 'note',
         'none'];
+
+    const allowed_show_notes = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
 
 
     public function __construct(Core $main_core) {
@@ -122,7 +125,9 @@ class RainbowCustomization extends AbstractModel {
                 "manual_grading_points" => $manual_grading_points,
                 "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override_percent" => false
+                "override_percent" => false,
+                "show_notes" => 'never',
+                "show_notes_applicable" => in_array($gradeable->getType(), [GradeableType::NUMERIC_TEXT, GradeableType::CHECKPOINTS], true)
             ];
         }
         // Determine which 'buckets' exist in the customization.json
@@ -177,16 +182,38 @@ class RainbowCustomization extends AbstractModel {
                 else {
                     continue;
                 }
+                // Create a map from id to percent for this bucket
+                $percent_map = [];
 
-                //loop through all gradeables in bucket and compare them
-                $j_index = 0;
-                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
-                        $c_gradeable['override_percent'] = true;
-                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'percent')) {
+                        $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
                     }
-                    $j_index++;
                 }
+
+                // Assign percents to customization_data gradeables by matching ids
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($percent_map[$c_gradeable['id']])) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
+                    }
+                }
+                unset($c_gradeable);
+
+                // Assign show_notes to customization_data gradeables by matching ids
+                $show_notes_map = [];
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'show_notes') && in_array($json_gradeable->show_notes, self::allowed_show_notes, true)) {
+                        $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
+                    }
+                }
+
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($show_notes_map[$c_gradeable['id']])) {
+                        $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
+                    }
+                }
+                unset($c_gradeable);
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -406,6 +433,49 @@ class RainbowCustomization extends AbstractModel {
      */
     public function getMessages(): array {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
+    }
+
+    public function getExtraCredit(): bool {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getExtraCredit() : false;
+    }
+
+    public function getShowGradeableConfiguration(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getShowGradeableConfiguration()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: when notes customization is enabled,
+        // show the gradeable configuration section on refresh.
+        return $this->getCustomizeShowNotes();
+    }
+
+    public function getCustomizeShowNotes(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getCustomizeShowNotes()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: if any gradeable has non-default show_notes,
+        // enable the toggle so existing custom values are visible on refresh.
+        foreach ($this->RCJSON->getGradeables() as $bucket) {
+            if (!property_exists($bucket, 'ids')) {
+                continue;
+            }
+            foreach ($bucket->ids as $gradeable) {
+                if (property_exists($gradeable, 'show_notes') && $gradeable->show_notes !== 'never') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 
@@ -655,6 +725,18 @@ class RainbowCustomization extends AbstractModel {
             foreach ($form_json->omit_section_from_stats as $omit_section) {
                 $this->RCJSON->addOmittedSection($omit_section);
             }
+        }
+
+        if (isset($form_json->extra_credit)) {
+            $this->RCJSON->setExtraCredit($form_json->extra_credit);
+        }
+
+        if (isset($form_json->show_gradeable_configuration)) {
+            $this->RCJSON->setShowGradeableConfiguration($form_json->show_gradeable_configuration);
+        }
+
+        if (isset($form_json->customize_show_notes)) {
+            $this->RCJSON->setCustomizeShowNotes($form_json->customize_show_notes);
         }
 
         if (isset($form_json->gradeables)) {

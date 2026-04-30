@@ -53,10 +53,10 @@ class GradeOverrideController extends AbstractController {
 
         $user = $this->core->getQueries()->getSubmittyUser($user_id);
 
-        if ($marks === '' || !ctype_digit($marks)) {
-            return $this->core->getOutput()->renderJsonFail("Marks must be at least 0");
+        if ($marks === '' || !is_numeric($marks) || floatval($marks) < 0) {
+            return $this->core->getOutput()->renderJsonFail("Marks must be at least 0 and a valid number.");
         }
-        $marks = (int) $marks;
+        $marks = (float) $marks;
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 

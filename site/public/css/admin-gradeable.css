@@ -140,6 +140,7 @@ select {
 
 .peer-button {
     background-color: var(--standard-plum-purple);
+    /* stylelint-disable-next-line color-named */
     color: white;
 }
 
@@ -292,8 +293,6 @@ div.btn-container {
     height: 34px;
     width: auto;
     padding: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
     border-radius: 5px;
 }
 
@@ -428,11 +427,20 @@ body::-webkit-scrollbar-track {
 }
 
 .main-folder {
-    margin-bottom: 1em;
+    margin-bottom: 4px;
 }
 
 .main-folder-contents {
-    margin-left: 23px;
+    margin-left: 31px;
+}
+
+.binary-file-type {
+    color: var(--text-black);
+    pointer-events: none;
+}
+
+.individual-folder-content {
+    margin: 10px 0;
 }
 
 .config-about-add {
@@ -466,7 +474,6 @@ body::-webkit-scrollbar-track {
 
 .config-folder-view {
     list-style-type: none;
-    margin-bottom: 1em;
     margin-left: 0.5em;
 }
 

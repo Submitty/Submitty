@@ -882,25 +882,6 @@ SQL;
         }
     }
 
-    public function searchThreads($searchQuery) {
-        $this->course_db->query(
-            "SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post
-            FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id,
-                t.created_by as author, t.pinned_expiration as pin, p.timestamp as timestamp_post,
-                p.content as post_content, p.anonymous, p.author_user_id as p_author,
-                to_tsvector('english', replace(replace(replace(p.content, '.', ' '), '-', ' '), '/', ' '))
-                || to_tsvector('english', replace(replace(replace(t.title, '.', ' '), '-', ' '), '/', ' '))
-                as document FROM posts p, threads t
-                JOIN (SELECT thread_id, timestamp FROM posts WHERE parent_id = -1) p2
-                ON p2.thread_id = t.id
-                WHERE t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc
-            WHERE p_doc.document @@ plainto_tsquery('english', replace(:q, '.', ' '))
-            ORDER BY timestamp_post DESC",
-            [':q' => $searchQuery]
-        );
-        return $this->course_db->rows();
-    }
-
     public function threadExists() {
         $this->course_db->query("SELECT id from threads where deleted = false LIMIT 1");
         return count($this->course_db->rows()) == 1;
@@ -3229,6 +3210,30 @@ ORDER BY user_id ASC"
         return $this->submitty_db->getRowCount();
     }
 
+    public function updateCourseSectionId(string $section_id, string $course_id): void {
+        $term = $this->core->getConfig()->getTerm();
+        $course   = $this->core->getConfig()->getCourse();
+
+        $this->submitty_db->query("UPDATE courses_registration_sections SET course_section_id = ? WHERE term=? AND course=? AND registration_section_id = ?", [$course_id, $term, $course, $section_id]);
+
+        $this->course_db->query("UPDATE sections_registration SET course_section_id = ? WHERE sections_registration_id = ?", [$course_id, $section_id]);
+    }
+
+    public function courseIdExists(string $course_id, string $section_id): bool {
+        $this->course_db->query(
+            "SELECT 1 FROM sections_registration WHERE
+            course_section_id = :course_id
+            AND sections_registration_id != :section_id
+            LIMIT 1",
+            [
+                $course_id,
+                $section_id
+            ]
+        );
+
+        return $this->course_db->getRowCount() > 0;
+    }
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", [$gradeable_id]);
         foreach ($graders as $grader => $sections) {
@@ -4522,7 +4527,7 @@ SQL;
      *
      * @param string  $user_id
      * @param string  $g_id
-     * @param integer $marks
+     * @param float $marks
      * @param string  $comment
      */
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
@@ -4540,10 +4545,10 @@ SQL;
     /**
      * @param string[] $user_ids
      * @param string $g_id
-     * @param int $marks
+     * @param float $marks
      * @param string $comment
      */
-    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, float $marks, string $comment): void {
         $values = [];
         $params = [];
 
@@ -5343,11 +5348,11 @@ AND gc_id IN (
      */
     public function insertNotifications(array $flattened_notifications, int $notification_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
+        $row_string = "(?, ?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
         $this->course_db->query(
             "
-            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id, gradeable_id)
             VALUES " . $value_param_string,
             $flattened_notifications
         );
@@ -5436,12 +5441,13 @@ AND gc_id IN (
     /**
      * Get 10 most recent Notification objects in a course
      * @param string $user_id
-     * @param string $semester
+     * @param string $term
      * @param string $course_name
      * @param object $course_db
+     * @param string $course_display_name
      * @return array<int, Notification>
      */
-    public function getRecentUserNotifications($user_id, $semester, $course_name, $course_db) {
+    public function getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name) {
         $query = "
             SELECT id, component, metadata, content,
                 (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
@@ -5466,8 +5472,9 @@ AND gc_id IN (
                     'seen' => $row['seen'],
                     'elapsed_time' => $row['elapsed_time'],
                     'created_at' => $row['created_at'],
-                    'semester' => $semester,
+                    'term' => $term,
                     'course' => $course_name,
+                    'course_name' => $course_display_name,
                 ]
             );
         }
@@ -5516,6 +5523,26 @@ AND gc_id IN (
             "UPDATE notifications SET seen_at = current_timestamp
                 WHERE to_user_id = ? and seen_at is NULL and {$id_query}",
             $parameters
+        );
+    }
+
+    /**
+     * Marks all unseen notifications for a given gradeable and user as seen, which should only
+     * be invoked when an unseen notification exists (GradedGradeable::getUnseenNotificationId()).
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     */
+    public function markNotificationAsSeenByGradeableId(string $user_id, string $gradeable_id): void {
+        $this->course_db->query(
+            "
+            UPDATE notifications
+            SET seen_at = current_timestamp
+            WHERE to_user_id = ?
+               AND gradeable_id = ?
+               AND component = 'grading'
+               AND seen_at IS NULL",
+            [$user_id, $gradeable_id]
         );
     }
 
@@ -6007,12 +6034,13 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id
+     * @param  string|null $for_user_id The user's id
      * @return \app\models\gradeable\Gradeable
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfig($id) {
-        foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
+    public function getGradeableConfig($id, ?string $for_user_id = null) {
+        foreach ($this->getGradeableConfigs([$id], ['id'], $for_user_id) as $gradeable) {
             return $gradeable;
         }
         throw new \InvalidArgumentException('Gradeable does not exist!');
@@ -6023,11 +6051,12 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
+     * @param  string|null          $for_user_id The user's id
      * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id'], ?string $for_user_id = null) {
         if ($ids === []) {
             return new \EmptyIterator();
         }
@@ -6044,6 +6073,23 @@ AND gc_id IN (
 
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
+
+        // Detect potential unseen grading notifications for the given user
+        if ($for_user_id !== null) {
+            $unseen_notification_select = "
+                EXISTS (
+                    SELECT 1 FROM notifications n
+                    WHERE n.gradeable_id = g.g_id
+                        AND n.to_user_id = ?
+                        AND n.component = 'grading'
+                        AND n.seen_at IS NULL
+                    ) AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [$for_user_id];
+        }
+        else {
+            $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [];
+        }
 
         $query = "
             SELECT
@@ -6066,6 +6112,7 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               r.*,
+              {$unseen_notification_select}
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6336,7 +6383,7 @@ AND gc_id IN (
 
         return $this->course_db->queryIterator(
             $query,
-            $ids,
+            array_merge($unseen_notification_param, $ids),
             $gradeable_constructor
         );
     }

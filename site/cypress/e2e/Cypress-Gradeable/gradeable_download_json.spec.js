@@ -47,7 +47,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
             expect(test_json.vcs).to.exist;
-            expect(test_json.vcs.subdirectory).to.eql('src');
+            expect(test_json.vcs.vcs_subdirectory).to.eql('src');
             expect(test_json.vcs.repository_type).to.eql('submitty-hosted');
         });
 

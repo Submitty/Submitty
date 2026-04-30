@@ -40,10 +40,41 @@
                 </button>
                 <div class="card-btn-info">
                     Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                    {% if show_warning %}
+                        <span class="last-run-warning">
+                            Warning: Last run was {{ days_since_run }} days ago.
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="card-btn-info nightly-status">
+                    {% if is_nightly_enabled %}
+                        <span class="nightly-status-enabled">
+                            Rainbow Grades Nightly Builds is currently enabled.
+                        </span>
+                    {% else %}
+                        <span class="nightly-status-disabled">
+                            Rainbow Grades Nightly Builds is currently not enabled.
+                            To enable nightly builds, follow the steps found 
+                            <a href="https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup" target="_blank">here</a>.
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
-
+        <!--
+        <div class="system-message {{ is_nightly_enabled ? 'info' : 'warning' }}" id="rg-system-message">
+            <span id="rg-system-message-text">
+                Rainbow Grades Nightly Builds are currently {{ is_nightly_enabled ? 'enabled' : 'not enabled' }}.
+                {% if not is_nightly_enabled %}
+                    <br>
+                    <span class="rg-small-text">
+                        To enable Nightly Builds, follow the steps found 
+                        <a href="https://submitty.org/instructor/course_settings/rainbow_grades/automatic_setup" target="_blank">here</a>.
+                    </span>
+                {% endif %}
+            </span>
+        </div>
+        -->
         <div id="save_status_container" class="customization_item">
             <div id="status_head">
                 <div id="build_buttons">
@@ -196,19 +227,22 @@
                     </ol>
                 </div>
                 <div id="gradeable_config" data-testid="gradeable-config" class="gradeable-configuration">
-                    <h2>Category/Gradeable Configuration:
-                        <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
-                    </h2>
-                    <div id="checkboxControls" style="display: none;">
-                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
-                        <label for="extra_credit_checkbox">Extra credit</label><br>
+                    <div class="switch-container">
+                        <h2 class="switch-label">Show Category/Gradeable Configuration</h2>
+                        <label class="switch" aria-label="Toggle Category/Gradeable Configuration">
+                            <input type="checkbox" id="config-toggle" {{ show_gradeable_configuration ? 'checked' : '' }}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="checkboxControls">
+                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit" {{ extra_credit ? 'checked' : '' }}>
+                        <label for="extra_credit_checkbox">Extra Credit</label><br>
 
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
-                        <label for="drop_lowest_checkbox">Remove lowest</label><br>
+                        <label for="drop_lowest_checkbox">Remove Lowest</label><br>
 
-                        <input id="enable-per-gradeable-percents" type="checkbox" name="enable-per-gradeable-percents">
-                        <label for="enable-per-gradeable-percents">Enable/Edit Per Gradeable Percents:</label>
-                        <i>For each bucket, you may grade by percent instead of by points.</i><br>
+                        <input id="customize_show_notes_checkbox" type="checkbox" name="customize_show_notes" {{ customize_show_notes ? 'checked' : '' }}>
+                        <label for="customize_show_notes_checkbox">Customize Notes Visibility</label><br>
                     </div>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
@@ -228,7 +262,7 @@
 
                                     {% set per_gradeable_percents_checked = false %}
                                     {% for gradeable in gradeables %}
-                                        {% if gradeable["override_percent"] %}
+                                        {% if gradeable["percent"] is defined %}
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}
@@ -313,6 +347,17 @@
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                                     </div>
+                                                    {% if gradeable['show_notes_applicable'] %}
+                                                        <div class="gradeable-show-notes-config" style="margin-top: 6px;">
+                                                            <label for="show-notes-{{ gradeable['id'] }}">Notes visibility:</label>
+                                                            <select id="show-notes-{{ gradeable['id'] }}" class="gradeable-custom-item-input gradeable-show-notes-select" style="margin-left: 8px; min-width: 220px;">
+                                                                <option value="never" {{ gradeable['show_notes'] == 'never' ? 'selected' : '' }}>Never</option>
+                                                                <option value="instructor_only" {{ gradeable['show_notes'] == 'instructor_only' ? 'selected' : '' }}>Instructor only</option>
+                                                                <option value="student_only" {{ gradeable['show_notes'] == 'student_only' ? 'selected' : '' }}>Student only</option>
+                                                                <option value="student_and_instructor" {{ gradeable['show_notes'] == 'student_and_instructor' ? 'selected' : '' }}>Student and instructor</option>
+                                                            </select>
+                                                        </div>
+                                                    {% endif %}
                                                     <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
                                                         {# Generate input boxes for each per-gradeable curve input #}
                                                         {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}

@@ -65,39 +65,40 @@
             </div>
         </div>
     </div>
-    {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
-    {% endif %}
-    {% if not is_instructor %}
-        <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
-    {% endif %}
-    {% if can_regrade %}
-        <div class="btn-group">
-            <button type="button" class="btn btn-primary regrade-btn" onclick="ajaxCountRegrade(0,event,confirmMessage);">Regrade Active Versions for All students</button>
-            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">Regrade All Versions for All students</a>
+    <div class="student-info-btns-container">
+        {% if not is_student %}
+            <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
+        {% endif %}
+        {% if not is_instructor %}
+            <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
+        {% endif %}
+        {% if can_regrade %}
+            <div>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-testid="regrade-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Regrade All Students <span style="margin-left: 6px" class="sr-only"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item regrade-btn-all" data-testid="regrade-all" onclick="ajaxCountRegrade(0,event,confirmMessage);">Active Versions Only</a>
+                    <a class="dropdown-item regrade-btn-all" onclick="ajaxCountRegrade(1,event,confirmMessage);">All Versions</a>
+                </div>
             </div>
-        </div>
-    {% endif %}
-    <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
-    {% include 'Vue.twig' with {
-        'type': 'component',
-        'name': 'ToggleColumns',
-        'style': 'display: inline;',
-        'args': {
-            'columns': all_columns|map(column => column.function),
-            'labels': all_columns|map(column => column.title),
-            'forced': [
-                'grading'
-            ],
-            'cookie': 'grading_details_columns',
-            'format': 'json',
-        },
-    } %}
+        {% endif %}
+        <button type="button" class="btn btn-primary" onclick="toggleAllSections()" id="toggle-all-sections-btn" data-testid="toggle-all-sections">Collapse All Sections</button>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'ToggleColumns',
+            'style': 'display: inline;',
+            'args': {
+                'columns': all_columns|map(column => column.function),
+                'labels': all_columns|map(column => column.title),
+                'forced': [
+                    'grading'
+                ],
+                'cookie': 'grading_details_columns',
+                'format': 'json',
+            },
+        } %}
+    </div>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -202,7 +203,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, override_data, anon_ids, max_team_name_length, active_graders) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -257,7 +258,7 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, override_data, anon_ids, max_team_name_length, active_graders) %}
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
@@ -282,9 +283,9 @@
             {% elseif column.function == "graded_questions" %}
                 {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) }}
             {% elseif column.function == "grading" %}
-                {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
+                {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
-                {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
+                {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
                 {{ _self.render_column_grading_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
@@ -302,7 +303,7 @@
             {% elseif column.function == "team_members" %}
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
-                {{ _self.render_column_total(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_total(context, section, graded_gradeable, index, info, column, override_data) }}
             {% elseif column.function == "user_given" %}
                 {{ _self.render_column_user_given(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
@@ -474,12 +475,14 @@
 {% endmacro %}
 
 {# Grading Button #}
-{% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
+{% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
     {% set badge_count = 0 %}
 
     {% if graded_gradeable.getSubmitter().getId() in overrides %}
-        {% set contents = "Overridden" %}
-        {% set btn_class = "btn-default" %}
+        {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
+        {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
+        {% set contents = "Overridden (" ~ override_marks ~ " / " ~ total_possible ~ ")" %}
+        {% set btn_class = "btn-warning" %}
 
 
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
@@ -535,10 +538,12 @@
 {% endmacro %}
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
-{% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, anon_ids) %}
+{% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
     {% if  graded_gradeable.getSubmitter().getId() in overrides %}
-        {% set contents = "Overridden" %}
-        {% set btn_class = "btn-default" %}
+        {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
+        {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
+        {% set contents = "Overridden (" ~ override_marks ~ " / " ~ total_possible ~ ")" %}
+        {% set btn_class = "btn-warning" %}
     {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
         {% set contents = "No Submission" %}
         {% set btn_class = "btn-default" %}
@@ -590,7 +595,7 @@
 
 {# Index #}
 {% macro render_column_index(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ index }}</td>
+    <td></td>
 {% endmacro %}
 
 {# Section Number #}
@@ -667,7 +672,7 @@
 {% endmacro %}
 
 {# Total Point Summary #}
-{% macro render_column_total(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_total(context, section, graded_gradeable, index, info, column, override_data) %}
 
     {% set box_background = (graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance() is not null and graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays()) ? "late-box" : "" %}
 
@@ -686,8 +691,10 @@
 
     {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
     <td>
-        {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
-                <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
+        {% if override_data[graded_gradeable.getSubmitter().getId()] is defined %}
+            <div class="{{ box_background }}" style="white-space: nowrap;">{{ override_data[graded_gradeable.getSubmitter().getId()].marks }} / {{ total_possible }}</div>
+        {% elseif not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
+            <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
     </td>
 {% endmacro %}
@@ -774,12 +781,13 @@
         inquiryUpdate();
     {% endif %}
 
-    const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
-    const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
-    const is_student = {{ is_student ? 'true' : 'false' }};
+    // Set global variable for electronic-grading JavaScript
+    window.is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
+    window.is_student = {{ is_student ? 'true' : 'false' }};
+    window.full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
 
-    //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
-    function ajaxCountRegrade(choice,e,confirmMessage) {
+    // Function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
+    function ajaxCountRegrade(choice, e, confirmMessage) {
         const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);
         let formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -811,7 +819,8 @@
             }
         });
     }
-    function confirmMessage(e,count, choice) {
+
+    function confirmMessage(e, count, choice) {
         if(count > 50) {
             e.preventDefault();
             if (window.confirm("Are you sure you want to add " + count + " submissions to the queue ?")) {

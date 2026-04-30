@@ -17,6 +17,9 @@ function sidebarContains(title, extension, header = title) {
     else if (title === 'My Courses') {
         selector = '.home-content';
     }
+    else if (title === 'Notifications') {
+        selector = '.content';
+    }
     cy.get(selector).should('contain', header);
     cy.get(selector).should('not.contain', 'Server Error');
 }

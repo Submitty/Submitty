@@ -4,11 +4,14 @@ on:
   repository_dispatch:
     types: [repo-release]
 
+permissions:
+  contents: read
+
 jobs:
   repo-up:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: 3.11
