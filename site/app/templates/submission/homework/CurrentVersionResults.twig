@@ -14,7 +14,7 @@
                 {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                     <div class="flex-row">
                         <span>
-                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}KB)
                         </span>
                         {# view and download icons if student is permitted to access files #}
                         {% if student_download %}
@@ -38,7 +38,7 @@
                     {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                         <div class="flex-row">
                             <span>
-                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}KB)
                             </span>
                             {# view and download icons if student is permitted to access files #}
                             {% if student_download %}
