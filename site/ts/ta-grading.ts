@@ -21,7 +21,7 @@ import { gotoNextStudent, gotoPrevStudent } from './ta-grading-toolbar';
 
 declare global {
     interface Window {
-        deleteAttachment(target: string, file_name: string): void;
+        deleteAttachment(target: string, file_name: string, uploader_grader_id?: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
         clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
@@ -797,6 +797,7 @@ window.uploadAttachment = function () {
                         );
                     }
                     else {
+                        const currentUserId = $('#attachments-list').attr('data-user') ?? '';
                         const renderedData = window.Twig.twig({
                             ref: 'Attachments',
                         }).render({
@@ -804,6 +805,7 @@ window.uploadAttachment = function () {
                             id: `a-up-${uploadedAttachmentIndex}`,
                             is_grader_view: true,
                             can_modify: true,
+                            uploader_id: currentUserId,
                         });
                         uploadedAttachmentIndex++;
                         if (origAttachment.length === 0) {
@@ -842,7 +844,7 @@ window.uploadAttachment = function () {
     }
 };
 
-window.deleteAttachment = function (target: string, file_name: string) {
+window.deleteAttachment = function (target: string, file_name: string, uploader_grader_id?: string) {
     const confirmation = confirm(
         `Are you sure you want to delete attachment '${decodeURIComponent(file_name)}'?`,
     );
@@ -851,6 +853,9 @@ window.deleteAttachment = function (target: string, file_name: string) {
         formData.append('attachment', file_name);
         formData.append('anon_id', getAnonId());
         formData.append('csrf_token', window.csrfToken);
+        if (uploader_grader_id) {
+            formData.append('uploader_grader_id', uploader_grader_id);
+        }
         $.ajax({
             url: buildCourseUrl([
                 'gradeable',
