@@ -193,9 +193,20 @@ else:
 print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
+# Check if section sort is enabled in customization.json
+make_section_sort = False
+customization_json_path = rg_course_path + '/customization.json'
+with open(customization_json_path, 'r') as f:
+    customization_data = json.load(f)
+    make_section_sort = customization_data.get('make_section_sort', False)
+
 # Run make
 print('Compiling rainbow grades', flush=True)
-cmd_output = os.popen('make').read()
+if make_section_sort:
+    print('Section sort enabled, sorting by section', flush=True)
+    cmd_output = os.popen('make section').read()
+else:
+    cmd_output = os.popen('make').read()
 
 # Run make push_test
 print('Exporting to summary_html', flush=True)
