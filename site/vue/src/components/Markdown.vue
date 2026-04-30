@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Marked, type TokenizerExtension } from 'marked';
+import { ref, watch, onMounted } from 'vue';
+import { Marked, type TokenizerExtension, type RendererExtension } from 'marked';
 import { renderToString } from 'katex';
 import DOMPurify from 'dompurify';
+import { buildCourseUrl } from '../../../ts/utils/server';
 
 interface Props {
     content: string;
@@ -10,6 +11,11 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// Cache for resolved thread titles: id -> title or null
+const threadTitleCache = ref<Record<number, string | null>>({});
+const resolvedContent = ref('');
+
 const inlineLatex: (TokenizerExtension) = {
     name: 'inlineLatex',
     level: 'inline',
@@ -48,17 +54,99 @@ const inlineLatex: (TokenizerExtension) = {
         };
     },
 };
-const markdownToHtml = (markdown: string | null | undefined): string => {
-    if (!markdown) {
-        return '';
-    }
-    const marked = new Marked({ extensions: [inlineLatex] });
-    return marked.parse(markdown, { async: false });
+
+const threadReference: (TokenizerExtension & RendererExtension) = {
+    name: 'threadReference',
+    level: 'inline',
+    start(src: string) {
+        return src.match(/(?:^|[\s(])#\d/)?.index ?? -1;
+    },
+    tokenizer(src: string) {
+        const match = /^(?:^|[\s(])?(#(\d+))/.exec(src);
+        if (!match) {
+            return;
+        }
+        const prefix = match[0].substring(0, match[0].indexOf('#'));
+        return {
+            type: 'threadReference',
+            raw: match[0],
+            threadId: parseInt(match[2], 10),
+            prefix: prefix,
+        };
+    },
+    renderer(token) {
+        const id = token.threadId as number;
+        const prefix = token.prefix as string;
+        const title = threadTitleCache.value[id];
+        if (title !== undefined && title !== null) {
+            const url = `${buildCourseUrl(['forum', 'threads', String(id)])}`;
+            const escapedTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            return `${prefix}<a href="${url}" class="thread-reference" title="${escapedTitle}">#${id}</a>`;
+        }
+        return `${prefix}#${id}`;
+    },
 };
 
-const htmlContent = computed(() => {
-    const rawHtml = markdownToHtml(props.content);
-    return DOMPurify.sanitize(rawHtml);
+function extractThreadIds(text: string): number[] {
+    const regex = /(?:^|[\s(])#(\d+)/g;
+    const ids: number[] = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        const id = parseInt(match[1], 10);
+        if (id > 0 && !ids.includes(id)) {
+            ids.push(id);
+        }
+    }
+    return ids;
+}
+
+async function resolveThreadIds(ids: number[]): Promise<void> {
+    const unresolvedIds = ids.filter((id) => !(id in threadTitleCache.value));
+    if (unresolvedIds.length === 0) {
+        return;
+    }
+    try {
+        const url = `${buildCourseUrl(['forum', 'threads', 'resolve'])}?ids=${unresolvedIds.join(',')}`;
+        const response = await fetch(url);
+        const json = await response.json() as { status: string; data: Record<number, string | null> };
+        if (json.status === 'success') {
+            for (const id of unresolvedIds) {
+                threadTitleCache.value[id] = json.data[id] ?? null;
+            }
+        }
+    }
+    catch {
+        for (const id of unresolvedIds) {
+            threadTitleCache.value[id] = null;
+        }
+    }
+}
+
+function renderMarkdown(): string {
+    if (!props.content) {
+        return '';
+    }
+    const marked = new Marked({ extensions: [inlineLatex, threadReference] });
+    const rawHtml = marked.parse(props.content, { async: false });
+    return DOMPurify.sanitize(rawHtml, {
+        ADD_ATTR: ['title'],
+    });
+}
+
+async function updateContent(): Promise<void> {
+    const ids = extractThreadIds(props.content ?? '');
+    if (ids.length > 0) {
+        await resolveThreadIds(ids);
+    }
+    resolvedContent.value = renderMarkdown();
+}
+
+watch(() => props.content, () => {
+    void updateContent();
+});
+
+onMounted(() => {
+    void updateContent();
 });
 </script>
 
@@ -67,7 +155,6 @@ const htmlContent = computed(() => {
   <div
     class="markdown"
     :data-testid="testId"
-    v-html="htmlContent"
+    v-html="resolvedContent"
   />
-  <!-- eslint-enable vue/no-v-html -->
 </template>

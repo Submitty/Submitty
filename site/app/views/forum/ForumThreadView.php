@@ -145,7 +145,9 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT
+                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
+                // Pass thread_list for autocomplete
+                "thread_list" => $this->getThreadListForAutocomplete($thread)
             ]);
         }
         else {
@@ -573,6 +575,7 @@ class ForumThreadView extends AbstractView {
             $thread_info = [
                 'thread_id' => $thread->getId(),
                 "title" => $titleDisplay,
+                "title_autocomplete" => $thread->getTitle(),
                 "content" => $contentDisplay,
                 "categories" => $categories_content,
                 "link" => $link,
@@ -864,6 +867,8 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            // Add thread_list for autocomplete
+            "thread_list" => $this->getThreadListForAutocomplete($thread),
         ];
 
         if ($render) {
@@ -879,6 +884,41 @@ class ForumThreadView extends AbstractView {
         else {
             return $created_post;
         }
+    }
+
+    /**
+     * Build the thread_list array for autocomplete (id, title, etc.)
+     */
+    private function getThreadListForAutocomplete(Thread $currentThread) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        // Use safe defaults for autocomplete
+        $category_ids = [];
+        $search_query = "";
+        $status = [-1, 0, 1];
+        $get_deleted = false;
+        $get_merged_threads = false;
+        $filter_unread = false;
+        $user_id = $this->core->getUser()->getId();
+        $block_number = 0;
+
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $status,
+            $get_deleted,
+            $get_merged_threads,
+            $filter_unread,
+            $user_id,
+            $block_number
+        );
+        $list = [];
+        foreach ($threads as $thread) {
+            $list[] = [
+                'id' => $thread->getId(),
+                'title' => $thread->getTitle(),
+            ];
+        }
+        return $list;
     }
 
     public function createThread($category_colors) {
