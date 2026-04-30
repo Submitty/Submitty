@@ -3,8 +3,21 @@
 namespace app\views;
 
 use app\libraries\FileUtils;
+use app\models\gradeable\Gradeable;
 
 class MiscView extends AbstractView {
+    public function aiClusterDashboard(Gradeable $gradeable) {
+        $this->core->getOutput()->setPageName('AI Clustering Dashboard');
+        $this->core->getOutput()->addInternalCss('ai-cluster-dashboard.css');
+        $this->core->getOutput()->addInternalJs('ai-cluster-dashboard.js');
+
+        return $this->core->getOutput()->renderTwigTemplate('misc/AIClusterDashboard.twig', [
+            'gradeable_id' => $gradeable->getId(),
+            'gradeable_title' => $gradeable->getTitle(),
+            'gradeable_is_ta' => $gradeable->isTaGrading(),
+        ]);
+    }
+
     public function displayFile($file_contents) {
         $this->core->getOutput()->setContentOnly(true);
         return $this->core->getOutput()->renderTwigTemplate("misc/File.twig", [
