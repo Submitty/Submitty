@@ -295,17 +295,17 @@
 .thread-autocomplete-dropdown {
     position: absolute;
     z-index: 1000;
-    background: var(--default-white) !important;
+    background: var(--default-white);
     border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
     max-height: 200px;
     overflow-y: auto;
     width: 300px;
 }
 
 [data-theme="dark"] .thread-autocomplete-dropdown {
-    background: var(--standard-deep-dark-gray) !important;
+    background: var(--standard-deep-dark-gray);
     border-color: var(--standard-medium-gray);
 }
 
@@ -317,43 +317,43 @@
     cursor: pointer;
     font-size: 14px;
     overflow: hidden;
-    color: var(--text-black) !important; 
+    color: var(--text-black);
 }
 
 .thread-autocomplete-id {
     font-weight: 600;
     white-space: nowrap;
-    color: var(--submitty-logo-blue) !important;
+    color: var(--submitty-logo-blue);
 }
 
 .thread-autocomplete-title {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--text-black) !important;
+    color: var(--text-black);
 }
 
 [data-theme="dark"] .thread-autocomplete-item .thread-autocomplete-title {
-    color: #ffffff !important;
+    color: var(--default-white);
 }
 
 /* --- Active/Hover State (Light Mode) --- */
 .thread-autocomplete-item-active {
-    background-color: var(--light-blue) !important;
+    background-color: var(--light-blue);
 }
 .thread-autocomplete-item-active .thread-autocomplete-title,
 .thread-autocomplete-item-active .thread-autocomplete-id {
-    color: var(--text-black) !important;
+    color: var(--text-black);
 }
 
 /* --- Active/Hover State (Dark Mode) --- */
 [data-theme="dark"] .thread-autocomplete-item-active {
-    background-color: var(--submitty-logo-blue) !important;
+    background-color: var(--submitty-logo-blue);
 }
 [data-theme="dark"] .thread-autocomplete-item-active .thread-autocomplete-title{
-    color: var(--default-white) !important;
+    color: var(--default-white);
 }
 
 [data-theme="dark"] .thread-autocomplete-item-active .thread-autocomplete-id {
-    color: var(--default-white) !important;
+    color: var(--default-white);
 }

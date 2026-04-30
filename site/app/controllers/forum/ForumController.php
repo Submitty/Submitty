@@ -1267,7 +1267,7 @@ class ForumController extends AbstractController {
         );
 
         // Build thread list for autocomplete: "Thread Title <#thread_id>"
-        $thread_list = array_map(function($t) {
+        $thread_list = array_map(function ($t) {
             return $t->getTitle() . ' <#' . $t->getId() . '>';
         }, $threads);
 

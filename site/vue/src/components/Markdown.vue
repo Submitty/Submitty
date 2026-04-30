@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { Marked, type TokenizerExtension, type RendererExtension } from 'marked';
 import { renderToString } from 'katex';
 import DOMPurify from 'dompurify';
@@ -108,7 +108,7 @@ async function resolveThreadIds(ids: number[]): Promise<void> {
     try {
         const url = `${buildCourseUrl(['forum', 'threads', 'resolve'])}?ids=${unresolvedIds.join(',')}`;
         const response = await fetch(url);
-        const json = await response.json();
+        const json = await response.json() as { status: string; data: Record<number, string | null> };
         if (json.status === 'success') {
             for (const id of unresolvedIds) {
                 threadTitleCache.value[id] = json.data[id] ?? null;
@@ -142,12 +142,11 @@ async function updateContent(): Promise<void> {
 }
 
 watch(() => props.content, () => {
-    updateContent();
+    void updateContent();
 });
 
-
 onMounted(() => {
-    updateContent();
+    void updateContent();
 });
 </script>
 
