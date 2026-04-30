@@ -106,7 +106,7 @@ function markSeen(course: string, id: number) {
             <span
               class="course-notification-link"
               title="Go to notifications"
-              @click.stop="goToCourseNotifications(notification.course)"
+              @click.stop.prevent="goToCourseNotifications(notification.course)"
             >
               {{ notification.course_name ? notification.course_name : notification.course }}
             </span>
