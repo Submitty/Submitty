@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -ev
 
+if [ "${IS_WORKER}" == 1 ]; then
+    echo "ERROR: This script cannot be run on a worker machine"
+    exit 1
+fi
+
 for cli_arg in "$@"
 do
     if [[ $cli_arg =~ ^config=.* ]]; then
