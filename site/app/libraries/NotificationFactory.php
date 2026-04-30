@@ -208,12 +208,13 @@ class NotificationFactory {
                 $flattened_notifications[] = $notification->getNotifyContent();
                 $flattened_notifications[] = $notification->getNotifySource();
                 $flattened_notifications[] = $notification->getNotifyTarget();
+                $flattened_notifications[] = $notification->getGradeableId();
             }
         }
         if (!empty($flattened_notifications)) {
             // some notifications may not have been added to the flattened notifications
             // so to calculate the number of notifications we must use flattened notifications
-            $this->core->getQueries()->insertNotifications($flattened_notifications, count($flattened_notifications) / 5);
+            $this->core->getQueries()->insertNotifications($flattened_notifications, count($flattened_notifications) / 6);
         }
     }
 
