@@ -198,7 +198,10 @@ if [ ${WORKER} == 1 ]; then
     if [ ${VAGRANT} == 1 ]; then
         # Setting it up to allow SSH as root by default
         mkdir -p -m 700 /root/.ssh
-        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+        touch /root/.ssh/authorized_keys
+        # we need to append the worker root keys into authorized keys because worker provisioning overwrites the root keys. 
+        cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
 
         sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
     fi
