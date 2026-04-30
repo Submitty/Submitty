@@ -40,6 +40,9 @@ class Core {
     /** @var AbstractDatabase */
     private $course_db = null;
 
+    /** @var AbstractDatabase */
+    private $course_readonly_db = null;
+
     /** @var EntityManager */
     private $submitty_entity_manager;
 
@@ -232,6 +235,12 @@ class Core {
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
         $this->course_db->connect($this->config->isDebug());
 
+        if ($this->course_readonly_db !== null && $this->course_readonly_db->isConnected()) {
+            $this->course_readonly_db->disconnect();
+        }
+        $this->course_readonly_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseReadonlyParams());
+        $this->course_readonly_db->connect($this->config->isDebug());
+
         $this->setQueries($this->database_factory->getQueries($this));
         $this->course_entity_manager = $this->createEntityManager($this->course_db);
     }
@@ -341,6 +350,9 @@ class Core {
         if ($this->course_db !== null) {
             $this->course_db->disconnect();
         }
+        if ($this->course_readonly_db !== null) {
+            $this->course_readonly_db->disconnect();
+        }
         if ($this->submitty_db !== null) {
             $this->submitty_db->disconnect();
         }
@@ -377,6 +389,13 @@ class Core {
      */
     public function getCourseDB() {
         return $this->course_db;
+    }
+
+    /**
+     * @return AbstractDatabase
+     */
+    public function getCourseReadonlyDB() {
+        return $this->course_readonly_db;
     }
 
     public function setQueries(DatabaseQueries $queries): void {
