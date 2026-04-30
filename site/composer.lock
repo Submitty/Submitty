@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a1eee0d17029e9efd9079ac42901021",
+    "content-hash": "140653b6339cf7da575ab7c3d87fcc2e",
     "packages": [
         {
             "name": "brick/math",
@@ -3856,16 +3856,16 @@
         },
         {
             "name": "robrichards/xmlseclibs",
-            "version": "3.1.4",
+            "version": "3.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/robrichards/xmlseclibs.git",
-                "reference": "bc87389224c6de95802b505e5265b0ec2c5bcdbd"
+                "reference": "03062be78178cbb5e8f605cd255dc32a14981f92"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/bc87389224c6de95802b505e5265b0ec2c5bcdbd",
-                "reference": "bc87389224c6de95802b505e5265b0ec2c5bcdbd",
+                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/03062be78178cbb5e8f605cd255dc32a14981f92",
+                "reference": "03062be78178cbb5e8f605cd255dc32a14981f92",
                 "shasum": ""
             },
             "require": {
@@ -3892,9 +3892,9 @@
             ],
             "support": {
                 "issues": "https://github.com/robrichards/xmlseclibs/issues",
-                "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.4"
+                "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.5"
             },
-            "time": "2025-12-08T11:57:53+00:00"
+            "time": "2026-03-13T10:31:56+00:00"
         },
         {
             "name": "symfony/cache",
@@ -6250,11 +6250,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.40",
+            "version": "2.1.46",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
-                "reference": "9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a193923fc2d6325ef4e741cf3af8c3e8f54dbf25",
+                "reference": "a193923fc2d6325ef4e741cf3af8c3e8f54dbf25",
                 "shasum": ""
             },
             "require": {
@@ -6299,7 +6299,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-23T15:04:35+00:00"
+            "time": "2026-04-01T09:25:14+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -6353,16 +6353,16 @@
         },
         {
             "name": "phpstan/phpstan-doctrine",
-            "version": "2.0.18",
+            "version": "2.0.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-doctrine.git",
-                "reference": "44a216a5cd9fe52be489dcf1e2d565c473daa1ca"
+                "reference": "81dac0ee4363c2359128aec844df31efb215dddc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/44a216a5cd9fe52be489dcf1e2d565c473daa1ca",
-                "reference": "44a216a5cd9fe52be489dcf1e2d565c473daa1ca",
+                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/81dac0ee4363c2359128aec844df31efb215dddc",
+                "reference": "81dac0ee4363c2359128aec844df31efb215dddc",
                 "shasum": ""
             },
             "require": {
@@ -6423,9 +6423,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-doctrine/issues",
-                "source": "https://github.com/phpstan/phpstan-doctrine/tree/2.0.18"
+                "source": "https://github.com/phpstan/phpstan-doctrine/tree/2.0.21"
             },
-            "time": "2026-02-24T10:01:00+00:00"
+            "time": "2026-04-17T13:00:39+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
