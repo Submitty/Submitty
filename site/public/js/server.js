@@ -1024,17 +1024,21 @@ function openUrl(url) {
 }
 
 function changeName(element, user, visible_username, anon) {
-    const new_element = element.getElementsByTagName('strong')[0];
+    const new_element = element.getElementsByClassName('author-name')[0];
+    if (!new_element) {
+        return;
+    }
+
     // eslint-disable-next-line eqeqeq
     anon = anon == 'true';
     icon = element.getElementsByClassName('fas fa-eye')[0];
     if (icon === undefined) {
         icon = element.getElementsByClassName('fas fa-eye-slash')[0];
         if (anon) {
-            new_element.style.color = 'black';
+            new_element.style.removeProperty('color');
             new_element.style.fontStyle = 'normal';
         }
-        new_element.textContent = visible_username;
+        new_element.childNodes[0].nodeValue = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
@@ -1155,25 +1159,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
     }
 }
 
-/**
- * TODO: This may be unused.  Check, and potentially remove this function.
- */
-function batchImportJSON(url, csrf_token) {
-    $.ajax(url, {
-        type: 'POST',
-        data: {
-            csrf_token: csrf_token,
-        },
-    })
-        .done((response) => {
-            window.alert(response);
-            location.reload(true);
-        })
-        .fail(() => {
-            window.alert('[AJAX ERROR] Refresh page');
-        });
-}
-
 function submitAJAX(url, data, callbackSuccess, callbackFailure) {
     $.ajax(url, {
         type: 'POST',
@@ -1244,27 +1229,27 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function (event) {
-        if (event.which === 27) { // ESC was pressed, proceed to next control element.
-            // Next control element may not be a sibling, so .next().focus() is not guaranteed
-            // to work.  There is also no guarantee that controls are properly wrapped within
-            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
-            // focus to the next control in the list.
-            const controls = $(':tabbable').filter(':visible');
-            controls.eq(controls.index(this) + 1).focus();
-            return false;
-        }
-        else if (!event.shiftKey && event.code === 'Tab') { // TAB was pressed without SHIFT, text indent
-            const text = this.value;
-            const beforeCurse = this.selectionStart;
-            const afterCurse = this.selectionEnd;
-            this.value = `${text.substring(0, beforeCurse)}\t${text.substring(afterCurse)}`;
-            this.selectionStart = this.selectionEnd = beforeCurse + 1;
-            return false;
-        }
-        // No need to test for SHIFT+TAB as it is not being redefined.
-    });
 }
+
+// Use event delegation to handle TAB/ESC for all forum textareas,
+// including those dynamically added when switching threads or loading
+// new posts, ensuring consistent behavior regardless of how the
+// textarea was inserted into the DOM.
+
+$(document).on('keydown', 'textarea.thread_post_content', function (event) {
+    if (event.which === 27) {
+        const controls = $(':tabbable').filter(':visible');
+        controls.eq(controls.index(this) + 1).focus();
+        return false;
+    }
+    else if (!event.shiftKey && event.code === 'Tab') {
+        const beforeCurse = this.selectionStart;
+        this.setRangeText('\t', this.selectionStart, this.selectionEnd, 'end');
+        this.selectionStart = this.selectionEnd = beforeCurse + 1;
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+        return false;
+    }
+});
 
 function confirmBypass(str, redirect) {
     if (confirm(str)) {

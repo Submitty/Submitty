@@ -228,16 +228,39 @@ class Utils {
     public static function checkUploadedImageFile($id) {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
-                if (file_exists($file_name)) {
-                    $mime_type = mime_content_type($file_name);
-                    if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
-                        return false;
-                    }
+                if (file_exists($file_name) && !self::isValidUploadedImage($file_name)) {
+                    return false;
                 }
             }
             return true;
         }
         return false;
+    }
+
+    public static function checkUploadedImageOrPdfFile(string $id): bool {
+        if (isset($_FILES[$id])) {
+            foreach ($_FILES[$id]['tmp_name'] as $file_name) {
+                if (file_exists($file_name) && !self::isValidUploadedImageOrPdf($file_name)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static function isValidUploadedImage(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && str_starts_with($mime_type, 'image/') && getimagesize($file_name) !== false;
+    }
+
+    public static function isValidUploadedPdf(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && $mime_type === 'application/pdf';
+    }
+
+    public static function isValidUploadedImageOrPdf(string $file_name): bool {
+        return self::isValidUploadedImage($file_name) || self::isValidUploadedPdf($file_name);
     }
 
     /**

@@ -89,6 +89,7 @@ use app\libraries\FileUtils;
  * @method string getLatestTag()
  * @method string getLatestCommit()
  * @method int getCourseMaterialFileUploadLimitMb()
+ * @method int getMaxCourseMaterialStorageMb()
  */
 
 class Config extends AbstractModel {
@@ -176,8 +177,16 @@ class Config extends AbstractModel {
     /**
      * Maximum file upload size for course materials (in MB)
      * @prop
+     * @var int
      */
     protected int $course_material_file_upload_limit_mb;
+
+    /**
+     * Maximum total storage for course materials (in MB)
+     * @prop
+     * @var int
+     */
+    protected int $max_course_material_storage_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
@@ -511,6 +520,8 @@ class Config extends AbstractModel {
 
         // Default to 100 MB if not set
         $this->course_material_file_upload_limit_mb = (int) ($submitty_json['course_material_file_upload_limit_mb'] ?? 100);
+        $this->max_course_material_storage_mb = (int) ($submitty_json['max_course_material_storage_mb'] ?? 1000);
+
 
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];

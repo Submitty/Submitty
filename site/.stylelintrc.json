@@ -1,6 +1,8 @@
 {
   "extends": "stylelint-config-standard",
   "rules": {
+    "color-named": "never",
+    "color-no-hex": true,
     "color-hex-length": "long",
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
@@ -11,6 +13,7 @@
   },
   "ignoreFiles": [
     "vendor/**",
+    "cypress/**",
     "tests/report/**",
     "public/css/jquery-ui.min.css",
     "public/css/reset.css",
@@ -22,6 +25,18 @@
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
     "public/css/select2-override.css",
-    "public/css/highlightjs/*"
+    "public/css/highlightjs/*",
+    "public/mjs/vue/submitty-vue.css"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "public/css/colors.css"
+      ],
+      "rules": {
+        "color-named": null,
+        "color-no-hex": null
+      }
+    }
   ]
 }

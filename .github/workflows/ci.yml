@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   PGPASSWORD: submitty_dbuser
   PHP_USER: submitty_php
@@ -124,7 +127,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -151,7 +154,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -187,7 +190,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -896,12 +899,18 @@ jobs:
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Downloads
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/downloads
 
   Integration:
     name: Integration
