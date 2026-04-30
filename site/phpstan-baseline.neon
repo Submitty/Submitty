@@ -6208,6 +6208,18 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
+			rawMessage: 'Only booleans are allowed in an elseif condition, mixed given.'
+			identifier: elseif.condNotBoolean
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			rawMessage: 'Only booleans are allowed in an if condition, mixed given.'
+			identifier: if.condNotBoolean
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
 			rawMessage: 'Strict comparison using === between null and null will always evaluate to true.'
 			identifier: identical.alwaysTrue
 			count: 1
@@ -15496,12 +15508,6 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between DateTime and DateTime is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
 			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
@@ -15515,6 +15521,12 @@ parameters:
 
 		-
 			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			identifier: equal.notAllowed
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: 'Loose comparison via "==" between mixed and mixed is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/views/submission/HomeworkView.php
