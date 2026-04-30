@@ -41,6 +41,8 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
+    window.open(url, '_blank');
+
     const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
     if (newWindow !== null) {
         newWindow.opener = null;
@@ -2171,6 +2173,13 @@ function loadInlineImages(encoded_data) {
             const attachment = data[i];
             const attachmentDiv = $('<div class="attachment-preview"></div>');
             const url = attachment[0];
+            const img = $(`<img src="${url}" alt="Click to view attachment in new tab" title="Click to view attachment in new tab" class="attachment-img">`);
+            img.click(function () {
+                const url = $(this).attr('src');
+                window.open(url, '_blank');
+            });
+            attachment_well.append(img);
+            attachment_well.append(title);
             const name = decodeURIComponent(attachment[2]);
             const type = attachment[3] || 'image';
             const title = $(`<p>${escapeSpecialChars(name)}</p>`);
@@ -2202,6 +2211,11 @@ function loadInlineImages(encoded_data) {
         }
     }
     updateGlobalAttachmentButtonState();
+}
+
+function openInWindow(img) {
+    const url = $(img).attr('src');
+    window.open(url, '_blank');
 }
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
