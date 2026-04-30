@@ -17,7 +17,3 @@ export Localization_Version=v23.08.02
 export JUNIT_VERSION=4.12
 export HAMCREST_VERSION=1.3
 export JACOCO_VERSION=0.8.0
-
-# DR. MEMORY
-export DRMEMORY_TAG=release_2.6.0
-export DRMEMORY_VERSION=2.6.0
