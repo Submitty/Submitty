@@ -6148,6 +6148,15 @@ parameters:
 			path: app/libraries/SessionManager.php
 
 		-
+			rawMessage: '''
+				Call to deprecated method setValidationConstraints() of class Lcobucci\JWT\Configuration:
+				Deprecated since v5.5, please use {@see self::withValidationConstraints()} instead
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: app/libraries/TokenManager.php
+
+		-
 			rawMessage: 'Method app\libraries\TokenManager::generateSessionToken() has parameter $persistent with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -6204,6 +6213,18 @@ parameters:
 		-
 			rawMessage: 'Method app\libraries\Utils::setCookie() has parameter $data with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			rawMessage: 'Only booleans are allowed in an elseif condition, mixed given.'
+			identifier: elseif.condNotBoolean
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			rawMessage: 'Only booleans are allowed in an if condition, mixed given.'
+			identifier: if.condNotBoolean
 			count: 1
 			path: app/libraries/Utils.php
 
@@ -15496,12 +15517,6 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between DateTime and DateTime is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
 			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
@@ -15515,6 +15530,12 @@ parameters:
 
 		-
 			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
+			identifier: equal.notAllowed
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: 'Loose comparison via "==" between mixed and mixed is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/views/submission/HomeworkView.php
