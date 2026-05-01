@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import NotificationsDisplay from '@/components/NotificationsDisplay.vue';
 import type { Notification } from '@/types/Notification';
@@ -21,7 +21,6 @@ interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
     notifications: Notification[];
     unseenCount: number;
-    course: boolean;
     userId: string;
 }
 
@@ -124,7 +123,10 @@ const buildCourseUrl = (course: Course) => {
             v-show="course_type !== 'archived_courses' || archivedCoursesVisible"
             :key="rank.title"
           >
-            <h2 v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'" class="courses-rank-title">
+            <h2
+              v-if="course_type !== 'dropped_courses' && course_type !== 'self_registration_courses'"
+              class="courses-rank-title"
+            >
               As {{ rank.title }}
             </h2>
 
@@ -165,7 +167,7 @@ const buildCourseUrl = (course: Course) => {
     >
       <NotificationsDisplay
         :notifications="notifications"
-        :unseenCount="unseenCount"
+        :unseen-count="unseenCount"
         :course="false"
       />
     </div>
@@ -183,15 +185,15 @@ const buildCourseUrl = (course: Course) => {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-auto-rows: auto;
     align-items: start;
-    grid-gap: 30px;
+    gap: 30px;
 }
 
 @media (max-width: 540px) {
     .home-content {
-        padding: 0px
+        padding: 0
     }
     .grid-container {
-        grid-gap: 15px;
+        gap: 15px;
     }
 }
 
@@ -202,6 +204,7 @@ const buildCourseUrl = (course: Course) => {
 }
 
 .courses-header {
+    /* stylelint-disable-next-line declaration-no-important */
     margin-bottom: 5px !important; /* Override submitty-vue.css */
     flex-grow: 1;
 }

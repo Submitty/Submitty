@@ -216,6 +216,11 @@ class User extends AbstractModel implements \JsonSerializable {
     /** @var array A cache of [gradeable id] => [anon id] */
     private $anon_id_by_gradeable = [];
 
+    /** @prop
+     * @var false|array<int, array{term: string, course: string}> List of courses where the user has instructor level access, or false if not loaded
+     */
+    protected $instructor_courses = false;
+
     /**
      * User constructor.
      *
@@ -698,13 +703,35 @@ class User extends AbstractModel implements \JsonSerializable {
                 $validator = new EmailValidator();
                 return $validator->isValid($data, new RFCValidation());
             case 'user_group':
-                //user_group check is a digit between 1 - 4.
+                //user_group check is either a digit between 1 - 4 or one of the strings:
+                // "Instructor"
+                // "Student"
+                // "Limited Access Grader (Mentor)"
+                // "Full Access Grader (Grad TA)"
+                if ($data === "Instructor") {
+                    return true;
+                }
+                if ($data === "Student") {
+                    return true;
+                }
+                if ($data === "Limited Access Grader (Mentor)") {
+                    return true;
+                }
+                if ($data === "Full Access Grader (Grad TA)") {
+                    return true;
+                }
+
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
+            case 'registration_subsection':
+                //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens, spaces.
+                // AND between 0 and 20 chars.
+                //"NULL" registration section should be validated as a datatype, not as a string.
+                return preg_match("~^(?!^null$)[a-z0-9_\- ]{1,20}$~i", $data) === 1 || is_null($data);
             case 'course_section_id':
                 //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
@@ -712,8 +739,8 @@ class User extends AbstractModel implements \JsonSerializable {
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
                 return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
             case 'student_registration_type':
-                // Student registration type must be one of either 'graded','audit', or 'withdrawn
-                return preg_match("~^(graded|audit|withdrawn)$~", $data) === 1;
+                // Student registration type must be one of either 'graded','audit', 'withdrawn', or 'staff'
+                return preg_match("~^(graded|audit|withdrawn|staff)$~", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";
@@ -795,6 +822,16 @@ class User extends AbstractModel implements \JsonSerializable {
      */
     public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
+
+    /**
+     * @return array<int, array{term: string, course: string}> List of courses where the user has instructor level access
+     */
+    public function getInstructorCourses() {
+        if ($this->instructor_courses === false) {
+            $this->instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->id);
+        }
+        return $this->instructor_courses;
     }
 
     /**

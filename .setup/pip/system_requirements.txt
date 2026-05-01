@@ -4,23 +4,22 @@
 # docker & sqlalchemy
 
 # Auto-grader module depends on:
-# sqlalchemy & paramiko & docker & python-dateutil & submitty_util (internal)
+# sqlalchemy & paramiko & docker & submitty_util (internal)
 
 # Submitty util module depends on:
 
 # For QR bulk upload
-opencv-python-headless==4.12.0.88
+opencv-python-headless==4.13.0.92
 
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
-requests==2.32.5
+requests==2.33.1
 python-pam==2.0.2
 ruamel.yaml==0.19.1
 psycopg2-binary==2.9.11
-sqlalchemy==2.0.46
+sqlalchemy==2.0.48
 psutil==7.2.2
-python-dateutil==2.9.0.post0
 watchdog==6.0.0
-xlsx2csv==0.8.4
+xlsx2csv==0.8.6
 pause==0.3
 paramiko==4.0.0
 tzlocal==5.3.1
@@ -37,5 +36,5 @@ pdf2image==1.17.0
 numpy==2.2.3
 
 # python libraries for OCR for digit recognition
-onnx==1.20.0
+onnx==1.21.0
 onnxruntime==1.23.2
