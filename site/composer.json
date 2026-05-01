@@ -20,7 +20,7 @@
     }
   },
   "require": {
-    "browscap/browscap-php": "7.6.0",
+    "browscap/browscap-php": "7.7.1",
     "cboden/ratchet": "0.4.4",
     "doctrine/dbal": "3.8.3",
     "doctrine/orm": "3.6.2",
