@@ -107,8 +107,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getName() {
-        // Always use preferred name (displayed given + family name)
-        return $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName();
+        // Always use abbreviated name (displayed given + first initial of family name)
+        return $this->core->getUser()->getDisplayedGivenName() . " " . substr($this->core->getUser()->getDisplayedFamilyName(), 0, 1) . ".";
     }
 
     public function getContactInfo() {

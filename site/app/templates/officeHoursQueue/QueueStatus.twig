@@ -1,3 +1,4 @@
+
 {% if viewer.inQueue() == 0 %}
 <div id="queue_status">
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
@@ -22,34 +23,33 @@
       <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
       <br>
     </div>
-    <button id="join_queue_btn" type="submit" class="btn btn-primary" data-testid="join-queue-btn">Join</button>
+    <button id="join_queue_btn" type="submit" class="btn btn-primary" data-testid="join-queue-btn">Join as {{viewer.getName()}}</button>
   </form>
-  <div class="queue-removed-nicknames">
-    <small>
-      Want to change your name? <a href="{{base_url}}/user_profile">Set your preferred name in your profile</a>.
-    </small>
-  </div>
-  <script>
-      $('#queue_code').change(function(){
-          document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
+    <p class="name-change-label">
+        Want to change your name? <a id="profile_link">Set your preferred name in your profile</a>.
+    </p>
+    <script>
+        document.getElementById('profile_link').href = buildUrl(['user_profile']);
+        $('#queue_code').change(function(){
+            document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
 
-          const selected_queue =  $("#queue_code").val();
-          let queue='temp';
-          let found = false;
-          {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
-              queue = "{{ queue['code'] }}";
-              if (queue === selected_queue){
-                  $('.enter-contact-info').css('display', 'block');
-                  $('#contact_info').prop('required', true);
-                  found = true;
-              }
-          {% endfor %}
-          if (found === false){
-              $('.enter-contact-info').css('display', 'none');
-              $('#contact_info').prop('required', false);
-          }
-      });
-  </script>
+            const selected_queue =  $("#queue_code").val();
+            let queue='temp';
+            let found = false;
+            {% for queue in viewer.getAllQueues()|filter(queue => queue['contact_information'] == 'true') %}
+                queue = "{{ queue['code'] }}";
+                if (queue === selected_queue){
+                    $('.enter-contact-info').css('display', 'block');
+                    $('#contact_info').prop('required', true);
+                    found = true;
+                }
+            {% endfor %}
+            if (found === false){
+                $('.enter-contact-info').css('display', 'none');
+                $('#contact_info').prop('required', false);
+            }
+        });
+    </script>
 </div>
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
     {% if viewer.getQueueSocketMessage() %}

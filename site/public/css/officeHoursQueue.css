@@ -116,7 +116,7 @@ th {
     background-color: var(--standard-vibrant-green);
 }
 
-.queue-removed-nicknames {
-    margin-top: 1em;
+.name-change-label {
+    margin-top: 12px;
 }
 
