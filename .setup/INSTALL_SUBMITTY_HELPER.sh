@@ -218,7 +218,7 @@ rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.j
 # replace filling variables
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
-# # change permissions of allowed_autograding_commands_default.json
+# change permissions of allowed_autograding_commands_default.json
 chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
