@@ -1791,6 +1791,12 @@ class ElectronicGraderController extends AbstractController {
             );
             return;
         }
+        // Block limited access graders from viewing submissions before grading opens
+        $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
+        if ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && !$past_grade_start_date) {
+            $this->core->addErrorMessage("You do not have permission to view submissions until grading opens.");
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
         $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
