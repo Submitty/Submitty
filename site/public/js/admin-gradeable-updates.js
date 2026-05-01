@@ -561,9 +561,11 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
             let alerted = false;
-            const build_info = response['data'][0];
-            const cmake_info = response['data'][1];
-            const make_info = response['data'][2];
+            const build_info = response['data']['build_output'] ?? null;
+            const cmake_info = response['data']['cmake_output'] ?? null;
+            const preprocessed_config = response['data']['preprocessed_config'] ?? null;
+            const generated_complete_config = response['data']['generated_complete_config'] ?? null;
+            const generated_config_note = preprocessed_config !== null || generated_complete_config !== null;
 
             if (build_info !== null) {
                 // eslint-disable-next-line no-restricted-syntax
@@ -589,18 +591,25 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             else {
                 $('#cmake-log-body').text('There is currently no cmake output.');
             }
-            if (make_info !== null) {
+            if (preprocessed_config !== null) {
                 // eslint-disable-next-line no-restricted-syntax
-                $('#make-log-body').html(make_info);
+                $('#preprocessed-config-body').html(preprocessed_config);
             }
             else {
-                // eslint-disable-next-line no-restricted-syntax
-                $('#make-log-body').html('There is currently no make output.');
+                $('#preprocessed-config-body').text('There is currently no preprocessed config for this build.');
             }
-
+            if (generated_complete_config !== null) {
+                // eslint-disable-next-line no-restricted-syntax
+                $('#generated-complete-config-body').html(generated_complete_config);
+            }
+            else {
+                $('#generated-complete-config-body').text('There is currently no generated complete config.');
+            }
             if (alerted || !rebuilt) {
                 // Display the build log for respective rebuild warnings/errors or manual instructor requests
                 $('.log-container').show();
+                $('#generated-config-help').toggle(generated_config_note);
+                $('#generated-config-note').prop('hidden', !generated_config_note);
                 $('#open-build-log').hide();
                 $('#close-build-log').show();
             }
@@ -643,7 +652,10 @@ function ajaxCheckBuildStatus() {
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
                 $('#rebuild-status').text('Gradeable build failed');
-                $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
+                $('#autograding_config_error').text(
+                    'The current configuration is not valid. Check the build log for details, ' +
+                    'and use the generated config sections if the reported line numbers do not match your source file.'
+                );
                 $('.config_search_error').show();
             }
             else {
