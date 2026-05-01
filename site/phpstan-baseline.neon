@@ -6148,6 +6148,15 @@ parameters:
 			path: app/libraries/SessionManager.php
 
 		-
+			rawMessage: '''
+				Call to deprecated method setValidationConstraints() of class Lcobucci\JWT\Configuration:
+				Deprecated since v5.5, please use {@see self::withValidationConstraints()} instead
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: app/libraries/TokenManager.php
+
+		-
 			rawMessage: 'Method app\libraries\TokenManager::generateSessionToken() has parameter $persistent with no type specified.'
 			identifier: missingType.parameter
 			count: 1

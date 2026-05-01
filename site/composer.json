@@ -25,7 +25,7 @@
     "doctrine/dbal": "3.8.3",
     "doctrine/orm": "3.6.2",
     "egulias/email-validator": "4.0.4",
-    "lcobucci/jwt": "5.3.0",
+    "lcobucci/jwt": "5.6.0",
     "league/commonmark": "2.8.2",
     "maennchen/zipstream-php": "3.1.1",
     "onelogin/php-saml": "4.3.1",
@@ -36,7 +36,7 @@
     "symfony/http-foundation": "6.4.14",
     "symfony/routing": "6.1.11",
     "textalk/websocket": "1.6.3",
-    "twig/markdown-extra": "^3.23",
+    "twig/markdown-extra": "^3.24",
     "twig/twig": "3.24.0"
   },
   "require-dev": {
