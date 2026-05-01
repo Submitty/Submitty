@@ -12,8 +12,3 @@ export RainbowGrades_Version=v25.10.00
 export Tutorial_Version=v25.06.03
 export SysadminTools_Version=v25.01.00
 export Localization_Version=v23.08.02
-
-# JAVA
-export JUNIT_VERSION=4.12
-export HAMCREST_VERSION=1.3
-export JACOCO_VERSION=0.8.0
