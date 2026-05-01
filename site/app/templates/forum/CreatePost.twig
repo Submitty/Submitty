@@ -163,7 +163,9 @@
             "show_unresolve": show_unresolve,
             "visible_username" : visible_username,
             "submit_label" : "Submit Reply to " ~ visible_username,
-            "data_testid" : "forum-submit-reply-user"
+            "data_testid" : "forum-submit-reply-user",
+            "show_reply_announcement": show_reply_announcement is defined ? show_reply_announcement : false,
+            "email_enabled": email_enabled is defined ? email_enabled : false
         } %}
 
     </form>
