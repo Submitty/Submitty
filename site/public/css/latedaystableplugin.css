@@ -77,7 +77,9 @@
 #late-day-table tr > td:nth-child(4) {
     width: var(--ld-col-4-width);
     position: sticky;
-    left: calc(var(--ld-col-1-width) + var(--ld-col-2-width) + var(--ld-col-3-width));
+    left: calc(
+        var(--ld-col-1-width) + var(--ld-col-2-width) + var(--ld-col-3-width)
+    );
     z-index: 2;
     border-right: 2px solid var(--standard-medium-gray);
 }
