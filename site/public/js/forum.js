@@ -1,5 +1,9 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars updateThreads */
+    displayErrorMessage, escapeSpecialChars, updateThreads, enableTabsInTextArea,
+    getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
+    previous_files, label_array, cancelDeferredSave, captureTabInModal,
+    WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
+    cleanupAutosaveHistory */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -37,19 +41,26 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (newWindow !== null) {
+        newWindow.opener = null;
+    }
 }
 
-function checkForumFileExtensions(post_box_id, files) {
+function isValidForumAttachment(file) {
+    const mime_type = file.type || '';
+    const lower_name = file.name.toLowerCase();
+    return mime_type.startsWith('image/') || mime_type === 'application/pdf' || lower_name.endsWith('.pdf');
+}
+
+function checkForumFileTypes(post_box_id, files) {
     const count = files.length;
     for (let i = 0; i < files.length; i++) {
-        // eslint-disable-next-line no-undef
-        const extension = getFileExtension(files[i].name);
-        if (!['gif', 'png', 'jpg', 'jpeg', 'bmp'].includes(extension)) {
-            // eslint-disable-next-line no-undef
-            deleteSingleFile(files[i].name, post_box_id, false);
-            // eslint-disable-next-line no-undef
-            removeLabel(files[i].name, post_box_id);
+        if (!isValidForumAttachment(files[i])) {
+            if (typeof post_box_id !== 'undefined') {
+                deleteSingleFile(files[i].name, post_box_id, false);
+                removeLabel(files[i].name, post_box_id);
+            }
             files.splice(i, 1);
             i--;
         }
@@ -70,8 +81,8 @@ function checkNumFilesForumUpload(input, post_id) {
         resetForumFileUploadAfterError(displayPostId);
     }
     else {
-        if (!checkForumFileExtensions(input.files)) {
-            displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+        if (!checkForumFileTypes(post_id, Array.from(input.files))) {
+            displayErrorMessage('Invalid file type. Please upload only image or PDF files.');
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
@@ -87,7 +98,6 @@ function uploadImageAttachments(attachment_box) {
         if (e[0].addedNodes.length === 0 || e[0].addedNodes[0].className === 'thumbnail') {
             return;
         }
-        // eslint-disable-next-line no-undef
         const part = get_part_number(e[0]);
         if (isNaN(parseInt(part))) {
             return;
@@ -95,19 +105,24 @@ function uploadImageAttachments(attachment_box) {
         const target = $(e[0].target).find('tr')[$(e[0].target).find('tr').length - 1];
         let file_object = null;
         const filename = $(target).attr('fname');
-        // eslint-disable-next-line no-undef
         for (let j = 0; j < file_array[part - 1].length; j++) {
-            // eslint-disable-next-line no-undef
             if (file_array[part - 1][j].name === filename) {
-                // eslint-disable-next-line no-undef
                 file_object = file_array[part - 1][j];
                 break;
             }
         }
-        const image = document.createElement('div');
-        $(image).addClass('thumbnail');
-        $(image).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
-        target.prepend(image);
+        const preview = document.createElement('div');
+        const isPdf = file_object && (file_object.type === 'application/pdf' || (file_object.name && /\.pdf$/i.test(file_object.name)));
+
+        if (isPdf) {
+            $(preview).addClass('thumbnail thumbnail-pdf');
+            $(preview).text('PDF');
+        }
+        else {
+            $(preview).addClass('thumbnail');
+            $(preview).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
+        }
+        target.prepend(preview);
     });
     $(attachment_box).each(function () {
         observer.observe($(this)[0], {
@@ -120,39 +135,28 @@ function uploadImageAttachments(attachment_box) {
 function testAndGetAttachments(post_box_id, dynamic_check) {
     const index = post_box_id - 1;
     const files = [];
-    // eslint-disable-next-line no-undef
     for (let j = 0; j < file_array[index].length; j++) {
-        // eslint-disable-next-line no-undef
         if (file_array[index][j].name.indexOf('\'') !== -1
-            // eslint-disable-next-line no-undef
             || file_array[index][j].name.indexOf('"') !== -1) {
-            // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use quotes in your filename: ${file_array[index][j].name}`);
             return false;
         }
-        // eslint-disable-next-line no-undef
         else if (file_array[index][j].name.indexOf('\\\\') !== -1
-            // eslint-disable-next-line no-undef
             || file_array[index][j].name.indexOf('/') !== -1) {
-            // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use a slash in your filename: ${file_array[index][j].name}`);
             return false;
         }
-        // eslint-disable-next-line no-undef
         else if (file_array[index][j].name.indexOf('<') !== -1
-            // eslint-disable-next-line no-undef
             || file_array[index][j].name.indexOf('>') !== -1) {
-            // eslint-disable-next-line no-undef
             alert(`ERROR! You may not use angle brackets in your filename: ${file_array[index][j].name}`);
             return false;
         }
-        // eslint-disable-next-line no-undef
         files.push(file_array[index][j]);
     }
 
     let valid = true;
-    if (!checkForumFileExtensions(post_box_id, files)) {
-        displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+    if (!checkForumFileTypes(post_box_id, files)) {
+        displayErrorMessage('Invalid file type. Please upload only image or PDF files.');
         valid = false;
     }
 
@@ -226,7 +230,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 return;
             }
             // Now that we've successfully submitted the form, clear autosave data
-            // eslint-disable-next-line no-undef
             cancelDeferredSave(autosaveKeyFor(form));
             clearReplyBoxAutosave(form);
 
@@ -321,11 +324,8 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                 $(`#${post_id}`).addClass('new_post');
                 $(`#${post_id}-reply`).css('display', 'none');
                 $(`#${post_id}-reply`).submit(publishPost);
-                // eslint-disable-next-line no-undef
                 previous_files[post_box_id] = [];
-                // eslint-disable-next-line no-undef
                 label_array[post_box_id] = [];
-                // eslint-disable-next-line no-undef
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
                 hljs.highlightAll();
@@ -421,8 +421,12 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 return;
             }
         },
-        error: function (a, b) {
-            window.alert('Something went wrong when adding new thread. Please refresh the page.');
+        error: function (jqXHR, textStatus, errorThrown) {
+            // Firefox will abort requests during page reloads (often showing up as status 0 or textStatus 'error' with empty errorThrown)
+            if (textStatus === 'abort' || jqXHR.status === 0) {
+                return;
+            }
+            displayErrorMessage('Something went wrong when adding new thread. Please refresh the page.');
         },
     });
 }
@@ -668,7 +672,6 @@ function socketUnpinThreadHandler(thread_id) {
 }
 
 function initSocketClient() {
-    // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
@@ -875,7 +878,6 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_post_anon_edit').remove();
             }
             $('#edit-user-post').css('display', 'block');
-            // eslint-disable-next-line no-undef
             captureTabInModal('edit-user-post');
             $('.cat-buttons input').prop('checked', false);
             $('#edit-user-post [id^="markdown_input_"]').val(json.markdown === true ? '1' : '0');
@@ -1361,7 +1363,6 @@ function replyPost(post_id) {
 function generateCodeMirrorBlocks(container_element) {
     const codeSegments = container_element.querySelectorAll('.code');
     for (const element of codeSegments) {
-        // eslint-disable-next-line no-undef
         const editor0 = CodeMirror.fromTextArea(element, {
             lineNumbers: true,
             readOnly: true,
@@ -1417,7 +1418,6 @@ function showSplit(post_id) {
             else {
                 document.getElementById('split_post_previously_merged').style.display = 'block';
                 document.getElementById('split_post_submit').disabled = false;
-                // eslint-disable-next-line no-undef
                 captureTabInModal('popup-post-split', false);
             }
             document.getElementById('split_post_input').value = json['title'];
@@ -1440,7 +1440,6 @@ function showSplit(post_id) {
                 }
             }
             $('#popup-post-split').show();
-            // eslint-disable-next-line no-undef
             captureTabInModal('popup-post-split');
         },
         error: function () {
@@ -1472,7 +1471,6 @@ function showHistory(post_id) {
                 return;
             }
             $('#popup-post-history').show();
-            // eslint-disable-next-line no-undef
             captureTabInModal('popup-post-history');
             $('#popup-post-history .post_box.history_box').remove();
             $('#popup-post-history .form-body').css('padding', '5px');
@@ -1659,7 +1657,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
             }
             displaySuccessMessage(`Successfully updated category "${category_desc}"!`);
             setTimeout(() => {
-                // eslint-disable-next-line no-undef
                 removeMessagePopup('theid');
             }, 1000);
             if (category_desc !== null) {
@@ -1801,7 +1798,6 @@ function reorderCategories(csrf_token) {
             }
             displaySuccessMessage('Successfully reordered categories.');
             setTimeout(() => {
-                // eslint-disable-next-line no-undef
                 removeMessagePopup('theid');
             }, 1000);
             refreshCategories();
@@ -2124,6 +2120,14 @@ function showAttachmentsOnload() {
     $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
 }
 
+function updateGlobalAttachmentButtonState() {
+    const anyVisible = $('.attachment-well').is(':visible');
+    const newState = anyVisible ? 'true' : 'false';
+    Cookies.set('show_forum_attachments', newState, { expires: 365, path: '/' });
+    const buttonText = `${anyVisible ? 'Hide' : 'Show'} attachments`;
+    $('#toggle-attachments-button').find('.status').text(buttonText);
+}
+
 function loadAllInlineImages(open_override = false) {
     if (open_override) {
         $('.attachment-btn').each(function (i) {
@@ -2162,25 +2166,42 @@ function loadInlineImages(encoded_data) {
 
     // if they're no images loaded for this well
     if (attachment_well.children().length === 0) {
-    // add image tags
+        // add attachment previews
         for (let i = 0; i < data.length - 1; i++) {
             const attachment = data[i];
+            const attachmentDiv = $('<div class="attachment-preview"></div>');
             const url = attachment[0];
-            const img = $(`<img src="${url}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">`);
-            const title = $(`<p>${escapeSpecialChars(decodeURI(attachment[2]))}</p>`);
-            img.click(function () {
-                const url = $(this).attr('src');
-                window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
-            });
-            attachment_well.append(img);
-            attachment_well.append(title);
+            const name = decodeURIComponent(attachment[2]);
+            const type = attachment[3] || 'image';
+            const title = $(`<p>${escapeSpecialChars(name)}</p>`);
+
+            if (type === 'pdf') {
+                const pdfPreview = $(`
+                    <div class="attachment-pdf">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-default attachment-open-btn">Open PDF</a>
+                        <iframe
+                            src="${url}"
+                            title="PDF attachment preview for ${escapeSpecialChars(name)}"
+                            class="attachment-pdf-preview"
+                        ></iframe>
+                    </div>
+                `);
+                attachmentDiv.append(pdfPreview);
+            }
+            else {
+                const imageLink = $(`
+                    <a href="${url}" target="_blank" rel="noopener noreferrer">
+                        <img src="${url}" alt="Click to view attachment in a new tab" title="Click to view attachment in a new tab" class="attachment-img">
+                    </a>
+                `);
+                attachmentDiv.append(imageLink);
+            }
+
+            attachmentDiv.append(title);
+            attachment_well.append(attachmentDiv);
         }
     }
-}
-
-function openInWindow(img) {
-    const url = $(img).attr('src');
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    updateGlobalAttachmentButtonState();
 }
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
@@ -2466,7 +2487,6 @@ function autosaveKeyFor(replyBox) {
 
 function saveReplyBoxToLocal(replyBox) {
     const inputBox = $(replyBox).find('textarea.thread_post_content');
-    // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         if (inputBox.val()) {
             const anonCheckbox = $(replyBox).find('input.thread-anon-checkbox');
@@ -2485,7 +2505,6 @@ function saveReplyBoxToLocal(replyBox) {
 }
 
 function restoreReplyBoxFromLocal(replyBox) {
-    // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         const json = localStorage.getItem(autosaveKeyFor(replyBox));
         if (json) {
@@ -2497,7 +2516,6 @@ function restoreReplyBoxFromLocal(replyBox) {
 }
 
 function clearReplyBoxAutosave(replyBox) {
-    // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         localStorage.removeItem(autosaveKeyFor(replyBox));
     }
@@ -2539,8 +2557,8 @@ function setupForumAutosave() {
     // on the create thread page.
     $('form.reply-box, form.post_reply_form, #thread_form').each((_index, replyBox) => {
         restoreReplyBoxFromLocal(replyBox);
+        enableTabsInTextArea($(replyBox).find('textarea.thread_post_content'));
         $(replyBox).find('textarea.thread_post_content').on('input',
-            // eslint-disable-next-line no-undef
             () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1),
         );
         $(replyBox).find('input.thread-anon-checkbox').change(() => saveReplyBoxToLocal(replyBox));
@@ -2553,7 +2571,6 @@ const CREATE_THREAD_DEFER_KEY = 'create-thread';
 const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`;
 
 function saveCreateThreadToLocal() {
-    // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         const title = $('#title').val();
         const categories = $('div.cat-buttons.btn-selected').get().map((e) => e.innerText);
@@ -2588,7 +2605,6 @@ function saveCreateThreadToLocal() {
 }
 
 function restoreCreateThreadFromLocal() {
-    // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
         const json = localStorage.getItem(CREATE_THREAD_AUTOSAVE_KEY);
         if (!json) {
@@ -2637,7 +2653,6 @@ function clearCreateThreadAutosave() {
 $(() => {
     showAttachmentsOnload();
     if (typeof cleanupAutosaveHistory === 'function') {
-        // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
         setupForumAutosave();
     }
@@ -2707,7 +2722,6 @@ function showUpduckUsers(post_id, csrf_token) {
             if (data.status === 'success') {
                 $('#popup-post-likes').show();
                 $('body').addClass('popup-active');
-                // eslint-disable-next-line no-undef
                 captureTabInModal('popup-post-likes');
 
                 $('#popup-post-likes .form-body').empty();
