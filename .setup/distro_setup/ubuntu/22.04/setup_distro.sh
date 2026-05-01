@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+WORKER=0
+if [ "$1" == "worker" ]; then
+    WORKER=1
+fi
+
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -16,6 +22,8 @@ fi
 #################################################################
 # PACKAGE SETUP
 #################
+
+
 
 # Need to change this otherwise it will hang the script in interactive mode
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
@@ -52,7 +60,10 @@ apt-get install -qqy libpam-passwdqc
 
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-14
-apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
+
+if [ ${WORKER} == 0 ]; then
+    apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
+fi
 apt-get install -qqy php8.2-cli php8.2-fpm php8.2-curl php8.2-pgsql php8.2-zip php8.2-mbstring php8.2-xml php8.2-ds php8.2-imagick php8.2-intl
 
 if [ ${DEV_VM} == 1 ]; then
@@ -74,14 +85,16 @@ jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
 apt-get install -qqy ninja-build
 
-# NodeJS
-NODE_MAJOR=20
-sudo rm -f /etc/apt/keyrings/nodesource.gpg
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
-chmod o+r /etc/apt/keyrings/nodesource.gpg
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-apt-get update
-apt-get install -y nodejs
+if [ ${WORKER} == 0 ]; then
+    # NodeJS
+    NODE_MAJOR=20
+    sudo rm -f /etc/apt/keyrings/nodesource.gpg
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    chmod o+r /etc/apt/keyrings/nodesource.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+    apt-get update
+    apt-get install -y nodejs
+fi
 
 #CMAKE
 echo "installing cmake"

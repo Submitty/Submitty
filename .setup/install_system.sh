@@ -225,7 +225,12 @@ DB_COURSE_PASSWORD=submitty_dbuser
 # DISTRO SETUP
 #################
 
-source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+if [ ${WORKER} == 1 ]; then
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh worker
+else
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+fi
+
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
@@ -698,16 +703,16 @@ fi
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
-    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
+    usersearch=$(cut -d '%' -f 2 /etc/sudoers | grep -w "^${SUPERVISOR_USER}$" | cut -d ' ' -f 1)
+    echo ${usersearch}
+    if [ "${usersearch}" == "${SUPERVISOR_USER}" ]; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "% ${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "% ${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
-
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
@@ -848,7 +853,12 @@ if [ ${WORKER} == 0 ]; then
 
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
+else
+
+    systemctl stop apache2.service
+
 fi
+
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
