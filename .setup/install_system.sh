@@ -198,7 +198,10 @@ if [ ${WORKER} == 1 ]; then
     if [ ${VAGRANT} == 1 ]; then
         # Setting it up to allow SSH as root by default
         mkdir -p -m 700 /root/.ssh
-        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+        touch /root/.ssh/authorized_keys
+        # we need to append the worker root keys into authorized keys because worker provisioning overwrites the root keys. 
+        cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
 
         sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
     fi
@@ -348,102 +351,6 @@ echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
-
-#################################################################
-# JAR SETUP
-#################
-if [ -x "$(command -v javac)" ]; then
-
-    # -----------------------------------------
-    echo "Getting JUnit & Hamcrest..."
-
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
-
-    if [ ${WORKER} == 0 ]; then
-        chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-    fi
-    chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-    rm -rf junit*jar
-    wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
-    popd > /dev/null
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
-    rm -rf hamcrest*.jar
-    wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
-    popd > /dev/null
-
-    # TODO:  Want to Install JUnit 5.0
-    # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-    echo "Getting JaCoCo..."
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
-    wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
-    mkdir jacoco-${JACOCO_VERSION}
-    unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
-    mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
-    mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
-    rm -rf jacoco-${JACOCO_VERSION}
-    rm -f jacoco-${JACOCO_VERSION}.zip
-    chmod o+r . *.jar
-    popd > /dev/null
-
-
-    # fix all java_tools permissions
-    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
-fi
-
-
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
-
-pushd /tmp > /dev/null
-
-echo "Getting DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-popd > /dev/null
-
-#################################################################
-# TCLAPP SETUP
-#################
-pushd /tmp > /dev/null
-
-echo "Getting TCLAPP"
-wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf tclap-1.2.2.tar.gz
-rm /tmp/tclap-1.2.2.tar.gz
-cd tclap-1.2.2/
-sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
-bash configure
-make
-make install
-cd /tmp
-rm -rf /tmp/tclap-1.2.2
-
-popd > /dev/null
 
 #################################################################
 # APACHE SETUP
@@ -876,6 +783,9 @@ fi
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
+
+## Create a preserve_files directory
+jq -n '$ARGS.positional' --args "/usr/local/submitty/config/footer_links.json" "/usr/local/submitty/config/login.md" > /usr/local/submitty/config/preserve_file_list.json
 
 
 echo "

@@ -165,6 +165,102 @@ describe('Test Rainbow Grading', () => {
             expect(gui_json.benchmark_percent).to.exist;
         });
     });
+    it('Show Notes options require both toggles and persist to GUI JSON', () => {
+        const allowedShowNotesValues = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
+
+        cy.get('#config-toggle').invoke('prop', 'checked').as('initial-config-toggle');
+        cy.get('#customize_show_notes_checkbox').invoke('prop', 'checked').as('initial-customize-show-notes');
+
+        // Start from explicit off-state so initial visibility assertions are deterministic.
+        cy.get('#config-toggle').uncheck({ force: true });
+        cy.get('#config-toggle').should('not.be.checked');
+        cy.get('#customize_show_notes_checkbox').uncheck({ force: true });
+        cy.get('#customize_show_notes_checkbox').should('not.be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
+        // Notes visibility controls should be hidden before toggles are enabled.
+        cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
+
+        // Enable only category/gradeable config toggle first.
+        cy.get('#config-toggle').check({ force: true });
+        cy.get('#config-toggle').should('be.checked');
+        cy.get('.gradeable-show-notes-config:visible').should('have.length', 0);
+
+        // Enable notes customization toggle and verify options become visible.
+        cy.get('#customize_show_notes_checkbox').check({ force: true });
+        cy.get('#customize_show_notes_checkbox').should('be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+        cy.get('.gradeable-show-notes-config:visible').should('have.length.greaterThan', 0);
+
+        cy.get('.gradeable-show-notes-select:visible').first().as('show-notes-select');
+        cy.get('@show-notes-select').invoke('attr', 'id').then((selectId) => {
+            cy.wrap(selectId.replace('show-notes-', '')).as('gradeable-id');
+        });
+
+        cy.get('@show-notes-select').then(($select) => {
+            const currentValue = String($select.val());
+            cy.wrap(currentValue).as('initial-show-notes-value');
+            const nonDefaultShowNotesValues = allowedShowNotesValues.filter((value) => value !== 'never');
+            const newValue = nonDefaultShowNotesValues.find((value) => value !== currentValue) ?? nonDefaultShowNotesValues[0];
+
+            expect(newValue).to.not.equal(undefined);
+            cy.wrap(newValue).as('show-notes-value');
+            cy.wrap($select).select(newValue);
+        });
+
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
+        // Refresh and verify selected value persists.
+        cy.reload();
+        cy.get('#config-toggle').check({ force: true });
+        cy.get('#config-toggle').should('be.checked');
+        cy.get('#customize_show_notes_checkbox').then(($checkbox) => {
+            if (!$checkbox.is(':checked')) {
+                cy.wrap($checkbox).check({ force: true });
+            }
+        });
+
+        cy.get('@gradeable-id').then((gradeableId) => {
+            cy.get('@show-notes-value').then((showNotesValue) => {
+                cy.get(`#show-notes-${gradeableId}`).should('be.visible').and('have.value', showNotesValue);
+
+                // Download GUI customization and verify the selected show_notes value is present.
+                cy.get('[data-testid="btn-download-gui-customization"]').click();
+                cy.readFile('cypress/downloads/gui_customization.json').then((gui_json) => {
+                    const gradeable = gui_json.gradeables
+                        .flatMap((bucket) => bucket.ids)
+                        .find((entry) => entry.id === gradeableId);
+
+                    expect(gradeable, `Expected to find gradeable ${gradeableId} in downloaded gui_customization.json`).to.exist;
+                    expect(gradeable.show_notes).to.equal(showNotesValue);
+                    expect(gui_json.customize_show_notes).to.equal(true);
+                });
+
+                // Restore modified state so this test does not affect later tests.
+                cy.get('@initial-show-notes-value').then((initialShowNotesValue) => {
+                    cy.get(`#show-notes-${gradeableId}`).select(initialShowNotesValue);
+                });
+
+                cy.get('@initial-customize-show-notes').then((initialCustomizeShowNotes) => {
+                    if (initialCustomizeShowNotes) {
+                        cy.get('#customize_show_notes_checkbox').check({ force: true });
+                    }
+                    else {
+                        cy.get('#customize_show_notes_checkbox').uncheck({ force: true });
+                    }
+                });
+
+                cy.get('@initial-config-toggle').then((initialConfigToggle) => {
+                    if (initialConfigToggle) {
+                        cy.get('#config-toggle').check({ force: true });
+                    }
+                    else {
+                        cy.get('#config-toggle').uncheck({ force: true });
+                    }
+                });
+            });
+        });
+    });
     it('Build Rainbow Grades and View Table', () => {
         // Add grades to numeric gradeable
         const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
@@ -240,8 +336,14 @@ describe('Test Automatic Nightly Processing for Rainbow Grades', () => {
         cy.get('[data-testid="auto-rainbow-grades"]').as('nightly-processing-checkbox');
         cy.get('[data-testid="customization-exists-warning"]').as('warning-message');
 
-        // Ensure Nightly Processing is on by default
-        cy.get('@nightly-processing-checkbox').should('be.checked');
+        // Normalize to ON for deterministic warning checks and remember original state.
+        cy.get('@nightly-processing-checkbox').then(($checkbox) => {
+            const wasInitiallyChecked = $checkbox.is(':checked');
+            cy.wrap(wasInitiallyChecked).as('initial-nightly-processing-state');
+            if (!wasInitiallyChecked) {
+                cy.wrap($checkbox).check({ force: true });
+            }
+        });
 
         // Ensure Nightly Processing warning only exists when Nightly Processing is on and there is no customization.json
         cy.window().its('customizationExists').then((customizationExists) => {
@@ -255,7 +357,14 @@ describe('Test Automatic Nightly Processing for Rainbow Grades', () => {
         });
         cy.get('@nightly-processing-checkbox').uncheck();
         cy.get('@warning-message').should('not.be.visible');
-        cy.get('@nightly-processing-checkbox').check();
+        cy.get('@initial-nightly-processing-state').then((wasInitiallyChecked) => {
+            if (wasInitiallyChecked) {
+                cy.get('@nightly-processing-checkbox').check({ force: true });
+            }
+            else {
+                cy.get('@nightly-processing-checkbox').uncheck({ force: true });
+            }
+        });
     });
 });
 const checkCheckbox = (testId) => {

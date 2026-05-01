@@ -35,7 +35,79 @@ SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/submi
 
 source "${SUBMITTY_REPOSITORY}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
+# added to preserve designated files
+source <(cat <<'EOF'
+########################################################################################################################
+########################################################################################################################
+# FILE PRESERVATION FUNCTIONS
 
+PRESERVE_LIST_FILE="${SUBMITTY_CONFIG_DIR}/preserve_file_list.json"
+PRESERVE_TMP_DIR="/tmp/submitty_preserve_$$"
+PRESERVE_MANIFEST="${PRESERVE_TMP_DIR}/manifest.txt"
+
+preserve_files_backup() {
+    if [ ! -f "$PRESERVE_LIST_FILE" ]; then
+        return 0
+    fi
+
+    echo -e "Backing up preserved files..."
+
+    mkdir -p "$PRESERVE_TMP_DIR"
+
+    if ! jq empty "$PRESERVE_LIST_FILE" 2>/dev/null; then
+        echo "Warning: preserve_file_list.json is not valid JSON, skipping file preservation"
+        return 0
+    fi
+
+    local file_count=0
+    jq -r '.[]' "$PRESERVE_LIST_FILE" 2>/dev/null | while IFS= read -r filepath; do
+        if [ -f "$filepath" ]; then
+            local file_hash=$(echo -n "$filepath" | md5sum | cut -d' ' -f1)
+            local tmp_path="$PRESERVE_TMP_DIR/$file_hash"
+
+            cp "$filepath" "$tmp_path"
+
+            echo "$tmp_path|$filepath" >> "$PRESERVE_MANIFEST"
+            file_count=$((file_count + 1))
+        fi
+    done
+
+    if [ "$file_count" -gt 0 ]; then
+        echo -e "Backed up $file_count preserved file(s) to $PRESERVE_TMP_DIR"
+    fi
+}
+
+# Function to restore files from backup
+preserve_files_restore() {
+    if [ ! -d "$PRESERVE_TMP_DIR" ] || [ ! -f "$PRESERVE_MANIFEST" ]; then
+        return 0
+    fi
+
+    echo -e "Restoring preserved files..."
+
+    local file_count=0
+    while IFS='|' read -r tmp_path orig_path; do
+        if [ -f "$tmp_path" ]; then
+            mkdir -p "$(dirname "$orig_path")"
+
+            cp "$tmp_path" "$orig_path"
+            file_count=$((file_count + 1))
+        fi
+    done < "$PRESERVE_MANIFEST"
+
+    if [ "$file_count" -gt 0 ]; then
+        echo -e "Restored $file_count preserved file(s)"
+    fi
+
+    rm -rf "$PRESERVE_TMP_DIR"
+}
+
+# ensure cleanup happens even on script failure
+trap preserve_files_restore EXIT
+EOF
+)
+
+preserve_files_backup
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
@@ -245,7 +317,7 @@ mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 cmake ..
 set +e
-make
+cmake --build . --parallel "$(nproc)"
 if [ "$?" -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
@@ -297,72 +369,6 @@ if [ "${IS_WORKER}" == 0 ]; then
         ${copy_cmd[@]} "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_tutorial/"
     fi
 fi
-########################################################################################################################
-########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
-
-if [ -x "$(command -v javac)" ] &&
-   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
-    echo -e "Build the junit test runner"
-
-    # copy the file from the repo
-    rsync -rtz "${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java" "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java"
-
-    pushd "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit" > /dev/null
-    # root will be owner & group of the source file
-    chown  root:root  TestRunner.java
-    # everyone can read this file
-    chmod  444 TestRunner.java
-
-    # compile the executable using the javac we use in the execute.cpp safelist
-    /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
-
-    # everyone can read the compiled file
-    chown root:root TestRunner.class
-    chmod 444 TestRunner.class
-
-    popd > /dev/null
-
-
-    # fix all java_tools permissions
-    chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
-    chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
-else
-    echo -e "Skipping build of the junit test runner"
-fi
-
-
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is initially installed in install_system.sh
-# It is re-installed here (on every Submitty software update) in case of version updates.
-
-pushd /tmp > /dev/null
-
-echo "Updating DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-
-
-echo "...DrMemory ${DRMEMORY_TAG} update complete."
-
-popd > /dev/null
 
 
 ########################################################################################################################
@@ -581,6 +587,9 @@ fi
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
+
+#restore files to be preserved
+preserve_files_restore
 
 ################################################################################################################
 ################################################################################################################
