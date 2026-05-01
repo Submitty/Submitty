@@ -23,7 +23,7 @@
     "browscap/browscap-php": "7.6.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/dbal": "3.8.3",
-    "doctrine/orm": "3.6.2",
+    "doctrine/orm": "3.6.3",
     "egulias/email-validator": "4.0.4",
     "lcobucci/jwt": "5.6.0",
     "league/commonmark": "2.8.2",
