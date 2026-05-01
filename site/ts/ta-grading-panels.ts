@@ -286,19 +286,27 @@ export function updatePanelOptions() {
         ? 'Open as right panel'
         : 'Open as top right panel';
 
-    const newOptions: string[] = [
-        `<option class="panel-position-left" value="leftTop">${leftTopText}</option>`,
+    const makeOption = (cls: string, value: string, text: string): JQuery<HTMLOptionElement> => {
+        return $('<option>')
+            .addClass(cls)
+            .attr('value', value)
+            .text(text) as JQuery<HTMLOptionElement>;
+    };
+
+    const newOptions: JQuery<HTMLOptionElement>[] = [
+        makeOption('panel-position-left', 'leftTop', leftTopText),
     ];
     if (showLeftBottom) {
-        newOptions.push('<option class="panel-position-left" value="leftBottom">Open as bottom left panel</option>');
+        newOptions.push(makeOption('panel-position-left', 'leftBottom', 'Open as bottom left panel'));
     }
-    newOptions.push(`<option class="panel-position-right" value="rightTop">${rightTopText}</option>`);
+    newOptions.push(makeOption('panel-position-right', 'rightTop', rightTopText));
     if (showRightBottom) {
-        newOptions.push('<option class="panel-position-right" value="rightBottom">Open as bottom right panel</option>');
+        newOptions.push(makeOption('panel-position-right', 'rightBottom', 'Open as bottom right panel'));
     }
 
     $('.grade-panel .panel-position-cont')
-        .html(newOptions.join(''))
+        .empty()
+        .append(...newOptions)
         .attr('size', newOptions.length);
 }
 
