@@ -6,6 +6,8 @@
 #late-day-table td {
     text-align: center;
     padding: 5px 10px;
+    display: table-cell;
+    box-sizing: border-box;
 }
 
 #late-day-table td::before {
@@ -34,12 +36,6 @@
     display: table-row;
 }
 
-#late-day-table th,
-#late-day-table td {
-    display: table-cell;
-    box-sizing: border-box;
-}
-
 #late-day-table {
     margin: 1em 0 0;
     border-collapse: separate;
@@ -56,26 +52,6 @@
 #late-day-table tr > th:nth-child(1),
 #late-day-table tr > td:nth-child(1) {
     width: var(--ld-col-1-width);
-}
-
-#late-day-table tr > th:nth-child(2),
-#late-day-table tr > td:nth-child(2) {
-    width: var(--ld-col-2-width);
-}
-
-#late-day-table tr > th:nth-child(3),
-#late-day-table tr > td:nth-child(3) {
-    width: var(--ld-col-3-width);
-}
-
-#late-day-table tr > th:nth-child(4),
-#late-day-table tr > td:nth-child(4) {
-    width: var(--ld-col-4-width);
-}
-
-/* Freeze first four columns only */
-#late-day-table tr > th:nth-child(1),
-#late-day-table tr > td:nth-child(1) {
     position: sticky;
     left: 0;
     z-index: 2;
@@ -83,6 +59,7 @@
 
 #late-day-table tr > th:nth-child(2),
 #late-day-table tr > td:nth-child(2) {
+    width: var(--ld-col-2-width);
     position: sticky;
     left: var(--ld-col-1-width);
     z-index: 2;
@@ -90,6 +67,7 @@
 
 #late-day-table tr > th:nth-child(3),
 #late-day-table tr > td:nth-child(3) {
+    width: var(--ld-col-3-width);
     position: sticky;
     left: calc(var(--ld-col-1-width) + var(--ld-col-2-width));
     z-index: 2;
@@ -97,10 +75,18 @@
 
 #late-day-table tr > th:nth-child(4),
 #late-day-table tr > td:nth-child(4) {
+    width: var(--ld-col-4-width);
     position: sticky;
     left: calc(var(--ld-col-1-width) + var(--ld-col-2-width) + var(--ld-col-3-width));
     z-index: 2;
     border-right: 2px solid var(--standard-medium-gray);
+}
+
+/* Ensure non-frozen columns scroll normally */
+#late-day-table tr > th:nth-child(n + 5),
+#late-day-table tr > td:nth-child(n + 5) {
+    position: static;
+    left: auto;
 }
 
 /* Keep sticky column backgrounds opaque while scrolling */
@@ -115,13 +101,6 @@
 
 #late-day-table tbody tr:nth-child(even) td:nth-child(-n + 4) {
     background: var(--standard-hover-light-gray);
-}
-
-/* Ensure non-frozen columns scroll normally */
-#late-day-table tr > th:nth-child(n + 5),
-#late-day-table tr > td:nth-child(n + 5) {
-    position: static;
-    left: auto;
 }
 
 @media (min-width: 831px) {
