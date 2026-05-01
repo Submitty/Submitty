@@ -294,7 +294,7 @@ class GradeableList extends AbstractModel {
                 ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading())
                 || $gradeable->getType() !== GradeableType::ELECTRONIC_FILE
             )
-            && $gradeable->getGradeStartDate() <= $now
+            && ($gradeable->getGradeStartDate() <= $now || $gradeable->getGradeDueDate() <= $now)
         ) {
             return self::GRADING;
         }
