@@ -1424,6 +1424,8 @@ tr.is_publish {
     height: 100%;
     width: 100%;
     overflow: hidden;
+}
+
 .sticky-file-info {
     position: sticky;
     top: 0;
@@ -1450,6 +1452,7 @@ tr.is_publish {
 }
 
 @media (max-width: 900px) {
+    /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
     #submission_browser.rubric_panel {
         overflow-x: hidden;
     }
