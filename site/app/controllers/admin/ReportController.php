@@ -38,6 +38,7 @@ class ReportController extends AbstractController {
     const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
+    private $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
 
     #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
@@ -197,8 +198,14 @@ class ReportController extends AbstractController {
      *
      * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
      * suggests the reports were manually generated and copied in.
+     * Result is cached to avoid repeated expensive directory walks on every request.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
+        // Return cached result if available
+        if ($this->rg_manual_generation_cache !== null) {
+            return $this->rg_manual_generation_cache;
+        }
+
         $course_path = $this->core->getConfig()->getCoursePath();
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
         $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
@@ -211,6 +218,7 @@ class ReportController extends AbstractController {
         );
 
         if ($latest_individual_html_timestamp === null) {
+            $this->rg_manual_generation_cache = false;
             return false;
         }
 
@@ -222,10 +230,13 @@ class ReportController extends AbstractController {
         );
 
         if ($latest_build_meta_timestamp === null) {
+            $this->rg_manual_generation_cache = true;
             return true;
         }
 
-        return ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $this->rg_manual_generation_cache = $result;
+        return $result;
     }
 
     /**
@@ -233,14 +244,15 @@ class ReportController extends AbstractController {
      *
      * @param string $directory
      * @param callable(string):bool|null $file_filter
-     * @return int|null
+     * @return int|null Returns null if directory doesn't exist or can't be read, otherwise returns latest mtime or 0 if no matching files found.
+     * Catches and logs permission/read errors to distinguish from missing directories.
      */
     private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
         if (!is_dir($directory)) {
             return null;
         }
 
-        $latest_timestamp = null;
+        $latest_timestamp = 0;  // Use 0 as default for "no files found" instead of null
         $flags = \FilesystemIterator::SKIP_DOTS;
 
         try {
@@ -256,16 +268,18 @@ class ReportController extends AbstractController {
                 }
 
                 $file_mtime = $file_info->getMTime();
-                if ($latest_timestamp === null || $file_mtime > $latest_timestamp) {
+                if ($file_mtime > $latest_timestamp) {
                     $latest_timestamp = $file_mtime;
                 }
             }
         }
         catch (\UnexpectedValueException $e) {
+            // Permission denied or unreadable directory—log the error for debugging
+            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
             return null;
         }
 
-        return $latest_timestamp;
+        return $latest_timestamp > 0 ? $latest_timestamp : 0;
     }
 
     /**

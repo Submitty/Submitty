@@ -22,6 +22,7 @@ describe('Test Rainbow Grading', () => {
         });
 
         cy.window().its('rainbowGradesGeneratedManually').then((rainbowGradesGeneratedManually) => {
+            expect(rainbowGradesGeneratedManually).to.be.a('boolean');
             if (rainbowGradesGeneratedManually === true) {
                 cy.get('[data-testid="manual-generation-warning-banner"]').should('be.visible');
             }
