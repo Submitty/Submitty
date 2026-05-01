@@ -420,7 +420,7 @@ div:has(.override)
     background-color: var(--alert-warning-yellow);
     background-image: none;
     background-clip: padding-box;
-    box-shadow: none !important;
+    box-shadow: none;
     filter: none;
     color: var(--standard-gray-black);
 }

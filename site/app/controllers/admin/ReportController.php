@@ -38,7 +38,7 @@ class ReportController extends AbstractController {
     const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
-    private $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
+    private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
 
     #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
