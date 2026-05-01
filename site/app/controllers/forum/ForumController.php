@@ -55,6 +55,10 @@ class ForumController extends AbstractController {
         return $unread_threads;
     }
 
+    private function searchQuery(): string {
+        return $_COOKIE["search_query"] ?? "";
+    }
+
     private function getSavedCategoryIds($currentCourse, $category_ids) {
         if (empty($category_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             $category_ids = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
@@ -152,11 +156,11 @@ class ForumController extends AbstractController {
         if (count($_FILES[$file_post]['tmp_name']) > 5) {
             return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
         }
-        $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
-        if ($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])) {
-            return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
+        $attachment_check = Utils::checkUploadedImageOrPdfFile($file_post) ? 1 : 0;
+        if ($attachment_check === 0 && !empty($_FILES[$file_post]['tmp_name'])) {
+            return $this->returnUserContentToPage("Invalid file type. Please upload only image or PDF files.", $isThread, $thread_id);
         }
-        return [$imageCheck];
+        return [$attachment_check];
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
@@ -492,12 +496,6 @@ class ForumController extends AbstractController {
         return JsonResponse::getSuccessResponse("Announcement successfully queued for sending");
     }
 
-    #[Route("/courses/{_semester}/{_course}/forum/search", methods: ["POST"])]
-    public function search() {
-        $results = $this->core->getQueries()->searchThreads($_POST['search-content']);
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
-    }
-
     #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/new", methods: ["POST"])]
     public function publishPost() {
@@ -586,8 +584,9 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
+                $parent_preview = $this->previewText($parent_post_content, 100);
                 $subject = "New Reply: " . $thread_title;
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . $parent_post_content . "\n\nNew Reply:\n\n" . $post_content;
+                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -620,6 +619,18 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * Returns the full text if short, otherwise a preview capped at $limit characters.
+     * Adds "...(truncated)" when truncated.
+     */
+    private function previewText(string $text, int $limit = 300): string {
+        $text = str_replace("\r", "", $text);
+        if (mb_strlen($text, 'UTF-8') <= $limit) {
+            return $text;
+        }
+        return mb_substr($text, 0, $limit, 'UTF-8') . "...(truncated)";
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]
@@ -1117,13 +1128,24 @@ class ForumController extends AbstractController {
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
+        $search_query = $this->searchQuery();
         $scroll_down = filter_var($_POST['scroll_down'] ?? "true", FILTER_VALIDATE_BOOLEAN);
 
         $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
         $thread_status = $this->getSavedThreadStatus($thread_status);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number, $scroll_down);
+        $threads = $repo->getAllThreads(
+            $categories_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number,
+            $scroll_down
+        );
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1165,12 +1187,22 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $this->core->authorizeWebSocketToken(['page' => 'discussion_forum']);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $current_user,
+            $block_number
+        );
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread, $block_number);
     }
 
@@ -1183,6 +1215,7 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
+        $search_query = $this->searchQuery();
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $option = 'tree';
@@ -1214,7 +1247,16 @@ class ForumController extends AbstractController {
         $merge_thread_options = $repo->getMergeThreadOptions($thread);
 
         $block_number = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $block_number);
+        $threads = $repo->getAllThreads(
+            $category_ids,
+            $search_query,
+            $thread_status,
+            $show_deleted,
+            $show_merged_thread,
+            $unread_threads,
+            $user,
+            $block_number
+        );
         if (!empty($_REQUEST["ajax"])) {
             $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
         }
@@ -1398,6 +1440,57 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $users
+     */
+    private function initializeForumStatsUser(array &$users, string $user): void {
+        if (isset($users[$user])) {
+            return;
+        }
+
+        $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+
+        $given_name = htmlspecialchars($user);
+        $family_name = '';
+
+        if ($user_obj !== null) {
+            $given_name = htmlspecialchars($user_obj->getDisplayedGivenName());
+            $family_name = htmlspecialchars($user_obj->getDisplayedFamilyName());
+        }
+
+        $users[$user] = [
+            "given_name" => $given_name,
+            "family_name" => $family_name,
+            "posts" => [],
+            "id" => [],
+            "timestamps" => [],
+            "thread_id" => [],
+            "thread_title" => [],
+            "total_threads" => 0,
+            "num_deleted_posts" => 0,
+            "total_upducks" => 0,
+        ];
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function getDeletedForumPostCounts(): array {
+        $this->core->getCourseDB()->query("
+            SELECT author_user_id, COUNT(*) AS num_deleted_posts
+            FROM posts
+            WHERE deleted = TRUE
+            GROUP BY author_user_id
+        ");
+
+        $deleted_post_counts = [];
+        foreach ($this->core->getCourseDB()->rows() as $row) {
+            $deleted_post_counts[$row['author_user_id']] = (int) $row['num_deleted_posts'];
+        }
+
+        return $deleted_post_counts;
+    }
+
     // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
@@ -1405,22 +1498,12 @@ class ForumController extends AbstractController {
         $num_posts = count($posts);
         $upducks = $this->core->getQueries()->getUpDucks();
         $num_users_with_upducks = count($upducks);
+        $deleted_post_counts = $this->getDeletedForumPostCounts();
         $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
-            if (!isset($users[$user])) {
-                $users[$user] = [];
-                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
-                $users[$user]["posts"] = [];
-                $users[$user]["id"] = [];
-                $users[$user]["timestamps"] = [];
-                $users[$user]["total_threads"] = 0;
-                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
-                $users[$user]["total_upducks"] = 0;
-            }
+            $this->initializeForumStatsUser($users, $user);
             if ($posts[$i]["parent_id"] == -1) {
                 $users[$user]["total_threads"]++;
             }
@@ -1432,16 +1515,15 @@ class ForumController extends AbstractController {
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
-            // user has only upducks and no posts, need to set some information
-            if (!isset($users[$user])) {
-                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
-                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
-                $users[$user]["total_threads"] = 0;
-            }
+            $this->initializeForumStatsUser($users, $user);
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
+
+        foreach ($deleted_post_counts as $user => $num_deleted_posts) {
+            $this->initializeForumStatsUser($users, $user);
+            $users[$user]["num_deleted_posts"] = $num_deleted_posts;
+        }
+
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }

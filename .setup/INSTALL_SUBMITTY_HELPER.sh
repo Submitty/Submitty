@@ -245,7 +245,7 @@ mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 cmake ..
 set +e
-make
+cmake --build . --parallel "$(nproc)"
 if [ "$?" -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
@@ -330,39 +330,6 @@ if [ -x "$(command -v javac)" ] &&
 else
     echo -e "Skipping build of the junit test runner"
 fi
-
-
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is initially installed in install_system.sh
-# It is re-installed here (on every Submitty software update) in case of version updates.
-
-pushd /tmp > /dev/null
-
-echo "Updating DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-
-
-echo "...DrMemory ${DRMEMORY_TAG} update complete."
-
-popd > /dev/null
 
 
 ########################################################################################################################

@@ -119,7 +119,7 @@
         </div>
         <div id="gradeable-config-structure">
             <p class="config-editor-about">
-                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. 
+                Click on a folder to see its contents. Click on a file to view it in the gradeable editor. You can add or delete individual files and folders as needed. 
                 By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files 
                 within it!</i> This feature is intended for <i>small changes</i> to an existing configuration. For larger changes 
                 to the file structure, consider reuploading the full configuration.
@@ -135,7 +135,7 @@
                             {% set displayFolder = parts|slice(-2)|join('/') %}
                             <a class="key_to_click" tabindex="0">{{ displayFolder }}</a>
                         </div>
-                        {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+                        {{ _self.display_config_files(config_files, gradeable.getId()) }}
                     </div>
                 </div>
                 <div id="gradeable-config-edit-bar">
@@ -294,19 +294,19 @@
     });
 </script>
 
-{# Loop to display root folders, then loop to display root level files #}
-{% macro display_config_files(files, indent, g_id) %}
+{# Print root folders/files. On click (folder): recurse on children to display its contents. On click (file): view in config editor #}
+{% macro display_config_files(files, g_id) %}
     <div class="main-folder-contents">
         {% for name, file in files %}
             {% if file.files is defined %}
                 {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
-                <div style="margin-left:{{ indent * 15 }}px;">
-                    <i class="fas fa-plus file-action-add" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
+                <div class="individual-folder-content" style="margin-left:{{ 15 }}px;">
+                    <i class="fas fa-plus file-action-add" onclick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
                     <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
-                    <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span>
-                    <a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
-                    <div id="{{ id }}" class="config-folder-view">
-                        {{ _self.display_config_files(file.files, indent + 1, g_id) }}
+                    <span id="{{ id }}-icon" class="fas fa-folder config-file-icon"></span>
+                    <a class="key_to_click" tabindex="0" onclick="toggleFolder('{{ id }}')">{{ name }}</a>
+                    <div id="{{ id }}" class="config-folder-view" style="display:none;">
+                        {{ _self.display_config_files(file.files, g_id) }}
                     </div>
                 </div>
             {% endif %}
@@ -315,13 +315,26 @@
             {% if file.files is not defined %}
                 {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
                 {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
-                    <div style="margin-left:{{ indent * 23 }}px; margin-top: 3px;">
-                            <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
+                    <!--Check for common binary types. If missed and the user selects it, 
+                    there is an error message, but this is more graceful-->
+                    {% set ext = file.path|split('.')|last|lower %}
+                    {% set binary_extensions = [
+                        'png','jpg','jpeg','gif','bmp','svg',
+                        'pdf','zip','gz','tar','7z','rar','iso',
+                        'class','o','so','dll','exe','bin','dylib'
+                    ] %}
+                    {% set is_binary = ext in binary_extensions %}
+                    <div style="margin-left:{{ 38 }}px; margin-top: 3px;">
+                        <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
                         <span class="fas fa-file config-file-icon"></span>
+                    {% if is_binary %}
+                        <a class="binary-file-type">{{ name }}</a>
+                    {% else %}
                         <a class="key_to_click" onclick="markLastClicked(this); updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+                    {% endif %}
                     </div>
                 {% else %}
-                    <div style="margin-left:{{ indent * 46 }}px;">
+                    <div style="margin-left:{{ 61 }}px;">
                         <span class="fas fa-file config-file-icon"></span>
                         <a class="key_to_click" onclick="markLastClicked(this); updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
                     </div>

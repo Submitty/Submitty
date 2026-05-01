@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -59,11 +60,13 @@ class HomePageController extends AbstractController {
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
-            foreach (['archived_courses', 'unarchived_courses'] as $var) {
-                $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
-                });
-            }
+            $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
+
+            $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
         }
 
         $self_rejoin_tester = new SelfRejoinController($this->core);
@@ -119,8 +122,8 @@ class HomePageController extends AbstractController {
         $course_title = $_POST['course'];
         foreach ($courses as $course) {
             if ($course->getTitle() === $course_title) {
-                $semester = $course->getTerm();
-                $this->core->loadCourseConfig($semester, $course_title);
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
                 $this->core->loadCourseDatabase();
                 $url = $this->core->buildCourseUrl(['notifications']);
                 $this->core->redirect($url);
@@ -132,7 +135,7 @@ class HomePageController extends AbstractController {
     }
 
     #[Route("/home/mark_seen", methods: ["POST"])]
-    public function markNotificationsAsSeen(): void {
+    public function markNotificationAsSeen(): void {
         $courses = $this->courses;
         $user_id = $this->core->getUser()->getId();
         $original_config = clone $this->core->getConfig();
@@ -140,8 +143,8 @@ class HomePageController extends AbstractController {
         $notification_id = $_POST['notification_id'];
         foreach ($courses as $course) {
             if ($course->getTitle() === $course_title) {
-                $semester = $course->getTerm();
-                $this->core->loadCourseConfig($semester, $course_title);
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
                 $this->core->loadCourseDatabase();
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
                 break;
@@ -151,29 +154,93 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * Returns recent notifications for a user
-     * @return array<int, Notification>
+     * Returns recent all recent notifications for a user,
+     * and the total count of their unseen notifications.
+     * @param int $unseen_count
+     * @return array<Notification>
      */
-    private function getAllRecentNotifications(): array {
+    private function getHomeNotificationData(int &$unseen_count = 0): array {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->courses;
         $results = [];
         $original_config = clone $this->core->getConfig();
 
         foreach ($courses as $course) {
-            $semester = $course->getTerm();
+            $term = $course->getTerm();
             $course_name = $course->getTitle();
-            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseConfig($term, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db));
+            $course_display_name = $course->getDisplayName();
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name));
+            $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
         usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
 
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
+        $unseen_count = $unseen_count;
         return $results;
+    }
+
+    /**
+     * Returns the counts of unseen notifications in each of the user's courses
+     * @return JsonResponse
+     */
+    #[Route("/home/get_unseen_counts", methods: ["GET"])]
+    public function getUnseenNotificationCounts(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $title = $course->getTitle();
+            $this->core->loadCourseConfig($term, $title);
+            $this->core->loadCourseDatabase();
+            $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+            $results[] = [
+                "term" => $term,
+                "title" => $title,
+                "name" => $course->getDisplayName(),
+                "count" => $count,
+            ];
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    /**
+     * Mark notifications from 1 or multiple courses as seen
+     * @return JsonResponse
+     */
+    #[Route("/home/mark_all_seen", methods: ["POST"])]
+    public function markSeen(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $_POST['courses'] ?? [];
+
+        if (!is_array($courses)) {
+            $courses = [];
+        }
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term   = $course["term"];
+            $course = $course["course"];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+            $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse("Marked seen");
     }
 
     /**
@@ -184,7 +251,8 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-        $notifications = $this->getAllRecentNotifications();
+        $unseen_count = 0;
+        $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
             new WebResponse(
@@ -195,7 +263,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
                 $courses["data"]["self_registration_courses"],
-                $notifications
+                $notifications,
+                $unseen_count
             )
         );
     }
@@ -322,7 +391,8 @@ class HomePageController extends AbstractController {
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new MultiResponse(
@@ -346,13 +416,9 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
-        $term_names = $this->core->getSubmittyEntityManager()
-            ->createQueryBuilder()
-            ->select('term.name')
-            ->from(Term::class, 'term')
-            ->orderBy('term.name', 'ASC')
-            ->getQuery()
-            ->getSingleColumnResult();
+        $terms = $this->core->getSubmittyEntityManager()
+            ->getRepository(Term::class)
+            ->findBy([], ['name' => 'DESC']);
 
         return new MultiResponse(
             null,
@@ -361,7 +427,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $term_names,
+                $terms,
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -431,8 +497,8 @@ class HomePageController extends AbstractController {
                 $term = new Term(
                     $term_id,
                     $term_name,
-                    $start_date,
-                    $end_date,
+                    new \DateTime($start_date),
+                    new \DateTime($end_date),
                 );
                 $em->persist($term);
                 $em->flush();

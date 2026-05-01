@@ -46,6 +46,8 @@ aside {
 #bar_wrapper {
     box-sizing: content-box;
     padding: 6px 0;
+    display: flex;
+    align-items: center;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -58,7 +60,7 @@ aside {
 }
 
 .navigation-box {
-    margin: 0 auto;
+    margin: 0 0 0 32px;
     display: flex;
     width: max-content;
     max-width: 100%;
@@ -156,12 +158,16 @@ button > i.fas:hover {
 }
 
 :root {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: black;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px black;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: grey;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px grey;
 }
 
@@ -538,6 +544,7 @@ progress::-webkit-progress-value {
 }
 
 .panel-instructions {
+    /* stylelint-disable-next-line color-named */
     color: dimgray;
     position: absolute;
     top: 50%;
@@ -546,11 +553,11 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
-    position: absolute;
     overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
-    left: 5px;
-    top: 5px;
+    padding: 5px 10px 5px 5px;
+    flex-shrink: 0;
+    max-height: 85px;
 }
 
 #grading-scroll-message {
@@ -809,6 +816,7 @@ progress::-webkit-progress-value {
 }
 
 .file-viewer a:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #6db7ff;
     text-decoration: none;
 }
@@ -1435,6 +1443,19 @@ tr.is_publish {
 #file-content {
     height: 90%;
     width: 100%;
+}
+
+#file-zoom-controls {
+    display: inline-block;
+    margin-left: 24px;
+    position: relative;
+    bottom: 3px;
+}
+
+#file-zoom-controls button {
+    box-shadow: none;
+    border: none;
+    background: none;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */

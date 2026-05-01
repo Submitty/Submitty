@@ -222,9 +222,9 @@ function build_homework {
         return 1
     fi
 
-    # build (in parallel, 8 threads)
+    # build (in parallel)
     # quit (don't continue on to build other homeworks) if there is a compile error
-    make -j 8
+    cmake --build . --parallel "$(nproc)"
 
     # capture exit code of make
     make_res="$?"

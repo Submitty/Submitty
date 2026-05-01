@@ -4,6 +4,9 @@ on:
     types:
       - review_requested
 
+permissions:
+  contents: read
+
 env:
   PR_ID: ${{ github.event.pull_request.number }}
 
@@ -14,7 +17,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
@@ -28,7 +31,7 @@ jobs:
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Move PR to In Review
         if: ${{ ! github.event.pull_request.draft }}

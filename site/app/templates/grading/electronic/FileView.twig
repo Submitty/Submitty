@@ -9,6 +9,17 @@
                     class="key_to_click"
                     tabindex="0"
                 ><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
+                {% if panel == "submission" %}
+				<div id="file-zoom-controls">
+					<button onclick="triggerPDFScale(-.10)" aria-label="Zoom Out">
+						<i class="fas fa-magnifying-glass-minus"></i>
+					</button>
+					<span id="file-zoom-display">xx%</span>
+					<button onclick="triggerPDFScale(+.10)" aria-label="Zoom In">
+						<i class="fas fa-magnifying-glass-plus"></i>
+					</button>
+				</div>
+                {% endif %}
             </span>
             <strong id="{{ save_status_id|default('save_status') }}">No changes</strong>
         </div>

@@ -6,6 +6,9 @@ on:
       - converted_to_draft
       - ready_for_review
 
+permissions:
+  contents: read
+
 env:
   PR_ID: ${{ github.event.pull_request.number }}
 
@@ -16,7 +19,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
@@ -30,7 +33,7 @@ jobs:
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Move draft to Work in Progress
         if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}

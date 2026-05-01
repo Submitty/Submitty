@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   PGPASSWORD: submitty_dbuser
   PHP_USER: submitty_php
@@ -16,7 +19,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 8.1
+  PHP_VER: 8.2
   NODE_VERSION: 20
   PYTHON_VERSION: "3.10"
 
@@ -31,7 +34,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
@@ -45,12 +48,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -70,12 +73,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -83,7 +86,7 @@ jobs:
                 ${{ runner.os }}-cache-node-modules-
       - run: npm ci
       - name: Run eslint
-        run: npm run eslint
+        run: npm run eslint -- --max-warnings=0
       - name: Run npm build (tsc and esbuild)
         run: npm run build
 
@@ -95,12 +98,12 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -123,15 +126,15 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -150,15 +153,15 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -186,8 +189,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@2.35.5
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -196,7 +199,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -219,12 +222,12 @@ jobs:
     name: Python Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -241,12 +244,12 @@ jobs:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -326,7 +329,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -337,7 +340,7 @@ jobs:
     name: Shell Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -350,13 +353,13 @@ jobs:
 
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: main
           path: MAIN
 
       - name: Checkout PR branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: PR
 
@@ -433,7 +436,7 @@ jobs:
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: branch/GIT_CHECKOUT/Submitty
           fetch-depth: 0
@@ -444,7 +447,7 @@ jobs:
                        -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
 
       - name: Checkout main Branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.MBASE || 'main' }}
           path: main/GIT_CHECKOUT/Submitty
@@ -635,7 +638,7 @@ jobs:
 
       - name: Pack Artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dumped_database
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql
@@ -663,11 +666,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -683,7 +686,7 @@ jobs:
         run: sudo sed -ie "s/Database/Pam/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run accessibility test
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/accessibility.spec.js
@@ -702,7 +705,7 @@ jobs:
           sudo systemctl stop submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
@@ -715,7 +718,7 @@ jobs:
           sudo systemctl restart submitty_autograding_shipper
 
       - name: Run autograding status test
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
@@ -728,7 +731,7 @@ jobs:
           sudo systemctl restart submitty_autograding_worker
 
       - name: Run cypress e2e login tests with PAM auth
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
           spec: cypress/e2e/Cypress-System/login.spec.js
@@ -739,7 +742,7 @@ jobs:
         run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with database auth
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/login.spec.js
@@ -747,7 +750,7 @@ jobs:
           browser: chrome
 
       - name: Run self-account-creation tests.
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
@@ -758,7 +761,7 @@ jobs:
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with LDAP auth
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-System/login.spec.js
@@ -774,7 +777,7 @@ jobs:
         run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
       - name: Run cypress e2e login tests with SAML auth
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost,chromeWebSecurity=false
           spec: cypress/e2e/Cypress-System/login.spec.js
@@ -801,19 +804,19 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Submitty-JSON
           path: /usr/local/submitty/config/submitty.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-System-Videos
@@ -847,7 +850,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # If the matrix is currently on Development or Tutorial,
       # we should use the respective courses
@@ -866,7 +869,7 @@ jobs:
 
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -879,7 +882,7 @@ jobs:
           npm ci
 
       - name: Run cypress e2e tests with pam auth
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
@@ -891,17 +894,23 @@ jobs:
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
         run: sudo bash tests/test_site_error_log.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
-      - uses: actions/upload-artifact@v4
+
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Downloads
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/downloads
 
   Integration:
     name: Integration
@@ -927,7 +936,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
@@ -936,7 +945,7 @@ jobs:
     name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup SSH
         shell: bash
         run: |
@@ -945,6 +954,13 @@ jobs:
           cat /home/runner/.ssh/id_rsa.pub >> /home/runner/.ssh/authorized_keys
           ssh -T localhost
           sudo systemctl start postgresql
+
+      - name: Delete unused folders
+        run: |
+          rm -rf /opt/hostedtoolcache
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf "$AGENT_TOOLSDIRECTORY"
 
       - name: Run ansible script
         shell: bash
@@ -959,11 +975,11 @@ jobs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -980,26 +996,26 @@ jobs:
           curl --show-error --fail --include http://localhost/authentication/login
 
       - name: Run Ansible cypress test
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           config: baseUrl=http://localhost
           spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: install-log
           path: /usr/local/submitty/install.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-Ansible-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-Ansible-Videos

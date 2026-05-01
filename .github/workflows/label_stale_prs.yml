@@ -3,6 +3,10 @@ name: Label Stale PRs
 on:
   schedule:
     - cron: '0 0 * * *'  # runs every day at midnight
+
+permissions:
+  contents: read
+
 jobs:
   autoClosePr:
     name: auto close pr
@@ -12,7 +16,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Check-out main repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Label Stale/Abandoned
         run: python .github/bin/label_abandoned_prs.py
         env:

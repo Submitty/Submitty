@@ -156,6 +156,8 @@ export default tseslint.config(
             'vue/require-typed-object-prop': ['error'],
             'vue/require-typed-ref': ['error'],
             'vue/valid-define-options': ['error'],
+            'vue/html-indent': ['error', 2],
+            'vue/attribute-hyphenation': ['error', 'always'],
         },
     },
     {

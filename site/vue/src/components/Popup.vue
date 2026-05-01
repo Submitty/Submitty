@@ -112,10 +112,7 @@ watch(
 
 <style>
 h1 {
+  /* stylelint-disable-next-line declaration-no-important */
   margin-bottom: 0 !important;
-}
-
-.popup-window {
-  gap: 0.25em;
 }
 </style>
