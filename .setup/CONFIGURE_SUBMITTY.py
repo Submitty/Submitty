@@ -660,10 +660,10 @@ user_id_requirements = {
 password_requirements = {
     "min_length": 12,
     "max_length": 72,
-    "require_uppercase": True,
-    "require_lowercase": True,
-    "require_numbers": True,
-    "require_special_chars": True
+    "require_uppercase": False,
+    "require_lowercase": False,
+    "require_numbers": False,
+    "require_special_chars": False
 }
 
 
