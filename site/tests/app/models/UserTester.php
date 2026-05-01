@@ -305,6 +305,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             ['registration_section', null, true],
             ['registration_section', 'test', true],
             ['registration_section', '1', true],
+            ['registration_section', '01', true],
+            ['registration_section', '001', true],
             ['registration_section', 'section-1', true],
             ['registration_section', 'section 1', false],
             ['registration_section', 'Section_1-2', true],

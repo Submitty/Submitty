@@ -185,15 +185,15 @@ const buildCourseUrl = (course: Course) => {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-auto-rows: auto;
     align-items: start;
-    grid-gap: 30px;
+    gap: 30px;
 }
 
 @media (max-width: 540px) {
     .home-content {
-        padding: 0px
+        padding: 0
     }
     .grid-container {
-        grid-gap: 15px;
+        gap: 15px;
     }
 }
 
@@ -204,6 +204,7 @@ const buildCourseUrl = (course: Course) => {
 }
 
 .courses-header {
+    /* stylelint-disable-next-line declaration-no-important */
     margin-bottom: 5px !important; /* Override submitty-vue.css */
     flex-grow: 1;
 }
