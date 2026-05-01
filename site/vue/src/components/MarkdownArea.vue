@@ -14,13 +14,7 @@ interface JQueryLike {
     parent: () => JQueryLike;
 }
 
-interface WindowWithJQuery extends Window {
-    $: ((element: unknown) => JQueryLike) & {
-        fn: {
-            autocomplete?: unknown;
-        };
-    };
-}
+type WindowWithJQuery = Window & { $?: any };
 
 interface Props {
     markdownAreaId: string;
@@ -186,7 +180,7 @@ function handleKeyup(event: Event) {
         const isAttachedToHash = /#\d*$/.test(text);
 
         if (e.key === '#' || (isAttachedToHash && (isTypingNumber || isHittingBackspace))) {
-            jq(textarea).autocomplete('search', '');
+            (jq(textarea) as any).autocomplete('search', '');
         }
         else if (e.key === ' ' || e.key === 'Escape' || !isAttachedToHash) {
             jq(textarea).autocomplete('close');
