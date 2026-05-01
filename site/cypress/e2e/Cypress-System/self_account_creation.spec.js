@@ -16,6 +16,35 @@ function inputData(email = valid_email, user_id = valid_user_id, password = vali
 }
 
 describe('Self account creation tests', () => {
+    it('Test client-side validation preserves form fields', () => {
+        cy.visit();
+        cy.get('[data-testid="new-account-button"]').click();
+
+        // Fill with invalid email (not accepted domain)
+        cy.get('[data-testid="email"]').clear();
+        cy.get('[data-testid="email"]').type('test@gmail.com');
+        cy.get('[data-testid="user-id"]').clear();
+        cy.get('[data-testid="user-id"]').type('testuser');
+        cy.get('[data-testid="given-name"]').clear();
+        cy.get('[data-testid="given-name"]').type(valid_given_name);
+        cy.get('[data-testid="family-name"]').clear();
+        cy.get('[data-testid="family-name"]').type(valid_family_name);
+        cy.get('[data-testid="password"]').clear();
+        cy.get('[data-testid="password"]').type(valid_password);
+        cy.get('[data-testid="confirm-password"]').clear();
+        cy.get('[data-testid="confirm-password"]').type(valid_password);
+
+        // Click sign up - should trigger client-side validation, NOT submit
+        cy.get('[data-testid="sign-up-button"]').click();
+
+        // Error should show (client-side validation, no server round-trip)
+        cy.get('[data-testid="popup-message"]').contains('email').should('exist');
+
+        // KEY TEST: Fields should still be filled (not cleared by server redirect)
+        cy.get('[data-testid="email"]').should('not.have.value', '');
+        cy.get('[data-testid="user-id"]').should('not.have.value', '');
+    });
+
     it('Test all paths of account creation', () => {
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
