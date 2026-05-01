@@ -43,7 +43,7 @@ describe('Tests cases for the Student API', () => {
             // Success
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values?user_id=student`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -134,18 +134,6 @@ describe('Tests cases for the Student API', () => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Unauthenticated access. Please log in.');
             });
-            // Fail, API key not for given user_id
-            cy.request({
-                method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/subdirectory_vcs_homework/values?user_id=not_a_student`,
-                headers: {
-                    Authorization: key,
-                }, body: {
-                },
-            }).then((response) => {
-                expect(response.body.status).to.equal('fail');
-                expect(response.body.message).to.equal('API key and specified user_id are not for the same user.');
-            });
             // Fail, endpoint not found.
             cy.request({
                 method: 'GET',
@@ -162,7 +150,7 @@ describe('Tests cases for the Student API', () => {
             // Gradeable doesn't exist
             cy.request({
                 method: 'GET',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/values?user_id=student`,
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeable/not_found_gradeable/values`,
                 headers: {
                     Authorization: key,
                 }, body: {
@@ -170,6 +158,62 @@ describe('Tests cases for the Student API', () => {
             }).then((response) => {
                 expect(response.body.status).to.equal('fail');
                 expect(response.body.message).to.equal('Gradeable does not exist');
+            });
+
+            // Lists gradeables
+            cy.request({
+                method: 'GET',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/gradeables`,
+                headers: {
+                    Authorization: key,
+                }, body: {
+                },
+            }).then((response) => {
+                expect(response.body.status).to.equal('success');
+                const data = response.body.data;
+                // VCS Subdirectory homework
+                expect(data.subdirectory_vcs_homework.id).equal('subdirectory_vcs_homework');
+                expect(data.subdirectory_vcs_homework.title).equal('Subdirectory VCS Homework');
+                expect(data.subdirectory_vcs_homework.instructions_url).equal('');
+                expect(data.subdirectory_vcs_homework.syllabus_bucket).equal('homework');
+                expect(data.subdirectory_vcs_homework.section).equal(2);
+                expect(data.subdirectory_vcs_homework.section_name).equal('OPEN');
+                expect(data.subdirectory_vcs_homework.due_date.date).equal('9996-12-31 23:59:59.000000');
+                expect(data.subdirectory_vcs_homework.due_date.timezone_type).equal(3);
+                expect(data.subdirectory_vcs_homework.due_date.timezone).equal('America/New_York');
+                expect(data.subdirectory_vcs_homework.gradeable_type).equal('Electronic File');
+                expect(data.subdirectory_vcs_homework.vcs_repository).equal(`http://localhost/git/${getCurrentSemester()}/sample/subdirectory_vcs_homework/student`);
+                expect(data.subdirectory_vcs_homework.vcs_subdirectory).equal('src');
+
+                // Open homework
+                expect(data.open_homework.id).equal('open_homework');
+                expect(data.open_homework.title).equal('Open Homework');
+                expect(data.open_homework.instructions_url).equal('');
+                expect(data.open_homework.syllabus_bucket).equal('homework');
+                expect(data.open_homework.section).equal(2);
+                expect(data.open_homework.section_name).equal('OPEN');
+                expect(data.open_homework.due_date.date).equal('9996-12-31 23:59:59.000000');
+                expect(data.open_homework.due_date.timezone_type).equal(3);
+                expect(data.open_homework.due_date.timezone).equal('America/New_York');
+                expect(data.open_homework.gradeable_type).equal('Electronic File');
+                expect(data.open_homework.vcs_repository).equal('');
+                expect(data.open_homework.vcs_subdirectory).equal('');
+            });
+
+            // Test /api/me
+            cy.request({
+                method: 'GET',
+                url: `${Cypress.config('baseUrl')}/api/me`,
+                headers: {
+                    Authorization: key,
+                }, body: {
+                },
+            }).then((response) => {
+                expect(response.body.status).to.equal('success');
+                const data = response.body.data;
+                expect(data.user_id).to.equal('student');
+                expect(data.user_given_name).to.equal('Joe');
+                expect(data.user_family_name).to.equal('Student');
             });
         });
     });
