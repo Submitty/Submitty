@@ -9,7 +9,6 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .forum_content {
     flex-grow: 1;
-    padding: 0;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -440,9 +439,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 36px;
-    margin-left: 15px;
-    margin-right: 15px;
     min-height: 30px;
     gap: 0.5rem;
 }
