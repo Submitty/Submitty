@@ -500,7 +500,7 @@ class Gradeable extends AbstractModel {
             }
             return null;
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
@@ -521,7 +521,7 @@ class Gradeable extends AbstractModel {
                     $time_zone = is_null($user) ? $this->core->getConfig()->getTimezone() : $user->getUsableTimeZone();
                     $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $time_zone);
                 }
-                catch (\Exception $e) {
+                catch (\Throwable $e) {
                     $parsedDates[$date] = null;
                 }
             }
@@ -537,11 +537,11 @@ class Gradeable extends AbstractModel {
     public function setRandomPeerGradersList(&$input) {
         $bad_rows = [];
         foreach ($input as $grader => $grading_list) {
-            if ($this->core->getQueries()->getUserById($grading_list[0]) == null) {
+            if ($this->core->getQueries()->getUserById($grading_list[0]) === null) {
                 array_push($bad_rows, ($grading_list[0]));
             }
         }
-        if (count($input) == 0) {
+        if (count($input) === 0) {
             $this->core->addErrorMessage("Changes Failed, Not Enough Submissions");
             return;
         }
@@ -648,16 +648,16 @@ class Gradeable extends AbstractModel {
     public function getPeerFeedback($grader_id, $anon_id) {
         $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $this->getId());
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
-        if ($feedback == 'thanks') {
+        if ($feedback === 'thanks') {
             return 'Thank you!';
         }
-        elseif ($feedback == 'helpful') {
+        elseif ($feedback === 'helpful') {
             return 'This feedback was helpful to me!';
         }
-        elseif ($feedback == 'detailed') {
+        elseif ($feedback === 'detailed') {
             return 'This feedback was detailed, specific, and/or technical';
         }
-        elseif ($feedback == 'inappropriate') {
+        elseif ($feedback === 'inappropriate') {
             return 'This feedback was inaccurate and/or inappropriate';
         }
         return 'No response';
@@ -899,7 +899,7 @@ class Gradeable extends AbstractModel {
         $date_strings = [];
         $now = $this->core->getDateTimeNow();
         foreach (self::date_properties as $property) {
-            if ($this->$property == null) {
+            if ($this->$property === null) {
                 $date_strings[$property] = null;
             }
             else {
@@ -1122,10 +1122,7 @@ class Gradeable extends AbstractModel {
      * @return boolean
      */
     public function isGradeByRegistration() {
-        if ($this->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
-            return true;
-        }
-        return false;
+        return $this->getGraderAssignmentMethod() === Gradeable::REGISTRATION_SECTION;
     }
 
     /**
@@ -1405,11 +1402,7 @@ class Gradeable extends AbstractModel {
             $instructor_check = $instructor_check || $owner_readable;
         }
 
-        if ($instructor_check && $submitty_daemon_check) {
-            return true;
-        }
-
-        return false;
+        return $instructor_check && $submitty_daemon_check;
     }
 
     /**
@@ -1791,14 +1784,16 @@ class Gradeable extends AbstractModel {
         });
     }
 
-    /**
-     * Gets the percent of grading complete for the provided user for this gradeable
-     * @param User $grader
-     * @param bool $include_null_section
-     * @param bool $include_bad_submissions
-     * @return float The percentage (0 to 1) of grading completed or NAN if none required
-     */
-    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section, bool $include_withdrawn_students) {
+     /**
+      * Gets the percent of grading complete for the provided user for this gradeable
+      * @param User $grader
+      * @param bool $include_bad_submissions
+      * @param bool $include_null_section
+      * @param bool $include_withdrawn_students
+      * @param bool $include_grade_override
+      * @return float The percentage (0 to 1) of grading completed or NAN if none required
+      */
+    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section, bool $include_withdrawn_students, bool $include_grade_override = true) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
@@ -1830,14 +1825,14 @@ class Gradeable extends AbstractModel {
         if (count($sections) > 0) {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
-                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students, $include_grade_override);
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key, $include_withdrawn_students);
-                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students, $include_grade_override);
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key, $include_withdrawn_students);
                 $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment(), $include_withdrawn_students);
@@ -2143,20 +2138,14 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryOpen() {
-        if (($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->grade_inquiry_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
-            return true;
-        }
-        return false;
+        return ($this->isTaGradeReleased() || !$this->hasReleaseDate()) && $this->grade_inquiry_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow());
     }
     /**
      * return true if the grade-inquiry is about to start for the students, false otherwise
      * @return bool
      */
     public function isGradeInquiryYetToStart() {
-        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
-            return true;
-        }
-        return false;
+        return $this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow();
     }
 
     /**
@@ -2164,10 +2153,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquiryEnded() {
-        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
-            return true;
-        }
-        return false;
+        return $this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow();
     }
 
     /**
@@ -2307,10 +2293,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasOverriddenGrades(Submitter $submitter) {
         $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $submitter->getId());
-        if ($userWithOverriddenGrades === null) {
-            return false;
-        }
-        return true;
+        return $userWithOverriddenGrades !== null;
     }
 
     /**
@@ -2328,7 +2311,7 @@ class Gradeable extends AbstractModel {
         //Remove incomplete gradeables for non-instructors
         if (
             !$user->accessAdmin()
-            && $this->getType() == GradeableType::ELECTRONIC_FILE
+            && $this->getType() === GradeableType::ELECTRONIC_FILE
             && !$this->hasAutogradingConfig()
         ) {
             return false;
@@ -2371,11 +2354,7 @@ class Gradeable extends AbstractModel {
         }
 
         // If the gradeable is open to ta beta testing, it should only be visible to graders
-        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() <= $date && !$user->accessGrading()) {
-            return false;
-        }
-
-        return true;
+        return $this->getType() === GradeableType::ELECTRONIC_FILE || $this->getTaViewStartDate() > $date || $user->accessGrading();
     }
 
     /*
@@ -2473,9 +2452,9 @@ class Gradeable extends AbstractModel {
     public function isLocked(string $user_id): bool {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
-            if ($dependent_gradeable != null) {
+            if ($dependent_gradeable !== null) {
                 $dependent_gradeable_graded = $this->core->getQueries()->getGradedGradeable($dependent_gradeable, $user_id);
-                if ($dependent_gradeable_graded != null) {
+                if ($dependent_gradeable_graded !== null) {
                     if ($dependent_gradeable_graded->hasSubmission()) {
                         if ($dependent_gradeable_graded->getAutoGradingScore() >= $this->depends_on_points) {
                             return false;

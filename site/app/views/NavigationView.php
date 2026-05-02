@@ -691,8 +691,9 @@ class NavigationView extends AbstractView {
                 $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
                 $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
                 $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
+                $include_grade_override = ($_COOKIE["include_grade_override"] ?? 'omit') === "include";
 
-                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students);
+                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students, $include_grade_override);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -744,8 +745,9 @@ class NavigationView extends AbstractView {
                     $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
                     $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
                     $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
+                    $include_grade_override = ($_COOKIE["include_grade_override"] ?? 'omit') === "include";
 
-                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students);
+                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students, $include_grade_override);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE
