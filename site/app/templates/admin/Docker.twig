@@ -134,7 +134,7 @@
                 <td>{{ image.created_timestamp }}</td>
                 <td>
                     {% for capability in image.capabilities %}
-                        <span class="badge badge-{{ capability_to_color_mapping[capability] % 8 + 1 }}">{{capability}}</span>
+                        <span class="badge badge-{{ capability_to_color_mapping[capability]}}">{{capability}}</span>
                     {% endfor %}
                 </td>
                 <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>

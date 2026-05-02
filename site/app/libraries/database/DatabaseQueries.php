@@ -3269,6 +3269,19 @@ ORDER BY user_id ASC"
     public function insertNewRegistrationSection($section) {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
+        // Prevent numerically-equivalent sections from both being inserted (e.g. '01' vs '1').
+        if (is_numeric($section)) {
+            $numeric_val = (string) (int) $section;
+            $this->submitty_db->query(
+                "SELECT registration_section_id FROM courses_registration_sections
+                 WHERE term=? AND course=? AND registration_section_id != ?
+                 AND registration_section_id ~ ('^0*' || ? || '$')",
+                [$semester, $course, $section, $numeric_val]
+            );
+            if (count($this->submitty_db->rows()) > 0) {
+                return 0; // treat as duplicate - controller will show friendly error
+            }
+        }
         $this->submitty_db->query("INSERT INTO courses_registration_sections (term, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
         return $this->submitty_db->getrowcount();
     }
