@@ -5,9 +5,14 @@ Deletes old entries from the active_graders table in all course databases.
 This script is intended to be run periodically (e.g. by cron) to cleanup stale locks.
 """
 
-import database_queries
-from sqlalchemy import create_engine, text
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+
+import database_queries  # noqa: E402
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def main():
@@ -16,7 +21,7 @@ def main():
     # 1. Connect to Master DB to get list of courses
     try:
         master_conn, _ = database_queries.setup_db()
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Error connecting to master database: {e}")
         return
 
@@ -25,7 +30,7 @@ def main():
     try:
         query = text("SELECT term, course FROM courses WHERE status=1")
         result = master_conn.execute(query)
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Error fetching courses: {e}")
         return
 
@@ -71,7 +76,7 @@ def main():
             course_conn.close()
             count += 1
 
-        except Exception as e:
+        except SQLAlchemyError as e:
             print(f"Failed to cleanup {db_name}: {e}")
 
     print(f"Finished active_graders cleanup. Processed {count} courses.")
