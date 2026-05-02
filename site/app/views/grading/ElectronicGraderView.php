@@ -232,7 +232,7 @@ class ElectronicGraderView extends AbstractView {
                 $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
-                if ($section['total_components'] == 0) {
+                if ($section['total_components'] === 0) {
                     $section['percentage'] = 0;
                     $section['verified_percentage'] = 0;
                 }
@@ -1508,7 +1508,17 @@ HTML;
                             $skipping = true;
                         }
                     }
-                    if (!$skipping) {
+                    if (
+                        !$skipping
+                        && !(
+                            $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER
+                            && (
+                                $graded_gradeable->getGradeable()->isPdfUpload()
+                                || $graded_gradeable->getGradeable()->getLimitedAccessBlind() === 2
+                            )
+                            && $file["name"] === "upload.pdf"
+                        )
+                    ) {
                         if ($start_dir_name == "submissions") {
                             $file["path"] = $this->setAnonPath($file["path"], $graded_gradeable->getGradeableId());
                         }
@@ -1542,6 +1552,9 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
+            $gradeable = $graded_gradeable->getGradeable();
+            $user = $this->core->getUser();
+
             $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
@@ -1562,6 +1575,7 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $submitter_id,
@@ -1579,7 +1593,7 @@ HTML;
             "anon_mode" => $anon_mode,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $uas
+            "user_assignment_settings_path" => $uas,
         ]);
     }
 

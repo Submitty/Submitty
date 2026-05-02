@@ -65,3 +65,119 @@ describe('Test cases revolving around bulk uploading', () => {
         });
     });
 });
+describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
+    it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
+        // Instructor uploads exam
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
+
+        cy.get('[data-testid="radio-student-upload"]').click();
+        cy.get('[data-testid="submit-student-userid"]').type('adamsg');
+        cy.get('#submission-mode-warning > .warning').should('contain', 'Submitting files for a student');
+
+        cy.get('[data-testid="select-files"]').selectFile('cypress/fixtures/bulk_upload.pdf', { force: true });
+        cy.get('[data-testid="submit-gradeable"]').click();
+
+        cy.get('[data-testid="assign-box"]', { timeout: 10000 }).should('exist');
+
+        // Enable blind grading for mentors
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+
+        cy.contains('Grader Assignment').click();
+
+        cy.get('#all_access').click();
+        cy.get('#all_access').should('be.checked');
+        cy.get('#unblind_limited_access_grading').click();
+        cy.get('#unblind_limited_access_grading').should('be.checked');
+
+        cy.get('#blind_limited_access_grading').click();
+        cy.get('#blind_limited_access_grading').should('be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
+        cy.logout();
+
+        // Mentor checks submissions
+        cy.login('grader');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details'], { timeout: 10000 });
+
+        cy.get('[data-testid="agree-popup-btn"]').scrollIntoView();
+        cy.get('[data-testid="agree-popup-btn"]').click();
+
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="grade-table"]')
+            .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
+            .click();
+
+        cy.get('[data-testid="show-submission"]').click();
+        cy.get('#submissions').click();
+
+        cy.contains('upload.pdf').should('not.exist');
+
+        cy.logout();
+
+        // Enable page assignments
+        cy.login('instructor');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+        cy.get('body').should('not.contain', 'Login');
+        cy.contains('Rubric').click();
+
+        cy.get('#yes_pdf_page').click();
+        cy.get('#yes_pdf_page').should('be.checked');
+
+        cy.logout();
+
+        // Mentor checks again
+        cy.login('grader');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('body').should('not.contain', 'Login');
+
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="grade-table"]')
+            .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
+            .click();
+
+        cy.get('#submissions').click();
+        cy.contains('upload.pdf').should('not.exist');
+        cy.logout();
+
+        // Disable both conditions
+        cy.login('instructor');
+
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+
+        cy.contains('Grader Assignment').click();
+
+        cy.get('#blind_limited_access_grading').click();
+        cy.get('#blind_limited_access_grading').should('be.checked');
+        cy.get('#unblind_limited_access_grading').click();
+        cy.get('#unblind_limited_access_grading').should('be.checked');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
+
+        cy.contains('Rubric').click();
+        cy.get('#no_pdf_page').click();
+        cy.get('#no_pdf_page').should('be.checked');
+        cy.logout();
+
+        // Mentor now sees upload.pdf
+        cy.login('grader');
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
+        cy.get('body').should('not.contain', 'Login');
+
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+
+        cy.get('[data-testid="grade-table"]')
+            .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
+            .click();
+
+        cy.get('#submissions').click();
+        cy.contains('upload.pdf').should('exist');
+    });
+});
