@@ -568,6 +568,7 @@ if not args.worker:
             json.dump(worker_dict, workers_file, indent=4)
 
     if not os.path.isfile(CONTAINERS_JSON):
+        # Update site/cypress/e2e/Cypress-UI/docker_ui.spec.js with changes to default containers
         container_dict = {
             "default":  [
                           "submitty/autograding-default:latest",
