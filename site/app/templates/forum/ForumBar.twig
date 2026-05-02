@@ -89,8 +89,6 @@
 				</div>
 			</div>
 			{% endif %}
-		</div>
-		<div>
 			{% for button in forum_bar_buttons_right %}
 				{% if user_group <= button.required_rank %}
 					{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
@@ -106,6 +104,7 @@
 					{% endif %}
 				{% endif %}
 			{% endfor %}
+			{% include "misc/FullScreenButton.twig" with { "classes": "toolbar-right-btn" } %}
 		</div>
 	</div>
 

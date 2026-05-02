@@ -3,7 +3,10 @@
     <div class="chatroom-container">
         <div class="chatroom-header">
             <span class="chatroom-title" data-testid="chat-title" title="{{ chatroom.getTitle() }}"> {{ chatroom.getTitle() | length > 40 ? chatroom.getTitle() | slice(0, 40) ~ '...' : chatroom.getTitle() }} </span>
-            <a href="{{ base_url }}" class="leave-room btn btn-danger" data-testid="leave-chat">Leave</a>
+            <div class="chatroom-header-buttons">
+                {% include "misc/FullScreenButton.twig" %}
+                <a href="{{ base_url }}" class="leave-room btn btn-danger" data-testid="leave-chat">Leave</a>
+            </div>
         </div>
         <div class="chatroom-content">
             <div class="messages-area"></div>
