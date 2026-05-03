@@ -487,14 +487,17 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson('f19', 'sample', $this->course_config);
         $core->setConfig($config);
 
-        $instructor = $this->createMock(User::class);
-        $instructor->method('getId')->willReturn('instructor');
+        $instructor = new User($core);
+        $instructor->setId('instructor');
         $core->setUser($instructor);
 
         $_POST['name'] = 'course_repo_url';
         $_POST['entry'] = 'https://example.com/course.git';
         $controller = new ConfigurationController($core);
         $controller->updateConfiguration();
+        $_POST = [];
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $controller = new ConfigurationController($core);
 
         $response = $controller->pullCourseRepository();
         $this->assertEquals('success', $response->json['status']);
@@ -517,8 +520,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $config->loadMasterConfigs($this->master_configs_dir);
         $config->loadCourseJson('f19', 'sample', $this->course_config);
         $core->setConfig($config);
-        $instructor = $this->createMock(User::class);
-        $instructor->method('getId')->willReturn('instructor');
+        $instructor = new User($core);
+        $instructor->setId('instructor');
         $core->setUser($instructor);
 
         $controller = new ConfigurationController($core);
@@ -619,14 +622,17 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseJson('f19', 'sample', $this->course_config);
         $core->setConfig($config);
 
-        $instructor = $this->createMock(User::class);
-        $instructor->method('getId')->willReturn('instructor');
+        $instructor = new User($core);
+        $instructor->setId('instructor');
         $core->setUser($instructor);
 
         $_POST['name'] = 'course_repo_url';
         $_POST['entry'] = 'https://example.com/course.git';
         $controller = new ConfigurationController($core);
         $controller->updateConfiguration();
+        $_POST = [];
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $controller = new ConfigurationController($core);
 
         $processing_file = FileUtils::joinPaths(
             $this->test_dir,
