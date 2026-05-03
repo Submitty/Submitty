@@ -969,6 +969,19 @@ jobs:
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
 
+      - name: Debug install failure context
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== install.log (tail) ==="
+          sudo tail -n 200 /usr/local/submitty/install.log || true
+          echo "=== PHP CLI version ==="
+          php -v || true
+          echo "=== /etc/php versions ==="
+          ls -la /etc/php || true
+          echo "=== PHP packages ==="
+          dpkg -l | grep -E '^ii\s+php' || true
+
       - name: Set perms
         shell: bash
         run: |
