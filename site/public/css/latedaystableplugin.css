@@ -30,3 +30,11 @@
         content: none !important;
     }
 }
+
+.late-days-remaining {
+    margin-top: 0.5rem;
+}
+
+.late-days-description {
+    margin: 0.5rem 0;
+}
