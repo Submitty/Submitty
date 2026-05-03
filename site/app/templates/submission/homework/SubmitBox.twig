@@ -13,8 +13,9 @@
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden-message'>
+    <div class='content overridden-message' data-testid='overridden-grades-student-banner'>
         <p>NOTE: The numeric score for this assignment has been overridden by your instructor.</p>
+        <p>Your overridden score for this assignment is {{ overridden_grade }}.</p>
         {% if rainbow_grades_active %} <p>Your numeric score for the assignment will be visible in <a href={{ rainbow_grades_url }}>Rainbow Grades.</a></p> {% endif %}
         <p>Please see your instructor if you have questions about your grade for this assignment.</p>
     </div>
@@ -90,6 +91,13 @@
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
+                    <label for="radio-placeholder">
+                        <input type='radio' id="radio-placeholder" name="submission-type">
+                         No File Rubric Grading
+                        <a aria-label "No File Rubric Grading Help" href = "https://submitty.org/instructor/no_file_rubric_grading" target="_blank">
+                            <i title="No File Rubric Grading Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
                 {% endif %}
@@ -568,6 +576,37 @@
             e.stopPropagation();
         });
     });
+
+    window.blankSubmitAll = function(){
+        const is_team_assignment = {{ is_team_assignment ? 'true' : 'false' }};
+        const url = is_team_assignment ? 
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+
+        const message = is_team_assignment ?
+        "This will create a placeholder submission for ALL TEAMS on this gradeable." :
+        "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    displayMessage(response.data);
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
 
