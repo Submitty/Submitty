@@ -3,20 +3,27 @@
 {% block title %}Upload Classlist{% endblock %}
 {% block body %}
     <p>
-        Format your student data as an .xlsx or .csv file with {{ use_database ? 6 : 5 }}-{{ use_database ? 9 : 8 }} columns and no header row:
+        Format your student data as an .xlsx or .csv file with as many of the following columns as you want, and a header row:
     </p>
     <ol class="full-list">
-        <li>username</li>
-        <li>Given Name</li>
-        <li>Family Name</li>
-        <li>email</li>
-        <li>registration section</li>
+        <li>"User ID": The user id associated with the student (mandatory).</li>
+        <li>"Given Name": Only read for new students.</li>
+        <li>"Family Name": Only read for new students.</li>
+        <li>"Preferred Given Name": Only read for new students.</li>
+        <li>"Preferred Family Name": Only read for new students.</li>
+        <li>"Email": Only read for new students.</li>
+        <li>"Secondary Email": Only read for new students.</li>
+        <li>"Registration Section": For graders, this is a comma-separated list of sections in quotes, e.g. "10AM,11AM,12PM".</li>
+        <li>"Registration Sub-Section": Can contain alphanumeric letters, spaces, hyphens or underscores.</li>
+        <li>"Registration Type": "graded", "audit", "withdrawn", or "staff"</li>
         {% if use_database %}
-            <li>password</li>
+            <li>"Password": Only works for new students on installations using database uploads.</li>
         {% endif %}
-        <li>preferred Given Name (optional)</li>
-        <li>preferred Family Name (optional)</li>
-        <li>registration type (optional)</li>
+        <li>"Group": "Instructor" (1), "Full Access Grader (Grad TA)" (2), "Limited Access Grader (Mentor)" (3), or "Student" (4)</li>
+        <li>"UTC Offset": Included for compatability with exported lists, ignored by this upload.</li>
+        <li>"Time Zone": Included for compatability with exported lists, ignored by this upload.</li>
+        <li>"Rotation Section": Included for compatability with exported lists, ignored by this upload.</li>
+        <li>"Autofill Data": "TRUE" or "FALSE", if set for an existing user they will have their personal information automatically filled.</li>
     </ol>
     <p>
         For more formatting information, see
@@ -25,7 +32,6 @@
         </a>
     </p>
     <br />
-    <span style="color: #006398">&#9734; : You can also supply just the user_id and rest of the fields will be auto-fill with the existing user data </span>
     <p>&emsp;</p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label class="std-margin" for="move_missing">
