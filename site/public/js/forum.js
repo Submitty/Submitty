@@ -1621,7 +1621,7 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 
 function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
     if (category_desc === null && category_color === null && category_date === null) {
-        return;
+        return true;
     }
     const data = { category_id: category_id, csrf_token: csrf_token };
     if (category_desc !== null && changed === 'desc') {
@@ -1680,6 +1680,7 @@ function editCategory(category_id, category_desc, category_color, category_date,
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
+    return true;
 }
 
 function refreshCategories() {

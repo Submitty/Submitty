@@ -222,22 +222,7 @@ class ForumController extends AbstractController {
         if (!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
             if ($this->core->getUser()->accessAdmin() && !empty($_POST["visibleDate"])) {
-                $visible_date_input = trim($_POST['visibleDate']);
-                if ($visible_date_input === "") {
-                    $visibleDate = null;
-                }
-                else {
-                    // Validate format is YYYY-MM-DD before parsing
-                    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visible_date_input)) {
-                        return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
-                    }
-                    try {
-                        $visibleDate = DateUtils::parseDateTime($visible_date_input, $this->core->getUser()->getUsableTimeZone());
-                    }
-                    catch (\InvalidArgumentException $e) {
-                        return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
-                    }
-                }
+                $visibleDate = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
             }
             else {
                 $visibleDate = null;
@@ -319,21 +304,12 @@ class ForumController extends AbstractController {
             }
         }
         if (!empty($_POST["visibleDate"]) && $this->core->getUser()->accessAdmin()) {
-            $visible_date_input = trim($_POST['visibleDate']);
-            if ($visible_date_input === "") {
-                $category_visible_date = null;
+            if ($_POST["visibleDate"] === "    ") {
+                $category_visible_date = "";
             }
             else {
-                // Validate format is YYYY-MM-DD before parsing
-                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visible_date_input)) {
-                    return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
-                }
-                try {
-                    $category_visible_date = DateUtils::parseDateTime($visible_date_input, $this->core->getUser()->getUsableTimeZone());
-                }
-                catch (\InvalidArgumentException $e) {
-                    return $this->core->getOutput()->renderJsonFail("Invalid date format. Expected date in YYYY-MM-DD format.");
-                }
+                $category_visible_date = DateUtils::parseDateTime($_POST['visibleDate'], $this->core->getUser()->getUsableTimeZone());
+                //ASSUME NO ISSUE
             }
         }
         else {
