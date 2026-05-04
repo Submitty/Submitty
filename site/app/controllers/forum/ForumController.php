@@ -1170,8 +1170,8 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id);
         // Checks if no threads were found. If so, render "fail" json response case informing that the no threads were found with the given ID.
-        if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
+        if (is_null($thread) || ($thread->isDeleted() && !$this->showDeleted())) {
+            return $this->core->getOutput()->renderJsonFail("The requested thread is no longer available.");
         }
         $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread]);
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -1226,9 +1226,9 @@ class ForumController extends AbstractController {
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
-        if (is_null($thread)) {
-            $this->core->addErrorMessage("Requested thread does not exist.");
-            $this->core->redirect(($this->core->buildCourseUrl(['forum'])));
+        if (is_null($thread) || ($thread->isDeleted() && !$show_deleted)) {
+            $this->core->addErrorMessage("The requested thread is no longer available.");
+            $this->core->redirect($this->core->buildCourseUrl(['forum']));
             return;
         }
 
