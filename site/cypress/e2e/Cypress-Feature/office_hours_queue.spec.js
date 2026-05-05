@@ -47,25 +47,25 @@ const wisozaRows = [{
 
 const checkRows = (rows) => {
     cy.get('[data-testid="row-label"]')
-        .its('length')
-        .then((length) => {
-            const startingRow = length - rows.length + 1;
-            for (let i = 0; i < rows.length; i++) {
-                cy.get(`[data-testid="student-row-${startingRow + i}"]`).first().as(`row-${i}`);
-                cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i);
-                cy.get(`@row-${i}`).find('[data-testid="current-state"]').should('contain', rows[i].state);
-                cy.get(`@row-${i}`).find('[data-testid="queue"]').should('contain', rows[i].queue);
-                if (rows[i].state !== 'waiting') {
+    .its('length')
+    .then((length) => {
+        const startingRow = length - rows.length + 1;
+        for (let i = 0; i < rows.length; i++) {
+            cy.get(`[data-testid="student-row-${startingRow + i}"]`).first().as(`row-${i}`);
+            cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i);
+            cy.get(`@row-${i}`).find('[data-testid="current-state"]').should('contain', rows[i].state);
+            cy.get(`@row-${i}`).find('[data-testid="queue"]').should('contain', rows[i].queue);
+            if (rows[i].state !== 'waiting') {
                     // This checks if time entered and time removed are in fact times.
                     // We do not check for a specific time because this may change.
                     cy.get(`@row-${i}`).find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
                     cy.get(`@row-${i}`).find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
-                }
-                cy.get(`@row-${i}`).find('[data-testid="helped-by"]').should('contain', rows[i].helpedBy);
-                cy.get(`@row-${i}`).find('[data-testid="removed-by"]').should('contain', rows[i].removedBy);
-                cy.get(`@row-${i}`).find('[data-testid="removal-method"]').should('contain', rows[i].removalMethod);
             }
-        });
+            cy.get(`@row-${i}`).find('[data-testid="helped-by"]').should('contain', rows[i].helpedBy);
+            cy.get(`@row-${i}`).find('[data-testid="removed-by"]').should('contain', rows[i].removedBy);
+            cy.get(`@row-${i}`).find('[data-testid="removal-method"]').should('contain', rows[i].removalMethod);
+        }
+    });
 };
 
 const deleteQueue = (queue_name) => {
@@ -322,10 +322,23 @@ describe('test office hours queue', () => {
     });
 
     it('Verify student ID toggle (eye icon) is non-destructive', () => {
-        // Ensure the queue code is known (independent of previous tests)
         switchUser('instructor');
-        changeQueueCode(queueName, queueCode);
-
+        cy.visit(['sample', 'office_hours_queue']);
+        cy.get('[data-testid="toggle-filter-settings"]').should('be.visible').click();
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="queue-name"]').contains(queueName)
+        .parents('[data-testid="queue-item"]')
+        .find('[data-testid="toggle-queue-checkbox"]')
+        .then(($checkbox) => {
+            if (!$checkbox.is(':checked')) {
+                cy.wrap($checkbox).click();
+            }
+        });
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="old-queue-code"]').select(queueName);
+        cy.get('[data-testid="old-queue-token"]').type(queueCode);
+        cy.get('[data-testid="change-code-btn"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
         // Ensure bitdiddle is in the queue
         switchUser('bitdiddle');
         ensureStudentOutOfQueue();
@@ -335,12 +348,13 @@ describe('test office hours queue', () => {
 
         switchUser('instructor');
         // Ensure the queue filter is enabled (newly created queues might be hidden)
-        cy.get('body').then(($body) => {
-            if ($body.find(`.queue_current_${queueName.replace(/\W/g, '_')}:visible`).length === 0) {
-                cy.contains(queueName).click();
+        cy.reload();
+        // Ensure the queue filter is enabled after reload
+        cy.get('.filter-buttons').each(($btn) => {
+            if ($btn.hasClass('btn-danger')) { // off state
+                cy.wrap($btn).click();
             }
         });
-
         cy.reload(); // Force reload to ensure student appears regardless of WebSocket sync
         // Wait for bitdiddle to appear (with retry)
         cy.contains('bitdiddle', { timeout: 10000 }).parents('tr').as('bitdiddleRow');
