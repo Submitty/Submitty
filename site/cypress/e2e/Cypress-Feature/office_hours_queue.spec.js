@@ -47,15 +47,15 @@ const wisozaRows = [{
 
 const checkRows = (rows) => {
     cy.get('[data-testid="row-label"]')
-    .its('length')
-    .then((length) => {
-        const startingRow = length - rows.length + 1;
-        for (let i = 0; i < rows.length; i++) {
-            cy.get(`[data-testid="student-row-${startingRow + i}"]`).first().as(`row-${i}`);
-            cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i);
-            cy.get(`@row-${i}`).find('[data-testid="current-state"]').should('contain', rows[i].state);
-            cy.get(`@row-${i}`).find('[data-testid="queue"]').should('contain', rows[i].queue);
-            if (rows[i].state !== 'waiting') {
+        .its('length')
+        .then((length) => {
+            const startingRow = length - rows.length + 1;
+            for (let i = 0; i < rows.length; i++) {
+                cy.get(`[data-testid="student-row-${startingRow + i}"]`).first().as(`row-${i}`);
+                cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i);
+                cy.get(`@row-${i}`).find('[data-testid="current-state"]').should('contain', rows[i].state);
+                cy.get(`@row-${i}`).find('[data-testid="queue"]').should('contain', rows[i].queue);
+                if (rows[i].state !== 'waiting') {
                     // This checks if time entered and time removed are in fact times.
                     // We do not check for a specific time because this may change.
                     cy.get(`@row-${i}`).find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
