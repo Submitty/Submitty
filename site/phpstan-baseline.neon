@@ -12264,7 +12264,7 @@ parameters:
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
-			count: 8
+			count: 5
 			path: app/models/gradeable/Gradeable.php
 
 		-
@@ -12810,7 +12810,7 @@ parameters:
 		-
 			rawMessage: 'Strict comparison using !== between mixed and null will always evaluate to true.'
 			identifier: notIdentical.alwaysTrue
-			count: 2
+			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
