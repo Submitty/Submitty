@@ -2154,12 +2154,12 @@ class Gradeable extends AbstractModel {
 
         //If we're not instructor and this is not open to TAs
         $date = $this->core->getDateTimeNow();
-        if ($this->getTaViewStartDate() > $date && $this->getSubmissionOpenDate() > $date && $this->getSubmissionDueDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && !$user->accessAdmin()) {
+        if ($this->getTaViewStartDate() > $date && $this->getSubmissionOpenDate() > $date && $this->getSubmissionDueDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && $this->getGradeReleasedDate() > $date && !$user->accessAdmin()) {
             return false;
         }
 
         // If the gradeable has NO open submission date and TA view start date is in the future
-        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && !$user->accessAdmin()) {
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && $this->getGradeReleasedDate() > $date && !$user->accessAdmin()) {
             return false;
         }
 
@@ -2168,8 +2168,13 @@ class Gradeable extends AbstractModel {
             return false;
         }
 
-        // If the gradeables grading is past due (regardless of toher dates), it should be only visible to graders
+        // If the gradeables grading is past due (regardless of other dates), it should be only visible to graders
         if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeDueDate() <= $date && !$user->accessGrading()) {
+            return false;
+        }
+
+        // If the gradeables grading is released (regardless of other dates), it should be only visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeReleasedDate() <= $date && !$user->accessGrading()) {
             return false;
         }
 

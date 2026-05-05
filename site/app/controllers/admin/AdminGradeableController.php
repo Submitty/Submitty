@@ -1847,7 +1847,7 @@ class AdminGradeableController extends AbstractController {
         if ($action === "release_grades_now") {
             if ($gradeable->hasReleaseDate()) {
                 if ($dates['grade_released_date'] > $now) {
-                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $dates['grade_released_date'] = $now;
                     $message .= "Released grades for ";
                     $success = true;
                 }
