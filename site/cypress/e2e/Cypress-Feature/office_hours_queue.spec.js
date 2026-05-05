@@ -60,12 +60,12 @@ const checkRows = (rows) => {
                     // We do not check for a specific time because this may change.
                     cy.get(`@row-${i}`).find('[data-testid="time-entered"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
                     cy.get(`@row-${i}`).find('[data-testid="time-removed"]').invoke('text').should('match', /\d{4}-\d\d-\d\d \d\d:\d\d:\d\d.*/);
+                }
+                cy.get(`@row-${i}`).find('[data-testid="helped-by"]').should('contain', rows[i].helpedBy);
+                cy.get(`@row-${i}`).find('[data-testid="removed-by"]').should('contain', rows[i].removedBy);
+                cy.get(`@row-${i}`).find('[data-testid="removal-method"]').should('contain', rows[i].removalMethod);
             }
-            cy.get(`@row-${i}`).find('[data-testid="helped-by"]').should('contain', rows[i].helpedBy);
-            cy.get(`@row-${i}`).find('[data-testid="removed-by"]').should('contain', rows[i].removedBy);
-            cy.get(`@row-${i}`).find('[data-testid="removal-method"]').should('contain', rows[i].removalMethod);
-        }
-    });
+        });
 };
 
 const deleteQueue = (queue_name) => {
@@ -327,13 +327,13 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="toggle-filter-settings"]').should('be.visible').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
         cy.get('[data-testid="queue-name"]').contains(queueName)
-        .parents('[data-testid="queue-item"]')
-        .find('[data-testid="toggle-queue-checkbox"]')
-        .then(($checkbox) => {
-            if (!$checkbox.is(':checked')) {
-                cy.wrap($checkbox).click();
-            }
-        });
+            .parents('[data-testid="queue-item"]')
+            .find('[data-testid="toggle-queue-checkbox"]')
+            .then(($checkbox) => {
+                if (!$checkbox.is(':checked')) {
+                    cy.wrap($checkbox).click();
+                }
+            });
         cy.get('[data-testid="popup-window"]').should('be.visible');
         cy.get('[data-testid="old-queue-code"]').select(queueName);
         cy.get('[data-testid="old-queue-token"]').type(queueCode);
