@@ -213,15 +213,25 @@ def main():
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
 
-                # FIXME: This will be incorrect if the username includes an underscore
-                if '_' not in my_who:
-                    my_user = my_who
-                    my_team = ""
-                    my_is_team = False
-                else:
+                # Determine if this submission belongs to a team or an individual user.
+                # We check user_assignment_settings.json — team directories contain a
+                # "team_history" key written by TeamController.php when the team is created.
+                # Individual user directories never contain this key.
+                # If the file is missing, default to treating the submitter as a user (safer fallback).
+                settings_file = os.path.join(data_dir, my_semester, my_course,
+                                             "submissions", my_gradeable, my_who,
+                                             "user_assignment_settings.json")
+                my_is_team = False
+                if os.path.isfile(settings_file):
+                    with open(settings_file, 'r') as sf:
+                        my_is_team = "team_history" in json.load(sf)
+
+                if my_is_team:
                     my_user = ""
                     my_team = my_who
-                    my_is_team = True
+                else:
+                    my_user = my_who
+                    my_team = ""
 
                 # Note: If the initial checkout failed, or if
                 # autograding failed to create a results subdirectory

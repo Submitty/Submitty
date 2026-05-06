@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 
 /**
  * Class RainbowCustomization
@@ -66,6 +67,8 @@ class RainbowCustomization extends AbstractModel {
         'participation', 'note',
         'none'];
 
+    const allowed_show_notes = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
+
 
     public function __construct(Core $main_core) {
         parent::__construct($main_core);
@@ -126,7 +129,9 @@ class RainbowCustomization extends AbstractModel {
                 "manual_grading_points" => $manual_grading_points,
                 "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override_percent" => false
+                "override_percent" => false,
+                "show_notes" => 'never',
+                "show_notes_applicable" => in_array($gradeable->getType(), [GradeableType::NUMERIC_TEXT, GradeableType::CHECKPOINTS], true)
             ];
         }
         // Determine which 'buckets' exist in the customization.json
@@ -204,7 +209,25 @@ class RainbowCustomization extends AbstractModel {
                     }
                 }
                 unset($c_gradeable);
+<<<<<<< HEAD
                 $this->customization_data[$c_bucket] = $bucket_gradeables;
+=======
+
+                // Assign show_notes to customization_data gradeables by matching ids
+                $show_notes_map = [];
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'show_notes') && in_array($json_gradeable->show_notes, self::allowed_show_notes, true)) {
+                        $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
+                    }
+                }
+
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($show_notes_map[$c_gradeable['id']])) {
+                        $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
+                    }
+                }
+                unset($c_gradeable);
+>>>>>>> upstream/main
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -476,6 +499,45 @@ class RainbowCustomization extends AbstractModel {
         return !is_null($this->RCJSON) ? $this->RCJSON->getExtraCredit() : false;
     }
 
+    public function getShowGradeableConfiguration(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getShowGradeableConfiguration()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: when notes customization is enabled,
+        // show the gradeable configuration section on refresh.
+        return $this->getCustomizeShowNotes();
+    }
+
+    public function getCustomizeShowNotes(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getCustomizeShowNotes()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: if any gradeable has non-default show_notes,
+        // enable the toggle so existing custom values are visible on refresh.
+        foreach ($this->RCJSON->getGradeables() as $bucket) {
+            if (!property_exists($bucket, 'ids')) {
+                continue;
+            }
+            foreach ($bucket->ids as $gradeable) {
+                if (property_exists($gradeable, 'show_notes') && $gradeable->show_notes !== 'never') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     /**
      * Get display benchmarks
@@ -727,6 +789,14 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->extra_credit)) {
             $this->RCJSON->setExtraCredit($form_json->extra_credit);
+        }
+
+        if (isset($form_json->show_gradeable_configuration)) {
+            $this->RCJSON->setShowGradeableConfiguration($form_json->show_gradeable_configuration);
+        }
+
+        if (isset($form_json->customize_show_notes)) {
+            $this->RCJSON->setCustomizeShowNotes($form_json->customize_show_notes);
         }
 
         if (isset($form_json->gradeables)) {
