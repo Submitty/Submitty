@@ -403,7 +403,7 @@ class SubmissionController extends AbstractController {
         $success_count = 0;
 
         foreach ($students as $student) {
-            if ($student->getGroup() !== User::GROUP_STUDENT || $student->getRegistrationSection() === null) {
+            if ($student->getRegistrationSection() === null) {
                 continue;
             }
 
