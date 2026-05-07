@@ -83,7 +83,6 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
- * @method DateTimeFormat getDateTimeFormat()
  * @method string getSystemMessage()
  * @method string getLatestTag()
  * @method string getLatestCommit()
@@ -387,14 +386,31 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
-        // It is configured as a property of the Config class
-        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
+        // Default format set to 'YMD' (ISO 8601 standard).
+        // Per-user date/time format preference is now handled in getDateTimeFormat() (Issue#11751).
         $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
 
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
         }
+    }
+
+    /**
+     * Get the DateTimeFormat object, updated with the current user's preferred format.
+     * Implements per-user date/time formatting as described in Issue#11751.
+     * If no user is logged in, defaults to 'YMD' (ISO 8601 standard).
+     * getDateFormat() returns the user's preferred format specifier (MDY, DMY, or YMD)
+     * which was loaded from the database when the user logged in.
+     *
+     * @return DateTimeFormat
+     */
+    public function getDateTimeFormat(): DateTimeFormat {
+        if ($this->core->getUser() !== null) {
+            $this->date_time_format->setSpecifier(
+                $this->core->getUser()->getDateFormat()
+            );
+        }
+        return $this->date_time_format;
     }
 
     public function loadMasterConfigs($config_path) {
