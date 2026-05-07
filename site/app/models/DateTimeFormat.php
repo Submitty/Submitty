@@ -77,6 +77,19 @@ class DateTimeFormat extends AbstractModel {
     }
 
     /**
+     * Set $this->specifier
+     * @param string $specifier A valid specifier from self::SPECIFIERS
+     */
+    public function setSpecifier(string $specifier): void {
+        if (in_array($specifier, self::SPECIFIERS)) {
+            $this->specifier = $specifier;
+        }
+        else {
+            throw new BadArgumentException('Illegal $specifier passed to setSpecifier.');
+        }
+    }
+
+    /**
      * Get the appropriate internationalized DateTime formatting string.  Some countries use a MM/DD/YYYY format, while
      * others use a DD/MM/YYYY format, etc.
      *
