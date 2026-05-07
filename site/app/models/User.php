@@ -389,6 +389,7 @@ class User extends AbstractModel implements \JsonSerializable {
         }
         return false;
     }
+    
     /**
      * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
      * if they don't.
