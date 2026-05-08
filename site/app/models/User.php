@@ -222,7 +222,7 @@ class User extends AbstractModel implements \JsonSerializable {
     protected $instructor_courses = false;
 
     /** @prop
-    * @var string The user's preferred date format specifier, must be one of DateTimeFormat::SPECIFIERS */
+     * @var string The user's preferred date format specifier, must be one of DateTimeFormat::SPECIFIERS */
     protected $date_format = 'YMD';
 
     /**
@@ -389,7 +389,7 @@ class User extends AbstractModel implements \JsonSerializable {
         }
         return false;
     }
-    
+
     /**
      * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
      * if they don't.
