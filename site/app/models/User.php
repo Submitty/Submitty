@@ -411,6 +411,13 @@ class User extends AbstractModel implements \JsonSerializable {
     }
 
     /**
+     * Get the UTC offset for the user's selected time zone.
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    /**
      * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
      * user has not set their time zone.
      *
