@@ -899,12 +899,18 @@ jobs:
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Downloads
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/downloads
 
   Integration:
     name: Integration
