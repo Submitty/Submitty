@@ -370,10 +370,6 @@ class Config extends AbstractModel {
     protected $feature_flags = [];
 
     /** @prop
-     * @var DateTimeFormat */
-    protected $date_time_format;
-
-    /** @prop
      * @var string */
     protected $php_user;
 
@@ -385,10 +381,6 @@ class Config extends AbstractModel {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
-
-        // Default format set to 'YMD' (ISO 8601 standard).
-        // Per-user date/time format preference is now handled in getDateTimeFormat() (Issue#11751).
-        $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
 
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
@@ -405,12 +397,13 @@ class Config extends AbstractModel {
      * @return DateTimeFormat
      */
     public function getDateTimeFormat(): DateTimeFormat {
-        if ($this->core->getUser() !== null) {
-            $this->date_time_format->setSpecifier(
-                $this->core->getUser()->getDateFormat()
-            );
+        $specifier = 'YMD';
+
+        if ($this->core->getUser() !== null && $this->core->getUser()->isLoaded()) {
+            $specifier = $this->core->getUser()->getDateFormat();
         }
-        return $this->date_time_format;
+
+        return new DateTimeFormat($this->core, $specifier);
     }
 
     public function loadMasterConfigs($config_path) {

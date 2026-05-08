@@ -319,7 +319,6 @@ class User extends AbstractModel implements \JsonSerializable {
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
         // Load user's preferred date format. Defaults to 'YMD' if not available
         $this->date_format = isset($details['date_format']) ? $details['date_format'] : 'YMD';
-        $this->core->getConfig()->getDateTimeFormat()->setSpecifier($this->date_format);
     }
 
     /**
@@ -379,15 +378,21 @@ class User extends AbstractModel implements \JsonSerializable {
      * @return bool True if date format was able to be updated, False otherwise
      */
     public function setDateFormat(string $date_format): bool {
-        if (in_array($date_format, DateTimeFormat::SPECIFIERS)) {
+        if (in_array($date_format, DateTimeFormat::SPECIFIERS, true)) {
             $result = $this->core->getQueries()->updateSubmittyUserDateFormat($this, $date_format);
             if ($result === 1) {
                 $this->date_format = $date_format;
-                $this->core->getConfig()->getDateTimeFormat()->setSpecifier($date_format);
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Get the user's preferred date format specifier.
+     */
+    public function getDateFormat(): string {
+        return $this->date_format;
     }
 
     /**
