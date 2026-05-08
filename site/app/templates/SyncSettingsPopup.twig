@@ -3,7 +3,7 @@
 {% block title %}Sync Notification Settings{% endblock %}
 {% block body %}
 <div class="form-group sync-popup-body">
-    <label>Select courses to copy the current notification settings to:</label>
+    <label>To copy the notification settings from this course to other courses, select them from the list below.</label>
     <div class="sync-course-list">
         {% for course in courses %}
             <div class="sync-course-container"
@@ -27,8 +27,8 @@
 </div>
 {% endblock %}
 {% block buttons %}
+    {{block('close_button')}}
 <button class="btn btn-primary" onclick="setNotification(this)">
     Sync Settings
 </button>
-    {{block('close_button')}}
 {% endblock %}

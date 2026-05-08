@@ -3,16 +3,15 @@
       input[type="checkbox"]:disabled {
           background: gray;
       }
-      .header {
-          position: relative;
-      }
       .sync-top-right {
-          position: absolute;
-          top: 0;
-          right: 0;
+          float: right;
+          text-align: right;
+          margin-top: -6px;
       }
       .sync-bottom-row {
           margin-top: 30px;
+          display: flex;
+          justify-content: flex-end;
       }
       .sync-course-container {
           cursor: pointer;
@@ -28,7 +27,6 @@
           grid-template-columns: 1fr 9fr;
           align-items: center;
           gap: 24px;
-          padding: 4px 6px;
           margin-top: 12px;
       }
       .sync-buttons {
@@ -41,6 +39,21 @@
           height: 0;
           border: 0;
           border-top: 1px solid var(--standard-light-gray);
+      }
+      .button-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+      }
+      .notification-setting-button {
+          flex-grow: 1;
+      }
+      .button-group {
+          margin-top: 8px;
+      }
+      .sync-help-text {
+          font-size: 13px;
+          white-space: nowrap;
       }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
@@ -63,7 +76,10 @@
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
                 {% if email_enabled %}
-                    <div class="sync-top-right">
+                    <div class="sync-top-right" style="display: flex; align-items: center; gap: 10px;">
+                        <span class="sync-help-text">
+                            To copy the notification settings from this course to other courses, click here.
+                        </span>
                         {{ sync_button|raw }}
                     </div>
                 {% endif %}
