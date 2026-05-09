@@ -210,6 +210,30 @@ class Notification extends AbstractModel implements \JsonSerializable {
         }
     }
 
+    private function getDisplayContent(): string {
+        $metadata = json_decode($this->getNotifyMetadata(), true);
+        if (
+            is_array($metadata)
+            && ($metadata['notification_type'] ?? null) === 'gradeable_release'
+            && !empty($metadata['title'])
+            && !empty($metadata['due_date'])
+        ) {
+            try {
+                $formatted_due_date = DateUtils::convertTimeStamp(
+                    $this->core->getUser(),
+                    $metadata['due_date'],
+                    $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')
+                );
+                return "Submissions Open: {$metadata['title']} | Due {$formatted_due_date}";
+            }
+            catch (\InvalidArgumentException $e) {
+                return $this->getNotifyContent();
+            }
+        }
+
+        return $this->getNotifyContent();
+    }
+
     /**
      * @return array{
      * id: int,
@@ -250,7 +274,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'id' => $this->getId(),
             'component' => $this->getComponent(),
             'metadata' => $this->getNotifyMetadata(),
-            'content' => $this->getNotifyContent(),
+            'content' => $this->getDisplayContent(),
             'seen' => $this->isSeen(),
             'elapsed_time' => $this->getElapsedTime(),
             'created_at' => $this->getCreatedAt(),
