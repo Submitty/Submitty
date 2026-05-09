@@ -215,8 +215,12 @@ class Notification extends AbstractModel implements \JsonSerializable {
         if (
             is_array($metadata)
             && ($metadata['notification_type'] ?? null) === 'gradeable_release'
-            && !empty($metadata['title'])
-            && !empty($metadata['due_date'])
+            && isset($metadata['title'])
+            && is_string($metadata['title'])
+            && $metadata['title'] !== ''
+            && isset($metadata['due_date'])
+            && is_string($metadata['due_date'])
+            && $metadata['due_date'] !== ''
         ) {
             try {
                 $formatted_due_date = DateUtils::convertTimeStamp(
