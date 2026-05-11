@@ -6,7 +6,7 @@ import type { Component } from 'vue';
 declare global {
     namespace Cypress {
         interface Chainable {
-            mount(component: Component, options?: MountingOptions<any>): Chainable<MountReturn>;
+            mount(component: Component, options?: MountingOptions<Component>): Chainable<MountReturn>;
         }
     }
 }
