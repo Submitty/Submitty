@@ -534,6 +534,39 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         );
     }
 
+    public function testPullCourseRepositorySavesPostedRepoSettings(): void {
+        $this->setUpConfig();
+        FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
+
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $instructor = new User($core);
+        $instructor->setId('instructor');
+        $core->setUser($instructor);
+
+        $_POST['course_repo_url'] = 'https://example.com/course.git';
+        $_POST['course_repo_branch'] = '';
+        $_POST['course_repo_subdirectory'] = '/course-config/';
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->pullCourseRepository();
+
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertEquals('queued', $response->json['data']['queue_status']);
+        $this->assertEquals('https://example.com/course.git', $core->getConfig()->getCourseRepoUrl());
+        $this->assertEquals('main', $core->getConfig()->getCourseRepoBranch());
+        $this->assertEquals('course-config', $core->getConfig()->getCourseRepoSubdirectory());
+        $this->assertFileExists(FileUtils::joinPaths(
+            $this->test_dir,
+            'daemon_job_queue',
+            'sync_course_repo__f19__sample.json'
+        ));
+    }
+
     public function testCourseRepositoryStatusQueued(): void {
         $this->setUpConfig();
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'daemon_job_queue'));
@@ -571,6 +604,23 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $_POST['name'] = 'course_repo_branch';
         $_POST['entry'] = '../main';
+
+        $controller = new ConfigurationController($core);
+        $response = $controller->updateConfiguration();
+        $this->assertEquals('fail', $response->json['status']);
+        $this->assertEquals('Invalid repository branch name', $response->json['message']);
+    }
+
+    public function testUpdateConfigurationRejectsOptionStyleCourseRepoBranch(): void {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+
+        $_POST['name'] = 'course_repo_branch';
+        $_POST['entry'] = '--upload-pack=/tmp/pwned';
 
         $controller = new ConfigurationController($core);
         $response = $controller->updateConfiguration();

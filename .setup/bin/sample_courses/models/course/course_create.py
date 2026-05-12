@@ -194,7 +194,6 @@ class Course_create:
                             sections_registration_id=str(grading_registration_section),
                         )
                     )
-
             self.conn.commit()
 
             if user.unix_groups is None:

@@ -170,6 +170,9 @@ $(document).ready(() => {
     pullButton.on('click', () => {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
+        formData.append('course_repo_url', $('#course-repo-url').val());
+        formData.append('course_repo_branch', $('#course-repo-branch').val());
+        formData.append('course_repo_subdirectory', $('#course-repo-subdirectory').val());
         pullButton.prop('disabled', true);
         $.ajax({
             url: buildCourseUrl(['config', 'course_repository', 'pull']),

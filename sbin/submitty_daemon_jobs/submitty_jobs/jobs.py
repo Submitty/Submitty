@@ -15,7 +15,7 @@ import mimetypes
 import re
 import docker
 import requests
-from urllib.parse import unquote, quote_plus
+from urllib.parse import unquote, quote_plus, urlparse
 from tempfile import TemporaryDirectory
 
 from . import regenerate_bulk_images
@@ -218,7 +218,7 @@ class SyncCourseRepo(CourseJob):
     def _validate_branch(branch):
         if branch == '':
             return False
-        if '..' in branch or branch.startswith('/'):
+        if '..' in branch or branch.startswith('/') or branch.startswith('-'):
             return False
         return SyncCourseRepo._BRANCH_PATTERN.match(branch) is not None
 
@@ -318,6 +318,19 @@ class SyncCourseRepo(CourseJob):
         if isinstance(value, dict):
             return value
         return {}
+
+    @staticmethod
+    def _normalize_course_detail_setting(key, value):
+        if key == 'course_home_url':
+            if value == '':
+                return ''
+            if not isinstance(value, str):
+                raise RuntimeError('course_home_url must be a string')
+            parsed_url = urlparse(value)
+            if parsed_url.scheme == '' or parsed_url.netloc == '':
+                raise RuntimeError('course_home_url must be an absolute URL')
+            return value
+        return value
 
     @staticmethod
     def _write_form_config(course_path, gradeable):
@@ -805,8 +818,11 @@ class SyncCourseRepo(CourseJob):
                     }
                     for key, value in manifest_course_details.items():
                         if key in allowed_keys and key not in protected_keys:
-                            course_json['course_details'][key] = value
-                            updated_course_keys.append(key)
+                            try:
+                                course_json['course_details'][key] = self._normalize_course_detail_setting(key, value)
+                                updated_course_keys.append(key)
+                            except RuntimeError as exc:
+                                warnings.append(f"Skipped invalid course setting '{key}': {exc}")
                     if len(updated_course_keys) > 0:
                         self._write_json_atomic(config_path, course_json)
             else:

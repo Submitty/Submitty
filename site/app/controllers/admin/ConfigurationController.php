@@ -171,7 +171,7 @@ class ConfigurationController extends AbstractController {
             if ($entry === '') {
                 $entry = 'main';
             }
-            if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $entry) || str_contains($entry, '..') || str_starts_with($entry, '/')) {
+            if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $entry) || str_contains($entry, '..') || str_starts_with($entry, '/') || str_starts_with($entry, '-')) {
                 return JsonResponse::getFailResponse('Invalid repository branch name');
             }
         }
@@ -229,6 +229,11 @@ class ConfigurationController extends AbstractController {
     #[Route("/api/courses/{_semester}/{_course}/config/course_repository/pull", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/config/course_repository/pull", methods: ["POST"])]
     public function pullCourseRepository(): JsonResponse {
+        $save_response = $this->savePostedCourseRepositorySettings();
+        if ($save_response !== null) {
+            return $save_response;
+        }
+
         $repo_url = trim($this->core->getConfig()->getCourseRepoUrl());
         if ($repo_url === '') {
             return JsonResponse::getFailResponse('Set a Course Repository URL before pulling');
@@ -293,6 +298,92 @@ class ConfigurationController extends AbstractController {
             'queue_status' => $queue_status,
             'last_sync' => $last_sync,
         ]);
+    }
+
+    private function savePostedCourseRepositorySettings(): ?JsonResponse {
+        $repo_fields = [
+            'course_repo_url',
+            'course_repo_branch',
+            'course_repo_subdirectory',
+        ];
+
+        $has_repo_field = false;
+        foreach ($repo_fields as $field) {
+            if (array_key_exists($field, $_POST)) {
+                $has_repo_field = true;
+                break;
+            }
+        }
+        if (!$has_repo_field) {
+            return null;
+        }
+
+        $config_json = $this->core->getConfig()->getCourseJson();
+        $course_details = $config_json['course_details'] ?? [];
+        if (!is_array($course_details)) {
+            return JsonResponse::getFailResponse('Could not save config file');
+        }
+
+        foreach ($repo_fields as $field) {
+            if (!array_key_exists($field, $_POST)) {
+                continue;
+            }
+            $normalized = $this->normalizeCourseRepositorySetting($field, $_POST[$field]);
+            if (array_key_exists('message', $normalized)) {
+                return JsonResponse::getFailResponse($normalized['message']);
+            }
+            $course_details[$field] = $normalized['value'];
+        }
+
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $course_details])) {
+            return JsonResponse::getFailResponse('Could not save config file');
+        }
+        $this->core->getConfig()->loadCourseJson(
+            $this->core->getConfig()->getTerm(),
+            $this->core->getConfig()->getCourse(),
+            $this->core->getConfig()->getCourseJsonPath()
+        );
+
+        return null;
+    }
+
+    private function normalizeCourseRepositorySetting(string $name, string $entry): array {
+        if ($name === 'course_repo_url') {
+            if (preg_match('/\s/', $entry)) {
+                return ['message' => 'Repository URL cannot contain whitespace'];
+            }
+            if ($entry !== '' && str_starts_with($entry, '-')) {
+                return ['message' => 'Repository URL cannot start with "-"'];
+            }
+            return ['value' => $entry];
+        }
+
+        if ($name === 'course_repo_branch') {
+            $entry = trim($entry);
+            if ($entry === '') {
+                $entry = 'main';
+            }
+            if (!preg_match('/^[A-Za-z0-9._\/-]+$/', $entry) || str_contains($entry, '..') || str_starts_with($entry, '/') || str_starts_with($entry, '-')) {
+                return ['message' => 'Invalid repository branch name'];
+            }
+            return ['value' => $entry];
+        }
+
+        if ($name === 'course_repo_subdirectory') {
+            $entry = trim($entry, " \t\n\r\0\x0B/");
+            if ($entry === '.') {
+                $entry = '';
+            }
+            if (str_contains($entry, '..')) {
+                return ['message' => 'Repository subdirectory cannot contain ".."'];
+            }
+            if ($entry !== '' && !preg_match('/^[A-Za-z0-9._\/-]+$/', $entry)) {
+                return ['message' => 'Invalid repository subdirectory'];
+            }
+            return ['value' => $entry];
+        }
+
+        return ['message' => 'Not a valid config name'];
     }
 
     private function getGradeableSeatingOptions(): array {
