@@ -126,13 +126,13 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses:  actions/checkout@v6
-      - uses : actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
         uses: actions/cache@v5
-        with: 
+        with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
