@@ -4,14 +4,6 @@
 # PYTHON PACKAGE SETUP
 #########################
 
-CONF_DIR="${SUBMITTY_INSTALL_DIR}/config"
-WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0) || 0
-VAGRANT=0
-
-if [ -d "${SUBMITTY_REPOSITORY}/.vagrant" ]; then
-    VAGRANT=1
-fi
-
 # All users should have access to these files
 umask 022
 
