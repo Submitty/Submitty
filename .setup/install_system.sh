@@ -353,6 +353,25 @@ sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 usermod -a -G docker "${DAEMON_USER}"
 
 #################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
+
+popd > /dev/null
+
+#################################################################
 # APACHE SETUP
 #################
 
