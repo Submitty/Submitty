@@ -2602,20 +2602,10 @@ class SubmissionController extends AbstractController {
     }
     #[Route("/api/{term}/{course}/gradeables", methods: ['GET'])]
     public function viewUsersGradeableList(string $term, string $course): JsonResponse {
-
         if (!$this->core->getQueries()->courseExists($term, $course)) {
             return JsonResponse::getFailResponse("Course $course for term $term does not exist");
         }
-
         $user = $this->core->getUser();
-        // Allow instructors to get list of courses for themselves, or for a different user
-        if (($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR)) {
-            $user_id = $_GET['user_id'] ?? '';
-            if ($user_id !== '') {
-                $user = $this->core->getQueries()->getUserById($user_id);
-            }
-        }
-
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
         $gradeables = new GradeableList($this->core, $user);
