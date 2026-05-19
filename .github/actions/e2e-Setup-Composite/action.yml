@@ -210,8 +210,8 @@ runs:
 
     - name: Fix Doctrine Cache Permissions
       run: |
-        chown -R submitty_php:submitty_php /usr/local/submitty/site/cache/doctrine-proxy
-        chmod -R 777 /usr/local/submitty/site/cache/doctrine-proxy
+        sudo chown -R submitty_php:submitty_php /usr/local/submitty/site/cache/doctrine-proxy
+        sudo chmod -R 777 /usr/local/submitty/site/cache/doctrine-proxy
       shell: bash
 
     - name: Run git tests
