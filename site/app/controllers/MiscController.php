@@ -217,11 +217,15 @@ class MiscController extends AbstractController {
             $this->core->getOutput()->setContentOnly(true);
             CodeMirrorUtils::loadDefaultDependencies($this->core);
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $notebook_result = NotebookUtils::jupyterToSubmittyNotebook($path);
             $this->core->getOutput()->renderString(
                 $this->core->getOutput()->renderTwigTemplate(
                     "notebook/Notebook.twig",
                     [
-                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'notebook' => $notebook_result['cells'],
+                        'notebook_size_exceeded' => $notebook_result['size_exceeded'],
+                        'notebook_skipped_content' => $notebook_result['skipped_content_count'],
+                        'notebook_skipped_output' => $notebook_result['skipped_output_count'],
                         'student_id' => $user_id,
                         'is_timed' => false,
                         'allowed_minutes' => 0,
