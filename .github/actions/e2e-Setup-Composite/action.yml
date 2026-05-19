@@ -208,6 +208,11 @@ runs:
         sudo service apache2 restart
       shell: bash
 
+    - name: Fix Doctrine Cache Permissions
+      run: |
+        chown -R submitty_php:submitty_php /usr/local/submitty/site/cache/doctrine-proxy
+        chmod -R 777 /usr/local/submitty/site/cache/doctrine-proxy
+
     - name: Run git tests
       if: contains(inputs.courses, 'sample')
       run: |
