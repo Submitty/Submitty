@@ -274,11 +274,11 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=late-days]').clear();
         cy.get('[data-testid=late-days]').type(0);
-        cy.get('[data-testid=late-days]').type('{enter}');
+        cy.get('[data-testid=late-days]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.get('[data-testid=submission-due-date]').clear();
         cy.get('[data-testid=submission-due-date]').type(getCurrentTime('few_seconds_past'));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
+        cy.get('[data-testid=submission-due-date]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file1', 'invalid_1_day_late');
@@ -293,11 +293,11 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=late-days]').clear();
         cy.get('[data-testid=late-days]').type(1, { force: true });
-        cy.get('[data-testid=late-days]').type('{enter}');
+        cy.get('[data-testid=late-days]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.get('[data-testid=submission-due-date]').clear();
         cy.get('[data-testid=submission-due-date]').type(getCurrentTime('few_seconds_past'));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
+        cy.get('[data-testid=submission-due-date]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
@@ -309,11 +309,11 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('[data-testid=late-days]').clear();
         cy.get('[data-testid=late-days]').type(1, { force: true });
-        cy.get('[data-testid=late-days]').type('{enter}');
+        cy.get('[data-testid=late-days]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.get('[data-testid=submission-due-date]').clear();
         cy.get('[data-testid=submission-due-date]').type(getCurrentTime());
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
+        cy.get('[data-testid=submission-due-date]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'valid_usage', '1_day_late');
@@ -326,12 +326,12 @@ describe('Test warning messages for non team gradeable', () => {
 
         cy.get('[data-testid=late-days]').clear();
         cy.get('[data-testid=late-days]').type(0);
-        cy.get('[data-testid=late-days]').type('{enter}');
+        cy.get('[data-testid=late-days]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
 
         cy.get('[data-testid=submission-due-date]').clear();
         cy.get('[data-testid=submission-due-date]').type(getCurrentTime('few_seconds_past'));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
+        cy.get('[data-testid=submission-due-date]').type('{enter}').blur();
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
