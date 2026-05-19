@@ -209,8 +209,8 @@ runs:
         sudo a2ensite submitty
         sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         sudo apache2ctl -t
-        sudo servicectl php${PHP_VER}-fpm restart
-        sudo servicectl apache2 restart
+        sudo service php${PHP_VER}-fpm restart
+        sudo service apache2 restart
       shell: bash
 
     - name: Fix Doctrine Cache Permissions
