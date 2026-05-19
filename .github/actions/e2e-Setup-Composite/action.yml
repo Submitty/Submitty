@@ -180,6 +180,11 @@ runs:
         sudo service nginx restart
       shell: bash
 
+    - name: Add www-data to submitty_php
+      run: |
+        sudo usermod -aG submitty_php www-data
+      shell: bash
+
     - name: Set up apache
       run: |
         sudo apt-get install apache2
