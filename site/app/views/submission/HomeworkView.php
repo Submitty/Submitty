@@ -557,6 +557,8 @@ class HomeworkView extends AbstractView {
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
+        $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
+
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
             'term' => $this->core->getConfig()->getTerm(),
@@ -619,7 +621,8 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'has_overridden_grades' => $has_overridden_grades,
+            'overridden_grade' => $has_overridden_grades ? $graded_gradeable->getTotalScore() : null,
             'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),

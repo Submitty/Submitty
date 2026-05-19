@@ -2,6 +2,7 @@
 .table-calendar {
     text-align: left;
     border: 1px solid var(--default-black);
+    table-layout: fixed;
 }
 
 /* the title at the top of the calendar table, showing month, year */
@@ -34,7 +35,7 @@
     text-align: center;
     font-size: 20px;
     font-weight: 600;
-    width: 65px;
+    width: auto;
     height: 50px;
     background: 1px solid var(--standard-light-gray);
     padding: 0;
@@ -111,34 +112,6 @@ a.cal-btn:focus {
     padding-left: 3px;
 }
 
-.cal-week-title-sun {
-    width: 12%;
-}
-
-.cal-week-title-mon {
-    width: 15%;
-}
-
-.cal-week-title-tue {
-    width: 15%;
-}
-
-.cal-week-title-wed {
-    width: 16%;
-}
-
-.cal-week-title-thu {
-    width: 15%;
-}
-
-.cal-week-title-fri {
-    width: 15%;
-}
-
-.cal-week-title-sat {
-    width: 12%;
-}
-
 /* the day number in each cell */
 .cal-day-title {
     font-style: italic;
@@ -204,7 +177,6 @@ a.cal-btn:focus {
     font-weight: normal;
     line-height: normal;
     text-align: left;
-    vertical-align: baseline;
     padding: 0 0 0 5px;
     display: block;
     width: 98%;
