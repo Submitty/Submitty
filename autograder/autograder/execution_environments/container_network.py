@@ -841,7 +841,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         try:
             container.create(execution_script, arguments, False)
             container.start(logfile)
-            container.process.wait()
         except Exception:
             self.log_message(
                 'ERROR generating random input using docker. '
@@ -849,7 +848,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             )
             self.log_stack_trace(traceback.format_exc())
         finally:
-            container.cleanup_container()
+            container.cleanup_container(logfile)
 
         return container.return_code
 
