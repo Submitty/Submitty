@@ -20,14 +20,15 @@ def course_list(ctx: typer.Context) -> None:
     """List all courses."""
     state: AppState = ctx.obj
     result = state.client.get("/api/courses")
-    courses = result.get("data", {}).get("courses", [])
+    data = result.get("data", {})
+    courses = data.get("unarchived_courses", []) + data.get("archived_courses", [])
 
     if state.fmt == OutputFormat.JSON:
         print_json(courses)
     else:
         rows = [
             {
-                "semester": c.get("semester", ""),
+                "semester": c.get("display_semester") or c.get("semester", ""),
                 "course": c.get("title", ""),
                 "name": c.get("display_name", ""),
             }

@@ -8,10 +8,21 @@ def test_course_list_table(runner, mock_state):
     mock_state.client.get.return_value = {
         "status": "success",
         "data": {
-            "courses": [
-                {"semester": "s25", "title": "csci1200", "display_name": "Data Structures"},
-                {"semester": "s25", "title": "csci2200", "display_name": "Foundations of CS"},
-            ]
+            "unarchived_courses": [
+                {
+                    "semester": "s25",
+                    "title": "csci1200",
+                    "display_name": "Data Structures",
+                    "display_semester": "Spring 2025",
+                },
+                {
+                    "semester": "s25",
+                    "title": "csci2200",
+                    "display_name": "Foundations of CS",
+                    "display_semester": "Spring 2025",
+                },
+            ],
+            "archived_courses": [],
         },
     }
     result = runner.invoke(app, ["course", "list"], obj=mock_state)
@@ -20,10 +31,33 @@ def test_course_list_table(runner, mock_state):
     assert "csci2200" in result.output
 
 
+def test_course_list_includes_archived(runner, mock_state):
+    mock_state.client.get.return_value = {
+        "status": "success",
+        "data": {
+            "unarchived_courses": [
+                {"semester": "s25", "title": "csci1200", "display_name": "", "display_semester": "Spring 2025"},
+            ],
+            "archived_courses": [
+                {"semester": "f24", "title": "csci1200", "display_name": "", "display_semester": "Fall 2024"},
+            ],
+        },
+    }
+    result = runner.invoke(app, ["course", "list"], obj=mock_state)
+    assert result.exit_code == 0
+    assert "Spring 2025" in result.output
+    assert "Fall 2024" in result.output
+
+
 def test_course_list_json_format(runner, mock_state):
     mock_state.client.get.return_value = {
         "status": "success",
-        "data": {"courses": [{"semester": "s25", "title": "csci1200"}]},
+        "data": {
+            "unarchived_courses": [
+                {"semester": "s25", "title": "csci1200", "display_name": "", "display_semester": "Spring 2025"},
+            ],
+            "archived_courses": [],
+        },
     }
     result = runner.invoke(app, ["--format", "json", "course", "list"], obj=mock_state)
     assert result.exit_code == 0
@@ -32,7 +66,10 @@ def test_course_list_json_format(runner, mock_state):
 
 
 def test_course_list_empty(runner, mock_state):
-    mock_state.client.get.return_value = {"status": "success", "data": {"courses": []}}
+    mock_state.client.get.return_value = {
+        "status": "success",
+        "data": {"unarchived_courses": [], "archived_courses": []},
+    }
     result = runner.invoke(app, ["course", "list"], obj=mock_state)
     assert result.exit_code == 0
 
