@@ -29,6 +29,7 @@ def test_course_list_table(runner, mock_state):
     assert result.exit_code == 0
     assert "csci1200" in result.output
     assert "csci2200" in result.output
+    assert "s25" in result.output
 
 
 def test_course_list_includes_archived(runner, mock_state):
@@ -46,7 +47,9 @@ def test_course_list_includes_archived(runner, mock_state):
     result = runner.invoke(app, ["course", "list"], obj=mock_state)
     assert result.exit_code == 0
     assert "Spring 2025" in result.output
+    assert "s25" in result.output
     assert "Fall 2024" in result.output
+    assert "f24" in result.output
 
 
 def test_course_list_json_format(runner, mock_state):
