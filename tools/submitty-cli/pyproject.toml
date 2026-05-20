@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-submitty = "submitty_cli.cli:app"
+submitty = "submitty_cli.cli:main"
 
 [project.optional-dependencies]
 dev = [

@@ -6,10 +6,11 @@ from pathlib import Path
 import typer
 from typing_extensions import Annotated
 
+from submitty_cli.client import APIError
 from submitty_cli.commands.auth import auth_app
 from submitty_cli.commands.course import course_app
-from submitty_cli.config import DEFAULT_CONFIG_DIR
-from submitty_cli.output import OutputFormat
+from submitty_cli.config import DEFAULT_CONFIG_DIR, ConfigError
+from submitty_cli.output import OutputFormat, print_error
 from submitty_cli.state import AppState
 
 
@@ -23,7 +24,7 @@ app.add_typer(course_app, name="course", help="Course management commands")
 
 
 @app.callback()
-def main(
+def callback(
     ctx: typer.Context,
     config_dir: Annotated[
         Path,
@@ -39,3 +40,15 @@ def main(
     if not isinstance(ctx.obj, AppState):
         ctx.obj = AppState(config_dir=config_dir, fmt=fmt)
     ctx.obj.fmt = fmt
+
+
+def main() -> None:
+    """Entry point that wraps app() with clean error handling for config/API errors."""
+    try:
+        app()
+    except ConfigError as exc:
+        print_error(str(exc))
+        raise SystemExit(1) from exc
+    except APIError as exc:
+        print_error(str(exc))
+        raise SystemExit(1) from exc
