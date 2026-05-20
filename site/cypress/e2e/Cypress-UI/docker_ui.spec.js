@@ -30,10 +30,7 @@ describe('Docker UI Test', () => {
     beforeEach(() => {
         cy.login();
         cy.visit(docker_ui_path);
-    });
-
-    before(() => {
-        // reset to default
+                // reset to default
         cy.exec('test -d /usr/local/submitty/config', { failOnNonZeroExit: false }).then((result) => {
             const json = JSON.stringify(defaultDockerConfiguration, null, 4);
             // inside the vm, the directory exists
@@ -49,8 +46,6 @@ describe('Docker UI Test', () => {
                 });
             }
         });
-        cy.login();
-        cy.visit(docker_ui_path);
         // update docker info
         cy.get('#update-machines').click();
         cy.get('.alert-success')
