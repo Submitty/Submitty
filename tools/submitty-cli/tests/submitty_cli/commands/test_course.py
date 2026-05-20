@@ -29,6 +29,7 @@ def test_course_list_table(runner, mock_state):
     assert result.exit_code == 0
     assert "csci1200" in result.output
     assert "csci2200" in result.output
+    assert "Spring 2025" in result.output
     assert "s25" in result.output
 
 

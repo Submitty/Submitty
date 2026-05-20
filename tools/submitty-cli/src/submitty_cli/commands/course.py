@@ -28,14 +28,14 @@ def course_list(ctx: typer.Context) -> None:
     else:
         rows = [
             {
-                "semester": c.get("display_semester") or c.get("semester", ""),
-                "term": c.get("semester", ""),
+                "term": c.get("display_semester") or c.get("semester", ""),
+                "key": c.get("semester", ""),
                 "course": c.get("title", ""),
                 "name": c.get("display_name", ""),
             }
             for c in courses
         ]
-        print_table(rows, columns=["semester", "term", "course", "name"])
+        print_table(rows, columns=["term", "key", "course", "name"])
 
 
 @course_app.command("create")
