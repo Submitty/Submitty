@@ -8,10 +8,15 @@ from pwd import getpwnam
 from timeit import default_timer as timer
 import shutil
 import docker
+import requests
 
 from submitty_utils import dateutils
 from . import secure_execution_environment, rlimit_utils
 from .. import autograding_utils
+
+# Maximum seconds to wait for a container to exit before force-killing it.
+# Containers should be killed by their own rlimits before this fires.
+CONTAINER_CLEANUP_TIMEOUT = 300
 
 
 class Container():
@@ -195,8 +200,19 @@ class Container():
         """ Remove this container. """
         cleanup_start = timer()
         if not self.is_server:
-            status = self.container.wait()
-            self.return_code = status['StatusCode']
+            try:
+                status = self.container.wait(timeout=CONTAINER_CLEANUP_TIMEOUT)
+                self.return_code = status['StatusCode']
+            except requests.exceptions.ReadTimeout:
+                self.log_function(
+                    f'WARNING: Container {self.full_name} did not exit within '
+                    f'{CONTAINER_CLEANUP_TIMEOUT}s, force killing'
+                )
+                try:
+                    self.container.kill()
+                except docker.errors.APIError:
+                    pass  # Container may have already exited between timeout and kill
+                self.return_code = -1
 
         logs = self.container.logs(stdout=True, stderr=False).decode('utf-8')
         print(f'Log entry for {self.name}:\n', file=logfile)
@@ -882,6 +898,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             self.log_stack_trace(traceback.format_exc())
             return -1
 
+        return_code = 0
+        router = None
         try:
             router = self.get_router(containers)
             # First start the router a second before any other container,
@@ -931,13 +949,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             )
             self.log_stack_trace(traceback.format_exc())
 
-        # A zero return code means execution went smoothly
-        return_code = 0
         # Check the return codes of the standard (non server/router) containers
         # to see if they finished properly. Note that this return code is yielded by
         # main runner/validator/compiler. We return the first non-zero return code we encounter.
-        for container in self.get_standard_containers(containers):
-            if container.return_code != 0:
-                return_code = container.return_code
-                break
+        # Skip the check if startup already failed so that error is not masked.
+        if return_code == 0:
+            for container in self.get_standard_containers(containers):
+                if container.return_code is not None and container.return_code != 0:
+                    return_code = container.return_code
+                    break
         return return_code
