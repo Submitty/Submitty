@@ -137,7 +137,8 @@ ignore-paths=
     sample_files/sample_CSV/test_grades.py,
     sample_files/sample_CSV/verify.py,
     vagrant-workers/workers.py,
-    vagrant-workers/generate_workers.py
+    vagrant-workers/generate_workers.py,
+    .venv
 
 [FORMAT]
 max-line-length=100
@@ -152,4 +153,5 @@ disable=
     missing-function-docstring,
     wrong-import-order,
     too-many-branches,
+    redefined-outer-name,
 
