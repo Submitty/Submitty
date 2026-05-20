@@ -1,10 +1,12 @@
 """Authentication commands: token, status, login, logout."""
 from __future__ import annotations
 
+import httpx
 import typer
 from typing_extensions import Annotated
 
 from submitty_cli.client import AuthError
+from submitty_cli.config import TOKEN_FILE, delete_token, load_user, save_token, save_user
 from submitty_cli.output import print_error, print_success
 from submitty_cli.state import AppState
 
@@ -13,7 +15,7 @@ auth_app = typer.Typer(no_args_is_help=True)
 
 @auth_app.command("token")
 def token(ctx: typer.Context) -> None:
-    """Print the current admin API token from config."""
+    """Print the active API token (env var, cached file, or config)."""
     state: AppState = ctx.obj
     typer.echo(state.config.token)
 
@@ -23,8 +25,8 @@ def status(ctx: typer.Context) -> None:
     """Validate the current token against the server."""
     state: AppState = ctx.obj
     try:
-        result = state.client.get("/api/token")
-        user = result.get("data", {}).get("user_id", "unknown")
+        state.client.get("/api/courses")
+        user = load_user() or "unknown"
         print_success(f"Authenticated as {user} at {state.config.server_url}")
     except AuthError as exc:
         print_error("Token is invalid or expired")
@@ -36,23 +38,42 @@ def login(
     ctx: typer.Context,
     user_id: Annotated[str, typer.Argument(help="Submitty user ID")],
 ) -> None:
-    """Authenticate with a user account and print the resulting token."""
+    """Authenticate with username and password; cache the token for future commands."""
     state: AppState = ctx.obj
     password = typer.prompt("Password", hide_input=True)
+    # Login is unauthenticated — build a bare client from the server URL only.
     try:
-        result = state.client.post(
-            "/api/token",
-            json={"user_id": user_id, "password": password},
+        response = httpx.post(
+            f"{state.server_url}/api/token",
+            data={"user_id": user_id, "password": password},
+            timeout=30.0,
         )
-        typer.echo(result.get("data", {}).get("token", ""))
-    except AuthError as exc:
-        print_error("Invalid credentials")
+    except httpx.RequestError as exc:
+        print_error(f"Could not reach server: {exc}")
         raise typer.Exit(1) from exc
+
+    if response.status_code == 401 or response.json().get("status") == "fail":
+        print_error(response.json().get("message", "Invalid credentials"))
+        raise typer.Exit(1)
+
+    if response.is_error:
+        print_error(f"Login failed ({response.status_code})")
+        raise typer.Exit(1)
+
+    new_token = response.json().get("data", {}).get("token", "")
+    if not new_token:
+        print_error(f"Login succeeded but no token in response. Raw body: {response.json()}")
+        raise typer.Exit(1)
+
+    save_token(new_token)
+    save_user(user_id)
+    print_success(f"Logged in as {user_id}. Token saved to {TOKEN_FILE}")
 
 
 @auth_app.command("logout")
 def logout(ctx: typer.Context) -> None:
-    """Invalidate the current admin API token."""
+    """Invalidate the current token on the server and remove the cached token file."""
     state: AppState = ctx.obj
     state.client.post("/api/token/invalidate")
-    print_success("Token invalidated")
+    delete_token()
+    print_success("Logged out and token removed")

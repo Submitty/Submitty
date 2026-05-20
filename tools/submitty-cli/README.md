@@ -15,12 +15,31 @@ The `sbin/` directory contains dozens of standalone Python and shell scripts (`a
 
 ## Installation
 
+### With uv (recommended)
+
+[uv](https://docs.astral.sh/uv/) is the fastest way to get started — no manual venv management needed.
+
+```bash
+# Install uv (once, system-wide)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# From the tools/submitty-cli/ directory:
+
+# Run tests or commands without activating a venv
+uv run pytest
+uv run submitty auth status
+
+# Install as a persistent global tool (like pipx)
+uv tool install .
+submitty --help
+```
+
+### With pip
+
 ```bash
 # From the tools/submitty-cli/ directory
 pip install -e ".[dev]"
 ```
-
-This installs the `submitty` entry point and all development dependencies.
 
 ## Configuration
 
@@ -34,8 +53,10 @@ The CLI reads server details from the standard Submitty config directory (defaul
 Override the config directory for testing or non-standard installs:
 
 ```bash
-submitty --config-dir /path/to/config auth status
+submitty --config-dir /path/to/custom/config auth status
 ```
+
+The default is `/usr/local/submitty/config`.
 
 ## Usage
 
@@ -98,6 +119,13 @@ tests/submitty_cli/          mirrors src/submitty_cli/ (no __init__.py)
 ### Running tests
 
 ```bash
+# With uv (no venv activation needed)
+uv run pytest
+uv run pytest -v
+uv run pytest --cov
+uv run pytest tests/submitty_cli/commands/test_auth.py
+
+# With an activated venv
 pytest                    # all tests
 pytest -v                 # verbose
 pytest --cov              # with coverage report

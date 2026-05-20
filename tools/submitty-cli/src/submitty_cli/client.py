@@ -24,9 +24,13 @@ class SubmittyClient:
     """Thin httpx wrapper that injects Bearer auth and maps HTTP errors to exceptions."""
 
     def __init__(self, base_url: str, token: str) -> None:
+        if not token:
+            raise APIError(
+                "API token is empty — run 'submitty auth login <user>' or set SUBMITTY_TOKEN"
+            )
         self._http = httpx.Client(
             base_url=base_url,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": token},
             timeout=30.0,
         )
 

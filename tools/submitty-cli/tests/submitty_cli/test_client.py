@@ -27,7 +27,7 @@ def test_get_sends_auth_header(api_client):
         return_value=httpx.Response(200, json={})
     )
     api_client.get("/api/courses")
-    assert route.calls[0].request.headers["Authorization"] == "Bearer test-token"
+    assert route.calls[0].request.headers["Authorization"] == "test-token"
 
 
 @respx.mock

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from submitty_cli.client import SubmittyClient
-from submitty_cli.config import DEFAULT_CONFIG_DIR, SubmittyConfig, load_config
+from submitty_cli.config import DEFAULT_CONFIG_DIR, SubmittyConfig, load_config, load_server_url
 from submitty_cli.output import OutputFormat
 
 
@@ -25,6 +25,13 @@ class AppState:
         state._config = config  # pylint: disable=protected-access
         state._client = client  # pylint: disable=protected-access
         return state
+
+    @property
+    def server_url(self) -> str:
+        """Return the server URL without requiring an API token."""
+        if self._config is not None:
+            return self._config.server_url
+        return load_server_url(self.config_dir)
 
     @property
     def config(self) -> SubmittyConfig:
