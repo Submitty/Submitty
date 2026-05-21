@@ -115,7 +115,5 @@ def load_config(config_dir: Path = DEFAULT_CONFIG_DIR) -> SubmittyConfig:
             install_dir=submitty.get("submitty_install_dir", ""),
             data_dir=submitty.get("submitty_data_dir", ""),
         )
-    except ConfigError:
-        raise
     except KeyError as e:
         raise ConfigError(f"Missing required config key: {e}") from e

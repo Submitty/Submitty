@@ -38,10 +38,12 @@ def test_course_list_includes_archived(runner, mock_state):
         "status": "success",
         "data": {
             "unarchived_courses": [
-                {"semester": "s25", "title": "csci1200", "display_name": "", "display_semester": "Spring 2025"},
+                {"semester": "s25", "title": "csci1200", "display_name": "",
+                 "display_semester": "Spring 2025"},
             ],
             "archived_courses": [
-                {"semester": "f24", "title": "csci1200", "display_name": "", "display_semester": "Fall 2024"},
+                {"semester": "f24", "title": "csci1200", "display_name": "",
+                 "display_semester": "Fall 2024"},
             ],
         },
     }
@@ -58,7 +60,8 @@ def test_course_list_json_format(runner, mock_state):
         "status": "success",
         "data": {
             "unarchived_courses": [
-                {"semester": "s25", "title": "csci1200", "display_name": "", "display_semester": "Spring 2025"},
+                {"semester": "s25", "title": "csci1200", "display_name": "",
+                 "display_semester": "Spring 2025"},
             ],
             "archived_courses": [],
         },
@@ -145,7 +148,7 @@ def test_config_set_sends_form_encoded(runner, mock_state):
         obj=mock_state,
     )
     _, kwargs = mock_state.client.post.call_args
-    assert kwargs["data"] == {"name": "course_name", "entry": "Updated Name"}  # API field name is 'entry'
+    assert kwargs["data"] == {"name": "course_name", "entry": "Updated Name"}
 
 
 def test_config_set_api_error_exits_nonzero(runner, mock_state):

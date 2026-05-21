@@ -1,5 +1,4 @@
 import json
-import os
 
 import pytest
 
@@ -24,7 +23,7 @@ def _write_config(tmp_path, submitty_data=None, admin_data=None):
 # resolve_token unit tests
 # ---------------------------------------------------------------------------
 
-def test_resolve_token_from_env(monkeypatch, tmp_path):
+def test_resolve_token_from_env(monkeypatch):
     """SUBMITTY_TOKEN env var takes priority over everything else."""
     monkeypatch.setenv("SUBMITTY_TOKEN", "env-token")
     assert resolve_token({"token": "config-token"}) == "env-token"
