@@ -138,7 +138,7 @@ def test_config_set_sends_form_encoded(runner, mock_state):
         obj=mock_state,
     )
     _, kwargs = mock_state.client.post.call_args
-    assert kwargs["data"] == {"name": "course_name", "entry": "Updated Name"}
+    assert kwargs["data"] == {"name": "course_name", "entry": "Updated Name"}  # API field name is 'entry'
 
 
 def test_config_set_api_error_exits_nonzero(runner, mock_state):

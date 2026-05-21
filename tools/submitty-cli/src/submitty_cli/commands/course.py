@@ -84,14 +84,14 @@ def config_set(
     semester: Annotated[str, typer.Argument(help="Term key (e.g. winter26)")],
     course: Annotated[str, typer.Argument(help="Course identifier (e.g. cptr142)")],
     name: Annotated[str, typer.Argument(help="Config key to update (e.g. course_name)")],
-    entry: Annotated[str, typer.Argument(help="New value")],
+    value: Annotated[str, typer.Argument(help="New value")],
 ) -> None:
     """Update a single course configuration value."""
     state: AppState = ctx.obj
     try:
         state.client.post(
             f"/api/courses/{semester}/{course}/config",
-            data={"name": name, "entry": entry},
+            data={"name": name, "entry": value},
         )
         typer.echo(f"Set {name} for {semester}/{course}")
     except APIError as e:
