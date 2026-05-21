@@ -121,6 +121,13 @@ describe('Docker UI Test', () => {
 
         cy.intercept('POST', '**/admin/add_image').as('addImage');
 
+        // Wait so the config write has a clearly newer mtime than the docker log
+        // from the previous test's machine update. Without this, both timestamps can
+        // fall within the same second, causing the "Changes Pending" badge to never
+        // appear. See https://github.com/Submitty/Submitty/pull/12216 for context.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(2000);
+
         // Check valid format and valid image
         cy.get('#capability-form')
             .select('et-cetera');
@@ -139,15 +146,8 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
 
-        // Verify DockerUI status has changed to "Changes Pending"
-        // eslint-disable-next-line no-restricted-syntax
-        cy.waitAndReloadUntil(() => {
-            return cy.get('[data-testid="docker-status"]')
-                .invoke('text')
-                .then((text) => {
-                    return text.includes('Changes Pending');
-                });
-        }, 2000);
+        cy.get('[data-testid="docker-status"]')
+            .should('contain.text', 'Changes Pending');
 
         // Update the machine to link existing image to a new tag
         cy.get('#update-machines').click();
