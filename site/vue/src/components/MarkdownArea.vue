@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import Markdown from './Markdown.vue';
 
 interface Props {
@@ -143,6 +143,10 @@ function addMarkdownFromMenu(type: string) {
     moreMenuRef.value?.removeAttribute('open');
 }
 
+function closeMoreMenu() {
+    moreMenuRef.value?.removeAttribute('open');
+}
+
 function handleKeyup(event: Event) {
     emit('keyup', event);
 
@@ -219,6 +223,12 @@ onMounted(() => {
     if (props.initializePreview) {
         setMode('preview');
     }
+
+    window.addEventListener('resize', closeMoreMenu);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', closeMoreMenu);
 });
 
 const showHeader = ref(!!props.renderHeader);
