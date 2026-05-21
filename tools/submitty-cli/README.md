@@ -56,7 +56,7 @@ Override the config directory for testing or non-standard installs:
 submitty --config-dir /path/to/custom/config auth status
 ```
 
-The default is `/usr/local/submitty/config`.
+The default is `/submitty/config`.
 
 ## Usage
 
@@ -79,8 +79,8 @@ submitty auth logout         # Invalidate the current admin token
 submitty course list                              # List all courses
 submitty course create s25 csci1200               # Create a course
 submitty course create s25 csci1200 --group mygrp # Create with a custom Unix group
-submitty course config get s25 csci1200           # Get course configuration (JSON)
-submitty course config set s25 csci1200 '{"key": "value"}'  # Update course config
+submitty course config get winter26 cptr142                        # Get course configuration (JSON)
+submitty course config set winter26 cptr142 course_name "My Course" # Update a single config value
 ```
 
 ### Output formats
@@ -88,7 +88,7 @@ submitty course config set s25 csci1200 '{"key": "value"}'  # Update course conf
 Every command supports `--format json` for scripting:
 
 ```bash
-submitty --format json course list | jq '.[].semester'
+submitty --format json course list | jq '.[].key'
 ```
 
 ## Development
