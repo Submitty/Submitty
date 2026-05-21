@@ -39,24 +39,24 @@ def course_list(ctx: typer.Context) -> None:
 @course_app.command("create")
 def course_create(
     ctx: typer.Context,
-    semester: Annotated[str, typer.Argument(help="Semester identifier (e.g. s25)")],
-    course: Annotated[str, typer.Argument(help="Course identifier (e.g. csci1200)")],
+    term: Annotated[str, typer.Argument(help="Term key (e.g. winter26)")],
+    course: Annotated[str, typer.Argument(help="Course identifier (e.g. cptr142)")],
+    instructor: Annotated[str, typer.Option("--instructor", help="Head instructor user ID")],
     group: Annotated[str, typer.Option("--group", help="Unix group for the course")] = "",
-    section: Annotated[str, typer.Option("--section", help="Registration section")] = "",
 ) -> None:
     """Create a new course."""
     state: AppState = ctx.obj
     try:
         state.client.post(
             "/api/courses",
-            json={
-                "semester": semester,
-                "course": course,
-                "group": group or f"{semester}_{course}",
-                "section": section,
+            data={
+                "course_semester": term,
+                "course_title": course,
+                "head_instructor": instructor,
+                "group_name": group or f"{term}_{course}",
             },
         )
-        typer.echo(f"Course {semester}/{course} created")
+        typer.echo(f"Course {term}/{course} created")
     except APIError as e:
         print_error(str(e))
         raise typer.Exit(1)

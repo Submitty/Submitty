@@ -80,7 +80,9 @@ def test_course_list_empty(runner, mock_state):
 
 def test_course_create_success(runner, mock_state):
     mock_state.client.post.return_value = {"status": "success"}
-    result = runner.invoke(app, ["course", "create", "s25", "csci1200"], obj=mock_state)
+    result = runner.invoke(
+        app, ["course", "create", "s25", "csci1200", "--instructor", "prof01"], obj=mock_state
+    )
     assert result.exit_code == 0
     assert "created" in result.output
 
@@ -88,17 +90,22 @@ def test_course_create_success(runner, mock_state):
 def test_course_create_passes_correct_payload(runner, mock_state):
     mock_state.client.post.return_value = {"status": "success"}
     runner.invoke(
-        app, ["course", "create", "s25", "csci1200", "--group", "mygroup"], obj=mock_state
+        app,
+        ["course", "create", "s25", "csci1200", "--instructor", "prof01", "--group", "mygroup"],
+        obj=mock_state,
     )
     _, kwargs = mock_state.client.post.call_args
-    assert kwargs["json"]["semester"] == "s25"
-    assert kwargs["json"]["course"] == "csci1200"
-    assert kwargs["json"]["group"] == "mygroup"
+    assert kwargs["data"]["course_semester"] == "s25"
+    assert kwargs["data"]["course_title"] == "csci1200"
+    assert kwargs["data"]["head_instructor"] == "prof01"
+    assert kwargs["data"]["group_name"] == "mygroup"
 
 
 def test_course_create_api_error_exits_nonzero(runner, mock_state):
     mock_state.client.post.side_effect = APIError("Course already exists", 409)
-    result = runner.invoke(app, ["course", "create", "s25", "csci1200"], obj=mock_state)
+    result = runner.invoke(
+        app, ["course", "create", "s25", "csci1200", "--instructor", "prof01"], obj=mock_state
+    )
     assert result.exit_code == 1
 
 

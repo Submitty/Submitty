@@ -76,9 +76,9 @@ submitty auth logout         # Invalidate the current admin token
 ### course — Course management
 
 ```bash
-submitty course list                              # List all courses
-submitty course create s25 csci1200               # Create a course
-submitty course create s25 csci1200 --group mygrp # Create with a custom Unix group
+submitty course list                                                        # List all courses
+submitty course create winter26 cptr141 --instructor prof01                 # Create a course
+submitty course create winter26 cptr141 --instructor prof01 --group mygrp   # Create with a custom Unix group
 submitty course config get winter26 cptr142                        # Get course configuration (JSON)
 submitty course config set winter26 cptr142 course_name "My Course" # Update a single config value
 ```
