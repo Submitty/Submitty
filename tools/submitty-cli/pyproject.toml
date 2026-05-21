@@ -34,3 +34,8 @@ pythonpath = ["src"]
 
 [tool.coverage.run]
 source = ["src/submitty_cli"]
+
+[dependency-groups]
+dev = [
+    "pylint>=3.3.9",
+]

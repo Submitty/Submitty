@@ -1,4 +1,5 @@
 [MASTER]
+ignore=.venv
 ignore-paths=
     site/node_modules,
     more_autograding_examples,
@@ -138,7 +139,7 @@ ignore-paths=
     sample_files/sample_CSV/verify.py,
     vagrant-workers/workers.py,
     vagrant-workers/generate_workers.py,
-    .venv
+    .*\.venv.*
 
 [FORMAT]
 max-line-length=100
