@@ -75,3 +75,25 @@ def test_auth_error_has_correct_status_code(api_client):
     with pytest.raises(AuthError) as exc_info:
         api_client.get("/api/token")
     assert exc_info.value.status_code == 401
+
+
+@respx.mock
+def test_application_fail_status_raises_api_error(api_client):
+    """HTTP 200 with status=fail in body should raise APIError."""
+    respx.post(f"{BASE_URL}/api/courses").mock(
+        return_value=httpx.Response(
+            200, json={"status": "fail", "message": "You don't have access to this endpoint."}
+        )
+    )
+    with pytest.raises(APIError) as exc_info:
+        api_client.post("/api/courses", data={})
+    assert "You don't have access" in str(exc_info.value)
+
+
+@respx.mock
+def test_application_fail_without_message_raises_api_error(api_client):
+    respx.get(f"{BASE_URL}/api/something").mock(
+        return_value=httpx.Response(200, json={"status": "fail"})
+    )
+    with pytest.raises(APIError):
+        api_client.get("/api/something")

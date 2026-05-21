@@ -35,7 +35,7 @@ class SubmittyClient:
         )
 
     def _raise_for_status(self, response: httpx.Response) -> None:
-        """Translate HTTP error codes into typed exceptions."""
+        """Translate HTTP error codes and application-level failures into typed exceptions."""
         if response.status_code == 401:
             raise AuthError("Authentication failed — check your token", 401)
         if response.status_code == 404:
@@ -46,6 +46,12 @@ class SubmittyClient:
             except ValueError:
                 message = response.text
             raise APIError(f"API error {response.status_code}: {message}", response.status_code)
+        try:
+            body = response.json()
+            if body.get("status") == "fail":
+                raise APIError(body.get("message", "Request failed"), response.status_code)
+        except (ValueError, AttributeError):
+            pass
 
     def get(self, path: str, **kwargs: object) -> dict:
         """Send a GET request and return the parsed JSON body."""
