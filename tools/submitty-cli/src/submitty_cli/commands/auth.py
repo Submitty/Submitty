@@ -37,7 +37,6 @@ def status(ctx: typer.Context) -> None:
 
 @auth_app.command("login")
 def login(
-    ctx: typer.Context,
     user_id: Annotated[str, typer.Argument(help="Submitty user ID")],
     server: Annotated[
         str,
