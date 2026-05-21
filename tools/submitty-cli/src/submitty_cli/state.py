@@ -2,18 +2,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Optional
 
 from submitty_cli.client import SubmittyClient
-from submitty_cli.config import DEFAULT_CONFIG_DIR, SubmittyConfig, load_config, load_server_url
+from submitty_cli.config import SubmittyConfig, load_server, resolve_token
 from submitty_cli.output import OutputFormat
 
 
 @dataclass
 class AppState:
     """Shared runtime state passed through Typer's context object to every command."""
-    config_dir: Path = DEFAULT_CONFIG_DIR
     fmt: OutputFormat = OutputFormat.TABLE
     _config: Optional[SubmittyConfig] = field(default=None, repr=False)
     _client: Optional[SubmittyClient] = field(default=None, repr=False)
@@ -28,16 +26,19 @@ class AppState:
 
     @property
     def server_url(self) -> str:
-        """Return the server URL without requiring an API token."""
+        """Return the server URL without requiring a token."""
         if self._config is not None:
             return self._config.server_url
-        return load_server_url(self.config_dir)
+        return load_server()
 
     @property
     def config(self) -> SubmittyConfig:
         """Load config on first access."""
         if self._config is None:
-            self._config = load_config(self.config_dir)
+            self._config = SubmittyConfig(
+                server_url=load_server(),
+                token=resolve_token(),
+            )
         return self._config
 
     @property

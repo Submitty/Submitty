@@ -43,25 +43,27 @@ pip install -e ".[dev]"
 
 ## Configuration
 
-The CLI reads server details from the standard Submitty config directory (default: `/usr/local/submitty/config`):
+The CLI requires no config files. All connection details are stored in `~/.config/submitty/` after the first login:
 
-| File | Fields used |
+| File | Contents | Set by |
+|---|---|---|
+| `~/.config/submitty/server` | Server URL | `submitty auth login --server <url>` |
+| `~/.config/submitty/token` | API token | `submitty auth login` |
+| `~/.config/submitty/user` | Logged-in user ID | `submitty auth login` |
+
+Environment variables override the saved files:
+
+| Variable | Overrides |
 |---|---|
-| `submitty.json` | `submission_url` (base API URL), `submitty_install_dir`, `submitty_data_dir` |
-| `submitty_admin.json` | `token` (admin API token) |
+| `SUBMITTY_SERVER` | Saved server URL |
+| `SUBMITTY_TOKEN` | Saved token |
 
-Override the config directory for testing or non-standard installs:
-
-```bash
-submitty --config-dir /path/to/custom/config auth status
-```
-
-The default is `/usr/local/submitty/config/`.
+If no server has been saved and `SUBMITTY_SERVER` is not set, the server defaults to `http://localhost` (useful when running directly on the Submitty host).
 
 ## Usage
 
 ```
-submitty [--config-dir PATH] [--format {table,json}] <command> <subcommand> [args]
+submitty [--format {table,json}] <command> <subcommand> [args]
 ```
 
 Every command supports `--format json` for scripting:
@@ -77,10 +79,11 @@ Commands marked ✅ are implemented. Commands marked 🔲 are planned.
 ### auth — Authentication
 
 ```bash
-submitty auth token                    # ✅ Print the active API token
-submitty auth status                   # ✅ Validate the token against the server
-submitty auth login <user>             # ✅ Log in and cache a token
-submitty auth logout                   # ✅ Invalidate the token and remove the cache
+submitty auth login <user> --server <url>  # ✅ Log in; saves server URL, token, and user
+submitty auth login <user>                 # ✅ Log in using the saved or default server
+submitty auth token                        # ✅ Print the active API token
+submitty auth status                       # ✅ Validate the token against the server
+submitty auth logout                       # ✅ Invalidate the token and remove cached files
 ```
 
 ### course — Course management
@@ -154,7 +157,7 @@ submitty admin version                 # 🔲 Show Submitty version details (rep
 
 ```
 src/submitty_cli/
-  config.py        Loads /usr/local/submitty/config/submitty.json → SubmittyConfig
+  config.py        Loads server URL and token from ~/.config/submitty/ → SubmittyConfig
   client.py        httpx-based API client; raises AuthError / NotFoundError / APIError
   state.py         AppState — lazy config + client, injected via Typer context
   output.py        OutputFormat enum, print_table / print_json / print_error

@@ -11,8 +11,6 @@ def sample_config() -> SubmittyConfig:
     return SubmittyConfig(
         server_url="https://submitty.example.com",
         token="test-token-abc123",
-        install_dir="/submitty",
-        data_dir="/var/local/submitty",
     )
 
 

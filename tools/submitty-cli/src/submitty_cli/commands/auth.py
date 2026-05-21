@@ -6,7 +6,9 @@ import typer
 from typing_extensions import Annotated
 
 from submitty_cli.client import AuthError
-from submitty_cli.config import TOKEN_FILE, delete_token, load_user, save_token, save_user
+from submitty_cli.config import (
+    DEFAULT_SERVER, TOKEN_FILE, delete_token, load_user, save_server, save_token, save_user,
+)
 from submitty_cli.output import print_error, print_success
 from submitty_cli.state import AppState
 
@@ -37,14 +39,17 @@ def status(ctx: typer.Context) -> None:
 def login(
     ctx: typer.Context,
     user_id: Annotated[str, typer.Argument(help="Submitty user ID")],
+    server: Annotated[
+        str,
+        typer.Option("--server", help="Submitty server URL (saved for future commands)"),
+    ] = DEFAULT_SERVER,
 ) -> None:
-    """Authenticate with username and password; cache the token for future commands."""
-    state: AppState = ctx.obj
+    """Authenticate with username and password; cache the server URL and token."""
+    server_url = server.rstrip("/")
     password = typer.prompt("Password", hide_input=True)
-    # Login is unauthenticated — build a bare client from the server URL only.
     try:
         response = httpx.post(
-            f"{state.server_url}/api/token",
+            f"{server_url}/api/token",
             data={"user_id": user_id, "password": password},
             timeout=30.0,
         )
@@ -65,9 +70,10 @@ def login(
         print_error(f"Login succeeded but no token in response. Raw body: {response.json()}")
         raise typer.Exit(1)
 
+    save_server(server_url)
     save_token(new_token)
     save_user(user_id)
-    print_success(f"Logged in as {user_id}. Token saved to {TOKEN_FILE}")
+    print_success(f"Logged in as {user_id} at {server_url}. Token saved to {TOKEN_FILE}")
 
 
 @auth_app.command("logout")

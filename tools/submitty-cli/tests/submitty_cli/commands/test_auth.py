@@ -56,9 +56,13 @@ def test_login_saves_token_and_user(runner, mock_state):
     with (
         patch("submitty_cli.commands.auth.save_token") as mock_save_token,
         patch("submitty_cli.commands.auth.save_user") as mock_save_user,
+        patch("submitty_cli.commands.auth.save_server"),
     ):
         result = runner.invoke(
-            app, ["auth", "login", "instructor01"], input="secret\n", obj=mock_state
+            app,
+            ["auth", "login", "--server", "https://submitty.example.com", "instructor01"],
+            input="secret\n",
+            obj=mock_state,
         )
     assert result.exit_code == 0
     mock_save_token.assert_called_once_with("new-token-xyz")
@@ -66,10 +70,32 @@ def test_login_saves_token_and_user(runner, mock_state):
 
 
 @respx.mock
+def test_login_saves_server_url(runner, mock_state):
+    respx.post(LOGIN_URL).mock(
+        return_value=httpx.Response(200, json={"data": {"token": "new-token-xyz"}})
+    )
+    with (
+        patch("submitty_cli.commands.auth.save_token"),
+        patch("submitty_cli.commands.auth.save_user"),
+        patch("submitty_cli.commands.auth.save_server") as mock_save_server,
+    ):
+        runner.invoke(
+            app,
+            ["auth", "login", "--server", "https://submitty.example.com/", "instructor01"],
+            input="secret\n",
+            obj=mock_state,
+        )
+    mock_save_server.assert_called_once_with("https://submitty.example.com")
+
+
+@respx.mock
 def test_login_bad_credentials_exits_nonzero(runner, mock_state):
     respx.post(LOGIN_URL).mock(return_value=httpx.Response(401))
     result = runner.invoke(
-        app, ["auth", "login", "instructor01"], input="wrong\n", obj=mock_state
+        app,
+        ["auth", "login", "--server", "https://submitty.example.com", "instructor01"],
+        input="wrong\n",
+        obj=mock_state,
     )
     assert result.exit_code == 1
 
@@ -83,7 +109,10 @@ def test_login_status_fail_exits_nonzero(runner, mock_state):
         )
     )
     result = runner.invoke(
-        app, ["auth", "login", "instructor01"], input="wrong\n", obj=mock_state
+        app,
+        ["auth", "login", "--server", "https://submitty.example.com", "instructor01"],
+        input="wrong\n",
+        obj=mock_state,
     )
     assert result.exit_code == 1
 
@@ -92,6 +121,9 @@ def test_login_status_fail_exits_nonzero(runner, mock_state):
 def test_login_server_error_exits_nonzero(runner, mock_state):
     respx.post(LOGIN_URL).mock(return_value=httpx.Response(500))
     result = runner.invoke(
-        app, ["auth", "login", "instructor01"], input="secret\n", obj=mock_state
+        app,
+        ["auth", "login", "--server", "https://submitty.example.com", "instructor01"],
+        input="secret\n",
+        obj=mock_state,
     )
     assert result.exit_code == 1
