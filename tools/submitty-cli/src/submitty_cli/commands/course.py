@@ -1,8 +1,6 @@
 """Course management commands: list, create, config get/set."""
 from __future__ import annotations
 
-import json
-
 import typer
 from typing_extensions import Annotated
 
@@ -83,21 +81,19 @@ def config_get(
 @course_config_app.command("set")
 def config_set(
     ctx: typer.Context,
-    semester: Annotated[str, typer.Argument(help="Semester identifier")],
-    course: Annotated[str, typer.Argument(help="Course identifier")],
-    data: Annotated[str, typer.Argument(help="Configuration values as a JSON string")],
+    semester: Annotated[str, typer.Argument(help="Term key (e.g. winter26)")],
+    course: Annotated[str, typer.Argument(help="Course identifier (e.g. cptr142)")],
+    name: Annotated[str, typer.Argument(help="Config key to update (e.g. course_name)")],
+    entry: Annotated[str, typer.Argument(help="New value")],
 ) -> None:
-    """Update course configuration."""
+    """Update a single course configuration value."""
     state: AppState = ctx.obj
     try:
-        payload = json.loads(data)
-    except json.JSONDecodeError as e:
-        print_error(f"Invalid JSON: {e}")
-        raise typer.Exit(1)
-
-    try:
-        state.client.post(f"/api/courses/{semester}/{course}/config", json=payload)
-        typer.echo(f"Config updated for {semester}/{course}")
+        state.client.post(
+            f"/api/courses/{semester}/{course}/config",
+            data={"name": name, "entry": entry},
+        )
+        typer.echo(f"Set {name} for {semester}/{course}")
     except APIError as e:
         print_error(str(e))
         raise typer.Exit(1)

@@ -123,27 +123,29 @@ def test_config_set_success(runner, mock_state):
     mock_state.client.post.return_value = {"status": "success"}
     result = runner.invoke(
         app,
-        ["course", "config", "set", "s25", "csci1200", '{"course_name": "Updated"}'],
+        ["course", "config", "set", "s25", "csci1200", "course_name", "Updated Name"],
         obj=mock_state,
     )
     assert result.exit_code == 0
-    assert "updated" in result.output.lower()
+    assert "course_name" in result.output
 
 
-def test_config_set_invalid_json_exits_nonzero(runner, mock_state):
-    result = runner.invoke(
+def test_config_set_sends_form_encoded(runner, mock_state):
+    mock_state.client.post.return_value = {"status": "success"}
+    runner.invoke(
         app,
-        ["course", "config", "set", "s25", "csci1200", "not-valid-json"],
+        ["course", "config", "set", "s25", "csci1200", "course_name", "Updated Name"],
         obj=mock_state,
     )
-    assert result.exit_code == 1
+    _, kwargs = mock_state.client.post.call_args
+    assert kwargs["data"] == {"name": "course_name", "entry": "Updated Name"}
 
 
 def test_config_set_api_error_exits_nonzero(runner, mock_state):
     mock_state.client.post.side_effect = APIError("Forbidden", 403)
     result = runner.invoke(
         app,
-        ["course", "config", "set", "s25", "csci1200", '{"x": 1}'],
+        ["course", "config", "set", "s25", "csci1200", "course_name", "x"],
         obj=mock_state,
     )
     assert result.exit_code == 1
