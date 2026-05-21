@@ -445,6 +445,7 @@ function checkWarningBanners() {
     const submission_open_date = $('#date_submit').val();
     const submission_due_date = $('#date_due').val();
     const manual_grading_start_date = $('#date_grade').val();
+    const manual_grading_due_date = $('#date_grade_due').val();
     const grades_release_date = $('#date_released').val();
 
     if ($('#radio_electronic_file').is(':checked')) {
@@ -499,6 +500,17 @@ function checkWarningBanners() {
             else {
                 $('#submission-due-after-grading-released-dates-warning').hide();
             }
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        // hide/show element when manual grading open date is after the manual grading due date
+        if (manual_grading_due_date < manual_grading_start_date) {
+            $('#grading-open-after-grading-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#grading-open-after-grading-due-dates-warning').hide();
         }
     }
 
