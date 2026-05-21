@@ -1,4 +1,4 @@
-"""Config loader: reads /submitty/config/submitty.json and submitty_admin.json."""
+"""Config loader: reads /usr/local/submitty/config/submitty.json and submitty_admin.json."""
 from __future__ import annotations
 
 import json
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_CONFIG_DIR = Path("/submitty/config")
+DEFAULT_CONFIG_DIR = Path("/usr/local/submitty/config")
 TOKEN_FILE = Path.home() / ".config" / "submitty" / "token"
 USER_FILE = Path.home() / ".config" / "submitty" / "user"
 

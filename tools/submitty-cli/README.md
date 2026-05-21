@@ -43,7 +43,7 @@ pip install -e ".[dev]"
 
 ## Configuration
 
-The CLI reads server details from the standard Submitty config directory (default: `/submitty/config`):
+The CLI reads server details from the standard Submitty config directory (default: `/usr/local/submitty/config`):
 
 | File | Fields used |
 |---|---|
@@ -56,7 +56,7 @@ Override the config directory for testing or non-standard installs:
 submitty --config-dir /path/to/custom/config auth status
 ```
 
-The default is `/usr/local/submitty/config`.
+The default is `/usr/local/submitty/config/`.
 
 ## Usage
 
@@ -154,7 +154,7 @@ submitty admin version                 # 🔲 Show Submitty version details (rep
 
 ```
 src/submitty_cli/
-  config.py        Loads /submitty/config/*.json → SubmittyConfig
+  config.py        Loads /usr/local/submitty/config/submitty.json → SubmittyConfig
   client.py        httpx-based API client; raises AuthError / NotFoundError / APIError
   state.py         AppState — lazy config + client, injected via Typer context
   output.py        OutputFormat enum, print_table / print_json / print_error
