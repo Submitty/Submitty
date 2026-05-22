@@ -269,6 +269,9 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var bool if gradeable release notifications have been sent*/
     protected $release_notifications_sent = false;
+    /** @prop
+     * @var bool Whether an unseen gradeable notification exists for a specific user */
+    protected bool $has_unseen_gradeable_notification = false;
 
     /**
      * Gradeable constructor.
@@ -351,6 +354,7 @@ class Gradeable extends AbstractModel {
             $this->setDependsOnPoints($details['depends_on_points']);
             $this->setScoreNotificationsSent($details['score_notifications_sent'] ?? 0);
             $this->setReleaseNotificationsSent($details['release_notifications_sent'] ?? false);
+            $this->has_unseen_gradeable_notification = (bool) ($details['has_unseen_gradeable_notification'] ?? false);
             if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
                 $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }
@@ -415,11 +419,7 @@ class Gradeable extends AbstractModel {
      * All \DateTime properties that should be validated
      */
     const date_validated_properties = [
-        'ta_view_start_date',
         'team_lock_date',
-        'submission_open_date',
-        'submission_due_date',
-        'grade_start_date',
         'grade_due_date',
         'grade_released_date',
     ];
@@ -429,8 +429,6 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_simple = [
-        'ta_view_start_date',
-        'grade_start_date',
         'grade_due_date',
         'grade_released_date'
     ];
@@ -440,38 +438,7 @@ class Gradeable extends AbstractModel {
      * Note: this is in validation order
      */
     const date_properties_elec_ta = [
-        'ta_view_start_date',
-        'submission_open_date',
-        'grade_start_date',
         'grade_due_date'
-    ];
-
-    /**
-     * All \DateTime properties for ELECTRONIC gradeables with no ta grading
-     * Note: this is in validation order
-     */
-    const date_properties_elec_no_ta = [
-        'ta_view_start_date',
-        'submission_open_date'
-    ];
-
-    /**
-     * All \DateTime properties for ELECTRONIC exam gradeables
-     * Note: this is in validation order
-     */
-    const date_properties_elec_exam = [
-        'ta_view_start_date',
-        'grade_start_date',
-        'grade_due_date'
-    ];
-
-    /**
-     * All \DateTime properties relevant for all types
-     * Note: This is also the set for no student upload AND no ta grading
-     * Note: this is in validation order
-     */
-    const date_properties_bare = [
-        'ta_view_start_date'
     ];
 
     public function toArray() {
@@ -752,12 +719,7 @@ class Gradeable extends AbstractModel {
                 $result = self::date_properties_elec_ta;
             }
             else {
-                $result = self::date_properties_elec_no_ta;
-            }
-            // Add in submission due date
-            if ($this->hasDueDate()) {
-                // Make sure we insert the due date into the correct location (after the open date)
-                array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
+                $result = [];
             }
 
             if ($this->hasReleaseDate()) {
@@ -2389,7 +2351,27 @@ class Gradeable extends AbstractModel {
 
         //If we're not instructor and this is not open to TAs
         $date = $this->core->getDateTimeNow();
-        if ($this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+        if ($this->getTaViewStartDate() > $date && $this->getSubmissionOpenDate() > $date && $this->getSubmissionDueDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+
+        // If the gradeable has NO open submission date and TA view start date is in the future
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() > $date && $this->getGradeDueDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+
+        // If the gradeable is open to grading (regardless of the TA view date), it should be only visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeStartDate() <= $date && !$user->accessGrading()) {
+            return false;
+        }
+
+        // If the gradeables grading is past due (regardless of toher dates), it should be only visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() > $date && $this->getGradeDueDate() <= $date && !$user->accessGrading()) {
+            return false;
+        }
+
+        // If the gradeable is open to ta beta testing, it should only be visible to graders
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && $this->getTaViewStartDate() <= $date && !$user->accessGrading()) {
             return false;
         }
 
@@ -2954,6 +2936,10 @@ class Gradeable extends AbstractModel {
 
     public function getReleaseNotificationsSent(): bool {
         return $this->release_notifications_sent;
+    }
+
+    public function hasUnseenGradeableNotification(): bool {
+        return $this->has_unseen_gradeable_notification;
     }
 
     /**
