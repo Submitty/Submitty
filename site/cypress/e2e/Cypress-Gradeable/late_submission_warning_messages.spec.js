@@ -193,7 +193,6 @@ const setInputAndSave = (selector, value) => {
     cy.get(selector).clear();
     cy.get(selector).type(value);
     cy.get(selector).type('{enter}');
-    cy.get(selector).blur();
     cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
 };
 
@@ -280,9 +279,6 @@ describe('Test warning messages for non team gradeable', () => {
         // 0 allowed late days and 0 remaining late days for student ==> Warning message
         giveLateDays(getCurrentTime(), 'student', 0);
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        setInputAndSave('[data-testid=late-days]', '1');
-        setInputAndSave('[data-testid=late-days]', '0');
-        setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_future'));
         setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_past'));
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file1', 'invalid_1_day_late');
@@ -295,9 +291,7 @@ describe('Test warning messages for non team gradeable', () => {
         If testing runs for too long, you can remove this test bloc */
         giveLateDays(getCurrentTime(), 'student', 0);
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        setInputAndSave('[data-testid=late-days]', '0');
         setInputAndSave('[data-testid=late-days]', '1');
-        setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_future'));
         setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_past'));
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
@@ -307,9 +301,6 @@ describe('Test warning messages for non team gradeable', () => {
         // 1 allowed late day and 1 remaining late day for student ==> Confirmation message
         giveLateDays(getCurrentTime(), 'student', 1);
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        setInputAndSave('[data-testid=late-days]', '0');
-        setInputAndSave('[data-testid=late-days]', '1');
-        setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_future'));
         setInputAndSave('[data-testid=submission-due-date]', getCurrentTime());
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'valid_usage', '1_day_late');
@@ -320,9 +311,7 @@ describe('Test warning messages for non team gradeable', () => {
         giveLateDays(getCurrentTime(), 'student', 1);
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
 
-        setInputAndSave('[data-testid=late-days]', '1');
         setInputAndSave('[data-testid=late-days]', '0');
-        setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_future'));
         setInputAndSave('[data-testid=submission-due-date]', getCurrentTime('few_seconds_past'));
         cy.logout();
         SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_1_day_late');
