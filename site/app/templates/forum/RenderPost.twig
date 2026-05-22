@@ -12,20 +12,32 @@
 {% if post_attachment is defined and post_attachment.exist == true %}
     <table>
         <tbody class="history-attachment-table" id="history-table-{{ edit_id }}">
-            {% for row in post_attachment.params.unencoded_data %}
-            {% if row[2] is defined %}
-                <tr>
-                    <td style="padding: 20px">
-                        <img 
-                            src="{{ row[0] }}"
-                            alt="Click to view attachment in popup"
-                            title="Click to view attachment in popup"
-                            class="attachment-img"
-                            onclick="openInWindow(this)"
-                        />
-                    </td>
-                    <td class="attachment-name-history">{{ row[2] }}</td>
-                </tr>
+            {% for attachment in post_attachment.params.unencoded_data %}
+                {% if attachment[2] is defined %}
+                    <tr>
+                        <td style="padding: 20px">
+                            {% if attachment[3] is defined and attachment[3] == 'pdf' %}
+                                <div class="attachment-pdf">
+                                    <a href="{{ attachment[0] }}" target="_blank" rel="noopener noreferrer" class="btn btn-default attachment-open-btn">Open PDF</a>
+                                    <iframe
+                                        src="{{ attachment[0] }}"
+                                        title="PDF attachment preview for {{ attachment[2] }}"
+                                        class="attachment-pdf-preview"
+                                    ></iframe>
+                                </div>
+                            {% else %}
+                                <a href="{{ attachment[0] }}" target="_blank" rel="noopener noreferrer">
+                                    <img
+                                        src="{{ attachment[0] }}"
+                                        alt="Click to view attachment in a new tab"
+                                        title="Click to view attachment in a new tab"
+                                        class="attachment-img"
+                                    />
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td class="attachment-name-history">{{ attachment[2] }}</td>
+                    </tr>
                 {% endif %}
             {% endfor %}
         </tbody>
