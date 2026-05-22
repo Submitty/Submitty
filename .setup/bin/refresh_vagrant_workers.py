@@ -54,7 +54,7 @@ for name, data in vagrant_workers_data.items():
     os.chmod(f"/tmp/worker_keys/{name}", 0o400)
     w = subprocess.run(['su', DAEMON_USER, '-c', f"scp -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no ~/.ssh/id_rsa.pub root@{data['ip_addr']}:/tmp/workerkey"])
     if w.returncode != 0:
-        # checking if the first subprocess fails before moving to the next one. 
+        # checking if the first subprocess fails before moving to the next one.
         print("failed to connect to " + name)
         continue
     w = subprocess.run(['su', DAEMON_USER, '-c', f"ssh -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no root@{data['ip_addr']} \"chown {SUPERVISOR_USER}:{SUPERVISOR_USER} /tmp/workerkey && su {SUPERVISOR_USER} -c \\\"mkdir -p ~/.ssh && mv /tmp/workerkey ~/.ssh/authorized_keys\\\"\""])
