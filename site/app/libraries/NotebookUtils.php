@@ -21,19 +21,16 @@ class NotebookUtils {
     /**
      * Accepts a path to a .ipynb file and returns an array in the Submitty notebook format.
      *
-     * @return array<int,array<string,mixed>>
+     * @return array{cells: array<int, array<string, mixed>>, size_exceeded: bool, skipped_content_count: int, skipped_output_count: int}
      */
     public static function jupyterToSubmittyNotebook(string $filepath): array {
         // Check the total file size before doing any processing
         if (filesize($filepath) > self::NOTEBOOK_SIZE_LIMIT) {
-            // Return a single markdown cell with an error message
             return [
-                [
-                    'type' => 'markdown',
-                    'markdown_data' => '### Notebook Not Rendered' . PHP_EOL .
-                    'The executed notebook is larger than ' . (self::NOTEBOOK_SIZE_LIMIT / (1024 * 1024)) . ' MB and will not be displayed.' . PHP_EOL .
-                    'Please download the notebook to view its contents.'
-                ]
+                'cells' => [],
+                'size_exceeded' => true,
+                'skipped_content_count' => 0,
+                'skipped_output_count' => 0,
             ];
         }
 
@@ -70,20 +67,12 @@ class NotebookUtils {
             }
         }
 
-        // If there is skipped content, prepend a warning cell
-        if ($skipped_content_count > 0 || $skipped_output_count > 0) {
-            $warning_cell = [
-                'type' => 'markdown',
-                'markdown_data' => '### Notebook Rendered with Skipped Content' . PHP_EOL .
-                'Some content was skipped due to size limits. ' .
-                ($skipped_content_count > 0 ? "Skipped $skipped_content_count attachment(s)." : '') .
-                ($skipped_output_count > 0 ? " Skipped $skipped_output_count output(s)." : '') .
-                PHP_EOL . 'Download the notebook to view the full notebook.'
-            ];
-            array_unshift($cells, $warning_cell);
-        }
-
-        return $cells;
+        return [
+            'cells' => $cells,
+            'size_exceeded' => false,
+            'skipped_content_count' => $skipped_content_count,
+            'skipped_output_count' => $skipped_output_count,
+        ];
     }
 
     /**
