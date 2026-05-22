@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import Autocomplete from './Autocomplete.vue';
 
 interface AutocompleteItem {
@@ -26,14 +26,14 @@ const emit = defineEmits<Emits>();
 const isOpen = ref(false);
 const filteredItems = ref<AutocompleteItem[]>([]);
 
-
-//Collect all available threads
+// Collect all available threads
+type ThreadListEntry = { id?: number | string; title?: string } | string;
 
 function getThreadSource(): AutocompleteItem[] {
     const normalizedThreads: Array<{ id: number; title: string }> = [];
     
     // Get threads from global list (server-provided)
-    const globalList = (window as any).thread_list;
+    const globalList = (window as Window & { thread_list?: ThreadListEntry[] }).thread_list;
     if (Array.isArray(globalList)) {
         for (const entry of globalList) {
             const parsed = parseThreadListEntry(entry);
@@ -70,7 +70,6 @@ function getThreadSource(): AutocompleteItem[] {
             value: `#${thread.id}`,
         }));
 }
-
 
 function normalizeThreadTitle(rawTitle: string, id: number): string {
     let title = rawTitle.trim();
@@ -110,7 +109,6 @@ function parseThreadListEntry(
     };
 }
 
-
 // Matches threads based on typed number after "#"
 
 function performSearch(): void {
@@ -121,7 +119,7 @@ function performSearch(): void {
 
     const caret = props.textareaRef.selectionStart;
     const textToCaret = props.textareaRef.value.substring(0, caret);
-    
+
     // Match pattern: "#" followed by optional digits
     const match = textToCaret.match(/#(\d*)$/);
     if (!match) {
@@ -132,12 +130,12 @@ function performSearch(): void {
     // Get the typed number (could be empty if just typed "#")
     const term = match[1] || '';
     const allThreads = getThreadSource();
-    
+
     // Filter: show threads that match the typed number or title
     filteredItems.value = allThreads.filter(
         (item) =>
-            item.value.startsWith(`#${term}`) ||
-            item.label.toLowerCase().includes(term.toLowerCase()),
+            item.value.startsWith(`#${term}`)
+            || item.label.toLowerCase().includes(term.toLowerCase()),
     );
 }
 
@@ -148,21 +146,20 @@ function handleTextareaKeyup(event: KeyboardEvent): void {
         return;
     }
 
-    const e = event as KeyboardEvent;
     const caret = props.textareaRef.selectionStart;
     const text = props.textareaRef.value.substring(0, caret);
 
-    const isTypingNumber = e.key.length === 1 && /[0-9]/.test(e.key);
-    const isHittingBackspace = e.key === 'Backspace';
+    const isTypingNumber = event.key.length === 1 && /[0-9]/.test(event.key);
+    const isHittingBackspace = event.key === 'Backspace';
     const isAttachedToHash = /#\d*$/.test(text);
 
     // Show dropdown when starting mention or typing numbers/backspace
-    if (e.key === '#' || (isAttachedToHash && (isTypingNumber || isHittingBackspace))) {
+    if (event.key === '#' || (isAttachedToHash && (isTypingNumber || isHittingBackspace))) {
         performSearch();
         isOpen.value = true;
     }
     // Hide dropdown when finishing mention or pressing escape
-    else if (e.key === ' ' || e.key === 'Escape' || !isAttachedToHash) {
+    else if (event.key === ' ' || event.key === 'Escape' || !isAttachedToHash) {
         isOpen.value = false;
     }
 }
@@ -170,36 +167,37 @@ function handleTextareaKeyup(event: KeyboardEvent): void {
 // put the selected thread into the textarea at the correct position, replacing the typed text
 
 function handleThreadSelect(item: AutocompleteItem): void {
-    if (!props.textareaRef) {
+    const textarea = props.textareaRef;
+    if (!textarea) {
         return;
     }
 
-    const caret = props.textareaRef.selectionStart;
-    const textToCaret = props.textareaRef.value.substring(0, caret);
+    const caret = textarea.selectionStart;
+    const textToCaret = textarea.value.substring(0, caret);
     const lastHashIndex = textToCaret.lastIndexOf('#');
 
     if (lastHashIndex !== -1) {
         // Get text before "#" and after current cursor
-        const before = props.textareaRef.value.substring(0, lastHashIndex);
-        const after = props.textareaRef.value.substring(caret);
-        
+        const before = textarea.value.substring(0, lastHashIndex);
+        const after = textarea.value.substring(caret);
+
         // Insert selected value with trailing space
-        props.textareaRef.value = `${before + item.value} ${after}`;
+        textarea.value = `${before + item.value} ${after}`;
 
         // Position cursor after the inserted text and space
         const newPos = before.length + item.value.length + 1;
-        props.textareaRef.setSelectionRange(newPos, newPos);
-        props.textareaRef.focus();
-        
+        textarea.setSelectionRange(newPos, newPos);
+        textarea.focus();
+
         // Dispatch input event so parent knows textarea changed
-        props.textareaRef.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     isOpen.value = false;
     emit('thread-inserted', item.value);
 }
 
-//Close dropdown when autocomplete is disabled
+// Close dropdown when autocomplete is disabled
 
 watch(
     () => props.enabled,

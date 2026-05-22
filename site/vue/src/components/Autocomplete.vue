@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-    ref, computed, watch, nextTick, onMounted, onBeforeUnmount,
+    ref, computed, watch, onMounted, onBeforeUnmount,
 } from 'vue';
 
 interface AutocompleteItem {
@@ -9,9 +9,9 @@ interface AutocompleteItem {
 }
 
 interface Props {
-    //The current value - what's being typexd in the textarea 
+    // The current value - what's being typed in the textarea
     modelValue: string;
-    // Array of items to show in dropdown 
+    // Array of items to show in dropdown
     items: AutocompleteItem[];
     // Minimum characters needed before showing dropdown
     minLength?: number;
@@ -23,7 +23,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     minLength: 0,
-    isOpen: false,
     position: () => ({ my: 'left top', at: 'left bottom+5' }),
 });
 
@@ -142,10 +141,10 @@ onBeforeUnmount(() => {
         :class="{ 'highlighted': index === highlightedIndex }"
         role="option"
         :aria-selected="index === highlightedIndex"
-        @click="selectItem(item)"
-        @mouseenter="highlightedIndex = index"
         :data-testid="`autocomplete-item-${item.value}`"
-      >
+                @click="selectItem(item)"
+        @mouseenter="highlightedIndex = index"
+            >
         {{ item.label }}
       </div>
     </div>
@@ -165,8 +164,7 @@ onBeforeUnmount(() => {
 .autocomplete-dropdown {
     position: absolute;
     max-height: 250px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto hidden;
     padding: 0;
     margin: 0;
     background-color: var(--default-white);
