@@ -217,8 +217,9 @@ defineExpose({
 </script>
 
 <template>
-  //autocomplete component handles this
+  <!-- autocomplete component handles this -->
   <Autocomplete
+    data-testid="thread-autocomplete"
     model-value=""
     :items="filteredItems"
     :is-open="isOpen"

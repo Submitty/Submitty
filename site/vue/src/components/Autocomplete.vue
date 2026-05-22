@@ -126,12 +126,14 @@ onBeforeUnmount(() => {
   <div
     ref="containerRef"
     class="autocomplete-container"
+    data-testid="autocomplete-container"
   >
     <!-- Dropdown is positioned absolutely, rendered after trigger element -->
     <div
       v-if="showDropdown"
       class="autocomplete-dropdown"
       role="listbox"
+      data-testid="autocomplete-dropdown"
     >
       <div
         v-for="(item, index) in items"
@@ -142,6 +144,7 @@ onBeforeUnmount(() => {
         :aria-selected="index === highlightedIndex"
         @click="selectItem(item)"
         @mouseenter="highlightedIndex = index"
+        :data-testid="`autocomplete-item-${item.value}`"
       >
         {{ item.label }}
       </div>
