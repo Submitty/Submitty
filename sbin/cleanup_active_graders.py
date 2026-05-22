@@ -8,8 +8,8 @@ This script is intended to be run periodically (e.g. by cron) to cleanup stale l
 import os
 
 import database_queries
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import create_engine, text  # pylint: disable=import-error
+from sqlalchemy.exc import SQLAlchemyError  # pylint: disable=import-error
 
 
 def _cleanup_course(db_user, db_pass, db_host, db_name):
