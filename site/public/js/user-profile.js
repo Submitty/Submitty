@@ -3,8 +3,8 @@ showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUp
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
-/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, csrfToken, updateSidebarPreference, CollapseSidebarOnNarrowView, DisableAutomaticCollapse,
-  updateTheme, displayWarningMessage */
+/* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup, closePopup, csrfToken, updateSidebarPreference, CollapseSidebarOnNarrowView, DisableAutomaticCollapse,
+    updateTheme, displayWarningMessage */
 
 // This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
@@ -335,8 +335,8 @@ function updateUserProfilePhoto() {
             displayErrorMessage('Some went wrong while updating profile photo!');
         },
     });
-    // hide the form from view
-    $('.popup-form').css('display', 'none');
+    // hide the modal and restore document scrolling
+    closePopup('edit-profile-photo-form');
     $('#user-image-button').val(null);
     return false;
 }

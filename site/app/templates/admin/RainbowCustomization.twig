@@ -230,7 +230,7 @@
                     <div class="switch-container">
                         <h2 class="switch-label">Show Category/Gradeable Configuration</h2>
                         <label class="switch" aria-label="Toggle Category/Gradeable Configuration">
-                            <input type="checkbox" id="config-toggle">
+                            <input type="checkbox" id="config-toggle" {{ show_gradeable_configuration ? 'checked' : '' }}>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -240,6 +240,9 @@
 
                         <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
                         <label for="drop_lowest_checkbox">Remove Lowest</label><br>
+
+                        <input id="customize_show_notes_checkbox" type="checkbox" name="customize_show_notes" {{ customize_show_notes ? 'checked' : '' }}>
+                        <label for="customize_show_notes_checkbox">Customize Notes Visibility</label><br>
                     </div>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
@@ -344,6 +347,17 @@
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                                     </div>
+                                                    {% if gradeable['show_notes_applicable'] %}
+                                                        <div class="gradeable-show-notes-config" style="margin-top: 6px;">
+                                                            <label for="show-notes-{{ gradeable['id'] }}">Notes visibility:</label>
+                                                            <select id="show-notes-{{ gradeable['id'] }}" class="gradeable-custom-item-input gradeable-show-notes-select" style="margin-left: 8px; min-width: 220px;">
+                                                                <option value="never" {{ gradeable['show_notes'] == 'never' ? 'selected' : '' }}>Never</option>
+                                                                <option value="instructor_only" {{ gradeable['show_notes'] == 'instructor_only' ? 'selected' : '' }}>Instructor only</option>
+                                                                <option value="student_only" {{ gradeable['show_notes'] == 'student_only' ? 'selected' : '' }}>Student only</option>
+                                                                <option value="student_and_instructor" {{ gradeable['show_notes'] == 'student_and_instructor' ? 'selected' : '' }}>Student and instructor</option>
+                                                            </select>
+                                                        </div>
+                                                    {% endif %}
                                                     <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
                                                         {# Generate input boxes for each per-gradeable curve input #}
                                                         {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
