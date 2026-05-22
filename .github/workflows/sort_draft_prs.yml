@@ -24,16 +24,28 @@ jobs:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
 
-      - name: Get PR project ID
+      - name: Checkout the repo
+        uses: actions/checkout@v6
+
+      - name: Get or add PR project ID
         id: get-pr-id
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
-          echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
+          source .github/bin/board_automation_helper.sh
 
-      - name: Checkout the repo
-        uses: actions/checkout@v6
+          PR_PROJECT_ITEMS_JSON="$(gh project item-list -L 9999 --owner Submitty 1 --format json)"
+          PR_PROJECT_ID="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, number: .content.number} | select((.number | tostring) == $pr_id) | .id')"
+
+          if [ -z "$PR_PROJECT_ID" ]; then
+            PR_NODE_ID="$(gh api graphql -F owner=Submitty -F repo=Submitty -F number="$PR_ID" -f query='query($owner:String!,$repo:String!,$number:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$number){ id } } }' --jq '.data.repository.pullRequest.id')"
+            gh project item-add --project-id "$PROJECT_ID" --content-id "$PR_NODE_ID" >/dev/null
+
+            PR_PROJECT_ITEMS_JSON="$(gh project item-list -L 9999 --owner Submitty 1 --format json)"
+            PR_PROJECT_ID="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, number: .content.number} | select((.number | tostring) == $pr_id) | .id')"
+          fi
+
+          printf 'pr-project-id=%s\n' "$PR_PROJECT_ID" >> "$GITHUB_OUTPUT"
 
       - name: Move draft to Work in Progress
         if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}
