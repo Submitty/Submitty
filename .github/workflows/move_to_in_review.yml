@@ -2,6 +2,7 @@ name: Move PR to In Review
 on:
   pull_request_target:
     types:
+      - reopened
       - review_requested
 
 permissions:
@@ -30,8 +31,8 @@ jobs:
           PR_PROJECT_ITEMS_JSON="$(gh project item-list -L 9999 --owner Submitty 1 --format json)"
           PR_PROJECT_ID="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .id')"
           PR_PROJECT_STATUS="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .status')"
-          printf 'pr-project-id=%s\n' "${PR_PROJECT_ID:?}" >> "$GITHUB_OUTPUT"
-          printf 'pr-project-status=%s\n' "${PR_PROJECT_STATUS:?}" >> "$GITHUB_OUTPUT"
+          printf 'pr-project-id=%s\n' "$PR_PROJECT_ID" >> "$GITHUB_OUTPUT"
+          printf 'pr-project-status=%s\n' "$PR_PROJECT_STATUS" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the repo
         uses: actions/checkout@v6
@@ -44,6 +45,16 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           source .github/bin/board_automation_helper.sh
+
+          # If the PR is not on the project board, add it first.
+          if [ -z "$PR_PROJECT_ID" ]; then
+            PR_NODE_ID="$(gh api graphql -F owner=Submitty -F repo=Submitty -F number="$PR_ID" -f query='query($owner:String!,$repo:String!,$number:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$number){ id } } }' --jq '.data.repository.pullRequest.id')"
+            gh project item-add --project-id "$PROJECT_ID" --content-id "$PR_NODE_ID" >/dev/null
+
+            PR_PROJECT_ITEMS_JSON="$(gh project item-list -L 9999 --owner Submitty 1 --format json)"
+            PR_PROJECT_ID="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .id')"
+            PR_PROJECT_STATUS="$(printf '%s\n' "$PR_PROJECT_ITEMS_JSON" | jq -r --arg pr_id "$PR_ID" '.items[] | {id, status, number: .content.number} | select((.number | tostring) == $pr_id) | .status')"
+          fi
 
           # If the reopened PR is already in In Review, no update is required.
           if [ "$PR_PROJECT_STATUS" = "In Review" ]; then
