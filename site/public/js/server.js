@@ -1159,25 +1159,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
     }
 }
 
-/**
- * TODO: This may be unused.  Check, and potentially remove this function.
- */
-function batchImportJSON(url, csrf_token) {
-    $.ajax(url, {
-        type: 'POST',
-        data: {
-            csrf_token: csrf_token,
-        },
-    })
-        .done((response) => {
-            window.alert(response);
-            location.reload(true);
-        })
-        .fail(() => {
-            window.alert('[AJAX ERROR] Refresh page');
-        });
-}
-
 function submitAJAX(url, data, callbackSuccess, callbackFailure) {
     $.ajax(url, {
         type: 'POST',
