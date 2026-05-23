@@ -18,11 +18,15 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
 </script>
 
 <template>
-  <div id="forum_filter_bar">
+  <div
+    id="forum_filter_bar"
+    data-testid="forum-filter-bar"
+  >
     <label
       id="filter_unread_btn"
       class="btn btn-default btn-sm inline-block filter-inactive"
       for="unread"
+      data-testid="filter-unread-label"
     >
       Unread Only
     </label>
@@ -31,6 +35,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
       name="unread"
       type="checkbox"
       data-ays-ignore="true"
+      data-testid="filter-unread-checkbox"
     />
 
     <div
@@ -38,6 +43,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
       aria-label="Select thread category"
       class="inline-block"
       data-ays-ignore="true"
+      data-testid="thread-category-filter"
     >
       <button
         v-for="category in props.categories.filter(isVisibleCategory)"
@@ -47,6 +53,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         class="btn btn-sm filter-inactive"
         data-btn-selected="false"
         type="button"
+        :data-testid="`thread-category-${category.id}`"
       >
         {{ category.description }}
       </button>
@@ -57,12 +64,14 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
       aria-label="Select thread status"
       class="inline-block"
       data-ays-ignore="true"
+      data-testid="thread-status-filter"
     >
       <button
         class="btn btn-sm btn-default inline-block filter-inactive"
         data-btn-selected="false"
         data-sel_id="0"
         type="button"
+        data-testid="thread-status-comment"
       >
         Comment
       </button>
@@ -71,6 +80,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-btn-selected="false"
         data-sel_id="-1"
         type="button"
+        data-testid="thread-status-unresolved"
       >
         Unresolved
       </button>
@@ -79,6 +89,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-btn-selected="false"
         data-sel_id="1"
         type="button"
+        data-testid="thread-status-resolved"
       >
         Resolved
       </button>
