@@ -1,4 +1,13 @@
 <script setup lang="ts">
+declare global {
+  interface Window {
+    toggleLike?: (postId: number, threadId: number, currentUser: string) => void;
+    showUpduckUsers?: (postId: number) => void;
+  }
+}
+
+export {};
+
 interface Props {
     postId: number;
     threadId: number;
@@ -12,15 +21,11 @@ interface Props {
 const props = defineProps<Props>();
 
 const handleToggleLike = () => {
-    if (typeof window.toggleLike === 'function') {
-        window.toggleLike(props.postId, props.threadId, props.currentUser);
-    }
+  window.toggleLike?.(props.postId, props.threadId, props.currentUser);
 };
 
 const handleShowLikedUsers = () => {
-    if (typeof window.showUpduckUsers === 'function') {
-        window.showUpduckUsers(props.postId);
-    }
+  window.showUpduckUsers?.(props.postId);
 };
 </script>
 
@@ -45,13 +50,13 @@ const handleShowLikedUsers = () => {
       >
     </button>
     <span
-      data-testid="like-count"
       :id="`likeCounter_${props.postId}`"
+      data-testid="like-count"
       class="like-counter"
     >{{ props.likeCount }}</span>
     <span
-      data-testid="instructor-like"
       :id="`likedByInstructor_${props.postId}`"
+      data-testid="instructor-like"
       class="liked-by-instructor"
       :style="props.likedByStaff ? '' : 'display: none;'"
     >
