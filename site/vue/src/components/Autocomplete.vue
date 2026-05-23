@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
         :data-testid="`autocomplete-item-${item.value}`"
         @click="selectItem(item)"
         @mouseenter="highlightedIndex = index"
-        >
+      >
         {{ item.label }}
       </div>
     </div>
