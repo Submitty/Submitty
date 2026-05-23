@@ -1,12 +1,8 @@
 <script setup lang="ts">
-declare global {
-  interface Window {
+type WindowWithLikeHandlers = Window & {
     toggleLike?: (postId: number, threadId: number, currentUser: string) => void;
     showUpduckUsers?: (postId: number) => void;
-  }
-}
-
-export {};
+};
 
 interface Props {
     postId: number;
@@ -19,13 +15,14 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const likeWindow = window as WindowWithLikeHandlers;
 
 const handleToggleLike = () => {
-  window.toggleLike?.(props.postId, props.threadId, props.currentUser);
+    likeWindow.toggleLike?.(props.postId, props.threadId, props.currentUser);
 };
 
 const handleShowLikedUsers = () => {
-  window.showUpduckUsers?.(props.postId);
+    likeWindow.showUpduckUsers?.(props.postId);
 };
 </script>
 
