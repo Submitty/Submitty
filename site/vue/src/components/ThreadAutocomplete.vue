@@ -31,7 +31,7 @@ type ThreadListEntry = { id?: number | string; title?: string } | string;
 
 function getThreadSource(): AutocompleteItem[] {
     const normalizedThreads: Array<{ id: number; title: string }> = [];
-    
+
     // Get threads from global list (server-provided)
     const globalList = (window as Window & { thread_list?: ThreadListEntry[] }).thread_list;
     if (Array.isArray(globalList)) {
