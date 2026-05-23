@@ -142,9 +142,9 @@ onBeforeUnmount(() => {
         role="option"
         :aria-selected="index === highlightedIndex"
         :data-testid="`autocomplete-item-${item.value}`"
-                @click="selectItem(item)"
+        @click="selectItem(item)"
         @mouseenter="highlightedIndex = index"
-            >
+        >
         {{ item.label }}
       </div>
     </div>
