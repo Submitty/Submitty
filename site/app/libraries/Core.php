@@ -181,7 +181,9 @@ class Core {
             FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
             $cache
         );
-
+        if ($this->config->isDebug()) {
+            $config->setAutoGenerateProxyClasses(\Doctrine\ORM\Proxy\ProxyFactory::AUTOGENERATE_EVAL);
+        }
         return new EntityManager($database->getConnection(), $config);
     }
 
