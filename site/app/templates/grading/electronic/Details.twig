@@ -83,7 +83,11 @@
                 </div>
             </div>
         {% endif %}
-        <button type="button" class="btn btn-primary" onclick="toggleAllSections()" id="toggle-all-sections-btn" data-testid="toggle-all-sections">Collapse All Sections</button>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'ta_grading/ToggleAllSectionsButton',
+            'style': 'display: inline;',
+        } %}        
         {% include 'Vue.twig' with {
             'type': 'component',
             'name': 'ToggleColumns',
