@@ -323,7 +323,8 @@ function readCookies() {
             const fileUrl = decodeURIComponent($elem.attr('file-url')!);
             if ($elem.hasClass('image-file')) {
                 viewFileFullPanel(fileName, fileUrl);
-            } else {
+            }
+            else {
                 const viewerId = $elem.attr('data-viewer_id')!;
                 openFrame(fileName, fileUrl, viewerId);
             }
