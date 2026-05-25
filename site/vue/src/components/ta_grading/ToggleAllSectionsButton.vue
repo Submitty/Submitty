@@ -24,8 +24,8 @@ onMounted(() => {
 <template>
   <button
     type="button"
-    class="btn btn-primary"
     id="toggle-all-sections-btn"
+    class="btn btn-primary"
     data-testid="toggle-all-sections"
     @click="onClick"
   >
