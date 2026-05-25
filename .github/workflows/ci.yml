@@ -886,7 +886,7 @@ jobs:
         with:
           config: baseUrl=http://localhost
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-          spec: cypress/e2e/Cypress-Gradeable/late_submission_warning_messages.spec.js
+          spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
           env: run_area=CI
 
