@@ -2,22 +2,18 @@
 import { onMounted } from 'vue';
 
 declare global {
-  interface Window {
-    toggleAllSections?: () => void;
-    updateToggleButtonText?: () => void;
-  }
+    interface Window {
+        toggleAllSections?: () => void;
+        updateToggleButtonText?: () => void;
+    }
 }
 
 const onClick = () => {
-  if (typeof window.toggleAllSections === 'function') {
-    window.toggleAllSections();
-  }
+    window.toggleAllSections?.();
 };
 
 onMounted(() => {
-  if (typeof window.updateToggleButtonText === 'function') {
-    window.updateToggleButtonText();
-  }
+    window.updateToggleButtonText?.();
 });
 </script>
 
