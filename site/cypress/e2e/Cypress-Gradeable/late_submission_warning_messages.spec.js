@@ -112,7 +112,7 @@ const giveLateDays = (timestamp, student_id, late_days = 2) => {
 const giveExtensions = (gradeable_name) => {
     // Grant an extension to the student
     cy.visit(['sample', 'extensions']);
-    cy.get('[data-testid=gradeable-select]', { timeout: 20000 }).select(gradeable_name);
+    cy.get('[data-testid=gradeable-select]').select(gradeable_name);
     cy.get('[data-testid=extension-user-id]').type('student');
     cy.get('[data-testid=extension-late-days]').clear();
     cy.get('[data-testid=extension-late-days]').type(1, { force: true });
@@ -121,9 +121,10 @@ const giveExtensions = (gradeable_name) => {
         .contains('Submit')
         .click();
     if (gradeable_name.includes('_team')) {
-        cy.get('#more_extension_popup', { timeout: 20000 }).should('be.visible');
+        cy.get('#more_extension_popup').should('be.visible');
         cy.get('[data-testid=more-extension-apply-to-all]').click();
     }
+    cy.get('.alert-success').should('contain.text', 'Extensions have been updated');
 };
 
 // daysLate: total calendar days late the server will report (daysAgo + 1)
@@ -143,7 +144,7 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
     }
 
     cy.get('#upload1').selectFile('cypress/fixtures/file2.txt', { action: 'drag-drop' });
-    cy.get('#gradeable-time-remaining-text', { timeout: 20000 }).should('have.text', 'Gradeable Time Remaining: Past Due');
+    cy.get('#gradeable-time-remaining-text').should('have.text', 'Gradeable Time Remaining: Past Due');
     cy.get('#submit').should('be.enabled');
     const team_warning_messages = [
         `Your submission will be ${daysLate} day(s) late. Are you sure you want to use ${daysLate - extensionDays} late day(s)?`,
@@ -190,14 +191,10 @@ const SubmitAndCheckMessage = (gradeable_type, upload_file1, invalid_late_day, v
 };
 
 const setInputAndSave = (selector, value) => {
-    cy.get(selector).invoke('val').then((currentValue) => {
-        if (currentValue !== String(value)) {
-            cy.get(selector).clear();
-            cy.get(selector).type(value);
-            cy.get(selector).type('{enter}');
-            cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        }
-    });
+    cy.get(selector).clear();
+    cy.get(selector).type(value);
+    cy.get(selector).type('{enter}');
+    cy.get('[data-testid=save-status]').should('have.text', 'All Changes Saved');
 };
 
 const checkDaylightBanner = (late_days, existence) => {
@@ -333,7 +330,7 @@ describe('Test warning messages for non team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
         cy.get('#no_late_submission').click(); // disable late submissions
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid=save-status]').should('have.text', 'All Changes Saved');
     });
 });
 
@@ -346,7 +343,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('#g_id').type(team_gradeable);
         cy.get('#radio_ef_student_upload').check();
         cy.get('#radio_ef_student_upload').click();
-        cy.get('#team_yes_radio', { timeout: 20000 }).check();
+        cy.get('#team_yes_radio').check();
         cy.get('#team_yes_radio').click();
         // Create Gradeable
         cy.get('#create-gradeable-btn').click();
@@ -402,7 +399,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', team_gradeable, 'update?nav_tab=5']);
         cy.get('#no_late_submission').click();
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
+        cy.get('[data-testid=save-status]').should('have.text', 'All Changes Saved');
         // Delete all late days
         cy.visit(['sample', 'late_days']);
         for (let i = 0; i < 3; i++) {
@@ -420,7 +417,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('body').then((body) => {
             if (body.find('#extensions-table').length > 0) {
                 cy.wrap(body).find('#Delete').first().click();
-                cy.get('#more_extension_popup', { timeout: 20000 });
+                cy.get('#more_extension_popup');
                 cy.get('#apply-to-all').click();
             }
         });
