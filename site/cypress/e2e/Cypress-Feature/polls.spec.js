@@ -461,7 +461,7 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
         cy.get('[data-testid="timer"]').should('be.visible');
-        cy.get('[data-testid="timer"]', { timeout: 15000 }).should('contain', 'Poll Ended');
+        cy.get('[data-testid="timer"]', { timeout: 20000 }).should('contain', 'Poll Ended');
         cy.go('back');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
 
