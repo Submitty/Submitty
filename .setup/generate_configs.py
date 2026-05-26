@@ -24,6 +24,21 @@ SETUP_INSTALL_DIR = os.path.join(args.install_dir, '.setup')
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 os.makedirs(SETUP_REPOSITORY_DIR, exist_ok=True)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
+PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
+# Rescue preserve list
+preserve_list = OrderedDict()
+try:
+    with open(PRESERVE_LIST_JSON, 'r') as json_file:
+        preserve_list = json.load(json_file, object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    pass
+print("preserve list", preserve_list)
+
+# preserve_list users json
+
+with open(PRESERVE_LIST_JSON, 'w') as json_file:
+    json.dump(preserve_list, json_file, indent=2)
+os.chmod(SUBMITTY_JSON, 0o444)
 
 # Copy all files from .setup/data/configs to the install config directory
 for item in os.listdir(CONFIG_REPOSITORY):
