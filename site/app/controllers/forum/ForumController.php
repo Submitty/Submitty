@@ -604,7 +604,6 @@ class ForumController extends AbstractController {
                         $is_reply_announcement = false;
                     }
                 }
-
                 else {
                     $parent_preview = $this->previewText($parent_post_content, 100);
                     $subject = "New Reply: " . $thread_title;
