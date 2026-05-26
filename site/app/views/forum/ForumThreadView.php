@@ -389,11 +389,10 @@ class ForumThreadView extends AbstractView {
     /**
      * Renders scroll content or new posts from websocket.
      * @param Thread[] $threads
-     * @param bool $is_full_page
      * @return string
      */
-    public function showAlteredDisplayList(array $threads, bool $is_full_page = true): string {
-        return $this->displayThreadList($threads, true, $is_full_page);
+    public function showAlteredDisplayList(array $threads): string {
+        return $this->displayThreadList($threads, true, true);
     }
 
     public function contentMarkdownToPlain($str) {
