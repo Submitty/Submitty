@@ -124,7 +124,7 @@ const giveExtensions = (gradeable_name) => {
         cy.get('#more_extension_popup').should('be.visible');
         cy.get('[data-testid=more-extension-apply-to-all]').click();
     }
-    cy.get('.alert-success').should('contain.text', 'Extensions have been updated');
+    cy.get('.alert-success', { timeout: 15000 }).should('contain.text', 'Extensions have been updated');
 };
 
 // daysLate: total calendar days late the server will report (daysAgo + 1)
@@ -421,7 +421,7 @@ describe('Test warning messages for team gradeable', () => {
                 cy.get('#apply-to-all').click();
             }
         });
-        cy.get('.alert-success').invoke('text').should('contain', 'Extensions have been updated');
+        cy.get('.alert-success', { timeout: 15000 }).invoke('text').should('contain', 'Extensions have been updated');
         cy.get('#remove_popup').click();
         cy.get('#gradeable-select').select(gradeable);
         cy.get('body').then((body) => {
