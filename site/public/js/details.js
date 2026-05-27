@@ -90,37 +90,23 @@ function hideGradeableMessage() {
 }
 
 function getCollapsedSections() {
-    return JSON.parse(Cookies.get('collapsed_sections') || '[]');
+    return window.GetCollapsedSections?.() || [];
 }
 
 function updateToggleButtonText() {
-    const collapsed = getCollapsedSections();
-    const button = $('#toggle-all-sections-btn');
-
-    if (collapsed.length === 0) {
-        button.text('Collapse All Sections');
-    }
-    else {
-        button.text('Expand All Sections');
-    }
+    window.UpdateToggleButtonText?.();
 }
 
 function updateCollapsedSections() {
-    window.vueUpdateCollapsedSections?.([...collapseItems]);
+    window.UpdateCollapsedSections?.([...collapseItems]);
 }
 
 function expandAllSections() {
-    $('#details-table .details-info-header').each(function () {
-        $(this).addClass('panel-head-active');
-        $(this).next().show();
-    });
-    collapseItems.clear();
-    updateCollapsedSections();
-    updateToggleButtonText();
+    window.ExpandAllSections?.();
 }
 
 function collapseAllSections() {
-    window.vueCollapseAllSections?.();
+    window.CollapseAllSections?.();
 }
 
 function toggleAllSections() {

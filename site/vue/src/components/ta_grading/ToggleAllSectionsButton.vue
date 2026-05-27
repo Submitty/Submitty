@@ -7,7 +7,10 @@ declare global {
         updateToggleButtonText?: () => void;
         CollapseAllSections?: () => void;
         UpdateCollapsedSections?: (ids: string[]) => void;
-        Cookies?: { set: (key: string, value: string, options?: { path?: string }) => void };
+        UpdateToggleButtonText?: () => void;
+        ExpandAllSections?: () => void;
+        GetCollapsedSections?: () => string[];
+        Cookies?: { get: (key: string) => string | undefined; set: (key: string, value: string, options?: { path?: string }) => void };
     }
 }
 
@@ -16,7 +19,7 @@ const onClick = () => {
 };
 
 onMounted(() => {
-    window.updateToggleButtonText?.();
+    updateToggleButtonText?.();
 });
 
 const getDetailsBasePath = (): string => {
@@ -47,8 +50,42 @@ const collapseAllSections = () => {
     window.updateToggleButtonText?.();
 };
 
+const getCollapsedSections = (): string[] => {
+    const raw = window.Cookies?.get('collapsed_sections') ?? '[]';
+    try{
+      return JSON.parse(raw) as string[];
+    }
+    catch {
+      return [];  
+    }
+};
+
+const updateToggleButtonText = () => {
+    const collapsed = getCollapsedSections();
+    const button = document.getElementById('toggle-all-sections-btn');
+    if(!button) return;
+
+    button.textContent = collapsed.length > 0 ? 'Expand All Sections' : 'Collapse All Sections';
+}
+
+const expandAllSections = () => {
+    const headers = document.querySelectorAll('#details-table .details-info-header');
+
+    headers.forEach((header) => {
+        header.classList.add('panel-head-active');
+        const next = header.nextElementSibling as HTMLElement | null;
+        if (next) {
+            next.style.display = '';
+        }
+    });
+    updateCollapsedSections([]);
+    window.updateToggleButtonText?.();
+}
 window.UpdateCollapsedSections = updateCollapsedSections;
 window.CollapseAllSections = collapseAllSections;
+window.ExpandAllSections = expandAllSections;
+window.GetCollapsedSections = getCollapsedSections;
+window.UpdateToggleButtonText = updateToggleButtonText;
 </script>
 
 <template>
