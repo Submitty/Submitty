@@ -89,37 +89,6 @@ function hideGradeableMessage() {
     message.css('display', 'none');
 }
 
-function getCollapsedSections() {
-    return window.GetCollapsedSections?.() || [];
-}
-
-function updateToggleButtonText() {
-    window.UpdateToggleButtonText?.();
-}
-
-function updateCollapsedSections() {
-    window.UpdateCollapsedSections?.([...collapseItems]);
-}
-
-function expandAllSections() {
-    window.ExpandAllSections?.();
-}
-
-function collapseAllSections() {
-    window.CollapseAllSections?.();
-}
-
-function toggleAllSections() {
-    const collapsed = getCollapsedSections();
-
-    if (collapsed.length === 0) {
-        collapseAllSections();
-    }
-    else {
-        expandAllSections();
-    }
-}
-
 function inquiryUpdate() {
     const status = Cookies.get('inquiry_status');
 

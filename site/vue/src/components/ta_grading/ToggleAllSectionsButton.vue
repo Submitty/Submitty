@@ -15,12 +15,23 @@ declare global {
 }
 
 const onClick = () => {
-    window.toggleAllSections?.();
+    toggleAllSections();
 };
 
 onMounted(() => {
-    updateToggleButtonText?.();
+    updateToggleButtonText();
 });
+
+const toggleAllSections = () => {
+    const collapsed = getCollapsedSections();
+
+    if (collapsed.length === 0) {
+        collapseAllSections();
+    }
+    else {
+        expandAllSections();
+    }
+}
 
 const getDetailsBasePath = (): string => {
     const table = document.getElementById('details-table');
