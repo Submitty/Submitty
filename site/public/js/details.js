@@ -106,7 +106,7 @@ function updateToggleButtonText() {
 }
 
 function updateCollapsedSections() {
-    Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
+    window.vueUpdateCollapsedSections?.([...collapseItems]);
 }
 
 function expandAllSections() {
@@ -120,14 +120,7 @@ function expandAllSections() {
 }
 
 function collapseAllSections() {
-    collapseItems.clear();
-    $('#details-table .details-info-header').each(function () {
-        $(this).removeClass('panel-head-active');
-        $(this).next().hide();
-        collapseItems.add($(this).attr('data-section-id'));
-    });
-    updateCollapsedSections();
-    updateToggleButtonText();
+    window.vueCollapseAllSections?.();
 }
 
 function toggleAllSections() {
