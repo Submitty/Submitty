@@ -124,7 +124,9 @@ class ReportControllerTester extends BaseUnitTest {
                     'value' => 10
                 ]
             ],
-            'extra_credit' => false
+            'extra_credit' => false,
+            'show_gradeable_configuration' => false,
+            'customize_show_notes' => false,
         ];
     }
 

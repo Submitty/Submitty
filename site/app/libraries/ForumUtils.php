@@ -21,11 +21,11 @@ class ForumUtils {
         if (count($_FILES[$file_post]['tmp_name']) > 5) {
             //return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
         }
-        $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
-        if ($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])) {
+        $attachment_check = Utils::checkUploadedImageOrPdfFile($file_post) ? 1 : 0;
+        if ($attachment_check === 0 && !empty($_FILES[$file_post]['tmp_name'])) {
             //return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
         }
-        return [$imageCheck];
+        return [$attachment_check];
     }
 
     public static function isValidCategories($rows, $inputCategoriesIds = -1, $inputCategoriesName = -1) {
@@ -100,14 +100,17 @@ class ForumUtils {
             foreach ($files as $file) {
                 if (in_array($file['name'], $attachment_names, true)) {
                     $path = rawurlencode($file['path']);
-                    $name = rawurlencode($file['name']);
                     $url = $course_url . '?dir=forum_attachments&path=' . $path;
+
+                    // Forum attachments are validated before storage, so any non-image attachment here is treated as a PDF.
+                    $mime_type = mime_content_type($file['path']);
+                    $attachment_type = is_string($mime_type) && str_starts_with($mime_type, 'image/') && getimagesize($file['path']) !== false ? 'image' : 'pdf';
 
                     $post_attachment["files"][] = [
                         "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
                     ];
 
-                    $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
+                    $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, rawurlencode($file['name']), $attachment_type];
 
                     $attachment_file_count++;
                     $GLOBALS['totalAttachments']++;
