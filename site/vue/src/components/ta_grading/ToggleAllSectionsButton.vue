@@ -3,13 +3,6 @@ import { onMounted, onUnmounted } from 'vue';
 
 declare global {
     interface Window {
-        toggleAllSections?: () => void;
-        updateToggleButtonText?: () => void;
-        CollapseAllSections?: () => void;
-        UpdateCollapsedSections?: (ids: string[]) => void;
-        UpdateToggleButtonText?: () => void;
-        ExpandAllSections?: () => void;
-        GetCollapsedSections?: () => string[];
         Cookies?: { get: (key: string) => string | undefined; set: (key: string, value: string, options?: { path?: string }) => void };
     }
 }
@@ -147,12 +140,7 @@ const expandAllSections = () => {
     });
     updateCollapsedSections([]);
     updateToggleButtonText();
-}
-window.UpdateCollapsedSections = updateCollapsedSections;
-window.CollapseAllSections = collapseAllSections;
-window.ExpandAllSections = expandAllSections;
-window.GetCollapsedSections = getCollapsedSections;
-window.UpdateToggleButtonText = updateToggleButtonText;
+};
 </script>
 
 <template>
