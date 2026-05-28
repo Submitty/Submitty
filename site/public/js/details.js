@@ -3,33 +3,33 @@
 
 const MOBILE_BREAKPOINT = 951;
 
-let collapseItems;
+// let collapseItems;
 $(document).ready(() => {
-    updateToggleButtonText();
-    const collapsedSections = Cookies.get('collapsed_sections');
-    collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
+    // updateToggleButtonText();
+    // const collapsedSections = Cookies.get('collapsed_sections');
+    // collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
     // Attach the collapsible panel on details-table
-    const ANIMATION_DURATION = 600;
-    $('#details-table .details-info-header').click(function () {
-        $(this).toggleClass('panel-head-active');
-        const id = $(this).attr('data-section-id');
-        if (collapseItems.has(id)) {
-            collapseItems.delete(id);
-        }
-        else {
-            collapseItems.add(id);
-        }
-        updateCollapsedSections();
-        if (window.innerWidth < MOBILE_BREAKPOINT) {
-            $(this).next().slideToggle({
-                duration: ANIMATION_DURATION,
-            });
-        }
-        else {
-            $(this).next().toggle();
-        }
-    });
+    // const ANIMATION_DURATION = 600;
+    // $('#details-table .details-info-header').click(function () {
+    //     $(this).toggleClass('panel-head-active');
+    //     const id = $(this).attr('data-section-id');
+    //     if (collapseItems.has(id)) {
+    //         collapseItems.delete(id);
+    //     }
+    //     else {
+    //         collapseItems.add(id);
+    //     }
+    //     updateCollapsedSections();
+    //     if (window.innerWidth < MOBILE_BREAKPOINT) {
+    //         $(this).next().slideToggle({
+    //             duration: ANIMATION_DURATION,
+    //         });
+    //     }
+    //     else {
+    //         $(this).next().toggle();
+    //     }
+    // });
 
     // Creating and adding style for the pseudo selector in the details-table
     const style = document.createElement('style');

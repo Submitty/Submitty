@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 
 declare global {
     interface Window {
@@ -18,9 +18,65 @@ const onClick = () => {
     toggleAllSections();
 };
 
+const detailsTableSelector = '#details-table';
+let detailsTableEl: Element | null = null;
+
+const handleDetailsTableClick = (event: Event) => {
+    const target = event.target as Element | null;
+    const header = target?.closest('.details-info-header');
+    if (header) {
+        toggleSection(header);
+    }
+};
+
 onMounted(() => {
     updateToggleButtonText();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachDetailsTableListener, { once: true });
+    }
+    else {
+        attachDetailsTableListener();
+    }
 });
+
+onUnmounted(() => {
+    document.removeEventListener('DOMContentLoaded', attachDetailsTableListener);
+    detailsTableEl?.removeEventListener('click', handleDetailsTableClick);
+    detailsTableEl = null;
+});
+
+const attachDetailsTableListener = () => {
+    const table = document.querySelector(detailsTableSelector);
+    if (!table) {
+        return;
+    }
+    detailsTableEl = table;
+    table.addEventListener('click', handleDetailsTableClick);
+};
+
+const MOBILE_BREAKPOINT = 951;
+
+const toggleSection = (header: Element) => {
+    header.classList.toggle('panel-head-active');
+    const id = header.getAttribute('data-section-id');
+    const next = header.nextElementSibling as HTMLElement | null;
+    if (next) {
+        const isHidden = window.getComputedStyle(next).display === 'none';
+        next.style.display = isHidden ? '' : 'none';
+    }
+    if(id){
+        const collapsed = getCollapsedSections();
+        const nextSet = new Set(collapsed);
+        if(header.classList.contains('panel-head-active')){
+            nextSet.delete(id);
+        }
+        else {
+            nextSet.add(id);
+        }
+        updateCollapsedSections(Array.from(nextSet));
+        updateToggleButtonText();
+    }
+}
 
 const toggleAllSections = () => {
     const collapsed = getCollapsedSections();
@@ -58,7 +114,7 @@ const collapseAllSections = () => {
         }
     });
     updateCollapsedSections(collapsedIds);
-    window.updateToggleButtonText?.();
+    updateToggleButtonText();
 };
 
 const getCollapsedSections = (): string[] => {
@@ -90,7 +146,7 @@ const expandAllSections = () => {
         }
     });
     updateCollapsedSections([]);
-    window.updateToggleButtonText?.();
+    updateToggleButtonText();
 }
 window.UpdateCollapsedSections = updateCollapsedSections;
 window.CollapseAllSections = collapseAllSections;
