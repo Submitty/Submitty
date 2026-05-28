@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref, computed } from 'vue';
 
 declare global {
     interface Window {
@@ -22,14 +22,20 @@ const handleDetailsTableClick = (event: Event) => {
     }
 };
 
+const collapsedSections = ref<string[]>([]);
+
+const toggleLabel = computed(() =>
+  collapsedSections.value.length > 0 ? 'Expand All Sections' : 'Collapse All Sections',
+);
+
 onMounted(() => {
-    updateToggleButtonText();
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attachDetailsTableListener, { once: true });
-    }
-    else {
-        attachDetailsTableListener();
-    }
+  collapsedSections.value = readCollapsedSections();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachDetailsTableListener, { once: true });
+  }
+  else {
+    attachDetailsTableListener();
+  }
 });
 
 onUnmounted(() => {
@@ -47,8 +53,6 @@ const attachDetailsTableListener = () => {
     table.addEventListener('click', handleDetailsTableClick);
 };
 
-const MOBILE_BREAKPOINT = 951;
-
 const toggleSection = (header: Element) => {
     header.classList.toggle('panel-head-active');
     const id = header.getAttribute('data-section-id');
@@ -57,37 +61,34 @@ const toggleSection = (header: Element) => {
         const isHidden = window.getComputedStyle(next).display === 'none';
         next.style.display = isHidden ? '' : 'none';
     }
-    if(id){
-        const collapsed = getCollapsedSections();
-        const nextSet = new Set(collapsed);
-        if(header.classList.contains('panel-head-active')){
-            nextSet.delete(id);
+    if (id) {
+        const nextSet = new Set(collapsedSections.value);
+        if (header.classList.contains('panel-head-active')) {
+          nextSet.delete(id);
         }
         else {
-            nextSet.add(id);
+          nextSet.add(id);
         }
-        updateCollapsedSections(Array.from(nextSet));
-        updateToggleButtonText();
+        setCollapsedSections(Array.from(nextSet));
     }
 }
 
 const toggleAllSections = () => {
-    const collapsed = getCollapsedSections();
-
-    if (collapsed.length === 0) {
+    if (collapsedSections.value.length === 0) {
         collapseAllSections();
     }
     else {
         expandAllSections();
     }
-}
+};
 
 const getDetailsBasePath = (): string => {
     const table = document.getElementById('details-table');
     return table?.getAttribute('data-details-base-path') ?? '';
 };
 
-const updateCollapsedSections = (ids: string[]) => {
+const setCollapsedSections = (ids: string[]) => {
+    collapsedSections.value = ids;
     window.Cookies?.set('collapsed_sections', JSON.stringify(ids), { path: getDetailsBasePath() });
 };
 
@@ -106,11 +107,10 @@ const collapseAllSections = () => {
             collapsedIds.push(id);
         }
     });
-    updateCollapsedSections(collapsedIds);
-    updateToggleButtonText();
+    setCollapsedSections(collapsedIds);
 };
 
-const getCollapsedSections = (): string[] => {
+const readCollapsedSections = (): string[] => {
     const raw = window.Cookies?.get('collapsed_sections') ?? '[]';
     try{
       return JSON.parse(raw) as string[];
@@ -119,14 +119,6 @@ const getCollapsedSections = (): string[] => {
       return [];  
     }
 };
-
-const updateToggleButtonText = () => {
-    const collapsed = getCollapsedSections();
-    const button = document.getElementById('toggle-all-sections-btn');
-    if(!button) return;
-
-    button.textContent = collapsed.length > 0 ? 'Expand All Sections' : 'Collapse All Sections';
-}
 
 const expandAllSections = () => {
     const headers = document.querySelectorAll('#details-table .details-info-header');
@@ -138,8 +130,7 @@ const expandAllSections = () => {
             next.style.display = '';
         }
     });
-    updateCollapsedSections([]);
-    updateToggleButtonText();
+    setCollapsedSections([]);
 };
 </script>
 
@@ -151,6 +142,6 @@ const expandAllSections = () => {
     data-testid="toggle-all-sections"
     @click="onClick"
   >
-    Collapse All Sections
+        {{ toggleLabel }}
   </button>
 </template>
