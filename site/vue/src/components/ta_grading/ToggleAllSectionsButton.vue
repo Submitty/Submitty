@@ -25,17 +25,17 @@ const handleDetailsTableClick = (event: Event) => {
 const collapsedSections = ref<string[]>([]);
 
 const toggleLabel = computed(() =>
-  collapsedSections.value.length > 0 ? 'Expand All Sections' : 'Collapse All Sections',
+        collapsedSections.value.length > 0 ? 'Expand All Sections' : 'Collapse All Sections',
 );
 
 onMounted(() => {
-  collapsedSections.value = readCollapsedSections();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attachDetailsTableListener, { once: true });
-  }
-  else {
-    attachDetailsTableListener();
-  }
+        collapsedSections.value = readCollapsedSections();
+        if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachDetailsTableListener, { once: true });
+        }
+        else {
+                attachDetailsTableListener();
+        }
 });
 
 onUnmounted(() => {
@@ -63,15 +63,15 @@ const toggleSection = (header: Element) => {
     }
     if (id) {
         const nextSet = new Set(collapsedSections.value);
-        if (header.classList.contains('panel-head-active')) {
-          nextSet.delete(id);
+                if (header.classList.contains('panel-head-active')) {
+                        nextSet.delete(id);
         }
         else {
-          nextSet.add(id);
+                        nextSet.add(id);
         }
         setCollapsedSections(Array.from(nextSet));
     }
-}
+};
 
 const toggleAllSections = () => {
     if (collapsedSections.value.length === 0) {
@@ -112,11 +112,11 @@ const collapseAllSections = () => {
 
 const readCollapsedSections = (): string[] => {
     const raw = window.Cookies?.get('collapsed_sections') ?? '[]';
-    try{
-      return JSON.parse(raw) as string[];
+        try {
+                return JSON.parse(raw) as string[];
     }
     catch {
-      return [];  
+                return [];
     }
 };
 

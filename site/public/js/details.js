@@ -4,7 +4,6 @@
 const MOBILE_BREAKPOINT = 951;
 
 $(document).ready(() => {
-
     // Creating and adding style for the pseudo selector in the details-table
     const style = document.createElement('style');
     let content = '';
