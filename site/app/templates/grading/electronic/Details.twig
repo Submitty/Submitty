@@ -38,7 +38,7 @@
                 </li>
             </ul>
 
-            <div class="row-wrapper">
+            {# <div class="row-wrapper">
                 {% if show_all_sections_button %}
                 <label for="toggle-view-sections" data-testid="view-sections-label" class="column-wrapper" > Only Assigned Sections
                     <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
@@ -62,7 +62,19 @@
                     <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
-            </div>
+            </div> #}
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'ta_grading/DetailsFiltersControls',
+                'args': {
+                    'showAllSections': show_all_sections_button,
+                    'toggleAnon': toggle_anon_button,
+                    'gradeInquiryOnly': grade_inquiry_only_button,
+                    'canFilterWithdrawn': full_access_grader_permission and not gradeable.isTeamAssignment(),
+                    'anonMode': anon_mode,
+                    'gradeableId': gradeable.getId()
+                }
+            } %}
         </div>
     </div>
     <div class="student-info-btns-container">
