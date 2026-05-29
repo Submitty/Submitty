@@ -159,44 +159,44 @@ function inquiryUpdate() {
 }
 
 // Ensures all filters and checkboxes remain the same on page reload.
-window.addEventListener('DOMContentLoaded', () => {
-    const inquiryFilterStatus = Cookies.get('inquiry_status');
-    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-    withdrawnFilterElements.hide();
-    // Instructors and TAs have access to all toggles
-    if (full_access_grader_permission) {
-        // Only Assigned Sections
-        const assignedFilterBox = document.getElementById('toggle-view-sections');
-        const assignedFilterStatus = Cookies.get('view');
-        assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
+// window.addEventListener('DOMContentLoaded', () => {
+//     const inquiryFilterStatus = Cookies.get('inquiry_status');
+//     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+//     withdrawnFilterElements.hide();
+//     // Instructors and TAs have access to all toggles
+//     if (full_access_grader_permission) {
+//         // Only Assigned Sections
+//         const assignedFilterBox = document.getElementById('toggle-view-sections');
+//         const assignedFilterStatus = Cookies.get('view');
+//         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
-        // Withdrawn Students
-        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
-        const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+//         // Withdrawn Students
+//         const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
+//         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
 
-        if (!is_team_assignment) { // Toggle not available on team assignments
-            if (withdrawnFilterStatus === 'omit') {
-                withdrawnFilterBox.checked = true;
-                withdrawnFilterElements.hide();
-            }
-            else {
-                withdrawnFilterBox.checked = false;
-                withdrawnFilterElements.show();
-            }
-        }
-    }
-    // Grade Inquiry Only - students don't have permission
-    if (!is_student) {
-        const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
-        inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
-    }
-    // Randomize Order - all graders have permission
-    const randomFilterBox = document.getElementById('toggle-random-order');
-    const randomFilterStatus = Cookies.get('sort');
-    randomFilterBox.checked = (randomFilterStatus === 'random');
+//         if (!is_team_assignment) { // Toggle not available on team assignments
+//             if (withdrawnFilterStatus === 'omit') {
+//                 withdrawnFilterBox.checked = true;
+//                 withdrawnFilterElements.hide();
+//             }
+//             else {
+//                 withdrawnFilterBox.checked = false;
+//                 withdrawnFilterElements.show();
+//             }
+//         }
+//     }
+//     // Grade Inquiry Only - students don't have permission
+//     if (!is_student) {
+//         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
+//         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
+//     }
+//     // Randomize Order - all graders have permission
+//     const randomFilterBox = document.getElementById('toggle-random-order');
+//     const randomFilterStatus = Cookies.get('sort');
+//     randomFilterBox.checked = (randomFilterStatus === 'random');
 
-    // Withdrawn students should always be visible in team gradeables
-    if (is_team_assignment) {
-        withdrawnFilterElements.show();
-    }
-});
+//     // Withdrawn students should always be visible in team gradeables
+//     if (is_team_assignment) {
+//         withdrawnFilterElements.show();
+//     }
+// });

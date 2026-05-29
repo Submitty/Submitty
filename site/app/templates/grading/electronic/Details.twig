@@ -37,32 +37,6 @@
                     Component actively being graded
                 </li>
             </ul>
-
-            {# <div class="row-wrapper">
-                {% if show_all_sections_button %}
-                <label for="toggle-view-sections" data-testid="view-sections-label" class="column-wrapper" > Only Assigned Sections
-                    <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
-                </label>
-                {% endif %}
-                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
-                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
-                </label>
-                {% if toggle_anon_button %}
-                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
-                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>
-                </label>
-                {% endif %}
-                {% if grade_inquiry_only_button %}
-                <label for="toggle-inquiry-only" data-testid="inquiry-only-label" class="column-wrapper"> Grade Inquiries Only
-                    <input type="checkbox" id="toggle-inquiry-only" data-testid="inquiry-only-checkbox" onchange="changeInquiry()">
-                </label>
-                {% endif %}
-                {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
-                <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
-                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
-                </label>
-                {% endif %}
-            </div> #}
             {% include 'Vue.twig' with {
                 'type': 'component',
                 'name': 'ta_grading/DetailsFiltersControls',
