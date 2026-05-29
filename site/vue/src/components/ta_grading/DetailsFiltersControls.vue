@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, toRefs } from 'vue';
 
 declare global {
     interface Window {
@@ -12,15 +12,7 @@ declare global {
     }
 }
 
-const {
-    showAllSections,
-    toggleAnon,
-    gradeInquiryOnly,
-    canFilterWithdrawn,
-    anonMode,
-    gradeableId,
-    isTeamAssignment,
-} = defineProps<{
+const props = withDefaults(defineProps<{
     showAllSections: boolean;
     toggleAnon: boolean;
     gradeInquiryOnly: boolean;
@@ -28,7 +20,19 @@ const {
     anonMode: boolean;
     gradeableId?: string;
     isTeamAssignment: boolean;
-}>();
+}>(), {
+  gradeableId: undefined,
+});
+
+const {
+  showAllSections,
+  toggleAnon,
+  gradeInquiryOnly,
+  canFilterWithdrawn,
+  anonMode,
+  gradeableId,
+  isTeamAssignment,
+} = toRefs(props);
 
 const viewSectionsChecked = ref(false);
 const randomOrderChecked = ref(false);
@@ -43,20 +47,20 @@ onMounted(() => {
     const randomFilterStatus = window.Cookies?.get('sort');
     const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
 
-    if (showAllSections) {
+    if (showAllSections.value) {
         viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
     }
 
     randomOrderChecked.value = randomFilterStatus === 'random';
 
-    if (gradeInquiryOnly) {
+    if (gradeInquiryOnly.value) {
         inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
     }
 
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
     withdrawnFilterElements.hide();
 
-    if (canFilterWithdrawn) {
+    if (canFilterWithdrawn.value) {
         if (withdrawnFilterStatus === 'omit') {
             withdrawnHiddenChecked.value = true;
             withdrawnFilterElements.hide();
@@ -67,7 +71,7 @@ onMounted(() => {
         }
     }
 
-    if (isTeamAssignment) {
+    if (isTeamAssignment.value) {
         withdrawnFilterElements.show();
     }
 
