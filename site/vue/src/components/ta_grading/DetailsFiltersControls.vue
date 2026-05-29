@@ -3,13 +3,12 @@ import { onMounted, ref } from 'vue';
 
 declare global {
     interface Window {
-        changeSections: () => void;
-        changeSortOrder: () => void;
-        changeAnon: () => void;
-        changeInquiry: () => void;
-        filter_withdrawn_students: () => void;
         updateElectronicGradingRowNumbersAndColors: () => void;
-        Cookies?: { get: (key: string) => string | undefined };
+        updateSimpleGradingRowNumbersAndColors: () => void;
+        Cookies?: { 
+            get: (key: string) => string | undefined;
+            set: (key: string, value: string, options?: { path?: string; expires?: number }) => void;
+        };
     }
 }
 
@@ -35,6 +34,8 @@ const viewSectionsChecked = ref(false);
 const randomOrderChecked = ref(false);
 const inquiryOnlyChecked = ref(false);
 const withdrawnHiddenChecked = ref(false);
+
+const cookieArguments = { path: document.body.dataset.coursePath ?? '', expires: 365 };
 
 onMounted(() => {
     const inquiryFilterStatus = window.Cookies?.get('inquiry_status');
@@ -74,11 +75,59 @@ onMounted(() => {
     $('table').removeClass('table-striped');
 });
 
-const onChangeSections = () => window.changeSections();
-const onChangeSortOrder = () => window.changeSortOrder();
-const onChangeAnon = () => window.changeAnon();
-const onChangeInquiry = () => window.changeInquiry();
-const onFilterWithdrawn = () => window.filter_withdrawn_students();
+const onChangeSections = (event: Event) => {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    viewSectionsChecked.value = checked;
+    window.Cookies?.set('view', checked ? 'assigned' : 'all', cookieArguments);
+    localStorage.setItem(
+        'general-setting-navigate-assigned-students-only',
+        checked ? 'true' : 'false',
+    );
+    location.reload();
+};
+
+const onChangeSortOrder = (event: Event) => {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    randomOrderChecked.value = checked;
+    window.Cookies?.set('sort', checked ? 'random' : 'id', cookieArguments);
+    location.reload();
+};
+
+const onChangeInquiry = (event: Event) => {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    inquiryOnlyChecked.value = checked;
+    window.Cookies?.set('inquiry_status', checked ? 'on' : 'off', cookieArguments);
+    location.reload();
+};
+
+const onChangeAnon = (event: Event) => {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    window.Cookies?.set('anon_mode', checked ? 'on' : 'off', cookieArguments);
+    location.reload();
+};
+
+const onFilterWithdrawn = (event: Event) => {
+    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    withdrawnHiddenChecked.value = checked;
+
+    const withdrawnElectronic = $('[data-student="electronic-grade-withdrawn"]');
+    const withdrawnSimple = $('[data-student="simple-grade-withdrawn"]');
+
+    if (checked) {
+        withdrawnElectronic.hide();
+        withdrawnSimple.hide();
+        window.Cookies?.set('include_withdrawn_students', 'omit', cookieArguments);
+    }
+    else {
+        withdrawnElectronic.show();
+        withdrawnSimple.show();
+        window.Cookies?.set('include_withdrawn_students', 'include', cookieArguments);
+    }
+
+    $('table').removeClass('table-striped');
+    window.updateSimpleGradingRowNumbersAndColors();
+    window.updateElectronicGradingRowNumbersAndColors();
+};
 </script>
 
 <template>
