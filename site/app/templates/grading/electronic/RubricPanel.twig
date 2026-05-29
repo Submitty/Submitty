@@ -26,12 +26,14 @@
                     {% endif %}
 
                     {# Verify all button #}
-                    {% if show_verify_all %}
+                    {# {% if show_verify_all %}
                         <div class="col-no-gutters">
                             <label for="verify-all" tabIndex="0" class="screen-reader">Verify All</label>
                             <input id="verify-all" type="button" class="btn btn-default key_to_click mx-1" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
                         </div>
-                    {% endif %}
+                    {% endif %} #}
+                    {# Rubric controls moved to Vue (rendered by RubricPanel component) #}
+                    <div id="rubric-controls"></div>
 
                     {# clear version conflicts button #}
                     {% if show_clear_conflicts and not version_conflict %}
