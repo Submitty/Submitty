@@ -72,7 +72,8 @@
                     'gradeInquiryOnly': grade_inquiry_only_button,
                     'canFilterWithdrawn': full_access_grader_permission and not gradeable.isTeamAssignment(),
                     'anonMode': anon_mode,
-                    'gradeableId': gradeable.getId()
+                    'gradeableId': gradeable.getId(),
+                    'isTeamAssignment': gradeable.isTeamAssignment()
                 }
             } %}
         </div>

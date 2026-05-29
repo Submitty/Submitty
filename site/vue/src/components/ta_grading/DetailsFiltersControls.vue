@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+
 declare global {
     interface Window {
         changeSections: () => void;
@@ -6,6 +8,8 @@ declare global {
         changeAnon: () => void;
         changeInquiry: () => void;
         filter_withdrawn_students: () => void;
+        updateElectronicGradingRowNumbersAndColors: () => void;
+        Cookies?: { get: (key: string) => string | undefined };
     }
 }
 
@@ -16,6 +20,7 @@ const {
     canFilterWithdrawn,
     anonMode,
     gradeableId,
+    isTeamAssignment,
 } = defineProps<{
     showAllSections: boolean;
     toggleAnon: boolean;
@@ -23,7 +28,51 @@ const {
     canFilterWithdrawn: boolean;
     anonMode: boolean;
     gradeableId?: string;
+    isTeamAssignment: boolean;
 }>();
+
+const viewSectionsChecked = ref(false);
+const randomOrderChecked = ref(false);
+const inquiryOnlyChecked = ref(false);
+const withdrawnHiddenChecked = ref(false);
+
+onMounted(() => {
+    const inquiryFilterStatus = window.Cookies?.get('inquiry_status');
+    const assignedFilterStatus = window.Cookies?.get('view');
+    const randomFilterStatus = window.Cookies?.get('sort');
+    const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
+
+    if (showAllSections) {
+        viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
+    }
+
+    randomOrderChecked.value = randomFilterStatus === 'random';
+
+    if (gradeInquiryOnly) {
+        inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
+    }
+
+    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    withdrawnFilterElements.hide();
+
+    if (canFilterWithdrawn) {
+        if (withdrawnFilterStatus === 'omit') {
+            withdrawnHiddenChecked.value = true;
+            withdrawnFilterElements.hide();
+        }
+        else {
+            withdrawnHiddenChecked.value = false;
+            withdrawnFilterElements.show();
+        }
+    }
+
+    if (isTeamAssignment) {
+        withdrawnFilterElements.show();
+    }
+
+    window.updateElectronicGradingRowNumbersAndColors();
+    $('table').removeClass('table-striped');
+});
 
 const onChangeSections = () => window.changeSections();
 const onChangeSortOrder = () => window.changeSortOrder();
@@ -45,6 +94,7 @@ const onFilterWithdrawn = () => window.filter_withdrawn_students();
                 id="toggle-view-sections"
                 type="checkbox"
                 data-testid="view-sections"
+                :checked="viewSectionsChecked"
                 @change="onChangeSections"
             >
         </label>
@@ -59,6 +109,7 @@ const onFilterWithdrawn = () => window.filter_withdrawn_students();
                 id="toggle-random-order"
                 type="checkbox"
                 data-testid="random-order-checkbox"
+                :checked="randomOrderChecked"
                 @change="onChangeSortOrder"
             >
         </label>
@@ -91,6 +142,7 @@ const onFilterWithdrawn = () => window.filter_withdrawn_students();
                 id="toggle-inquiry-only"
                 type="checkbox"
                 data-testid="inquiry-only-checkbox"
+                :checked="inquiryOnlyChecked"
                 @change="onChangeInquiry"
             >
         </label>
@@ -106,6 +158,7 @@ const onFilterWithdrawn = () => window.filter_withdrawn_students();
                 id="toggle-filter-withdrawn"
                 type="checkbox"
                 data-testid="filter-withdrawn-checkbox"
+                :checked="withdrawnHiddenChecked"
                 @change="onFilterWithdrawn"
             >
         </label>
