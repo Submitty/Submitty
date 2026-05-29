@@ -21,17 +21,17 @@ const props = withDefaults(defineProps<{
     gradeableId?: string;
     isTeamAssignment: boolean;
 }>(), {
-  gradeableId: undefined,
+    gradeableId: undefined,
 });
 
 const {
-  showAllSections,
-  toggleAnon,
-  gradeInquiryOnly,
-  canFilterWithdrawn,
-  anonMode,
-  gradeableId,
-  isTeamAssignment,
+    showAllSections,
+    toggleAnon,
+    gradeInquiryOnly,
+    canFilterWithdrawn,
+    anonMode,
+    gradeableId,
+    isTeamAssignment,
 } = toRefs(props);
 
 const viewSectionsChecked = ref(false);
