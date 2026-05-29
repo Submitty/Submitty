@@ -93,3 +93,28 @@
         {% endif %}
     </div>
 </div>
+<div id="rubric-vue-root">
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'ta_grading/RubricPanel',
+        'args': {
+            'gradeableId': gradeable_id,
+            'anonId': anon_id,
+            'isTaGrading': is_ta_grading,
+            'hasActiveVersion': has_active_version,
+            'hasSubmission': has_submission,
+            'hasOverriddenGrades': has_overridden_grades,
+            'versionConflict': version_conflict,
+            'isWithdrawnStudent': is_withdrawn_student,
+            'showVerifyAll': show_verify_all,
+            'showClearConflicts': show_clear_conflicts,
+            'showSilentEdit': show_silent_edit,
+            'isPeerGrader': is_peer_grader,
+            'displayVersion': display_version,
+            'graderId': grader_id,
+            'verifierId': verifier_id,
+            'canVerify': can_verify,
+            'allowCustomMarks': allow_custom_marks
+        }
+    } %}
+</div>
