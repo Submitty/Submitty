@@ -44,20 +44,35 @@ class ClusteringEngine:
 
             test_results = self._get_test_results(user_id, version)
 
-            # For POC: just extract features from the first python file found
-            # Or concatenate them, but let's just use the first for simplicity
-            with open(code_files[0], 'r', encoding='utf-8') as f:
-                code = f.read()
+            # Aggregate across all python files
+            code_contents = []
+            for filepath in code_files:
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        code_contents.append(f.read())
+                except Exception:
+                    pass
+            
+            if not code_contents:
+                continue
+                
+            code = "\n".join(code_contents)
 
             features_dict = self.extractor.extract_features(code, test_results)
 
-            # Convert dict to a list of values in consistent order
-            feature_vector = [features_dict[k] for k in sorted(features_dict.keys())]
+            # Convert dict to a list of values in explicit stable order (insertion order)
+            feature_vector = list(features_dict.values())
             feature_matrix.append(feature_vector)
             labels.append(f"{user_id}_v{version}")
 
         if not feature_matrix:
             return {"error": "No features could be extracted."}
+
+        if len(feature_matrix) < 2:
+            # Trivial tree for single submission edge case
+            if len(feature_matrix) == 1:
+                return {"status": "success", "tree": {"name": labels[0], "distance": 0.0}}
+            return {"error": "Not enough data for clustering."}
 
         # Normalize features
         normalized_matrix = self._normalize_features(feature_matrix)
@@ -86,11 +101,21 @@ class ClusteringEngine:
                         versions.append(int(v_dir.name))
 
                 if versions:
-                    highest_version = max(versions)
+                    active_version = max(versions)
+                    settings_file = user_dir / 'user_assignment_settings.json'
+                    if settings_file.exists():
+                        try:
+                            with open(settings_file, 'r', encoding='utf-8') as sf:
+                                settings = json.load(sf)
+                                if 'active_version' in settings:
+                                    active_version = int(settings['active_version'])
+                        except Exception:
+                            pass
+
                     active_submissions.append({
                         'user': user_dir.name,
-                        'version': highest_version,
-                        'path': user_dir / str(highest_version)
+                        'version': active_version,
+                        'path': user_dir / str(active_version)
                     })
         return active_submissions
 

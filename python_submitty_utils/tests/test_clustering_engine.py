@@ -21,7 +21,7 @@ class TestClusteringEngine(unittest.TestCase):
         self.results_dir.mkdir(parents=True)
         self._create_mock_student('student1', 3, 'for i in range(10): print(i)')
         self._create_mock_student('student2', 1, 'for x in range(10): print(x)') # Similar to 1
-        self._create_mock_student('student3', 2, 'def fact(n):\n if n<=1: return 1\n return n*fact(n-1)') # Different
+        self._create_mock_student('student3', 2, 'def fact(n):\n    if n<=1: return 1\n    return n*fact(n-1)') # Different
 
     def tearDown(self):
         self.temp_dir.cleanup()
@@ -33,7 +33,7 @@ class TestClusteringEngine(unittest.TestCase):
         res_dir = self.results_dir / user_id / str(version)
         res_dir.mkdir(parents=True)
         with open(res_dir / 'results.json', 'w', encoding='utf-8') as f:
-            json.dump({'testcases': [{'points': 1}, {'points': 0}]}, f)
+            json.dump({'testcases': [{'points_awarded': 1}, {'points_awarded': 0}]}, f)
 
     def test_clustering(self):
         engine = ClusteringEngine(str(self.data_dir), self.semester, self.course, self.gradeable)
