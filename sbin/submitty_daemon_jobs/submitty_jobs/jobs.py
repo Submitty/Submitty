@@ -215,7 +215,7 @@ class RunClustering(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
-        
+
         # error checking
         if '..' in semester or '..' in course or '..' in gradeable:
             print('Error: Invalid path component ".." in string')
@@ -225,18 +225,18 @@ class RunClustering(CourseGradeableJob):
         sys.path.append(os.path.join(INSTALL_DIR, 'python_submitty_utils'))
         try:
             from submitty_utils.clustering_engine import ClusteringEngine
-            
+
             engine = ClusteringEngine(DATA_DIR, semester, course, gradeable)
             result = engine.run_clustering()
-            
+
             # Save results to DB / JSON
             output_dir = Path(DATA_DIR, 'courses', semester, course, 'clustering', gradeable)
             output_dir.mkdir(parents=True, exist_ok=True)
-            
+
             output_file = output_dir / 'clustering.json'
             with open(output_file, 'w') as f:
                 json.dump(result, f, indent=4)
-                
+
             print(f"Clustering successfully completed for {course} - {gradeable}.")
         except Exception as e:
             print(f"Error running clustering: {e}")
@@ -325,7 +325,8 @@ class BulkUpload(CourseJob):
         try:
             current_path = os.path.dirname(os.path.realpath(__file__))
             bulk_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/bulk_pdf", gradeable_id, timestamp)
-            split_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/split_pdf", gradeable_id, timestamp)
+            split_path = os.path.join(DATA_DIR, "courses", semester, course,
+                                      "uploads/split_pdf", gradeable_id, timestamp)
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
@@ -349,9 +350,9 @@ class BulkUpload(CourseJob):
             # access so submitty_php can view & delete pdfs when they are
             # assigned to a student and/or deleted
             self.add_permissions_recursive(split_path,
-                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
-                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
-                                           stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP)  # noqa: E222
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_ISGID,  # noqa: E222
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_ISGID,  # noqa: E222
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)  # noqa: E222
 
             # move to copy folder
             os.chdir(split_path)
@@ -423,10 +424,13 @@ class CreateCourse(AbstractJob):
         ))
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course,
+                           head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor,
+                           semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
-                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py",
+                               VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
 
     def cleanup_job(self):
         pass
@@ -445,7 +449,8 @@ class UpdateDockerImages(AbstractJob):
         with os.fdopen(log_fd, 'a') as output_file:
             subprocess.run(["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file)
 
-        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
+        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(
+            today.year, today.month, today.day, today.hour, today.minute, today.second)
         logger.write_to_log(log_file_path, log_msg)
 
     def cleanup_job(self):
@@ -509,7 +514,8 @@ class DocxToPDF(AbstractJob):
             submissions_processed_dir = os.path.join(course_dir, 'submissions_processed')
 
             submissions_path = os.path.join(submissions_dir, gradeable, user, str(version))
-            submissions_processed_path = os.path.join(submissions_processed_dir, gradeable, user, str(version), 'convert_docx_to_pdf')
+            submissions_processed_path = os.path.join(
+                submissions_processed_dir, gradeable, user, str(version), 'convert_docx_to_pdf')
 
             if not os.path.isdir(submissions_processed_path):
                 os.makedirs(submissions_processed_path)
@@ -550,13 +556,15 @@ class DocxToPDF(AbstractJob):
                 except requests.exceptions.ConnectionError:
                     log.write("Container timed out...\n")
 
-                log.write("Output from libreoffice container:\n----------------------------------\n" + container.logs().decode('utf-8'))
+                log.write("Output from libreoffice container:\n----------------------------------\n" +
+                          container.logs().decode('utf-8'))
                 container.stop()
                 container.remove()
 
                 stat_parent = os.stat(submissions_processed_path)
                 for i in range(len(docx_files)):
-                    dest = os.path.join(submissions_processed_path, os.path.relpath(docx_files[i], submissions_path) + '.pdf')
+                    dest = os.path.join(submissions_processed_path, os.path.relpath(
+                        docx_files[i], submissions_path) + '.pdf')
                     os.makedirs(os.path.dirname(dest), 0o2755, exist_ok=True)
                     out_dir = os.path.join(tmpdir, 'docx_files', str(i), 'out')
                     if not os.path.isdir(out_dir):

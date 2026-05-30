@@ -5,6 +5,13 @@ import json
 from pathlib import Path
 from submitty_utils.clustering_engine import ClusteringEngine
 
+try:
+    import scipy
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
+
 class TestClusteringEngine(unittest.TestCase):
     
     def setUp(self):
@@ -40,6 +47,7 @@ class TestClusteringEngine(unittest.TestCase):
         with open(res_dir / 'results.json', 'w') as f:
             json.dump({'testcases': [{'points': 1}, {'points': 0}]}, f)
 
+    @unittest.skipIf(not SCIPY_AVAILABLE, "SciPy is not installed")
     def test_clustering(self):
         engine = ClusteringEngine(str(self.data_dir), self.semester, self.course, self.gradeable)
         result = engine.run_clustering()

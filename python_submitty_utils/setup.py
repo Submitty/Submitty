@@ -8,7 +8,8 @@ setup(
     license='BSD',
     description='Python Submitty Utils',
     install_requires=[
-        'tzlocal'
+        'tzlocal',
+        'scipy>=1.10.0'
     ],
     tests_require=[],
     zip_safe=True

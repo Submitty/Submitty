@@ -1,10 +1,9 @@
 import ast
-import re
-import math
+
 
 class CodeFeatureExtractor:
     """
-    Extracts Layer 1 (Structural), Layer 2 (Behavioral), and Layer 3 (Metrics) 
+    Extracts Layer 1 (Structural), Layer 2 (Behavioral), and Layer 3 (Metrics)
     features from Python source code for clustering analysis.
     """
 
@@ -24,14 +23,14 @@ class CodeFeatureExtractor:
             'iteration_pattern': 0,
             'if_statement_count': 0,
             'nested_if_depth': 0,
-            'switch_statement_count': 0, # Match statements
+            'switch_statement_count': 0,  # Match statements
             'ternary_operator_count': 0,
             'loop_total_count': 0,
 
             # Layer 1: Boundary & Defensive
             'boundary_check_count': 0,
             'defensive_programming_level': 0.0,
-            'error_handling_strategy': 0, # 0: None, 1: Exception, 2: Assertion
+            'error_handling_strategy': 0,  # 0: None, 1: Exception, 2: Assertion
             'error_handling_count': 0,
 
             # Layer 1: Modularity
@@ -42,7 +41,7 @@ class CodeFeatureExtractor:
 
             # Layer 1: Data Structure & Memory
             'array_access_count': 0,
-            'pointer_dereference_count': 0, # 0 in pure python
+            'pointer_dereference_count': 0,  # 0 in pure python
             'memory_allocation_count': 0,
             'memory_deallocation_count': 0,
             'memory_leak_risk': 0.0,
@@ -82,7 +81,7 @@ class CodeFeatureExtractor:
     def extract_features(self, source_code: str, test_results: dict = None) -> dict:
         """Main entry point. Parses AST and extracts all features."""
         self.reset_features()
-        
+
         # 1. Extract Layer 3 text-based metrics first
         self._extract_text_metrics(source_code)
 
@@ -93,17 +92,17 @@ class CodeFeatureExtractor:
         except SyntaxError:
             # If code doesn't parse, we return empty/default features but keep text metrics
             pass
-        
+
         # 3. Extract Layer 2 features from test_results
         if test_results:
             self._extract_behavioral_features(test_results)
-            
+
         return self.features
 
     def _extract_text_metrics(self, source_code: str):
         lines = source_code.split('\n')
         self.features['total_lines'] = len(lines)
-        
+
         for line in lines:
             stripped = line.strip()
             if not stripped:
@@ -112,25 +111,26 @@ class CodeFeatureExtractor:
                 self.features['comment_lines'] += 1
             else:
                 self.features['code_lines'] += 1
-                
+
         if self.features['total_lines'] > 0:
             self.features['comment_ratio'] = self.features['comment_lines'] / self.features['total_lines']
-            
+
         if self.features['code_lines'] > 0:
             # statements per code line estimate
-            self.features['code_density'] = 1.0  
+            self.features['code_density'] = 1.0
 
     def _extract_ast_features(self, tree):
         # We will use an AST NodeVisitor to walk the tree
         visitor = FeatureNodeVisitor(self.features)
         visitor.visit(tree)
-        
+
         # Post-process some aggregated metrics
         self.features['loop_total_count'] = self.features['for_loop_count'] + self.features['while_loop_count']
-        
+
         if self.features['function_count'] > 0:
             self.features['average_function_length'] = self.features['code_lines'] / self.features['function_count']
-            self.features['modularity_score'] = self.features['function_count'] / max(1, self.features['cyclomatic_complexity'])
+            self.features['modularity_score'] = self.features['function_count'] / \
+                max(1, self.features['cyclomatic_complexity'])
 
     def _extract_behavioral_features(self, test_results: dict):
         # test_results is expected to look like:
@@ -138,16 +138,16 @@ class CodeFeatureExtractor:
         self.features['total_tests_run'] = test_results.get('total_tests', 0)
         self.features['total_tests_passed'] = test_results.get('passed', 0)
         self.features['total_tests_failed'] = test_results.get('failed', 0)
-        
+
         if self.features['total_tests_run'] > 0:
             self.features['test_pass_rate'] = self.features['total_tests_passed'] / self.features['total_tests_run']
-            
+
         results = test_results.get('results', [])
         max_consecutive_passes = 0
         max_consecutive_fails = 0
         current_passes = 0
         current_fails = 0
-        
+
         for r in results:
             if r:
                 current_passes += 1
@@ -157,7 +157,7 @@ class CodeFeatureExtractor:
                 current_fails += 1
                 current_passes = 0
                 max_consecutive_fails = max(max_consecutive_fails, current_fails)
-                
+
         self.features['consecutive_passes'] = max_consecutive_passes
         self.features['consecutive_failures'] = max_consecutive_fails
 
@@ -191,7 +191,7 @@ class FeatureNodeVisitor(ast.NodeVisitor):
         self.features['cyclomatic_complexity'] += 1
         self.generic_visit(node)
 
-    def visit_Match(self, node): # Python 3.10+
+    def visit_Match(self, node):  # Python 3.10+
         self.features['switch_statement_count'] += 1
         self.features['cyclomatic_complexity'] += len(node.cases)
         self.generic_visit(node)
@@ -212,7 +212,7 @@ class FeatureNodeVisitor(ast.NodeVisitor):
         self.functions_defined.add(node.name)
         if node.name.startswith('_'):
             self.features['helper_function_count'] += 1
-            
+
         prev_function = self.current_function
         self.current_function = node.name
         self.generic_visit(node)
@@ -222,27 +222,27 @@ class FeatureNodeVisitor(ast.NodeVisitor):
         if isinstance(node.func, ast.Name):
             func_name = node.func.id
             self.function_calls.append(func_name)
-            
+
             # Simple recursion check
             if self.current_function == func_name:
                 self.features['has_recursion'] = True
                 self.features['recursion_count'] += 1
-                self.features['recursion_style'] = 1 # Linear (simplified check)
-                
+                self.features['recursion_style'] = 1  # Linear (simplified check)
+
             # String ops heuristic (len, str, print)
             if func_name in ['len', 'str', 'print', 'format']:
                 self.features['string_operations_count'] += 1
-                
+
         elif isinstance(node.func, ast.Attribute):
             # Object method calls, often string ops like .join(), .split()
             self.features['string_operations_count'] += 1
-            
+
         self.generic_visit(node)
 
     def visit_Subscript(self, node):
         self.features['array_access_count'] += 1
         self.generic_visit(node)
-        
+
     def visit_Attribute(self, node):
         self.features['struct_access_count'] += 1
         self.generic_visit(node)
