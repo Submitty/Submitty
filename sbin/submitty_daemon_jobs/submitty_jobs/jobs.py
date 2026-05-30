@@ -210,6 +210,39 @@ class RunLichen(CourseGradeableJob):
         subprocess.call(['/usr/local/submitty/Lichen/bin/run_lichen.sh', config_path, data_path])
 
 
+class RunClustering(CourseGradeableJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+        
+        # error checking
+        if '..' in semester or '..' in course or '..' in gradeable:
+            print('Error: Invalid path component ".." in string')
+            return
+
+        import sys
+        sys.path.append(os.path.join(INSTALL_DIR, 'python_submitty_utils'))
+        try:
+            from submitty_utils.clustering_engine import ClusteringEngine
+            
+            engine = ClusteringEngine(DATA_DIR, semester, course, gradeable)
+            result = engine.run_clustering()
+            
+            # Save results to DB / JSON
+            output_dir = Path(DATA_DIR, 'courses', semester, course, 'clustering', gradeable)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            output_file = output_dir / 'clustering.json'
+            with open(output_file, 'w') as f:
+                json.dump(result, f, indent=4)
+                
+            print(f"Clustering successfully completed for {course} - {gradeable}.")
+        except Exception as e:
+            print(f"Error running clustering: {e}")
+            traceback.print_exc()
+
+
 class DeleteLichenResult(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']
