@@ -2,7 +2,7 @@ import unittest
 from submitty_utils.feature_extractor import CodeFeatureExtractor
 
 class TestCodeFeatureExtractor(unittest.TestCase):
-    
+    """Tests for Feature Extractor."""
     def setUp(self):
         self.extractor = CodeFeatureExtractor()
 

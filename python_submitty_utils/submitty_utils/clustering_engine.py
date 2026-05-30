@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long,invalid-name,broad-exception-caught
 import os
 import json
 import math
@@ -13,6 +14,7 @@ except ImportError:
 
 
 class ClusteringEngine:
+    """Engine for executing HAC clustering."""
     def __init__(self, data_dir: str, semester: str, course: str, gradeable: str):
         self.data_dir = data_dir
         self.semester = semester
@@ -62,12 +64,12 @@ class ClusteringEngine:
 
         if SCIPY_AVAILABLE:
             # Perform HAC
-            Z = linkage(normalized_matrix, method='ward')
+            linkage_matrix = linkage(normalized_matrix, method='ward')
             # Convert Linkage matrix Z to dendrogram JSON
-            tree_json = self._linkage_to_json(Z, labels)
+            tree_json = self._linkage_to_json(linkage_matrix, labels)
             return {"status": "success", "tree": tree_json}
-        else:
-            return {"error": "Scipy is not available. Clustering failed.", "features": len(feature_matrix)}
+
+        return {"error": "Scipy is not available. Clustering failed.", "features": len(feature_matrix)}
 
     def _discover_submissions(self) -> List[Dict[str, Any]]:
         """Finds the highest version submission for each user."""
@@ -170,7 +172,7 @@ class ClusteringEngine:
 
         return normalized
 
-    def _linkage_to_json(self, Z, labels: List[str]) -> Dict[str, Any]:
+    def _linkage_to_json(self, linkage_matrix, labels: List[str]) -> Dict[str, Any]:
         """Converts scipy linkage matrix to nested JSON for D3.js"""
         # Z is a (n-1) x 4 matrix where each row represents a cluster merge.
         # n is the number of original samples.
@@ -181,7 +183,7 @@ class ClusteringEngine:
         nodes = [{"name": labels[i], "distance": 0.0} for i in range(n)]
 
         # Iterate over the merges
-        for i, row in enumerate(Z):
+        for i, row in enumerate(linkage_matrix):
             idx1 = int(row[0])
             idx2 = int(row[1])
             dist = float(row[2])

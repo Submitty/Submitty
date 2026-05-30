@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long,invalid-name
 import ast
 
 
@@ -163,6 +164,7 @@ class CodeFeatureExtractor:
 
 
 class FeatureNodeVisitor(ast.NodeVisitor):
+    """AST Visitor that extracts structural features from Python code."""
     def __init__(self, features):
         self.features = features
         self.current_nesting = 0
