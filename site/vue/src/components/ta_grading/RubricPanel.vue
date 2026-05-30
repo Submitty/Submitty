@@ -28,6 +28,10 @@ const editMode = ref(false);
 const silentEdit = ref(false);
 
 onMounted(async () => {
+  if (!props.hasSubmission || !props.hasActiveVersion) {
+    return;
+  }
+
   await (window as any).loadTemplates?.();
   await (window as any).reloadGradingRubric?.(props.gradeableId, props.anonId ?? undefined);
 });
@@ -55,23 +59,23 @@ const handleSilentEditToggle = async () => {
   <teleport to="#rubric-controls">
     <div id="rubric-vue-controls" class="row row-wrap vertical-center">
       <div v-if="showVerifyAll" class="col-no-gutters">
-        <button class="btn btn-default key_to_click mx-1" @click="handleVerifyAll">Verify All</button>
+        <button id="verify-all" class="btn btn-default key_to_click mx-1" @click="handleVerifyAll">Verify All</button>
       </div>
 
       <div v-if="showClearConflicts && !versionConflict" class="col-no-gutters">
-        <button class="btn btn-default key_to_click mx-1" @click="handleClearConflicts">Clear Version Conflicts</button>
+        <button id="change-graded-version" data-testid="change-graded-version" class="btn btn-default key_to_click mx-1" @click="handleClearConflicts">Clear Version Conflicts</button>
       </div>
 
       <div v-if="showSilentEdit" class="col-no-gutters">
         <label>
-          <input type="checkbox" class="key_to_click" :checked="silentEdit" @change="handleSilentEditToggle" />
+          <input id="silent-edit-id" type="checkbox" class="key_to_click" :checked="silentEdit" @change="handleSilentEditToggle" />
           Silent Regrade (don't change who graded)
         </label>
       </div>
 
       <div v-if="!isPeerGrader" class="col-no-gutters">
         <label>
-          <input type="checkbox" class="key_to_click" :checked="editMode" @change="handleEditModeToggle" />
+          <input id="edit-mode-enabled" type="checkbox" class="key_to_click" :checked="editMode" @change="handleEditModeToggle" />
           Edit Rubric
         </label>
       </div>
