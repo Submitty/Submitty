@@ -28,12 +28,12 @@ const editMode = ref(false);
 const silentEdit = ref(false);
 
 onMounted(async () => {
-  if (!props.hasSubmission || !props.hasActiveVersion) {
-    return;
-  }
+  if (!props.hasSubmission || !props.hasActiveVersion) { 
+    return; 
+  } 
 
-  await (window as any).loadTemplates?.();
-  await (window as any).reloadGradingRubric?.(props.gradeableId, props.anonId ?? undefined);
+  await (window as any).loadTemplates?.(); 
+  await (window as any).reloadGradingRubric?.(props.gradeableId, props.anonId ?? undefined); 
 });
 
 const handleVerifyAll = async () => {
@@ -57,13 +57,13 @@ const handleSilentEditToggle = async () => {
 
 <template>
   <teleport to="#rubric-controls">
-    <div id="rubric-vue-controls" class="row row-wrap vertical-center">
-      <div v-if="showVerifyAll" class="col-no-gutters">
-        <button id="verify-all" class="btn btn-default key_to_click mx-1" @click="handleVerifyAll">Verify All</button>
+    <div id="rubric-vue-controls" class="row row-wrap vertical-center"> 
+      <div v-if="showVerifyAll" class="col-no-gutters"> 
+        <button id="verify-all" class="btn btn-default key_to_click mx-1" @click="handleVerifyAll">Verify All</button> 
       </div>
 
-      <div v-if="showClearConflicts && !versionConflict" class="col-no-gutters">
-        <button id="change-graded-version" data-testid="change-graded-version" class="btn btn-default key_to_click mx-1" @click="handleClearConflicts">Clear Version Conflicts</button>
+      <div v-if="showClearConflicts && !versionConflict" class="col-no-gutters"> 
+        <button id="change-graded-version" data-testid="change-graded-version" class="btn btn-default key_to_click mx-1" @click="handleClearConflicts">Clear Version Conflicts</button> 
       </div>
 
       <div v-if="showSilentEdit" class="col-no-gutters">
