@@ -27,13 +27,9 @@ const containerRef = ref<HTMLElement | null>(null);
 const editMode = ref(false);
 const silentEdit = ref(false);
 
-onMounted(async () => {
-  if (!props.hasSubmission || !props.hasActiveVersion) { 
-    return; 
-  } 
-
-  await (window as any).loadTemplates?.(); 
-  await (window as any).reloadGradingRubric?.(props.gradeableId, props.anonId ?? undefined); 
+onMounted(() => {
+  // Data loading is handled by the inline <script> in RubricPanel.twig.
+  // This component only manages the panel controls.
 });
 
 const handleVerifyAll = async () => {

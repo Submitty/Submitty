@@ -32,6 +32,9 @@
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>
                 <div class="inner-container" id="grading-box">
                     {% if has_submission and has_active_version %}
+                        {# Rubric body is now rendered by Vue (ta_grading/Rubric component) #}
+                        <div id="rubric-body-vue-root"></div>
+                        {# Keep the script call as a reliable fallback to populate global state #}
                         <script>
                             $(document).ready(function () {
                                 loadTemplates().then(function() {
@@ -83,3 +86,21 @@
         },
     } %}
 </div>
+
+{% if has_submission and has_active_version %}
+<div id="rubric-body-vue-root-container">
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'ta_grading/Rubric',
+        'args': {
+            'gradeableId': gradeable_id,
+            'anonId': anon_id,
+            'displayVersion': display_version,
+            'allowCustomMarks': allow_custom_marks,
+            'isPeerGrader': is_peer_grader,
+            'graderId': grader_id,
+            'canVerify': can_verify
+        },
+    } %}
+</div>
+{% endif %}
