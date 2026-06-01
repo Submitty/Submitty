@@ -35,9 +35,11 @@ import { buildUrl } from './utils.js';
 */
 Cypress.Commands.add('login', (username = 'instructor', password = username) => {
     cy.url({ decode: true }).then(($url) => {
+        const queryString = $url.split('?')[1];
+        const checkLoginUrl = queryString ? '/authentication/check_login?'.concat(queryString) : '/authentication/check_login';
         cy.request({
             method: 'POST',
-            url: '/authentication/check_login'.concat('?', $url.split('?')[1]),
+            url: checkLoginUrl,
             form: true,
             followRedirect: false,
             body: {
