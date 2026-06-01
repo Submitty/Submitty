@@ -597,13 +597,6 @@ jobs:
           mkdir -vp ${GITHUB_WORKSPACE}/dumped/main
           mkdir -vp ${GITHUB_WORKSPACE}/dumped/branch
 
-
-      - name: Debug dbdump.sh
-        run: - name: Debug sed pattern
-        run: |
-          echo '\restrict 0ERux6q5ehfyr0ivymjWMSHEbHR7WHLkvpOyXaJui5TXdFnOEHlJteh8qxZwxzV' | sed -e '/\\restrict/d'
-
-
       - name: Setup Databases and Courses for main
         run: | # migrate main according to dumped master database (assume it is correct)
           python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
