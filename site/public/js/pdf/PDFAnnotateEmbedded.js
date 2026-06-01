@@ -394,7 +394,8 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
                                 if (initialPage.length) {
-                                    $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
+                                    const scrollContainer = $('#file-content').length ? $('#file-content') : $('#submission_browser');
+                                    scrollContainer.scrollTop(Math.max(page.offsetTop, 0));
                                 }
                             }
                         }));
