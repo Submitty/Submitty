@@ -119,6 +119,38 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  cypress-component:
+    name: Cypress Component
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run cypress component tests
+        run: npx cypress run --component --browser chrome
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Screenshots
+          path: cypress/screenshots
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Videos
+          path: cypress/videos
+
   twig-lint:
     name: Twig Lint
     runs-on: ubuntu-22.04
