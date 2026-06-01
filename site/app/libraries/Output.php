@@ -107,7 +107,7 @@ class Output {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
 
         // cache must be in a directory that is not hardened by php fpm 'ProtectSystem=full' property
-        $cache_path = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'cache', 'twig');
+        $cache_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'cache', 'twig');
 
         $debug = $full_load && $this->core->getConfig()?->isDebug();
         // set this to false to force caching even on development machine
