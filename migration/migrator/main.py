@@ -16,6 +16,7 @@ from .loader import load_module, load_migrations
 
 import subprocess
 
+
 def create(args):
     """
     Create a new migration.
