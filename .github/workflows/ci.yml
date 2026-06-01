@@ -119,6 +119,38 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  cypress-component:
+    name: Cypress Component
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run cypress component tests
+        run: npx cypress run --component --browser chrome
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Screenshots
+          path: cypress/screenshots
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Videos
+          path: cypress/videos
+
   twig-lint:
     name: Twig Lint
     runs-on: ubuntu-22.04
@@ -127,7 +159,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -154,7 +186,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -190,7 +222,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.36.0
+      - uses: shivammathur/setup-php@2.37.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -535,7 +567,7 @@ jobs:
 
       - name: Create Databases
         run: |
-          psql -d postgres -h localhost -U postgres        -p ${{  job.services.postgres-main.ports['5432']  }} \
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
@@ -603,9 +635,8 @@ jobs:
       - name: Compare Migrated master Databases
         if: always()
         run: |
-          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/master.sql > /tmp/branch_master.sql
-
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql /tmp/branch_master.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql                           \
+                       ${GITHUB_WORKSPACE}/dumped/branch/master.sql || {
             echo "::error:: Master databases are not identical, please check your migration"
             exit 1
           }
@@ -613,9 +644,8 @@ jobs:
       - name: Compare Migrated course Databases
         if: always()
         run: |
-          sed '/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;/^[[:space:]]*$/d' ${GITHUB_WORKSPACE}/dumped/branch/course.sql > /tmp/branch_course.sql
-
-          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql /tmp/branch_course.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql                           \
+                       ${GITHUB_WORKSPACE}/dumped/branch/course.sql || {
             echo "::error:: Course databases are not identical, please check your migration"
             exit 1
           }
@@ -623,7 +653,8 @@ jobs:
       - name: Compare Migrated master Database with Provided Dump
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql                         \
+                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
@@ -631,7 +662,8 @@ jobs:
       - name: Compare Migrated course Database with Provided Dump
         if: always()
         run: |
-          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql                         \
+                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
             echo "::error:: Wrong provided dump, please check your database dumps"
             exit 1
           }
@@ -643,6 +675,7 @@ jobs:
           name: dumped_database
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql
           retention-days: 3
+
 
   Cypress-System:
     name: Cypress (System)
@@ -898,12 +931,18 @@ jobs:
         with:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Downloads
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/downloads
 
   Integration:
     name: Integration
