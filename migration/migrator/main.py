@@ -14,6 +14,7 @@ from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_envi
 from .dumper import dump_database
 from .loader import load_module, load_migrations
 
+import subprocess
 
 def create(args):
     """
@@ -463,6 +464,8 @@ def dump(args):
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
         dump_database('submitty', out_file)
+        # Remove restrict tokens from dumped sql file
+        subprocess.run(['sed', '-i', '/^[[:space:]]*\\\\restrict/d;/^[[:space:]]*\\\\unrestrict/d;', str(out_file)])
         print('DONE')
 
     if 'course' in args.environments:
@@ -471,6 +474,8 @@ def dump(args):
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
+        # Remove restrict tokens from dumped sql file
+        subprocess.run(['sed', '-i', '/^[[:space:]]*\\\\restrict/d;/^[[:space:]]*\\\\unrestrict/d;', str(out_file)])
         print('DONE')
 
 
