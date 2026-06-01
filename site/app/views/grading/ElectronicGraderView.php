@@ -268,13 +268,13 @@ class ElectronicGraderView extends AbstractView {
                     number_format(($individual_viewed_grade / $total_submissions) * 100, 1);
             }
             if ($overall_average !== null) {
-                $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
-                if ($overall_total != 0) {
+                $overall_total = (float) $overall_average->getMaxValue() + (float) $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                if ($overall_total !== 0.0) {
                     $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                 }
             }
             if ($autograded_average !== null) {
-                if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() != 0 && $autograded_average->getCount() !== 0) {
+                if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
                     $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
                 }
             }
@@ -283,12 +283,13 @@ class ElectronicGraderView extends AbstractView {
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
                     $percentage = 0;
-                    if ($comp->getMaxValue() != 0) {
-                        $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
+                    $max_value = (float) $comp->getMaxValue();
+                    if ($max_value !== 0.0) {
+                        $percentage = round($comp->getAverageScore() / $max_value * 100);
                     }
                     $component_percentages[] = $percentage;
                 }
-                if ($component_overall_max != 0) {
+                if ((float) $component_overall_max !== 0.0) {
                     $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
                 }
             }
