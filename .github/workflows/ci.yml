@@ -599,7 +599,7 @@ jobs:
 
 
       - name: Debug dbdump.sh
-        run: cat dbdump.sh
+        run: grep -n "restrict" ${GITHUB_WORKSPACE}/dumped/main/master.sql | head -20
 
 
       - name: Setup Databases and Courses for main
