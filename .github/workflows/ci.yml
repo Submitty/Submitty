@@ -586,7 +586,8 @@ jobs:
               echo 'sed -i -e "'"/SELECT pg_catalog.set_config('search_path'/d"'"\'
               echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
               echo '       -e "/SET default_table_access_method = /d"            \'
-              echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"'
+              echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"\'
+              echo 'sed -i "/^[[:space:]]*\\restrict/d;/^[[:space:]]*\\unrestrict/d;" "$2"'
           ) > dbdump.sh
           chmod +x dbdump.sh
 
