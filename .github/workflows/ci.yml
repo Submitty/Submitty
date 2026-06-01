@@ -587,8 +587,7 @@ jobs:
               echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
               echo '       -e "/SET default_table_access_method = /d"            \'
               echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"'
-              echo 'sed -i -e "/\\restrict/d;" "$2"'
-              echo 'sed -i -e "/\\unrestrict/d;" "$2"'
+              echo 'sed -i -e "/\\restrict/d;/\\unrestrict/d;" "$2"'
           ) > dbdump.sh
           chmod +x dbdump.sh
 
@@ -597,6 +596,11 @@ jobs:
 
           mkdir -vp ${GITHUB_WORKSPACE}/dumped/main
           mkdir -vp ${GITHUB_WORKSPACE}/dumped/branch
+
+
+      - name: Debug dbdump.sh
+        run: cat dbdump.sh
+
 
       - name: Setup Databases and Courses for main
         run: | # migrate main according to dumped master database (assume it is correct)
