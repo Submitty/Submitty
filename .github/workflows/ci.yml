@@ -599,7 +599,9 @@ jobs:
 
 
       - name: Debug dbdump.sh
-        run: grep -n "restrict" ${GITHUB_WORKSPACE}/dumped/main/master.sql | head -20
+        run: - name: Debug sed pattern
+        run: |
+          echo '\restrict 0ERux6q5ehfyr0ivymjWMSHEbHR7WHLkvpOyXaJui5TXdFnOEHlJteh8qxZwxzV' | sed -e '/\\restrict/d'
 
 
       - name: Setup Databases and Courses for main
