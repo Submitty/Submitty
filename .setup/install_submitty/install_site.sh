@@ -153,47 +153,23 @@ fi
 
 readarray -t result_array <<< "${result}"
 
-# clear old twig cache
-if [ -d "${SUBMITTY_DATA_DIR}/cache/twig" ]; then
-    rm -rf "${SUBMITTY_DATA_DIR}/cache/twig"
+# clear old data directory cache
+if [ -d "${SUBMITTY_DATA_DIR}/cache" ]; then
+    rm -rf "${SUBMITTY_DATA_DIR}/cache"
 fi
-# create twig cache directory
-mkdir -p ${SUBMITTY_DATA_DIR}/cache/twig
+# create cache directories in data dir
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/twig"
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/routes"
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/doctrine"
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/access_control"
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/doctrine-proxy"
+mkdir -p "${SUBMITTY_DATA_DIR}/cache/lang"
 
-# clear old routes cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
+# preserve compatibility for legacy site/cache references
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache" ] || [ -L "${SUBMITTY_INSTALL_DIR}/site/cache" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache"
 fi
-# create routes cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
-
-# clear old doctrine cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
-fi
-# create doctrine cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
-
-# clear old access control cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
-fi
-# create access control cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
-
-# clear old doctrine proxy classes
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy"
-fi
-# create doctrine proxy classes directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
-
-# clear old lang cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
-fi
-# create lang cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
+ln -s "${SUBMITTY_DATA_DIR}/cache" "${SUBMITTY_INSTALL_DIR}/site/cache"
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -266,14 +242,14 @@ fi
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 # load lang files
-php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_DATA_DIR}/cache/lang"
 
 # Update permissions & ownership for cache directory
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
-chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
+chmod -R 751 "${SUBMITTY_INSTALL_DIR}/site/cache"
+chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/site/cache"
 
-chmod -R 751 ${SUBMITTY_DATA_DIR}/cache
-chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}/cache
+chmod -R 751 "${SUBMITTY_DATA_DIR}/cache"
+chown -R ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_DATA_DIR}/cache"
 
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
@@ -446,7 +422,7 @@ chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
-find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
+find "${SUBMITTY_INSTALL_DIR}/site/cache" -type d -exec chmod u+w {} \;
 
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
