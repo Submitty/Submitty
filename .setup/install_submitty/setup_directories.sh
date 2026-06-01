@@ -175,6 +175,9 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     # php & daemon needs to be able to read workers & containers config
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
+    # instructors need read access to these files to build gradeables from the command line
+    chmod  644                                                "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
+    chmod  644                                                "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
 fi
 
 # Set permissions of all files in the logs directories
