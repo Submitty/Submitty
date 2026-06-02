@@ -283,7 +283,11 @@ def handle_migration(args):
 
     print('Loading trigger functions...', end='')
     load_triggers(args, False)
+    print('Running cleaner...', end='')
+    #run the cleaner to remove restrict tokens
+    subprocess.run(['bash', './cleaner.sh'])
     print('DONE')
+
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -465,8 +469,6 @@ def dump(args):
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
         dump_database('submitty', out_file)
-        # Remove restrict tokens from dumped sql file
-        subprocess.run(['sed', '-i', '/^[[:space:]]*\\\\restrict/d;/^[[:space:]]*\\\\unrestrict/d;', str(out_file)])
         print('DONE')
 
     if 'course' in args.environments:
@@ -475,8 +477,6 @@ def dump(args):
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
-        # Remove restrict tokens from dumped sql file
-        subprocess.run(['sed', '-i', '/^[[:space:]]*\\\\restrict/d;/^[[:space:]]*\\\\unrestrict/d;', str(out_file)])
         print('DONE')
 
 
