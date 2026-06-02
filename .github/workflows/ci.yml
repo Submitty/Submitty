@@ -582,7 +582,7 @@ jobs:
       - name: Create Database Dumper
         run: | # the original dumper requires a `su`, which is not needed when psql as a service
           (
-              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres --no-security-labels'
+              echo 'pg_dump --no-security-labels -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres'
               echo 'sed -i -e "'"/SELECT pg_catalog.set_config('search_path'/d"'"\'
               echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
               echo '       -e "/SET default_table_access_method = /d"            \'
