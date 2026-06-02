@@ -1,23 +1,41 @@
 describe('TA Grading Panel Switcher', () => {
     it('Should show correct panel options for each layout', () => {
         const panels = [
-            '#autograding_results_btn',
-            '#grading_rubric_btn',
-            '#submission_browser_btn',
-            '#student_info_btn',
-            '#solution_ta_notes_btn',
-            '#grade_inquiry_info_btn',
+            {
+                button: '[data-testid="show-autograding"]',
+                selector: '[data-testid="autograding-results-panel-position-select"]',
+            },
+            {
+                button: '[data-testid="grading-rubric-panel-toggle"]',
+                selector: '[data-testid="grading-rubric-panel-position-select"]',
+            },
+            {
+                button: '[data-testid="show-submission"]',
+                selector: '[data-testid="submission-browser-panel-position-select"]',
+            },
+            {
+                button: '[data-testid="student-info-panel-toggle"]',
+                selector: '[data-testid="student-info-panel-position-select"]',
+            },
+            {
+                button: '[data-testid="solution-ta-notes-panel-toggle"]',
+                selector: '[data-testid="solution-ta-notes-panel-position-select"]',
+            },
+            {
+                button: '[data-testid="grade-inquiry-info-panel-toggle"]',
+                selector: '[data-testid="grade-inquiry-info-panel-position-select"]',
+            },
         ];
 
         const layouts = [
             {
                 name: 'Single Panel',
-                selector: '#layout-option-1 > div.layout-option-cont > div > div > button',
+                selector: '[data-testid="layout-single-panel-apply"]',
                 expectedOptions: null,
             },
             {
                 name: 'Side by Side',
-                selector: '#layout-option-2 > div.layout-option-cont > div:nth-child(1) > div > button',
+                selector: '[data-testid="layout-two-panel-equal-apply"]',
                 expectedOptions: [
                     'Open as left panel',
                     'Open as right panel',
@@ -25,7 +43,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'Side by Side Taller Left',
-                selector: '#layout-option-2 > div.layout-option-cont > div:nth-child(2) > div > button',
+                selector: '[data-testid="layout-two-panel-tall-left-apply"]',
                 expectedOptions: [
                     'Open as left panel',
                     'Open as right panel',
@@ -33,7 +51,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'Two on Left One on Right',
-                selector: '#layout-option-3 > div.layout-option-cont > div:nth-child(1) > div > button',
+                selector: '[data-testid="layout-three-panel-two-left-apply"]',
                 expectedOptions: [
                     'Open as top left panel',
                     'Open as bottom left panel',
@@ -42,7 +60,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'Two on Left One on Right Taller Left',
-                selector: '#layout-option-3 > div.layout-option-cont > div:nth-child(2) > div > button',
+                selector: '[data-testid="layout-three-panel-two-left-tall-left-apply"]',
                 expectedOptions: [
                     'Open as top left panel',
                     'Open as bottom left panel',
@@ -51,7 +69,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'One on Left Two on Right',
-                selector: '#layout-option-3 > div.layout-option-cont > div:nth-child(3) > div > button',
+                selector: '[data-testid="layout-three-panel-two-right-apply"]',
                 expectedOptions: [
                     'Open as left panel',
                     'Open as top right panel',
@@ -60,7 +78,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'One on Left Two on Right Taller Left',
-                selector: '#layout-option-3 > div.layout-option-cont > div:nth-child(4) > div > button',
+                selector: '[data-testid="layout-three-panel-two-right-tall-left-apply"]',
                 expectedOptions: [
                     'Open as left panel',
                     'Open as top right panel',
@@ -69,7 +87,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'Two on Left Two on Right',
-                selector: '#layout-option-4 > div.layout-option-cont > div:nth-child(1) > div > button',
+                selector: '[data-testid="layout-four-panel-equal-apply"]',
                 expectedOptions: [
                     'Open as top left panel',
                     'Open as bottom left panel',
@@ -79,7 +97,7 @@ describe('TA Grading Panel Switcher', () => {
             },
             {
                 name: 'Two on Left Two on Right Taller Left',
-                selector: '#layout-option-4 > div.layout-option-cont > div:nth-child(2) > div > button',
+                selector: '[data-testid="layout-four-panel-tall-left-apply"]',
                 expectedOptions: [
                     'Open as top left panel',
                     'Open as bottom left panel',
@@ -91,19 +109,19 @@ describe('TA Grading Panel Switcher', () => {
         cy.login('grader');
         cy.visit('/courses/s26/sample/gradeable/no_due_date_no_release/grading/grade?who_id=FI9yKu3j9DrXWt5&sort=id&direction=ASC');
         layouts.forEach((layout) => {
-            cy.get('#two-panel-mode-btn').click();
+            cy.get('[data-testid="panel-selector-toggle"]').click();
             cy.get(layout.selector).click();
 
             if (layout.expectedOptions === null) {
                 return;
-            };
+            }
 
-            panels.forEach((panelBtn) => {
-                cy.get(panelBtn).click();
+            panels.forEach((panel) => {
+                cy.get(panel.button).click();
                 layout.expectedOptions.forEach((option) => {
-                    cy.get('#autograding_results_select').should('contain', option);
+                    cy.get(panel.selector).should('contain', option);
                 });
-                cy.get(panelBtn).click();
+                cy.get(panel.button).click();
             });
             cy.reload();
         });
