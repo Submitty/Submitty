@@ -914,6 +914,11 @@ jobs:
         run: |
           npm ci
 
+      - name: Get status of daemons
+        run: |
+          sudo systemctl status submitty_daemon_jobs_handler
+        shell: bash
+
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v7
         with:
