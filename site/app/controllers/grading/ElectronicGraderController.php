@@ -3252,7 +3252,7 @@ class ElectronicGraderController extends AbstractController {
             if ($can_view_hidden && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
                 $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
                 $grades_released = (!$gradeable->isTaGrading() || $version_instance->getVersion() == $ta_graded_gradeable->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
-                $can_view_hidden = $grades_released;
+                $can_view_hidden = $grades_released && $testcase->getTestcase()->isReleaseHiddenDetails();
             }
             $popup_css = "diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
