@@ -1,1 +1,2 @@
+#!/bin/bash
 sed -i '/^[\\]restrict/d;/^[\\]unrestrict/d;' ./data/*.sql

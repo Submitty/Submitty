@@ -284,10 +284,9 @@ def handle_migration(args):
     print('Loading trigger functions...', end='')
     load_triggers(args, False)
     print('Running cleaner...', end='')
-    #run the cleaner to remove restrict tokens
+    # run the cleaner to remove restrict tokens
     subprocess.run(['bash', './cleaner.sh'])
     print('DONE')
-
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
