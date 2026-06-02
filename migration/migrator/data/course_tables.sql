@@ -675,6 +675,25 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+-- Name: autograding_testcase_details; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase_details (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_version integer NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    testcase_order integer NOT NULL,
+    hidden boolean DEFAULT false NOT NULL,
+    extra_credit boolean DEFAULT false NOT NULL,
+    points_possible numeric(10,2) NOT NULL,
+    points_earned numeric(10,2) NOT NULL,
+    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) <> (team_id IS NOT NULL)))
+);
+
+
+--
 -- Name: calendar_messages; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2914,6 +2933,27 @@ CREATE INDEX grading_registration_user_id_index ON public.grading_registration U
 
 
 --
+-- Name: idx_autograding_testcase_details_gradeable; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_gradeable ON public.autograding_testcase_details USING btree (g_id, testcase_id);
+
+
+--
+-- Name: idx_autograding_testcase_details_team; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_team ON public.autograding_testcase_details USING btree (g_id, team_id, g_version);
+
+
+--
+-- Name: idx_autograding_testcase_details_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_autograding_testcase_details_user ON public.autograding_testcase_details USING btree (g_id, user_id, g_version);
+
+
+--
 -- Name: ldc_g_user_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3134,19 +3174,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
