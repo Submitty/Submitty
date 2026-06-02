@@ -14,8 +14,6 @@ from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_envi
 from .dumper import dump_database
 from .loader import load_module, load_migrations
 
-import subprocess
-
 
 def create(args):
     """
@@ -283,9 +281,6 @@ def handle_migration(args):
 
     print('Loading trigger functions...', end='')
     load_triggers(args, False)
-    print('Running cleaner...', end='')
-    # run the cleaner to remove restrict tokens
-    subprocess.run(['bash', './cleaner.sh'])
     print('DONE')
 
 

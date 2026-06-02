@@ -8,7 +8,7 @@ def dump_database(db_name: str, out_file: str) -> bool:
         '-',
         'postgres',
         '-c',
-        f'pg_dump -d {db_name} --schema-only --no-privileges --no-owner'
+        f'pg_dump -d {db_name} --no-security-labels --schema-only --no-privileges --no-owner'
     ], universal_newlines=True)
     out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
     out = re.sub(r"\\(un)?restrict [^\n]*\n\n?", '', out)
