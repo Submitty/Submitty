@@ -15,6 +15,37 @@ const props = defineProps<Props>();
 const isVisibleCategory = (category: ForumCategory): boolean => {
     return category.visibleDate === null || (Number(category.diff ?? 0) >= 0);
 };
+
+function toggleFilterButton(event: MouseEvent): void {
+    const btn = event.currentTarget as HTMLElement;
+    const $btn = (window as any).$(btn);
+    const current = btn.dataset.btnSelected;
+    if (current === 'true') {
+        btn.dataset.btnSelected = 'false';
+        btn.classList.remove('filter-active');
+        btn.classList.add('filter-inactive');
+        $btn.data('btn-selected', 'false');
+    }
+    else {
+        btn.dataset.btnSelected = 'true';
+        btn.classList.remove('filter-inactive');
+        btn.classList.add('filter-active');
+        $btn.data('btn-selected', 'true');
+    }
+    (window as any).updateClearFilterButton?.();
+    (window as any).updateThreads?.(true, (window as any).saveFilterState);
+}
+
+function toggleUnreadLabel(event: MouseEvent): void {
+    const label = event.currentTarget as HTMLElement;
+    label.classList.toggle('filter-inactive');
+    label.classList.toggle('filter-active');
+}
+
+function onUnreadChange(): void {
+    (window as any).updateThreads?.(true, (window as any).saveFilterState);
+    (window as any).checkUnread?.();
+}
 </script>
 
 <template>
@@ -27,6 +58,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
       class="btn btn-default btn-sm inline-block filter-inactive"
       for="unread"
       data-testid="filter-unread-label"
+      @mousedown="toggleUnreadLabel"
     >
       Unread Only
     </label>
@@ -36,6 +68,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
       type="checkbox"
       data-ays-ignore="true"
       data-testid="filter-unread-checkbox"
+      @change="onUnreadChange"
     />
 
     <div
@@ -54,6 +87,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-btn-selected="false"
         type="button"
         :data-testid="`thread-category-${category.id}`"
+        @mousedown.prevent="toggleFilterButton"
       >
         {{ category.description }}
       </button>
@@ -72,6 +106,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-sel_id="0"
         type="button"
         data-testid="thread-status-comment"
+        @mousedown.prevent="toggleFilterButton"
       >
         Comment
       </button>
@@ -81,6 +116,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-sel_id="-1"
         type="button"
         data-testid="thread-status-unresolved"
+        @mousedown.prevent="toggleFilterButton"
       >
         Unresolved
       </button>
@@ -90,6 +126,7 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
         data-sel_id="1"
         type="button"
         data-testid="thread-status-resolved"
+        @mousedown.prevent="toggleFilterButton"
       >
         Resolved
       </button>

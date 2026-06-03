@@ -2267,26 +2267,6 @@ function updateClearFilterButton() {
 }
 
 function loadFilterHandlers() {
-    $('#filter_unread_btn').on('mousedown', function (e) {
-        $(this).toggleClass('filter-inactive filter-active');
-    });
-
-    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
-        e.preventDefault();
-        const current_selection = $(this).data('btn-selected');
-
-        if (current_selection === 'true') {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-        }
-        else {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-
-        updateClearFilterButton();
-        updateThreads(true, saveFilterState);
-        return true;
-    });
-
     $('#search-submit').on('mousedown', (e) => {
         e.preventDefault();
         updateClearFilterButton();
@@ -2308,13 +2288,6 @@ function loadFilterHandlers() {
         $('#search-content').val('').trigger('change');
         updateClearFilterButton();
         updateThreads(true, saveFilterState);
-        return true;
-    });
-
-    $('#unread').change((e) => {
-        e.preventDefault();
-        updateThreads(true, saveFilterState);
-        checkUnread();
         return true;
     });
 
