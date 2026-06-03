@@ -209,12 +209,13 @@ class RainbowCustomization extends AbstractModel {
                     }
                 }
                 unset($c_gradeable);
-<<<<<<< HEAD
                 $this->customization_data[$c_bucket] = $bucket_gradeables;
-=======
 
                 // Assign show_notes to customization_data gradeables by matching ids
                 $show_notes_map = [];
+                if (!property_exists($json_bucket, 'ids') || !is_array($json_bucket->ids)) {
+                    continue;
+                }
                 foreach ($json_bucket->ids as $json_gradeable) {
                     if (property_exists($json_gradeable, 'show_notes') && in_array($json_gradeable->show_notes, self::allowed_show_notes, true)) {
                         $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
@@ -227,7 +228,6 @@ class RainbowCustomization extends AbstractModel {
                     }
                 }
                 unset($c_gradeable);
->>>>>>> upstream/main
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -525,7 +525,9 @@ class RainbowCustomization extends AbstractModel {
         // Backward-compatible fallback: if any gradeable has non-default show_notes,
         // enable the toggle so existing custom values are visible on refresh.
         foreach ($this->RCJSON->getGradeables() as $bucket) {
-            if (!property_exists($bucket, 'ids')) {
+            if (!property_exists($bucket, 'ids') || is_null($buckets->ids)) {
+                //Notify the user instead of silently skipping
+                $this->addNormalizationWarning();
                 continue;
             }
             foreach ($bucket->ids as $gradeable) {
