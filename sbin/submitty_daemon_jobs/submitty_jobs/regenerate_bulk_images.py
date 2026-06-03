@@ -3,36 +3,36 @@ import os
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
 
 from . import generate_pdf_images
 
 
-def process_single_submission(submitter_dir, redactions, stats):
-    """Process a single submission with error handling and stats tracking."""
+def process_single_submission(submitter_dir_str, redactions):
+    """Process a single submission and return its status without shared state."""
+    submitter_dir = Path(submitter_dir_str)
     try:
         # Read user_assignment_settings.json to get the active version
         settings_path = submitter_dir / "user_assignment_settings.json"
+
+        if not settings_path.exists():
+            return ('skipped', 0, f"Skipped {submitter_dir.name} - no settings")
 
         with open(settings_path, "r") as f:
             settings = json.load(f)
             active_version = settings.get("active_version", None)
 
             if active_version is None:
-                stats['skipped'] += 1
-                return f"Skipped {submitter_dir.name} - no active version"
+                return ('skipped', 0, f"Skipped {submitter_dir.name} - no active version")
 
             active_version_path = submitter_dir / str(active_version)
             # Check if the active version is a directory
             if not active_version_path.is_dir():
-                stats['skipped'] += 1
-                return f"Skipped {submitter_dir.name} - invalid active version path"
+                return ('skipped', 0, f"Skipped {submitter_dir.name} - invalid active version path")
 
             # Check if PDF exists
             pdf_path = active_version_path / "upload.pdf"
             if not pdf_path.exists():
-                stats['skipped'] += 1
-                return f"Skipped {submitter_dir.name} - no PDF file"
+                return ('skipped', 0, f"Skipped {submitter_dir.name} - no PDF file")
 
             # Run the generate_pdf_images job on the active version
             results_path = str(active_version_path).replace("submissions", "submissions_processed")
@@ -45,13 +45,10 @@ def process_single_submission(submitter_dir, redactions, stats):
             )
 
             elapsed = time.time() - start_time
-            stats['processed'] += 1
-            stats['total_time'] += elapsed
-            return f"Processed {submitter_dir.name} in {elapsed:.2f}s"
+            return ('processed', elapsed, f"Processed {submitter_dir.name} in {elapsed:.2f}s")
 
     except Exception as e:
-        stats['errors'] += 1
-        return f"Error processing {submitter_dir.name}: {str(e)}"
+        return ('errors', 0, f"Error processing {submitter_dir.name}: {str(e)}")
 
 
 def main(folder, redactions, max_workers=None):
@@ -62,7 +59,7 @@ def main(folder, redactions, max_workers=None):
     folder_path = Path(folder)
 
     # Get all submitter directories
-    submitter_dirs = [d for d in folder_path.iterdir() if d.is_dir()]
+    submitter_dirs = [str(d) for d in folder_path.iterdir() if d.is_dir()]
 
     if not submitter_dirs:
         print("No submitter directories found")
@@ -78,13 +75,6 @@ def main(folder, redactions, max_workers=None):
         'total_time': 0
     }
 
-    # Thread-safe stats updating
-    stats_lock = threading.Lock()
-
-    def update_stats_local(result):
-        with stats_lock:
-            print(result)
-
     # Determine optimal number of workers (default to CPU count, but cap at 4 to avoid overwhelming system)
     if max_workers is None:
         max_workers = min(4, os.cpu_count() or 2)
@@ -95,14 +85,17 @@ def main(folder, redactions, max_workers=None):
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tasks
         future_to_submission = {
-            executor.submit(process_single_submission, submitter_dir, redactions, stats): submitter_dir
+            executor.submit(process_single_submission, submitter_dir, redactions): submitter_dir
             for submitter_dir in submitter_dirs
         }
 
         # Process completed tasks
         for future in as_completed(future_to_submission):
-            result = future.result()
-            update_stats_local(result)
+            status, elapsed, message = future.result()
+            print(message)
+            stats[status] += 1
+            if status == 'processed':
+                stats['total_time'] += elapsed
 
     # Print final statistics
     total_elapsed = time.time() - start_time

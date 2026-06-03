@@ -2,8 +2,9 @@ import os
 import traceback
 import hashlib
 import io
-from typing import List, Sequence, Dict
 import time
+import json
+from typing import List, Sequence, Dict
 
 import fitz  # PyMuPDF
 from PIL import ImageDraw, Image
@@ -59,18 +60,31 @@ def apply_redaction_optimized(img: Image.Image, redaction: 'Redaction', pattern_
     img.paste(pattern_cache[pattern_key], (left, top))
 
 
-def get_file_hash(pdf_file_path: str) -> str:
-    """Get hash of PDF file for caching purposes."""
+def get_file_hash(pdf_file_path: str, redactions: List['Redaction']) -> str:
+    """Get deterministic hash of PDF file and redactions for caching purposes."""
+    hasher = hashlib.md5()
+
+    # Version tag: bump when rendering parameters change
+    hasher.update(b"v1_")
+
+    # Hash the PDF file in chunks to avoid memory spikes
     with open(pdf_file_path, 'rb') as f:
-        return hashlib.md5(f.read()).hexdigest()
+        for chunk in iter(lambda: f.read(4096), b""):
+            hasher.update(chunk)
+
+    # Hash redactions deterministically
+    sorted_redactions = sorted(
+        [{"page": r.page_number, "coords": list(r.coordinates)} for r in redactions],
+        key=lambda x: (x["page"], x["coords"])
+    )
+    redactions_json = json.dumps(sorted_redactions, sort_keys=True, separators=(',', ':'))
+    hasher.update(redactions_json.encode('utf-8'))
+
+    return hasher.hexdigest()
 
 
 def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     start_time = time.time()
-
-    directory = os.path.dirname(pdf_file_path)
-    if directory:
-        os.chdir(os.path.dirname(pdf_file_path))
 
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
@@ -89,7 +103,7 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     try:
         # Check if we need to regenerate (optional optimization)
         cache_file = os.path.join(output_dir, ".cache_info")
-        current_hash = get_file_hash(pdf_file_path)
+        current_hash = get_file_hash(pdf_file_path, redactions)
 
         # Only proceed if cache doesn't exist or hash changed
         if os.path.exists(cache_file):
