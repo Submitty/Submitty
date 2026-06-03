@@ -69,6 +69,18 @@
         </h4>
     {% endif %}
 
+    {% if penalty_free_submissions <= 5 %}
+        <div class="submission-warning">
+        {% if penalty_free_submissions > 0 %}
+            <p>Warning: You have {{ penalty_free_submissions }} penalty free submissions remaining.</p>
+        {% else %}
+            <p>Warning: You have 0 penalty free submissions remaining.</p>
+        {% endif %}
+        </div>
+    {% endif %}
+
+    <div id="error-banner" class="submission-error" style="display: none;"> </div>
+
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
@@ -204,7 +216,7 @@
             <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
             <br><br>
         {% endif %}
-        
+
         {% if (vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1)) or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>Grade your repository:</h3>
             {% if using_subdirectory %}
@@ -221,7 +233,7 @@
             </div>
             <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
         {% endif %}
-    
+
     {% else %}
         {% if is_notebook %}
             {% include 'notebook/Notebook.twig' with {
@@ -292,7 +304,7 @@
             </form>
         {% endif %}
         {# /Page selector #}
-        
+
         {% if can_student_submit %}
             <div class="upload-message">
                 {% include 'Vue.twig' with {
@@ -306,7 +318,7 @@
             <button type="button" id="submit" data-testid="submit-gradeable" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
-            
+
             {% if is_notebook %}
             <button class = "btn btn-default" id = "printing" onclick="window.print()">Print Quiz as PDF</button>
             {% endif %}
@@ -371,7 +383,24 @@
             var highest_version = {{ highest_version }};
             {% if not viewing_inactive_version %}
                 for (var i = 1; i <= num_parts; i++ ){
-                    initializeDropZone("upload" + String(i));
+                    var boxId = "upload" + String(i);
+                    initializeDropZone(boxId);
+
+                    var element = document.getElementById(boxId);
+                    if (element) {
+                        // Run check when files are dragged and dropped
+                        element.addEventListener('drop', function() {
+                            setTimeout(checkDroppedFiles, 100);
+                        });
+                    }
+
+                    // Run check when files are selected via the file browser click
+                    var fileInput = document.getElementById("input-file" + i);
+                    if (fileInput) {
+                        fileInput.addEventListener('change', function() {
+                            setTimeout(checkDroppedFiles, 100);
+                        });
+                    }
                 }
             {% endif %}
 
@@ -380,6 +409,7 @@
                 for (var i = 1; i <= num_parts; i++){
                     deleteFiles(i);
                 }
+                $('#error-banner').text('').hide();
                 e.stopPropagation();
             });
 
@@ -402,6 +432,61 @@
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
+
+            //Handle Submission Size / File Count Warnings:
+            function checkDroppedFiles() {
+                let totalFiles = 0;
+                let totalSize = 0;
+
+                if (typeof file_array !== 'undefined' && Array.isArray(file_array)) {
+                    for (let i = 0; i < file_array.length; i++) {
+                        let fileBatch = file_array[i];
+
+                        if (fileBatch && Array.isArray(fileBatch)) {
+                            totalFiles += fileBatch.length;
+
+                            for (let j = 0; j < fileBatch.length; j++) {
+                                let file = fileBatch[j];
+
+                                if (file && typeof file.size === 'number') {
+                                    totalSize += file.size;
+                                }
+                                else if (file && typeof file.file_size === 'number') {
+                                    totalSize += file.file_size;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const maxFileCount = {{ max_file_uploads }};
+                const maxFileSize = {{ max_submission_size }};
+
+                let invalid_count = totalFiles > maxFileCount;
+                let invalid_size = totalSize > maxFileSize;
+
+                const $errorBanner = $('#error-banner');
+
+                if (invalid_count) {
+                    $errorBanner
+                        .text('Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.')
+                        .show();
+                }
+                else if (invalid_size) {
+                    $errorBanner
+                        .text('Selected files are too large. Total upload size exceeds the allowed limit.')
+                        .show();
+                }
+                else {
+                    $errorBanner
+                        .text('')
+                        .hide();
+                }
+
+                window.checkDroppedFiles = checkDroppedFiles;
+
+            }
+
             //TODO: move the logic on loading submission mode into a module
 
         </script>
@@ -581,7 +666,7 @@
 
     window.blankSubmitAll = function(){
         const is_team_assignment = {{ is_team_assignment ? 'true' : 'false' }};
-        const url = is_team_assignment ? 
+        const url = is_team_assignment ?
         buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
         buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
 

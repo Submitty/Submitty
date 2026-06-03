@@ -66,7 +66,7 @@ function readPrevious(filename, size, part) {
     changed = false;
     previous_files[part - 1].push({
         name: filename,
-        size: size
+        size: size,
     });
     validateCurrentUploadState(part);
 }
@@ -143,7 +143,7 @@ function validateCurrentUploadState(part) {
     if (currentUploadedCount > MAX_NUM_OF_FILES) {
         showUploadWarning(
             part,
-            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`,
         );
         return false;
     }
@@ -151,7 +151,7 @@ function validateCurrentUploadState(part) {
     if (getTotalSubmissionSize() > MAX_TOTAL_UPLOAD_SIZE) {
         showUploadWarning(
             part,
-            'Selected files are too large. Total upload size exceeds the allowed limit.'
+            'Selected files are too large. Total upload size exceeds the allowed limit.',
         );
         return false;
     }
@@ -165,7 +165,7 @@ function addIsValid(files_to_add, total_added_files, part) {
     if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
         showUploadWarning(
             part,
-            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`
+            `Too many files selected. Maximum allowed number of files to be uploaded is ${MAX_NUM_OF_FILES}.`,
         );
         return false;
     }

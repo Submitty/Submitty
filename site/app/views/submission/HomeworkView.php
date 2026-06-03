@@ -559,6 +559,9 @@ class HomeworkView extends AbstractView {
         $numberUtils = new NumberUtils();
         $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
 
+        $max_submissions = $gradeable->getAutogradingConfig()->getMaxSubmissions();
+        $penalty_free_submissions = $max_submissions - $highest_version;
+
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
             'term' => $this->core->getConfig()->getTerm(),
@@ -595,6 +598,7 @@ class HomeworkView extends AbstractView {
             'min_team_member_late_days_exception' => $min_team_member_late_days_exception,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            'penalty_free_submissions' => $penalty_free_submissions,
             'display_version' => $display_version,
             'highest_version' => $highest_version,
             'student_page' => $student_page,
