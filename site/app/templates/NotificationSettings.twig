@@ -461,6 +461,9 @@
             }
             $('#form_notification_settings').trigger("change");
         }
+
+
+
         function setNotification(button) {
             const popup = $(button).closest('#sync-notification-popup');
             const selected = popup.find('input[name="sync_course_ids[]"]:checked').map(function () {return this.value;}).get();
