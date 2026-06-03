@@ -6,7 +6,7 @@ from sqlalchemy import text
 def up(config, database):
     sql_file = Path(Path(__file__).parent.parent.parent, 'data', 'submitty_db.sql')
     with sql_file.open() as open_file:
-        sql = re.sub(r"\\(un)?restrict [^\n]*\n\n?", '', open_file.read())
+        sql = re.sub(r"\\(un)?restrict [^\n]*\n?", '', open_file.read())
         database.execute(text(sql))
 
 

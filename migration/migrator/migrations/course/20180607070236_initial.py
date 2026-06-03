@@ -6,7 +6,7 @@ from sqlalchemy import text
 def up(config, database, semester, course):
     sql_file = Path(Path(__file__).parent.parent.parent, 'data', 'course_tables.sql')
     with sql_file.open() as open_file:
-        sql = re.sub(r"\\(un)?restrict [^\n]*\n\n?", '', open_file.read())
+        sql = re.sub(r"\\(un)?restrict [^\n]*\n?", '', open_file.read())
         database.execute(text(sql))
 
 
