@@ -41,8 +41,13 @@
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
             <th scope="row" class="number-count">{{history_count}}</th>
             <td>
-              {{ entry['name'] }}
-              <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+              <span class="full-name">
+                {{ entry['name'] }}
+              </span>
+              <span class="user-id" style="display: none;">
+                &lt;{{ entry['user_id'] }}&gt;
+              </span>
+              <a onclick="toggleUserId(this)" onkeypress="toggleUserId(this)" title="Show user id" aria-label="Show user id" tabindex="0">
                 <i class="fas fa-eye"></i>
               </a>
             </td>

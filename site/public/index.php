@@ -110,8 +110,11 @@ header('X-Content-Type-Options: nosniff');
 // Prevents pages from being embedded in an iframe
 header('Content-Security-Policy: frame-ancestors \'self\'');
 
-// Prevent intermediaries from caching the resource
-header('Cache-Control: private');
+// Prevent browser from caching site files
+// Ensures user sees most up-to-date information
+header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+header("Pragma: no-cache"); // HTTP 1.0.
+header("Expires: 0"); // Proxies
 
 // Set the cross-origin embedder policy to prevent the browser from loading the page if it is not CORS safe
 header('Cross-Origin-Embedder-Policy: credentialless');
