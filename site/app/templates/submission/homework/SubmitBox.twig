@@ -79,7 +79,8 @@
         </div>
     {% endif %}
 
-    <div id="error-banner" class="submission-error" style="display: none;"> </div>
+    <div id="error-banner-count" class="submission-error" style="display: none;"> </div>
+    <div id="error-banner-size" class="submission-error" style="display: none;"> </div>
 
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
@@ -465,27 +466,32 @@
                 let invalid_count = totalFiles > maxFileCount;
                 let invalid_size = totalSize > maxFileSize;
 
-                const $errorBanner = $('#error-banner');
+                const $errorBannerCount = $('#error-banner-count');
+                const $errorBannerSize = $('#error-banner-size');
 
                 if (invalid_count) {
-                    $errorBanner
+                    $errorBannerCount
                         .text('Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.')
                         .show();
                 }
-                else if (invalid_size) {
-                    $errorBanner
+                else {
+                    $errorBannerCount
+                        .text('')
+                        .hide();
+                }
+                if (invalid_size) {
+                    $errorBannerSize
                         .text('Selected files are too large. Total upload size exceeds the allowed limit.')
                         .show();
                 }
                 else {
-                    $errorBanner
+                    $errorBannerSize
                         .text('')
                         .hide();
                 }
-
-                window.checkDroppedFiles = checkDroppedFiles;
-
             }
+
+            window.checkDroppedFiles = checkDroppedFiles;
 
             //TODO: move the logic on loading submission mode into a module
 
