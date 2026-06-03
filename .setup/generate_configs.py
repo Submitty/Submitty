@@ -1,5 +1,6 @@
 import argparse
 from collections import OrderedDict
+import json
 import os
 import shutil
 
@@ -39,7 +40,6 @@ print("preserve list", preserve_list)
 
 with open(PRESERVE_LIST_JSON, 'w') as json_file:
     json.dump(preserve_list, json_file, indent=2)
-os.chmod(SUBMITTY_JSON, 0o444)
 
 # Copy all files from .setup/data/configs to the install config directory
 for item in os.listdir(CONFIG_REPOSITORY):

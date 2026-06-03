@@ -48,7 +48,7 @@ EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
-
+PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
 
 PHP_USER = 'submitty_php'
 PHP_GROUP = 'submitty_php'
@@ -93,7 +93,7 @@ if not args.worker:
 
 os.chmod(SUBMITTY_JSON, 0o444)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
-
+os.chmod(PRESERVE_LIST_JSON, 0o444)
 shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
 
 # Users aren't created yet when running generate_configs,
