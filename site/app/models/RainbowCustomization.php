@@ -525,7 +525,7 @@ class RainbowCustomization extends AbstractModel {
         // Backward-compatible fallback: if any gradeable has non-default show_notes,
         // enable the toggle so existing custom values are visible on refresh.
         foreach ($this->RCJSON->getGradeables() as $bucket) {
-            if (!property_exists($bucket, 'ids') || is_null($buckets->ids)) {
+            if (!property_exists($bucket, 'ids') || is_null($bucket->ids)) {
                 //Notify the user instead of silently skipping
                 $this->addNormalizationWarning();
                 continue;
