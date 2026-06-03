@@ -22,6 +22,18 @@ const visitPoll = (title, text, wsEnabled = false) => {
 };
 
 describe('Test cases revolving around polls functionality', () => {
+    before(() => {
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        cy.get('#old-table-dropdown').click();
+        cy.get('body').then(($body) => {
+            if ($body.text().includes('Poll Cypress Test')) {
+                cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
+            }
+        });
+        cy.get('#old-table-dropdown').click();
+        cy.logout();
+    });
     it('Should verify the default settings and functionality of the dropdown bars', () => {
         // log in from instructor account
         cy.visit(['sample', 'polls']);
@@ -135,7 +147,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 1').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 1');
-        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.get('.markdown').contains('What animals swim in the sea?');
         cy.get('#chartContainer').contains('Poll 1');
         cy.get('#chartContainer').contains('Dolphin');
@@ -149,7 +161,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll 2').siblings().last().click();
         // make sure all the page elements are there
         cy.get('.content > h1').contains('Poll 2');
-        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.get('.markdown').contains('What color is the sky?');
         cy.get('#chartContainer').contains('Poll 2');
         cy.get('#chartContainer').contains('Green');
@@ -205,7 +217,6 @@ describe('Test cases revolving around polls functionality', () => {
         // click cancel, verify url and make sure the poll wasn't created
         cy.contains('Cancel').click();
         cy.url().should('include', 'sample/polls');
-        cy.get('TEST').should('not.exist');
 
         // make a poll
         cy.contains('New Poll').click();
@@ -306,14 +317,13 @@ describe('Test cases revolving around polls functionality', () => {
         visitPoll('Poll Cypress Test', 'View Poll', true);
 
         // Waiting for duration to reach 0, so poll ends.
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(5000);
+        cy.get('[data-testid="timer"]', { timeout: 6000 }).should('contain', 'Poll Ended');
         cy.visit(['sample', 'polls']);
 
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
-        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.go('back');
 
         // Removing duration to continue testing
@@ -383,7 +393,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#poll-seconds').invoke('val').should('eq', '0');
         cy.get('#poll-hours').clear();
         cy.get('#poll-seconds').clear();
-        cy.get('#poll-seconds').type('10');
+        cy.get('#poll-seconds').type('30');
         cy.get('[data-testid="poll-date"]').invoke('val').should('eq', '1970-01-01');
         // release histogram/answer's default values should be "never"
         cy.get('#student-histogram-release-setting').invoke('val').should('eq', 'never');
@@ -448,16 +458,12 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        // Wait 6 seconds to wait out the time remaining for poll to close
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(6000);
-        cy.reload();
-        // Validate that the poll is closed.
-        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
         cy.get('[data-testid="timer"]').should('be.visible');
-        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]', { timeout: 20000 }).should('contain', 'Poll Ended');
         cy.go('back');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
 
         // log into student, now we can see the histogram on closed poll
         cy.logout();

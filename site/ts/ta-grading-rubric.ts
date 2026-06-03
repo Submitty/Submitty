@@ -2940,7 +2940,8 @@ function scrollToPage(page_num: number) {
                 page_num = Math.min($('#viewer > .page').length, page_num);
                 const page = $(`#pageContainer${page_num}`);
                 if (page.length) {
-                    $('#submission_browser').scrollTop(Math.max(page[0].offsetTop - $('#file-view > .sticky-file-info').first().height()!, 0));
+                    const scrollContainer = $('#file-content').length ? $('#file-content') : $('#submission_browser');
+                    scrollContainer.scrollTop(Math.max(page[0].offsetTop, 0));
                 }
             }
             else {
