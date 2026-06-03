@@ -41,6 +41,18 @@
     dest: /usr/local/submitty/config/
     mode: "0644"
 
+- name: Stat preserved_list.json file
+  ansible.builtin.stat:
+    path: /usr/local/submitty/config/preserved_file_list.json
+  register: preserved_list_stat
+
+- name: Create preserved_list.json file
+  ansible.builtin.file:
+    path: /usr/local/submitty/config/preserved_file_list.json
+    mode: "0644"
+    state: touch
+  when: not preserved_list_stat.stat.exists
+
 - name: Run install_system.sh script
   ansible.builtin.shell:
     executable: "/bin/bash"
