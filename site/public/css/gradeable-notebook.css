@@ -125,8 +125,8 @@ img {
     resize: both;
     min-width: 20rem;
     max-width: 60rem;
-    min-height: 8rem;
-    max-height: 32rem;
+    min-height: 30px;
+    max-height: 80vh;
     overflow: hidden;
     box-sizing: border-box;
 }
