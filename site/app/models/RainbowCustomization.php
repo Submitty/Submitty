@@ -45,6 +45,10 @@ class RainbowCustomization extends AbstractModel {
      * @var string[]
      */
     private array $available_buckets;
+    /**
+     * @var string[]
+     */
+    private array $normalization_warnings = [];
     private ?object $RCJSON;                            // This is the customization.json php object, or null if it wasn't found
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
@@ -141,9 +145,14 @@ class RainbowCustomization extends AbstractModel {
                 // entered a value which was greater than the number of gradeables in the database, we should use the
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
+                if (!array_key_exists($bucket, $this->bucket_counts)) {
+                    $this->bucket_counts[$bucket] = 0;
+                    $this->bucket_remove_lowest[$bucket] = 0;
+                }
+                $bucket_gradeables = $this->getBucketGradeables($bucket);
 
                 // Filter out removed gradeables or updated gradeable buckets
-                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                $this->customization_data[$bucket] = array_values(array_filter($bucket_gradeables, function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
                     $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
                     return !$removed && !$swapped;
@@ -185,20 +194,24 @@ class RainbowCustomization extends AbstractModel {
                 // Create a map from id to percent for this bucket
                 $percent_map = [];
 
-                foreach ($json_bucket->ids as $json_gradeable) {
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
                     if (property_exists($json_gradeable, 'percent')) {
                         $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
                     }
                 }
 
                 // Assign percents to customization_data gradeables by matching ids
-                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                $bucket_gradeables = $this->getBucketGradeables($c_bucket);
+                foreach ($bucket_gradeables as &$c_gradeable) {
                     if (isset($percent_map[$c_gradeable['id']])) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
                     }
                 }
                 unset($c_gradeable);
+<<<<<<< HEAD
+                $this->customization_data[$c_bucket] = $bucket_gradeables;
+=======
 
                 // Assign show_notes to customization_data gradeables by matching ids
                 $show_notes_map = [];
@@ -214,6 +227,7 @@ class RainbowCustomization extends AbstractModel {
                     }
                 }
                 unset($c_gradeable);
+>>>>>>> upstream/main
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -231,7 +245,7 @@ class RainbowCustomization extends AbstractModel {
             $json_buckets = $this->RCJSON->getGradeables();
             foreach ($json_buckets as $json_bucket) {
                 if (property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
-                    $json_buckets_gradeables[$json_bucket->type] = $json_bucket->ids;
+                    $json_buckets_gradeables[$json_bucket->type] = $this->getJsonBucketIds($json_bucket);
                 }
             }
         }
@@ -319,7 +333,7 @@ class RainbowCustomization extends AbstractModel {
             foreach ($json_buckets as $json_bucket) {
                 $retArray[$json_bucket->type] = [];
 
-                foreach ($json_bucket->ids as $json_gradeable) {
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
                     if (property_exists($json_gradeable, 'curve')) {
                         $curve_data = $json_gradeable->curve;
                         $curve_data_pos = 0;
@@ -345,6 +359,45 @@ class RainbowCustomization extends AbstractModel {
         }
 
         return $retArray;
+    }
+
+    /**
+     * Normalize stored bucket data so legacy null entries behave like empty buckets.
+     *
+     * @return array<mixed>
+     */
+    private function getBucketGradeables(string $bucket): array {
+        $bucket_gradeables = $this->customization_data[$bucket] ?? [];
+        if (!array_key_exists($bucket, $this->customization_data) || !is_array($bucket_gradeables)) {
+            $this->addNormalizationWarning();
+        }
+        if (!is_array($bucket_gradeables)) {
+            $bucket_gradeables = [];
+        }
+        return $bucket_gradeables;
+    }
+
+    /**
+     * Normalize legacy JSON buckets whose ids field may be null or malformed.
+     *
+     * @return array<mixed>
+     */
+    private function getJsonBucketIds(object $json_bucket): array {
+        $json_bucket_ids = $json_bucket->ids ?? [];
+        if (!property_exists($json_bucket, 'ids') || !is_array($json_bucket_ids)) {
+            $this->addNormalizationWarning();
+        }
+        if (!is_array($json_bucket_ids)) {
+            $json_bucket_ids = [];
+        }
+        return $json_bucket_ids;
+    }
+
+    private function addNormalizationWarning(): void {
+        $warning = 'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.';
+        if (!in_array($warning, $this->normalization_warnings, true)) {
+            $this->normalization_warnings[] = $warning;
+        }
     }
 
     /**
@@ -426,6 +479,13 @@ class RainbowCustomization extends AbstractModel {
      */
     public function getUsedBuckets(): array {
         return $this->used_buckets;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getNormalizationWarnings(): array {
+        return $this->normalization_warnings;
     }
 
     /**
