@@ -31,11 +31,6 @@ defineExpose({
 </script>
 
 <template>
-    <!--
-      Passive mount point. Content is injected into #grading-box by
-      the legacy reloadGradingRubric function (called from RubricPanel).
-      This component will gradually own the rendering.
-    -->
     <div class="rubric-body-container" data-testid="rubric-body"></div>
 </template>
 

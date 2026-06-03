@@ -43,12 +43,33 @@ declare global {
         deleteComponent(component_id: number): Promise<string | undefined>;
         addNewMark(component_id: number): Promise<void>;
         getGradeableId(): string | undefined;
+        __updateTotalScores?: (scores: TotalScores) => void;
 
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
     }
+}
+
+/**
+ * Bridge for Vue total score box updates
+ * If the Vue total-score container exists, the legacy refreshTotalScoreBox
+ * pipes data through this function instead of writing to the DOM.
+ */
+interface TotalScores {
+    user_group: number;
+    ta_grading_earned: number | undefined;
+    ta_grading_total: number;
+    peer_grade_earned: number | undefined;
+    peer_total: number;
+    auto_grading_earned?: number;
+    auto_grading_total?: number;
+    auto_grading_complete: boolean;
+    combined_peer_score?: number;
+    peer_gradeable?: boolean;
+    see_peer_grade?: number;
+    precision?: number;
 }
 
 type Stats = { section_submitter_count: string; total_submitter_count: string; section_graded_component_count: string; total_graded_component_count: string; section_total_component_count: string; total_total_component_count: string; submitter_ids: string[]; submitter_anon_ids: Record<string, string> };
@@ -124,6 +145,10 @@ type GradedGradeable = {
     auto_grading_earned: number;
     ta_grading_total: number;
     ta_grading_earned: number;
+    peer_total?: number;
+    peer_grade_earned?: number;
+    see_peer_grade?: number;
+    combined_peer_score?: number;
     anon_id: string;
     itempool_items: Record<number, string>;
 };
@@ -1077,6 +1102,16 @@ function setRubricDOMElements(elements: string | Element | DocumentFragment | Do
 
     if (isInstructorEditEnabled()) {
         setupSortableComponents();
+    }
+
+    // When Vue is active, hide the legacy total score container that was
+    // injected by the Twig template inside grading-box, to avoid showing
+    // both the Vue total score box and the legacy one.
+    if ($('#vue-total-score-container').length > 0) {
+        const legacyContainer = document.getElementById('total-score-container');
+        if (legacyContainer) {
+            legacyContainer.style.display = 'none';
+        }
     }
 }
 
@@ -3489,7 +3524,20 @@ function refreshComponentHeader(component_id: number, showMarkList: boolean) {
  * @return {Promise}
  */
 function refreshTotalScoreBox() {
-    return injectTotalScoreBox(getScoresFromDOM());
+    const scores = getScoresFromDOM();
+    // Bridge for Vue: if the Vue container exists, pipe through window
+    if ($('#vue-total-score-container').length > 0 && window.__updateTotalScores) {
+        window.__updateTotalScores({
+            ...scores,
+            combined_peer_score: GRADED_GRADEABLE?.combined_peer_score,
+            peer_gradeable: GRADED_GRADEABLE?.peer_gradeable,
+            see_peer_grade: GRADED_GRADEABLE?.see_peer_grade,
+            precision: getPointPrecision(),
+            peer_grade_earned: getPeerGradingEarned(),
+        });
+        return Promise.resolve();
+    }
+    return injectTotalScoreBox(scores);
 }
 
 /**
