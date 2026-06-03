@@ -43,15 +43,15 @@
 
 - name: Stat preserved_list.json file
   ansible.builtin.stat:
-    path: /usr/local/submitty/config/preserved_file_list.json
-  register: preserved_list_stat
+    path: /usr/local/submitty/config/preserve_file_list.json
+  register: submitty_install_preserved_list_stat
 
 - name: Create preserved_list.json file
   ansible.builtin.file:
-    path: /usr/local/submitty/config/preserved_file_list.json
+    path: /usr/local/submitty/config/preserve_file_list.json
     mode: "0644"
-    state: touch
-  when: not preserved_list_stat.stat.exists
+    state: file
+  when: not submitty_install_preserved_list_stat.stat.exists
 
 - name: Run install_system.sh script
   ansible.builtin.shell:
