@@ -40,7 +40,7 @@ class GradingClusterController extends AbstractController {
         );
         $submitters = $this->core->getCourseDB()->rows();
 
-        if (empty($submitters)) {
+        if ($submitters === []) {
             return JsonResponse::getErrorResponse("No active submissions found for this gradeable.");
         }
 
@@ -54,7 +54,7 @@ class GradingClusterController extends AbstractController {
 
         // 6. Save clusters
         foreach ($cluster_groups as $label => $members) {
-            if (empty($members)) {
+            if ($members === []) {
                 continue;
             }
 

@@ -9981,7 +9981,7 @@ ORDER BY
         );
         $cluster_rows = $this->course_db->rows();
 
-        if (empty($cluster_rows)) {
+        if ($cluster_rows === []) {
             return [];
         }
 
