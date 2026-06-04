@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+
 interface ForumCategory {
     id: number;
     description: string;
@@ -16,21 +18,68 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
     return category.visibleDate === null || (Number(category.diff ?? 0) >= 0);
 };
 
-function toggleFilterButton(event: MouseEvent): void {
+//Reactive filter states
+const selectedCategoryIds = ref<number[]>([]);
+const selectedThreadStatuses = ref<number[]>([]);
+
+// Expose on window so legacy JS can read filter values.
+// The Vue component now owns the single source of truth.
+(window as any).selectedCategoryIds = selectedCategoryIds;
+(window as any).selectedThreadStatuses = selectedThreadStatuses;
+
+//Initialise state from DOM on mount 
+function readInitialStateFromDOM(): void {
+    const cats: number[] = [];
+    document.querySelectorAll('#thread_category button').forEach(btn => {
+        if ((btn as HTMLElement).dataset.btnSelected === 'true') {
+            const id = parseInt((btn as HTMLElement).dataset.cat_id ?? '', 10);
+            if (!isNaN(id)) cats.push(id);
+        }
+    });
+    selectedCategoryIds.value = cats;
+
+    const statuses: number[] = [];
+    document.querySelectorAll('#thread_status_select button').forEach(btn => {
+        if ((btn as HTMLElement).dataset.btnSelected === 'true') {
+            const id = parseInt((btn as HTMLElement).dataset.sel_id ?? '', 10);
+            if (!isNaN(id)) statuses.push(id);
+        }
+    });
+    selectedThreadStatuses.value = statuses;
+}
+
+onMounted(() => {
+    readInitialStateFromDOM();
+});
+
+function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: number): void {
     const btn = event.currentTarget as HTMLElement;
     const $btn = (window as any).$(btn);
     const current = btn.dataset.btnSelected;
+
     if (current === 'true') {
         btn.dataset.btnSelected = 'false';
         btn.classList.remove('filter-active');
         btn.classList.add('filter-inactive');
         $btn.data('btn-selected', 'false');
+        if (catId !== undefined) {
+            selectedCategoryIds.value = selectedCategoryIds.value.filter(id => id !== catId);
+        }
+        if (statusSelId !== undefined) {
+            selectedThreadStatuses.value = selectedThreadStatuses.value.filter(id => id !== statusSelId);
+        }
     }
     else {
         btn.dataset.btnSelected = 'true';
         btn.classList.remove('filter-inactive');
         btn.classList.add('filter-active');
         $btn.data('btn-selected', 'true');
+        if (catId !== undefined) {
+            selectedCategoryIds.value = [...selectedCategoryIds.value, catId];
+        }
+        if (statusSelId !== undefined) {
+            selectedThreadStatuses.value = [...selectedThreadStatuses.value, statusSelId];
+        }
     }
     (window as any).updateClearFilterButton?.();
     (window as any).updateThreads?.(true, (window as any).saveFilterState);
@@ -87,7 +136,7 @@ function onUnreadChange(): void {
         data-btn-selected="false"
         type="button"
         :data-testid="`thread-category-${category.id}`"
-        @mousedown.prevent="toggleFilterButton"
+        @mousedown.prevent="toggleFilterButton($event, category.id, undefined)"
       >
         {{ category.description }}
       </button>
@@ -106,7 +155,7 @@ function onUnreadChange(): void {
         data-sel_id="0"
         type="button"
         data-testid="thread-status-comment"
-        @mousedown.prevent="toggleFilterButton"
+        @mousedown.prevent="toggleFilterButton($event, undefined, 0)"
       >
         Comment
       </button>
@@ -116,7 +165,7 @@ function onUnreadChange(): void {
         data-sel_id="-1"
         type="button"
         data-testid="thread-status-unresolved"
-        @mousedown.prevent="toggleFilterButton"
+        @mousedown.prevent="toggleFilterButton($event, undefined, -1)"
       >
         Unresolved
       </button>
@@ -126,7 +175,7 @@ function onUnreadChange(): void {
         data-sel_id="1"
         type="button"
         data-testid="thread-status-resolved"
-        @mousedown.prevent="toggleFilterButton"
+        @mousedown.prevent="toggleFilterButton($event, undefined, 1)"
       >
         Resolved
       </button>

@@ -968,6 +968,10 @@ function changeDisplayOptions(option) {
 }
 
 function readCategoryValues() {
+    // Vue owns the single source of truth for filter state
+    if (window.selectedCategoryIds) {
+        return window.selectedCategoryIds.value;
+    }
     const categories_value = [];
     $('#thread_category button').each(function () {
         if ($(this).data('btn-selected') === 'true') {
@@ -978,6 +982,10 @@ function readCategoryValues() {
 }
 
 function setCategoryValues(cat_ids) {
+    // If Vue is active, update reactive state (convert strings to numbers)
+    if (window.selectedCategoryIds) {
+        window.selectedCategoryIds.value = cat_ids.map((id) => Number(id));
+    }
     $('#thread_category button').each(function () {
         if (cat_ids.includes($(this).data('cat_id'))) {
             $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
@@ -989,6 +997,10 @@ function setCategoryValues(cat_ids) {
 }
 
 function readThreadStatusValues() {
+    // Vue owns the single source of truth for filter state
+    if (window.selectedThreadStatuses) {
+        return window.selectedThreadStatuses.value;
+    }
     const thread_status_value = [];
     $('#thread_status_select button').each(function () {
         if ($(this).data('btn-selected') === 'true') {
@@ -999,6 +1011,10 @@ function readThreadStatusValues() {
 }
 
 function setThreadStatusValues(sel_ids) {
+    // If Vue is active, update reactive state
+    if (window.selectedThreadStatuses) {
+        window.selectedThreadStatuses.value = sel_ids.map((id) => Number(id));
+    }
     $('#thread_status_select button').each(function () {
         if (sel_ids.includes($(this).data('sel_id'))) {
             $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
@@ -2253,6 +2269,13 @@ function clearForumFilter() {
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
+    // Reset Vue reactive state
+    if (window.selectedCategoryIds) {
+        window.selectedCategoryIds.value = [];
+    }
+    if (window.selectedThreadStatuses) {
+        window.selectedThreadStatuses.value = [];
+    }
 
     return false;
 }
