@@ -133,17 +133,15 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/sync", methods: ["POST"])]
     public function syncNotifications() {
         $course_ids = $_POST['sync_course_ids'] ?? [];
         unset($_POST['csrf_token'], $_POST['sync_course_ids']);
         $new_settings = $_POST;
-        if (empty($course_ids)) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse("No courses selected.")
-            );
+        if (count($course_ids) === 0) {
+            return JsonResponse::getFailResponse("No courses selected.");
         }
         foreach ($course_ids as $course_id) {
             $parts = explode('|', $course_id);
@@ -154,22 +152,14 @@ class NotificationController extends AbstractController {
             $this->core->loadCourseConfig($semester, $course_name);
             $this->core->loadCourseDatabase();
             if (!$this->changeSettings($new_settings)) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse(
-                        "Failed to sync settings for {$semester} {$course_name}."
-                    )
-                );
+                return JsonResponse::getFailResponse("Failed to sync settings for {$semester} {$course_name}.");
             }
         }
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse(
-                "Notification settings have been synced successfully."
-            )
-        );
+        return JsonResponse::getSuccessResponse("Notification settings have been synced successfully.");
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["POST"])]
     public function changeCourseNotificationSettings() {
@@ -177,17 +167,17 @@ class NotificationController extends AbstractController {
         unset($_POST['csrf_token']);
         $new_settings = $_POST;
         if ($this->changeSettings($new_settings)) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse('Notification settings have been saved.')
-            );
+            return JsonResponse::getSuccessResponse('Notification settings have been saved.');
         }
         else {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
-            );
+            return JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.');
         }
     }
-    private function changeSettings($new_settings) {
+    /**
+     * @param array<string, mixed> $new_settings
+     * @return bool
+     */
+    private function changeSettings(array $new_settings): bool {
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff($this->selections, array_keys($new_settings));
             foreach (array_values($values_not_sent) as $value) {

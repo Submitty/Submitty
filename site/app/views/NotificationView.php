@@ -5,6 +5,7 @@ namespace app\views;
 use app\controllers\admin\ConfigurationController;
 use app\models\Notification;
 use app\models\User;
+use app\models\Course;
 
 class NotificationView extends AbstractView {
     /**
@@ -26,7 +27,13 @@ class NotificationView extends AbstractView {
         ]);
     }
 
-    public function showNotificationSettings($notification_saves, int $self_registration_type, $courses = []) {
+    /**
+     * @param array<string, bool> $notification_saves
+     * @param int $self_registration_type
+     * @param array <int, Course> $courses
+     * @return void
+     */
+    public function showNotificationSettings(array $notification_saves, int $self_registration_type, array $courses = []): void {
         $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildCourseUrl(['notifications']));
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->addBreadcrumb("Notification Settings");
