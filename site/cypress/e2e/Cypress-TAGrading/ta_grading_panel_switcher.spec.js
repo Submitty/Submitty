@@ -106,24 +106,28 @@ describe('TA Grading Panel Switcher', () => {
                 ],
             },
         ];
+
         cy.login('grader');
         cy.visit('/courses/s26/sample/gradeable/no_due_date_no_release/grading/grade?who_id=FI9yKu3j9DrXWt5&sort=id&direction=ASC');
-        layouts.forEach((layout) => {
-            cy.get('[data-testid="panel-selector-toggle"]').click();
-            cy.get(layout.selector).click();
 
-            if (layout.expectedOptions === null) {
+        cy.wrap(layouts).each((layout) => {
+            cy.get('[data-testid="panel-selector-toggle"]').should('be.visible').click();
+            cy.get(layout.selector).should('be.visible').click();
+
+            if (!layout.expectedOptions) {
                 return;
             }
 
-            panels.forEach((panel) => {
-                cy.get(panel.button).click();
+            cy.wrap(panels).each((panel) => {
+                cy.get(panel.button).should('be.visible').click();
+                cy.get(panel.selector).should('be.visible');
+
                 layout.expectedOptions.forEach((option) => {
                     cy.get(panel.selector).should('contain', option);
                 });
+
                 cy.get(panel.button).click();
             });
-            cy.reload();
         });
     });
 });
