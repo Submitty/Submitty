@@ -46,6 +46,20 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * API route to return user data
+     *
+     */
+    #[Route("/api/me", methods: ["GET"])]
+    public function apiMeResponse(): JsonResponse {
+        $user = $this->core->getUser();
+        return JsonResponse::getSuccessResponse([
+            'user_id' => $user->getId(),
+            'user_given_name' => $user->getDisplayedGivenName(),
+            'user_family_name' => $user->getDisplayedFamilyName()
+        ]);
+    }
+
+    /**
      *
      * Handle ajax request to update the currently logged in user's time zone data.
      *
