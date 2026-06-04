@@ -68,7 +68,7 @@ class DateTimeFormat extends AbstractModel {
     public function __construct(Core $core, string $specifier) {
         parent::__construct($core);
 
-        if (in_array($specifier, self::SPECIFIERS)) {
+        if (in_array($specifier, self::SPECIFIERS, true)) {
             $this->specifier = $specifier;
         }
         else {
@@ -81,7 +81,7 @@ class DateTimeFormat extends AbstractModel {
      * @param string $specifier A valid specifier from self::SPECIFIERS
      */
     public function setSpecifier(string $specifier): void {
-        if (in_array($specifier, self::SPECIFIERS)) {
+        if (in_array($specifier, self::SPECIFIERS, true)) {
             $this->specifier = $specifier;
         }
         else {
@@ -98,7 +98,7 @@ class DateTimeFormat extends AbstractModel {
      * @return string
      */
     public function getFormat(string $key) {
-        if (!in_array($key, self::DATE_FORMATS_KEYS)) {
+        if (!in_array($key, self::DATE_FORMATS_KEYS, true)) {
             throw new BadArgumentException('The $key must be a member DateTimeFormat::DATE_FORMAT_KEYS');
         }
 
