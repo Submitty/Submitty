@@ -277,7 +277,7 @@ async function ajaxGetGradeableRubric(gradeable_id: string) {
  * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
  */
-async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined) {
+async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined, peer: boolean) {
     let response: Record<string, string> | null;
     try {
         response = await $.ajax({
@@ -298,7 +298,7 @@ async function ajaxSaveComponent(gradeable_id: string | undefined, component_id:
                 upper_clamp: upper_clamp,
                 is_itempool_linked: is_itempool_linked,
                 itempool_option: itempool_option === 'null' ? undefined : itempool_option,
-                peer: false,
+                peer: peer,
             },
         }) as Record<string, string>;
     }
@@ -2074,6 +2074,10 @@ window.onGetMarkStats = async function (me: HTMLElement) {
  */
 window.onClickComponent = async function (me: HTMLElement, edit_mode = false) {
     const component_id = getComponentIdFromDOMElement(me);
+
+    const component = getComponentFromDOM(component_id);
+    COMPONENT_RUBRIC_LIST[component_id] = component;
+
     try {
         await toggleComponent(component_id, true, edit_mode);
     }
@@ -3011,7 +3015,7 @@ async function closeComponentInstructorEdit(component_id: number, saveChanges: b
         // Save the component title and comments
         await ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
             component.student_comment, component.page, component.lower_clamp,
-            component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
+            component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option, component.peer);
     }
     const component_rubric = await ajaxGetComponentRubric(getGradeableId(), component_id);
     await injectInstructorEditComponent(component_rubric, false);
@@ -3141,7 +3145,7 @@ async function checkMark(component_id: number, mark_id: number) {
     $(`#mark-${mark_id} .mark-selector`).addClass('mark-selected');
 
     // Finally, re-render the component
-    await injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], gradedComponent, false, true);
 }
 
 /**
@@ -3166,7 +3170,7 @@ function unCheckMark(component_id: number, mark_id: number) {
     $(`#mark-${mark_id} .mark-selector`).removeClass('mark-selected');
 
     // Finally, re-render the component
-    return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    return injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], gradedComponent, false, true);
 }
 
 /**
@@ -3460,9 +3464,10 @@ window.updateAllComponentVersions = async function () {
  */
 function refreshGradedComponent(component_id: number, showMarkList: boolean) {
     return injectGradingComponent(
-        getComponentFromDOM(component_id),
+        COMPONENT_RUBRIC_LIST[component_id],
         getGradedComponentFromDOM(component_id),
-        isEditModeEnabled(), showMarkList);
+        isEditModeEnabled(),
+        showMarkList);
 }
 
 /**
@@ -3542,7 +3547,8 @@ async function injectInstructorEditComponentHeader(component: Component, showMar
  */
 async function injectGradingComponent(component: Component, graded_component: ComponentGradeInfo, editable: boolean, showMarkList: boolean) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), !!canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), !!student_grader, TA_GRADING_PEER, getAllowCustomMarks());
+    const allow_custom_marks = component.peer ? false : getAllowCustomMarks();
+    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), !!canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), !!student_grader, TA_GRADING_PEER, allow_custom_marks);
     setComponentContents(component.id, elements);
 }
 
