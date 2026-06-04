@@ -9,9 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 
 // Handles all API requests related to AI-assisted grading clusters.
-class GradingClusterController extends AbstractController
-{
-
+class GradingClusterController extends AbstractController {
     /**
      * Generates clusters for a given gradeable using the specified algorithm.
      *
@@ -21,8 +19,7 @@ class GradingClusterController extends AbstractController
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/create", methods: ["POST"])]
-    public function createClustering(string $gradeable_id): JsonResponse
-    {
+    public function createClustering(string $gradeable_id): JsonResponse {
         // 1. Validate CSRF token
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
@@ -51,7 +48,7 @@ class GradingClusterController extends AbstractController
         switch ($algorithm) {
             case 'dummy_split':
             default:
-                $cluster_groups = $this->_runDummySplitAlgorithm($submitters);
+                $cluster_groups = $this->runDummySplitAlgorithm($submitters);
                 break;
         }
 
@@ -68,11 +65,13 @@ class GradingClusterController extends AbstractController
             }
         }
 
-        return JsonResponse::getSuccessResponse([
+        return JsonResponse::getSuccessResponse(
+            [
             "message"       => "Clustering completed successfully.",
             "cluster_count" => count($cluster_groups),
             "algorithm"     => $algorithm,
-        ]);
+            ]
+        );
     }
 
     /**
@@ -84,17 +83,18 @@ class GradingClusterController extends AbstractController
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/clear", methods: ["POST"])]
-    public function clearClustering(string $gradeable_id): JsonResponse
-    {
+    public function clearClustering(string $gradeable_id): JsonResponse {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
         $this->core->getQueries()->clearGradingClustersByGradeable($gradeable_id);
 
-        return JsonResponse::getSuccessResponse([
+        return JsonResponse::getSuccessResponse(
+            [
             "message" => "All clusters have been cleared successfully.",
-        ]);
+            ]
+        );
     }
 
     /**
@@ -106,8 +106,7 @@ class GradingClusterController extends AbstractController
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
-    public function getClusters(string $gradeable_id): JsonResponse
-    {
+    public function getClusters(string $gradeable_id): JsonResponse {
         $raw_clusters = $this->core->getQueries()->getGradingClustersByGradeable($gradeable_id);
 
         $clusters = [];
@@ -124,10 +123,12 @@ class GradingClusterController extends AbstractController
             ];
         }
 
-        return JsonResponse::getSuccessResponse([
+        return JsonResponse::getSuccessResponse(
+            [
             "gradeable_id" => $gradeable_id,
             "clusters"     => $clusters,
-        ]);
+            ]
+        );
     }
 
     /**
@@ -137,8 +138,7 @@ class GradingClusterController extends AbstractController
      *
      * @return array<string, array<int, array<string, mixed>>>
      */
-    private function _runDummySplitAlgorithm(array $submitters): array
-    {
+    private function runDummySplitAlgorithm(array $submitters): array {
         $cluster_a = [];
         $cluster_b = [];
 
@@ -148,7 +148,8 @@ class GradingClusterController extends AbstractController
 
             if ($first_char >= 'A' && $first_char <= 'M') {
                 $cluster_a[] = $submitter;
-            } else {
+            }
+            else {
                 $cluster_b[] = $submitter;
             }
         }
