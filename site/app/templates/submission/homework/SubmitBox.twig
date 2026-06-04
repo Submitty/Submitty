@@ -467,23 +467,27 @@
 
                 if (invalid_count) {
                     $errorBannerCount
-                        .text('Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.')
+                        .text('Maximum allowed number of files to be uploaded is {{ max_file_uploads }}. For submissions with more than {{ max_file_uploads }}, please use a .zip file.')
                         .show();
+                        $(".submit-gradeable").prop('disabled', true);
                 }
-                else {
+                else if (invalid_size == false) {
                     $errorBannerCount
                         .text('')
                         .hide();
+                        $(".submit-gradeable").prop('disabled', false);
                 }
                 if (invalid_size) {
                     $errorBannerSize
-                        .text('Selected files are too large. Total upload size exceeds the allowed limit.')
+                        .text('Selected files are too large. Total upload size exceeds the allowed limit of {{ max_submission_size / 1000 }} KB.')
                         .show();
+                        $(".submit-gradeable").prop('disabled', true);
                 }
-                else {
+                else if (invalid_count == false) {
                     $errorBannerSize
                         .text('')
                         .hide();
+                        $(".submit-gradeable").prop('disabled', false);
                 }
             }
 
