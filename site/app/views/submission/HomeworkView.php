@@ -559,8 +559,17 @@ class HomeworkView extends AbstractView {
         $numberUtils = new NumberUtils();
         $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
 
-        $max_submissions = $gradeable->getAutogradingConfig()->getMaxSubmissions();
-        $penalty_free_submissions = $max_submissions - $highest_version;
+        $max_submissions = 10000;
+        $penalty_free_submissions = 10000;
+        $max_submission_size = 10000;
+
+        $autograding_config = $gradeable->getAutogradingConfig();
+
+        if ($autograding_config !== null) {
+            $max_submissions = $autograding_config->getMaxSubmissions();
+            $penalty_free_submissions = $max_submissions - $highest_version;
+            $max_submission_size = $autograding_config->getMaxSubmissionSize();
+        }
 
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
@@ -597,7 +606,7 @@ class HomeworkView extends AbstractView {
             'min_team_member_late_days' => $min_team_member_late_days,
             'min_team_member_late_days_exception' => $min_team_member_late_days_exception,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
-            'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            'max_submissions' => $max_submissions,
             'penalty_free_submissions' => $penalty_free_submissions,
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -632,7 +641,7 @@ class HomeworkView extends AbstractView {
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
-            'max_submission_size' => $gradeable->getAutogradingConfig()->getMaxSubmissionSize(),
+            'max_submission_size' => $max_submission_size,
             'is_notebook' => $config->isNotebookGradeable(),
             'viewing_inactive_version' => $viewing_inactive_version,
             'allowed_minutes' => $gradeable->getUserAllowedTime($this->core->getUser()),
