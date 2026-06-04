@@ -1442,6 +1442,72 @@ CREATE TABLE public.gradeable_teams (
 
 
 --
+-- Name: grading_cluster; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grading_cluster (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    label character varying(255),
+    algorithm character varying(255) NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: grading_cluster_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grading_cluster_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grading_cluster_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grading_cluster_id_seq OWNED BY public.grading_cluster.id;
+
+
+--
+-- Name: grading_cluster_members; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grading_cluster_members (
+    id integer NOT NULL,
+    cluster_id integer NOT NULL,
+    user_id character varying(255) DEFAULT NULL::character varying,
+    team_id character varying(255) DEFAULT NULL::character varying,
+    CONSTRAINT cluster_member_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: grading_cluster_members_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.grading_cluster_members_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grading_cluster_members_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.grading_cluster_members_id_seq OWNED BY public.grading_cluster_members.id;
+
+
+--
 -- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2216,6 +2282,20 @@ ALTER TABLE ONLY public.gradeable_redaction ALTER COLUMN redaction_id SET DEFAUL
 
 
 --
+-- Name: grading_cluster id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster ALTER COLUMN id SET DEFAULT nextval('public.grading_cluster_id_seq'::regclass);
+
+
+--
+-- Name: grading_cluster_members id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_members ALTER COLUMN id SET DEFAULT nextval('public.grading_cluster_members_id_seq'::regclass);
+
+
+--
 -- Name: lichen id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2589,6 +2669,22 @@ ALTER TABLE ONLY public.grade_inquiries
 
 
 --
+-- Name: grading_cluster_members grading_cluster_members_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_members
+    ADD CONSTRAINT grading_cluster_members_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grading_cluster grading_cluster_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster
+    ADD CONSTRAINT grading_cluster_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: grading_registration grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2900,6 +2996,20 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.grade_inquiries USING btree 
 
 
 --
+-- Name: grading_cluster_g_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_cluster_g_id_idx ON public.grading_cluster USING btree (g_id);
+
+
+--
+-- Name: grading_cluster_members_cluster_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_cluster_members_cluster_id_idx ON public.grading_cluster_members USING btree (cluster_id);
+
+
+--
 -- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3134,19 +3244,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3499,6 +3609,22 @@ ALTER TABLE ONLY public.gradeable_teams
 
 ALTER TABLE ONLY public.gradeable_teams
     ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES public.sections_rotating(sections_rotating_id);
+
+
+--
+-- Name: grading_cluster grading_cluster_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster
+    ADD CONSTRAINT grading_cluster_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_cluster_members grading_cluster_members_cluster_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_members
+    ADD CONSTRAINT grading_cluster_members_cluster_id_fkey FOREIGN KEY (cluster_id) REFERENCES public.grading_cluster(id) ON DELETE CASCADE;
 
 
 --
