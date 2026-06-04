@@ -502,7 +502,6 @@ $(document).ready(() => {
             success: function (response) {
                 if (response.status === 'success') {
                     displaySuccessMessage('Date/time format updated successfully!');
-                    location.reload();
                 }
                 else {
                     console.log(response);
