@@ -18,16 +18,28 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
     return category.visibleDate === null || (Number(category.diff ?? 0) >= 0);
 };
 
-//Reactive filter states
+//Reactive filter state
 const selectedCategoryIds = ref<number[]>([]);
 const selectedThreadStatuses = ref<number[]>([]);
+const unreadChecked = ref(false);
 
 // Expose on window so legacy JS can read filter values.
 // The Vue component now owns the single source of truth.
 (window as any).selectedCategoryIds = selectedCategoryIds;
 (window as any).selectedThreadStatuses = selectedThreadStatuses;
+(window as any).selectedUnreadChecked = unreadChecked;
 
-//Initialise state from DOM on mount 
+// Replace the legacy checkUnread — reads from Vue state instead of DOM.
+(window as any).checkUnread = () => {
+    const clearBtn = document.getElementById('clear_filter_button');
+    if (unreadChecked.value) {
+        if (clearBtn) clearBtn.style.visibility = 'visible';
+        return true;
+    }
+    return false;
+};
+
+//Initialise state from DOM on mount
 function readInitialStateFromDOM(): void {
     const cats: number[] = [];
     document.querySelectorAll('#thread_category button').forEach(btn => {
@@ -46,6 +58,12 @@ function readInitialStateFromDOM(): void {
         }
     });
     selectedThreadStatuses.value = statuses;
+
+    // Read initial unread checkbox state (was set by Twig earlier)
+    const unreadEl = document.getElementById('unread') as HTMLInputElement | null;
+    if (unreadEl) {
+        unreadChecked.value = unreadEl.checked;
+    }
 }
 
 onMounted(() => {
@@ -85,13 +103,12 @@ function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: num
     (window as any).updateThreads?.(true, (window as any).saveFilterState);
 }
 
-function toggleUnreadLabel(event: MouseEvent): void {
-    const label = event.currentTarget as HTMLElement;
-    label.classList.toggle('filter-inactive');
-    label.classList.toggle('filter-active');
-}
-
-function onUnreadChange(): void {
+function toggleUnread(): void {
+    unreadChecked.value = !unreadChecked.value;
+    const checkbox = document.getElementById('unread') as HTMLInputElement | null;
+    if (checkbox) {
+        checkbox.checked = unreadChecked.value;
+    }
     (window as any).updateThreads?.(true, (window as any).saveFilterState);
     (window as any).checkUnread?.();
 }
@@ -102,22 +119,21 @@ function onUnreadChange(): void {
     id="forum_filter_bar"
     data-testid="forum-filter-bar"
   >
-    <label
+    <button
       id="filter_unread_btn"
-      class="btn btn-default btn-sm inline-block filter-inactive"
-      for="unread"
+      :class="['btn btn-sm btn-default inline-block', unreadChecked ? 'filter-active' : 'filter-inactive']"
       data-testid="filter-unread-label"
-      @mousedown="toggleUnreadLabel"
+      @click="toggleUnread"
     >
       Unread Only
-    </label>
+    </button>
     <input
       id="unread"
       name="unread"
       type="checkbox"
       data-ays-ignore="true"
       data-testid="filter-unread-checkbox"
-      @change="onUnreadChange"
+      hidden
     />
 
     <div
