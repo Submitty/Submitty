@@ -273,6 +273,7 @@ async function ajaxGetGradeableRubric(gradeable_id: string) {
  * @param {number} upper_clamp
  * @param {boolean} is_itempool_linked
  * @param {string} itempool_option
+ * @param {boolean} peer
  * @async
  * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
