@@ -418,15 +418,15 @@
 
             // Event listener to check when files are added / removed from the drag-and-drop box
             $(function() {
-                const drag_and_drop_box = document.getElementById('upload-boxes');
-                if (drag_and_drop_box) {
+                const uploadBoxes = document.getElementById('upload-boxes');
+                if (uploadBoxes) {
                     const observer = new MutationObserver(function(mutations) {
-                        // Whenever a is added or removed, recalculate totals and warnings
+                        // Whenever a file is added or removed, recalculate totals and warnings
                         checkDroppedFiles();
                     });
 
                     // Observe modifications to the drag-and-drop box
-                    observer.observe(drag_and_drop_box, { childList: true, subtree: true });
+                    observer.observe(uploadBoxes, { childList: true, subtree: true });
                 }
             });
 
