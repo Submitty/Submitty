@@ -383,24 +383,7 @@
             var highest_version = {{ highest_version }};
             {% if not viewing_inactive_version %}
                 for (var i = 1; i <= num_parts; i++ ){
-                    var boxId = "upload" + String(i);
-                    initializeDropZone(boxId);
-
-                    var element = document.getElementById(boxId);
-                    if (element) {
-                        // Run check when files are dragged and dropped
-                        element.addEventListener('drop', function() {
-                            setTimeout(checkDroppedFiles, 100);
-                        });
-                    }
-
-                    // Run check when files are selected via the file browser click
-                    var fileInput = document.getElementById("input-file" + i);
-                    if (fileInput) {
-                        fileInput.addEventListener('change', function() {
-                            setTimeout(checkDroppedFiles, 100);
-                        });
-                    }
+                    initializeDropZone("upload" + String(i));
                 }
             {% endif %}
 
@@ -432,6 +415,20 @@
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
+
+            // Event listener to check when files are added / removed from the drag-and-drop box
+            $(function() {
+                const drag_and_drop_box = document.getElementById('upload-boxes');
+                if (drag_and_drop_box) {
+                    const observer = new MutationObserver(function(mutations) {
+                        // Whenever a is added or removed, recalculate totals and warnings
+                        checkDroppedFiles();
+                    });
+
+                    // Observe modifications to the drag-and-drop box
+                    observer.observe(drag_and_drop_box, { childList: true, subtree: true });
+                }
+            });
 
             // Handle Submission Size / File Count Warnings:
             function checkDroppedFiles() {
