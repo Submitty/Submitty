@@ -203,7 +203,7 @@ describe('Test cases involving late day cache updates', () => {
                 cy.get('#late-days').type(2, { force: true });
                 cy.get('#extensions-form').find('a').as('ext-form-link');
 
-                cy.get('@ext-form-link').contains('Submit');
+                cy.get('@ext-form-link').should('contain', 'Submit');
                 cy.get('@ext-form-link').should('exist');
                 cy.get('@ext-form-link').click();
                 cy.wait('@extensions-update');

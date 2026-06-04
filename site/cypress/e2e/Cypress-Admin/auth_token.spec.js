@@ -17,7 +17,7 @@ describe('Test cases revolving around authentication tokens', () => {
 
         cy.get('[data-testid="new-auth-token-submit"]').click();
 
-        cy.get('[data-testid="new-token-banner"]').contains('Value: ');
+        cy.get('[data-testid="new-token-banner"]').should('contain', 'Value: ');
 
         let cookie;
 

@@ -32,36 +32,36 @@ describe('Test cases revolving around bulk uploading', () => {
             // Bulk upload
             cy.get('[data-testid="select-files"]').selectFile('cypress/fixtures/bulk_upload.pdf', { force: true });
             cy.get('[data-testid="submit-gradeable"]').click();
-            cy.get('[data-testid="assign-box"]').contains('2 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '2 files ready to assign', { timeout: 10000 });
             // reload to load the new files
             cy.reload();
             cy.get('[data-testid="bulk-delete-all"]').click();
-            cy.get('[data-testid="assign-box"]').contains('0 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '0 files ready to assign', { timeout: 10000 });
 
             // Bulk upload with QR Code
             cy.get('[data-testid="split-by-qr-code"]').check();
             cy.get('[data-testid="select-files"]').selectFile('cypress/fixtures/bulk_upload_qr.pdf', { force: true });
             cy.get('[data-testid="submit-gradeable"]').click();
-            cy.get('[data-testid="assign-box"]').contains('2 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '2 files ready to assign', { timeout: 10000 });
             cy.reload();
             cy.get('[data-testid="bulk-delete-all"]').click();
-            cy.get('[data-testid="assign-box"]').contains('0 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '0 files ready to assign', { timeout: 10000 });
 
             // Bulk upload with QR code, detect and assign a test to studentID
             cy.get('[data-testid="select-files"]').selectFile('cypress/fixtures/bulk_upload_qr.pdf', { force: true });
             cy.get('[data-testid="submit-gradeable"]').click();
-            cy.get('[data-testid="assign-box"]').contains('2 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '2 files ready to assign', { timeout: 10000 });
             cy.reload();
             cy.get('[data-testid="bulk-user-id-1"]').should('have.value', 'adamsg');
             // assign adamsg their test
             cy.get('[data-testid="bulk-submit-1"]').click();
             cy.get('[data-testid="bulk-delete-all"]').click();
-            cy.get('[data-testid="assign-box"]').contains('0 files ready to assign', { timeout: 10000 });
+            cy.get('[data-testid="assign-box"]').should('contain', '0 files ready to assign', { timeout: 10000 });
 
             // confirm that adamsg has a test
             cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
             cy.get('[data-testid="view-sections"]').click();
-            cy.get('[data-testid="grade-table"]').contains('adamsg').parent().get('[data-testid="grade-button"]').contains('Grade');
+            cy.get('[data-testid="grade-table"]').contains('adamsg').parent().get('[data-testid="grade-button"]').should('contain', 'Grade');
         });
     });
 });

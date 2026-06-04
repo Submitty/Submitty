@@ -5,7 +5,7 @@ describe('Rubric Access Test', () => {
         cy.get('.content').should('contain', 'You don\'t have access to this page.');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('#error-0').should('contain', 'You do not have permission to grade Grading Homework');
-        cy.get('.alert-error').contains('You do not have permission to grade Grading Homework');
+        cy.get('.alert-error').should('contain', 'You do not have permission to grade Grading Homework');
         cy.logout();
     });
     it('test rubric delete file attachment ta and instructor', () => {

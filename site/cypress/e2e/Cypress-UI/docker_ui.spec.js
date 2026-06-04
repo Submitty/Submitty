@@ -117,7 +117,7 @@ describe('Docker UI Test', () => {
 
         // Check empty tag list, should have `et-cetera'
         cy.get('#capabilities-list')
-            .contains('et-cetera');
+            .should('contain', 'et-cetera');
 
         cy.intercept('POST', '**/admin/add_image').as('addImage');
 
@@ -319,7 +319,7 @@ describe('Docker UI Test', () => {
 
         // images should be visible
         cy.get('[data-testid="image-row"]').should('exist');
-        cy.get('[data-testid="image-row"]').contains('submitty/autograding-default');
+        cy.get('[data-testid="image-row"]').should('contain', 'submitty/autograding-default');
 
         // Add image to capability section should not exist
         cy.get('[data-testid="add-image-to-capability"]').should('not.exist');

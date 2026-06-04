@@ -61,7 +61,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
             cy.get('[data-testid="version-warning"]').should('exist');
             cy.get('@test-component').children().eq(0).children().eq(0).click();
 
-            cy.get('[data-testid="save-tools-save"]').contains('Save and resolve version conflict');
+            cy.get('[data-testid="save-tools-save"]').should('contain', 'Save and resolve version conflict');
             cy.get('[data-testid="save-tools-save"]').click();
 
             cy.get('[data-testid="version-warning"]', { timeout: 10000 }).should('not.exist');
