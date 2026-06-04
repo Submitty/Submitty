@@ -10264,6 +10264,12 @@ parameters:
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
+			path: app/models/DateTimeFormat.php
+
+		-
+			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
+			identifier: function.strict
+			count: 2
 			path: app/models/DisplayImage.php
 
 		-
