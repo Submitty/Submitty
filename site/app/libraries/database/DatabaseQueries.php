@@ -2044,7 +2044,7 @@ ORDER BY {$orderby}",
      * Second half of query will count all user submissions that have been overriden
      * These counts are added and returned.
      */
-    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students, bool $include_grade_override = true) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2068,7 +2068,7 @@ ORDER BY {$orderby}",
         $go_create = "";
         $go_check = "";
         $go_select = "";
-        if (!$is_team) {
+        if (!$is_team && $include_grade_override) {
             $go_create = "LEFT JOIN grade_override AS go ON gd.g_id = go.g_id AND gd.gd_{$user_or_team_id} = go.{$user_or_team_id}";
             $go_check = "AND go.g_id IS NULL AND go.user_id IS NULL";
             $go_select = "UNION ALL
@@ -2080,6 +2080,13 @@ ORDER BY {$orderby}",
                                         FROM gradeable_component AS gc
                                         GROUP BY gc.g_id
                                     ) AS component_count ON go.g_id = component_count.g_id
+                        WHERE EXISTS (
+                            SELECT 1
+                            FROM electronic_gradeable_version AS egv
+                            WHERE egv.g_id = go.g_id
+                              AND egv.{$user_or_team_id} = go.{$user_or_team_id}
+                              AND egv.active_version > 0
+                        )
                         GROUP BY {$users_or_teams}.{$section_key}, component_count.num";
             array_push($params, $g_id);
         }
@@ -2124,6 +2131,69 @@ ORDER BY merged_data.{$section_key}
             $return['NULL'] = 0;
         }
         return $return;
+    }
+
+    /**
+     * Return counts of grade overrides split by whether the user has an active submission.
+     *
+     * @param array<int> $sections
+     * @return array<string, int>
+     */
+    public function getGradeOverrideCountsByGradingSections(string $g_id, array $sections, string $section_key, bool $include_null_section, bool $include_withdrawn_students): array {
+        $where_clauses = [
+            'go.g_id = ?',
+            'go.marks IS NOT NULL',
+        ];
+        $params = [$g_id];
+
+        if (count($sections) > 0) {
+            $where_clauses[] = "(u.{$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params = array_merge($params, $sections);
+        }
+
+        if (!$include_null_section) {
+            $where_clauses[] = "u.{$section_key} IS NOT NULL";
+        }
+
+        if (!$include_withdrawn_students) {
+            $where_clauses[] = "u.registration_type != 'withdrawn'";
+        }
+
+        $where = implode(' AND ', $where_clauses);
+
+        $this->course_db->query(
+            "
+            SELECT
+                COUNT(*) FILTER (
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM electronic_gradeable_version AS egv
+                        WHERE egv.g_id = go.g_id
+                          AND egv.user_id = go.user_id
+                          AND egv.active_version > 0
+                    )
+                ) AS with_submission,
+                COUNT(*) FILTER (
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM electronic_gradeable_version AS egv
+                        WHERE egv.g_id = go.g_id
+                          AND egv.user_id = go.user_id
+                          AND egv.active_version > 0
+                    )
+                ) AS without_submission
+            FROM grade_override AS go
+            INNER JOIN users AS u ON u.user_id = go.user_id
+            WHERE {$where}
+            ",
+            $params
+        );
+
+        $row = $this->course_db->row();
+        return [
+            'with_submission' => intval($row['with_submission'] ?? 0),
+            'without_submission' => intval($row['without_submission'] ?? 0),
+        ];
     }
 
 
@@ -2607,14 +2677,14 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to combine grade overridden marks within averages
         if (!$is_team && $override === 'include') {
-            $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
+            $include = " UNION ALL SELECT gd.gd_id, grade_override.marks::numeric AS g_score, grade_override.marks::numeric AS max, 1 as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
                 AND u.user_id IS NOT NULL
                 LEFT JOIN gradeable_data as gd ON u.user_id = gd.gd_user_id
                 AND grade_override.g_id = gd.g_id
                 WHERE grade_override.g_id=?
-                GROUP BY gd.gd_id, marks";
+                ";
             $params[] = $g_id;
         }
 
