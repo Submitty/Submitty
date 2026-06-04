@@ -71,7 +71,9 @@
 
     {% if penalty_free_submissions <= 5 %}
         <div class="submission-warning">
-        {% if penalty_free_submissions > 0 %}
+        {% if penalty_free_submissions == 1 %}
+            <p>Warning: You have 1 penalty free submission remaining.</p>
+        {% elseif penalty_free_submissions > 0 %}
             <p>Warning: You have {{ penalty_free_submissions }} penalty free submissions remaining.</p>
         {% else %}
             <p>Warning: You have 0 penalty free submissions remaining.</p>
@@ -286,8 +288,6 @@
                     </table>
                     {% if viewing_inactive_version %}
                         <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
-                    {% else %}
-                        <div id="upload-warning-{{ loop.index }}" class="upload-warning" style="display:none; color:#9f3a38; background:#fff6f6; border:1px solid #e0b4b4; padding:0.75rem; margin-top:0.75rem;" role="alert" aria-live="polite"></div>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -340,7 +340,7 @@
                         setUsePrevious();
                         {% for file in old_files %}
                             addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                            readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
+                            readPrevious('{{ file.name }}', {{ file.size }}, {{ file.part }});
                         {% endfor %}
 
                         //TODO: move logic for loading submission mode from session storage into module file
@@ -372,7 +372,6 @@
             $(function() {
                 setButtonStatus({{ viewing_inactive_version }});
                 initMaxNoFiles({{ max_file_uploads }});
-                initMaxTotalUploadSize({{ max_submission_size|default(100000) }});
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
@@ -426,7 +425,7 @@
                 $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name|e('js') }}', {{ file.size }}, {{ file.part }});
+                        readPrevious('{{ file.name }}', {{ file.size }}, {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
@@ -434,20 +433,20 @@
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
 
-            //Handle Submission Size / File Count Warnings:
+            // Handle Submission Size / File Count Warnings:
             function checkDroppedFiles() {
                 let totalFiles = 0;
                 let totalSize = 0;
-
+                // Loop through files to total count and size
                 if (typeof file_array !== 'undefined' && Array.isArray(file_array)) {
                     for (let i = 0; i < file_array.length; i++) {
-                        let fileBatch = file_array[i];
+                        let files = file_array[i];
 
-                        if (fileBatch && Array.isArray(fileBatch)) {
-                            totalFiles += fileBatch.length;
+                        if (files && Array.isArray(files)) {
+                            totalFiles += files.length;
 
-                            for (let j = 0; j < fileBatch.length; j++) {
-                                let file = fileBatch[j];
+                            for (let j = 0; j < files.length; j++) {
+                                let file = files[j];
 
                                 if (file && typeof file.size === 'number') {
                                     totalSize += file.size;
