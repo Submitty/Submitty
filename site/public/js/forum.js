@@ -2263,25 +2263,7 @@ if (!Array.prototype.toggleElement) {
 }
 
 function clearForumFilter() {
-    if (checkUnread()) {
-        $('#filter_unread_btn').click();
-    }
-    $('#search-content').val('').trigger('change');
-    $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').css('visibility', 'hidden');
-    // Reset Vue reactive state
-    if (window.selectedCategoryIds) {
-        window.selectedCategoryIds.value = [];
-    }
-    if (window.selectedThreadStatuses) {
-        window.selectedThreadStatuses.value = [];
-    }
-    if (window.selectedUnreadChecked) {
-        window.selectedUnreadChecked.value = false;
-    }
-
-    return false;
+    return window.clearForumFilter?.();
 }
 
 function updateClearFilterButton() {

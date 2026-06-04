@@ -39,6 +39,45 @@ const unreadChecked = ref(false);
     return false;
 };
 
+// Vue owns clearForumFilter — resets all reactive state and DOM, then the caller
+// (Twig's onclick or updateClearFilterButton) calls updateThreads after.
+(window as any).clearForumFilter = () => {
+    // Reset unread
+    if (unreadChecked.value) {
+        unreadChecked.value = false;
+        const checkbox = document.getElementById('unread') as HTMLInputElement | null;
+        if (checkbox) checkbox.checked = false;
+    }
+
+    // Reset search input 
+    const searchInput = document.getElementById('search-content') as HTMLInputElement | null;
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('change'));
+    }
+
+    // Reset DOM button classes and jQuery .data() cache for category/status buttons
+    document.querySelectorAll('#thread_category button, #thread_status_select button').forEach(btn => {
+        const el = btn as HTMLElement;
+        el.dataset.btnSelected = 'false';
+        el.classList.remove('filter-active');
+        el.classList.add('filter-inactive');
+        const $btn = (window as any).$(el);
+        if ($btn && $btn.data) $btn.data('btn-selected', 'false');
+    });
+
+    // Reset Vue reactive state
+    selectedCategoryIds.value = [];
+    selectedThreadStatuses.value = [];
+    unreadChecked.value = false;
+
+    // Hide clear button
+    const clearBtn = document.getElementById('clear_filter_button');
+    if (clearBtn) clearBtn.style.visibility = 'hidden';
+
+    return false;
+};
+
 //Initialise state from DOM on mount
 function readInitialStateFromDOM(): void {
     const cats: number[] = [];
