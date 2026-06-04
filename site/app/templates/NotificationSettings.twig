@@ -4,9 +4,11 @@
           background: gray;
       }
       .sync-top-right {
+        display: flex;
+        align-items: center;
           float: right;
           text-align: right;
-          margin-top: -6px;
+          margin-right: 5px;
       }
       .sync-bottom-row {
           margin-top: 30px;
@@ -423,7 +425,10 @@
                 </div>
             {% endif %}
             {% if email_enabled %}
-            <div class="sync-bottom-row">
+            <div class="sync-bottom-row" style="display: flex; align-items: center; gap: 10px;">
+                <span class="sync-help-text">
+                    To copy the notification settings from this course to other courses, click here.
+                </span>
                 {{ sync_button|raw }}
             </div>
 {% endif %}
