@@ -4,12 +4,11 @@ namespace app\models\gradeable;
 
 use app\models\AbstractModel;
 
-/**
- * Represents a single grading cluster for a gradeable.
- * A cluster is a group of students/teams whose submissions
- * have been grouped together (e.g., by an algorithm or AI).
- */
-class GradingCluster extends AbstractModel {
+// Represents a single grading cluster for a gradeable.
+// A cluster is a group of students/teams whose submissions
+// have been grouped together (e.g., by an algorithm or AI).
+class GradingCluster extends AbstractModel
+{
     /** @var int Unique ID for this cluster */
     protected int $id;
 
@@ -37,10 +36,13 @@ class GradingCluster extends AbstractModel {
     protected array $members = [];
 
     /**
+     * Constructor for GradingCluster
+     *
      * @param \app\libraries\Core $core
-     * @param array<string, mixed> $details  A row from the grading_cluster table
+     * @param array<string, mixed> $details A row from the grading_cluster table
      */
-    public function __construct(\app\libraries\Core $core, array $details) {
+    public function __construct(\app\libraries\Core $core, array $details)
+    {
         parent::__construct($core);
 
         $this->id          = (int) $details['id'];
@@ -50,45 +52,97 @@ class GradingCluster extends AbstractModel {
         $this->created_at  = $details['created_at'];
     }
 
-    // Getters
-
-    public function getId(): int {
+    /**
+     * Get the ID
+     *
+     * @return int
+     */
+    public function getId(): int
+    {
         return $this->id;
     }
 
-    public function getGradeableId(): string {
+    /**
+     * Get the Gradeable ID
+     *
+     * @return string
+     */
+    public function getGradeableId(): string
+    {
         return $this->gradeable_id;
     }
 
-    public function getLabel(): ?string {
+    /**
+     * Get the label
+     *
+     * @return string|null
+     */
+    public function getLabel(): ?string
+    {
         return $this->label;
     }
 
-    public function getAlgorithm(): string {
+    /**
+     * Get the algorithm
+     *
+     * @return string
+     */
+    public function getAlgorithm(): string
+    {
         return $this->algorithm;
     }
 
-    public function getCreatedAt(): string {
+    /**
+     * Get the creation timestamp
+     *
+     * @return string
+     */
+    public function getCreatedAt(): string
+    {
         return $this->created_at;
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function getMembers(): array {
+    /**
+     * Get the members array
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getMembers(): array
+    {
         return $this->members;
     }
 
-    public function getMemberCount(): int {
+    /**
+     * Get the number of members
+     *
+     * @return int
+     */
+    public function getMemberCount(): int
+    {
         return count($this->members);
     }
 
-    // Setters / Helpers
-
-    /** @param array<int, array<string, mixed>> $members */
-    public function setMembers(array $members): void {
+    /**
+     * Set the members array
+     *
+     * @param array<int, array<string, mixed>> $members
+     *
+     * @return void
+     */
+    public function setMembers(array $members): void
+    {
         $this->members = $members;
     }
 
-    public function setLabel(?string $label): void {
+    /**
+     * Set the label
+     *
+     * @param string|null $label
+     *
+     * @return void
+     */
+    public function setLabel(?string $label): void
+    {
         $this->label = $label;
     }
 }

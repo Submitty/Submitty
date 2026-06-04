@@ -9919,9 +9919,11 @@ ORDER BY
      * @param string      $g_id      The gradeable ID this cluster belongs to
      * @param string|null $label     An optional human-readable label for the cluster
      * @param string      $algorithm The algorithm used to generate this cluster
-     * @return int  The auto-generated primary key ID of the new cluster row
+     *
+     * @return int The auto-generated primary key ID of the new cluster row
      */
-    public function createGradingCluster(string $g_id, ?string $label, string $algorithm): int {
+    public function createGradingCluster(string $g_id, ?string $label, string $algorithm): int
+    {
         $this->course_db->query(
             "INSERT INTO grading_cluster (g_id, label, algorithm, created_at)
              VALUES (?, ?, ?, NOW())",
@@ -9937,8 +9939,11 @@ ORDER BY
      * @param int         $cluster_id The cluster to assign the member to
      * @param string|null $user_id    The individual student's user ID (null for teams)
      * @param string|null $team_id    The team ID (null for individual assignments)
+     *
+     * @return void
      */
-    public function insertClusterMember(int $cluster_id, ?string $user_id, ?string $team_id): void {
+    public function insertClusterMember(int $cluster_id, ?string $user_id, ?string $team_id): void
+    {
         $this->course_db->query(
             "INSERT INTO grading_cluster_members (cluster_id, user_id, team_id)
              VALUES (?, ?, ?)",
@@ -9950,8 +9955,11 @@ ORDER BY
      * Deletes all clusters (and their members via CASCADE) for a given gradeable.
      *
      * @param string $g_id The gradeable ID whose clusters should be cleared
+     *
+     * @return void
      */
-    public function clearGradingClustersByGradeable(string $g_id): void {
+    public function clearGradingClustersByGradeable(string $g_id): void
+    {
         $this->course_db->query(
             "DELETE FROM grading_cluster WHERE g_id = ?",
             [$g_id]
@@ -9965,9 +9973,11 @@ ORDER BY
      *   members: [['id', 'cluster_id', 'user_id', 'team_id'], ...]
      *
      * @param string $g_id The gradeable ID to fetch clusters for
+     *
      * @return array<int, array<string, mixed>>
      */
-    public function getGradingClustersByGradeable(string $g_id): array {
+    public function getGradingClustersByGradeable(string $g_id): array
+    {
         // Fetch all clusters for this gradeable
         $this->course_db->query(
             "SELECT * FROM grading_cluster WHERE g_id = ? ORDER BY created_at ASC",
