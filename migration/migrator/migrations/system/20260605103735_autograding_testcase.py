@@ -16,7 +16,7 @@ def up(config):
             testcase_order integer              not NULL,
             hidden      boolean                 not NULL,
             extra_credit boolean                not NULL,
-            points_possible numeric(10,2)      not NULL
+            points_possible numeric(10,0)      not NULL
             );
         """
     )

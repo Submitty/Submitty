@@ -16,7 +16,7 @@ def up(config):
             user_id     character varying(255),
             team_id     character varying(255),
             g_version   integer                     not NULL,
-            points_earned numeric(10,2)             not NULL,
+            points_earned numeric(10,0)             not NULL,
             CONSTRAINT user_team_id_check CHECK ((user_id IS NOT NULL) != (team_id IS NOT NULL))
             );
         """
