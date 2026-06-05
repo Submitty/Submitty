@@ -263,6 +263,7 @@ class ReportControllerTester extends BaseUnitTest {
             'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.'
         ], $twig_output[0][1]['normalization_warnings']);
         $this->assertSame([], $twig_output[0][1]['customization_data']['Tests']);
+    }
 
     public function testGenerateCustomizationShowsNormalizationWarning() {
         // Write a gui_customization.json with a legacy bucket containing "ids": null
