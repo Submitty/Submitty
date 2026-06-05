@@ -559,17 +559,11 @@ class HomeworkView extends AbstractView {
         $numberUtils = new NumberUtils();
         $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
 
-        $max_submissions = 10000;
-        $penalty_free_submissions = 10000;
-        $max_submission_size = 10000;
-
         $autograding_config = $gradeable->getAutogradingConfig();
 
-        if ($autograding_config !== null) {
-            $max_submissions = $autograding_config->getMaxSubmissions();
-            $penalty_free_submissions = $max_submissions - $highest_version;
-            $max_submission_size = $autograding_config->getMaxSubmissionSize();
-        }
+        $max_submissions = $autograding_config->getMaxSubmissions();
+        $penalty_free_submissions = $max_submissions - $highest_version;
+        $max_submission_size = $autograding_config->getMaxSubmissionSize();
 
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
