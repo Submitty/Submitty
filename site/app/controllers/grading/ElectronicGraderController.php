@@ -3266,6 +3266,14 @@ class ElectronicGraderController extends AbstractController {
         try {
             //display hidden testcases only if the user can view the entirety of this gradeable.
             $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
+
+            // For students, require that grades are released and the requested version is graded
+            // Also check that the specific hidden test case has "release_hidden_details" set to true
+            if ($can_view_hidden && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+                $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+                $grades_released = (!$gradeable->isTaGrading() || $version_instance->getVersion() === $ta_graded_gradeable->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
+                $can_view_hidden = $grades_released && $testcase->getTestcase()->isReleaseHiddenDetails();
+            }
             $popup_css = "diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
                 $this->core->getOutput()->renderTemplate(
