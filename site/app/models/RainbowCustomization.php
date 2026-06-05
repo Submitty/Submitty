@@ -401,14 +401,6 @@ class RainbowCustomization extends AbstractModel {
         }
         return $json_bucket_ids;
     }
-
-    private function addNormalizationWarning(): void {
-        $warning = 'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.';
-        if (!in_array($warning, $this->normalization_warnings, true)) {
-            $this->normalization_warnings[] = $warning;
-        }
-    }
-
     /**
      * Get an array containing what percentage of the grade the bucket counts toward.  The key is the name of the
      * bucket and the value is the percentage which has been cast back to a whole number integer.  This differs
