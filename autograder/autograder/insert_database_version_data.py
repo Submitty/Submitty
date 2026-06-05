@@ -110,6 +110,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             )
             db.commit()
 
+    autograding_testcase = Table('autograding_testcase', metadata, autoload_with=engine)
     autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
     testcase_rows = build_testcase_rows(
         user_id=user_id,
@@ -119,25 +120,29 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         testcases=testcases,
         results_testcases=results['testcases'],
     )
-    existing = db.execute(
-        select(func.count()).select_from(autograding_testcase_details)
-        .where(autograding_testcase_details.c.g_id == gradeable_id)
-        .where(autograding_testcase_details.c.user_id == user_id)
-        .where(autograding_testcase_details.c.team_id == team_id)
-        .where(autograding_testcase_details.c.g_version == version)
-    ).scalar()
-    if existing:
-        db.execute(
-            delete(autograding_testcase_details)
-            .where(autograding_testcase_details.c.g_id == gradeable_id)
-            .where(autograding_testcase_details.c.user_id == user_id)
-            .where(autograding_testcase_details.c.team_id == team_id)
-            .where(autograding_testcase_details.c.g_version == version)
-        )
-    if testcase_rows:
-        db.execute(insert(autograding_testcase_details), testcase_rows)
-    db.commit()
-    submission_time = results['submission_time']
+    # check if the autograding_testcase has a row for this gradeable and testcase
+    if (autograding_testcase.c.g_id == autograding_testcase_data.c.g_id &&
+        autograding_testcase.c.testcase_order == autograding_testcase_data.testcase_order)
+        # check if this is a regrade (gradeable version is the same)
+        existing = db.execute(
+            select(func.count()).select_from(autograding_testcase_data)
+            .where(autograding_testcase_data.c.g_id == gradeable_id)
+            .where(autograding_testcase_data.c.user_id == user_id)
+            .where(autograding_testcase_data.c.team_id == team_id)
+            .where(autograding_testcase_data.c.g_version == version)
+        ).scalar()
+        if existing:
+            db.execute(
+                delete(autograding_testcase_data)
+                .where(autograding_testcase_data.c.g_id == gradeable_id)
+                .where(autograding_testcase_data.c.user_id == user_id)
+                .where(autograding_testcase_data.c.team_id == team_id)
+                .where(autograding_testcase_data.c.g_version == version)
+            )
+        if testcase_rows:
+            db.execute(insert(autograding_testcase_data), testcase_rows)
+        db.commit()
+        submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
         # automatic_grading_total = results["automatic_grading_total"]
@@ -260,11 +265,11 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             testcases=testcases,
             results_testcases=results['testcases'],
         )
-        upsert_testcase_results(db, autograding_testcase_details, rows,
+        upsert_testcase_results(db, autograding_testcase_data, rows,
                                 gradeable_id, user_id, team_id, version)
         db.commit()
     except Exception as e:
-        print(f"WARNING: could not write autograding_testcase_details: {e}")
+        print(f"WARNING: could not write autograding_testcase_data: {e}")
 
     db.close()
     engine.dispose()
