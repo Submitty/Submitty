@@ -1519,10 +1519,8 @@ HTML;
                             && $file["name"] === "upload.pdf"
                         )
                     ) {
-                        if (!$skipping) {
-                            if ($start_dir_name === "submissions") {
+                        if ($start_dir_name === "submissions") {
                                 $file["path"] = $this->setAnonPath($file["path"], $graded_gradeable->getGradeableId());
-                            }
                         }
                         $path = explode('/', $file['relative_name']);
                         array_pop($path);
