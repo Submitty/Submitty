@@ -3,6 +3,7 @@
 --
 
 
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -959,7 +960,6 @@ CREATE TABLE public.electronic_gradeable (
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
@@ -1622,7 +1622,8 @@ CREATE TABLE public.notifications (
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
     created_at timestamp(0) with time zone NOT NULL,
-    seen_at timestamp(0) with time zone
+    seen_at timestamp(0) with time zone,
+    gradeable_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -2938,6 +2939,13 @@ CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree 
 
 
 --
+-- Name: notifications_user_gradeable_unseen_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications USING btree (to_user_id, gradeable_id) WHERE ((gradeable_id IS NOT NULL) AND (seen_at IS NULL));
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3852,4 +3860,5 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
 

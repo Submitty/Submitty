@@ -3,7 +3,7 @@
         <table class="file-upload-table edit-imgs-table">
             <thead>
                 <tr>
-                    <th>Attached Images</th>
+                    <th>Attached Files</th>
                 </tr>
             </thead>
             <tbody>
@@ -11,7 +11,11 @@
                 {% if attachment[2] is defined %}
                 <tr>
                     <td>
-                        <img src="{{ attachment[0] }}" class="thumbnail" alt="{{ attachment[2] }}"/>
+                        {% if attachment[3] is defined and attachment[3] == 'pdf' %}
+                            <span class="thumbnail thumbnail-pdf">PDF</span>
+                        {% else %}
+                            <img src="{{ attachment[0] }}" class="thumbnail" alt="{{ attachment[2] }}"/>
+                        {% endif %}
                     </td>
                     <td class="display-attachment-name">{{ attachment[2] }}</td>
                     <td class="file-trash">

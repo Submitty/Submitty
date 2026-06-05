@@ -2044,7 +2044,7 @@ ORDER BY {$orderby}",
      * Second half of query will count all user submissions that have been overriden
      * These counts are added and returned.
      */
-    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team, bool $include_withdrawn_students, bool $include_grade_override = true) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2068,7 +2068,7 @@ ORDER BY {$orderby}",
         $go_create = "";
         $go_check = "";
         $go_select = "";
-        if (!$is_team) {
+        if (!$is_team && $include_grade_override) {
             $go_create = "LEFT JOIN grade_override AS go ON gd.g_id = go.g_id AND gd.gd_{$user_or_team_id} = go.{$user_or_team_id}";
             $go_check = "AND go.g_id IS NULL AND go.user_id IS NULL";
             $go_select = "UNION ALL
@@ -2080,6 +2080,13 @@ ORDER BY {$orderby}",
                                         FROM gradeable_component AS gc
                                         GROUP BY gc.g_id
                                     ) AS component_count ON go.g_id = component_count.g_id
+                        WHERE EXISTS (
+                            SELECT 1
+                            FROM electronic_gradeable_version AS egv
+                            WHERE egv.g_id = go.g_id
+                              AND egv.{$user_or_team_id} = go.{$user_or_team_id}
+                              AND egv.active_version > 0
+                        )
                         GROUP BY {$users_or_teams}.{$section_key}, component_count.num";
             array_push($params, $g_id);
         }
@@ -2124,6 +2131,69 @@ ORDER BY merged_data.{$section_key}
             $return['NULL'] = 0;
         }
         return $return;
+    }
+
+    /**
+     * Return counts of grade overrides split by whether the user has an active submission.
+     *
+     * @param array<int> $sections
+     * @return array<string, int>
+     */
+    public function getGradeOverrideCountsByGradingSections(string $g_id, array $sections, string $section_key, bool $include_null_section, bool $include_withdrawn_students): array {
+        $where_clauses = [
+            'go.g_id = ?',
+            'go.marks IS NOT NULL',
+        ];
+        $params = [$g_id];
+
+        if (count($sections) > 0) {
+            $where_clauses[] = "(u.{$section_key} IN " . $this->createParameterList(count($sections)) . ") IS NOT FALSE";
+            $params = array_merge($params, $sections);
+        }
+
+        if (!$include_null_section) {
+            $where_clauses[] = "u.{$section_key} IS NOT NULL";
+        }
+
+        if (!$include_withdrawn_students) {
+            $where_clauses[] = "u.registration_type != 'withdrawn'";
+        }
+
+        $where = implode(' AND ', $where_clauses);
+
+        $this->course_db->query(
+            "
+            SELECT
+                COUNT(*) FILTER (
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM electronic_gradeable_version AS egv
+                        WHERE egv.g_id = go.g_id
+                          AND egv.user_id = go.user_id
+                          AND egv.active_version > 0
+                    )
+                ) AS with_submission,
+                COUNT(*) FILTER (
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM electronic_gradeable_version AS egv
+                        WHERE egv.g_id = go.g_id
+                          AND egv.user_id = go.user_id
+                          AND egv.active_version > 0
+                    )
+                ) AS without_submission
+            FROM grade_override AS go
+            INNER JOIN users AS u ON u.user_id = go.user_id
+            WHERE {$where}
+            ",
+            $params
+        );
+
+        $row = $this->course_db->row();
+        return [
+            'with_submission' => intval($row['with_submission'] ?? 0),
+            'without_submission' => intval($row['without_submission'] ?? 0),
+        ];
     }
 
 
@@ -2607,14 +2677,14 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         // Check if we want to combine grade overridden marks within averages
         if (!$is_team && $override === 'include') {
-            $include = " UNION SELECT gd.gd_id, marks::numeric AS g_score, marks::numeric AS max, COUNT(*) as count, 0 as autograding
+            $include = " UNION ALL SELECT gd.gd_id, grade_override.marks::numeric AS g_score, grade_override.marks::numeric AS max, 1 as count, 0 as autograding
                 FROM grade_override
                 INNER JOIN users as u ON u.user_id = grade_override.user_id
                 AND u.user_id IS NOT NULL
                 LEFT JOIN gradeable_data as gd ON u.user_id = gd.gd_user_id
                 AND grade_override.g_id = gd.g_id
                 WHERE grade_override.g_id=?
-                GROUP BY gd.gd_id, marks";
+                ";
             $params[] = $g_id;
         }
 
@@ -3199,6 +3269,19 @@ ORDER BY user_id ASC"
     public function insertNewRegistrationSection($section) {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
+        // Prevent numerically-equivalent sections from both being inserted (e.g. '01' vs '1').
+        if (is_numeric($section)) {
+            $numeric_val = (string) (int) $section;
+            $this->submitty_db->query(
+                "SELECT registration_section_id FROM courses_registration_sections
+                 WHERE term=? AND course=? AND registration_section_id != ?
+                 AND registration_section_id ~ ('^0*' || ? || '$')",
+                [$semester, $course, $section, $numeric_val]
+            );
+            if (count($this->submitty_db->rows()) > 0) {
+                return 0; // treat as duplicate - controller will show friendly error
+            }
+        }
         $this->submitty_db->query("INSERT INTO courses_registration_sections (term, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", [$semester, $course, $section]);
         return $this->submitty_db->getrowcount();
     }
@@ -5370,11 +5453,11 @@ AND gc_id IN (
      */
     public function insertNotifications(array $flattened_notifications, int $notification_count) {
         // PDO Placeholders
-        $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
+        $row_string = "(?, ?, ?, current_timestamp, ?, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
         $this->course_db->query(
             "
-            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id, gradeable_id)
             VALUES " . $value_param_string,
             $flattened_notifications
         );
@@ -5545,6 +5628,26 @@ AND gc_id IN (
             "UPDATE notifications SET seen_at = current_timestamp
                 WHERE to_user_id = ? and seen_at is NULL and {$id_query}",
             $parameters
+        );
+    }
+
+    /**
+     * Marks all unseen notifications for a given gradeable and user as seen, which should only
+     * be invoked when an unseen notification exists (GradedGradeable::getUnseenNotificationId()).
+     *
+     * @param string $user_id
+     * @param string $gradeable_id
+     */
+    public function markNotificationAsSeenByGradeableId(string $user_id, string $gradeable_id): void {
+        $this->course_db->query(
+            "
+            UPDATE notifications
+            SET seen_at = current_timestamp
+            WHERE to_user_id = ?
+               AND gradeable_id = ?
+               AND component = 'grading'
+               AND seen_at IS NULL",
+            [$user_id, $gradeable_id]
         );
     }
 
@@ -6036,12 +6139,13 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id
+     * @param  string|null $for_user_id The user's id
      * @return \app\models\gradeable\Gradeable
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfig($id) {
-        foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
+    public function getGradeableConfig($id, ?string $for_user_id = null) {
+        foreach ($this->getGradeableConfigs([$id], ['id'], $for_user_id) as $gradeable) {
             return $gradeable;
         }
         throw new \InvalidArgumentException('Gradeable does not exist!');
@@ -6052,11 +6156,12 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
+     * @param  string|null          $for_user_id The user's id
      * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id'], ?string $for_user_id = null) {
         if ($ids === []) {
             return new \EmptyIterator();
         }
@@ -6073,6 +6178,23 @@ AND gc_id IN (
 
         // Generate the ORDER BY clause
         $order = self::generateOrderByClause($sort_keys, []);
+
+        // Detect potential unseen grading notifications for the given user
+        if ($for_user_id !== null) {
+            $unseen_notification_select = "
+                EXISTS (
+                    SELECT 1 FROM notifications n
+                    WHERE n.gradeable_id = g.g_id
+                        AND n.to_user_id = ?
+                        AND n.component = 'grading'
+                        AND n.seen_at IS NULL
+                    ) AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [$for_user_id];
+        }
+        else {
+            $unseen_notification_select = "FALSE AS has_unseen_gradeable_notification,";
+            $unseen_notification_param = [];
+        }
 
         $query = "
             SELECT
@@ -6095,6 +6217,7 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               r.*,
+              {$unseen_notification_select}
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6365,7 +6488,7 @@ AND gc_id IN (
 
         return $this->course_db->queryIterator(
             $query,
-            $ids,
+            array_merge($unseen_notification_param, $ids),
             $gradeable_constructor
         );
     }
