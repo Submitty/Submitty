@@ -160,8 +160,8 @@ $(document).ready(() => {
     });
 
     forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', (event) => {
-    const id = $(event.currentTarget).data('thread_id');
-    const url = buildCourseUrl(['forum', 'threads', id]);
-    window.open(url, '_blank');
+        const id = $(event.currentTarget).data('thread_id');
+        const url = buildCourseUrl(['forum', 'threads', id]);
+        window.open(url, '_blank');
     });
 });
