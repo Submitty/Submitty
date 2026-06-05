@@ -755,6 +755,7 @@ class ReportController extends AbstractController {
                 'is_nightly_enabled' => $is_nightly_enabled,
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
+                'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
 

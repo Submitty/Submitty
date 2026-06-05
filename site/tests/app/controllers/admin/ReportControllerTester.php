@@ -234,7 +234,7 @@ class ReportControllerTester extends BaseUnitTest {
         $this->gradeables[] = $this->createMockGradeable('lab1', 'Lab 1', 'lab', 100, '2025-01-01 23:59:59-0500');
         $this->submitCustomization($content);
     }
-
+    
     public function testGenerateCustomizationShowsNormalizationWarning(): void {
         $this->writeCustomization([
             'gradeables' => [
@@ -263,5 +263,23 @@ class ReportControllerTester extends BaseUnitTest {
             'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.'
         ], $twig_output[0][1]['normalization_warnings']);
         $this->assertSame([], $twig_output[0][1]['customization_data']['Tests']);
+
+    public function testGenerateCustomizationShowsNormalizationWarning() {
+        // Write a gui_customization.json with a legacy bucket containing "ids": null
+        $content = $this->getSampleCustomizationJson();
+        $content['gradeables'][] = [
+            'type' => 'legacy-bucket',
+            'count' => 1,
+            'remove_lowest' => 0,
+            'percent' => 0.25,
+            'ids' => null
+        ];
+        $this->writeCustomization($content, 'gui_customization.json');
+        $this->writeCustomization($content, 'customization.json');
+
+        $this->setupMockConfigs();
+        $response = $this->controller->saveGUICustomizations();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals('success', $response->json['status']);
     }
 }

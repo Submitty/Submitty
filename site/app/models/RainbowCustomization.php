@@ -50,7 +50,7 @@ class RainbowCustomization extends AbstractModel {
      */
     private array $normalization_warnings = [];
     private ?object $RCJSON;                            // This is the customization.json php object, or null if it wasn't found
-
+    private bool $normalization_warning = false;
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
      * On top of that, Rainbow Grades has its own enum internally. Since that's a separate repo it's probably
      * unavoidable, but the fewer places we can duplicate this, the better.
@@ -257,6 +257,15 @@ class RainbowCustomization extends AbstractModel {
             $temp_customization_data[$bucket] = $this->reorderBucket($gradeables, $json_bucket_ids);
         }
         $this->customization_data = $temp_customization_data;
+    }
+
+    //Normalization warning:
+    public function addNormalizationWarning(): void {
+        $this->normalization_warning = true;
+    }
+
+    public function hasNormalizationWarning(): bool {
+        return $this->normalization_warning;
     }
 
     /**
