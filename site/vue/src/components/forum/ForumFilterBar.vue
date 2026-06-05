@@ -78,6 +78,21 @@ const unreadChecked = ref(false);
     return false;
 };
 
+// Vue owns saveFilterState/getFilterState — reads from reactive refs for filter
+// state, then pushes to history for browser back/forward navigation support.
+// The search input value is still read from DOM (owned by legacy Twig/jQuery).
+(window as any).getFilterState = () => {
+    return {
+        'categories': selectedCategoryIds.value,
+        'thread-status': selectedThreadStatuses.value,
+        'search-content': (document.getElementById('search-content') as HTMLInputElement)?.value ?? '',
+    };
+};
+
+(window as any).saveFilterState = () => {
+    history.pushState((window as any).getFilterState(), '');
+};
+
 //Initialise state from DOM on mount
 function readInitialStateFromDOM(): void {
     const cats: number[] = [];

@@ -2308,15 +2308,11 @@ function loadFilterHandlers() {
 }
 
 function getFilterState() {
-    return {
-        'categories': readCategoryValues(),
-        'thread-status': readThreadStatusValues(),
-        'search-content': $('#search-content').val(),
-    };
+    return window.getFilterState?.();
 }
 
 function saveFilterState() {
-    history.pushState(getFilterState(), '');
+    window.saveFilterState?.();
 }
 
 function setFilterState(state) {
