@@ -4,7 +4,6 @@
 def up(config):
     """
     Run up migration.
-
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
@@ -21,7 +20,6 @@ def up(config):
             );
         """
     )
-    pass
 
 
     def down(config):
