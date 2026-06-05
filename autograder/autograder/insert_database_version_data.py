@@ -232,13 +232,11 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         rows = build_testcase_rows(
             user_id=user_id,
             team_id=team_id,
-            g_id=gradeable_id,
             g_version=version,
-            testcases=testcases,
             results_testcases=results['testcases'],
-        )
-        upsert_testcase_results(db, autograding_testcase_data, rows,
-                                gradeable_id, user_id, team_id, version)
+            testcase_ids=testcase_ids,
+            )
+        upsert_testcase_results(db, autograding_testcase_data, rows, user_id, team_id, version)
         db.commit()
     except Exception as e:
         print(f"WARNING: could not write autograding_testcase_data: {e}")
@@ -247,7 +245,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-def build_testcase_rows(user_id, team_id, g_id, g_version, results_testcases, testcase_ids):
+def build_testcase_rows(user_id, team_id, g_version, results_testcases, testcase_ids):
     """
     Build the rows for full autograding results
     """
@@ -263,14 +261,15 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, results_testcases, te
     return rows
 
 
-def upsert_testcase_results(db, table, rows, g_id, user_id, team_id, g_version):
+def upsert_testcase_results(db, table, rows, user_id, team_id, g_version):
     """
     Delete all existing testcase rows for this (g_id, user/team, version),
     then insert the new rows (only delete for regrades)
     """
+    tc_ids = [row["autograding_testcase_id"] for row in rows]
     delete_stmt = (
         delete(table)
-        .where(table.c.g_id == g_id)
+        .where(table.c.autograding_testcase_id.in_(tc_ids))
         .where(table.c.g_version == g_version)
     )
     if user_id is not None:
