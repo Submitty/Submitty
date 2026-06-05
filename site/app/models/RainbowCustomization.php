@@ -264,7 +264,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     public function hasNormalizationWarning(): bool {
-        return !empty($this->normalization_warnings);
+        return $this->normalization_warnings !== [];
     }
 
     /**
