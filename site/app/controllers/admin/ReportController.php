@@ -217,7 +217,7 @@ class ReportController extends AbstractController {
             }
         );
 
-        if ($latest_individual_html_timestamp === null) {
+        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
             $this->rg_manual_generation_cache = false;
             return false;
         }
