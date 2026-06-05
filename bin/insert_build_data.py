@@ -71,7 +71,6 @@ def send_data(db, metadata, testcases):
             delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
         )
 
-    id_map = {}
     for order, testcase in enumerate(testcases):
         result = db.execute(
             insert(testcase_table).values(
@@ -87,8 +86,7 @@ def send_data(db, metadata, testcases):
         id_map[testcase['testcase_id']] = generated_id
 
     db.commit()
-    print("Inserted {} testcase(s) for gradeable '{}'.".format(len(id_map), GRADEABLE))
-    return id_map
+    print("Inserted {} testcase(s) for gradeable '{}'.".format(len(testcases), GRADEABLE))
 
 
 def main():
@@ -97,7 +95,7 @@ def main():
 
     try:
         db, metadata = setup_db()
-        id_map = send_data(db, metadata, CONFIG_FILE['testcases'])
+        send_data(db, metadata, CONFIG_FILE['testcases'])
     except exc.IntegrityError as e:
         print("ERROR: IntegrityError - {}".format(str(e)))
         sys.exit(1)
