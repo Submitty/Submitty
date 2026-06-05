@@ -222,9 +222,13 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     db.commit()
 
     try:
-        autograding_testcase_data = Table(
-            'autograding_testcase_data', metadata, autoload_with=engine
-        )
+        autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
+        autograding_testcase = Table('autograding_testcase', metadata, autoload_with=engine)
+        result = db.execute(
+            select(autograding_testcase.c.id)
+            .where(autograding_testcase.c.g_id == gradeable_id)
+            .order_by(autograding_testcase.c.testcase_order))
+        testcase_ids = [row[0] for row in result.fetchall()]
         rows = build_testcase_rows(
             user_id=user_id,
             team_id=team_id,
@@ -243,20 +247,18 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine.dispose()
 
 
-def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_testcases):
+def build_testcase_rows(user_id, team_id, g_id, g_version, results_testcases, testcase_ids):
     """
     Build the rows for full autograding results
     """
     rows = []
-    for i in range(len(testcases)):
-        res = results_testcases[i]
+    for i, tc_id in enumerate(testcase_ids):
         rows.append({
-            "g_id":            g_id,
-            "user_id":         user_id if user_id else None,
-            "team_id":         team_id if team_id else None,
-            "g_version":       g_version,
-            "testcase_order":  i,
-            "points_earned":   res["points"],
+            "autograding_testcase_id": tc_id,
+            "user_id":    user_id if user_id else None,
+            "team_id":    team_id if team_id else None,
+            "g_version":  g_version,
+            "points_earned": results_testcases[i]["points"],
         })
     return rows
 
