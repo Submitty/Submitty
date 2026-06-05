@@ -72,7 +72,7 @@ def send_data(db, metadata, testcases):
         )
 
     for order, testcase in enumerate(testcases):
-        result = db.execute(
+        db.execute(
             insert(testcase_table).values(
                 g_id=GRADEABLE,
                 testcase_id=testcase['testcase_id'],
