@@ -109,39 +109,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 )
             )
             db.commit()
-
-    autograding_testcase = Table('autograding_testcase', metadata, autoload_with=engine)
-    autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
-    testcase_rows = build_testcase_rows(
-        user_id=user_id,
-        team_id=team_id,
-        g_id=gradeable_id,
-        g_version=version,
-        testcases=testcases,
-        results_testcases=results['testcases'],
-    )
-    # check if the autograding_testcase has a row for this gradeable and testcase
-    if (autograding_testcase.c.g_id == autograding_testcase_data.c.g_id && autograding_testcase.c.testcase_order == autograding_testcase_data.testcase_order):
-        # check if this is a regrade (gradeable version is the same)
-        existing = db.execute(
-            select(func.count()).select_from(autograding_testcase_data)
-            .where(autograding_testcase_data.c.g_id == gradeable_id)
-            .where(autograding_testcase_data.c.user_id == user_id)
-            .where(autograding_testcase_data.c.team_id == team_id)
-            .where(autograding_testcase_data.c.g_version == version)
-        ).scalar()
-        if existing:
-            db.execute(
-                delete(autograding_testcase_data)
-                .where(autograding_testcase_data.c.g_id == gradeable_id)
-                .where(autograding_testcase_data.c.user_id == user_id)
-                .where(autograding_testcase_data.c.team_id == team_id)
-                .where(autograding_testcase_data.c.g_version == version)
-            )
-        if testcase_rows:
-            db.execute(insert(autograding_testcase_data), testcase_rows)
-        db.commit()
-        submission_time = results['submission_time']
+    submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
         # automatic_grading_total = results["automatic_grading_total"]

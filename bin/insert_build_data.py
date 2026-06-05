@@ -6,4 +6,4 @@
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete, update
 
-def insert_into_database()
+def insert_into_database():
