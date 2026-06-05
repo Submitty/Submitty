@@ -121,7 +121,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         results_testcases=results['testcases'],
     )
     # check if the autograding_testcase has a row for this gradeable and testcase
-    if (autograding_testcase.c.g_id == autograding_testcase_data.c.g_id && autograding_testcase.c.testcase_order == autograding_testcase_data.testcase_order)
+    if (autograding_testcase.c.g_id == autograding_testcase_data.c.g_id && autograding_testcase.c.testcase_order == autograding_testcase_data.testcase_order):
         # check if this is a regrade (gradeable version is the same)
         existing = db.execute(
             select(func.count()).select_from(autograding_testcase_data)
