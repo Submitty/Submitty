@@ -235,36 +235,6 @@ class ReportControllerTester extends BaseUnitTest {
         $this->submitCustomization($content);
     }
     
-    public function testGenerateCustomizationShowsNormalizationWarning(): void {
-        $this->writeCustomization([
-            'gradeables' => [
-                [
-                    'type' => 'Tests',
-                    'count' => 1,
-                    'remove_lowest' => 0,
-                    'percent' => 0.25,
-                    'ids' => null,
-                ],
-            ],
-        ], 'gui_customization.json');
-
-        $this->setupMockConfigs();
-        $output = new NullOutput($this->core);
-        $this->core->method('getOutput')->willReturn($output);
-        $this->controller = new ReportController($this->core);
-
-        $response = $this->controller->generateCustomization();
-
-        $this->assertNull($response);
-        $twig_output = $output->getTwigOutput();
-        $this->assertCount(1, $twig_output);
-        $this->assertSame('admin/RainbowCustomization.twig', $twig_output[0][0]);
-        $this->assertSame([
-            'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.'
-        ], $twig_output[0][1]['normalization_warnings']);
-        $this->assertSame([], $twig_output[0][1]['customization_data']['Tests']);
-    }
-
     public function testGenerateCustomizationShowsNormalizationWarning() {
         // Write a gui_customization.json with a legacy bucket containing "ids": null
         $content = $this->getSampleCustomizationJson();
