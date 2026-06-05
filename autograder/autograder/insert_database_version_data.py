@@ -110,7 +110,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             )
             db.commit()
 
-    autograding_testcase_details = Table('autograding_testcase_details', metadata, autoload_with=engine)
+    autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
     testcase_rows = build_testcase_rows(
         user_id=user_id,
         team_id=team_id,
@@ -249,8 +249,8 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     db.commit()
 
     try:
-        autograding_testcase_details = Table(
-            'autograding_testcase_details', metadata, autoload_with=engine
+        autograding_testcase_data = Table(
+            'autograding_testcase_data', metadata, autoload_with=engine
         )
         rows = build_testcase_rows(
             user_id=user_id,
@@ -283,11 +283,7 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_te
             "user_id":         user_id if user_id else None,
             "team_id":         team_id if team_id else None,
             "g_version":       g_version,
-            "testcase_id":     spec["testcase_id"],
             "testcase_order":  i,
-            "hidden":          spec["hidden"],
-            "extra_credit":    spec["extra_credit"],
-            "points_possible": spec["total_points"],
             "points_earned":   res["points"],
         })
     return rows
