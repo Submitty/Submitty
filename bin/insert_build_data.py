@@ -3,7 +3,7 @@
 Handles updating the database with the
 autograding testcase details for this gradeable
 """
-from sqlalchemy import create_engine, Table, MetaData, insert, delete, exc
+from sqlalchemy import create_engine, MetaData, insert, delete, exc
 import datetime
 import os
 import sys

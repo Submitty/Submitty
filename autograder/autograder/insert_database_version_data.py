@@ -109,7 +109,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 )
             )
             db.commit()
-            
+
     submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
