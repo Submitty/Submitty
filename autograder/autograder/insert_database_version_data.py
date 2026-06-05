@@ -248,7 +248,6 @@ def build_testcase_rows(user_id, team_id, g_id, g_version, testcases, results_te
     """
     rows = []
     for i in range(len(testcases)):
-        spec = testcases[i]
         res = results_testcases[i]
         rows.append({
             "g_id":            g_id,
