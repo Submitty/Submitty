@@ -195,8 +195,6 @@ def update_qemu_plugin(plugin_version):
         subprocess.check_call(["vagrant", "plugin", "install", gem_path])
         print("Successfully updated plugin")
 
-
-
 def main():
     args = get_args()
     if args.command == "generate":
