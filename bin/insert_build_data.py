@@ -1,9 +1,107 @@
 #!/usr/bin/env python3
-#
-# This script is run by a cron job as the DAEMON_USER
-#
-# Whenever a gradeable is built, insert testcase details into the database
+"""
+Handles updating the database with the
+autograding testcase details for this gradeable
+"""
+from sqlalchemy import create_engine, Table, MetaData, insert, delete, exc
+import datetime
+import os
+import sys
+import json
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete, update
+try:
+    CONFIG_PATH = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+        SUBMITTY_CONFIG = json.load(open_file)
+except Exception as config_fail_error:
+    print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
+        str(datetime.datetime.now()), str(config_fail_error)))
+    sys.exit(1)
 
-def insert_into_database():
+CONFIG_FILE_PATH = sys.argv[1]
+SEMESTER = sys.argv[2]
+COURSE = sys.argv[3]
+GRADEABLE = sys.argv[4]
+
+
+def setup_db():
+    """Set up a connection with the course database."""
+    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+        db_config = json.load(open_file)
+    db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
+
+    if os.path.isdir(db_config['database_host']):
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_name,
+            db_config['database_host']
+        )
+    else:
+        conn_string = "postgresql://{}:{}@{}/{}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_config['database_host'],
+            db_name
+        )
+
+    engine = create_engine(conn_string)
+    db = engine.connect()
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+    return db, metadata
+
+
+def send_data(db, metadata, testcases):
+    """
+    If testcase entries already exist for this gradeable, delete them all
+    and re-insert fresh ones. Returns a dict mapping testcase_id -> generated id.
+    """
+    testcase_table = metadata.tables['autograding_testcase']
+
+    existing = db.execute(
+        testcase_table.select().where(testcase_table.c.g_id == GRADEABLE)
+    ).fetchall()
+
+    if existing:
+        print("Rebuilding gradeable '{}': removing {} existing testcase(s).".format(
+            GRADEABLE, len(existing)))
+        db.execute(
+            delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
+        )
+
+    id_map = {}
+    for order, testcase in enumerate(testcases):
+        result = db.execute(
+            insert(testcase_table).values(
+                g_id=GRADEABLE,
+                testcase_id=testcase['testcase_id'],
+                testcase_order=order,
+                hidden=testcase.get('hidden', False),
+                extra_credit=testcase.get('extra_credit', False),
+                points_possible=testcase.get('points', 0)
+            ).returning(testcase_table.c.id)
+        )
+        generated_id = result.fetchone()[0]
+        id_map[testcase['testcase_id']] = generated_id
+
+    db.commit()
+    print("Inserted {} testcase(s) for gradeable '{}'.".format(len(id_map), GRADEABLE))
+    return id_map
+
+
+def main():
+    with open(CONFIG_FILE_PATH) as config_file:
+        CONFIG_FILE = json.loads(config_file.read())
+
+    try:
+        db, metadata = setup_db()
+        id_map = send_data(db, metadata, CONFIG_FILE['testcases'])
+    except exc.IntegrityError as e:
+        print("ERROR: IntegrityError - {}".format(str(e)))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
