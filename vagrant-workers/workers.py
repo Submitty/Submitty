@@ -59,6 +59,7 @@ def get_args():
 
     return parser.parse_args()
 
+
 def load_config():
     try:
         with open(".vagrant/workers.json") as f:
@@ -68,9 +69,9 @@ def load_config():
         print("Please run 'vagrant workers generate'")
         sys.exit(1)
 
+
 def start_socket(args, config, hbpath, svn_exe):
-    pid_check = subprocess.run(["pgrep", "-f", svn_exe],
-                               stdout=subprocess.DEVNULL, check=False)
+    pid_check = subprocess.run(["pgrep", "-f", svn_exe], stdout=subprocess.DEVNULL, check=False)
     if not pid_check.returncode:
         print("There is a socket server already running on this machine")
         print("Run 'vagrant workers socket stop' to stop it")
@@ -96,15 +97,16 @@ def start_socket(args, config, hbpath, svn_exe):
     print("Socket server running")
     sys.exit()
 
+
 def stop_socket(svn_exe):
-    pid_check = subprocess.run(["pgrep", "-f", svn_exe],
-                               stdout=subprocess.DEVNULL, check=False)
+    pid_check = subprocess.run(["pgrep", "-f", svn_exe], stdout=subprocess.DEVNULL, check=False)
     if pid_check.returncode:
         print("Socket server is not running")
         sys.exit(1)
     subprocess.check_call(["sudo", "pkill", "-f", svn_exe])
     print("Successfully stopped socket server")
     sys.exit()
+
 
 def restart_socket(args, config, hbpath, svn_exe):
     pkill_call = subprocess.run(["sudo", "pkill", "-f", svn_exe], check=False)
@@ -113,6 +115,7 @@ def restart_socket(args, config, hbpath, svn_exe):
     else:
         print("Socket server not running")
     start_socket(args, config, hbpath, svn_exe)
+
 
 def handle_socket(args, config):
     if platform.system() != "Darwin":
@@ -143,11 +146,13 @@ def handle_socket(args, config):
     elif args.socket_command == "restart":
         restart_socket(args, config, hbpath, svn_exe)
 
+
 def handle_up(args, config, worker_env):
     if platform.system() != "Darwin" or config["provider"] != "qemu":
         up = subprocess.run(
             ["vagrant", "up", f"--provider={config['provider']}", *args.remainder],
-            env=worker_env, check=False
+            env=worker_env,
+            check=False,
         )
         sys.exit(up.returncode)
     plugin_version = "24.07.00"
@@ -156,8 +161,7 @@ def handle_up(args, config, worker_env):
         update_qemu_plugin(plugin_version)
     hbpath = os.environ["HOMEBREW_PREFIX"]
     svn_exe = os.path.join(hbpath, "opt", "socket_vmnet", "bin", "socket_vmnet")
-    pid_check = subprocess.run(["pgrep", "-f", svn_exe],
-                                stdout=subprocess.DEVNULL, check=False)
+    pid_check = subprocess.run(["pgrep", "-f", svn_exe], stdout=subprocess.DEVNULL, check=False)
     if pid_check.returncode:
         print("Socket server is not running, to start it run 'vagrant workers socket start'")
         return
@@ -176,12 +180,13 @@ def handle_up(args, config, worker_env):
     )
     sys.exit(up.returncode)
 
+
 def update_qemu_plugin(plugin_version):
     print("Updating QEMU plugin...")
     with tempfile.TemporaryDirectory() as tmpdir:
         with urllib.request.urlopen(
-                f"https://github.com/Submitty/vagrant-qemu/releases/download/"
-                f"v{plugin_version}/vagrant-qemu-{plugin_version}.gem"
+            f"https://github.com/Submitty/vagrant-qemu/releases/download/"
+            f"v{plugin_version}/vagrant-qemu-{plugin_version}.gem"
         ) as res:
             if res.getcode() // 100 != 2:
                 print(
@@ -194,6 +199,7 @@ def update_qemu_plugin(plugin_version):
                 f.write(res.read())
         subprocess.check_call(["vagrant", "plugin", "install", gem_path])
         print("Successfully updated plugin")
+
 
 def main():
     args = get_args()
@@ -210,6 +216,7 @@ def main():
     else:
         cmd = subprocess.run(["vagrant", *args.command], env=worker_env, check=False)
         sys.exit(cmd.returncode)
+
 
 if __name__ == "__main__":
     main()
