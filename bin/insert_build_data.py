@@ -80,10 +80,8 @@ def send_data(db, metadata, testcases):
                 hidden=testcase.get('hidden', False),
                 extra_credit=testcase.get('extra_credit', False),
                 points_possible=testcase.get('points', 0)
-            ).returning(testcase_table.c.id)
+            )
         )
-        generated_id = result.fetchone()[0]
-        id_map[testcase['testcase_id']] = generated_id
 
     db.commit()
     print("Inserted {} testcase(s) for gradeable '{}'.".format(len(testcases), GRADEABLE))
