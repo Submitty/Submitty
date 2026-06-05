@@ -497,7 +497,7 @@
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
 
-    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or graded_gradeable.getGradeable().hasPeerComponent() %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
@@ -553,7 +553,7 @@
     {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
-    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or graded_gradeable.getGradeable().hasPeerComponent() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}

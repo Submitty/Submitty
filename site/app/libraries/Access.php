@@ -476,13 +476,17 @@ class Access {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
                     if (
-                        //Full access graders are allowed to view submissions if there is no manual grading
+                        // Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
-                        //Students are allowed to see this if its a peer graded assignment
-                        !(($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        // Users are allowed to access peer grading if this gradeable has peer components
+                        !((
+                            $group === User::GROUP_STUDENT
+                            || $group === User::GROUP_LIMITED_ACCESS_GRADER
+                            || $group === User::GROUP_FULL_ACCESS_GRADER
+                            || $group === User::GROUP_INSTRUCTOR
+                        ) && $gradeable->hasPeerComponent() && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
-                        //Otherwise, you're not allowed
                         $grading_checks = false;
                     }
                 }
@@ -583,8 +587,18 @@ class Access {
                 return false;
             }
 
-            if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
-                //Make sure a component allows students to access it via peer grading
+            $peer_only_staff_grader =
+                $gradeable !== null
+                && $gradeable->hasPeerComponent()
+                && $user !== null
+                && $user->accessGrading()
+                && !$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup());
+
+            if (
+                self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT)
+                && ($group === User::GROUP_STUDENT || $peer_only_staff_grader)
+            ) {
+                // Make sure peer graders can only access peer components
                 if (!$component->isPeerComponent()) {
                     return false;
                 }
