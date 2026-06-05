@@ -20,7 +20,7 @@ def up(config):
             points_possible numeric(10,0)               NOT NULL
             );
         """
-        )
+    )
     pass
 
 
