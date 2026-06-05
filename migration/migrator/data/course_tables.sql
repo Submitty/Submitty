@@ -1158,9 +1158,7 @@ CREATE TABLE public.gradeable (
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
-    CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
+    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date))
 );
 
 
@@ -2082,7 +2080,6 @@ CREATE TABLE public.users (
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
     previous_rotating_section integer,
-    user_date_format character varying(3) DEFAULT 'MDY'::character varying NOT NULL,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
