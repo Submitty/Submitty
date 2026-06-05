@@ -176,13 +176,14 @@ class Chatroom {
             $conn = $em->getConnection();
             $query = 'SELECT count(*) FROM users WHERE user_id < ?';
             $index = (int) $conn->fetchOne($query, [$user_id]);
-        } else {
+        }
+        else {
             $index = abs(crc32($user_id)) % 4096;
         }
 
         $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
         $info = "chatroom_" . $this->getId() . "_" . $session_started_at;
-        
+
         $randomizer_key = hash_hkdf('sha256', $global_secret, 32, $info, '');
 
         $a = intdiv($index, 64) % 64;
