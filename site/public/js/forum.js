@@ -1621,7 +1621,7 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 
 function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
     if (category_desc === null && category_color === null && category_date === null) {
-        return true;
+        return;
     }
     const data = { category_id: category_id, csrf_token: csrf_token };
     if (category_desc !== null && changed === 'desc') {
@@ -1660,18 +1660,10 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 removeMessagePopup('theid');
             }, 1000);
             if (category_desc !== null) {
-                const item = $(`#categorylistitem-${category_id}`);
-                item.data('category_desc', category_desc);
-                item.find('.categorylistitem-desc span').text(category_desc);
-                item.find('.categorylistitem-editdesc').hide();
-                item.find('.categorylistitem-desc').show();
+                $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
             if (category_date !== null) {
-                const item = $(`#categorylistitem-${category_id}`);
-                item.data('visible_date', category_date);
-                item.find('.categorylistitemdate-desc span').text(category_date);
-                item.find('.categorylistitemdate-editdesc').hide();
-                item.find('.categorylistitemdate-desc').show();
+                $(`#categorylistitem-${category_id}`).find('.categorylistitemdate-desc span').text(category_date);
             }
 
             refreshCategories();
@@ -1680,7 +1672,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
-    return true;
 }
 
 function refreshCategories() {
