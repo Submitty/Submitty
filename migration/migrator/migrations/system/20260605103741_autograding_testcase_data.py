@@ -10,21 +10,21 @@ def up(config):
     """
     database.execute(
         """
-        CREATE TABLE IF NOT EXISTS autograding_testcase_data (
-            g_id        character varying(255)      not NULL,
-            testcase_order integer                  not NULL,
-            user_id     character varying(255),
-            team_id     character varying(255),
-            g_version   integer                     not NULL,
-            points_earned numeric(10,0)             not NULL,
+        CREATE TABLE autograding_testcase_data (
+            atd_id          integer                     NOT NULL,
+            user_id         character varying(255),
+            team_id         character varying(255),
+            g_version       integer                     NOT NULL,
+            points_earned   numeric(10,0)               NOT NULL,
+            CONSTRAINT fk_testcase FOREIGN KEY (atd_id) REFERENCES autograding_testcase (id) ON DELETE CASCADE,
             CONSTRAINT user_team_id_check CHECK ((user_id IS NOT NULL) != (team_id IS NOT NULL))
             );
         """
-    )
+        )
     pass
 
 
-def down(config):
+    def down(config):
     """
     Run down migration (rollback).
 
