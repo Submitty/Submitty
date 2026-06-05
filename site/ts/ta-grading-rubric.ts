@@ -140,6 +140,8 @@ const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {
 const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
 const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
 let GRADED_GRADEABLE: GradedGradeable | null = null;
+// added to prevent double clicks from registering
+const COMPONENT_TOGGLE_IN_PROGRESS: Record<number, boolean> = {};
 
 export type MarkConflicts = Record<number, MarkConflictInfo>;
 
@@ -1346,7 +1348,7 @@ function getComponentFromDOM(component_id: number): Component {
             marks: getMarkListFromDOM(component_id),
             is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
             itempool_option: domElement.find('select[name="component-itempool"]').val() as string,
-            peer: (domElement.attr('data-peer') === 'true'),
+            peer: domElement.attr('data-peer') === 'true' || domElement.hasClass('peer-component'),
         };
     }
     return {
@@ -1362,7 +1364,7 @@ function getComponentFromDOM(component_id: number): Component {
         marks: getMarkListFromDOM(component_id),
         is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
         itempool_option: domElement.find('select[name="component-itempool"]').val() as string,
-        peer: (domElement.attr('data-peer') === 'true'),
+        peer: domElement.attr('data-peer') === 'true' || domElement.hasClass('peer-component'),
     };
 }
 
@@ -2076,16 +2078,31 @@ window.onGetMarkStats = async function (me: HTMLElement) {
 window.onClickComponent = async function (me: HTMLElement, edit_mode = false) {
     const component_id = getComponentIdFromDOMElement(me);
 
-    const component = getComponentFromDOM(component_id);
-    COMPONENT_RUBRIC_LIST[component_id] = component;
+    if (COMPONENT_TOGGLE_IN_PROGRESS[component_id]) {
+        return;
+    }
+
+    COMPONENT_TOGGLE_IN_PROGRESS[component_id] = true;
 
     try {
+        const wasOpen = isComponentOpen(component_id);
+
+        // Only update component metadata when opening, not when closing
+        if (!wasOpen) {
+            const component = getComponentFromDOM(component_id);
+            component.peer = component.peer || COMPONENT_RUBRIC_LIST[component_id]?.peer === true;
+            COMPONENT_RUBRIC_LIST[component_id] = component;
+        }
+
         await toggleComponent(component_id, true, edit_mode);
     }
     catch (err) {
         console.error(err);
         setComponentInProgress(component_id, false);
         alert(`Error opening/closing component! ${(err as Error).message}`);
+    }
+    finally {
+        COMPONENT_TOGGLE_IN_PROGRESS[component_id] = false;
     }
 };
 
@@ -3062,7 +3079,9 @@ async function closeComponentGrading(component_id: number, saveChanges: boolean)
 
     if (saveChanges) {
         GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
-        COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
+        const component = getComponentFromDOM(component_id);
+        component.peer = COMPONENT_RUBRIC_LIST[component_id].peer;
+        COMPONENT_RUBRIC_LIST[component_id] = component;
         await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden
@@ -3548,7 +3567,10 @@ async function injectInstructorEditComponentHeader(component: Component, showMar
  */
 async function injectGradingComponent(component: Component, graded_component: ComponentGradeInfo, editable: boolean, showMarkList: boolean) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    const allow_custom_marks = component.peer ? false : getAllowCustomMarks();
+    component.peer = component.peer === true
+        || getComponentJQuery(component.id).attr('data-peer') === 'true'
+        || getComponentJQuery(component.id).hasClass('peer-component');
+    const allow_custom_marks = !component.peer && getAllowCustomMarks();
     const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), !!canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), !!student_grader, TA_GRADING_PEER, allow_custom_marks);
     setComponentContents(component.id, elements);
 }
