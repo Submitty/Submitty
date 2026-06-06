@@ -12,28 +12,45 @@ interface Props {
     categories: ForumCategory[];
 }
 
+interface ForumWindow {
+    selectedCategoryIds: typeof selectedCategoryIds;
+    selectedThreadStatuses: typeof selectedThreadStatuses;
+    selectedUnreadChecked: typeof unreadChecked;
+    checkUnread: () => boolean;
+    clearForumFilter: () => boolean;
+    getFilterState: () => Record<string, string | number[]>;
+    saveFilterState: () => void;
+    updateClearFilterButton?: () => void;
+    updateThreads?: (loadFirstPage: boolean, successCallback: unknown) => void;
+    $: (el: HTMLElement) => { data: (key: string, value?: string) => unknown };
+}
+
 const props = defineProps<Props>();
 
 const isVisibleCategory = (category: ForumCategory): boolean => {
     return category.visibleDate === null || (Number(category.diff ?? 0) >= 0);
 };
 
-//Reactive filter state
+// Reactive filter state
 const selectedCategoryIds = ref<number[]>([]);
 const selectedThreadStatuses = ref<number[]>([]);
 const unreadChecked = ref(false);
 
+const fw = window as unknown as ForumWindow;
+
 // Expose on window so legacy JS can read filter values.
 // The Vue component now owns the single source of truth.
-(window as any).selectedCategoryIds = selectedCategoryIds;
-(window as any).selectedThreadStatuses = selectedThreadStatuses;
-(window as any).selectedUnreadChecked = unreadChecked;
+fw.selectedCategoryIds = selectedCategoryIds;
+fw.selectedThreadStatuses = selectedThreadStatuses;
+fw.selectedUnreadChecked = unreadChecked;
 
 // Replace the legacy checkUnread — reads from Vue state instead of DOM.
-(window as any).checkUnread = () => {
+fw.checkUnread = () => {
     const clearBtn = document.getElementById('clear_filter_button');
     if (unreadChecked.value) {
-        if (clearBtn) clearBtn.style.visibility = 'visible';
+        if (clearBtn) {
+            clearBtn.style.visibility = 'visible';
+        }
         return true;
     }
     return false;
@@ -41,15 +58,17 @@ const unreadChecked = ref(false);
 
 // Vue owns clearForumFilter — resets all reactive state and DOM, then the caller
 // (Twig's onclick or updateClearFilterButton) calls updateThreads after.
-(window as any).clearForumFilter = () => {
+fw.clearForumFilter = () => {
     // Reset unread
     if (unreadChecked.value) {
         unreadChecked.value = false;
         const checkbox = document.getElementById('unread') as HTMLInputElement | null;
-        if (checkbox) checkbox.checked = false;
+        if (checkbox) {
+            checkbox.checked = false;
+        }
     }
 
-    // Reset search input 
+    // Reset search input
     const searchInput = document.getElementById('search-content') as HTMLInputElement | null;
     if (searchInput) {
         searchInput.value = '';
@@ -57,13 +76,15 @@ const unreadChecked = ref(false);
     }
 
     // Reset DOM button classes and jQuery .data() cache for category/status buttons
-    document.querySelectorAll('#thread_category button, #thread_status_select button').forEach(btn => {
-        const el = btn as HTMLElement;
-        el.dataset.btnSelected = 'false';
-        el.classList.remove('filter-active');
-        el.classList.add('filter-inactive');
-        const $btn = (window as any).$(el);
-        if ($btn && $btn.data) $btn.data('btn-selected', 'false');
+    document.querySelectorAll('#thread_category button, #thread_status_select button').forEach((el) => {
+        const btn = el as HTMLElement;
+        btn.dataset.btnSelected = 'false';
+        btn.classList.remove('filter-active');
+        btn.classList.add('filter-inactive');
+        const $btn = fw.$(btn);
+        if ($btn.data) {
+            $btn.data('btn-selected', 'false');
+        }
     });
 
     // Reset Vue reactive state
@@ -73,7 +94,9 @@ const unreadChecked = ref(false);
 
     // Hide clear button
     const clearBtn = document.getElementById('clear_filter_button');
-    if (clearBtn) clearBtn.style.visibility = 'hidden';
+    if (clearBtn) {
+        clearBtn.style.visibility = 'hidden';
+    }
 
     return false;
 };
@@ -81,7 +104,7 @@ const unreadChecked = ref(false);
 // Vue owns saveFilterState/getFilterState — reads from reactive refs for filter
 // state, then pushes to history for browser back/forward navigation support.
 // The search input value is still read from DOM (owned by legacy Twig/jQuery).
-(window as any).getFilterState = () => {
+fw.getFilterState = () => {
     return {
         'categories': [...selectedCategoryIds.value],
         'thread-status': [...selectedThreadStatuses.value],
@@ -89,26 +112,30 @@ const unreadChecked = ref(false);
     };
 };
 
-(window as any).saveFilterState = () => {
-    history.pushState((window as any).getFilterState(), '');
+fw.saveFilterState = () => {
+    history.pushState(fw.getFilterState(), '');
 };
 
-//Initialise state from DOM on mount
+// Initialise state from DOM on mount
 function readInitialStateFromDOM(): void {
     const cats: number[] = [];
-    document.querySelectorAll('#thread_category button').forEach(btn => {
+    document.querySelectorAll('#thread_category button').forEach((btn) => {
         if ((btn as HTMLElement).dataset.btnSelected === 'true') {
             const id = parseInt((btn as HTMLElement).dataset.cat_id ?? '', 10);
-            if (!isNaN(id)) cats.push(id);
+            if (!isNaN(id)) {
+                cats.push(id);
+            }
         }
     });
     selectedCategoryIds.value = cats;
 
     const statuses: number[] = [];
-    document.querySelectorAll('#thread_status_select button').forEach(btn => {
+    document.querySelectorAll('#thread_status_select button').forEach((btn) => {
         if ((btn as HTMLElement).dataset.btnSelected === 'true') {
             const id = parseInt((btn as HTMLElement).dataset.sel_id ?? '', 10);
-            if (!isNaN(id)) statuses.push(id);
+            if (!isNaN(id)) {
+                statuses.push(id);
+            }
         }
     });
     selectedThreadStatuses.value = statuses;
@@ -126,7 +153,7 @@ onMounted(() => {
 
 function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: number): void {
     const btn = event.currentTarget as HTMLElement;
-    const $btn = (window as any).$(btn);
+    const $btn = fw.$(btn);
     const current = btn.dataset.btnSelected;
 
     if (current === 'true') {
@@ -135,10 +162,10 @@ function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: num
         btn.classList.add('filter-inactive');
         $btn.data('btn-selected', 'false');
         if (catId !== undefined) {
-            selectedCategoryIds.value = selectedCategoryIds.value.filter(id => id !== catId);
+            selectedCategoryIds.value = selectedCategoryIds.value.filter((id) => id !== catId);
         }
         if (statusSelId !== undefined) {
-            selectedThreadStatuses.value = selectedThreadStatuses.value.filter(id => id !== statusSelId);
+            selectedThreadStatuses.value = selectedThreadStatuses.value.filter((id) => id !== statusSelId);
         }
     }
     else {
@@ -153,8 +180,12 @@ function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: num
             selectedThreadStatuses.value = [...selectedThreadStatuses.value, statusSelId];
         }
     }
-    (window as any).updateClearFilterButton?.();
-    (window as any).updateThreads?.(true, (window as any).saveFilterState);
+    if (fw.updateClearFilterButton) {
+        fw.updateClearFilterButton();
+    }
+    if (fw.updateThreads) {
+        fw.updateThreads(true, fw.saveFilterState);
+    }
 }
 
 function toggleUnread(): void {
@@ -163,8 +194,12 @@ function toggleUnread(): void {
     if (checkbox) {
         checkbox.checked = unreadChecked.value;
     }
-    (window as any).updateThreads?.(true, (window as any).saveFilterState);
-    (window as any).checkUnread?.();
+    if (fw.updateThreads) {
+        fw.updateThreads(true, fw.saveFilterState);
+    }
+    if (fw.checkUnread) {
+        fw.checkUnread();
+    }
 }
 </script>
 
@@ -175,7 +210,8 @@ function toggleUnread(): void {
   >
     <button
       id="filter_unread_btn"
-      :class="['btn btn-sm btn-default inline-block', unreadChecked ? 'filter-active' : 'filter-inactive']"
+      class="btn btn-sm btn-default inline-block"
+      :class="[unreadChecked ? 'filter-active' : 'filter-inactive']"
       data-testid="filter-unread-label"
       @click="toggleUnread"
     >

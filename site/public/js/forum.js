@@ -1222,7 +1222,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null) ? '' : thread_status_value.join('|');
 
-    // Check if no changes since last update 
+    // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
         && thread_status_value === Cookies.get('forum_thread_status')
         && unread_select_value === (Cookies.get('unread_select_value') === 'true')

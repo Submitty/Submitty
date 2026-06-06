@@ -107,13 +107,13 @@ describe('ForumFilterBar', () => {
 
         it('shows clear button when unread is active', () => {
             let clearBtn;
-            cy.document().then(doc => {
+            cy.document().then((doc) => {
                 clearBtn = doc.createElement('div');
                 clearBtn.id = 'clear_filter_button';
                 doc.body.appendChild(clearBtn);
             });
             cy.get('[data-testid="filter-unread-label"]').click();
-            cy.document().then(doc => {
+            cy.document().then((doc) => {
                 expect(doc.getElementById('clear_filter_button').style.visibility).to.equal('visible');
                 clearBtn.remove();
             });
@@ -123,7 +123,7 @@ describe('ForumFilterBar', () => {
     describe('clearForumFilter', () => {
         it('resets all filter state, classes, and DOM', () => {
             let searchInput;
-            cy.document().then(doc => {
+            cy.document().then((doc) => {
                 searchInput = doc.createElement('input');
                 searchInput.id = 'search-content';
                 searchInput.value = 'test query';
@@ -141,7 +141,7 @@ describe('ForumFilterBar', () => {
                 expect(window.selectedThreadStatuses.value).to.deep.equal([]);
                 expect(window.selectedUnreadChecked.value).to.equal(false);
             });
-            cy.document().then(doc => {
+            cy.document().then((doc) => {
                 expect(doc.getElementById('search-content').value).to.equal('');
                 searchInput.remove();
             });
