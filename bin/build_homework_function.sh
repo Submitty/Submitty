@@ -16,6 +16,7 @@ function clean_homework {
     rm -rf "$course_dir/test_output/${3}"
     rm -rf "$course_dir/provided_code/${3}"
     rm -rf "$course_dir/instructor_solution/${3}"
+    rm -rf "$course_dir/instructor_solution_executable/${3}"
     rm -rf "$course_dir/generated_output/${3}"
     rm -rf "$course_dir/custom_validation_code/${3}"
     rm -rf "$course_dir/build/${3}"
@@ -45,6 +46,9 @@ function fix_permissions {
     if [ -d "$hw_build_path/instructor_solution/" ]; then
 	rsync -ruz --delete "$hw_build_path/instructor_solution/"    "$course_dir/instructor_solution/$assignment/"
     fi
+    if [ -d "$hw_build_path/instructor_solution_executable/" ]; then
+    rsync -ruz --delete "$hw_build_path/instructor_solution_executable/"    "$course_dir/instructor_solution_executable/$assignment/"
+    fi
     if [ -d "$hw_build_path/test_input/" ]; then
 	rsync -ruz --delete "$hw_build_path/test_input/"   "$course_dir/test_input/$assignment/"
     fi
@@ -71,6 +75,9 @@ function fix_permissions {
     find "$course_dir/instructor_solution/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/instructor_solution/"           -type f -exec chmod -f ug+rw,o= {} \;
     find "$course_dir/instructor_solution/"                   -exec chgrp -f "${course_group}" {} \;
+    find "$course_dir/instructor_solution_executable/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find "$course_dir/instructor_solution_executable/"           -type f -exec chmod -f ug+rw,o= {} \;
+    find "$course_dir/instructor_solution_executable/"                   -exec chgrp -f "${course_group}" {} \;
     find "$course_dir/generated_output/"           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$course_dir/generated_output/"           -type f -exec chmod -f ug+rw,o= {} \;
     find "$course_dir/generated_output/"                   -exec chgrp -f "${course_group}" {} \;
@@ -232,11 +239,76 @@ function build_homework {
         return 1
     fi
 
+    log_instructor_output="${hw_build_path}/log_instructor_output.txt"
+    # clean up the config file (remove comments for parsing)
+    config_file=$(sed 's://.*$::' "${hw_build_path}/config.json")
+    instructor_solution_compile_commands=$(echo "${config_file}" | jq -r '.instructor_solution_compile_command // empty | .[]') >> $log_instructor_output
+
+    # only enter if it has property: instructor_solution_compile_command in config
+    if [ -n "${instructor_solution_compile_commands}" ]; then
+
+        instructor_executable=$(echo "${config_file}" | jq -r '.instructor_executable[]')
+        echo "${instructor_executable}" >> $log_instructor_output
+
+        if [ -z "${instructor_executable}" ]; then
+            echo "No instructor_executable property exists inside config." >> $log_instructor_output
+            exit 0
+        fi
+
+        # assign all the required directories
+        test_input_dir="${hw_build_path}/test_input"
+        instructor_solution_executable_dir="${course_dir}/instructor_solution_executable/$assignment"
+        instructor_cmake_file="${hw_build_path}/instructor_CMakeLists.txt"
+        instructor_solution_dir="${hw_build_path}/instructor_solution"
+
+        # ensure that necessary directories exist
+        mkdir -p "${instructor_solution_executable_dir}"
+
+        # check if directories exist and are accessible
+        find "$instructor_solution_executable_dir" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+        find "$instructor_solution_executable_dir" -type f -exec chmod -f ug+rw,o= {} \;
+
+        # run commands using the provided compilation commands
+        while IFS= read -r compile_command; do
+
+            # extract the executable name
+            executable_name=$(echo "${compile_command}" | awk '{print $NF}')
+            echo "executable_name ${executable_name}" >> "$log_instructor_output"
+
+            executable_path="${instructor_solution_executable_dir}/${executable_name}"
+
+            # modify the compile command to use the full path for the instructor_solution and executable files
+            source_file=$(echo "${compile_command}" | awk '{for(i=1;i<=NF;i++) if ($i ~ /\.cpp$/) print $i}')
+            modified_source_file="${instructor_solution_dir}/$(basename "${source_file}")"
+            echo "Modified source file ${modified_source_file}" >> "$log_instructor_output"
+
+            # replace the file names with the file paths using sed in compilation command
+            modified_compile_command=$(echo "${compile_command}" | sed "s|${source_file}|${modified_source_file}|; s|${executable_name}|${executable_path}|")
+
+            echo "Running compile command: ${modified_compile_command}" >> "$log_instructor_output"
+            eval "${modified_compile_command}"
+            if [ $? -eq 0 ]; then
+                    echo "Compile command succeeded." >> "$log_instructor_output"
+            else
+                echo -e "\nCOMPILE ERROR\n\n" >> "$log_instructor_output"
+                exit 1
+            fi
+
+        done <<< "${instructor_solution_compile_commands}"
+
+        echo "Instructor solutions compiled successfully." >> $log_instructor_output
+        echo "Executables are stored in ${instructor_solution_executable_dir}."
+    fi
+
+
     # run the schema validator on the complete_config generated by the build process
     "$SUBMITTY_INSTALL_DIR"/bin/config_syntax_check.py "$hw_source" "$assignment" "$semester" "$course"
 
-    # generate queue file for generated_output
-    "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
+    # only enter if it has property: instructor_solution_compile_command in config
+    if [ -n "${instructor_solution_compile_commands}" ]; then
+        # generate queue file for generated_output (Generate outputs for non-random inputs only once at the time of build)
+        "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
+    fi
 
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
     popd > /dev/null
