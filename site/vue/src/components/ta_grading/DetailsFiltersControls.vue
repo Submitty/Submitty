@@ -75,9 +75,28 @@ onMounted(() => {
         withdrawnFilterElements.show();
     }
 
+    if (gradeInquiryOnly.value) {
+        applyInquiryFilter();
+    }
+
     window.updateElectronicGradingRowNumbersAndColors();
     $('table').removeClass('table-striped');
 });
+
+const applyInquiryFilter = () => {
+    if (inquiryOnlyChecked.value) {
+        $('.grade-button').each(function () {
+            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
+                $(this).closest('.grade-table').addClass('inquiry-only-disabled');
+            }
+        });
+    }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').removeClass('inquiry-only-disabled');
+        });
+    }
+};
 
 const onChangeSections = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;

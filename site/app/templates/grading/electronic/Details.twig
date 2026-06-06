@@ -764,10 +764,6 @@
 
 {# /Column functions #}
 <script>
-    {% if grade_inquiry_only_button %}
-        inquiryUpdate();
-    {% endif %}
-
     // Set global variable for electronic-grading JavaScript
     window.is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     window.is_student = {{ is_student ? 'true' : 'false' }};
