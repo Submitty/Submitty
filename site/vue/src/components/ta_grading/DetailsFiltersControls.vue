@@ -120,7 +120,7 @@ const onChangeInquiry = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     inquiryOnlyChecked.value = checked;
     window.Cookies?.set('inquiry_status', checked ? 'on' : 'off', cookieArguments);
-    location.reload();
+    applyInquiryFilter();
 };
 
 const onChangeAnon = (event: Event) => {
