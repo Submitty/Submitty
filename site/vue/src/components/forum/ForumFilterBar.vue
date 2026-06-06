@@ -83,8 +83,8 @@ const unreadChecked = ref(false);
 // The search input value is still read from DOM (owned by legacy Twig/jQuery).
 (window as any).getFilterState = () => {
     return {
-        'categories': selectedCategoryIds.value,
-        'thread-status': selectedThreadStatuses.value,
+        'categories': [...selectedCategoryIds.value],
+        'thread-status': [...selectedThreadStatuses.value],
         'search-content': (document.getElementById('search-content') as HTMLInputElement)?.value ?? '',
     };
 };
