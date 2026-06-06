@@ -1,8 +1,8 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars, updateThreads, getFileExtension,
-    deleteSingleFile, removeLabel, get_part_number, file_array, previous_files,
-    label_array, cancelDeferredSave, captureTabInModal, WebSocketClient,
-    removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
+    displayErrorMessage, escapeSpecialChars, updateThreads, enableTabsInTextArea,
+    getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
+    previous_files, label_array, cancelDeferredSave, captureTabInModal,
+    WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
     cleanupAutosaveHistory */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
@@ -41,16 +41,26 @@ function categoriesFormEvents() {
 
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (newWindow !== null) {
+        newWindow.opener = null;
+    }
 }
 
-function checkForumFileExtensions(post_box_id, files) {
+function isValidForumAttachment(file) {
+    const mime_type = file.type || '';
+    const lower_name = file.name.toLowerCase();
+    return mime_type.startsWith('image/') || mime_type === 'application/pdf' || lower_name.endsWith('.pdf');
+}
+
+function checkForumFileTypes(post_box_id, files) {
     const count = files.length;
     for (let i = 0; i < files.length; i++) {
-        const extension = getFileExtension(files[i].name);
-        if (!['gif', 'png', 'jpg', 'jpeg', 'bmp'].includes(extension)) {
-            deleteSingleFile(files[i].name, post_box_id, false);
-            removeLabel(files[i].name, post_box_id);
+        if (!isValidForumAttachment(files[i])) {
+            if (typeof post_box_id !== 'undefined') {
+                deleteSingleFile(files[i].name, post_box_id, false);
+                removeLabel(files[i].name, post_box_id);
+            }
             files.splice(i, 1);
             i--;
         }
@@ -71,8 +81,8 @@ function checkNumFilesForumUpload(input, post_id) {
         resetForumFileUploadAfterError(displayPostId);
     }
     else {
-        if (!checkForumFileExtensions(input.files)) {
-            displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+        if (!checkForumFileTypes(post_id, Array.from(input.files))) {
+            displayErrorMessage('Invalid file type. Please upload only image or PDF files.');
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
@@ -101,10 +111,18 @@ function uploadImageAttachments(attachment_box) {
                 break;
             }
         }
-        const image = document.createElement('div');
-        $(image).addClass('thumbnail');
-        $(image).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
-        target.prepend(image);
+        const preview = document.createElement('div');
+        const isPdf = file_object && (file_object.type === 'application/pdf' || (file_object.name && /\.pdf$/i.test(file_object.name)));
+
+        if (isPdf) {
+            $(preview).addClass('thumbnail thumbnail-pdf');
+            $(preview).text('PDF');
+        }
+        else {
+            $(preview).addClass('thumbnail');
+            $(preview).css('background-image', `url(${window.URL.createObjectURL(file_object)})`);
+        }
+        target.prepend(preview);
     });
     $(attachment_box).each(function () {
         observer.observe($(this)[0], {
@@ -137,8 +155,8 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
 
     let valid = true;
-    if (!checkForumFileExtensions(post_box_id, files)) {
-        displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+    if (!checkForumFileTypes(post_box_id, files)) {
+        displayErrorMessage('Invalid file type. Please upload only image or PDF files.');
         valid = false;
     }
 
@@ -1603,7 +1621,7 @@ function deleteCategory(category_id, category_desc, csrf_token) {
 
 function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
     if (category_desc === null && category_color === null && category_date === null) {
-        return;
+        return true;
     }
     const data = { category_id: category_id, csrf_token: csrf_token };
     if (category_desc !== null && changed === 'desc') {
@@ -1642,10 +1660,18 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 removeMessagePopup('theid');
             }, 1000);
             if (category_desc !== null) {
-                $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
+                const item = $(`#categorylistitem-${category_id}`);
+                item.data('category_desc', category_desc);
+                item.find('.categorylistitem-desc span').text(category_desc);
+                item.find('.categorylistitem-editdesc').hide();
+                item.find('.categorylistitem-desc').show();
             }
             if (category_date !== null) {
-                $(`#categorylistitem-${category_id}`).find('.categorylistitemdate-desc span').text(category_date);
+                const item = $(`#categorylistitem-${category_id}`);
+                item.data('visible_date', category_date);
+                item.find('.categorylistitemdate-desc span').text(category_date);
+                item.find('.categorylistitemdate-editdesc').hide();
+                item.find('.categorylistitemdate-desc').show();
             }
 
             refreshCategories();
@@ -1654,6 +1680,7 @@ function editCategory(category_id, category_desc, category_color, category_date,
             window.alert('Something went wrong while trying to add a new category. Please try again.');
         },
     });
+    return true;
 }
 
 function refreshCategories() {
@@ -2148,26 +2175,42 @@ function loadInlineImages(encoded_data) {
 
     // if they're no images loaded for this well
     if (attachment_well.children().length === 0) {
-    // add image tags
+        // add attachment previews
         for (let i = 0; i < data.length - 1; i++) {
             const attachment = data[i];
+            const attachmentDiv = $('<div class="attachment-preview"></div>');
             const url = attachment[0];
-            const img = $(`<img src="${url}" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">`);
-            const title = $(`<p>${escapeSpecialChars(decodeURI(attachment[2]))}</p>`);
-            img.click(function () {
-                const url = $(this).attr('src');
-                window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
-            });
-            attachment_well.append(img);
-            attachment_well.append(title);
+            const name = decodeURIComponent(attachment[2]);
+            const type = attachment[3] || 'image';
+            const title = $(`<p>${escapeSpecialChars(name)}</p>`);
+
+            if (type === 'pdf') {
+                const pdfPreview = $(`
+                    <div class="attachment-pdf">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-default attachment-open-btn">Open PDF</a>
+                        <iframe
+                            src="${url}"
+                            title="PDF attachment preview for ${escapeSpecialChars(name)}"
+                            class="attachment-pdf-preview"
+                        ></iframe>
+                    </div>
+                `);
+                attachmentDiv.append(pdfPreview);
+            }
+            else {
+                const imageLink = $(`
+                    <a href="${url}" target="_blank" rel="noopener noreferrer">
+                        <img src="${url}" alt="Click to view attachment in a new tab" title="Click to view attachment in a new tab" class="attachment-img">
+                    </a>
+                `);
+                attachmentDiv.append(imageLink);
+            }
+
+            attachmentDiv.append(title);
+            attachment_well.append(attachmentDiv);
         }
     }
     updateGlobalAttachmentButtonState();
-}
-
-function openInWindow(img) {
-    const url = $(img).attr('src');
-    window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
@@ -2523,6 +2566,7 @@ function setupForumAutosave() {
     // on the create thread page.
     $('form.reply-box, form.post_reply_form, #thread_form').each((_index, replyBox) => {
         restoreReplyBoxFromLocal(replyBox);
+        enableTabsInTextArea($(replyBox).find('textarea.thread_post_content'));
         $(replyBox).find('textarea.thread_post_content').on('input',
             () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1),
         );
