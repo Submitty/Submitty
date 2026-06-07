@@ -22,7 +22,7 @@ def up(config):
     )
 
 
-    def down(config):
+def down(config):
     """
     Run down migration (rollback).
 
