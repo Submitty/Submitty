@@ -3,7 +3,7 @@
 Handles updating the database with the
 autograding testcase details for this gradeable
 """
-from sqlalchemy import create_engine, MetaData, insert, delete, exc
+from sqlalchemy import create_engine, MetaData, insert, delete, exc  # pylint: disable=import-error
 import datetime
 import os
 import sys
@@ -12,11 +12,10 @@ import json
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-        SUBMITTY_CONFIG = json.load(open_file)
-except Exception as config_fail_error:
-    print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
-        str(datetime.datetime.now()), str(config_fail_error)))
+    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as submitty_config_file:
+        SUBMITTY_CONFIG = json.load(submitty_config_file)
+except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
+    print(f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {config_fail_error}")
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
@@ -27,25 +26,13 @@ GRADEABLE = sys.argv[4]
 
 def setup_db():
     """Set up a connection with the course database."""
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-        db_config = json.load(open_file)
-    db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
-
+    with open(os.path.join(CONFIG_PATH, 'database.json')) as db_config_file:
+        db_config = json.load(db_config_file)
+    db_name = f"submitty_{SEMESTER}_{COURSE}"
     if os.path.isdir(db_config['database_host']):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            db_config['database_user'],
-            db_config['database_password'],
-            db_name,
-            db_config['database_host']
-        )
+        conn_string = f"postgresql://{db_config['database_user']}:{db_config['database_password']}@/{db_name}?host={db_config['database_host']}"
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
-            db_config['database_user'],
-            db_config['database_password'],
-            db_config['database_host'],
-            db_name
-        )
-
+        conn_string = f"postgresql://{db_config['database_user']}:{db_config['database_password']}@{db_config['database_host']}/{db_name}"
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
@@ -56,21 +43,17 @@ def setup_db():
 def send_data(db, metadata, testcases):
     """
     If testcase entries already exist for this gradeable, delete them all
-    and re-insert fresh ones. Returns a dict mapping testcase_id -> generated id.
+    and re-insert fresh ones.
     """
     testcase_table = metadata.tables['autograding_testcase']
-
     existing = db.execute(
         testcase_table.select().where(testcase_table.c.g_id == GRADEABLE)
     ).fetchall()
-
     if existing:
-        print("Rebuilding gradeable '{}': removing {} existing testcase(s).".format(
-            GRADEABLE, len(existing)))
+        print(f"Rebuilding gradeable '{GRADEABLE}': removing {len(existing)} existing testcase(s).")
         db.execute(
             delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
         )
-
     for order, testcase in enumerate(testcases):
         db.execute(
             insert(testcase_table).values(
@@ -82,20 +65,18 @@ def send_data(db, metadata, testcases):
                 points_possible=testcase.get('points', 0)
             )
         )
-
     db.commit()
-    print("Inserted {} testcase(s) for gradeable '{}'.".format(len(testcases), GRADEABLE))
+    print(f"Inserted {len(testcases)} testcase(s) for gradeable '{GRADEABLE}'.")
 
 
 def main():
     with open(CONFIG_FILE_PATH) as config_file:
-        CONFIG_FILE = json.loads(config_file.read())
-
+        config_data = json.loads(config_file.read())
     try:
         db, metadata = setup_db()
-        send_data(db, metadata, CONFIG_FILE['testcases'])
+        send_data(db, metadata, config_data['testcases'])
     except exc.IntegrityError as e:
-        print("ERROR: IntegrityError - {}".format(str(e)))
+        print(f"ERROR: IntegrityError - {e}")
         sys.exit(1)
 
 
