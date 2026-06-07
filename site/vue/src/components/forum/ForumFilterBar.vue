@@ -36,16 +36,17 @@ const selectedCategoryIds = ref<number[]>([]);
 const selectedThreadStatuses = ref<number[]>([]);
 const unreadChecked = ref(false);
 
-const fw = window as unknown as ForumWindow;
+const forumWindow = window as unknown as ForumWindow;
 
-// Expose on window so legacy JS can read filter values.
-// The Vue component now owns the single source of truth.
-fw.selectedCategoryIds = selectedCategoryIds;
-fw.selectedThreadStatuses = selectedThreadStatuses;
-fw.selectedUnreadChecked = unreadChecked;
+// TODO: Remove these window property assignments once forum.js is fully migrated to Vue.
+// These are temporary bridges so the legacy jQuery code can read Vue's reactive state.
+forumWindow.selectedCategoryIds = selectedCategoryIds;
+forumWindow.selectedThreadStatuses = selectedThreadStatuses;
+forumWindow.selectedUnreadChecked = unreadChecked;
 
-// Replace the legacy checkUnread — reads from Vue state instead of DOM.
-fw.checkUnread = () => {
+// TODO: Remove this bridge once forum.js is fully migrated to Vue.
+// Replaces the legacy checkUnread — reads from Vue state instead of DOM.
+forumWindow.checkUnread = () => {
     const clearBtn = document.getElementById('clear_filter_button');
     if (unreadChecked.value) {
         if (clearBtn) {
@@ -56,9 +57,10 @@ fw.checkUnread = () => {
     return false;
 };
 
+// TODO: Remove this bridge once forum.js is fully migrated to Vue.
 // Vue owns clearForumFilter — resets all reactive state and DOM, then the caller
 // (Twig's onclick or updateClearFilterButton) calls updateThreads after.
-fw.clearForumFilter = () => {
+forumWindow.clearForumFilter = () => {
     // Reset unread
     if (unreadChecked.value) {
         unreadChecked.value = false;
@@ -81,7 +83,7 @@ fw.clearForumFilter = () => {
         btn.dataset.btnSelected = 'false';
         btn.classList.remove('filter-active');
         btn.classList.add('filter-inactive');
-        const $btn = fw.$(btn);
+        const $btn = forumWindow.$(btn);
         if ($btn.data) {
             $btn.data('btn-selected', 'false');
         }
@@ -101,10 +103,11 @@ fw.clearForumFilter = () => {
     return false;
 };
 
+// TODO: Remove these bridges once forum.js is fully migrated to Vue.
 // Vue owns saveFilterState/getFilterState — reads from reactive refs for filter
 // state, then pushes to history for browser back/forward navigation support.
 // The search input value is still read from DOM (owned by legacy Twig/jQuery).
-fw.getFilterState = () => {
+forumWindow.getFilterState = () => {
     return {
         'categories': [...selectedCategoryIds.value],
         'thread-status': [...selectedThreadStatuses.value],
@@ -112,8 +115,8 @@ fw.getFilterState = () => {
     };
 };
 
-fw.saveFilterState = () => {
-    history.pushState(fw.getFilterState(), '');
+forumWindow.saveFilterState = () => {
+    history.pushState(forumWindow.getFilterState(), '');
 };
 
 // Initialise state from DOM on mount
@@ -153,7 +156,7 @@ onMounted(() => {
 
 function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: number): void {
     const btn = event.currentTarget as HTMLElement;
-    const $btn = fw.$(btn);
+    const $btn = forumWindow.$(btn);
     const current = btn.dataset.btnSelected;
 
     if (current === 'true') {
@@ -180,11 +183,11 @@ function toggleFilterButton(event: MouseEvent, catId?: number, statusSelId?: num
             selectedThreadStatuses.value = [...selectedThreadStatuses.value, statusSelId];
         }
     }
-    if (fw.updateClearFilterButton) {
-        fw.updateClearFilterButton();
+    if (forumWindow.updateClearFilterButton) {
+        forumWindow.updateClearFilterButton();
     }
-    if (fw.updateThreads) {
-        fw.updateThreads(true, fw.saveFilterState);
+    if (forumWindow.updateThreads) {
+        forumWindow.updateThreads(true, forumWindow.saveFilterState);
     }
 }
 
@@ -194,11 +197,11 @@ function toggleUnread(): void {
     if (checkbox) {
         checkbox.checked = unreadChecked.value;
     }
-    if (fw.updateThreads) {
-        fw.updateThreads(true, fw.saveFilterState);
+    if (forumWindow.updateThreads) {
+        forumWindow.updateThreads(true, forumWindow.saveFilterState);
     }
-    if (fw.checkUnread) {
-        fw.checkUnread();
+    if (forumWindow.checkUnread) {
+        forumWindow.checkUnread();
     }
 }
 </script>

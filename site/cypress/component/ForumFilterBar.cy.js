@@ -1,37 +1,4 @@
 import ForumFilterBar from '../../vue/src/components/forum/ForumFilterBar.vue';
-// import '../../public/css/forum.css';
-
-/*
- * Branches covered:
- *   - isVisibleCategory → visibleDate === null → true
- *   - isVisibleCategory → diff >= 0 → true
- *   - isVisibleCategory → diff < 0 → false
- *   - toggleFilterButton → current === 'true' (deselect path)
- *   - toggleFilterButton → current !== 'true' (select path)
- *   - toggleFilterButton → catId !== undefined (category branch)
- *   - toggleFilterButton → statusSelId !== undefined (status branch)
- *   - toggleUnread → toggles unreadChecked
- *   - clearForumFilter → unreadChecked was true (uncheck checkbox path)
- *   - clearForumFilter → resets all state unconditionally
- *   - checkUnread → unreadChecked is true → returns true + show clear btn
- *   - checkUnread → unreadChecked is false → returns false
- */
-
-// beforeEach(() => {
-//     cy.document().then(doc => {
-//         const style = doc.createElement('style');
-//         style.id = 'cy-override';
-//         style.textContent = '#forum_filter_bar { display: block !important; }';
-//         doc.head.appendChild(style);
-//     });
-// });
-
-// afterEach(() => {
-//     cy.document().then(doc => {
-//         const style = doc.getElementById('cy-override');
-//         if (style) style.remove();
-//     });
-// });
 
 describe('ForumFilterBar', () => {
     const categories = [
