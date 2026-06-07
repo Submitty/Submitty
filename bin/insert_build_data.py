@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+
 """
 Handles updating the database with the
 autograding testcase details for this gradeable
 """
+
 from sqlalchemy import create_engine, MetaData, insert, delete, exc
 import datetime
 import os
