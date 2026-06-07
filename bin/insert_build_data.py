@@ -3,7 +3,7 @@
 Handles updating the database with the
 autograding testcase details for this gradeable
 """
-from sqlalchemy import create_engine, MetaData, insert, delete, exc  # pylint: disable=import-error
+from sqlalchemy import create_engine, MetaData, insert, delete, exc
 import datetime
 import os
 import sys
@@ -14,7 +14,7 @@ try:
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as submitty_config_file:
         SUBMITTY_CONFIG = json.load(submitty_config_file)
-except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
+except Exception as config_fail_error:
     print(f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {config_fail_error}")
     sys.exit(1)
 
