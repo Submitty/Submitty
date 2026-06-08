@@ -17,7 +17,9 @@ try:
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as submitty_config_file:
         SUBMITTY_CONFIG = json.load(submitty_config_file)
 except Exception as config_fail_error:
-    print(f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {config_fail_error}")
+    print(f"[{datetime.datetime.now()}] \
+    	ERROR: CORE SUBMITTY CONFIGURATION ERROR \
+    	{config_fail_error}")
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
@@ -32,9 +34,19 @@ def setup_db():
         db_config = json.load(db_config_file)
     db_name = f"submitty_{SEMESTER}_{COURSE}"
     if os.path.isdir(db_config['database_host']):
-        conn_string = f"postgresql://{db_config['database_user']}:{db_config['database_password']}@/{db_name}?host={db_config['database_host']}"
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_name,
+            db_config['database_host']
+        )
     else:
-        conn_string = f"postgresql://{db_config['database_user']}:{db_config['database_password']}@{db_config['database_host']}/{db_name}"
+        conn_string = "postgresql://{}:{}@{}/{}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_config['database_host'],
+            db_name
+        )
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
