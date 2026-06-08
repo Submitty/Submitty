@@ -30,23 +30,28 @@ COURSE = sys.argv[4]
 
 def setup_db():
     """Set up a connection with the course database."""
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as db_config_file:
-        db_config = json.load(db_config_file)
-    db_name = f"submitty_{SEMESTER}_{COURSE}"
+    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+        db_config = json.load(open_file)
+    db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
+    # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_config['database_host']):
-        conn_string = f"postgresql://{db_config['database_user']}: \
-        {db_config['database_password']}@/ \
-        {db_name}?host= \
-        {db_config['database_host']}"
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_name,
+            db_config['database_host']
+        )
     else:
-        conn_string = f"postgresql://{db_config['database_user']}:\
-        {db_config['database_password']}@\
-        {db_config['database_host']}/\
-        {db_name}"
+        conn_string = "postgresql://{}:{}@{}/{}".format(
+            db_config['database_user'],
+            db_config['database_password'],
+            db_config['database_host'],
+            db_name
+        )
+
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
-    metadata.reflect(bind=engine)
     return db, metadata
 
 
