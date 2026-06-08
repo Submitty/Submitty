@@ -5,7 +5,7 @@ Handles updating the database with the
 autograding testcase details for this gradeable
 """
 
-from sqlalchemy import create_engine, MetaData, insert, delete, exc, Table
+from sqlalchemy import create_engine, MetaData, insert, delete, exc, Table 	# pylint: disable=import-error
 import datetime
 import os
 import sys
@@ -16,7 +16,7 @@ try:
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as submitty_config_file:
         SUBMITTY_CONFIG = json.load(submitty_config_file)
-except Exception as config_fail_error:
+except Exception as config_fail_error:	# pylint: disable=broad-exception-caught
     print(f"[{datetime.datetime.now()}] \
     ERROR: CORE SUBMITTY CONFIGURATION ERROR \
     s{config_fail_error}")
@@ -32,7 +32,7 @@ def setup_db():
     """Set up a connection with the course database."""
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         db_config = json.load(open_file)
-    db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
+    db_name = f"submitty_{SEMESTER}_{COURSE}"
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_config['database_host']):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
