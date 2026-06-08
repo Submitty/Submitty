@@ -9913,6 +9913,8 @@ ORDER BY
 
     /**
      * Returns all submitters with an active version for a given gradeable.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getActiveSubmittersForGradeable(string $gradeable_id): array {
         $this->course_db->query(

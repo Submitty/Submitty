@@ -15,7 +15,7 @@ class GradingClusterController extends AbstractController {
      * Generates clusters for a given gradeable using the specified algorithm.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
-    #[Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["POST"])]
     public function createClustering(string $gradeable_id): JsonResponse {
         // 1. Validate CSRF token
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
@@ -62,7 +62,7 @@ class GradingClusterController extends AbstractController {
      * Fetches all clusters and their members for a given gradeable.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
-    #[Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
         $clusters = $this->core->getCourseEntityManager()
             ->getRepository(GradingCluster::class)
@@ -95,6 +95,10 @@ class GradingClusterController extends AbstractController {
 
     /**
      * Placeholder dummy split algorithm: splits submitters A–M into Cluster A, N–Z into Cluster B.
+     *
+     * @param array<int, array<string, mixed>> $submitters
+     *
+     * @return array<string, array<int, array<string, mixed>>>
      */
     private function runDummySplitAlgorithm(array $submitters): array {
         $cluster_a = [];
