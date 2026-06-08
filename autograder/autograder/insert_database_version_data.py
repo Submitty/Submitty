@@ -221,6 +221,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     db.commit()
 
+    print("TRYING-INSERTION")
     try:
         autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
         autograding_testcase = Table('autograding_testcase', metadata, autoload_with=engine)
@@ -238,6 +239,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             )
         upsert_testcase_results(db, autograding_testcase_data, rows, user_id, team_id, version)
         db.commit()
+        print("RESULTS-INSERTED")
     except Exception as e:
         print(f"WARNING: could not write autograding_testcase_data: {e}")
 
