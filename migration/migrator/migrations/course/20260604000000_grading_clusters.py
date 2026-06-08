@@ -1,9 +1,4 @@
-"""
-Migration to create tables for AI-assisted grading clusters.
-Creates:
-  - grading_cluster: stores cluster metadata per gradeable
-  - grading_cluster_members: maps users/teams to a cluster
-"""
+"""Migration to create tables for AI-assisted grading clusters."""
 
 
 def up(config, database, semester, course):

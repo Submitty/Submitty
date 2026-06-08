@@ -9911,105 +9911,16 @@ ORDER BY
         $this->course_db->commit();
     }
 
-    // Grading Cluster Queries (AI-Assisted Grading - PR 1)
-
     /**
-     * Creates a new grading cluster for a gradeable and returns its generated ID.
-     *
-     * @param string      $g_id      The gradeable ID this cluster belongs to
-     * @param string|null $label     An optional human-readable label for the cluster
-     * @param string      $algorithm The algorithm used to generate this cluster
-     *
-     * @return int The auto-generated primary key ID of the new cluster row
+     * Returns all submitters with an active version for a given gradeable.
      */
-    public function createGradingCluster(string $g_id, ?string $label, string $algorithm): int {
+    public function getActiveSubmittersForGradeable(string $gradeable_id): array {
         $this->course_db->query(
-            "INSERT INTO grading_cluster (g_id, label, algorithm, created_at)
-             VALUES (?, ?, ?, NOW())",
-            [$g_id, $label, $algorithm]
+            "SELECT DISTINCT egv.user_id, egv.team_id
+             FROM electronic_gradeable_version egv
+             WHERE egv.g_id = ? AND egv.active_version > 0",
+            [$gradeable_id]
         );
-        return (int) $this->course_db->getLastInsertId('grading_cluster_id_seq');
-    }
-
-    /**
-     * Links a single student (user_id) or team (team_id) to a specific cluster.
-     * Exactly one of $user_id or $team_id must be non-null.
-     *
-     * @param int         $cluster_id The cluster to assign the member to
-     * @param string|null $user_id    The individual student's user ID (null for teams)
-     * @param string|null $team_id    The team ID (null for individual assignments)
-     *
-     * @return void
-     */
-    public function insertClusterMember(int $cluster_id, ?string $user_id, ?string $team_id): void {
-        $this->course_db->query(
-            "INSERT INTO grading_cluster_members (cluster_id, user_id, team_id)
-             VALUES (?, ?, ?)",
-            [$cluster_id, $user_id, $team_id]
-        );
-    }
-
-    /**
-     * Deletes all clusters (and their members via CASCADE) for a given gradeable.
-     *
-     * @param string $g_id The gradeable ID whose clusters should be cleared
-     *
-     * @return void
-     */
-    public function clearGradingClustersByGradeable(string $g_id): void {
-        $this->course_db->query(
-            "DELETE FROM grading_cluster WHERE g_id = ?",
-            [$g_id]
-        );
-    }
-
-    /**
-     * Returns all clusters and their members for a given gradeable.
-     * Each element in the returned array is an associative array with keys:
-     *   cluster: ['id', 'g_id', 'label', 'algorithm', 'created_at']
-     *   members: [['id', 'cluster_id', 'user_id', 'team_id'], ...]
-     *
-     * @param string $g_id The gradeable ID to fetch clusters for
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function getGradingClustersByGradeable(string $g_id): array {
-        // Fetch all clusters for this gradeable
-        $this->course_db->query(
-            "SELECT * FROM grading_cluster WHERE g_id = ? ORDER BY created_at ASC",
-            [$g_id]
-        );
-        $cluster_rows = $this->course_db->rows();
-
-        if ($cluster_rows === []) {
-            return [];
-        }
-
-        // Collect cluster IDs and fetch all members in a single query
-        $cluster_ids = array_column($cluster_rows, 'id');
-        $placeholders = $this->createParameterList(count($cluster_ids));
-
-        $this->course_db->query(
-            "SELECT * FROM grading_cluster_members WHERE cluster_id IN {$placeholders} ORDER BY cluster_id ASC",
-            $cluster_ids
-        );
-        $member_rows = $this->course_db->rows();
-
-        // Group members by cluster_id for efficient lookup
-        $members_by_cluster = [];
-        foreach ($member_rows as $member) {
-            $members_by_cluster[$member['cluster_id']][] = $member;
-        }
-
-        // Build the final result combining clusters with their members
-        $result = [];
-        foreach ($cluster_rows as $cluster) {
-            $result[] = [
-                'cluster' => $cluster,
-                'members' => $members_by_cluster[$cluster['id']] ?? [],
-            ];
-        }
-
-        return $result;
+        return $this->course_db->rows();
     }
 }
