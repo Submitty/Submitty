@@ -465,7 +465,7 @@ function handle_input_keypress(inactive_version) {
 // BULK UPLOAD
 // ========================================================================================
 function openFile(url_full) {
-    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank');
 }
 
 // HANDLE SUBMISSION

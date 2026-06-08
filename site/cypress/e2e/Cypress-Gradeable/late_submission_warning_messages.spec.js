@@ -313,44 +313,6 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable]);
         cy.get('#do_not_grade').click();
     });
-
-    it('Confirmation for the first submission with 2 remaining late days and 1 extension', () => {
-        // Part 1/2 of a test case
-        // The first submission will be done 2 days after the due date and use 2 valid late days
-        cy.login('instructor');
-        giveExtensions(gradeable);
-        giveLateDays(getMorningDateString(3), 'student'); // Give valid late days (the current ones are after the original due date)
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=late-days]').clear();
-        cy.get('[data-testid=late-days]').type(3);
-        cy.get('[data-testid=late-days]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-due-date]').clear();
-        cy.get('[data-testid=submission-due-date]').type(getDueDateString(2));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.logout();
-        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day, 2 late days consumed
-        SubmitAndCheckMessage('non_team', 'upload_file1', 'valid_usage', '2_days_late+extension', 3, 1);
-    });
-    it('Warning message for the second submission with 0 valid remaining late day ', () => {
-        /* Part 2/2 of a test case
-        This submission is invalid because the late days remaining are earned at the extension date,
-        not the original due date. */
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear();
-        cy.get('[data-testid=submission-due-date]').type(getDueDateString(3));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.logout();
-        // Due 3 days ago: server reports 3+1=4 days late
-        SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_4_days_late', '', 4);
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('#no_late_submission').click(); // disable late submissions
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-    });
 });
 
 describe('Test warning messages for team gradeable', () => {

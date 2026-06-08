@@ -593,15 +593,6 @@ parameters:
 
 		-
 			rawMessage: '''
-				Call to deprecated method JsonOnlyResponse() of class app\libraries\response\MultiResponse:
-				should not be used, just return JsonResponse directly
-			'''
-			identifier: staticMethod.deprecated
-			count: 2
-			path: app/controllers/NotificationController.php
-
-		-
-			rawMessage: '''
 				Call to deprecated method RedirectOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return RedirectResponse directly
 			'''
@@ -10264,12 +10255,6 @@ parameters:
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
-			path: app/models/DateTimeFormat.php
-
-		-
-			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
-			identifier: function.strict
-			count: 2
 			path: app/models/DisplayImage.php
 
 		-
@@ -12286,48 +12271,6 @@ parameters:
 			rawMessage: Foreach overwrites $user with its value variable.
 			identifier: foreach.valueOverwrite
 			count: 2
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\Gradeable and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\GradedGradeable|null and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between DateTime|null and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between app\models\User|null and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
-			count: 4
 			path: app/models/gradeable/Gradeable.php
 
 		-
@@ -14365,18 +14308,6 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			rawMessage: 'Method app\views\NotificationView::showNotificationSettings() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
-			rawMessage: 'Method app\views\NotificationView::showNotificationSettings() has parameter $notification_saves with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/NotificationView.php
-
-		-
 			rawMessage: 'Method app\views\PDFView::downloadPDFEmbedded() has parameter $annotation_jsons with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -15087,126 +15018,6 @@ parameters:
 		-
 			rawMessage: Implicit array creation is not allowed - variable $user_ids does not exist.
 			identifier: variable.implicitArray
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between (float|int) and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between app\models\gradeable\GradedComponent|null and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between float and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int and int<min, -1>|int<1, max> is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between int<min, 0>|int<2, max> and int is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 2
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between string and mixed is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 14
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<1, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<3, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 0>|int<2, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 0>|int<3, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int|null and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 3
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and null is not allowed.'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
-			identifier: equal.notAllowed
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
