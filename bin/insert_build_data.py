@@ -5,7 +5,7 @@ Handles updating the database with the
 autograding testcase details for this gradeable
 """
 
-from sqlalchemy import create_engine, MetaData, insert, delete, exc
+from sqlalchemy import create_engine, MetaData, insert, delete, exc, Table
 import datetime
 import os
 import sys
@@ -52,15 +52,15 @@ def setup_db():
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
-    return db, metadata
+    return db, metadata, engine
 
 
-def send_data(db, metadata, testcases):
+def send_data(db, metadata, engine, testcases):
     """
     If testcase entries already exist for this gradeable, delete them all
     and re-insert fresh ones.
     """
-    testcase_table = metadata.tables['autograding_testcase']
+    testcase_table = Table('autograding_testcase', metadata, autoload_with=engine)
     existing = db.execute(
         testcase_table.select().where(testcase_table.c.g_id == GRADEABLE)
     ).fetchall()
@@ -88,8 +88,8 @@ def main():
     with open(CONFIG_FILE_PATH) as config_file:
         config_data = json.loads(config_file.read())
     try:
-        db, metadata = setup_db()
-        send_data(db, metadata, config_data['testcases'])
+        db, metadata, engine = setup_db()
+        send_data(db, metadata, engine, config_data['testcases'])
     except exc.IntegrityError as e:
         print(f"ERROR: IntegrityError - {e}")
         sys.exit(1)
