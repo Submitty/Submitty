@@ -3,6 +3,7 @@
 --
 
 
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -1157,8 +1158,7 @@ CREATE TABLE public.gradeable (
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date))
+    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date))
 );
 
 
@@ -1620,7 +1620,8 @@ CREATE TABLE public.notifications (
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
     created_at timestamp(0) with time zone NOT NULL,
-    seen_at timestamp(0) with time zone
+    seen_at timestamp(0) with time zone,
+    gradeable_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -2935,6 +2936,13 @@ CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree 
 
 
 --
+-- Name: notifications_user_gradeable_unseen_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications USING btree (to_user_id, gradeable_id) WHERE ((gradeable_id IS NOT NULL) AND (seen_at IS NULL));
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3127,19 +3135,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3849,4 +3857,5 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
 
