@@ -11,7 +11,7 @@ function confirmArchiveToggle(element) {
 
     if (isArchiving) {
         // Confirming archive
-        if (!confirm('Are you sure you want to archive this course? This action will hide the course from the course list and prevent new submissions.')) {
+        if (!confirm('Archiving will change the course to be only visible to the instructor.')) {
             element.checked = false;
             return false;
         }
