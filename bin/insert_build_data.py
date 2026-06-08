@@ -23,9 +23,9 @@ except Exception as config_fail_error:
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
-SEMESTER = sys.argv[2]
-COURSE = sys.argv[3]
-GRADEABLE = sys.argv[4]
+GRADEABLE = sys.argv[2]
+SEMESTER = sys.argv[3]
+COURSE = sys.argv[4]
 
 
 def setup_db():
