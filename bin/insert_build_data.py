@@ -35,14 +35,14 @@ def setup_db():
     db_name = f"submitty_{SEMESTER}_{COURSE}"
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_config['database_host']):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(		# pylint: disable=consider-using-f-string
             db_config['database_user'],
             db_config['database_password'],
             db_name,
             db_config['database_host']
         )
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
+        conn_string = "postgresql://{}:{}@{}/{}".format(			# pylint: disable=consider-using-f-string
             db_config['database_user'],
             db_config['database_password'],
             db_config['database_host'],
