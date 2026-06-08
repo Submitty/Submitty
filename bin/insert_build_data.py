@@ -16,7 +16,7 @@ try:
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
     with open(os.path.join(CONFIG_PATH, 'submitty.json')) as submitty_config_file:
         SUBMITTY_CONFIG = json.load(submitty_config_file)
-except Exception as config_fail_error:	# pylint: disable=broad-exception-caught
+except Exception as config_fail_error:					# pylint: disable=broad-exception-caught
     print(f"[{datetime.datetime.now()}] \
     ERROR: CORE SUBMITTY CONFIGURATION ERROR \
     s{config_fail_error}")
