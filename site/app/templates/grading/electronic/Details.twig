@@ -286,7 +286,7 @@
                 {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
                 {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
-            {% elseif column.function == "grading_blind" %}
+            {% elseif column.function == "grading_peer" %}
                 {{ _self.render_column_grading_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ _self.render_column_index(context, section, graded_gradeable, index, info, column) }}
@@ -495,7 +495,7 @@
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
 
-    {% elseif graded_gradeable.getGradeable().isTaGrading() or graded_gradeable.getGradeable().hasPeerComponent() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
@@ -558,7 +558,10 @@
     {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
-    {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
+        {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
