@@ -968,6 +968,10 @@ function changeDisplayOptions(option) {
 }
 
 function readCategoryValues() {
+    // Vue owns the single source of truth for filter state
+    if (window.selectedCategoryIds) {
+        return window.selectedCategoryIds.value;
+    }
     const categories_value = [];
     $('#thread_category button').each(function () {
         if ($(this).data('btn-selected') === 'true') {
@@ -978,6 +982,10 @@ function readCategoryValues() {
 }
 
 function setCategoryValues(cat_ids) {
+    // If Vue is active, update reactive state (convert strings to numbers)
+    if (window.selectedCategoryIds) {
+        window.selectedCategoryIds.value = cat_ids.map((id) => Number(id));
+    }
     $('#thread_category button').each(function () {
         if (cat_ids.includes($(this).data('cat_id'))) {
             $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
@@ -989,6 +997,10 @@ function setCategoryValues(cat_ids) {
 }
 
 function readThreadStatusValues() {
+    // Vue owns the single source of truth for filter state
+    if (window.selectedThreadStatuses) {
+        return window.selectedThreadStatuses.value;
+    }
     const thread_status_value = [];
     $('#thread_status_select button').each(function () {
         if ($(this).data('btn-selected') === 'true') {
@@ -999,6 +1011,10 @@ function readThreadStatusValues() {
 }
 
 function setThreadStatusValues(sel_ids) {
+    // If Vue is active, update reactive state
+    if (window.selectedThreadStatuses) {
+        window.selectedThreadStatuses.value = sel_ids.map((id) => Number(id));
+    }
     $('#thread_status_select button').each(function () {
         if (sel_ids.includes($(this).data('sel_id'))) {
             $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
@@ -1209,6 +1225,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
         && thread_status_value === Cookies.get('forum_thread_status')
+        && unread_select_value === (Cookies.get('unread_select_value') === 'true')
         && search_query === Cookies.get('search_query')) {
         return;
     }
@@ -2246,15 +2263,7 @@ if (!Array.prototype.toggleElement) {
 }
 
 function clearForumFilter() {
-    if (checkUnread()) {
-        $('#filter_unread_btn').click();
-    }
-    $('#search-content').val('').trigger('change');
-    $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').css('visibility', 'hidden');
-
-    return false;
+    return window.clearForumFilter?.();
 }
 
 function updateClearFilterButton() {
@@ -2267,26 +2276,6 @@ function updateClearFilterButton() {
 }
 
 function loadFilterHandlers() {
-    $('#filter_unread_btn').on('mousedown', function (e) {
-        $(this).toggleClass('filter-inactive filter-active');
-    });
-
-    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
-        e.preventDefault();
-        const current_selection = $(this).data('btn-selected');
-
-        if (current_selection === 'true') {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-        }
-        else {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-
-        updateClearFilterButton();
-        updateThreads(true, saveFilterState);
-        return true;
-    });
-
     $('#search-submit').on('mousedown', (e) => {
         e.preventDefault();
         updateClearFilterButton();
@@ -2311,13 +2300,6 @@ function loadFilterHandlers() {
         return true;
     });
 
-    $('#unread').change((e) => {
-        e.preventDefault();
-        updateThreads(true, saveFilterState);
-        checkUnread();
-        return true;
-    });
-
     window.onpopstate = function (e) {
         setFilterState(e.state);
     };
@@ -2326,15 +2308,11 @@ function loadFilterHandlers() {
 }
 
 function getFilterState() {
-    return {
-        'categories': readCategoryValues(),
-        'thread-status': readThreadStatusValues(),
-        'search-content': $('#search-content').val(),
-    };
+    return window.getFilterState?.();
 }
 
 function saveFilterState() {
-    history.pushState(getFilterState(), '');
+    window.saveFilterState?.();
 }
 
 function setFilterState(state) {
