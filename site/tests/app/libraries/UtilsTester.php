@@ -10,6 +10,26 @@ use tests\BaseUnitTest;
 class UtilsTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
+    private function createTestPdf(): string {
+        $pdf_path = tempnam(sys_get_temp_dir(), 'submitty_pdf_');
+        file_put_contents($pdf_path, <<<PDF
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>
+endobj
+trailer
+<< /Root 1 0 R >>
+%%EOF
+PDF);
+        return $pdf_path;
+    }
+
     public function testPad1() {
         $this->assertEquals("00", Utils::pad("0"));
     }
@@ -245,6 +265,56 @@ class UtilsTester extends BaseUnitTest {
 
     public function testCheckUploadedImageInvalidId() {
         $this->assertFalse(Utils::checkUploadedImageFile('invalid'));
+    }
+
+    public function testCheckUploadedImageOrPdfFileWithPdf() {
+        $pdf_path = $this->createTestPdf();
+        try {
+            $_FILES['test'] = [
+                'name' => ['test.pdf'],
+                'tmp_name' => [$pdf_path],
+                'type' => ['application/pdf'],
+                'error' => [UPLOAD_ERR_OK],
+                'size' => [123]
+            ];
+            $this->assertTrue(Utils::checkUploadedImageOrPdfFile('test'));
+        }
+        finally {
+            $_FILES = [];
+            unlink($pdf_path);
+        }
+    }
+
+    public function testCheckUploadedImageOrPdfFileInvalidFile() {
+        try {
+            $_FILES['test'] = [
+                'name' => ['test.txt'],
+                'tmp_name' => [__TEST_DATA__ . '/test.txt'],
+                'type' => ['text/plain'],
+                'error' => [UPLOAD_ERR_OK],
+                'size' => [123]
+            ];
+            $this->assertFalse(Utils::checkUploadedImageOrPdfFile('test'));
+        }
+        finally {
+            $_FILES = [];
+        }
+    }
+
+    public function testCheckUploadedImageOrPdfFileWithImage() {
+        try {
+            $_FILES['test'] = [
+                'name' => ['test_image.png'],
+                'tmp_name' => [__TEST_DATA__ . '/images/test_image.png'],
+                'type' => ['image/png'],
+                'error' => [UPLOAD_ERR_OK],
+                'size' => [123]
+            ];
+            $this->assertTrue(Utils::checkUploadedImageOrPdfFile('test'));
+        }
+        finally {
+            $_FILES = [];
+        }
     }
 
     public static function comparableNullableGtProvider() {
