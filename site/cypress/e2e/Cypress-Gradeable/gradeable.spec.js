@@ -124,7 +124,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
 
             cy.on('window:alert', (text) => {
                 expect(text).to.include(
-                    'Please complete Open Homework first with a score of 7 point(s).'
+                    'Please complete Open Homework first with a score of 7 point(s).',
                 );
             });
 
@@ -136,7 +136,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             cy.logout();
         });
 
-        // users with 7+ points on open_homework 
+        // users with 7+ points on open_homework
         ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
             cy.login(user);
             cy.visit(['testing']);
