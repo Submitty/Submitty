@@ -56,7 +56,7 @@ class ForumController extends AbstractController {
     }
 
     private function searchQuery(): string {
-        return $_COOKIE["search_query"] ?? "";
+        return $_POST["search_query"] ?? "";
     }
 
     private function getSavedCategoryIds($currentCourse, $category_ids) {
