@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-        database.execute(
+    database.execute(
         """
         CREATE TABLE IF NOT EXISTS autograding_testcase_data (
             atd_id          integer                     NOT NULL,
