@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import Markdown from './Markdown.vue';
 
 interface Props {
@@ -45,6 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const moreMenuRef = ref<HTMLDetailsElement | null>(null);
 const mode = ref('edit');
 const content = ref(props.markdownAreaValue);
 const isLoadingPreview = ref(false);
@@ -137,6 +138,15 @@ function addMarkdown(type: string) {
     emit('add-markdown', { type, textarea: textareaRef.value });
 }
 
+function addMarkdownFromMenu(type: string) {
+    addMarkdown(type);
+    moreMenuRef.value?.removeAttribute('open');
+}
+
+function closeMoreMenu() {
+    moreMenuRef.value?.removeAttribute('open');
+}
+
 function handleKeyup(event: Event) {
     emit('keyup', event);
 
@@ -213,6 +223,12 @@ onMounted(() => {
     if (props.initializePreview) {
         setMode('preview');
     }
+
+    window.addEventListener('resize', closeMoreMenu);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', closeMoreMenu);
 });
 
 const showHeader = ref(!!props.renderHeader);
@@ -357,6 +373,55 @@ function syncMarkdownToggle() {
         >
           Blockquote <i class="fas fa-quote-left fa-1x" />
         </button>
+        <details
+          ref="moreMenuRef"
+          class="markdown-more-menu"
+        >
+          <summary
+            class="btn btn-default btn-markdown markdown-more-toggle"
+            title="More markdown tools"
+            aria-label="More markdown tools"
+          >
+            <i class="fas fa-ellipsis-h fa-1x" />
+          </summary>
+          <div class="markdown-more-dropdown">
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-link"
+              @click="addMarkdownFromMenu('link')"
+            >
+              Link
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-code"
+              @click="addMarkdownFromMenu('code')"
+            >
+              Code
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-bold"
+              @click="addMarkdownFromMenu('bold')"
+            >
+              Bold
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-italic"
+              @click="addMarkdownFromMenu('italic')"
+            >
+              Italics
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-blockquote"
+              @click="addMarkdownFromMenu('blockquote')"
+            >
+              Blockquote
+            </button>
+          </div>
+        </details>
       </div>
     </div>
     <div class="markdown-area-body">
