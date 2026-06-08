@@ -18,8 +18,8 @@ try:
         SUBMITTY_CONFIG = json.load(submitty_config_file)
 except Exception as config_fail_error:
     print(f"[{datetime.datetime.now()}] \
-    	ERROR: CORE SUBMITTY CONFIGURATION ERROR \
-    	{config_fail_error}")
+    ERROR: CORE SUBMITTY CONFIGURATION ERROR \
+    {config_fail_error}")
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
