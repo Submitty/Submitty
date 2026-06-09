@@ -1077,6 +1077,8 @@ main#main.full-screen-mode #posts_list {
 
 main#main.full-screen-mode #thread-container {
     height: calc(100vh - 120px);
+}
+
 #search-clear:hover,
 #search-clear:focus {
     color: var(--default-black);
