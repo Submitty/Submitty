@@ -5,7 +5,7 @@ Handles updating the database with the
 autograding testcase details for this gradeable
 """
 
-from sqlalchemy import create_engine, MetaData, select, except_, insert, delete, exc, Table 	# pylint: disable=import-error
+from sqlalchemy import create_engine, MetaData, insert, delete, exc, Table 	# pylint: disable=import-error
 import datetime
 import os
 import sys
@@ -101,10 +101,10 @@ def check_invalidated(existing_rows, testcases):
 
     for i, (db_row, new_tc) in enumerate(zip(existing_rows, testcases)):
         if (
-            db_row.testcase_id     != new_tc.get('testcase_id')
-            or db_row.testcase_order  != i
-            or db_row.hidden          != new_tc.get('hidden', False)
-            or db_row.extra_credit    != new_tc.get('extra_credit', False)
+            db_row.testcase_id != new_tc.get('testcase_id')
+            or db_row.testcase_order != i
+            or db_row.hidden != new_tc.get('hidden', False)
+            or db_row.extra_credit != new_tc.get('extra_credit', False)
             or db_row.points_possible != new_tc.get('points', 0)
         ):
             return True
