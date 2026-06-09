@@ -1,3 +1,9 @@
+Cypress.on('uncaught:exception', (err) => {
+    if (err.message.includes('ResizeObserver loop')) {
+        return false;
+    }
+});
+
 describe('TA Grading Panel Switcher', () => {
     const panels = [
         {
