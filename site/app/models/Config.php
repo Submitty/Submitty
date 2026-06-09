@@ -83,7 +83,6 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
- * @method DateTimeFormat getDateTimeFormat()
  * @method string getSystemMessage()
  * @method string getLatestTag()
  * @method string getLatestCommit()
@@ -371,10 +370,6 @@ class Config extends AbstractModel {
     protected $feature_flags = [];
 
     /** @prop
-     * @var DateTimeFormat */
-    protected $date_time_format;
-
-    /** @prop
      * @var string */
     protected $php_user;
 
@@ -387,14 +382,28 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
-        // It is configured as a property of the Config class
-        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
-        $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
-
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
         }
+    }
+
+    /**
+     * Get the DateTimeFormat object, updated with the current user's preferred format.
+     * Implements per-user date/time formatting as described in Issue#11751.
+     * If no user is logged in, defaults to 'YMD' (ISO 8601 standard).
+     * getDateFormat() returns the user's preferred format specifier (MDY, DMY, or YMD)
+     * which was loaded from the database when the user logged in.
+     *
+     * @return DateTimeFormat
+     */
+    public function getDateTimeFormat(): DateTimeFormat {
+        $specifier = 'YMD';
+
+        if ($this->core->getUser() !== null && $this->core->getUser()->isLoaded()) {
+            $specifier = $this->core->getUser()->getDateFormat();
+        }
+
+        return new DateTimeFormat($this->core, $specifier);
     }
 
     public function loadMasterConfigs($config_path) {
