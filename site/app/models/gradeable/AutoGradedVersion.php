@@ -72,6 +72,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     private $files = null;
     /** @prop
+     * @var array<string,string>[] An array of all the processed submission files  */
+    private $submissions_processed_files = null;
+    /** @prop
      * @var array[] An array of all the autograded results files  */
     private $results_files = null;
     /** @prop
@@ -227,6 +230,24 @@ class AutoGradedVersion extends AbstractModel {
             return json_decode($json_content, true);
         }
         return null;
+    }
+
+    /**
+     * Loads information about processed submission files
+     */
+    private function loadProcessedSubmissionFiles(): void {
+        $this->submissions_processed_files = [];
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $config = $gradeable->getAutogradingConfig();
+
+        $submissions_processed_path = FileUtils::joinPaths($course_path, 'submissions_processed', $gradeable->getId(), $submitter_id, $this->version);
+
+        $submissions_processed_files = FileUtils::getAllFiles($submissions_processed_path, [], true);
+        foreach ($submissions_processed_files as $file => $details) {
+            $this->submissions_processed_files[$file] = $details;
+        }
     }
 
     public function getTestcaseMessages() {
@@ -389,6 +410,17 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadSubmissionFiles();
         }
         return ['submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []];
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all processed submission files
+     * @return array<string,string>[]
+     */
+    public function getProcessedFiles(): array {
+        if ($this->submissions_processed_files === null) {
+            $this->loadProcessedSubmissionFiles();
+        }
+        return $this->submissions_processed_files;
     }
 
     /**

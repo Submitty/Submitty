@@ -31,6 +31,8 @@ describe('Test course should exist', () => {
         // checkGradeable('haskell_hello_world');
         checkGradeable('image_diff_mirror');
         checkGradeable('input_output_subdirectories');
+        checkGradeable('jupyter_notebook_autograding');
+        checkGradeable('jupyter_autograding_with_cell_ids');
         checkGradeable('leaderboard');
         checkGradeable('left_right_exam_seating');
         checkGradeable('matlab');

@@ -154,11 +154,11 @@ fi
 readarray -t result_array <<< "${result}"
 
 # clear old twig cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/twig"
+if [ -d "${SUBMITTY_DATA_DIR}/cache/twig" ]; then
+    rm -rf "${SUBMITTY_DATA_DIR}/cache/twig"
 fi
 # create twig cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
+mkdir -p ${SUBMITTY_DATA_DIR}/cache/twig
 
 # clear old routes cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
@@ -246,17 +246,21 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
+
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 else
+    # TODO: We can skip this step in the future by checking whether there are any new files.
     if [ ${VAGRANT} == 1 ]; then
         su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
     else
         su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
-fi
 
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type d -exec chmod 551 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type f -exec chmod 440 {} \;
+fi
 
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
@@ -267,6 +271,9 @@ php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Loca
 # Update permissions & ownership for cache directory
 chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
 chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
+
+chmod -R 751 ${SUBMITTY_DATA_DIR}/cache
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}/cache
 
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
@@ -391,6 +398,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     #vue
     mkdir ${VENDOR_FOLDER}/vue
     cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
+    #katex
+    mkdir -p ${VENDOR_FOLDER}/katex/fonts
+    cp ${NODE_FOLDER}/katex/dist/katex.min.css ${VENDOR_FOLDER}/katex
+    cp ${NODE_FOLDER}/katex/dist/fonts/*.woff2 ${VENDOR_FOLDER}/katex/fonts
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -407,12 +418,16 @@ chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
 chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
+mkdir -p "${NODE_FOLDER}/.vue-global-types"
+chown -R "${PHP_USER}:${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+chmod -R u+rw ${NODE_FOLDER}/.vue-global-types
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
@@ -421,8 +436,10 @@ su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod -R u-rw ${NODE_FOLDER}/.vue-global-types
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

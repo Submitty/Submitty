@@ -37,6 +37,9 @@ class Chatroom {
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_anon;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $allow_read_only_after_end = false;
+
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     private ?\DateTime $session_started_at = null;
 
@@ -54,6 +57,7 @@ class Chatroom {
         $this->is_active = false;
         $this->allow_anon = true;
         $this->is_deleted = false;
+        $this->allow_read_only_after_end = false;
     }
 
     public function getId(): int {
@@ -140,5 +144,17 @@ class Chatroom {
 
     public function setSessionStartedAt(?\DateTime $session_started_at): void {
         $this->session_started_at = $session_started_at;
+    }
+
+    public function allowReadOnlyAfterEnd(): bool {
+        return $this->allow_read_only_after_end;
+    }
+
+    public function setAllowReadOnlyAfterEnd(bool $allow): void {
+        $this->allow_read_only_after_end = $allow;
+    }
+
+    public function isReadOnly(): bool {
+        return !$this->isActive() && $this->allowReadOnlyAfterEnd();
     }
 }

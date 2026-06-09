@@ -465,7 +465,7 @@ function handle_input_keypress(inactive_version) {
 // BULK UPLOAD
 // ========================================================================================
 function openFile(url_full) {
-    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank');
 }
 
 // HANDLE SUBMISSION
@@ -1375,20 +1375,22 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('link_url', link_url);
     }
 
-    if (file_path !== null && file_path !== '') {
+    if (file_path !== null) {
         if (file_path.startsWith('/')) {
             alert('The file path cannot start with the root directory “/”, use a relative path.');
             return;
         }
-        const file_name = file_path.split('/').pop();
-        if (link_url !== null) {
-            const lastSlashIndex = file_path.lastIndexOf('/');
-            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
-            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
+        // For editing, file_path is the directory path, not the full file path
+        // Validate that it doesn't contain invalid characters for directories
+        if (file_path.includes('..')) {
+            alert('Directory path cannot contain ".."');
+            return;
         }
-        if (window.isValidFileName(file_name)) {
-            formData.append('file_path', file_path);
+        // Add placeholder to give form of a file path for validation (only for non-empty paths)
+        if (file_path !== '' && !window.isValidFilePath(`${file_path}/placeholder`)) {
+            return;
         }
+        formData.append('file_path', file_path);
     }
 
     if (title !== null && window.isValidFileName(title)) {
@@ -1397,6 +1399,12 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
+    }
+    else {
+        if (title !== null) {
+            alert('Invalid filename');
+            return;
+        }
     }
 
     if (overwrite !== null) {
@@ -1436,9 +1444,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
-                console.log(data);
+                alert(`Error parsing response from server. Message returned:\n${data}`);
             }
         },
         error: function () {

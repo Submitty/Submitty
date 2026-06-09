@@ -99,35 +99,54 @@ class CourseMaterialsView extends AbstractView {
             if ($course_material->isLink()) {
                 $file_name = $course_material->getTitle() . $course_material->getPath();
             }
+            /** @var array<string, mixed> $path_to_place */
             $path_to_place = &$final_structure;
             $path = "";
             foreach ($dirs as $dir) {
+                // Create the directory if it doesn't exist
+                if (!isset($path_to_place[$dir])) {
+                    $this->core->addErrorMessage($dir . " is broken, ask a system admin to remove the broken directory from the database.");
+                    $path_to_place[$dir] = [];
+                    // Also add to directories array with a default priority if it doesn't exist
+                    $current_relative_path = ($path === '') ? $dir : FileUtils::joinPaths($path, $dir);
+                    $current_full_path = FileUtils::joinPaths($base_course_material_path, $current_relative_path);
+                    if (!isset($directories[$current_relative_path])) {
+                        $directories[$current_relative_path] = 0;
+                        $directory_priorities[$current_full_path] = 0;
+                        $folder_ids[$current_full_path] = 0;
+                    }
+                }
                 $path_to_place = &$path_to_place[$dir];
                 $path = FileUtils::joinPaths($path, $dir);
             }
             $index = 0;
-            foreach ($path_to_place as $key => $value) {
-                if (is_array($value)) {
-                    $priority = $directories[FileUtils::joinPaths($path, $key)]->getPriority();
-                }
-                else {
-                    $priority = $value->getPriority();
-                }
-                if ($course_material->getPriority() > $priority) {
-                    $index++;
-                }
-                elseif ($course_material->getPriority() === $priority) {
-                    if (is_array($value)) {
-                        $index++;
+            if (count($path_to_place) !== 0) {
+                foreach ($path_to_place as $key => $value) {
+                    /** @var array<mixed>|CourseMaterial $value */
+                    $relative_dir_path = FileUtils::joinPaths($path, $key);
+                    if (is_array($value) && isset($directories[$relative_dir_path]) && $directories[$relative_dir_path] instanceof CourseMaterial) {
+                        $priority = $directories[$relative_dir_path]->getPriority();
+                    }
+                    elseif ($value instanceof CourseMaterial) {
+                        $priority = $value->getPriority();
                     }
                     else {
-                        if ($course_material->getPath() > $value->getPath()) {
+                        $priority = 0;
+                    }
+                    if ($course_material->getPriority() > $priority) {
+                        $index++;
+                    }
+                    elseif ($course_material->getPriority() === $priority) {
+                        if (is_array($value)) {
+                            $index++;
+                        }
+                        elseif ($value instanceof CourseMaterial && $course_material->getPath() > $value->getPath()) {
                             $index++;
                         }
                     }
-                }
-                else {
-                    break;
+                    else {
+                        break;
+                    }
                 }
             }
             $path_to_place = array_slice($path_to_place, 0, $index, true) +
@@ -140,6 +159,23 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
         $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
+        $max_course_materials_storage_limit_mb = $this->core->getConfig()->getMaxCourseMaterialStorageMb();
+
+        //Sums all of the disk storage of all of the files in Course Materials
+        $current_course_materials_storage_bytes = 0;
+        foreach ($course_materials_db as $cm_item) {
+            if ($cm_item->getType() === CourseMaterial::FILE) {
+                $path = $cm_item->getPath();
+                if (is_file($path)) {
+                    $size = @filesize($path);
+                    if ($size !== false) {
+                        $current_course_materials_storage_bytes += $size;
+                    }
+                }
+            }
+        }
+        //Rounds the value to 2 decimals
+        $current_course_materials_storage_used_mb = round($current_course_materials_storage_bytes / 1024 / 1024, 2);
 
         $folder_paths = $this->compileAllFolderPaths($final_structure);
 
@@ -161,7 +197,9 @@ class CourseMaterialsView extends AbstractView {
             "links" => $links,
             "folder_paths" => $folder_paths,
             "beginning_of_time_date" => $beginning_of_time_date,
-            "file_upload_limit_mb" => $file_upload_limit_mb
+            "file_upload_limit_mb" => $file_upload_limit_mb,
+            "max_course_materials_storage_limit_mb" => $max_course_materials_storage_limit_mb,
+            "current_course_materials_storage_used_mb" => $current_course_materials_storage_used_mb
         ]);
     }
 
@@ -255,8 +293,8 @@ class CourseMaterialsView extends AbstractView {
     /**
      * Recurses through folders and compiles an array of all the paths to folders.
      *
-     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
-     * @return array<string> List of folders paths.
+     * @param array<string, CourseMaterial|array<string, CourseMaterial>> $course_materials - Dictionary: path name => CourseMaterial.
+     * @return array<int, string> List of folders paths.
      */
     private function compileAllFolderPaths(array $course_materials): array {
         $folder_paths = [];
@@ -268,8 +306,8 @@ class CourseMaterialsView extends AbstractView {
      * Recurses through folders and compiles an array of all the paths to folders.
      * Helper recursive function.
      *
-     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
-     * @param array<string>  $folder_paths - List we append
+     * @param array<string, CourseMaterial|array<string, CourseMaterial>> $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array<int, string> &$folder_paths - List we append
      * @param string $full_path - Current path we are examining files in.
      */
     private function compileAllFolderPathsR(
@@ -280,7 +318,7 @@ class CourseMaterialsView extends AbstractView {
         foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
                 $inner_full_path = "";
-                if (empty($full_path)) {
+                if ($full_path === '') {
                     $inner_full_path = $name;
                 }
                 else {

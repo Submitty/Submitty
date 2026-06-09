@@ -12,11 +12,18 @@ const DECIMAL_PRECISION = 3;
 // eslint-disable-next-line no-var
 var itempool_items = {};
 
+let loadedTemplates = false;
+
 /**
  * Asynchronously load all of the templates
  * @return {Promise}
  */
 function loadTemplates() {
+    if (loadedTemplates) {
+        return Promise.resolve();
+    }
+    loadedTemplates = true;
+
     const templates = [
         { id: 'GradingGradeable', href: '/templates/grading/GradingGradeable.twig' },
         { id: 'PeerGradeable', href: '/templates/grading/PeerGradeable.twig' },
@@ -33,6 +40,7 @@ function loadTemplates() {
         { id: 'TotalPeerScoreBox', href: '/templates/grading/TotalPeerScoreBox.twig' },
         { id: 'ConflictMarks', href: '/templates/grading/ConflictMarks.twig' },
         { id: 'RubricTotalBox', href: '/templates/grading/RubricTotalBox.twig' },
+        { id: 'Redactions', href: '/templates/admin/Redactions.twig' },
     ];
     const promises = [];
     templates.forEach((template) => {
@@ -233,7 +241,7 @@ function renderGradingComponent(grader_id, component, graded_component, graders,
             can_verify_graders: canVerifyGraders,
             grader_id: grader_id,
             peer_component: component.peer,
-            allow_custom_marks: allowCustomMarks,
+            allow_custom_marks: (is_student || component.peer) ? false : allowCustomMarks,
             component_version_conflict: componentVersionConflict,
             itempool_id: Object.prototype.hasOwnProperty.call(itempool_items, component.id) ? itempool_items[component.id] : '',
             ta_grading_peer: taGradingPeer,

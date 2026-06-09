@@ -217,16 +217,39 @@ class Utils {
     public static function checkUploadedImageFile($id) {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
-                if (file_exists($file_name)) {
-                    $mime_type = mime_content_type($file_name);
-                    if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
-                        return false;
-                    }
+                if (file_exists($file_name) && !self::isValidUploadedImage($file_name)) {
+                    return false;
                 }
             }
             return true;
         }
         return false;
+    }
+
+    public static function checkUploadedImageOrPdfFile(string $id): bool {
+        if (isset($_FILES[$id])) {
+            foreach ($_FILES[$id]['tmp_name'] as $file_name) {
+                if (file_exists($file_name) && !self::isValidUploadedImageOrPdf($file_name)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static function isValidUploadedImage(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && str_starts_with($mime_type, 'image/') && getimagesize($file_name) !== false;
+    }
+
+    public static function isValidUploadedPdf(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && $mime_type === 'application/pdf';
+    }
+
+    public static function isValidUploadedImageOrPdf(string $file_name): bool {
+        return self::isValidUploadedImage($file_name) || self::isValidUploadedPdf($file_name);
     }
 
     /**
@@ -422,5 +445,49 @@ class Utils {
         }
         // Default to returning false
         return false;
+    }
+
+    /**
+     * Builds a full page identifier based on page type and parameters for a WebSocket page.
+     *
+     * @param array<string, string> $params Parameters array containing page, term, course, and other optional parameters
+     * @return string|null Full WebSocket page identifier or null if the inputs are invalid
+     */
+    public static function buildWebSocketPageIdentifier(array $params = []): ?string {
+        if (!isset($params['page'], $params['term'], $params['course'])) {
+            return null;
+        }
+
+        $page = $params['page'];
+        $prefix = $params['term'] . '-' . $params['course'] . '-';
+
+        switch ($page) {
+            case 'discussion_forum':
+            case 'office_hours_queue':
+                return $prefix . $page;
+            case 'chatrooms':
+                if (!isset($params['all_chatrooms']) && isset($params['chatroom_id'])) {
+                    return $prefix . $page . '-' . $params['chatroom_id'];
+                }
+                return $prefix . $page;
+            case 'polls':
+                if (!isset($params['poll_id']) || !isset($params['instructor'])) {
+                    return null;
+                }
+                $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                return $prefix . $page . '-' . $params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+            case 'grade_inquiry':
+                if (!isset($params['gradeable_id']) || !isset($params['submitter_id'])) {
+                    return null;
+                }
+                return $prefix . $page . '-' . $params['gradeable_id'] . '_' . $params['submitter_id'];
+            case 'grading':
+                if (!isset($params['gradeable_id'])) {
+                    return null;
+                }
+                return $prefix . $page . '-' . $params['gradeable_id'];
+            default:
+                return null;
+        }
     }
 }

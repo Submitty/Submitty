@@ -249,6 +249,7 @@ create_and_set  u=rwx,g=rwxs,o=   "$instructor"  "$ta_www_group"  "$course_dir/c
 
 # NOTE: on each student submission, files are written to these directories
 #               drwxr-s---        $PHP_USER           ta_www_group      submissions/
+#               drwxrws---        $DAEMON_USER        ta_www_group      submissions_processed/
 #               drwxr-s---        $PHP_USER           ta_www_group      config_upload/
 #               drwxr-s---        $PHP_USER           ta_www_group      site/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      results/
@@ -264,6 +265,7 @@ create_and_set  u=rwx,g=rwxs,o=   "$instructor"  "$ta_www_group"  "$course_dir/c
 #               drwxrws---        $PHP_USER           ta_www_group      rainbow_grades
 #               drwxrws---        $DAEMON_USER        ta_www_group      lichen/
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/submissions"
+create_and_set  u=rwx,g=rwxs,o=  "$DAEMON_USER"     "$ta_www_group"   "$course_dir/submissions_processed"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/forum_attachments"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/annotations"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/config_upload"
@@ -344,6 +346,15 @@ python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --cours
 if [[ $? -ne "0" ]] ; then
     PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE term='${semester}' AND course='${course}';"
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
+    exit
+fi
+
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('General Questions', 0, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Homework Help', 1, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Quizzes', 2, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Tests', 3, NULL);"
+if [[ "$?" -ne "0" ]] ; then
+    echo "ERROR: Failed create default discussion forum categories."
     exit
 fi
 

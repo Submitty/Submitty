@@ -59,7 +59,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool getEnforceSingleSession()
  * @method string getRegistrationSubsection()
  */
-class User extends AbstractModel {
+class User extends AbstractModel implements \JsonSerializable {
     /**
      * Access groups, lower is more access
      */
@@ -216,6 +216,15 @@ class User extends AbstractModel {
     /** @var array A cache of [gradeable id] => [anon id] */
     private $anon_id_by_gradeable = [];
 
+    /** @prop
+     * @var false|array<int, array{term: string, course: string}> List of courses where the user has instructor level access, or false if not loaded
+     */
+    protected $instructor_courses = false;
+
+    /** @prop
+     * @var string The user's preferred date format specifier, must be one of DateTimeFormat::SPECIFIERS */
+    protected $date_format = 'YMD';
+
     /**
      * User constructor.
      *
@@ -308,6 +317,8 @@ class User extends AbstractModel {
 
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
+        // Load user's preferred date format. Defaults to 'YMD' if not available
+        $this->date_format = isset($details['date_format']) ? $details['date_format'] : 'YMD';
     }
 
     /**
@@ -362,12 +373,26 @@ class User extends AbstractModel {
     }
 
     /**
-     * Get the UTC offset for this user's time zone.
-     *
-     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     * Set $this->date_format
+     * @param string $date_format Appropriate date format string from DateTimeFormat::SPECIFIERS
+     * @return bool True if date format was able to be updated, False otherwise
      */
-    public function getUTCOffset(): string {
-        return DateUtils::getUTCOffset($this->time_zone);
+    public function setDateFormat(string $date_format): bool {
+        if (in_array($date_format, DateTimeFormat::SPECIFIERS, true)) {
+            $result = $this->core->getQueries()->updateSubmittyUserDateFormat($this, $date_format);
+            if ($result === 1) {
+                $this->date_format = $date_format;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the user's preferred date format specifier.
+     */
+    public function getDateFormat(): string {
+        return $this->date_format;
     }
 
     /**
@@ -383,6 +408,13 @@ class User extends AbstractModel {
         else {
             return new \DateTimeZone($this->time_zone);
         }
+    }
+
+    /**
+     * Get the UTC offset for the user's selected time zone.
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
     }
 
     /**
@@ -698,13 +730,35 @@ class User extends AbstractModel {
                 $validator = new EmailValidator();
                 return $validator->isValid($data, new RFCValidation());
             case 'user_group':
-                //user_group check is a digit between 1 - 4.
+                //user_group check is either a digit between 1 - 4 or one of the strings:
+                // "Instructor"
+                // "Student"
+                // "Limited Access Grader (Mentor)"
+                // "Full Access Grader (Grad TA)"
+                if ($data === "Instructor") {
+                    return true;
+                }
+                if ($data === "Student") {
+                    return true;
+                }
+                if ($data === "Limited Access Grader (Mentor)") {
+                    return true;
+                }
+                if ($data === "Full Access Grader (Grad TA)") {
+                    return true;
+                }
+
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
+            case 'registration_subsection':
+                //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens, spaces.
+                // AND between 0 and 20 chars.
+                //"NULL" registration section should be validated as a datatype, not as a string.
+                return preg_match("~^(?!^null$)[a-z0-9_\- ]{1,20}$~i", $data) === 1 || is_null($data);
             case 'course_section_id':
                 //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
@@ -712,8 +766,8 @@ class User extends AbstractModel {
                 // Grading assignments must be comma-separated registration sections (containing only alpha, numbers, underscores or hyphens).
                 return preg_match("~^[0-9a-z_\-]+(,[0-9a-z_\-]+)*$~i", $data) === 1;
             case 'student_registration_type':
-                // Student registration type must be one of either 'graded','audit', or 'withdrawn
-                return preg_match("~^(graded|audit|withdrawn)$~", $data) === 1;
+                // Student registration type must be one of either 'graded','audit', 'withdrawn', or 'staff'
+                return preg_match("~^(graded|audit|withdrawn|staff)$~", $data) === 1;
             case 'user_password':
                 //Database password cannot be blank, no check on format
                 return $data !== "";
@@ -725,29 +779,60 @@ class User extends AbstractModel {
         }
     }
 
-    public static function constructNotificationSettings($details) {
+    /**
+     * Construct the notification settings for a user.
+     *
+     * @param array<string, bool> $details
+     * @return array<string, bool>
+     */
+    public static function constructNotificationSettings($details): array {
         $notification_settings = [];
+
+        /* Required */
+        $notification_settings['all_announcements'] = true;
+        $notification_settings['all_announcements_email'] = true;
+        $notification_settings['all_reply_thread'] = true;
+        $notification_settings['all_reply_thread_email'] = true;
+        $notification_settings['all_my_post_altered'] = true;
+        $notification_settings['all_my_post_altered_email'] = true;
+
+        $notification_settings['grade_inquiry_submitted'] = true;
+        $notification_settings['grade_inquiry_submitted_email'] = true;
+        $notification_settings['grade_inquiry_post'] = true;
+        $notification_settings['grade_inquiry_post_email'] = true;
+        $notification_settings['grade_inquiry_resolved'] = true;
+        $notification_settings['grade_inquiry_resolved_email'] = true;
+        $notification_settings['grade_inquiry_resolved_reopened'] = true;
+        $notification_settings['grade_inquiry_resolved_reopened_email'] = true;
+
+        /* Optional */
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
-        $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
-        $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
-        $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
-        $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
-        $notification_settings['team_invite'] = $details['team_invite'] ?? true;
-        $notification_settings['team_joined'] = $details['team_joined'] ?? true;
-        $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
-        $notification_settings['self_notification'] = $details['self_notification'] ?? false;
-        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
+        $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
+        $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
+        $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
         $notification_settings['all_new_posts_email'] = $details['all_new_posts_email'] ?? false;
+        $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
         $notification_settings['all_modifications_forum_email'] = $details['all_modifications_forum_email'] ?? false;
+
+        $notification_settings['team_invite'] = $details['team_invite'] ?? true;
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
+        $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
+        $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
-        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
-        $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
+        $notification_settings['all_gradeable_releases'] = $details['all_gradeable_releases'] ?? true;
+        $notification_settings['all_gradeable_releases_email'] = $details['all_gradeable_releases_email'] ?? false;
+
+        $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
+
         return $notification_settings;
     }
 
@@ -764,5 +849,26 @@ class User extends AbstractModel {
      */
     public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
+
+    /**
+     * @return array<int, array{term: string, course: string}> List of courses where the user has instructor level access
+     */
+    public function getInstructorCourses() {
+        if ($this->instructor_courses === false) {
+            $this->instructor_courses = $this->core->getQueries()->getInstructorLevelAccessCourse($this->id);
+        }
+        return $this->instructor_courses;
+    }
+
+    /**
+     * @return array{id: string, displayedGivenName: string, displayedFamilyName: string}
+     */
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->getId(),
+            'displayedGivenName' => $this->getDisplayedGivenName(),
+            'displayedFamilyName' => $this->getDisplayedFamilyName(),
+        ];
     }
 }

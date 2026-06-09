@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { buildUrl } from '../../../ts/utils/server';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import Markdown from './Markdown.vue';
 
 interface Props {
     markdownAreaId: string;
     markdownAreaValue: string;
+    markdownStatusId?: string;
     class?: string;
     dataPreviousComment?: string;
     initializePreview?: boolean;
@@ -16,7 +17,6 @@ interface Props {
     placeholder?: string;
     previewDivId?: string | null;
     renderHeader?: boolean;
-    showToggle?: boolean;
     rootClass?: string;
     textareaMaxlength?: string | number;
     required?: boolean;
@@ -27,7 +27,6 @@ interface Props {
     textareaOnChange?: string;
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
-    renderMarkdown?: boolean;
     toggleButtonId?: string;
 }
 
@@ -46,6 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const moreMenuRef = ref<HTMLDetailsElement | null>(null);
 const mode = ref('edit');
 const content = ref(props.markdownAreaValue);
 const isLoadingPreview = ref(false);
@@ -70,49 +70,10 @@ const previewStyle = computed(() => ({
     maxHeight: props.maxHeight,
 }));
 
-async function setMode(newMode: 'edit' | 'preview') {
+function setMode(newMode: 'edit' | 'preview') {
     mode.value = newMode;
     if (newMode === 'preview') {
         emit('preview', content.value ?? '');
-        await fetchPreviewContent();
-    }
-}
-
-const previewContent = ref('');
-
-async function fetchPreviewContent() {
-    if (!content.value) {
-        previewContent.value = '';
-        return;
-    }
-
-    isLoadingPreview.value = true;
-    try {
-        const response = await fetch(buildUrl(['markdown']), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                content: content.value,
-                csrf_token: window.csrfToken,
-            }),
-        });
-
-        if (response.ok) {
-            const html = await response.text();
-            previewContent.value = html;
-        }
-        else {
-            previewContent.value = 'Error loading preview';
-        }
-    }
-    catch (error) {
-        console.log('Error fetching markdown preview:', error);
-        previewContent.value = 'Error loading preview';
-    }
-    finally {
-        isLoadingPreview.value = false;
     }
 }
 
@@ -175,6 +136,15 @@ function addMarkdown(type: string) {
     }, 0);
 
     emit('add-markdown', { type, textarea: textareaRef.value });
+}
+
+function addMarkdownFromMenu(type: string) {
+    addMarkdown(type);
+    moreMenuRef.value?.removeAttribute('open');
+}
+
+function closeMoreMenu() {
+    moreMenuRef.value?.removeAttribute('open');
 }
 
 function handleKeyup(event: Event) {
@@ -249,33 +219,53 @@ function handleInput(event: Event) {
     }
 }
 
-onMounted(async () => {
+onMounted(() => {
     if (props.initializePreview) {
-        await setMode('preview');
+        setMode('preview');
     }
+
+    window.addEventListener('resize', closeMoreMenu);
 });
-const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
-function toggleHeader() {
-    showHeader.value = !showHeader.value;
-    window.Cookies.set('markdown_enabled', showHeader.value ? '1' : '0', { path: '/', expires: 365 });
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', closeMoreMenu);
+});
+
+const showHeader = ref(!!props.renderHeader);
+function toggleMarkdown() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            markdownStatusElement.value = +markdownStatusElement.value ? '0' : '1';
+            syncMarkdownToggle();
+        }
+    }
+}
+
+function syncMarkdownToggle() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            const status = markdownStatusElement.value === '1';
+            showHeader.value = status;
+        }
+    }
 }
 </script>
 
 <template>
   <div
-    v-if="showToggle"
+    v-if="markdownStatusId"
     class="button-row"
   >
     <div
       :id="toggleButtonId"
       role="button"
       class="markdown-toggle key_to_click"
-      :class="[
-        showHeader ? 'markdown-active' : 'markdown-inactive'
-      ]"
+      :class="{ 'markdown-active': showHeader, 'markdown-inactive': !showHeader }"
       tabindex="0"
       title="Render markdown"
-      @click="toggleHeader"
+      @click="toggleMarkdown"
     >
       <i class="fab fa-markdown fa-2x" />
     </div>
@@ -291,9 +281,10 @@ function toggleHeader() {
   <div
     :class="[rootClass]"
     class="markdown-area fill-available"
+    @click="syncMarkdownToggle"
   >
     <div
-      v-if="props.renderHeader || showHeader"
+      v-if="showHeader"
       :id="markdownHeaderId ?? undefined"
       class="markdown-area-header"
       :data-mode="mode"
@@ -382,6 +373,55 @@ function toggleHeader() {
         >
           Blockquote <i class="fas fa-quote-left fa-1x" />
         </button>
+        <details
+          ref="moreMenuRef"
+          class="markdown-more-menu"
+        >
+          <summary
+            class="btn btn-default btn-markdown markdown-more-toggle"
+            title="More markdown tools"
+            aria-label="More markdown tools"
+          >
+            <i class="fas fa-ellipsis-h fa-1x" />
+          </summary>
+          <div class="markdown-more-dropdown">
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-link"
+              @click="addMarkdownFromMenu('link')"
+            >
+              Link
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-code"
+              @click="addMarkdownFromMenu('code')"
+            >
+              Code
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-bold"
+              @click="addMarkdownFromMenu('bold')"
+            >
+              Bold
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-italic"
+              @click="addMarkdownFromMenu('italic')"
+            >
+              Italics
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-blockquote"
+              @click="addMarkdownFromMenu('blockquote')"
+            >
+              Blockquote
+            </button>
+          </div>
+        </details>
       </div>
     </div>
     <div class="markdown-area-body">
@@ -415,14 +455,14 @@ function toggleHeader() {
         @change="handleChange"
         @input="handleInput"
       />
-      <!-- eslint-disable vue/no-v-html -->
       <div
-        v-show="mode === 'preview'"
+        v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
         class="fill-available markdown-preview"
         :style="previewStyle"
-        v-html="previewContent"
-      />
+      >
+        <Markdown :content="content" />
+      </div>
     </div>
   </div>
 </template>

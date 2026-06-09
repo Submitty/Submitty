@@ -59,6 +59,7 @@ class AuthenticationController extends AbstractController {
         }
 
         Utils::setCookie('submitty_session', '', time() - 3600);
+        Utils::setCookie('submitty_websocket_token', '', time() - 3600);
         // Remove all history for checkpoint gradeables
         foreach (array_keys($_COOKIE) as $cookie) {
             if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8

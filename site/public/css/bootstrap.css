@@ -615,7 +615,7 @@ input[type="button"].btn-block {
     text-align: center;
 
     white-space: nowrap;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     vertical-align: baseline;
     border-radius: 0.25em;
 }
@@ -1041,6 +1041,6 @@ input[type="button"].btn-block {
 .btn-group-toggle > .btn-group > .btn input[type="radio"],
 .btn-group-toggle > .btn-group > .btn input[type="checkbox"] {
     position: absolute;
-    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     pointer-events: none;
 }

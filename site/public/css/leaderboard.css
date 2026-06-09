@@ -9,15 +9,17 @@
     background-color: var(--default-white);
     color: var(--text-black);
     border-radius: 6px;
+    /* stylelint-disable-next-line color-named */
     border: 1px solid gray;
     margin: 0 0.2rem 0.1rem;
     margin-right: 0;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .leaderboard-nav.normal-btn {
     background-color: var(--default-white);
     color: var(--text-black);
+    /* stylelint-disable-next-line color-named */
     border: 1px solid gray;
 }
 
@@ -30,10 +32,12 @@
 .leaderboard-nav.unselected-btn:hover {
     background-color: var(--standard-pastel-blue);
     color: var(--text-black);
+    /* stylelint-disable-next-line color-named */
     border: 1px solid gray;
 }
 
 #leaderboard-table {
+    /* stylelint-disable-next-line color-named */
     border-top: 1px solid gray;
     margin-top: 0.5rem;
 }

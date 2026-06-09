@@ -11,10 +11,16 @@
 .pdfViewer {
     display: flex;
     flex-direction: column;
+    --pdf-scale: 1;
 }
 
 .pdfViewer .canvasWrapper {
     box-shadow: 0 0 3px var(--standard-light-medium-gray);
+}
+
+.pdfViewer .canvasWrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .pdfViewer .page {

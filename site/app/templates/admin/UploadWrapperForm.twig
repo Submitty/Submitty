@@ -22,23 +22,23 @@
 </div>
 
 {% macro table_file(wrapper_files, file, name, type, class, aria_labelledby_id, csrf_token, upload_url, delete_url) %}
-    <tr class="{{ class }}">
+    <tr class="{{ class }}" data-testid="{{ file }}">
         <td id="name_{{ aria_labelledby_id }}">{{ name }}</td>
         <td id="type_{{ aria_labelledby_id }}">{{ type }}</td>
         <td>
             <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="location" value="{{ file }}">
-                <input type="file" class="wrapper_upload" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
-                <input type="submit" class="btn btn-default" value="Upload" />
+                <input type="file" class="wrapper_upload" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}" data-testid="{{ file }}-upload-input" />
+                <input type="submit" class="btn btn-default" value="Upload" data-testid="{{ file }}-upload-button" />
             </form>
         </td>
-        <td>
+        <td data-testid="{{ file }}-current-file">
             {% if wrapper_files[file] is defined and wrapper_files[file] != null %}
                 <form action="{{ delete_url }}" method="post">
                     <input type="hidden" name="location" value="{{ file }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
+                    <input type="submit" class="btn btn-danger" value="Delete" data-testid="{{ file }}-delete-button">&nbsp;
                     {{ wrapper_files[file] }}
                 </form>
             {% endif %}

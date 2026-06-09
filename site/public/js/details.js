@@ -1,10 +1,11 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filterWithdrawnUpdate */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
+    updateToggleButtonText();
     const collapsedSections = Cookies.get('collapsed_sections');
     collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
@@ -88,6 +89,22 @@ function hideGradeableMessage() {
     message.css('display', 'none');
 }
 
+function getCollapsedSections() {
+    return JSON.parse(Cookies.get('collapsed_sections') || '[]');
+}
+
+function updateToggleButtonText() {
+    const collapsed = getCollapsedSections();
+    const button = $('#toggle-all-sections-btn');
+
+    if (collapsed.length === 0) {
+        button.text('Collapse All Sections');
+    }
+    else {
+        button.text('Expand All Sections');
+    }
+}
+
 function updateCollapsedSections() {
     Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
 }
@@ -99,6 +116,7 @@ function expandAllSections() {
     });
     collapseItems.clear();
     updateCollapsedSections();
+    updateToggleButtonText();
 }
 
 function collapseAllSections() {
@@ -109,6 +127,18 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
+    updateToggleButtonText();
+}
+
+function toggleAllSections() {
+    const collapsed = getCollapsedSections();
+
+    if (collapsed.length === 0) {
+        collapseAllSections();
+    }
+    else {
+        expandAllSections();
+    }
 }
 
 function inquiryUpdate() {
@@ -128,20 +158,6 @@ function inquiryUpdate() {
     }
 }
 
-function filterWithdrawnUpdate() {
-    const filterCheckbox = document.getElementById('toggle-filter-withdrawn');
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-
-    if (filterCheckbox.checked) {
-        withdrawnElements.hide();
-        Cookies.set('filter_withdrawn_student', 'true');
-    }
-    else {
-        withdrawnElements.show();
-        Cookies.set('filter_withdrawn_student', 'false');
-    }
-}
-
 // Ensures all filters and checkboxes remain the same on page reload.
 window.addEventListener('DOMContentLoaded', () => {
     const inquiryFilterStatus = Cookies.get('inquiry_status');
@@ -154,17 +170,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const assignedFilterStatus = Cookies.get('view');
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
-        // Anonymous Mode
-        const anonFilterBox = document.getElementById('toggle-anon-students');
-        const currentGradeableCookiePath = `anon_mode_${Cookies.get('current_gradeable_path')}`;
-        const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
-        anonFilterBox.checked = (anonFilterStatus === 'on');
-
         // Withdrawn Students
-        const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+
         if (!is_team_assignment) { // Toggle not available on team assignments
-            if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {
+            if (withdrawnFilterStatus === 'omit') {
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
             }

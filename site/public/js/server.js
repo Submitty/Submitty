@@ -1,4 +1,4 @@
-/* exported changeDiffView addMarkdownCode renderMarkdown previewMarkdown getFocusableElements popOutSubmittedFile
+/* exported changeDiffView addMarkdownCode renderMarkdown previewMarkdown getFocusableElements openSubmittedFile
    openPopUp enableTabsInTextArea submitAJAX getFileExtension toggleSidebar updateSidebarPreference detectColorScheme
    setAllRelease deleteOverriddenGrades flagUserImage peerFeedbackUpload resizeNoScrollTextareas checkBulkProgress
    updateTheme openSetAllRelease setChildNewDateTime escapeSpecialChars loadOverriddenGrades updateGradeOverride
@@ -445,15 +445,43 @@ function newEditCourseMaterialsForm(tag) {
         }
     }
 
-    editFilePathRecommendations();
-    if (is_link === 1) {
-        path.val(decodeURIComponent(file_path.substring(file_path.indexOf('course_materials/') + 17).replace('link-', '')));
-    }
-    else {
-        path.val(file_path.substring(1));
-    }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 
+    // Set the directory value after select2 is initialized
+    const pathElement = $('#new-file-name');
+    let valueToSet;
+    // Extract directory path from full path for both files and links
+    const lastSlashIndex = file_path.lastIndexOf('/');
+
+    if (lastSlashIndex === -1) {
+        // Material is in root directory
+        valueToSet = '';
+    }
+    else {
+        // Extract directory path relative to course_materials
+        const fullDirPath = file_path.substring(0, lastSlashIndex);
+        const courseMaterialsIndex = fullDirPath.indexOf('course_materials/');
+
+        if (courseMaterialsIndex !== -1) {
+            valueToSet = fullDirPath.substring(courseMaterialsIndex + 17);
+        }
+        else {
+            valueToSet = '';
+        }
+    }
+    // Wait for select2 to be fully initialized by checking for the select2 container
+    const waitForSelect2 = () => {
+        if (pathElement.next('.select2-container').length > 0) {
+            // Select2 is initialized, set the value
+            pathElement.val(valueToSet).trigger('change');
+        }
+        else {
+            // Not ready yet, try again
+            setTimeout(waitForSelect2, 50);
+        }
+    };
+
+    setTimeout(waitForSelect2, 100);
     $('#material-edit-form', form).attr('data-id', id);
     $('#edit-picker', form).attr('value', release_time);
     $('#edit-sort', form).attr('value', dir);
@@ -469,8 +497,16 @@ function newEditCourseMaterialsForm(tag) {
 function editFilePathRecommendations() {
     const fileNameInput = $('#edit-title');
     const fileName = fileNameInput.val();
-
     const options = document.getElementById('new-file-name').options;
+    // Update the input display to show just the filename
+    if (fileName.trim().length > 0) {
+        const lastSlash = fileName.lastIndexOf('/');
+        const extractedFileName = lastSlash !== -1 ? fileName.substring(lastSlash + 1) : fileName;
+        fileNameInput.val(extractedFileName);
+    }
+    else {
+        return;
+    }
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
@@ -834,7 +870,7 @@ function downloadTestCaseResult(testcase, name, version, gradeable, user) {
 }
 
 function downloadStudentAnnotations(url) {
-    window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
 }
 
 function downloadSubmissionZip(grade_id, submitter_id, version, origin = null, is_anon = false) {
@@ -983,22 +1019,26 @@ function toggleCMFolders(open) {
 }
 
 function openUrl(url) {
-    window.open(url, '_blank', 'toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600');
+    window.open(url, '_blank');
     return false;
 }
 
 function changeName(element, user, visible_username, anon) {
-    const new_element = element.getElementsByTagName('strong')[0];
+    const new_element = element.getElementsByClassName('author-name')[0];
+    if (!new_element) {
+        return;
+    }
+
     // eslint-disable-next-line eqeqeq
     anon = anon == 'true';
     icon = element.getElementsByClassName('fas fa-eye')[0];
     if (icon === undefined) {
         icon = element.getElementsByClassName('fas fa-eye-slash')[0];
         if (anon) {
-            new_element.style.color = 'black';
+            new_element.style.removeProperty('color');
             new_element.style.fontStyle = 'normal';
         }
-        new_element.textContent = visible_username;
+        new_element.childNodes[0].nodeValue = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
@@ -1119,25 +1159,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
     }
 }
 
-/**
- * TODO: This may be unused.  Check, and potentially remove this function.
- */
-function batchImportJSON(url, csrf_token) {
-    $.ajax(url, {
-        type: 'POST',
-        data: {
-            csrf_token: csrf_token,
-        },
-    })
-        .done((response) => {
-            window.alert(response);
-            location.reload(true);
-        })
-        .fail(() => {
-            window.alert('[AJAX ERROR] Refresh page');
-        });
-}
-
 function submitAJAX(url, data, callbackSuccess, callbackFailure) {
     $.ajax(url, {
         type: 'POST',
@@ -1208,27 +1229,27 @@ function enableTabsInTextArea(jQuerySelector) {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function (event) {
-        if (event.which === 27) { // ESC was pressed, proceed to next control element.
-            // Next control element may not be a sibling, so .next().focus() is not guaranteed
-            // to work.  There is also no guarantee that controls are properly wrapped within
-            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
-            // focus to the next control in the list.
-            const controls = $(':tabbable').filter(':visible');
-            controls.eq(controls.index(this) + 1).focus();
-            return false;
-        }
-        else if (!event.shiftKey && event.code === 'Tab') { // TAB was pressed without SHIFT, text indent
-            const text = this.value;
-            const beforeCurse = this.selectionStart;
-            const afterCurse = this.selectionEnd;
-            this.value = `${text.substring(0, beforeCurse)}\t${text.substring(afterCurse)}`;
-            this.selectionStart = this.selectionEnd = beforeCurse + 1;
-            return false;
-        }
-        // No need to test for SHIFT+TAB as it is not being redefined.
-    });
 }
+
+// Use event delegation to handle TAB/ESC for all forum textareas,
+// including those dynamically added when switching threads or loading
+// new posts, ensuring consistent behavior regardless of how the
+// textarea was inserted into the DOM.
+
+$(document).on('keydown', 'textarea.thread_post_content', function (event) {
+    if (event.which === 27) {
+        const controls = $(':tabbable').filter(':visible');
+        controls.eq(controls.index(this) + 1).focus();
+        return false;
+    }
+    else if (!event.shiftKey && event.code === 'Tab') {
+        const beforeCurse = this.selectionStart;
+        this.setRangeText('\t', this.selectionStart, this.selectionEnd, 'end');
+        this.selectionStart = this.selectionEnd = beforeCurse + 1;
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+        return false;
+    }
+});
 
 function confirmBypass(str, redirect) {
     if (confirm(str)) {
@@ -1257,6 +1278,10 @@ function updateGradeOverride() {
             }
             if (json['status'] === 'fail') {
                 displayErrorMessage(json['message']);
+                return;
+            }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
                 return;
             }
             refreshOnResponseOverriddenGrades(json);
@@ -1308,16 +1333,25 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
-            const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
+            const row = `
+                <tr data-testid="grade-row-${elem['user_id']}">
+                    <td class="align-left" data-testid="student-id">${elem['user_id']}</td>
+                    <td class="align-left" data-testid="given-name">${elem['user_givenname']}</td>
+                    <td class="align-left" data-testid="family-name">${elem['user_familyname']}</td>
+                    <td class="align-left" data-testid="marks">${elem['marks']}</td>
+                    <td class="align-left" data-testid="comment">${elem['comment']}</td>
+                    <td class="align-left">${delete_button}</td>
+                </tr>
+            `;
+            $('#grade-override-table').append(row);
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
+function deleteOverriddenGrades(user_id, g_id, option) {
     const url = buildCourseUrl(['grade_override', g_id, 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
@@ -1327,11 +1361,17 @@ function deleteOverriddenGrades(user_id, g_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1343,6 +1383,38 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), $('#g_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val('');
+    }
+}
+
+function overridePopup(json) {
+    $('.popup-form').hide();
+    $('#override_team_popup').remove();
+
+    // Generate a unique mount ID for the dynamic Vue app until we implement a uniform Vue framework to manage mounting.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time.
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args,
+    );
 }
 
 /**
@@ -1636,10 +1708,14 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
     });
 }
 
-function popOutSubmittedFile(html_file, url_file) {
+function openSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
-    if (url_file.includes('submissions')) {
+
+    if (url_file.includes('submissions_processed')) {
+        directory = 'submissions_processed';
+    }
+    else if (url_file.includes('submissions')) {
         directory = 'submissions';
     }
     else if (url_file.includes('results_public')) {
@@ -1658,10 +1734,12 @@ function popOutSubmittedFile(html_file, url_file) {
         directory = 'attachments';
     }
     file_path = `${display_file_url}?dir=${encodeURIComponent(directory)}&file=${encodeURIComponent(html_file)}&path=${encodeURIComponent(url_file)}&ta_grading=true`;
+
+    // If #submission_browser exists, the view is a grading context and the file should open in a new tab.
     if ($('#submission_browser').length > 0) {
         file_path += `&gradeable_id=${$('#submission_browser').data('gradeable-id')}`;
     }
-    window.open(file_path, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(file_path, '_blank');
     return false;
 }
 

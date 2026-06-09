@@ -147,3 +147,36 @@ export function verifyWebSocketFunctionality(
         });
     });
 }
+
+/**
+ * Verifies that the WebSocket server is connected and the system message is hidden,
+ * where the message is displayed for authentication, connection, or internal server errors.
+ */
+export function verifyWebSocketStatus(timeout = 10000, interval = 100) {
+    const start = Date.now();
+
+    const pollSocket = () => {
+        return cy.window().then((win) => {
+            const client = win.socketClient?.client;
+
+            if (Date.now() - start > timeout) {
+                throw new Error(`WebSocket did not open within ${timeout}ms`);
+            }
+
+            if (!client) {
+                // Retry for the initialization of the socket client
+                return Cypress.Promise.delay(interval).then(pollSocket);
+            }
+
+            if (client.readyState === WebSocket.OPEN) {
+                // Double check that the system message is hidden
+                return cy.get('#socket-server-system-message').should('be.hidden');
+            }
+
+            // Retry after a short wait in case we are attempting to establish a stable connection
+            return Cypress.Promise.delay(interval).then(pollSocket);
+        });
+    };
+
+    return pollSocket();
+}

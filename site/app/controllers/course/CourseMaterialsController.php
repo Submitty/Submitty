@@ -148,8 +148,14 @@ class CourseMaterialsController extends AbstractController {
 
         if ($cm->getType() === DIR) {
             $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+            // Directory-boundary check (path + '/') to avoid prefix collisions
+            // to only remove DB entries that are the directory itself or descendants
+            $normalized_path = rtrim($path, '/') . '/';
+
             foreach ($all_files as $file) {
-                if (str_starts_with(pathinfo($file->getPath(), PATHINFO_DIRNAME), $path) || ($file->getPath() === $path)) {
+                $file_dir = pathinfo($file->getPath(), PATHINFO_DIRNAME);
+
+                if ($file->getPath() === $path || str_starts_with($file_dir . '/', $normalized_path)) {
                     $this->core->getCourseEntityManager()->remove($file);
                 }
             }
@@ -164,24 +170,9 @@ class CourseMaterialsController extends AbstractController {
         else {
             $success = unlink($path);
         }
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        // delete the topmost parent folder that's empty (contains no files)
-        if (pathinfo($path, PATHINFO_DIRNAME) !== $base_path) {
-            $empty_folders = [];
-            FileUtils::getTopEmptyDir($path, $base_path, $empty_folders);
-            if (count($empty_folders) > 0) {
-                $path = $empty_folders[0];
-                $success = $success && FileUtils::recursiveRmdir($path);
-                if (!isset($all_files)) {
-                    $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
-                }
-                foreach ($all_files as $file) {
-                    if (str_starts_with($file->getPath(), $path)) {
-                        $this->core->getCourseEntityManager()->remove($file);
-                    }
-                }
-            }
-        }
+
+        $this->cleanupEmptyDirectoriesAfterDeletion($path);
+
         $this->core->getCourseEntityManager()->flush();
         if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
@@ -288,7 +279,10 @@ class CourseMaterialsController extends AbstractController {
     private function setFileTimeStamp(CourseMaterial $courseMaterial, array $courseMaterials, \DateTime $dateTime) {
         if ($courseMaterial->isDir()) {
             foreach ($courseMaterials as $cm) {
-                if (str_starts_with(pathinfo($cm->getPath(), PATHINFO_DIRNAME), $courseMaterial->getPath()) && $cm->getPath() !== $courseMaterial->getPath()) {
+                // Directory-boundary matching to avoid prefix collisions
+                $normalized_main = rtrim($courseMaterial->getPath(), '/') . '/';
+
+                if (str_starts_with($cm->getPath(), $normalized_main) && $cm->getPath() !== $courseMaterial->getPath()) {
                     $this->setFileTimeStamp($cm, $courseMaterials, $dateTime);
                 }
             }
@@ -321,7 +315,7 @@ class CourseMaterialsController extends AbstractController {
         $courseMaterials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findAll();
 
-        if ($courseMaterial === null || empty($courseMaterials)) {
+        if ($courseMaterial === null || count($courseMaterials) === 0) {
             $has_error = true;
         }
         else {
@@ -340,7 +334,9 @@ class CourseMaterialsController extends AbstractController {
 
         foreach ($course_materials as $course_material) {
             $course_material_path = $course_material->getPath();
-            $is_descendant = str_starts_with($course_material_path, $main_path . '/');
+            // Normalize the main path to ensure an exact directory boundary when checking descendants
+            $normalized_main = rtrim($main_path, '/') . '/';
+            $is_descendant = str_starts_with($course_material_path, $normalized_main);
 
             if ($is_descendant) {
                 $this->handleSectionLock($course_material, $_POST);
@@ -394,51 +390,59 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-            $requested_path = $_POST['file_path'];
+            $requested_path = $_POST['file_path'] ?? '';
+
             if (strpos($requested_path, '/') === 0) {
                 return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
             }
-            $new_path = FileUtils::joinPaths($upload_path, $requested_path);
+            if (strpos($requested_path, '.') !== false) {
+                return JsonResponse::getErrorResponse("Directory paths cannot contain '.' character.");
+            }
+            $target_directory = FileUtils::joinPaths($upload_path, $requested_path);
 
             if (isset($_POST['title'])) {
                 $file_name = $_POST['title'];
-                $directory = dirname($new_path);
-                $new_path = FileUtils::joinPaths($directory, $file_name);
+
+                if ($file_name === '') {
+                    return JsonResponse::getErrorResponse("Filename cannot be empty.");
+                }
+                $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
             }
             else {
-                $file_name = basename($new_path);
+                $file_name = basename($path);
+                $new_file_path = FileUtils::joinPaths($target_directory, $file_name);
             }
-            if ($path !== $new_path) {
-                if (!FileUtils::ValidPath($new_path)) {
+
+            if ($path !== $new_file_path) {
+                if (!FileUtils::ValidPath($new_file_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
-                if (($overflow = strlen($new_path) - self::MAX_PATH_LENGTH) > 0) {
+                if (dirname($new_file_path) === $path) {
+                    return JsonResponse::getErrorResponse("Cannot move a file into a directory with the same name as the file.");
+                }
+
+                if (($overflow = strlen($new_file_path) - self::MAX_PATH_LENGTH) > 0) {
                     return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
+                // Ensure target directory exists
+                if (!is_dir($target_directory)) {
+                    if (!FileUtils::createDir($target_directory, true)) {
+                        return JsonResponse::getErrorResponse("Failed to create target directory");
+                    }
+                }
                 $requested_path = explode("/", $requested_path);
-                if (count($requested_path) > 1) {
-                    $requested_path_directories = $requested_path;
-                    array_pop($requested_path_directories);
-                    $requested_path_directories = implode("/", $requested_path_directories);
-                    $full_dir_path = explode("/", $new_path);
+
+                if (count($requested_path) > 0 && $requested_path[0] !== '') {
+                    $requested_path_string = implode("/", $requested_path);
+                    $full_dir_path = explode("/", $new_file_path);
                     array_pop($full_dir_path);
                     $full_dir_path = implode("/", $full_dir_path);
 
-
-
-                    //ADD IN NEW DIRECTORIES IF IT DOESN'T EXIST
-
-
-                    if (!FileUtils::createDir($full_dir_path, true)) {
-                        return JsonResponse::getErrorResponse("Invalid requested path");
-                    }
-
-
+                    // Add new directory to database if new.
                     $dirs_to_make = [];
-                    $this->addDirs($requested_path_directories, $upload_path, $dirs_to_make);
-
+                    $this->addDirs($requested_path_string, $upload_path, $dirs_to_make);
 
                     if ($dirs_to_make != null) {
                         $new_paths = [];
@@ -478,9 +482,9 @@ class CourseMaterialsController extends AbstractController {
                 if (isset($_POST['overwrite']) && $_POST['overwrite'] === 'true') {
                     $overwrite = true;
                 }
-
-                $dir = dirname($new_path);
+                $dir = dirname($new_file_path);
                 $clash_resolution = $this->resolveClashingMaterials($dir, [$file_name], $overwrite);
+
                 if ($clash_resolution !== true) {
                     return JsonResponse::getErrorResponse(
                         'Name clash',
@@ -488,10 +492,22 @@ class CourseMaterialsController extends AbstractController {
                     );
                 }
 
-                rename($course_material->getPath(), $new_path);
-                $course_material->setPath($new_path);
+                if (!rename($course_material->getPath(), $new_file_path)) {
+                    return JsonResponse::getErrorResponse("Failure to rename filepath.");
+                }
+                $course_material->setPath($new_file_path);
+
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
+                }
+
+                // Clean up empty directories after moving the file
+                try {
+                    $this->cleanupEmptyDirectoriesAfterDeletion($path);
+                }
+                catch (\Exception $e) {
+                    // Log the error but do not fail the operation
+                    $this->core->addErrorMessage("Warning: Failed to cleanup empty directories: " . $e->getMessage());
                 }
             }
         }
@@ -523,6 +539,9 @@ class CourseMaterialsController extends AbstractController {
         $path = $this->getRequestedPath($upload_path, $_POST['requested_path']);
         if ($path === null) {
             return JsonResponse::getErrorResponse("Invalid requested path");
+        }
+        if (strpos($path, '.') !== false) {
+            return JsonResponse::getErrorResponse("Directory paths cannot contain '.' character.");
         }
         $details['path'][0] = $path;
         $requested_path = $details['path'][0];
@@ -562,7 +581,7 @@ class CourseMaterialsController extends AbstractController {
         if (isset($title) && isset($url_url)) {
             $details['type'][0] = CourseMaterial::LINK;
             $final_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-            if (!empty($requested_path)) {
+            if ($requested_path !== '') {
                 $final_path = FileUtils::joinPaths($final_path, $requested_path);
                 if (!FileUtils::createDir($final_path)) {
                     return JsonResponse::getErrorResponse("Failed to make path.");
@@ -582,7 +601,9 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
             }
 
-            FileUtils::writeFile($details['path'][0], "");
+            if (!FileUtils::writeFile($details['path'][0], "")) {
+                return JsonResponse::getErrorResponse("Failure to write file");
+            }
         }
         else {
             $uploaded_files = [];
@@ -590,7 +611,7 @@ class CourseMaterialsController extends AbstractController {
                 $uploaded_files[1] = $_FILES["files1"];
             }
 
-            if (empty($uploaded_files) && !(isset($url_url) && isset($title))) {
+            if (count($uploaded_files) === 0 && !(isset($url_url) && isset($title))) {
                 return JsonResponse::getErrorResponse("No files were submitted.");
             }
 
@@ -619,7 +640,7 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("Failed to make image path.");
             }
             // create nested path
-            if (!empty($requested_path)) {
+            if ($requested_path !== '') {
                 $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
                 if (!FileUtils::createDir($upload_nested_path, true)) {
                     return JsonResponse::getErrorResponse("Failed to make image path.");
@@ -712,7 +733,9 @@ class CourseMaterialsController extends AbstractController {
                                 );
                             }
 
-                            $zip->extractTo($upload_path, $entries);
+                            if (!$zip->extractTo($upload_path, $entries)) {
+                                return JsonResponse::getErrorResponse('Failed to extract zip');
+                            }
 
                             foreach ($zfiles as $zfile) {
                                 $path = FileUtils::joinPaths($upload_path, $zfile);
@@ -892,7 +915,7 @@ class CourseMaterialsController extends AbstractController {
                 $sections = explode(",", $post_data['sections']);
 
                 // If no sections are selected
-                if (empty($sections[0])) {
+                if (count($sections) === 0 || $sections[0] === '') {
                     $result['success'] = false;
                     $result['error'] = "Select at least one section";
                     return $result;
@@ -927,6 +950,38 @@ class CourseMaterialsController extends AbstractController {
         }
 
         return $result;
+    }
+
+    /**
+     * Cleans up empty directories after a file or directory deletion.
+     * This method handles the removal of empty parent directories and updates the database accordingly.
+     *
+     * @param string $deleted_path The path that was deleted
+     */
+    private function cleanupEmptyDirectoriesAfterDeletion(string $deleted_path): void {
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+
+        // Delete the topmost parent folder that's empty (contains no files)
+        if (pathinfo($deleted_path, PATHINFO_DIRNAME) !== $base_path) {
+            $empty_folders = [];
+            FileUtils::getTopEmptyDir($deleted_path, $base_path, $empty_folders);
+
+            if (count($empty_folders) > 0) {
+                $empty_path = $empty_folders[0];
+                FileUtils::recursiveRmdir($empty_path);
+
+                // Remove database entries for the empty folders
+                $all_files = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findAll();
+                $normalized_empty = rtrim($empty_path, '/') . '/';
+
+                foreach ($all_files as $file) {
+                    // Ensure only exact or descendant paths are removed (avoid prefix collisions)
+                    if ($file->getPath() === $empty_path || str_starts_with($file->getPath(), $normalized_empty)) {
+                        $this->core->getCourseEntityManager()->remove($file);
+                    }
+                }
+            }
+        }
     }
 
     /**
