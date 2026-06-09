@@ -111,7 +111,7 @@ describe('TA Grading Panel Switcher', () => {
         cy.visit('/courses/s26/sample/gradeable/no_due_date_no_release/grading/grade?who_id=FI9yKu3j9DrXWt5&sort=id&direction=ASC');
 
         cy.wrap(layouts).each((layout) => {
-            cy.get('#two-panel-mode-btn').should('be.visible').click();
+            cy.get('[data-testid="panel-selector-toggle"]').should('be.visible').click();
             cy.get(layout.selector).should('be.visible').click();
 
             if (!layout.expectedOptions) {
