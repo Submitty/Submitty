@@ -6,6 +6,7 @@ import time
 import signal
 import string
 import json
+import jsonschema
 
 import shutil
 import contextlib
@@ -1788,6 +1789,23 @@ def monitoring_loop(
 
 
 # ==================================================================================
+AUTOGRADING_WORKERS_SCHEMA = {
+    "type": "object",
+    "additionalProperties": {
+        "type": "object",
+        "required": ["address", "username", "num_autograding_workers", "enabled", "capabilities"],
+        "properties": {
+            "address": {"type": "string"},
+            "username": {"type": "string"},
+            "num_autograding_workers": {"type": "integer", "minimum": 1},
+            "enabled": {"type": "boolean"},
+            "capabilities": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        },
+        "additionalProperties": False,
+    },
+}
+
+
 def load_autograding_workers_json(config: submitty_config.Config):
     print("LOAD AUTOGRADING WORKERS JSON")
 
@@ -1803,6 +1821,11 @@ def load_autograding_workers_json(config: submitty_config.Config):
     except Exception as e:
         config.logger.log_stack_trace(traceback.format_exc())
         raise SystemExit(f"ERROR: could not locate the autograding workers json: {e}")
+
+    try:
+        jsonschema.validate(autograding_workers, AUTOGRADING_WORKERS_SCHEMA)
+    except jsonschema.ValidationError as e:
+        raise SystemExit(f"ERROR: autograding_workers.json is invalid: {e.message} (path: {list(e.absolute_path)})")
 
     # There must always be a primary machine, it may or may not have
     # autograding workers.

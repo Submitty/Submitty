@@ -119,6 +119,38 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  cypress-component:
+    name: Cypress Component
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run cypress component tests
+        run: npx cypress run --component --browser chrome
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Screenshots
+          path: cypress/screenshots
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Videos
+          path: cypress/videos
+
   twig-lint:
     name: Twig Lint
     runs-on: ubuntu-22.04
@@ -127,7 +159,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -154,7 +186,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -190,7 +222,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -405,7 +437,7 @@ jobs:
 
     services:
       postgres-main:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -415,7 +447,7 @@ jobs:
           - 5432
 
       postgres-branch:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -432,7 +464,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get autoremove -y postgresql-14 postgresql-client-common
-          sudo apt-get install -y postgresql-12
+          sudo apt-get install -y postgresql-14 postgresql-client-14
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
@@ -535,7 +567,7 @@ jobs:
 
       - name: Create Databases
         run: |
-          psql -d postgres -h localhost -U postgres        -p ${{  job.services.postgres-main.ports['5432']  }} \
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
@@ -550,11 +582,12 @@ jobs:
       - name: Create Database Dumper
         run: | # the original dumper requires a `su`, which is not needed when psql as a service
           (
-              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres '
+              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres'
               echo 'sed -i -e "'"/SELECT pg_catalog.set_config('search_path'/d"'"\'
               echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
               echo '       -e "/SET default_table_access_method = /d"            \'
               echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"'
+              echo 'sed -i -e "/^[\\]restrict/d;/^[\\]unrestrict/d;" "$2"'
           ) > dbdump.sh
           chmod +x dbdump.sh
 
@@ -880,6 +913,11 @@ jobs:
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
           npm ci
+
+      - name: Get status of daemons
+        run: |
+          sudo systemctl status submitty_daemon_jobs_handler
+        shell: bash
 
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v7
