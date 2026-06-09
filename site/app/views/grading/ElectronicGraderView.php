@@ -1515,19 +1515,14 @@ HTML;
                             $skipping = true;
                         }
                     }
-                    if (
-                        !$skipping
-                        && !(
-                            $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER
-                            && (
-                                $graded_gradeable->getGradeable()->isPdfUpload()
-                                || $graded_gradeable->getGradeable()->getLimitedAccessBlind() === 2
-                            )
-                            && $file["name"] === "upload.pdf"
-                        )
-                    ) {
+
+                    $is_limited_access_grader = $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER;
+                    $is_pdf = $graded_gradeable->getGradeable()->isPdfUpload();
+                    $is_blind = $graded_gradeable->getGradeable()->getLimitedAccessBlind() === 2;
+
+                    if (!$skipping && !($is_limited_access_grader && ($is_pdf || $is_blind) && $file['name'] === 'upload.pdf')) {
                         if ($start_dir_name === "submissions") {
-                                $file["path"] = $this->setAnonPath($file["path"], $graded_gradeable->getGradeableId());
+                            $file["path"] = $this->setAnonPath($file["path"], $graded_gradeable->getGradeableId());
                         }
                         $path = explode('/', $file['relative_name']);
                         array_pop($path);
