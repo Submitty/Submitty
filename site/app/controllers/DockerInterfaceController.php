@@ -161,7 +161,7 @@ class DockerInterfaceController extends AbstractController {
             );
             if (!$write_ok) {
                 Logger::error("addImage write failed; install_path=" . $this->core->getConfig()->getSubmittyInstallPath());
-                return JsonResponse::getErrorResponse("Write failed!");
+                return JsonResponse::getErrorResponse("Write failed");
             }
 
             return JsonResponse::getSuccessResponse($_POST['image'] . ' has been added to the configuration! 
