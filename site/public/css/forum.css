@@ -1070,8 +1070,8 @@
 }
 
 /* Global Full Screen Mode Styles for Forum Split View */
-main#main.full-screen-mode #thread_list,
-main#main.full-screen-mode #posts_list {
+main#main.full-screen-mode #thread-list,
+main#main.full-screen-mode #posts-list {
     max-height: calc(100vh - 120px);
 }
 
