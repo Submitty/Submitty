@@ -26,7 +26,7 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
     if (!acceptedEmails || !userIdRequirements) {
         return true;
     }
-    
+
     clearErrorMessages();
 
     const email = $('input[name="email"]').val().trim();
