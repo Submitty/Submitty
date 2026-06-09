@@ -12,7 +12,7 @@ function checkPasswordsMatch() {
 }
 
 function clearErrorMessages() {
-    $('#message_box').hide().find('#message_box_items').empty();
+    $('#messages .inner-message.alert-error').remove();
 }
 
 /**
@@ -26,6 +26,8 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
     if (!acceptedEmails || !userIdRequirements) {
         return true;
     }
+    
+    clearErrorMessages();
 
     const email = $('input[name="email"]').val().trim();
     const userId = $('input[name="user_id"]').val().trim();

@@ -7,12 +7,12 @@ const incorrect_verification_code = '99999999';
 const valid_verification_code = '00000000';
 
 function inputData(email = valid_email, user_id = valid_user_id, password = valid_password, confirm_password = valid_password) {
-    cy.get('[data-testid="email"]').type(email);
-    cy.get('[data-testid="user-id"]').type(user_id);
-    cy.get('[data-testid="given-name"]').type(valid_given_name);
-    cy.get('[data-testid="family-name"]').type(valid_family_name);
-    cy.get('[data-testid="password"]').type(password);
-    cy.get('[data-testid="confirm-password"]').type(confirm_password);
+    cy.get('[data-testid="email"]').clear().type(email);
+    cy.get('[data-testid="user-id"]').clear().type(user_id);
+    cy.get('[data-testid="given-name"]').clear().type(valid_given_name);
+    cy.get('[data-testid="family-name"]').clear().type(valid_family_name);
+    cy.get('[data-testid="password"]').clear().type(password);
+    cy.get('[data-testid="confirm-password"]').clear().type(confirm_password);
 }
 
 describe('Self account creation tests', () => {
@@ -69,8 +69,8 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="confirm-password"]').blur();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match');
 
-        // Correct information
-        cy.get('[data-testid="confirm-password"]').type(valid_password);
+        // Correct information - use inputData() to ensure all fields are cleanly set
+        inputData();
         cy.get('[data-testid="sign-up-button"]').click();
         // Incorrect verification code
         cy.get('[data-testid="verification-code"]').type(incorrect_verification_code);
