@@ -107,7 +107,7 @@ describe('TA Grading Panel Switcher', () => {
             },
         ];
 
-        cy.login('grader');
+        cy.login('ta');
         cy.visit('/courses/s26/sample/gradeable/no_due_date_no_release/grading/grade?who_id=FI9yKu3j9DrXWt5&sort=id&direction=ASC');
 
         cy.wrap(layouts).each((layout) => {
