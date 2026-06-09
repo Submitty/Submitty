@@ -97,9 +97,8 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         // Open gradeable for TA / Mentor Grading
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
         cy.contains('Dates').click();
-        cy.get('[data-testid="grade_start_date"]').clear()
+        cy.get('[data-testid="grade_start_date"]').clear();
         cy.get('[data-testid="grade_start_date"]').type('1976-01-01 00:00:00');
-
 
         cy.logout();
 
