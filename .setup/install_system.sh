@@ -785,16 +785,6 @@ su -c 'docker pull submitty/libreoffice-writer:latest' ${DAEMON_USER}
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
     service nginx restart
-    # Allow php-fpm to write to Submitty paths that live under /usr,
-    # which the packaged unit's ProtectSystem=full otherwise makes read-only.
-    mkdir -p /etc/systemd/system/php${PHP_VERSION}-fpm.service.d
-    cat > /etc/systemd/system/php${PHP_VERSION}-fpm.service.d/submitty.conf <<EOF
-    [Service]
-    ReadWritePaths=/usr/local/submitty/site/cache /usr/local/submitty/config
-EOF
-    chown root:root /etc/systemd/system/php${PHP_VERSION}-fpm.service.d/submitty.conf
-    chmod 444 /etc/systemd/system/php${PHP_VERSION}-fpm.service.d/submitty.conf
-    systemctl daemon-reload
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
