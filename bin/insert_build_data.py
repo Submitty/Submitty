@@ -5,7 +5,7 @@ Handles updating the database with the
 autograding testcase details for this gradeable
 """
 
-from sqlalchemy import create_engine, MetaData, insert, delete, exc, Table 	# pylint: disable=import-error
+from sqlalchemy import create_engine, MetaData, select, except_, insert, delete, exc, Table 	# pylint: disable=import-error
 import datetime
 import os
 import sys
@@ -57,31 +57,59 @@ def setup_db():
 
 def send_data(db, metadata, engine, testcases):
     """
-    If testcase entries already exist for this gradeable, delete them all
-    and re-insert fresh ones.
+    If testcase entries already exist for this gradeable and specifications are met,
+    delete them all and re-insert fresh ones.
     """
     testcase_table = Table('autograding_testcase', metadata, autoload_with=engine)
     existing = db.execute(
-        testcase_table.select().where(testcase_table.c.g_id == GRADEABLE)
+        testcase_table.select()
+        .where(testcase_table.c.g_id == GRADEABLE)
+        .order_by(testcase_table.c.testcase_order)
     ).fetchall()
-    if existing:
+
+    if check_invalidated(existing, testcases):
         print(f"Rebuilding gradeable '{GRADEABLE}': removing {len(existing)} existing testcase(s).")
         db.execute(
             delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
         )
-    for order, testcase in enumerate(testcases):
-        db.execute(
-            insert(testcase_table).values(
-                g_id=GRADEABLE,
-                testcase_id=testcase['testcase_id'],
-                testcase_order=order,
-                hidden=testcase.get('hidden', False),
-                extra_credit=testcase.get('extra_credit', False),
-                points_possible=testcase.get('points', 0)
+        for order, testcase in enumerate(testcases):
+            db.execute(
+                insert(testcase_table).values(
+                    g_id=GRADEABLE,
+                    testcase_id=testcase['testcase_id'],
+                    testcase_order=order,
+                    hidden=testcase.get('hidden', False),
+                    extra_credit=testcase.get('extra_credit', False),
+                    points_possible=testcase.get('points', 0)
+                )
             )
-        )
-    db.commit()
-    print(f"Inserted {len(testcases)} testcase(s) for gradeable '{GRADEABLE}'.")
+        db.commit()
+        print(f"Inserted {len(testcases)} testcase(s) for gradeable '{GRADEABLE}'.")
+    else:
+        print(f"Gradeable '{GRADEABLE}' is up to date, skipping database insertion.")
+
+
+def check_invalidated(existing_rows, testcases):
+    """
+    Check for invalidated autograding (some gradeable rebuilds are small enough
+    that autograding shouldn't be deleted) i.e. points per testcase is altered,
+    number of testcases is altered, etc.
+    """
+
+    if len(existing_rows) != len(testcases):
+        return True
+
+    for i, (db_row, new_tc) in enumerate(zip(existing_rows, testcases)):
+        if (
+            db_row.testcase_id     != new_tc.get('testcase_id')
+            or db_row.testcase_order  != i
+            or db_row.hidden          != new_tc.get('hidden', False)
+            or db_row.extra_credit    != new_tc.get('extra_credit', False)
+            or db_row.points_possible != new_tc.get('points', 0)
+        ):
+            return True
+
+    return False
 
 
 def main():
