@@ -173,5 +173,3 @@ for (const component of props.solutionComponents) {
     </div>
   </div>
 </template>
-
-<style scoped></style>
