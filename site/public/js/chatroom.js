@@ -135,8 +135,6 @@ function socketChatMessageHandler(msg) {
     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
-
-
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {

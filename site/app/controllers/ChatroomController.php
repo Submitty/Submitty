@@ -330,8 +330,6 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($message);
     }
 
-
-
     #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     public function clearMessages(string $chatroom_id): JsonResponse {
