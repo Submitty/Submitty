@@ -1,4 +1,4 @@
-import PostLikeButton from '@/components/forum/UpduckButton.vue';
+import PostLikeButton from '@/components/forum/PostButtonLike.vue';
 
 describe('PostLikeButton', () => {
     const baseProps = {
