@@ -2195,7 +2195,7 @@ function loadInlineImages(encoded_data) {
                 window.open(url, '_blank');
             });
             attachment_well.append(img);
-            attachment_well.append(title);
+            // attachment_well.append(title);
             const name = decodeURIComponent(attachment[2]);
             const type = attachment[3] || 'image';
             const title = $(`<p>${escapeSpecialChars(name)}</p>`);
