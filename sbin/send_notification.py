@@ -155,10 +155,15 @@ def construct_notifications(term, course, pending, notification_type):
         # Metadata-related content
         gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
                          f"/gradeable/{gradeable['id']}")
-        metadata = json.dumps({"url": gradeable_url})
+        metadata = {"url": gradeable_url}
 
         # Notification-related content
         if notification_type == "gradeable_release":
+            metadata.update({
+                "notification_type": "gradeable_release",
+                "title": gradeable["title"],
+                "due_date": gradeable["submission_due_date"].isoformat()
+            })
             email_subject = f"Submissions Open: {gradeable['title']}"
             notification_content = (
                 f"{email_subject} | Due {format_timestamp(gradeable['submission_due_date'])}"
@@ -182,7 +187,7 @@ def construct_notifications(term, course, pending, notification_type):
         if gradeable["site_enabled"] is True:
             site.append({
                 "component": "grading",
-                "metadata": metadata,
+                "metadata": json.dumps(metadata),
                 "content": notification_content,
                 "created_at": timestamp,
                 "from_user_id": "submitty-admin",
@@ -436,7 +441,10 @@ def send_pending_notifications():
                         FROM notifications n
                         WHERE n.to_user_id = u.user_id
                         AND n.component = 'grading'
-                        AND n.content ILIKE '%' || 'Submissions Open: ' || g.g_title || '%'
+                        AND (
+                            n.gradeable_id = g.g_id
+                            OR n.content ILIKE '%' || 'Submissions Open: ' || g.g_title || '%'
+                        )
                     )
                 )
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
