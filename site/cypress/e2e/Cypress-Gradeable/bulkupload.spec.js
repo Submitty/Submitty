@@ -101,7 +101,6 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('[data-testid="grade_start_date"]').type('1976-01-01 00:00:00');
         cy.get('[data-testid="grade_start_date"]').type('{enter}');
 
-
         cy.logout();
 
         // Mentor checks submissions
