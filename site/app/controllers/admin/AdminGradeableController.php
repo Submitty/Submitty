@@ -1874,7 +1874,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
-                $this->shiftDates($dates, 'grade_start_date', $now);
+                $dates['grade_start_date'] = $now;
                 $message .= "Opened grading for ";
                 $success = true;
             }
