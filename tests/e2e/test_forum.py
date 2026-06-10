@@ -6,7 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
-import time
 import unittest
 
 
@@ -207,6 +206,31 @@ class TestForum(BaseTestCase):
         urllib.request.urlretrieve(image_url, tf)
         return tf
 
+    def create_dummy_pdf_file(self):
+        tf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        tf.write(b"""%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>
+endobj
+trailer
+<< /Root 1 0 R >>
+%%EOF
+""")
+        tf.close()
+        return tf.name
+
+    def create_dummy_text_file(self):
+        tf = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
+        tf.write(b"not a valid forum attachment")
+        tf.close()
+        return tf.name
+
     def merge_threads(self, child_thread_title, parent_thread_title, press_cancel=False):
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element(By.ID, "merge-threads")
@@ -253,6 +277,47 @@ class TestForum(BaseTestCase):
         for title in list_title:
             self.delete_thread(title)
             assert not self.thread_exists(title)
+
+    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
+    def test_forum_pdf_attachment_upload(self):
+        self.init_and_enable_discussion()
+        self.switch_to_page_create_thread()
+
+        pdf_file = self.create_dummy_pdf_file()
+        invalid_file = self.create_dummy_text_file()
+        self.addCleanup(lambda: os.path.exists(pdf_file) and os.unlink(pdf_file))
+        self.addCleanup(lambda: os.path.exists(invalid_file) and os.unlink(invalid_file))
+
+        thread_title = "E2E PDF attachment thread {}".format(os.path.basename(pdf_file))
+        thread_content = "E2E PDF attachment post body"
+
+        self.driver.find_element(By.ID, "title").send_keys(thread_title)
+        self.driver.find_element(By.CLASS_NAME, "thread_post_content").send_keys(thread_content)
+        self.select_categories([("Question", True)])
+
+        upload_button = self.driver.find_element(By.XPATH, "//input[@type='file']")
+        upload_box = upload_button.find_element(By.XPATH, "./ancestor::div[contains(@class, 'upload_attachment_box')]")
+        file_table = upload_box.find_element(By.XPATH, ".//table[contains(@class, 'file-upload-table')]")
+        upload_button.send_keys("\n".join([pdf_file, invalid_file]))
+
+        wait = WebDriverWait(self.driver, 10)
+        wait.until(lambda driver: len(file_table.find_elements(By.CLASS_NAME, "file-label")) == 1)
+        wait.until(lambda driver: len(file_table.find_elements(By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(pdf_file)))) == 1)
+        assert len(file_table.find_elements(By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(invalid_file)))) == 0
+
+        messages = self.driver.find_element(By.ID, "messages")
+        wait.until(lambda driver: "Invalid file type" in messages.text)
+
+        self.driver.find_element(By.XPATH, "//input[@value='Publish thread']").click()
+        wait.until(EC.url_contains("/forum/threads/"))
+        self.check_socket_message('new_thread')
+
+        attachment_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[starts-with(@id, 'button_attachments_')]")))
+        attachment_button.click()
+
+        attachment_well = wait.until(EC.visibility_of_element_located((By.XPATH, "//div[contains(@class, 'attachment-well')]")))
+        wait.until(lambda driver: len(attachment_well.find_elements(By.XPATH, ".//iframe[contains(@class, 'attachment-pdf-preview')]")) == 1)
+        assert len(attachment_well.find_elements(By.XPATH, ".//*[contains(text(), '{}')]".format(os.path.basename(pdf_file)))) > 0
 
 
 if __name__ == "__main__":
