@@ -1,13 +1,14 @@
-/* exported showRequirements, checkPasswordsMatch, validatePasswordClientSide  */
+/* exported showRequirements, checkPasswordsMatch, validatePasswordClientSide, checkSubmittedPassword  */
 /* global displayErrorMessage */
 function showRequirements(id_string) {
     $(`#${id_string}-helper`).toggle();
 }
 
-function checkPasswordsMatch() {
-    if ($('#password-input').val() !== $('#confirm-password-input').val()) {
-        $('#confirm-password-input').val('');
-        displayErrorMessage('Passwords do not match');
+// checks if the password matches its confirmation, given the ids of the tags holding them
+function checkPasswordsMatch(password_id_string, confirm_password_id_string) {
+    if ($(`#${password_id_string}`).val() !== $(`#${confirm_password_id_string}`).val()) {
+        $(`#${confirm_password_id_string}`).val('');
+        displayErrorMessage('Passwords do not match.');
     }
 }
 
@@ -28,4 +29,18 @@ function validatePasswordClientSide(password, requirements) {
         return false;
     }
     return true;
+}
+
+function checkSubmittedPassword(event, password_id_string, confirm_password_id_string, passwordRequirements) {
+    // frontend validation, check that password matches with its confirmation, and the password is valid
+    if ($(`#${password_id_string}`).val() !== $(`#${confirm_password_id_string}`).val()) {
+        event.preventDefault();
+        displayErrorMessage('Passwords do not match.');
+        $(`#${confirm_password_id_string}`).val('');
+        return;
+    }
+    if (!validatePasswordClientSide($(`#${password_id_string}`).val(), passwordRequirements)) {
+        event.preventDefault();
+        displayErrorMessage('Password does not meet the requirements.');
+    }
 }
