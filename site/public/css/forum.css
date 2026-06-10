@@ -312,7 +312,7 @@
 
 .post-action-container {
     margin-top: 8px;
-    margin-left: 10px;
+    margin-left: auto;
     float: right;
     white-space: nowrap;
 }
