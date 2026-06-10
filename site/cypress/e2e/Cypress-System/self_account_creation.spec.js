@@ -16,10 +16,8 @@ function inputData(email = valid_email, user_id = valid_user_id, password = vali
 }
 
 function clearTextFields() {
-    // clears all text fields in the Create Account form;
-    // this function may or may not be needed, depending on if frontend validation
-    // for passwords successfully prevents reload when password is incorrect
-    // (event.preventDefault() doesn't always seem to do the trick)
+    // clears all text fields in the Create Account form; this is needed when
+    // frontend password validation prevents a reload from clearing the form fields
     cy.get('[data-testid="email"]').clear();
     cy.get('[data-testid="user-id"]').clear();
     cy.get('[data-testid="given-name"]').clear();
