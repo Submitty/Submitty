@@ -105,6 +105,8 @@ const replyDisabled = (title, attachment) => {
     cy.get('[data-testid="forum-submit-reply-all"]').should('not.be.disabled').click();
 
     // Wait for submission and ensure attachment with no text is visible
+    cy.get('.attachment-btn');
+    cy.wait(750);
     cy.get('.attachment-btn').click();
     cy.contains('p', attachment).should('be.visible');
 };
