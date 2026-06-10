@@ -87,6 +87,26 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Error encountered updating user time zone.');
     }
 
+    /**
+     * Handle ajax request to update the currently logged in user's date/time format.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
+    */
+    #[Route("/user_profile/change_date_format", methods: ["POST"])]
+    public function changeDateFormat(): JsonResponse {
+        if (isset($_POST['date_format'])) {
+            $updated = $this->core->getUser()->setDateFormat($_POST['date_format']);
+
+            if ($updated) {
+                return JsonResponse::getSuccessResponse([
+                    'date_format' => $this->core->getUser()->getDateFormat()
+                ]);
+            }
+        }
+
+        return JsonResponse::getFailResponse('Error encountered updating user date format.');
+    }
+
     #[Route("/user_profile/set_pref_locale", methods: ["POST"])]
     public function setPrefLocale(): JsonResponse {
         if (isset($_POST['locale'])) {

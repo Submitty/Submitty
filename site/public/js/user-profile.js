@@ -491,6 +491,31 @@ $(document).ready(() => {
         });
     });
 
+    $('#date_format_select').on('change', function () {
+        $.getJSON({
+            type: 'POST',
+            url: buildUrl(['user_profile', 'change_date_format']),
+            data: {
+                csrf_token: csrfToken,
+                date_format: $(this).val(),
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    displaySuccessMessage('Date/time format updated successfully!');
+                }
+                else {
+                    console.log(response);
+                    displayErrorMessage('Failed to update date/time format!');
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server!');
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
+
     $('#user-image-button').bind('change', function () {
         if ((this.files[0].size / 1048576) > 5.0) {
             alert('Selected file\'s size exceeds 5 MB');
