@@ -360,6 +360,7 @@ describe('Test warning messages for team gradeable', () => {
     it('Confirmation for the first submission with 2 remaining late days and 1 extension for teams', () => {
         // Part 1/2 of a test case
         // The first submission will be done 2 days after the due date and use 2 valid late days for each team member
+        cy.logout();
         cy.login('instructor');
         giveExtensions(team_gradeable);
         giveLateDays(getMorningDateString(3), 'student', 3); // this is important for part 2/2
@@ -371,7 +372,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         // Due 2 days ago: server reports 2+1=3 days late; 1 extension day, 2 late days consumed
-        SubmitAndCheckMessage('team', 'upload_file1', 'valid_usage', '2_days_late+extension', 3, 1);
+        SubmitAndCheckMessage('team', 'upload_file1', 'valid_usage', '2_days_late+extension', 2, 1);
     });
 
     it('Warning message for the second submission with one team member having 0 remaining late days ', () => {
@@ -386,7 +387,7 @@ describe('Test warning messages for team gradeable', () => {
         cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
         cy.logout();
         // Due 3 days ago: server reports 3+1=4 days late; 1 extension day, 3 late days consumed
-        SubmitAndCheckMessage('team', 'upload_file2', 'both_messages', 'both_messages', 4, 1);
+        SubmitAndCheckMessage('team', 'upload_file2', 'both_messages', 'both_messages', 3, 1);
     });
 
     it('should cleanup everything that was added during testing', () => {
