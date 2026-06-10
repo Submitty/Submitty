@@ -420,6 +420,7 @@
             $(function() {
                 const uploadBoxes = document.getElementById('upload-boxes');
                 if (uploadBoxes) {
+                    previousSubmissionFileCount = $('.file-label').length; // track # of files from prior submission
                     const observer = new MutationObserver(function(mutations) {
                         // Whenever a file is added or removed, recalculate totals and warnings
                         checkDroppedFiles();
@@ -456,7 +457,12 @@
                 const maxFileCount = {{ max_file_uploads }};
                 const maxFileSize = {{ max_submission_size }};
 
-                let no_files = totalFiles === 0;
+                // determine if files from previous submission were removed
+                const totalFilesIncludingPrevious = $('.file-label').length;
+                const previousFilesCount = totalFilesIncludingPrevious - totalFiles;
+                const previousFileDeleted = previousFilesCount < previousSubmissionFileCount;
+
+                let no_files = (totalFiles === 0) && !previousFileDeleted;
                 let invalid_count = totalFiles > maxFileCount;
                 let invalid_size = totalSize > maxFileSize;
 
