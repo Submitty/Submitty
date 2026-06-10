@@ -200,8 +200,4 @@ class Chatroom {
 
         return "Anonymous {$adjectives[$a]} {$nouns[$b]}";
     }
-
-    public function regenerateAllAnonNames(): void {
-        $this->setSessionStartedAt(new \DateTime("now"));
-    }
 }

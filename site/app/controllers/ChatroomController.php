@@ -330,37 +330,7 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($message);
     }
 
-    #[AccessControl(role: "INSTRUCTOR")]
-    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonName", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
-    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/regenerateAnonName", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
-    public function regenerateAnonNames(string $chatroom_id): JsonResponse {
-        $em = $this->core->getCourseEntityManager();
-        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
-        if ($chatroom === null) {
-            return JsonResponse::getFailResponse("Chatroom not found");
-        }
-
-        if (!$chatroom->isAllowAnon()) {
-            return JsonResponse::getFailResponse("Chatroom does not allow anonymous users");
-        }
-
-        $user = $this->core->getUser();
-        $global_secret = $this->core->getConfig()->getSecretSession();
-        $oldName = $chatroom->calcAnonName($user->getId(), $global_secret, $em);
-        $chatroom->regenerateAllAnonNames();
-        $em->flush();
-        $newName = $chatroom->calcAnonName($user->getId(), $global_secret, $em);
-
-        $msg_array = [];
-        $msg_array['type'] = 'anon_names_regenerated';
-        $msg_array['chatroom_id'] = $chatroom->getId();
-        $msg_array['oldName'] = $oldName;
-        $msg_array['newName'] = $newName;
-        $this->sendSocketMessage($msg_array, true);
-
-        return JsonResponse::getSuccessResponse(['newName' => $newName]);
-    }
 
     #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
