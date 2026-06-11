@@ -173,7 +173,7 @@ onUnmounted(() => {
             <hr/>
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="single-panel" width="350" height="200"></canvas>
+                <canvas id="single-panel"></canvas>
                 <div class="flex-col">
                   <span>single panel</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(1, false)">Apply</button>
@@ -188,14 +188,14 @@ onUnmounted(() => {
             <hr/>
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-height" width="350" height="200"></canvas>
+                <canvas id="equal-height"></canvas>
                 <div class="flex-col">
                   <span>side-by-side</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(2, false)">Apply</button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left" width="350" height="200"></canvas>
+                <canvas id="tall-left"></canvas>
                 <div class="flex-col">
                   <span>side-by-side, taller left</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(2, true)">Apply</button>
@@ -210,28 +210,28 @@ onUnmounted(() => {
             <hr/>
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-two-in-left" width="350" height="200"></canvas>
+                <canvas id="equal-two-in-left"></canvas>
                 <div class="flex-col">
                   <span>two on left, one on right</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(3, false)">Apply</button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-left" width="350" height="200"></canvas>
+                <canvas id="tall-left-two-in-left"></canvas>
                 <div class="flex-col">
                   <span>two on left, one on right, taller left</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(3, true)">Apply</button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="equal-two-in-right" width="350" height="200"></canvas>
+                <canvas id="equal-two-in-right"></canvas>
                 <div class="flex-col">
                   <span>one on left, two on right</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(3, false, true)">Apply</button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-right" width="350" height="200"></canvas>
+                <canvas id="tall-left-two-in-right"></canvas>
                 <div class="flex-col">
                   <span>one on left, two on right, taller left</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(3, true, true)">Apply</button>
@@ -246,14 +246,14 @@ onUnmounted(() => {
             <hr/>
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-four-panel" width="350" height="200"></canvas>
+                <canvas id="equal-four-panel"></canvas>
                 <div class="flex-col">
                   <span>two on left, two on right</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(4, false)">Apply</button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-four-panel" width="350" height="200"></canvas>
+                <canvas id="tall-left-four-panel"></canvas>
                 <div class="flex-col">
                   <span>two on left, two on right, taller left</span>
                   <button type="button" class="btn btn-primary" @click="selectLayout(4, true)">Apply</button>
