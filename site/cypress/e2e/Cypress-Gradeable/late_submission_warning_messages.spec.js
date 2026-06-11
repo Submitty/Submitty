@@ -35,9 +35,8 @@ const getServerDateComponents = (date = new Date()) => {
 };
 
 // Due date `daysAgo` days before the current instant, expressed in the server's timezone.
-// Anchoring on the real instant (not a fixed time like noon) means the gap to the actual
-// submission is always daysAgo*24h + test-runtime, so the server consistently reports
-// (daysAgo + 1) days late regardless of time of day or DST period.
+// Anchoring on the real instant means the gap to the actual submission
+// is always daysAgo*24h + test-runtime
 const getDueDateString = (daysAgo) => {
     const due = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
     const parts = new Intl.DateTimeFormat('en-US', {
