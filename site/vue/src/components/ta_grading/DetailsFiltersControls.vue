@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRefs } from 'vue';
+import { onMounted, ref } from 'vue';
 
 declare global {
     interface Window {
@@ -24,16 +24,6 @@ const props = withDefaults(defineProps<{
     gradeableId: undefined,
 });
 
-const {
-    showAllSections,
-    toggleAnon,
-    gradeInquiryOnly,
-    canFilterWithdrawn,
-    anonMode,
-    gradeableId,
-    isTeamAssignment,
-} = toRefs(props);
-
 const viewSectionsChecked = ref(false);
 const randomOrderChecked = ref(false);
 const inquiryOnlyChecked = ref(false);
@@ -43,18 +33,18 @@ const coursePath = document.body.dataset.coursePath ?? '';
 const cookieArguments = { path: coursePath, expires: 365 };
 
 onMounted(() => {
-    const inquiryFilterStatus = window.Cookies.get('inquiry_status');
-    const assignedFilterStatus = window.Cookies.get('view');
-    const randomFilterStatus = window.Cookies.get('sort');
-    const withdrawnFilterStatus = window.Cookies.get('include_withdrawn_students') || 'omit';
+    const inquiryFilterStatus = window.Cookies?.get('inquiry_status');
+    const assignedFilterStatus = window.Cookies?.get('view');
+    const randomFilterStatus = window.Cookies?.get('sort');
+    const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
 
-    if (showAllSections.value) {
+    if (props.showAllSections) {
         viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
     }
 
     randomOrderChecked.value = randomFilterStatus === 'random';
 
-    if (gradeInquiryOnly.value) {
+    if (props.gradeInquiryOnly) {
         inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
     }
 
@@ -63,7 +53,7 @@ onMounted(() => {
         const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
         withdrawnFilterElements.hide();
 
-        if (canFilterWithdrawn.value) {
+        if (props.canFilterWithdrawn) {
             if (withdrawnFilterStatus === 'omit') {
                 withdrawnHiddenChecked.value = true;
                 withdrawnFilterElements.hide();
@@ -74,7 +64,7 @@ onMounted(() => {
             }
         }
 
-        if (isTeamAssignment.value) {
+        if (props.isTeamAssignment) {
             withdrawnFilterElements.show();
         }
 
@@ -87,6 +77,10 @@ onMounted(() => {
     }
     else {
         applyDomUpdates();
+    }
+
+    if (props.gradeInquiryOnly && inquiryOnlyChecked.value) {
+        applyInquiryFilter();
     }
 });
 

@@ -53,7 +53,8 @@ $(document).ready(() => {
         form.css('display', 'block');
         form.find('.form-body').scrollTop(0);
     }
-});
+}
+);
 
 function gradeableMessageStorageKey() {
     const dataElement = document.getElementById('gradeable-message-data');

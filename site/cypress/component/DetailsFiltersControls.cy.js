@@ -25,10 +25,15 @@ describe('DetailsFiltersControls', () => {
             const row = document.createElement('tr');
             row.className = 'grade-table';
             const hasInquiry = i === 0;
-            const btn = hasInquiry
-                ? '<button class="grade-button" data-grade-inquiry="active">Grade</button>'
-                : '<button class="grade-button">Grade</button>';
-            row.innerHTML = `<td>${btn}</td>`;
+            const btn = document.createElement('button');
+            btn.className = 'grade-button';
+            if (hasInquiry) {
+                btn.setAttribute('data-grade-inquiry', 'true');
+            }
+            btn.textContent = 'Grade';
+            const td = document.createElement('td');
+            td.appendChild(btn);
+            row.appendChild(td);
             document.body.appendChild(row);
         }
     };
@@ -36,7 +41,9 @@ describe('DetailsFiltersControls', () => {
     const addWithdrawnRow = (selector) => {
         const row = document.createElement('tr');
         row.setAttribute('data-student', selector);
-        row.innerHTML = '<td>Withdrawn</td>';
+        const td = document.createElement('td');
+        td.textContent = 'Withdrawn';
+        row.appendChild(td);
         row.style.display = 'none';
         document.body.appendChild(row);
     };
@@ -70,6 +77,7 @@ describe('DetailsFiltersControls', () => {
                 isTeamAssignment: false,
             },
         });
+        cy.get('[data-testid="random-order-label"]').should('exist');
         cy.get('[data-testid="view-sections-label"]').should('exist');
         cy.get('[data-testid="anon-students-label"]').should('exist');
         cy.get('[data-testid="inquiry-only-label"]').should('exist');
