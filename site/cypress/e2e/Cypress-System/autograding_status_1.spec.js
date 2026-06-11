@@ -38,6 +38,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="regrade-all"]').click();
             cy.get('.alert-success').invoke('text').should('contain', '104 submissions added to queue for regrading');
 
+            cy.get('.alert-success').invoke('text').should('contain', '102 submissions added to queue for regrading');
             cy.visit(autograding_status_path);
             cy.get('#toggle-btn').should('have.text', 'Pause Update');
             cy.get('#toggle-btn').click();

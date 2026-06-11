@@ -40,8 +40,15 @@ require 'json'
 ON_CI = !ENV.fetch('CI', '').empty?
 
 # VM resource configuration
-VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
-VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
+if ARGV[0] == 'workers'
+ # if this is a worker machine, do not allocate as much memory. (scaling concerns)
+ VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
+ VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
+else
+ VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '4096').to_i
+ VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '4').to_i
+end
+
 
 def gen_script(machine_name, worker: false, base: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?

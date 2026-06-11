@@ -101,9 +101,9 @@
 
         <span class="last-edit" data-testid="last-edit">
             {% if post_user_info.is_OP == true and first == false %}
-			    <strong class="post_user_id" data-testid="post-user-id" title="Original Poster">{{ visible_username }} <span style="color: var(--standard-medium-vibrant-blue);"><strong>OP</strong></span></strong>
+			    <strong class="post_user_id" data-testid="post-user-id" title="Original Poster"><span class="author-name">{{ visible_username }}</span> <span style="color: var(--standard-medium-vibrant-blue);"><strong>OP</strong></span></strong>
             {% else %}
-                <strong class="post_user_id" data-testid="post-user-id">{{ visible_username }}</strong>
+                <strong class="post_user_id" data-testid="post-user-id"><span class="author-name">{{ visible_username }}</span></strong>
             {% endif %}
             {% if post_user_info.pronouns and post_user_info.display_pronouns and visible_username !="Anonymous" %}
                 <strong class="post_user_pronouns" data-testid="post-user-pronouns">({{post_user_info.pronouns}})</strong>
@@ -133,7 +133,7 @@
 
     {% if post_attachment.exist == true %}
 
-        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm key_to_click" tabindex="0" type="button">
+        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data|e('html_attr') }}');" class="attachment-btn btn btn-default btn-sm key_to_click" tabindex="0" type="button">
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
 
 

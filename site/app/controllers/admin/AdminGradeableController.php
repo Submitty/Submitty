@@ -149,7 +149,7 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
             $values['has_due_date'] = $dates['has_due_date'] ?? true;
-            $values['has_release_date'] = $dates['has_released_date'] ?? true;
+            $values['has_release_date'] = $dates['has_release_date'] ?? true;
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
@@ -1407,7 +1407,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $repo_name,
-                $subdir
+                $subdir,
+                $this->core->getConfig()->getSubmittyPath()
             );
         }
 
@@ -1715,8 +1716,7 @@ class AdminGradeableController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "BuildConfig",
@@ -1734,9 +1734,8 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory, string $submittyPath) {
+        $config_build_file = FileUtils::joinPaths($submittyPath, "daemon_job_queue", "generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "RunGenerateRepos",
@@ -1864,7 +1863,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
-                $this->shiftDates($dates, 'ta_view_start_date', $now);
+                $dates['ta_view_start_date'] = $now;
                 $message .= "Opened TA access to ";
                 $success = true;
             }
@@ -1875,7 +1874,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
-                $this->shiftDates($dates, 'grade_start_date', $now);
+                $dates['grade_start_date'] = $now;
                 $message .= "Opened grading for ";
                 $success = true;
             }
@@ -1886,7 +1885,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
-                $this->shiftDates($dates, 'submission_open_date', $now);
+                $dates['submission_open_date'] = $now;
                 $message .= "Opened student access to ";
                 $success = true;
             }
@@ -1898,7 +1897,7 @@ class AdminGradeableController extends AbstractController {
         elseif ($action === "close_submissions") {
             if ($gradeable->hasDueDate()) {
                 if ($dates['submission_due_date'] > $now) {
-                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $dates['submission_due_date'] = $now;
                     $message .= "Closed assignment ";
                     $success = true;
                 }

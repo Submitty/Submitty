@@ -166,10 +166,12 @@
 }
 
 .fa-rb {
+    /* stylelint-disable-next-line color-named */
     color: black;
 }
 
 .fa-rb:hover {
+    /* stylelint-disable-next-line color-named */
     color: red;
 }
 
