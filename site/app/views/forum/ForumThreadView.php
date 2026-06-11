@@ -917,10 +917,11 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
-            "back_to_threads_url" => $back_to_threads_url,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "thread_exists" => $thread_exists,
             "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
+            "back_to_threads_url" => $back_to_threads_url,
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
