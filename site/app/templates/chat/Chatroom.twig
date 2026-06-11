@@ -9,8 +9,18 @@
             <div class="messages-area"></div>
             {% if not isReadOnly %}
                 <div class="input-container">
-                    <textarea name="content" class="message-input" placeholder="Enter your message here" maxlength=1500 data-testid="msg-input"></textarea>
-                    <button class="send-message-btn btn btn-primary" data-testid="send-btn">Send</button>
+                    {% include "Vue.twig" with { "name" : "MarkdownArea",
+                        "type": "component",
+                        "class": "message-input-vue-wrapper",
+                        "args": {
+                            "markdownAreaId" : "chat-markdown-input",
+                            "markdownAreaName" : "content",
+                            "placeholder" : "Enter your message here",
+                            "renderHeader" : true,
+                            "chatMode": true
+                        }
+                    } only %}
+                    <button class="send-message-btn btn btn-primary" data-testid="send-btn" aria-label="Send Message"><i class="fas fa-paper-plane"></i></button>
                 </div>
             {% endif %}
         </div>
