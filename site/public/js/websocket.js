@@ -130,3 +130,6 @@ class WebSocketClient {
         }, this.autoReconnectInterval);
     }
 }
+
+// Explicitly make it available globally for Vue 3 components
+window.WebSocketClient = WebSocketClient;
