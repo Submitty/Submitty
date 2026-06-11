@@ -48,10 +48,8 @@ export default defineConfig({
             const res = await client.query(query_in)
             await client.end()
             return res.rows;
-        }
-        }
-    }
-            );
+                }
+            });
             config = cypressBrowserPermissionsPlugin(on, config);
             return cypressPlugins(on, config);
         },
