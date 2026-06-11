@@ -5,6 +5,12 @@
     flex-direction: column;
 }
 
+main#main.full-screen-mode .chatroom-container {
+    height: calc(100vh - 40px);
+    border: none;
+    box-shadow: none;
+}
+
 .chatroom-header {
     padding-top: 1rem;
     padding-bottom: 0.5rem;
@@ -18,9 +24,11 @@
     padding-left: 1rem;
 }
 
-.leave-room {
+.chatroom-header-buttons {
     float: right;
     margin-right: 1rem;
+    display: flex;
+    gap: 0.5rem;
 }
 
 .chatroom-content {

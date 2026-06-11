@@ -2238,3 +2238,20 @@ End of slider switch
 .fas:hover {
     color: var(--external-link-blue);
 }
+
+/* Full Screen Mode */
+main#main.full-screen-mode {
+    z-index: 999;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    background-color: var(--default-white);
+    overflow: auto;
+}
+
+main#main.full-screen-mode .content {
+    margin: 0;
+    padding: 20px 40px;
+}
