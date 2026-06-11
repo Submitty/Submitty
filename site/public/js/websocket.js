@@ -130,3 +130,5 @@ class WebSocketClient {
         }, this.autoReconnectInterval);
     }
 }
+
+window.WebSocketClient = WebSocketClient;
