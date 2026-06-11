@@ -6,66 +6,20 @@
                 <div class="row row-wrap vertical-center">
                     <span id="gradeable-version-container" data-gradeable_version="{{ display_version }}" hidden></span>
                     <span class="col grading_label" data-testid="grading-rubric-label">Grading Rubric</span>
-                    {# Wrong version warnings #}
-                    {% if not has_active_version and not has_overridden_grades %}
-                        {% if has_submission %}
-                            {# Cancelled submission #}
-                            <div class="red-message">Cancelled Submission</div>
-                        {% else %}
-                            {# No submission #}
-                            <div class="red-message">No Submission</div>
-                        {% endif %}
-                    {% elseif version_conflict %}
-                        {# Opened a different version #}
-                        <div class="red-message">Select the correct submission version to grade</div>
-                        <div id="version-conflict-indicator"></div>
-                    {% elseif is_withdrawn_student %}
-                        <div class="yellow-message">Withdrawn Student</div>
-                    {% elseif has_overridden_grades %}
-                        <div class="yellow-message">Overridden Grades</div>
-                    {% endif %}
 
-                    {# Verify all button #}
-                    {% if show_verify_all %}
-                        <div class="col-no-gutters">
-                            <label for="verify-all" tabIndex="0" class="screen-reader">Verify All</label>
-                            <input id="verify-all" type="button" class="btn btn-default key_to_click mx-1" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
-                        </div>
-                    {% endif %}
+                    {# Version/status warnings rendered by Vue (RubricPanel component) #}
+                    <div id="rubric-warnings"></div>
 
-                    {# clear version conflicts button #}
-                    {% if show_clear_conflicts and not version_conflict %}
-                        <div class="col-no-gutters">
-                            <label for="change-graded-version" tabIndex="0" class="screen-reader">Clear Version Conflicts</label>
-                            <input 
-                                id="change-graded-version" 
-                                data-testid="change-graded-version" 
-                                type="button" 
-                                class="btn btn-default key_to_click mx-1" 
-                                tabindex="0" 
-                                value="Clear Version Conflicts" 
-                                onclick="updateAllComponentVersions()"
-                            />
-                        </div>
-                    {% endif %}
-
-                    {# Silent Edit Checkbox #}
-                    {% if show_silent_edit %}
-                        <div class="col-no-gutters">
-                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
-                        </div>
-                    {% endif %}
-                    {# Edit Mode Checkbox #}
-                    {% if not is_peer_grader %}
-                    <div class="col-no-gutters">
-                        <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
-                    </div>
-                    {% endif %}
+                    {# Rubric controls are rendered by Vue (RubricPanel component) #}
+                    <div id="rubric-controls"></div>
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>
                 <div class="inner-container" id="grading-box">
-                    {% if has_active_version %}
+                    {% if has_submission and has_active_version %}
+                        {# Rubric body is now rendered by Vue (ta_grading/Rubric component) #}
+                        <div id="rubric-body-vue-root"></div>
+                        {# Keep the script call as a reliable fallback to populate global state #}
                         <script>
                             $(document).ready(function () {
                                 loadTemplates().then(function() {
@@ -73,11 +27,12 @@
                                 });
                             });
                         </script>
-
                     {% else %}
                         <h4>No Submission</h4>
                     {% endif %}
                 </div>
+                {# Total score box — outside grading-box so setRubricDOMElements doesn't wipe it #}
+                <div id="vue-total-score-container"></div>
                 {% for student_anon_id in student_anon_ids and gradeable.hasPeerComponent() %}
                     {% if gradeable.getPeerFeedback(grader_id, student_anon_id) != 'No response' %}
                         <div class="box component peer-border">
@@ -93,3 +48,46 @@
         {% endif %}
     </div>
 </div>
+<div id="rubric-vue-root">
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'ta_grading/RubricPanel',
+        'args': {
+            'gradeableId': gradeable_id,
+            'anonId': anon_id,
+            'isTaGrading': is_ta_grading,
+            'hasActiveVersion': has_active_version,
+            'hasSubmission': has_submission,
+            'hasOverriddenGrades': has_overridden_grades,
+            'versionConflict': version_conflict,
+            'isWithdrawnStudent': is_withdrawn_student,
+            'showVerifyAll': show_verify_all,
+            'showClearConflicts': show_clear_conflicts,
+            'showSilentEdit': show_silent_edit,
+            'isPeerGrader': is_peer_grader,
+            'displayVersion': display_version,
+            'graderId': grader_id,
+            'verifierId': verifier_id,
+            'canVerify': can_verify,
+            'allowCustomMarks': allow_custom_marks
+        },
+    } %}
+</div>
+
+{% if has_submission and has_active_version %}
+<div id="rubric-body-vue-root-container">
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'ta_grading/Rubric',
+        'args': {
+            'gradeableId': gradeable_id,
+            'anonId': anon_id,
+            'displayVersion': display_version,
+            'allowCustomMarks': allow_custom_marks,
+            'isPeerGrader': is_peer_grader,
+            'graderId': grader_id,
+            'canVerify': can_verify
+        },
+    } %}
+</div>
+{% endif %}
