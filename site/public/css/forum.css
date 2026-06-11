@@ -708,6 +708,11 @@
     margin-top: 10px;
 }
 
+.attachment-preview a {
+    display: flex;
+    justify-content: center;
+}
+
 .attachment-div {
     text-align: center;
 }
