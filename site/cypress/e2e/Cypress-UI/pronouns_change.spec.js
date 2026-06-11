@@ -48,7 +48,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="popup-save-button"]').first().click();
 
         // Ensure correctness in table
-        cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
+        cy.get('.td-pronouns:eq( 13 )').should('have.text', 'They/Them');
     });
 
     it('Verifies changed pronouns as instructor in Student Photos', () => {

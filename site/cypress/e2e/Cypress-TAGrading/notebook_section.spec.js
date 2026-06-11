@@ -16,7 +16,7 @@ describe('Notebook Section Testing', () => {
         cy.get('[data-testid="notebook-builder-markdown-0"]').click();
         cy.get('[data-testid="notebook-builder-markdown-0"]').type('# Notebook-Cypress-Test');
         cy.get('[data-testid="notebook-save"]').click();
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=hG1b13ljpDjKu32&sort=id&direction=ASC']);
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=UgOoUhkrRVBlYHl&sort=id&direction=ASC']);
         cy.get('body').type('{N}'); // Notebook View
         cy.get('[data-testid="notebook-view"]').should('contain', 'Notebook View');
         cy.get('[data-testid="notebook-main-view"]').should('contain', 'Notebook-Cypress-Test');
