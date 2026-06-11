@@ -33,7 +33,25 @@ export default defineConfig({
                         }
                     }
                 }
-            });
+            },
+            on("task", {
+                async connectDB(database_name, query_in){
+                    const client = new Client({
+                        user: "submitty_dbuser",
+                        password: "submitty_dbuser",
+                        host: "localhost",
+                        database: database_name,
+                        ssl: false,
+                        port: 5432
+                    })
+            await client.connect()
+            const res = await client.query(query_in)
+            await client.end()
+            return res.rows;
+        }
+        }
+    }
+            );
             config = cypressBrowserPermissionsPlugin(on, config);
             return cypressPlugins(on, config);
         },
