@@ -15,6 +15,17 @@ function inputData(email = valid_email, user_id = valid_user_id, password = vali
     cy.get('[data-testid="confirm-password"]').type(confirm_password);
 }
 
+function clearTextFields() {
+    // clears all text fields in the Create Account form; this is needed when
+    // frontend password validation prevents a reload from clearing the form fields
+    cy.get('[data-testid="email"]').clear();
+    cy.get('[data-testid="user-id"]').clear();
+    cy.get('[data-testid="given-name"]').clear();
+    cy.get('[data-testid="family-name"]').clear();
+    cy.get('[data-testid="password"]').clear();
+    cy.get('[data-testid="confirm-password"]').clear();
+}
+
 describe('Self account creation tests', () => {
     it('Test all paths of account creation', () => {
         // create new randomized alphanumeric user id and email to limit interference of
@@ -36,10 +47,43 @@ describe('Self account creation tests', () => {
         inputData(undefined, '123456789123456789123456789');
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'This user id does not meet the requirements');
+
         // Password too short
         inputData(undefined, undefined, 'pass!123', 'pass!123');
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        clearTextFields(); // remove leftover inputs after frontend validation prevents sign up
+
+        /*
+            FIX ME! Currently the assertions below aren't accurate tests for the
+            password complexity requirements, because these requirements are false by default in the configs
+            and we don't yet have a method for changing configurations within Cypress tests.
+            For reference, the relevant configs are:
+                require_uppercase, require_lowercase, require_numbers, require_special_chars
+        */
+        /*
+            // Password missing uppercase
+            inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
+            cy.get('[data-testid="sign-up-button"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+            clearTextFields();
+            // Password missing lowercase
+            inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
+            cy.get('[data-testid="sign-up-button"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+            clearTextFields();
+            // Password missing numbers
+            inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
+            cy.get('[data-testid="sign-up-button"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+            clearTextFields();
+            // Password missing special characters
+            inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
+            cy.get('[data-testid="sign-up-button"]').click();
+            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+            clearTextFields();
+        */
+
         // Passwords don't match
         inputData(undefined, undefined, 'Password123!', 'NotPassword123!');
         cy.get('[data-testid="confirm-password"]').blur();
