@@ -5,6 +5,8 @@ import viteConfig from './vue/vite.config.mts';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { Client } from 'pg';
+
 export default defineConfig({
     video: true,
     pageLoadTimeout: 120000,
@@ -22,7 +24,7 @@ export default defineConfig({
                     // Do we have failures for any retry attempts?
                     const failures = results.tests.some((test) =>
                         test.attempts.some((attempt) => attempt.state === 'failed'),
-                    );
+                        );
                     if (!failures) {
                         // Specify the full path to the video file
                         const videoPath = path.resolve(results.video);
@@ -33,21 +35,26 @@ export default defineConfig({
                         }
                     }
                 }
-            },
+            })
             on("task", {
-                async connectDB(database_name, query_in){
+                async connectDB(args) {
                     const client = new Client({
                         user: "submitty_dbuser",
                         password: "submitty_dbuser",
                         host: "localhost",
-                        database: database_name,
+                        database: args.database,
                         ssl: false,
-                        port: 5432
-                    })
-            await client.connect()
-            const res = await client.query(query_in)
-            await client.end()
-            return res.rows;
+                        port: 16442
+                    });
+                    try {
+                        await client.connect();
+                        const res = await client.query(args.query);
+                        await client.end();
+                        return res.rows;
+                    } catch (err) {
+                        await client.end().catch(() => {});
+                        throw err;
+                    }
                 }
             });
             config = cypressBrowserPermissionsPlugin(on, config);
