@@ -97,6 +97,10 @@ class Notification extends AbstractModel implements \JsonSerializable {
      * @var string Type of notification used for settings */
     protected $type;
 
+    /** @prop
+     * @var string|null Gradeable ID this notification is tied to (grading components) */
+    protected ?string $gradeable_id = null;
+
 
     /**
      * Notifications constructor.
@@ -114,6 +118,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
         $instance->setNotifyContent($event['subject']);
         $instance->setNotifySource($event['sender_id']);
         $instance->setNotifyTarget($event['to_user_id']);
+        $instance->setGradeableId($event['gradeable_id'] ?? null);
         return $instance;
     }
 
@@ -129,6 +134,7 @@ class Notification extends AbstractModel implements \JsonSerializable {
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);
         $instance->setNotifyContent($details['content']);
+        $instance->setGradeableId($details['gradeable_id'] ?? null);
         if (isset($details['term'])) {
             $instance->setTerm($details['term']);
         }
@@ -252,7 +258,16 @@ class Notification extends AbstractModel implements \JsonSerializable {
             'term' => $this->term,
             'course' => $this->course,
             'course_name' => $this->course_name,
+            'gradeable_id' => $this->gradeable_id,
             'url' => $url
         ];
+    }
+
+    public function getGradeableId(): ?string {
+        return $this->gradeable_id;
+    }
+
+    public function setGradeableId(?string $gradeable_id): void {
+        $this->gradeable_id = $gradeable_id;
     }
 }
