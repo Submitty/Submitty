@@ -82,10 +82,15 @@ class ChatroomController extends AbstractController {
         $chatrooms = $repo->findBy(['is_deleted' => 'FALSE'], ['id' => 'ASC']);
         $this->core->authorizeWebSocketToken(['page' => 'chatrooms']);
 
+        // Check if there are more than 4096 users for the insufficient names warning banner
+        $student_count = $this->core->getQueries()->getAllUsers();
+        $insufficient_names_warning = count($student_count) > 4096;
+
         return new WebResponse(
             'Chatroom',
             'showAllChatrooms',
-            $chatrooms
+            $chatrooms,
+            $insufficient_names_warning
         );
     }
 
@@ -163,7 +168,8 @@ class ChatroomController extends AbstractController {
             'Chatroom',
             'showChatroom',
             $chatroom,
-            $isAnonymous
+            $isAnonymous,
+            count($this->core->getQueries()->getAllUsers()) > 4096
         );
     }
 
@@ -301,7 +307,8 @@ class ChatroomController extends AbstractController {
         $msg_array['user_id'] = $isAnonymous ? 'null' : $user->getId();
         $display_name = '';
         if ($chatroom->isAllowAnon() && $isAnonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId());
+            $global_secret = $this->core->getConfig()->getSecretSession();
+            $display_name = $chatroom->calcAnonName($user->getId(), $global_secret, $em);
         }
         else {
             if ($user->accessAdmin()) {

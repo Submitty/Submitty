@@ -3,6 +3,11 @@
     {% if user_admin %} <!--only instructors can create chat rooms-->
         <a href='javascript:newChatroomForm()' data-testid="new-chatroom-btn" class="btn btn-primary">New Chatroom</a>
     {% endif %}
+    {% if insufficient_names_warning %}
+        <div class="alert alert-warning" style="margin-top: 15px;">
+            Warning: Insufficient adjectives and nouns to guarantee unique anonymous names for all students.
+        </div>
+    {% endif %}
     <hr>
     <div class="chatrooms-table-wrapper table-responsive">
         <h2> Chatrooms </h2>
