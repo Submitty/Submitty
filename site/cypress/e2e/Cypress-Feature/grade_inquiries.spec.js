@@ -78,6 +78,7 @@ describe('Test cases revolving around grade inquiries', () => {
         // student view
         cy.login('beahaf');
         cy.visit(['sample', 'gradeable', gradeableId]);
+        // this line may not pass if your instructor profile has changed to a date format other than the default
         cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST');
         verifyWebSocketStatus();
     });
