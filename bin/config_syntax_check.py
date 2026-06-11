@@ -41,6 +41,15 @@ def main():
         'complete_config',
         f'complete_config_{args.assignment}.json'
     )
+    preprocessed_config_json_path = os.path.join(
+        SUBMITTY_DATA_DIR,
+        'courses',
+        args.semester,
+        args.course,
+        'build',
+        args.assignment,
+        'complete_config.json'
+    )
 
     # Get the path to the complete config schema.
     complete_config_schema_path = os.path.join(
@@ -66,6 +75,10 @@ def main():
     except submitty_schema_validator.SubmittySchemaException as s:
         s.print_human_readable_error()
         print("The submitty configuration validator detected the above error in your config.")
+        print("If the reported line number does not match your source config.json,")
+        print("compare it against the generated files used during the build:")
+        print(f"  preprocessed config: {preprocessed_config_json_path}")
+        print(f"  generated complete config: {complete_config_json_path}")
         print("This is a new feature. If you feel that an error was incorrectly identified,")
         print("please submit an error report at https://github.com/Submitty/Submitty")
         print()

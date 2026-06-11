@@ -82,6 +82,7 @@
                 Course Autograding Config Directory<i style="font-style:normal;" class="fa-question-circle"></i></a>
                 from the Course Settings Page. </p>
             <p> Type the path or choose from the filtered dropdown. </p>
+            <p> Submitty also supports C/C++-style comments and <code>#include</code> directives inside <code>config.json</code>, so larger autograding configs can be organized across multiple files. </p>
     {% for error_message in repository_error_messages %}
         <div class="config_search_error">({{error_message}})</div>
     {% endfor %}
@@ -196,6 +197,24 @@
     <div class="log-container" hidden>
         <div class="option-title">CMake output:</div>
         <pre id="cmake-log-body"></pre>
+    </div>
+
+    <div class="log-container" id="generated-config-help" hidden>
+        <div class="option-title">Generated config files:</div>
+        <p id="generated-config-note" hidden>
+            If a build message points at a generated line number instead of your original <code>config.json</code>,
+            compare it against the generated files below.
+        </p>
+    </div>
+
+    <div class="log-container" hidden>
+        <div class="option-title">Preprocessed instructor config:</div>
+        <pre id="preprocessed-config-body"></pre>
+    </div>
+
+    <div class="log-container" hidden>
+        <div class="option-title">Generated complete config:</div>
+        <pre id="generated-complete-config-body"></pre>
     </div>
 
 </div>

@@ -1770,14 +1770,23 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    private function getBuildArtifactContents(string $gradeable_id): array {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $read_build_file = static function (string $path): ?string {
+            return is_file($path) ? htmlentities(file_get_contents($path)) : null;
+        };
+
+        return [
+            'build_output' => $read_build_file(FileUtils::joinPaths($course_path, 'build', $gradeable_id, 'build_script_output.txt')),
+            'cmake_output' => $read_build_file(FileUtils::joinPaths($course_path, 'build', $gradeable_id, 'log_cmake_output.txt')),
+            'preprocessed_config' => $read_build_file(FileUtils::joinPaths($course_path, 'build', $gradeable_id, 'complete_config.json')),
+            'generated_complete_config' => $read_build_file(FileUtils::joinPaths($course_path, 'config', 'complete_config', "complete_config_{$gradeable_id}.json")),
+        ];
+    }
+
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods: ["GET"])]
     public function getBuildLogs(string $gradeable_id): JsonResponse {
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'build_script_output.txt');
-        $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
-        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
-        $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
-
-        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output]);
+        return JsonResponse::getSuccessResponse($this->getBuildArtifactContents($gradeable_id));
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods: ["GET"])]
@@ -1799,10 +1808,10 @@ class AdminGradeableController extends AbstractController {
 
             // Check for schema validation errors and return a different status if needed.
             if ($status) {
-                $logs = $this->getBuildLogs($gradeable_id);
+                $logs = $this->getBuildArtifactContents($gradeable_id);
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
-                $haystack = $logs->json['data'][0] ?? '';
+                $haystack = $logs['build_output'] ?? '';
 
                 if (str_contains($haystack, 'MAKE ERROR')) {
                     $status = false;

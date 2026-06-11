@@ -9,6 +9,7 @@ import collections
 
 duplicate_keys = []
 
+
 def detect_duplicate_keys(list_of_pairs):
     """https://gist.github.com/htv2012/ad8c19ac43e128aa7ee1"""
     key_count = collections.Counter(k for k, _ in list_of_pairs)
@@ -18,6 +19,21 @@ def detect_duplicate_keys(list_of_pairs):
         duplicate_keys.append(duplicates)
 
     return dict(list_of_pairs)
+
+
+def print_error_context(contents, line_number, column_number, radius=2):
+    lines = contents.splitlines()
+    start = max(line_number - radius, 1)
+    end = min(line_number + radius, len(lines))
+    line_number_width = len(str(end))
+
+    print("ERROR: Context from the generated config used during this build:")
+    for current_line in range(start, end + 1):
+        marker = ">" if current_line == line_number else " "
+        print(f"{marker} {current_line:>{line_number_width}} | {lines[current_line - 1]}")
+        if current_line == line_number:
+            caret_padding = max(column_number - 1, 0)
+            print(f"  {' ' * line_number_width} | {' ' * caret_padding}^")
 
 
 if __name__ == "__main__":
@@ -42,6 +58,19 @@ if __name__ == "__main__":
             # Print each level of duplicate keys in reverse order (outer most to inner most)
             keys = ', '.join(f'{{ {keys} }}' for keys in reversed(duplicate_keys))
             print(f"WARNING: Duplicate JSON key(s) found - {keys}")
+    except json.JSONDecodeError as error:
+        print(f'ERROR: Could not load {args.file}')
+        print(
+            "ERROR: "
+            f"{error.msg} at line {error.lineno}, column {error.colno} "
+            f"(character {error.pos})"
+        )
+        print(
+            "ERROR: These line and column numbers refer to the preprocessed "
+            "config file used during the build."
+        )
+        print_error_context(j_string, error.lineno, error.colno)
+        sys.exit(1)
     except Exception:
         print(f'ERROR: Could not load {args.file}')
         traceback.print_exc()
