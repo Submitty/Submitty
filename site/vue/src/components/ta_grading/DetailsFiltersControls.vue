@@ -48,7 +48,7 @@ onMounted(() => {
         inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
     }
 
-    // Withdrawn filtering and row numbering depend on DOM being ready
+    // Withdrawn filtering and row numbering depend on DOM being ready - onMount was too early for this
     const applyDomUpdates = () => {
         const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
         withdrawnFilterElements.hide();
