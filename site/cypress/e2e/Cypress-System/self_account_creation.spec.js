@@ -7,15 +7,50 @@ const incorrect_verification_code = '99999999';
 const valid_verification_code = '00000000';
 
 function inputData(email = valid_email, user_id = valid_user_id, password = valid_password, confirm_password = valid_password) {
+    cy.get('[data-testid="email"]').clear();
     cy.get('[data-testid="email"]').type(email);
+    cy.get('[data-testid="user-id"]').clear();
     cy.get('[data-testid="user-id"]').type(user_id);
+    cy.get('[data-testid="given-name"]').clear();
     cy.get('[data-testid="given-name"]').type(valid_given_name);
+    cy.get('[data-testid="family-name"]').clear();
     cy.get('[data-testid="family-name"]').type(valid_family_name);
+    cy.get('[data-testid="password"]').clear();
     cy.get('[data-testid="password"]').type(password);
+    cy.get('[data-testid="confirm-password"]').clear();
     cy.get('[data-testid="confirm-password"]').type(confirm_password);
 }
 
 describe('Self account creation tests', () => {
+    it('Test client-side validation preserves form fields', () => {
+        cy.visit();
+        cy.get('[data-testid="new-account-button"]').click();
+
+        // Fill with invalid email (not accepted domain)
+        cy.get('[data-testid="email"]').clear();
+        cy.get('[data-testid="email"]').type('test@notvalid.invalid');
+        cy.get('[data-testid="user-id"]').clear();
+        cy.get('[data-testid="user-id"]').type('testuser');
+        cy.get('[data-testid="given-name"]').clear();
+        cy.get('[data-testid="given-name"]').type(valid_given_name);
+        cy.get('[data-testid="family-name"]').clear();
+        cy.get('[data-testid="family-name"]').type(valid_family_name);
+        cy.get('[data-testid="password"]').clear();
+        cy.get('[data-testid="password"]').type(valid_password);
+        cy.get('[data-testid="confirm-password"]').clear();
+        cy.get('[data-testid="confirm-password"]').type(valid_password);
+
+        // Click sign up - should trigger client-side validation, NOT submit
+        cy.get('[data-testid="sign-up-button"]').click();
+
+        // Error should show (client-side validation, no server round-trip)
+        cy.get('[data-testid="popup-message"]').contains('email').should('exist');
+
+        // KEY TEST: Fields should still be filled (not cleared by server redirect)
+        cy.get('[data-testid="email"]').should('not.have.value', '');
+        cy.get('[data-testid="user-id"]').should('not.have.value', '');
+    });
+
     it('Test all paths of account creation', () => {
         // create new randomized alphanumeric user id and email to limit interference of
         // current database contents on test (especially if this test is run multiple times)
@@ -46,15 +81,17 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match');
 
         // Correct information
+        cy.get('[data-testid="confirm-password"]').clear();
         cy.get('[data-testid="confirm-password"]').type(valid_password);
         cy.get('[data-testid="sign-up-button"]').click();
         // Incorrect verification code
         cy.get('[data-testid="verification-code"]').type(incorrect_verification_code);
-        cy.get('[data-testid="verify-email-button"').click();
+        cy.get('[data-testid="verify-email-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'The verification code is not correct. Verify you entered the correct code or resend the verification email');
         // Correct verification code
+        cy.get('[data-testid="verification-code"]').clear();
         cy.get('[data-testid="verification-code"]').type(valid_verification_code);
-        cy.get('[data-testid="verify-email-button"').click();
+        cy.get('[data-testid="verify-email-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'You have successfully verified your email.');
         cy.login(valid_user_id, valid_password);
         cy.get('body').should('contain', 'My Courses');
