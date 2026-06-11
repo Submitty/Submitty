@@ -74,7 +74,6 @@ class CourseMaterialsUtils {
             $core->getUser()->getId(),
             DateUtils::getDateTimeNow()
         );
-        $course_material->addAccess($course_material_access);
         $core->getCourseEntityManager()->persist($course_material_access);
         $core->getCourseEntityManager()->flush();
     }
