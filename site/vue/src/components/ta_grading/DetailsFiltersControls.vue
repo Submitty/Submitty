@@ -3,12 +3,12 @@ import { onMounted, ref, toRefs } from 'vue';
 
 declare global {
     interface Window {
-        updateElectronicGradingRowNumbersAndColors: () => void;
-        updateSimpleGradingRowNumbersAndColors: () => void;
-        Cookies?: {
+        Cookies: {
             get: (key: string) => string | undefined;
             set: (key: string, value: string, options?: { path?: string; expires?: number }) => void;
         };
+        updateSimpleGradingRowNumbersAndColors: () => void;
+        updateElectronicGradingRowNumbersAndColors: () => void;
     }
 }
 
@@ -39,13 +39,14 @@ const randomOrderChecked = ref(false);
 const inquiryOnlyChecked = ref(false);
 const withdrawnHiddenChecked = ref(false);
 
-const cookieArguments = { path: document.body.dataset.coursePath ?? '', expires: 365 };
+const coursePath = document.body.dataset.coursePath ?? '';
+const cookieArguments = { path: coursePath, expires: 365 };
 
 onMounted(() => {
-    const inquiryFilterStatus = window.Cookies?.get('inquiry_status');
-    const assignedFilterStatus = window.Cookies?.get('view');
-    const randomFilterStatus = window.Cookies?.get('sort');
-    const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
+    const inquiryFilterStatus = window.Cookies.get('inquiry_status');
+    const assignedFilterStatus = window.Cookies.get('view');
+    const randomFilterStatus = window.Cookies.get('sort');
+    const withdrawnFilterStatus = window.Cookies.get('include_withdrawn_students') || 'omit';
 
     if (showAllSections.value) {
         viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
@@ -57,30 +58,36 @@ onMounted(() => {
         inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
     }
 
-    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-    withdrawnFilterElements.hide();
+    // Withdrawn filtering and row numbering depend on DOM being ready
+    const applyDomUpdates = () => {
+        const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+        withdrawnFilterElements.hide();
 
-    if (canFilterWithdrawn.value) {
-        if (withdrawnFilterStatus === 'omit') {
-            withdrawnHiddenChecked.value = true;
-            withdrawnFilterElements.hide();
+        if (canFilterWithdrawn.value) {
+            if (withdrawnFilterStatus === 'omit') {
+                withdrawnHiddenChecked.value = true;
+                withdrawnFilterElements.hide();
+            }
+            else {
+                withdrawnHiddenChecked.value = false;
+                withdrawnFilterElements.show();
+            }
         }
-        else {
-            withdrawnHiddenChecked.value = false;
+
+        if (isTeamAssignment.value) {
             withdrawnFilterElements.show();
         }
-    }
 
-    if (isTeamAssignment.value) {
-        withdrawnFilterElements.show();
-    }
+        window.updateElectronicGradingRowNumbersAndColors();
+        $('table').removeClass('table-striped');
+    };
 
-    if (gradeInquiryOnly.value) {
-        applyInquiryFilter();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyDomUpdates);
     }
-
-    window.updateElectronicGradingRowNumbersAndColors();
-    $('table').removeClass('table-striped');
+    else {
+        applyDomUpdates();
+    }
 });
 
 const applyInquiryFilter = () => {
@@ -101,7 +108,7 @@ const applyInquiryFilter = () => {
 const onChangeSections = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     viewSectionsChecked.value = checked;
-    window.Cookies?.set('view', checked ? 'assigned' : 'all', cookieArguments);
+    window.Cookies.set('view', checked ? 'assigned' : 'all', cookieArguments);
     localStorage.setItem(
         'general-setting-navigate-assigned-students-only',
         checked ? 'true' : 'false',
@@ -112,20 +119,25 @@ const onChangeSections = (event: Event) => {
 const onChangeSortOrder = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     randomOrderChecked.value = checked;
-    window.Cookies?.set('sort', checked ? 'random' : 'id', cookieArguments);
+    window.Cookies.set('sort', checked ? 'random' : 'id', cookieArguments);
     location.reload();
 };
 
 const onChangeInquiry = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     inquiryOnlyChecked.value = checked;
-    window.Cookies?.set('inquiry_status', checked ? 'on' : 'off', cookieArguments);
+    window.Cookies.set('inquiry_status', checked ? 'on' : 'off', cookieArguments);
     applyInquiryFilter();
+
+    const banner = document.getElementById('inquiry-banner');
+    if (banner) {
+        banner.style.display = checked ? '' : 'none';
+    }
 };
 
 const onChangeAnon = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
-    window.Cookies?.set('anon_mode', checked ? 'on' : 'off', cookieArguments);
+    window.Cookies.set('anon_mode', checked ? 'on' : 'off', cookieArguments);
     location.reload();
 };
 
@@ -139,12 +151,12 @@ const onFilterWithdrawn = (event: Event) => {
     if (checked) {
         withdrawnElectronic.hide();
         withdrawnSimple.hide();
-        window.Cookies?.set('include_withdrawn_students', 'omit', cookieArguments);
+        window.Cookies.set('include_withdrawn_students', 'omit', cookieArguments);
     }
     else {
         withdrawnElectronic.show();
         withdrawnSimple.show();
-        window.Cookies?.set('include_withdrawn_students', 'include', cookieArguments);
+        window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
     }
 
     $('table').removeClass('table-striped');
