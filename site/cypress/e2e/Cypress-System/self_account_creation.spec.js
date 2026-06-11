@@ -1,6 +1,6 @@
 const valid_given_name = 'GivenName';
-const valid_user_id = 'good_id';
-const valid_email = 'valid.email@gmail.com';
+let valid_user_id = 'good_id';
+let valid_email = 'valid.email@gmail.com';
 const valid_password = 'Password123!';
 const valid_family_name = 'FamilyName';
 const incorrect_verification_code = '99999999';
@@ -17,6 +17,11 @@ function inputData(email = valid_email, user_id = valid_user_id, password = vali
 
 describe('Self account creation tests', () => {
     it('Test all paths of account creation', () => {
+        // create new randomized alphanumeric user id and email to limit interference of
+        // current database contents on test (especially if this test is run multiple times)
+        valid_user_id = Math.random().toString(36).substring(2, 8);
+        valid_email = `${Math.random().toString(36).substring(2, 8)}@gmail.com`;
+
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
         // Not accepted email extension
