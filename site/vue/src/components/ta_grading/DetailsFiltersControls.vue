@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-ref-object-reactivity-loss */
 import { onMounted, ref } from 'vue';
 
 declare global {
@@ -29,6 +30,11 @@ const randomOrderChecked = ref(false);
 const inquiryOnlyChecked = ref(false);
 const withdrawnHiddenChecked = ref(false);
 
+const showAllSections = props.showAllSections;
+const gradeInquiryOnly = props.gradeInquiryOnly;
+const canFilterWithdrawn = props.canFilterWithdrawn;
+const isTeamAssignment = props.isTeamAssignment;
+
 const coursePath = document.body.dataset.coursePath ?? '';
 const cookieArguments = { path: coursePath, expires: 365 };
 
@@ -38,22 +44,21 @@ onMounted(() => {
     const randomFilterStatus = window.Cookies?.get('sort');
     const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
 
-    if (props.showAllSections) {
+    if (showAllSections) {
         viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
     }
 
     randomOrderChecked.value = randomFilterStatus === 'random';
 
-    if (props.gradeInquiryOnly) {
+    if (gradeInquiryOnly) {
         inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
     }
 
-    // Withdrawn filtering and row numbering depend on DOM being ready - onMount was too early for this
     const applyDomUpdates = () => {
         const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
         withdrawnFilterElements.hide();
 
-        if (props.canFilterWithdrawn) {
+        if (canFilterWithdrawn) {
             if (withdrawnFilterStatus === 'omit') {
                 withdrawnHiddenChecked.value = true;
                 withdrawnFilterElements.hide();
@@ -64,7 +69,7 @@ onMounted(() => {
             }
         }
 
-        if (props.isTeamAssignment) {
+        if (isTeamAssignment) {
             withdrawnFilterElements.show();
         }
 
