@@ -457,23 +457,23 @@
                 const maxFileCount = {{ max_file_uploads }};
                 const maxFileSize = {{ max_submission_size }};
 
-                // determine if files from previous submission were removed
+                const no_new_files = totalFiles === 0;
                 const totalFilesIncludingPrevious = $('.file-label').length;
                 const previousFilesCount = totalFilesIncludingPrevious - totalFiles;
-                const previousFileDeleted = previousFilesCount < previousSubmissionFileCount;
 
-                let no_files = (totalFiles === 0) && !previousFileDeleted;
-                let invalid_count = totalFiles > maxFileCount;
-                let invalid_size = totalSize > maxFileSize;
+                const invalid_count = totalFiles > maxFileCount;
+                const invalid_size = totalSize > maxFileSize;
 
                 const $errorBannerCount = $('#error-banner-count');
                 const $errorBannerSize = $('#error-banner-size');
 
-                if (invalid_count || invalid_size || no_files) {
+                setButtonStatus();
+                if ((previousFilesCount === previousSubmissionFileCount) && no_new_files) {
                     $(".submit-gradeable").prop('disabled', true);
                 }
-                else {
-                    $(".submit-gradeable").prop('disabled', false);
+
+                if (invalid_count || invalid_size) {
+                    $(".submit-gradeable").prop('disabled', true);
                 }
 
                 if (invalid_count) {
