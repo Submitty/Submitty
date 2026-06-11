@@ -63,9 +63,9 @@ describe('Test cases revolving around the logging in functionality of the site',
             cy.visit('authentication/login');
             cy.url().should('eq', `${Cypress.config('baseUrl')}/authentication/login`);
             loginViaUI('pearsr');
-            cy.get('#courses > div > div > h1').contains('My Courses');
+            cy.get('#courses > div > div > h1').should('contain', 'My Courses');
             cy.visit(['sample']);
-            cy.get('.content').contains('You don\'t have access to this course.');
+            cy.get('.content').should('contain', 'You don\'t have access to this course.');
         });
 
         it('logout button should successfully logout and end up at login screen', () => {

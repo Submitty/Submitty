@@ -16,7 +16,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
             });
-            cy.get('#submitted-files > div').contains('file1.txt');
+            cy.get('#submitted-files > div').should('contain', 'file1.txt');
             cy.get('#submitted-files > div').contains('Download all files:').should('not.exist');
 
             cy.get('[fname = "file1.txt"] > td').first().contains('file1.txt').next('.file-trash').click();
@@ -29,9 +29,9 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             });
 
             // Checks submitted files
-            cy.get('#submitted-files > div').contains('span', 'file1.txt');
-            cy.get('#submitted-files > div').contains('span', 'file2.txt');
-            cy.get('#submitted-files > div').contains('Download all files:');
+            cy.get('#submitted-files > div').should('contain', 'span', 'file1.txt');
+            cy.get('#submitted-files > div').should('contain', 'span', 'file2.txt');
+            cy.get('#submitted-files > div').should('contain', 'Download all files:');
             // Commented out to pass cypress in CI -- FIXME
             // cy.get('[aria-label="Download file1.txt"]').click();
             // cy.readFile('cypress/downloads/file1.txt').should('eq','a\n');
@@ -49,7 +49,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             });
             if (user !== 'instructor2') {
                 cy.visit(['testing', 'gradeable', 'locked_homework']);
-                cy.get('[data-testid="popup-message"]').contains('You have not unlocked this gradeable yet');
+                cy.get('[data-testid="popup-message"]').should('contain', 'You have not unlocked this gradeable yet');
             }
             cy.logout();
         });

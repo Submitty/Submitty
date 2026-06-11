@@ -13,7 +13,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('.file-viewer').contains('file1.txt');
+        cy.get('.file-viewer').should('contain', 'file1.txt');
 
         const fileTgt = buildUrl(['sample', 'course_material', 'file1.txt']);
 
@@ -39,7 +39,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('#submit-materials').click();
         });
 
-        cy.get('.file-viewer').contains('file1.txt');
+        cy.get('.file-viewer').should('contain', 'file1.txt');
         const fileTgt = buildUrl(['sample', 'course_material', 'option1', 'file1.txt']);
 
         cy.visit(fileTgt);
@@ -121,7 +121,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
         cy.visit(fileTgt2);
 
-        cy.get('.content').contains('Reason: You may not access this file until it is released');
+        cy.get('.content').should('contain', 'Reason: You may not access this file until it is released');
 
         cy.logout();
         cy.login();
@@ -168,7 +168,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'option1', 'file2.txt']);
         cy.visit(fileTgt2);
-        cy.get('.content').contains('Reason: You may not access this file until it is released');
+        cy.get('.content').should('contain', 'Reason: You may not access this file until it is released');
 
         cy.logout();
         cy.login();
@@ -224,7 +224,7 @@ describe('Test cases revolving around course material uploading and access contr
 
         const fileTgt2 = buildUrl(['sample', 'course_material', 'zip', '1_1.txt']);
         cy.visit(fileTgt2);
-        cy.get('.content').contains('Reason: You may not access this file until it is released');
+        cy.get('.content').should('contain', 'Reason: You may not access this file until it is released');
 
         cy.logout();
         cy.login();
@@ -267,7 +267,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = buildUrl(['sample', 'course_material', 'file1.txt']);
 
         cy.visit(fileTgt2);
-        cy.get('.content').contains('Reason: Your section may not access this file');
+        cy.get('.content').should('contain', 'Reason: Your section may not access this file');
 
         cy.visit('/');
         cy.logout();
@@ -329,7 +329,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt2 = buildUrl(['sample', 'course_material', 'zip', '1_1.txt']);
         cy.visit(fileTgt2);
 
-        cy.get('.content').contains('Reason: Your section may not access this file');
+        cy.get('.content').should('contain', 'Reason: Your section may not access this file');
         cy.visit('/');
         cy.logout();
 
@@ -392,7 +392,7 @@ describe('Test cases revolving around course material uploading and access contr
         cy.get('#cm-toggle-folders-btn').click();
 
         for (let i = 5; i > 0; i--) {
-            cy.get(`.folder-container:nth-child(4) :nth-child(${6 - i}) > .file-viewer`).contains(`file${i}.txt`);
+            cy.get(`.folder-container:nth-child(4) :nth-child(${6 - i}) > .file-viewer`).should('contain', `file${i}.txt`);
         }
         cy.get('a[id=a]').parent().find('.fa-trash').click();
         cy.get('.btn-danger:visible').click();
@@ -432,7 +432,7 @@ describe('Test cases revolving around course material uploading and access contr
             cy.get('.fa-pencil-alt').eq((2 - i) * 2 + 1).click();
             cy.get('#edit-folder-sort').should('have.value', `${2 - i}`);
             cy.get('#edit-course-materials-folder-form > .popup-box > .popup-window > .form-title > .btn').click();
-            cy.get(`#div_viewer_sd1d${3 - i} > .file-container > .file-viewer`).contains(`file${i}.txt`);
+            cy.get(`#div_viewer_sd1d${3 - i} > .file-container > .file-viewer`).should('contain', `file${i}.txt`);
         }
 
         // Clean up files
@@ -565,7 +565,7 @@ describe('Test cases revolving around course material uploading and access contr
         const fileTgt = buildUrl(['sample', 'course_material', 'a', 'file1.txt']);
 
         cy.visit(fileTgt);
-        cy.get('.content').contains('Reason: Your section may not access this file');
+        cy.get('.content').should('contain', 'Reason: Your section may not access this file');
 
         cy.logout();
         cy.login();

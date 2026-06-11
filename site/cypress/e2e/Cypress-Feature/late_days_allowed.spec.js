@@ -6,7 +6,7 @@ describe('Test cases involving the late days allowed page', () => {
         });
 
         it('should not allow access', () => {
-            cy.get('.content').contains('You don\'t have access to this page');
+            cy.get('.content').should('contain', 'You don\'t have access to this page');
         });
     });
 
@@ -21,7 +21,7 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('#datestamp').should('be.empty');
             cy.get('#late_days').should('be.empty');
             cy.get('#csv_option_overwrite_all').should('be.checked');
-            cy.get('#empty-table').contains('No late days are currently entered');
+            cy.get('#empty-table').should('contain', 'No late days are currently entered');
         });
 
         it('check invalid user ID', () => {
@@ -67,19 +67,19 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('input[type=submit]').click();
 
             // make sure table has right values
-            cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
-            cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('3');
-            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('2021-01-01');
+            cy.get('#late-day-table > tbody > tr > :nth-child(1)').should('contain', 'bitdiddle');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').should('contain', 'Ben');
+            cy.get('#late-day-table > tbody > tr > :nth-child(3)').should('contain', 'Bitdiddle');
+            cy.get('#late-day-table > tbody > tr > :nth-child(4)').should('contain', '3');
+            cy.get('#late-day-table > tbody > tr > :nth-child(5)').should('contain', '2021-01-01');
 
             // login as bitdiddle and check that they have proper number of late days
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('2021-01-01');
-            cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+3');
-            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').should('contain', '2021-01-01');
+            cy.get('#late-day-table > tbody > tr > :nth-child(8)').should('contain', '+3');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').should('contain', '3');
 
             // logout and log back in as the instructor
             cy.logout();
@@ -97,19 +97,19 @@ describe('Test cases involving the late days allowed page', () => {
             cy.reload(); // make sure the late day registered
 
             // make sure the table has the updated values
-            cy.get('#late-day-table > tbody > tr > :nth-child(1)').contains('bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
-            cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
-            cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('5');
-            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('2021-01-01');
+            cy.get('#late-day-table > tbody > tr > :nth-child(1)').should('contain', 'bitdiddle');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').should('contain', 'Ben');
+            cy.get('#late-day-table > tbody > tr > :nth-child(3)').should('contain', 'Bitdiddle');
+            cy.get('#late-day-table > tbody > tr > :nth-child(4)').should('contain', '5');
+            cy.get('#late-day-table > tbody > tr > :nth-child(5)').should('contain', '2021-01-01');
 
             // logout and log back in as bitdiddle to make sure the number of late days has been updated correctly
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('2021-01-01');
-            cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+5');
-            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('5');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').should('contain', '2021-01-01');
+            cy.get('#late-day-table > tbody > tr > :nth-child(8)').should('contain', '+5');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').should('contain', '5');
 
             // logout and log back in as the instructor
             cy.logout();
@@ -121,14 +121,14 @@ describe('Test cases involving the late days allowed page', () => {
             cy.reload(); // make sure the late day removal was registered
 
             // assert that the table is now empty
-            cy.get('#empty-table').contains('No late days are currently entered');
+            cy.get('#empty-table').should('contain', 'No late days are currently entered');
 
             // logout and log back in as bitdiddle to make sure there are no remaining late days
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
             cy.reload(); // just a quick pause to make sure the page has loaded fully
-            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('0');
+            cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').should('contain', '0');
         });
     });
 });
