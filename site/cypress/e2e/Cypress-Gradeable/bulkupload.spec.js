@@ -67,6 +67,9 @@ describe('Test cases revolving around bulk uploading', () => {
 });
 describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
     it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
+        // Note: At some point, once there are more bulk upload type gradeables available for testing
+        // that have submissions and grading already open, the following checks should be made on those gradeables instead.
+
         // Instructor uploads exam
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
@@ -187,5 +190,14 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.get('#submissions').click();
         cy.contains('upload.pdf').should('exist');
+
+        // return the gradeable to the original date configuration
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'update']);
+        cy.contains('Dates').click();
+        cy.get('[data-testid="grade_start_date"]').clear();
+        cy.get('[data-testid="grade_start_date"]').type('9997-12-31 23:59:59');
+        cy.get('[data-testid="grade_start_date"]').type('{enter}');
     });
 });
