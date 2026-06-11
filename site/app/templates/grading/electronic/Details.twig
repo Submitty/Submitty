@@ -70,7 +70,7 @@
             <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
         {% endif %}
         {% if not is_instructor %}
-            <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
+            <button class="btn btn-default" onclick="window.dispatchEvent(new CustomEvent('show-gradeable-message-review'))" data-testid="grader-responsibility">Responsibilities as a Grader</button>
         {% endif %}
         {% if can_regrade %}
             <div>
@@ -845,9 +845,14 @@
     }
 </script>
 
-{% include 'grading/electronic/GradeableMessage.twig' with {
-    "course": course,
-    "semester": semester,
-    "gradeable_id": gradeable.getId,
-    "blind_status": blind_status
+{% include 'Vue.twig' with {
+    'type': 'component',
+    'name': 'GradeableMessage',
+    'args': {
+        'semester': semester,
+        'course': course,
+        'gradeableId': gradeable.getId,
+        'userGroup': core.getUser().getGroup(),
+        'blindStatus': blind_status
+    }
 }%}
