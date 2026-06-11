@@ -869,6 +869,63 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
+     * Test that a previous file without an extension is correctly detected as conflicting
+     * with a new file that has the same base name but with an extension.
+     * Fixes issue #10047.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testSecondVersionPreviousOverlapNoExtension() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
+        $this->addUploadFile('answers', 'old_file');
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
+        $this->assertFalse($return['status'] == 'fail');
+        $this->assertTrue($return['status'] == 'success');
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = [];
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        sort($files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'answers'], $files);
+
+        $this->addUploadFile('answers.pdf', 'new_file');
+        $_POST['previous_files'] = json_encode([['answers']]);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test', 'true', 'false');
+
+        $this->assertFalse($return['status'] == 'fail');
+        $this->assertTrue($return['status'] == 'success');
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = [];
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+            if ($file->getFilename() === 'answers.pdf') {
+                $this->assertStringEqualsFile($file->getPathname(), 'new_file');
+            }
+        }
+        sort($files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'answers', 'answers.pdf'], $files);
+    }
+
+    /**
      * Test uploading a zip that contains a file and a zip. We only unzip one level so we the inner zip should
      * be left alone.
      *
