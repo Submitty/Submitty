@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     visible?: boolean;
-}>(), {
-    visible: false,
-});
+}>();
 
 const emit = defineEmits<{
     close: [];
@@ -41,7 +39,6 @@ function fillCanvas(id: string, draw: (ctx: CanvasRenderingContext2D) => void) {
 }
 
 function drawCanvases() {
-    // Single panel
     fillCanvas('single-panel', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -50,7 +47,6 @@ function drawCanvases() {
         ctx.fillRect(5, 20, 288, 120);
     });
 
-    // Two panels — equal height
     fillCanvas('equal-height', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -60,7 +56,6 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    // Two panels — taller left
     fillCanvas('tall-left', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -70,7 +65,6 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    // Three panels — equal two in left
     fillCanvas('equal-two-in-left', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -81,7 +75,6 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    // Three panels — equal two in right
     fillCanvas('equal-two-in-right', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -92,7 +85,6 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    // Three panels — taller left, two in left
     fillCanvas('tall-left-two-in-left', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -103,7 +95,6 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    // Three panels — taller left, two in right
     fillCanvas('tall-left-two-in-right', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -114,7 +105,6 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    // Four panels — equal
     fillCanvas('equal-four-panel', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -126,7 +116,6 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    // Four panels — taller left
     fillCanvas('tall-left-four-panel', (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
@@ -152,9 +141,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-show="show" class="popup-form" id="panels-selector-modal">
-    <div class="popup-box" @click="close">
-      <div class="popup-window" data-testid="popup-window" @click.stop>
+  <div
+    v-show="show"
+    id="panels-selector-modal"
+    class="popup-form"
+  >
+    <div
+      class="popup-box"
+      @click="close"
+    >
+      <div
+        class="popup-window"
+        data-testid="popup-window"
+        @click.stop
+      >
         <div class="form-title">
           <h1>Panel Selector</h1>
           <button
@@ -163,100 +163,168 @@ onUnmounted(() => {
             tabindex="-1"
             type="button"
             @click="close"
-          >Close</button>
+          >
+            Close
+          </button>
         </div>
         <div class="form-body">
-          <div class="layout-option" id="layout-option-1">
+          <div
+            id="layout-option-1"
+            class="layout-option"
+          >
             <div class="layout-option-title">
               <h2>Single panel option</h2>
             </div>
-            <hr/>
+            <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="single-panel"></canvas>
+                <canvas id="single-panel" />
                 <div class="flex-col">
                   <span>single panel</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(1, false)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(1, false)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="layout-option" id="layout-option-2">
+          <div
+            id="layout-option-2"
+            class="layout-option"
+          >
             <div class="layout-option-title">
               <h2>Two panel options</h2>
             </div>
-            <hr/>
+            <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-height"></canvas>
+                <canvas id="equal-height" />
                 <div class="flex-col">
                   <span>side-by-side</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(2, false)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(2, false)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left"></canvas>
+                <canvas id="tall-left" />
                 <div class="flex-col">
                   <span>side-by-side, taller left</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(2, true)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(2, true)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="layout-option" id="layout-option-3">
+          <div
+            id="layout-option-3"
+            class="layout-option"
+          >
             <div class="layout-option-title">
               <h2>Three panel options</h2>
             </div>
-            <hr/>
+            <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-two-in-left"></canvas>
+                <canvas id="equal-two-in-left" />
                 <div class="flex-col">
                   <span>two on left, one on right</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(3, false)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(3, false)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-left"></canvas>
+                <canvas id="tall-left-two-in-left" />
                 <div class="flex-col">
                   <span>two on left, one on right, taller left</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(3, true)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(3, true)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="equal-two-in-right"></canvas>
+                <canvas id="equal-two-in-right" />
                 <div class="flex-col">
                   <span>one on left, two on right</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(3, false, true)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(3, false, true)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-right"></canvas>
+                <canvas id="tall-left-two-in-right" />
                 <div class="flex-col">
                   <span>one on left, two on right, taller left</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(3, true, true)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(3, true, true)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="layout-option" id="layout-option-4">
+          <div
+            id="layout-option-4"
+            class="layout-option"
+          >
             <div class="layout-option-title">
               <h2>Four panel options</h2>
             </div>
-            <hr/>
+            <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-four-panel"></canvas>
+                <canvas id="equal-four-panel" />
                 <div class="flex-col">
                   <span>two on left, two on right</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(4, false)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(4, false)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-four-panel"></canvas>
+                <canvas id="tall-left-four-panel" />
                 <div class="flex-col">
                   <span>two on left, two on right, taller left</span>
-                  <button type="button" class="btn btn-primary" @click="selectLayout(4, true)">Apply</button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="selectLayout(4, true)"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             </div>
