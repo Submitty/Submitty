@@ -901,17 +901,7 @@ class ForumThreadView extends AbstractView {
         $categories = $repo->getCategories();
         $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
-        $buttons = [
-            [
-                "required_rank" => 4,
-                "display_text" => 'Back to Threads',
-                "style" => 'position:relative;top:3px;float:right;',
-                "link" => [true, $this->core->buildCourseUrl(['forum'])],
-                "optional_class" => '',
-                "title" => 'Back to threads',
-                "onclick" => [false]
-            ]
-        ];
+        $back_to_threads_url = $this->core->buildCourseUrl(['forum']);
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
@@ -920,7 +910,7 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
-            "buttons" => $buttons,
+            "back_to_threads_url" => $back_to_threads_url,
             "thread_exists" => $thread_exists,
             "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
