@@ -1,0 +1,46 @@
+describe('Peer grading access testing', () => {
+    const component_title = 'Peer Grading Access Test';
+
+    it('Does not show student peer grade as TA grade', () => {
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
+        cy.get('[data-testid="add-new-peer-component"]').should('exist');
+        cy.get('[data-testid="add-new-peer-component"]').click();
+        cy.get('[data-testid="peer-component-title"]:visible').last().clear();
+        cy.get('[data-testid="peer-component-title"]:visible').last().type(component_title);
+        cy.get('[data-testid="max-points-box"]:visible').last().clear();
+        cy.get('[data-testid="max-points-box"]:visible').last().type(5);
+        cy.get('[data-testid="grade-by-count-down-option"]:visible').last().click();
+        cy.get('.save-tools-save').click();
+        cy.contains('Loading').should('exist');
+        cy.get('.save-tools-in-progress', { timeout: 15000 }).should('not.be.visible');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=3']);
+        cy.get('#unblind_instructor_grading').click();
+        cy.get('#unblind_peer_grading').click();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=4']);
+        cy.get('[data-testid="all-grade"]').click();
+        cy.get('#random_peer_graders_list').click();
+        cy.get('[data-testid="table-wrapper"]', { timeout: 10000 }).should('be.visible').and('contain', 'student');
+        cy.visit('/');
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('[data-testid="popup-window"]').should('exist');
+        cy.get('[data-testid="agree-popup-btn"]').click();
+        cy.contains('tr', 'kinge').find('[data-testid="grade-button"]').click();
+        cy.get('body').type('{G}');
+        cy.contains(component_title).click();
+        cy.get('[data-testid^="mark-"]').first().click();
+        cy.contains('Loading').should('exist');
+        cy.get('.save-tools-in-progress', { timeout: 15000 }).should('not.be.visible');
+        cy.get('[data-testid="grading-total"]').first().should('contain', '5 / 5');
+        cy.get('.save-tools-save').click();
+        cy.visit('/');
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=kinge&sort=id&direction=ASC']);
+        cy.get('body').type('{G}');
+        cy.get('[data-testid="grading-rubric-label"]', { timeout: 10000 }).should('contain', 'Grading Rubric');
+        cy.contains('[data-testid="component-container"]', component_title).find('.graded-by').should('contain', 'Ungraded!');
+    });
+});
