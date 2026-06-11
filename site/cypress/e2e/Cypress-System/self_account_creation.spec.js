@@ -28,7 +28,7 @@ describe('Self account creation tests', () => {
 
         // Fill with invalid email (not accepted domain)
         cy.get('[data-testid="email"]').clear();
-        cy.get('[data-testid="email"]').type('test@gmail.com');
+        cy.get('[data-testid="email"]').type('test@notvalid.invalid');
         cy.get('[data-testid="user-id"]').clear();
         cy.get('[data-testid="user-id"]').type('testuser');
         cy.get('[data-testid="given-name"]').clear();
