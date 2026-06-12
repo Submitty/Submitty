@@ -467,7 +467,32 @@
             $('#form_notification_settings').trigger("change");
         }
 
-
+        function saveNotificationDefaults() {
+        $.ajax({
+            type: "POST",
+            url: "{{ save_defaults_url }}",
+            data: { csrf_token: "{{ csrf_token }}" },
+            success: function(data) {
+                try {
+                    var json = JSON.parse(data);
+                    if (json['status'] === 'fail') {
+                        displayErrorMessage(json['message']);
+                    } else {
+                        displaySuccessMessage(json['data']);
+                        // Update button text to reflect defaults now exist
+                        $('[data-testid="save-notification-defaults"]')
+                        .text('Update Future Course Defaults');
+                        $('#sync-notification-popup').hide();
+                    }
+                } catch(err) {
+                displayErrorMessage('Error saving defaults. Please try again.');
+                }
+            },
+            error: function() {
+                displayErrorMessage('Failed to save notification defaults.');
+            }
+        });
+    }
 
         function setNotification(button) {
             const popup = $(button).closest('#sync-notification-popup');
@@ -538,4 +563,4 @@
         });
     </script>
 </div>
-{% include 'SyncSettingsPopup.twig' with { courses: courses } %}
+{% include 'SyncSettingsPopup.twig' with { courses: courses, has_defaults: has_defaults } %}
