@@ -40,6 +40,7 @@
     "katex": "^0.16.28",
     "luxon": "3.7.2",
     "mermaid": "11.12.2",
+    "node": "^25.8.1",
     "pdfjs-dist": "5.4.530",
     "plotly.js-dist": "3.3.1",
     "select2": "4.1.0-rc.0",

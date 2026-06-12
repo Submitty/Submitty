@@ -90,12 +90,12 @@
         <div class="file-viewer">
             {% if is_image %}
                 {# For image files: Clicking filename opens in full panel #}
-                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click image-file' file-url="{{ path|url_encode }}" onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}");' data-viewer_id="{{ id }}">
+                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click image-file' file-url="{{ path|url_encode }}" data-file_name="{{ dir }}" onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}");' data-viewer_id="{{ id }}">
                     <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                     {{ dir }}</a> &nbsp;
             {% else %}
                 {# For non-image files: Keep original behavior #}
-                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" data-file_name="{{ dir }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                     <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                     {{ dir }}</a> &nbsp;
             {% endif %}
