@@ -43,7 +43,7 @@ function onKeydown(e: KeyboardEvent): void {
 }
 
 onMounted(() => {
-    if (props.userGroup !== 1 && !localStorage.getItem(storageKey)) {
+    if (props.userGroup !== 1 && localStorage.getItem(storageKey) !== 'agreed') {
         canAgree.value = true;
         visible.value = true;
     }
