@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue';
-import Popup from '@/components/Popup.vue';
+import Popup from '../Popup.vue';
 
 interface MarkInfo {
     id: number;
@@ -83,6 +83,9 @@ onUnmounted(() => {
     :title="`Mark Conflicts: ${componentTitle}`"
     @toggle="close"
   >
+    <template #trigger>
+      <!-- Popup is opened programmatically via CustomEvent, no trigger button needed -->
+    </template>
     <template #default>
       <h4>
         It looks like someone else also edited the rubric. Choose the changes you want to keep.
