@@ -742,6 +742,7 @@ class ReportController extends AbstractController {
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
+                'normalization_warnings' => $customization->getNormalizationWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
@@ -754,6 +755,7 @@ class ReportController extends AbstractController {
                 'is_nightly_enabled' => $is_nightly_enabled,
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
+                'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
 

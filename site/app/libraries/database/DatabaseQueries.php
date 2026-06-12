@@ -149,6 +149,29 @@ class DatabaseQueries {
     }
 
     /**
+     * Update a user's preferred date format in the master database.
+     *
+     * @param User $user The user object to modify
+     * @param string $date_format The date format string, must be one of DateTimeFormat::SPECIFIERS
+     * @return int 1 if the update was successful, 0 if the operation failed
+     */
+    public function updateSubmittyUserDateFormat(User $user, string $date_format) {
+        $this->submitty_db->query("UPDATE users SET date_format = ? WHERE user_id = ?", [$date_format, $user->getId()]);
+        return $this->submitty_db->getRowCount();
+    }
+
+    /**
+     * Get a user's preferred date format from the master database.
+     *
+     * @param User $user The user object to get the date format for
+     * @return string The date format string, one of DateTimeFormat::SPECIFIERS
+     */
+    public function getSubmittyUserDateFormat(User $user): string {
+        $this->submitty_db->query("SELECT date_format FROM users WHERE user_id = ?", [$user->getId()]);
+        return $this->submitty_db->row()['date_format'] ?? 'YMD';
+    }
+
+    /**
      * Gets a user from the database given a user_id.
      *
      * @param string $user_id
