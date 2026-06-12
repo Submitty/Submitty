@@ -46,7 +46,7 @@ if __name__ == "__main__":
             # Print each level of duplicate keys in reverse order (outer most to inner most)
             KEYS_STR = ", ".join(f"{{ {keys} }}" for keys in reversed(duplicate_keys))
             print(f"WARNING: Duplicate JSON key(s) found - {KEYS_STR}")
-    except (json.JSONDecodeError, ValueError):
+    except (OSError, json.JSONDecodeError, ValueError):
         print(f"ERROR: Could not load {args.file}")
         traceback.print_exc()
         sys.exit(1)
