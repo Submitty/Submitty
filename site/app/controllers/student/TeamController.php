@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
+use app\libraries\response\JsonResponse;
 use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -520,6 +521,66 @@ class TeamController extends AbstractController {
 
         $this->core->addSuccessMessage("Team name successfully set");
         return new RedirectResponse($return_url);
+    }
+
+    /**
+    * Function to create teams from registration subsections.
+    *
+    * @param string $gradeable_id
+    * @return JsonResponse
+    */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_teams_from_subsections", methods: ["POST"])]
+    public function createTeamsFromSubsections($gradeable_id) {
+        $users = $this->core->getQueries()->getAllUsers();
+        $subsections = [];
+
+        // Group users by their subsection
+        foreach ($users as $user) {
+            $subsection = $user->getRegistrationSubsection();
+            if (empty($subsection)) continue;
+
+            // Skip if user is already on a team
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user->getId()) !== null) {
+                continue;
+            }
+
+            $subsections[$subsection][] = $user;
+        }
+
+        if (empty($subsections)) {
+            $result = "No new teams to create. All students are already on teams or aren't assigned subsections.";
+            return $this->core->getOutput()->renderResultMessage($result, false); 
+        }
+
+        $teams_created_count = 0;
+
+        foreach ($subsections as $members) {
+            // use the first subsection member as team leader
+            $team_leader = array_shift($members);
+        
+            $team_id = $this->core->getQueries()->createTeam(
+                $gradeable_id, 
+                $team_leader->getId(), 
+                $team_leader->getRegistrationSection(), 
+                $team_leader->getRotatingSection(), 
+                null
+            );
+
+            // set team name to subsection
+            $this->core->getQueries()->updateTeamName($team_id, $team_leader->getRegistrationSubsection());
+
+            // add remaining subsection members to the team
+            foreach ($members as $member) {
+                $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+                $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $member->getId());
+
+                $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+            }
+
+            $teams_created_count++;
+        }
+        $result = "Successfully created {$teams_created_count} teams from registration subsections.";
+        return $this->core->getOutput()->renderResultMessage($result, true); 
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]

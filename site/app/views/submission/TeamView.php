@@ -44,9 +44,11 @@ class TeamView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
             "seeking_enabled" => $this->core->getConfig()->isSeekMessageEnabled(),
             "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
+            "teams" => $gradeable->getTeams(),
             "team_name" => $team == null ? null : $team->getTeamName(),
             "team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
