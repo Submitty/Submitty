@@ -45,6 +45,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
     }
 
     public function testShowDockerInterface() {
+        $this->core->getUser()->method('getInstructorCourses')->willReturn([0 => ['term' => 's26', 'course' => 'test']]);
         $mock_data = [];
 
         $docker = new DockerInterfaceController($this->core);

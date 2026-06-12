@@ -349,6 +349,15 @@ if [[ $? -ne "0" ]] ; then
     exit
 fi
 
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('General Questions', 0, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Homework Help', 1, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Quizzes', 2, NULL);
+INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Tests', 3, NULL);"
+if [[ "$?" -ne "0" ]] ; then
+    echo "ERROR: Failed create default discussion forum categories."
+    exit
+fi
+
 if [[ "$archived" -eq "1" ]] ; then 
     PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "UPDATE courses SET status=2 WHERE term='${semester}' AND course='${course}';"
     echo "Archived Course ${course}"

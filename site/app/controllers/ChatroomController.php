@@ -10,6 +10,7 @@ use app\entities\chat\Message;
 use app\entities\UserEntity;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
+use app\libraries\Utils;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use WebSocket;
@@ -21,11 +22,11 @@ class ChatroomController extends AbstractController {
      *
      * @param array{
      *     type:        string,
-     *     socket:      string,
-     *     id?:         int,
+     *     message_id?:    int,
+     *     chatroom_id?:   int,
      *     title?:      string,
      *     description?:string,
-     *     allow_anon?: bool,
+     *     allow_anon?:   bool,
      *     host_name?:  string,
      *     base_url?:   string,
      *     user_id?:    string,
@@ -33,11 +34,26 @@ class ChatroomController extends AbstractController {
      *     display_name?:string,
      *     role?:       string,
      *     timestamp?:  string
-     * } $msg_array
+     * } $msg_array The WebSocket message parameters to send
+     * @param bool $is_individual Whether the message is being sent to a specific chatroom or to all chatrooms
      */
-    private function sendSocketMessage(array $msg_array): void {
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['socket'];
+    private function sendSocketMessage(array $msg_array, ?bool $is_individual = false): void {
         $msg_array['user_id'] = $msg_array['user_id'] ?? $this->core->getUser()->getId();
+        $params = [
+            'page' => 'chatrooms',
+            'term' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'message_id' => isset($msg_array['message_id']) ? strval($msg_array['message_id']) : null,
+            'chatroom_id' => isset($msg_array['chatroom_id']) ? strval($msg_array['chatroom_id']) : null,
+        ];
+        if ($params['message_id'] === null) {
+            unset($params['message_id']);
+        }
+        if (!$is_individual || $params['chatroom_id'] === null) {
+            $params['all_chatrooms'] = 'true';
+        }
+        $msg_array['page'] = Utils::buildWebSocketPageIdentifier($params);
+
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
@@ -47,10 +63,24 @@ class ChatroomController extends AbstractController {
         }
     }
 
+    // Use this for deleting singular messages.
+    /*
+    private function deleteMessage(string $chatroom_id, Message $message): JsonResponse {
+        $id = $message->getId();
+        $message->deleteMessage();
+        $msg_array = [];
+        $msg_array['type'] = 'message_delete';
+        $msg_array['socket'] = "chatroom_$chatroom_id";
+        $msg_array['id'] = $id;
+        $this->sendSocketMessage($msg_array);
+        return JsonResponse::getSuccessResponse("deleted message $id");
+    }*/
+
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatrooms = $repo->findBy(['is_deleted' => 'FALSE'], ['id' => 'ASC']);
+        $this->core->authorizeWebSocketToken(['page' => 'chatrooms']);
 
         return new WebResponse(
             'Chatroom',
@@ -66,6 +96,7 @@ class ChatroomController extends AbstractController {
         $user = $this->core->getUser();
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
+        $allow_read_only_after_end = isset($_POST['allow_read_only_after_end']);
 
         $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
 
@@ -79,6 +110,7 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
         $chatroom = new Chatroom($userEntity, $title, $description);
+        $chatroom->setAllowReadOnlyAfterEnd($allow_read_only_after_end);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
@@ -111,12 +143,22 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
-        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
+        if (
+            !$chatroom->isActive()
+            && !$chatroom->allowReadOnlyAfterEnd()
+            && !$this->core->getUser()->accessAdmin()
+        ) {
             $this->core->addErrorMessage("Chatroom not enabled");
             return new RedirectResponse(
                 $this->core->buildCourseUrl(['chat'])
             );
         }
+
+        $this->core->authorizeWebSocketToken([
+            'page' => 'chatrooms',
+            'chatroom_id' => $chatroom->getId(),
+        ]);
+
         return new WebResponse(
             'Chatroom',
             'showChatroom',
@@ -152,6 +194,9 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
+        $chatroom->setAllowReadOnlyAfterEnd(
+            isset($_POST['allow_read_only_after_end'])
+        );
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         if (trim($title) === '') {
@@ -169,6 +214,7 @@ class ChatroomController extends AbstractController {
     }
 
     #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function toggleChatroomActiveStatus(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -179,27 +225,27 @@ class ChatroomController extends AbstractController {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        if (!$chatroom->isActive()) {
-            $msg_array = [];
-            $msg_array['type'] = 'chat_open';
-            $msg_array['id'] = $chatroom->getId();
-            $msg_array['title'] = $chatroom->getTitle();
-            $msg_array['description'] = $chatroom->getDescription();
-            $msg_array['allow_anon'] = $chatroom->isAllowAnon();
-            $msg_array['host_name'] = $chatroom->getHostName();
-            $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
-            $msg_array['socket'] = "chatrooms";
-        }
-        else {
-            $msg_array = [];
+        $msg_array = [];
+        $msg_array['type'] = 'chat_open';
+        $msg_array['chatroom_id'] = $chatroom->getId();
+        $msg_array['title'] = $chatroom->getTitle();
+        $msg_array['description'] = $chatroom->getDescription();
+        $msg_array['allow_anon'] = $chatroom->isAllowAnon();
+        $msg_array['host_name'] = $chatroom->getHostName();
+        $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
+        $msg_array['socket'] = "chatrooms";
+        if ($chatroom->isActive()) {
             $msg_array['type'] = 'chat_close';
-            $msg_array['id'] = $chatroom->getId();
-            $msg_array['socket'] = "chatrooms";
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
-            $indiv_msg_array['type'] = 'chat_close';
-            $indiv_msg_array['socket'] = "chatroom_$chatroom_id";
-            $this->sendSocketMessage($indiv_msg_array);
+            $msg_array['allow_read_only_after_end'] = $chatroom->allowReadOnlyAfterEnd();
+
+            if (!$chatroom->allowReadOnlyAfterEnd()) {
+                $indiv_msg_array = [];
+                $indiv_msg_array['type'] = 'chat_close';
+                $indiv_msg_array['chatroom_id'] = $chatroom->getId();
+                $this->sendSocketMessage($indiv_msg_array, true);
+            }
         }
         $this->sendSocketMessage($msg_array);
         $chatroom->setSessionStartedAt($chatroom->isActive() ? null : new \DateTime("now"));
@@ -213,7 +259,7 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function fetchMessages(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
-        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id], ['timestamp' => 'ASC']);
+        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id, 'is_deleted' => false], ['timestamp' => 'ASC']);
 
         $formattedMessages = array_map(function ($message) {
             return [
@@ -240,6 +286,10 @@ class ChatroomController extends AbstractController {
             return JsonResponse::getFailResponse("Chatroom not found");
         }
         if (!$chatroom->isActive() && !$user->accessAdmin()) {
+            if ($chatroom->allowReadOnlyAfterEnd()) {
+                return JsonResponse::getFailResponse("This chatroom is read-only.");
+            }
+
             return JsonResponse::getFailResponse("This chatroom is not enabled");
         }
         if (strcmp($_POST['content'], "") === 0) {
@@ -263,13 +313,37 @@ class ChatroomController extends AbstractController {
         }
         $msg_array['display_name'] = $display_name;
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
-        $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
+        $msg_array['chatroom_id'] = $chatroom->getId();
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
-        $msg_array['id'] = $message->getId();
-        $this->sendSocketMessage($msg_array);
+        $msg_array['message_id'] = $message->getId();
+        $this->sendSocketMessage($msg_array, true);
         return JsonResponse::getSuccessResponse($message);
+    }
+
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/clear", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    public function clearMessages(string $chatroom_id): JsonResponse {
+        $em = $this->core->getCourseEntityManager();
+
+        // Get message IDs for socket notifications before bulk deletion
+        $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id, 'is_deleted' => false], ['timestamp' => 'ASC']);
+
+        // Bulk update to mark all messages as deleted - optimized to avoid N+1 queries
+        $em->createQuery('UPDATE app\entities\chat\Message m SET m.is_deleted = true WHERE m.chatroom = :chatroom_id AND m.is_deleted = false')
+           ->setParameter('chatroom_id', $chatroom_id)
+           ->execute();
+
+        // Send socket messages for each deleted message ID
+        foreach ($messages as $message) {
+            $msg_array = [];
+            $msg_array['type'] = 'message_delete';
+            $msg_array['chatroom_id'] = $message->getChatroom()->getId();
+            $msg_array['message_id'] = $message->getId();
+            $this->sendSocketMessage($msg_array, true);
+        }
+        return JsonResponse::getSuccessResponse("cleared chatroom $chatroom_id successfully");
     }
 }

@@ -19,6 +19,11 @@ use app\libraries\DateUtils;
  * @method void     setNotifySource($content)
  * @method void     setNotifyTarget($content)
  * @method void     setType($t)
+ * @method void setTerm(string $term)
+ * @method void setCourse(string $course)
+ * @method void setCourseName(string $course_name)
+
+
  *
  * @method bool     isViewOnly()
  * @method int      getId()
@@ -35,7 +40,7 @@ use app\libraries\DateUtils;
  * @method bool     getNotifyNotToSource()
  * @method string   getType()
  */
-class Notification extends AbstractModel {
+class Notification extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var bool Notification fetched from DB */
     protected $view_only;
@@ -64,6 +69,18 @@ class Notification extends AbstractModel {
     protected $notify_not_to_source;
 
     /** @prop
+     * @var string|null Term for this notification */
+    protected ?string $term = null;
+
+    /** @prop
+     * @var string|null Course for this notification */
+    protected ?string $course = null;
+
+    /** @prop
+     * @var string|null Display name of the course for this notification */
+    protected ?string $course_name = null;
+
+    /** @prop
      * @var int Notification ID */
     protected $id;
     /** @prop
@@ -79,6 +96,10 @@ class Notification extends AbstractModel {
     /** @prop
      * @var string Type of notification used for settings */
     protected $type;
+
+    /** @prop
+     * @var string|null Gradeable ID this notification is tied to (grading components) */
+    protected ?string $gradeable_id = null;
 
 
     /**
@@ -97,6 +118,7 @@ class Notification extends AbstractModel {
         $instance->setNotifyContent($event['subject']);
         $instance->setNotifySource($event['sender_id']);
         $instance->setNotifyTarget($event['to_user_id']);
+        $instance->setGradeableId($event['gradeable_id'] ?? null);
         return $instance;
     }
 
@@ -112,6 +134,17 @@ class Notification extends AbstractModel {
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);
         $instance->setNotifyContent($details['content']);
+        $instance->setGradeableId($details['gradeable_id'] ?? null);
+        if (isset($details['term'])) {
+            $instance->setTerm($details['term']);
+        }
+
+        if (isset($details['course'])) {
+            $instance->setCourse($details['course']);
+        }
+        if (isset($details['course_name'])) {
+            $instance->setCourseName($details['course_name']);
+        }
         return $instance;
     }
 
@@ -175,5 +208,66 @@ class Notification extends AbstractModel {
         else {
             return DateUtils::convertTimeStamp($this->core->getUser(), $actual_time, $this->core->getConfig()->getDateTimeFormat()->getFormat('notification'));
         }
+    }
+
+    /**
+     * @return array{
+     * id: int,
+     * component: string,
+     * metadata: string,
+     * content: string,
+     * seen: bool,
+     * elapsed_time: float,
+     * created_at: string,
+     * notify_time: string,
+     * term: string|null,
+     * course: string|null,
+     * course_name: string|null,
+     * url: string
+     * }
+     */
+    public function jsonSerialize(): array {
+        $base_url = '';
+
+        if ($this->getNotifyMetadata() !== null) {
+            $term = $this->term;
+            $course = $this->course;
+
+            if (($term !== null && $term !== '') && ($course !== null && $course !== '')) {
+                $base_url = $this->core->buildUrl(['courses', $term, $course, 'notifications', $this->getId()]);
+            }
+            else {
+                $base_url = $this->core->buildCourseUrl(['notifications', $this->getId()]);
+            }
+        }
+        else {
+            $base_url = $this->core->buildUrl(['home']);
+        }
+
+        $url = $base_url . '?seen=' . ($this->isSeen() ? '1' : '0');
+
+        return [
+            'id' => $this->getId(),
+            'component' => $this->getComponent(),
+            'metadata' => $this->getNotifyMetadata(),
+            'content' => $this->getNotifyContent(),
+            'seen' => $this->isSeen(),
+            'elapsed_time' => $this->getElapsedTime(),
+            'created_at' => $this->getCreatedAt(),
+            'notify_time' => $this->getNotifyTime(),
+            'term' => $this->term,
+            'course' => $this->course,
+            'course_name' => $this->course_name,
+            'gradeable_id' => $this->gradeable_id,
+            'url' => $url
+        ];
+    }
+
+    public function getGradeableId(): ?string {
+        return $this->gradeable_id;
+    }
+
+    public function setGradeableId(?string $gradeable_id): void {
+        $this->gradeable_id = $gradeable_id;
     }
 }

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import Markdown from './Markdown.vue';
 
 interface Props {
     markdownAreaId: string;
     markdownAreaValue: string;
+    markdownStatusId?: string;
     class?: string;
     dataPreviousComment?: string;
     initializePreview?: boolean;
@@ -16,7 +17,6 @@ interface Props {
     placeholder?: string;
     previewDivId?: string | null;
     renderHeader?: boolean;
-    showToggle?: boolean;
     rootClass?: string;
     textareaMaxlength?: string | number;
     required?: boolean;
@@ -27,7 +27,6 @@ interface Props {
     textareaOnChange?: string;
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
-    renderMarkdown?: boolean;
     toggleButtonId?: string;
 }
 
@@ -46,6 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const moreMenuRef = ref<HTMLDetailsElement | null>(null);
 const mode = ref('edit');
 const content = ref(props.markdownAreaValue);
 const isLoadingPreview = ref(false);
@@ -138,6 +138,15 @@ function addMarkdown(type: string) {
     emit('add-markdown', { type, textarea: textareaRef.value });
 }
 
+function addMarkdownFromMenu(type: string) {
+    addMarkdown(type);
+    moreMenuRef.value?.removeAttribute('open');
+}
+
+function closeMoreMenu() {
+    moreMenuRef.value?.removeAttribute('open');
+}
+
 function handleKeyup(event: Event) {
     emit('keyup', event);
 
@@ -214,29 +223,49 @@ onMounted(() => {
     if (props.initializePreview) {
         setMode('preview');
     }
+
+    window.addEventListener('resize', closeMoreMenu);
 });
-const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
-function toggleHeader() {
-    showHeader.value = !showHeader.value;
-    window.Cookies.set('markdown_enabled', showHeader.value ? '1' : '0', { path: '/', expires: 365 });
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', closeMoreMenu);
+});
+
+const showHeader = ref(!!props.renderHeader);
+function toggleMarkdown() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            markdownStatusElement.value = +markdownStatusElement.value ? '0' : '1';
+            syncMarkdownToggle();
+        }
+    }
+}
+
+function syncMarkdownToggle() {
+    if (props.markdownStatusId) {
+        const markdownStatusElement = document.getElementById(props.markdownStatusId) as HTMLInputElement;
+        if (markdownStatusElement) {
+            const status = markdownStatusElement.value === '1';
+            showHeader.value = status;
+        }
+    }
 }
 </script>
 
 <template>
   <div
-    v-if="showToggle"
+    v-if="markdownStatusId"
     class="button-row"
   >
     <div
       :id="toggleButtonId"
       role="button"
       class="markdown-toggle key_to_click"
-      :class="[
-        showHeader ? 'markdown-active' : 'markdown-inactive'
-      ]"
+      :class="{ 'markdown-active': showHeader, 'markdown-inactive': !showHeader }"
       tabindex="0"
       title="Render markdown"
-      @click="toggleHeader"
+      @click="toggleMarkdown"
     >
       <i class="fab fa-markdown fa-2x" />
     </div>
@@ -252,9 +281,10 @@ function toggleHeader() {
   <div
     :class="[rootClass]"
     class="markdown-area fill-available"
+    @click="syncMarkdownToggle"
   >
     <div
-      v-if="props.renderHeader || showHeader"
+      v-if="showHeader"
       :id="markdownHeaderId ?? undefined"
       class="markdown-area-header"
       :data-mode="mode"
@@ -343,6 +373,55 @@ function toggleHeader() {
         >
           Blockquote <i class="fas fa-quote-left fa-1x" />
         </button>
+        <details
+          ref="moreMenuRef"
+          class="markdown-more-menu"
+        >
+          <summary
+            class="btn btn-default btn-markdown markdown-more-toggle"
+            title="More markdown tools"
+            aria-label="More markdown tools"
+          >
+            <i class="fas fa-ellipsis-h fa-1x" />
+          </summary>
+          <div class="markdown-more-dropdown">
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-link"
+              @click="addMarkdownFromMenu('link')"
+            >
+              Link
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-code"
+              @click="addMarkdownFromMenu('code')"
+            >
+              Code
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-bold"
+              @click="addMarkdownFromMenu('bold')"
+            >
+              Bold
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-italic"
+              @click="addMarkdownFromMenu('italic')"
+            >
+              Italics
+            </button>
+            <button
+              type="button"
+              class="markdown-more-item markdown-more-blockquote"
+              @click="addMarkdownFromMenu('blockquote')"
+            >
+              Blockquote
+            </button>
+          </div>
+        </details>
       </div>
     </div>
     <div class="markdown-area-body">
@@ -356,7 +435,7 @@ function toggleHeader() {
         class="screen-reader"
       >{{ markdownAreaId }}</label>
       <textarea
-        v-if="mode === 'edit'"
+        v-show="mode === 'edit'"
         :id="markdownAreaId"
         ref="textareaRef"
         v-model="content"

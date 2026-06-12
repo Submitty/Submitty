@@ -4,8 +4,7 @@
     "container_options": {
         "container_image": "submitty/autograding-default:latest"
     },
-
-    "hide_submitted_files" : true,
+  
 //    "hide_version_and_test_details" : true,
 
     "assignment_message" : "# Welcome To My Favorite Notebook Gradeable\n  \

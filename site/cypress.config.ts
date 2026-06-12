@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress';
 import { cypressBrowserPermissionsPlugin } from 'cypress-browser-permissions';
 import cypressPlugins from './cypress/plugins/index.js';
+import viteConfig from './vue/vite.config.mts';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -39,6 +40,15 @@ export default defineConfig({
         baseUrl: 'http://localhost:1511',
         specPattern: 'cypress/e2e/**/*.spec.js',
         projectId: 'es51qa',
+    },
+    component: {
+        devServer: {
+            framework: 'vue',
+            bundler: 'vite',
+            viteConfig,
+        },
+        supportFile: 'cypress/support/component.js',
+        specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
     },
     env: {
         browserPermissions: {

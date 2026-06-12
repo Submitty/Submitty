@@ -121,7 +121,7 @@ img {
 
 /* stylelint-disable-next-line selector-class-pattern */
 .large-mirror .CodeMirror {
-    resize: vertical;
+    resize: both;
     min-height: 30px;
     max-height: 80vh;
 }

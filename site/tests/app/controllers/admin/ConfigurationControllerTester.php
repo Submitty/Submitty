@@ -421,40 +421,12 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
         $queries
-            ->expects($this->exactly(4))
-            ->method('addNewCategory')
-            ->with($this->callback(function ($value) {
-                switch ($value) {
-                    case 'General Questions':
-                        return true;
-                    case 'Homework Help':
-                        return true;
-                    case 'Quizzes':
-                        return true;
-                    case 'Tests':
-                        return true;
-                    default:
-                        return false;
-                }
-            }))
-            ->will($this->returnCallback(function ($value) {
-                switch ($value) {
-                    case 'General Questions':
-                        return 0;
-                    case 'Homework Help':
-                        return 1;
-                    case 'Quizzes':
-                        return 2;
-                    case 'Tests':
-                        return 3;
-                }
-            }));
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
         $categoryRepository = $this->createMock(CategoryRepository::class);
         $categoryRepository
-            ->expects($this->once())
-            ->method('getCategories')
-            ->with()
-            ->willReturn([]);
+            ->expects($this->exactly(0))
+            ->method('getCategories');
         $entityManager = $this->createMock(EntityManager::class);
         $entityManager
             ->method('getRepository')
@@ -487,10 +459,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             ->method('addNewCategory');
         $categoryRepository = $this->createMock(CategoryRepository::class);
         $categoryRepository
-            ->expects($this->once())
-            ->method('getCategories')
-            ->with()
-            ->willReturn(['Category']);
+            ->expects($this->exactly(0))
+            ->method('getCategories');
         $entityManager = $this->createMock(EntityManager::class);
         $entityManager
             ->method('getRepository')

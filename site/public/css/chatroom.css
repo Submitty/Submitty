@@ -111,3 +111,22 @@
     transition: opacity 1s;
     z-index: 1000;
 }
+
+.chatroom-name-cell {
+    text-align: left;
+}
+
+.chatroom-status-cell {
+    text-align: left;
+    white-space: nowrap;
+}
+
+#chatrooms-table th,
+#chatrooms-table td {
+    text-align: left;
+    padding-left: 12px;
+}
+
+.readonly-badge {
+    margin-left: -4px;
+}

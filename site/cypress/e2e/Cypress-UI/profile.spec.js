@@ -120,11 +120,13 @@ describe('Test cases revolving around user profile page', () => {
         const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
         cy.get('[data-testid="upload-photo-button"]').click();
         cy.get('[data-testid="submit-button"]').click();
+        cy.get('body').should('not.have.class', 'no-scroll');
         // Since the login success message is still up, we get the next message.
         cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'No image uploaded to update the profile photo');
         cy.get('[data-testid="upload-photo-button"]').click();
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
+        cy.get('body').should('not.have.class', 'no-scroll');
         cy.get('[data-testid="popup-message"]').next().next().next().should('contain.text', 'Profile photo updated successfully!');
     });
 

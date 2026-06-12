@@ -5,22 +5,24 @@
     {{ add_twig_module_js('courseMaterials/upload.js') }}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <label id="file-path-label">
-            <span><strong>File Path / URL </strong></span>
+            <span><strong>Directory</strong></span>
             <span id="edit-location-drop-down">
                 <select id="new-file-name">
-                    <option value="">.</option>
+                    <option value=""> (Top Directory) </option>
                     {% for folder_path in folder_paths %}
-                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
+                        <option value="{{ folder_path }}">{{ folder_path }}</option>
                     {% endfor %}
                 </select>
             </span>
         </label>
-
         <label id="edit-title-label">
             <span><strong>File Name </strong></span>
-            <input type="text" id="edit-title" class="full-width" onchange="editFilePathRecommendations()" />
+            <input type="text" id="edit-title" class="full-width" />
         </label>
-
+        <label hidden id="edit-url-url-label">
+            <span><strong>Link URL</strong></span>
+            <input id="edit-url-url" type="text" class="full-width" disabled>
+        </label>
         <fieldset id="edit_sections">
             <legend class="black-message">
                 Do you want to restrict this course material to some sections?
@@ -71,12 +73,6 @@
             <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
             <em>These materials will always be available to course staff (full and limited access graders), regardless of release date. </em>
         </p>
-        <label hidden id="edit-url-url-label">
-            <span>
-                <strong>Edit link url:</strong>
-            </span>
-            <input id="edit-url-url" type="text" size="26" disabled>
-        </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>

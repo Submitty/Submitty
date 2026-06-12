@@ -40,8 +40,8 @@ Testing should be limited only to Submitty and its various components, contained
 
 ## How to report a security vulnerability?
 
-If you believe you’ve found a security vulnerability in one of our products or platforms please send it to us 
-by emailing [submitty-admin@googlegroups.com](mailto:submitty-admin@googlegroups.com). 
+If you believe you’ve found a security vulnerability in one of our products or platforms, please
+report it through GitHub [here](https://github.com/Submitty/Submitty/security/advisories/new).
 
 Please include the following details with your report:
 

@@ -87,13 +87,12 @@
             "args": {
                 "markdownAreaId" : "reply_box_" ~ post_box_id,
                 "toggleButtonId" : "markdown_toggle_" ~ post_box_id,
+                "markdownStatusId" : "markdown_input_" ~ post_box_id,
                 "markdownAreaName" : "thread_post_content",
                 "markdownAreaValue" : "",
                 "class" : "post_content_reply thread_post_content",
                 "placeholder" : post_content_placeholder,
                 "previewDivId" : "preview_box_" ~ post_box_id,
-                "renderHeader" : render_markdown is defined and render_markdown ? render_markdown : false,
-                "showToggle" : true,
                 "markdownHeaderId" : "markdown_header_" ~ post_box_id,
                 "minHeight" : min_height,
                 "required" :  false,
@@ -151,9 +150,9 @@
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image/PDF</label>
                 </div>
-                <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <input type="file" accept="image/*,.pdf" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}" data-testid="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
             </div>
