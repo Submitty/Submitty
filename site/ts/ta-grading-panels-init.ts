@@ -315,17 +315,19 @@ function readCookies() {
 
     // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
     if (autoscroll === 'on') {
-        const openFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
-        const totalFiles = $('#file-container .openable-element-submissions').length;
-        if (openFiles === 0 && totalFiles === 1) {
-            const $elem = $('#file-container .openable-element-submissions').first();
-            const fileName = $elem[0].dataset.file_name!;
-            const fileUrl = decodeURIComponent($elem.attr('file-url')!);
-            if ($elem.hasClass('image-file')) {
+        // the number of files and folders that are open in the submissions and results browser
+        const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
+        // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)
+        const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions:not([data-file_name^="."])');
+        if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
+            const elem = SubmissionFiles[0];
+            const fileName = elem.dataset.file_name!;
+            const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
+            if (elem.classList.contains('image-file')) {
                 viewFileFullPanel(fileName, fileUrl);
             }
             else {
-                const viewerId = $elem.attr('data-viewer_id')!;
+                const viewerId = elem.getAttribute('data-viewer_id');
                 openFrame(fileName, fileUrl, viewerId);
             }
         }
