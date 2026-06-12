@@ -151,7 +151,7 @@ class DockerInterfaceController extends AbstractController {
             else {
                 return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
             }
-            FileUtils::writeJsonFile(
+            $write_ok = FileUtils::writeJsonFile(
                 FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyInstallPath(),
                     "config",
@@ -159,9 +159,13 @@ class DockerInterfaceController extends AbstractController {
                 ),
                 $json
             );
+            if (!$write_ok) {
+                Logger::error("addImage write failed; install_path=" . $this->core->getConfig()->getSubmittyInstallPath());
+                return JsonResponse::getErrorResponse("Write failed");
+            }
 
             return JsonResponse::getSuccessResponse($_POST['image'] . ' has been added to the configuration! 
-                                                                            Click \'Update dockers and machines\' to apply changes.');
+                Click \'Update dockers and machines\' to apply changes.');
         }
         else {
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
@@ -246,6 +250,6 @@ class DockerInterfaceController extends AbstractController {
         );
 
         return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
-                                                            Click \'Update dockers and machines\' to apply changes.');
+            Click \'Update dockers and machines\' to apply changes.');
     }
 }
