@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\models\Course;
 use app\models\RainbowCustomizationJSON;
 use app\views\admin\ConfigurationView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,6 +30,9 @@ class ConfigurationController extends AbstractController {
     #[Route("/api/courses/{_semester}/{_course}/config", methods: ["GET"])]
     #[Route("/courses/{_semester}/{_course}/config", methods: ["GET"])]
     public function viewConfiguration(): MultiResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
@@ -47,9 +51,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($term, $course),
             'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
-            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($term, $course),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -57,7 +61,9 @@ class ConfigurationController extends AbstractController {
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
-            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled()
+            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled(),
+            'course_status'                  => $this->core->getQueries()->getCourseStatus($term, $course),
+            'unarchivable'                   => $this->core->getQueries()->isCourseUnarchivable($term, $course)
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -204,6 +210,55 @@ class ConfigurationController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
         );
+    }
+
+    /**
+     * Archive a course
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
+    public function archiveCourse(): JsonResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        // Only instructors can archive their own course
+        if (!$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse('Only instructors can archive a course');
+        }
+
+        $this->core->getQueries()->setCourseStatus($term, $course, Course::ARCHIVED_STATUS);
+
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course archived successfully'
+        ]);
+    }
+
+    /**
+     * Unarchive a course
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
+    public function unarchiveCourse(): JsonResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        // Only instructors can unarchive their own course
+        if (!$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse('Only instructors can unarchive a course');
+        }
+
+        // Check if course is marked as unarchivable
+        if ($this->core->getQueries()->isCourseUnarchivable($term, $course)) {
+            return JsonResponse::getFailResponse('This course is marked as unarchivable by a system administrator');
+        }
+
+        $this->core->getQueries()->setCourseStatus($term, $course, Course::ACTIVE_STATUS);
+
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course unarchived successfully'
+        ]);
     }
 
     private function getGradeableSeatingOptions(): array {
