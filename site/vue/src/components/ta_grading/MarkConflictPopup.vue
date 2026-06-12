@@ -84,7 +84,7 @@ onUnmounted(() => {
     @toggle="close"
   >
     <template #trigger>
-      <!-- Popup is opened programmatically via CustomEvent, no trigger button needed -->
+      <span style="display: none;" />
     </template>
     <template #default>
       <h4>
