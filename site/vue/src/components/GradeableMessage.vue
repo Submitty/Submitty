@@ -64,8 +64,8 @@ onUnmounted(() => {
 <template>
   <div
     v-if="visible"
-    class="popup-form"
     id="gradeable-message-popup"
+    class="popup-form"
   >
     <div
       class="popup-box"
@@ -148,17 +148,17 @@ onUnmounted(() => {
           >
             <div class="form-button-container">
               <button
+                id="cancel-button"
                 class="btn btn-default close-button"
                 type="button"
-                id="cancel-button"
                 @click="cancel"
               >
                 Cancel
               </button>
               <button
+                id="agree-button"
                 class="btn btn-primary"
                 type="button"
-                id="agree-button"
                 data-testid="agree-popup-btn"
                 @click="agree"
               >
