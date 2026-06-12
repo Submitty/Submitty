@@ -581,10 +581,38 @@ class TeamController extends AbstractController {
             }
         }
 
+        $all_users = $this->core->getQueries()->getAllUsers();
+        
+        $users_by_subsection = [];
+        
+        foreach ($all_users as $user) {
+            
+            if ($user->getGroup() !== \app\models\User::GROUP_STUDENT) {
+                continue;
+            }
+        
+            $subsection = $user->getRegistrationSubsection();
+
+            if (!isset($users_by_subsection[$subsection])) {
+                $users_by_subsection[$subsection] = [];
+            }
+        
+            $users_by_subsection[$subsection][] = $user;
+        }
+
+        krsort($users_by_subsection);
+
+        $user_team_map = [];
+        foreach ($teams as $team) {
+            foreach ($team->getMembers() as $member_id) {
+                $user_team_map[$member_id] = $team->getId();
+            }
+        }
+        
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
-        $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock);
+        $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $users_by_subsection, $user_team_map, $invites_received, $seeking_partner, $lock);
     }
 
     /**

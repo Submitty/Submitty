@@ -213,4 +213,76 @@
     </div>
 {% endif %}
 
+{% if is_instructor %}
+
+    <div class="content">
+
+        <header>
+            <h1>Manage Teams</h1>
+            <div class="btn-wrapper">
+                <a class="btn btn-primary">Create Teams from Registration Subsections</a>
+            </div>
+        </header>
+        
+        {% set count = 1 %}
+        {% if users_by_subsection|length > 0 and user_team_map|length > 0 %}
+        
+            <table id="student-table" class="table table-striped mobile-table directory-table">
+                <caption><h3>Students Organized by Subsection</h3><br /></caption>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Registration Section</th>
+                        <th>Team</th>
+                        <th>User ID</th>
+                        <th>Given Name</th>
+                        <th>Family Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                
+                {# Loop through each subsection #}
+                {% for subsection, subsection_users in users_by_subsection %}
+                    
+                    {# create a tbody for each subsection #}
+                    <tbody id="subsection-{{ subsection }}">
+                        
+                        <tr class="info">
+                            <td class="section-break" colspan="7">
+                                {% if subsection %}
+                                Students Enrolled in Registration Subsection {{ subsection }}
+                                {% else %}
+                                Students without a Registration Subsection
+                                {% endif %}
+                            </td>
+                        </tr>
+                        
+                        {# iterate through students in this subsection #}
+                        {% for current_user in subsection_users %}
+                            <tr id="user-{{ current_user.getId() }}">
+                                <td class="td-student-number">{{ count }}</td>
+                                <td class="td-registration-section">
+                                    {{ current_user.getRegistrationSection() ?? "NULL" }}
+                                    {% if current_user.getRegistrationSubsection() is not empty %}
+                                        - {{ current_user.getRegistrationSubsection() }}
+                                    {% endif %}
+                                </td>
+                                <td class="td-team">
+                                    {{ user_team_map[current_user.getId()] ?? "No Team" }}
+                                </td>
+                                <td class="td-student-id">{{ current_user.getId() }}</td>
+                                <td class="td-given-name">{{ current_user.getDisplayedGivenName() }}</td>
+                                <td class="td-family-name">{{ current_user.getDisplayedFamilyName() }}</td>
+                                <td class="td-email">{{ current_user.getEmail() }}</td>
+                            </tr>
+                            {% set count = count + 1 %}
+                        {% endfor %}
+                    </tbody>
+                    {% set count = 1 %}
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+{% endif %}
+
 {% include 'submission/EditTeamName.twig' %}
