@@ -30,6 +30,33 @@ Parameters:
 
 Builds a gradeable for a course
 
+### SyncCourseRepo
+Parameters:
+* semester
+* course
+
+Pulls the configured course repository, validates the manifest structure,
+applies course settings and gradeable manifests, queues rebuilds, and writes
+sync status to the course config folder.
+
+Expected repository layout:
+```
+<repo root>/
+  course.json
+  gradeables/
+    <gradeable_id>/
+      gradeable.json
+      autograder/
+        config.json
+```
+
+Notes:
+* `course.json` can either contain top-level course settings or a `course_details` object.
+* `gradeable.json` currently supports electronic gradeables and must reference (or contain)
+  an autograding config directory with `config.json`.
+* Sync status is written to:
+  `courses/<semester>/<course>/config/course_repo_sync_status.json`
+
 ### RunLichen
 Parameters:
 * semester
