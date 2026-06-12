@@ -324,9 +324,12 @@ function readCookies() {
             const fileName = elem.dataset.file_name!;
             const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
             if (elem.classList.contains('image-file')) {
+                // single submitted image file fills up the whole screen
                 viewFileFullPanel(fileName, fileUrl);
             }
             else {
+                // text file is opened as a frame, but its parent folder needs to be opened to view it
+                openDiv('sd1');
                 const viewerId = elem.getAttribute('data-viewer_id');
                 openFrame(fileName, fileUrl, viewerId);
             }
