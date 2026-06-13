@@ -1814,42 +1814,19 @@ function toggleDOMCustomMark(component_id: number) {
 }
 
 /**
- * Opens the 'users who got mark' dialog
+ * Dispatches mark stats data to the Vue ReceivedMarkForm component via CustomEvent.
  * @param {string} component_title
  * @param {string} mark_title
  * @param {Object} stats
  */
 function openMarkStatsPopup(component_title: string, mark_title: string, stats: Stats) {
-    const popup = $('#student-marklist-popup');
-
-    popup.find('.question-title').html(component_title);
-    popup.find('.mark-title').html(mark_title);
-    popup.find('.section-submitter-count').html(stats.section_submitter_count);
-    popup.find('.total-submitter-count').html(stats.total_submitter_count);
-    popup.find('.section-graded-component-count').html(stats.section_graded_component_count);
-    popup.find('.total-graded-component-count').html(stats.total_graded_component_count);
-    popup.find('.section-total-component-count').html(stats.section_total_component_count);
-    popup.find('.total-total-component-count').html(stats.total_total_component_count);
-
-    // Create an array of links for each submitter
-    const submitterHtmlElements: string[] = [];
-    const location = window.location.href.split('?');
-    let base_url = location[0];
-    if (base_url.slice(base_url.length - 6) === 'update') {
-        base_url = `${base_url.slice(0, -6)}grading/grade`;
-    }
-    const search_params = new URLSearchParams(location[1]);
-    stats.submitter_ids.forEach((id: string | number) => {
-        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
-        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
-    });
-    popup.find('.student-names').html(submitterHtmlElements.join(', '));
-
-    // Hide all other (potentially) open popups
-    $('.popup-form').hide();
-
-    // Open the popup
-    popup.show();
+    window.dispatchEvent(new CustomEvent('show-mark-stats', {
+        detail: {
+            componentTitle: component_title,
+            markTitle: mark_title,
+            stats: stats,
+        },
+    }));
 }
 
 /**
