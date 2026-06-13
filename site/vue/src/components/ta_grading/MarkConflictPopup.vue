@@ -87,12 +87,13 @@ onUnmounted(() => {
       <span style="display: none;" />
     </template>
     <template #default>
-      <h4>
+      <h4 data-testid="mark-conflict-description">
         It looks like someone else also edited the rubric. Choose the changes you want to keep.
       </h4>
       <div
         v-if="currentConflict"
         class="container mark-conflict-container"
+        data-testid="mark-conflict-container"
       >
         <div class="row mark-conflict-row">
           <div class="col container">
@@ -100,8 +101,9 @@ onUnmounted(() => {
             <div
               v-if="currentConflict.oldServerMark"
               class="row mark-resolve mark-resolve-old-server"
+              data-testid="mark-conflict-old-server"
             >
-              <span class="col">
+              <span class="col" data-testid="mark-conflict-old-server-info">
                 ({{ currentConflict.oldServerMark.points }}) {{ currentConflict.oldServerMark.title ?? '' }}
                 <template v-if="currentConflict.oldServerMark.publish">
                   -- <i>Show mark to all students</i>
@@ -112,14 +114,15 @@ onUnmounted(() => {
                   type="button"
                   class="btn btn-default"
                   value="Revert to Original"
+                  data-testid="mark-conflict-old-server-btn"
                   @click="resolve(currentConflict.domMark.id, 'old-server')"
                 >
               </span>
             </div>
             <!-- Current server mark -->
-            <div class="row mark-resolve mark-resolve-server">
+            <div class="row mark-resolve mark-resolve-server" data-testid="mark-conflict-server">
               <template v-if="currentConflict.serverMark">
-                <span class="col">
+                <span class="col" data-testid="mark-conflict-server-info">
                   ({{ currentConflict.serverMark.points }}) {{ currentConflict.serverMark.title ?? '' }}
                   <template v-if="currentConflict.serverMark.publish">
                     -- <i>Show mark to all students</i>
@@ -130,26 +133,28 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Ignore My Edits"
+                    data-testid="mark-conflict-server-btn"
                     @click="resolve(currentConflict.domMark.id, 'server')"
                   >
                 </span>
               </template>
               <template v-else>
-                <span class="col mark-deleted-message">Mark Deleted From Server</span>
+                <span class="col mark-deleted-message" data-testid="mark-conflict-server-deleted">Mark Deleted From Server</span>
                 <span class="col-no-gutters button-container">
                   <input
                     type="button"
                     class="btn btn-primary"
                     value="Delete Mark"
+                    data-testid="mark-conflict-server-btn"
                     @click="resolve(currentConflict.domMark.id, 'server')"
                   >
                 </span>
               </template>
             </div>
             <!-- Local (DOM) mark -->
-            <div class="row mark-resolve mark-resolve-dom">
+            <div class="row mark-resolve mark-resolve-dom" data-testid="mark-conflict-dom">
               <template v-if="!currentConflict.localDeleted">
-                <span class="col">
+                <span class="col" data-testid="mark-conflict-dom-info">
                   ({{ currentConflict.domMark.points }}) {{ currentConflict.domMark.title ?? '' }}
                   <template v-if="currentConflict.domMark.publish">
                     -- <i>Show mark to all students</i>
@@ -160,17 +165,19 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Use My Edits"
+                    data-testid="mark-conflict-dom-btn"
                     @click="resolve(currentConflict.domMark.id, 'dom')"
                   >
                 </span>
               </template>
               <template v-else>
-                <span class="col mark-deleted-message">You Deleted the Mark</span>
+                <span class="col mark-deleted-message" data-testid="mark-conflict-dom-deleted">You Deleted the Mark</span>
                 <span class="col-no-gutters button-container">
                   <input
                     type="button"
                     class="btn btn-primary"
                     value="Delete Mark"
+                    data-testid="mark-conflict-dom-btn"
                     @click="resolve(currentConflict.domMark.id, 'dom')"
                   >
                 </span>
@@ -181,6 +188,7 @@ onUnmounted(() => {
         <div
           v-if="conflicts.length > 1"
           class="conflict-resolve-progress"
+          data-testid="mark-conflict-progress"
         >
           <i><span class="conflict-resolve-progress-indicator">{{ currentIndex + 1 }}</span> out of {{ conflicts.length }}</i>
         </div>
