@@ -117,7 +117,6 @@ onUnmounted(() => {
           <br>
           <br>
           <strong>Students:</strong>
-          <br>
           <span data-testid="student-names">
             <template v-if="studentLinks.length > 0">
               <span v-for="(student, index) in studentLinks" :key="student.name">
@@ -125,9 +124,20 @@ onUnmounted(() => {
               </span>
             </template>
             <template v-else>
-              <br>No students found
+              <br>
             </template>
           </span>
+          <div class="form-buttons">
+            <div class="form-button-container">
+              <button
+                class="btn btn-default close-button"
+                data-testid="popup-close-button"
+                tabindex="0"
+                type="button"
+                @click="close"
+              >Close</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
