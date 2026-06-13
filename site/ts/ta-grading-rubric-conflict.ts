@@ -51,7 +51,9 @@ export function openMarkConflictPopup(component_id: number, conflictMarks: MarkC
 
         let cleanedUp = false;
         function cleanup() {
-            if (cleanedUp) return;
+            if (cleanedUp) {
+                return;
+            }
             cleanedUp = true;
             window.removeEventListener('resolve-conflict', resolveConflictHandler);
             window.removeEventListener('all-conflicts-resolved', resolveAllHandler);
@@ -60,39 +62,41 @@ export function openMarkConflictPopup(component_id: number, conflictMarks: MarkC
         }
 
         // Handle each resolution choice from the component
-        const resolveConflictHandler = async (e: Event) => {
-            const detail = (e as CustomEvent).detail as ResolveConflictDetail;
-            const { markId, resolution } = detail;
-            const conflict = conflictMarks[markId];
+        const resolveConflictHandler = (e: Event) => {
+            void (async () => {
+                const detail = (e as CustomEvent).detail as ResolveConflictDetail;
+                const { markId, resolution } = detail;
+                const conflict = conflictMarks[markId];
 
-            try {
-                if (resolution === 'dom') {
-                    if (conflict.localDeleted) {
-                        await ajaxDeleteMark(gradeable_id, component_id, markId);
-                    }
-                    else {
-                        const isServerDeleted = conflict.serverMark === null;
-                        if (isServerDeleted) {
-                            const data = await ajaxAddNewMark(gradeable_id, component_id, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
-                            conflict.domMark.id = data.mark_id;
+                try {
+                    if (resolution === 'dom') {
+                        if (conflict.localDeleted) {
+                            await ajaxDeleteMark(gradeable_id, component_id, markId);
                         }
                         else {
-                            await ajaxSaveMark(gradeable_id, component_id, markId, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
+                            const isServerDeleted = conflict.serverMark === null;
+                            if (isServerDeleted) {
+                                const data = await ajaxAddNewMark(gradeable_id, component_id, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
+                                conflict.domMark.id = data.mark_id;
+                            }
+                            else {
+                                await ajaxSaveMark(gradeable_id, component_id, markId, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
+                            }
                         }
                     }
+                    else if (resolution === 'old-server') {
+                        const mark = conflict.oldServerMark!;
+                        await ajaxSaveMark(gradeable_id, component_id, markId, mark.title!, mark.points, mark.publish);
+                    }
+                    // resolution === 'server': accept server state, no AJAX needed
                 }
-                else if (resolution === 'old-server') {
-                    const mark = conflict.oldServerMark!;
-                    await ajaxSaveMark(gradeable_id, component_id, markId, mark.title!, mark.points, mark.publish);
+                catch (err) {
+                    console.error(`Failed to resolve conflict for mark ${markId}:`, err);
                 }
-                // resolution === 'server': accept server state, no AJAX needed
-            }
-            catch (err) {
-                console.error(`Failed to resolve conflict for mark ${markId}:`, err);
-            }
 
-            // Tell the component to advance to the next conflict
-            window.dispatchEvent(new CustomEvent('conflict-resolved'));
+                // Tell the component to advance to the next conflict
+                window.dispatchEvent(new CustomEvent('conflict-resolved'));
+            })();
         };
 
         const resolveAllHandler = () => cleanup();

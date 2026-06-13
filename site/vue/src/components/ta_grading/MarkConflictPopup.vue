@@ -103,7 +103,10 @@ onUnmounted(() => {
               class="row mark-resolve mark-resolve-old-server"
               data-testid="mark-conflict-old-server"
             >
-              <span class="col" data-testid="mark-conflict-old-server-info">
+              <span
+                class="col"
+                data-testid="mark-conflict-old-server-info"
+              >
                 ({{ currentConflict.oldServerMark.points }}) {{ currentConflict.oldServerMark.title ?? '' }}
                 <template v-if="currentConflict.oldServerMark.publish">
                   -- <i>Show mark to all students</i>
@@ -120,9 +123,15 @@ onUnmounted(() => {
               </span>
             </div>
             <!-- Current server mark -->
-            <div class="row mark-resolve mark-resolve-server" data-testid="mark-conflict-server">
+            <div
+              class="row mark-resolve mark-resolve-server"
+              data-testid="mark-conflict-server"
+            >
               <template v-if="currentConflict.serverMark">
-                <span class="col" data-testid="mark-conflict-server-info">
+                <span
+                  class="col"
+                  data-testid="mark-conflict-server-info"
+                >
                   ({{ currentConflict.serverMark.points }}) {{ currentConflict.serverMark.title ?? '' }}
                   <template v-if="currentConflict.serverMark.publish">
                     -- <i>Show mark to all students</i>
@@ -139,7 +148,10 @@ onUnmounted(() => {
                 </span>
               </template>
               <template v-else>
-                <span class="col mark-deleted-message" data-testid="mark-conflict-server-deleted">Mark Deleted From Server</span>
+                <span
+                  class="col mark-deleted-message"
+                  data-testid="mark-conflict-server-deleted"
+                >Mark Deleted From Server</span>
                 <span class="col-no-gutters button-container">
                   <input
                     type="button"
@@ -152,9 +164,15 @@ onUnmounted(() => {
               </template>
             </div>
             <!-- Local (DOM) mark -->
-            <div class="row mark-resolve mark-resolve-dom" data-testid="mark-conflict-dom">
+            <div
+              class="row mark-resolve mark-resolve-dom"
+              data-testid="mark-conflict-dom"
+            >
               <template v-if="!currentConflict.localDeleted">
-                <span class="col" data-testid="mark-conflict-dom-info">
+                <span
+                  class="col"
+                  data-testid="mark-conflict-dom-info"
+                >
                   ({{ currentConflict.domMark.points }}) {{ currentConflict.domMark.title ?? '' }}
                   <template v-if="currentConflict.domMark.publish">
                     -- <i>Show mark to all students</i>
@@ -171,7 +189,10 @@ onUnmounted(() => {
                 </span>
               </template>
               <template v-else>
-                <span class="col mark-deleted-message" data-testid="mark-conflict-dom-deleted">You Deleted the Mark</span>
+                <span
+                  class="col mark-deleted-message"
+                  data-testid="mark-conflict-dom-deleted"
+                >You Deleted the Mark</span>
                 <span class="col-no-gutters button-container">
                   <input
                     type="button"
