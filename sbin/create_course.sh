@@ -332,6 +332,13 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
+# Ensure readonly role can see course data in all existing and future course tables.
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT USAGE ON SCHEMA public TO database_readonly_user;"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO database_readonly_user;"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO database_readonly_user;"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO database_readonly_user;"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO database_readonly_user;"
+
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type)
 VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}', ${self_registration_type});"
 if [[ "$?" -ne "0" ]] ; then
