@@ -96,7 +96,7 @@ onUnmounted(() => {
       >
         <div class="row mark-conflict-row">
           <div class="col container">
-            <!-- Old server mark (original before edits) -->
+            <!-- Old server mark -->
             <div
               v-if="currentConflict.oldServerMark"
               class="row mark-resolve mark-resolve-old-server"
