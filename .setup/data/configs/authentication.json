@@ -1,0 +1,12 @@
+{
+  "authentication_method": "DatabaseAuthentication",
+  "ldap_options": {
+    "url": "ldap://localhost",
+    "uid": "uid",
+    "bind_dn": "ou=users,dc=vagrant,dc=local"
+  },
+  "saml_options": {
+    "name": "",
+    "username_attribute": ""
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "submitty_install_dir": "/usr/local/submitty",
+  "submitty_repository": "/usr/local/submitty/GIT_CHECKOUT/Submitty",
+  "submitty_data_dir": "/var/local/submitty",
+  "autograding_log_path": "/var/local/submitty/logs/autograding",
+  "site_log_path": "/var/local/submitty/logs",
+  "worker": true
+}
