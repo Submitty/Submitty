@@ -174,6 +174,7 @@ else:
 
     # Construct cmd string
     cmd = [
+        sys.executable,
         '{}/sbin/generate_grade_summaries.py'.format(install_dir),
         semester,
         course,
