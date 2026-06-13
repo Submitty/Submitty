@@ -74,6 +74,9 @@ class Access {
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
 
+    /** Allow access to annotated files if the user owns the file (for view_annotated_file parameter) */
+    const ALLOW_ANNOTATED_FILE_OWNER    = 1 << 19;
+
     /** If the current set of flags requires the "gradeable" (type Gradeable) argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "component" (type GradeableComponent) argument */
@@ -198,7 +201,7 @@ class Access {
         $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::ALLOW_ANNOTATED_FILE_OWNER;
         $this->permissions["path.read.attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW;
         $this->permissions["path.read.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         $this->permissions["path.read.submission_versions"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
@@ -536,6 +539,16 @@ class Access {
             // grade another (eg students cannot edit others' files during peer grading)
             if ($grading_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = false;
+            }
+
+            // Allow access to annotated files if the user owns the file and view_annotated_file is true
+            if (!$grading_checks && self::checkBits($checks, self::ALLOW_ANNOTATED_FILE_OWNER)) {
+                $view_annotated_file = filter_var($args['view_annotated_file'] ?? false, FILTER_VALIDATE_BOOL);
+                $dir = $args['dir'] ?? '';
+                $path = $args['path'] ?? '';
+                if ($view_annotated_file && $dir === 'submissions_processed' && strpos($path, $user->getId()) !== false) {
+                    $grading_checks = true;
+                }
             }
 
             if (!$grading_checks) {

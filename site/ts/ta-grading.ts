@@ -671,6 +671,12 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
+
+    // Clean up any open annotation editor when loading a new file
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     const extension = name.split('.').pop();
     if (fileFullPanelOptions[panel]['pdf'] && extension === 'pdf') {
         const gradeable_id = document.getElementById(
@@ -693,38 +699,77 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
+                // Clear previous PDF content before appending new content
+                $('#file-content').empty();
                 $('#file-content').append(data);
             },
         });
     }
     else {
+        // Check if the file is an image
+        const isImage = isImageFile(name);
         $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
-        $(fileFullPanelOptions[panel]['saveStatus']).hide();
-        $(fileFullPanelOptions[panel]['fileContent']).append(
-            `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            name,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            path,
-        );
-        openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
-        $(
-            `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
-        ).css('max-height', '1200px');
-        // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
+
+        if (isImage) {
+            // For images, use server-side annotation system
+            const gradeable_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.gradeableId;
+            const anon_submitter_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.anonSubmitterId;
+            $(fileFullPanelOptions[panel]['saveStatus']).show();
+
+            return $.ajax({
+                type: 'POST',
+                url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'img']),
+                data: {
+                    user_id: anon_submitter_id,
+                    filename: name,
+                    file_path: path,
+                    is_anon: true,
+                    csrf_token: window.csrfToken,
+                },
+                success: function (data: string) {
+                    // Clean up annotation editor and reset manager before loading new content
+                    if (typeof window.cleanupAnnotationEditor === 'function') {
+                        window.cleanupAnnotationEditor();
+                    }
+
+                    // Clear previous image content before appending new content
+                    $(fileFullPanelOptions[panel]['fileContent']).empty();
+                    $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                },
+            });
+        }
+        else {
+            $(fileFullPanelOptions[panel]['saveStatus']).hide();
+            // For other file types, use the original iframe approach
+            $(fileFullPanelOptions[panel]['fileContent']).append(
+                `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                name,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                path,
+            );
+            openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
+            $(
+                `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
+            ).css('max-height', '1200px');
+        }
     }
 }
 window.loadPDF = loadPDF;
@@ -733,6 +778,14 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    // Also remove image annotation containers
+    $(`${fileFullPanelOptions[panel]['fileContent']}`).empty();
+
+    // Clean up any open annotation editor when collapsing files
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
         if ($('#pdf_annotation_bar').is(':visible')) {
@@ -893,6 +946,13 @@ window.deleteAttachment = function (target: string, file_name: string) {
         });
     }
 };
+
+// Utility function to check if a file extension is an image
+function isImageFile(filename: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'tif'];
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return extension ? imageExtensions.includes(extension) : false;
+}
 
 function checkOpenComponentMark(index: number) {
     const component_id = getFirstOpenComponentId();
