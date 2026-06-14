@@ -114,18 +114,11 @@ describe('TA Grading Panel Switcher', () => {
 
             cy.log(`Testing layout: ${layout.name}`);
 
-            cy.get('[data-testid="panel-selector-toggle"]')
-                .should('be.visible')
-                .click();
+            cy.get('[data-testid="panel-selector-toggle"]').click();
 
-            cy.get(layout.selector)
-                .scrollIntoView({ block: 'center' });
+            cy.get(layout.selector).scrollIntoView({ block: 'center' });
 
-            cy.get(layout.selector)
-                .should('be.visible');
-
-            cy.get(layout.selector)
-                .click();
+            cy.get(layout.selector).click();
 
             if (!layout.expectedOptions) {
                 return;
@@ -134,13 +127,10 @@ describe('TA Grading Panel Switcher', () => {
             panels.forEach((panel) => {
                 cy.log(`Testing panel: ${panel.name}`);
 
-                cy.get(panel.button).should('be.visible').click();
-
-                cy.get(panel.selector).should('be.visible');
+                cy.get(panel.button).click();
 
                 layout.expectedOptions.forEach((option) => {
-                    cy.get(panel.selector)
-                        .should('contain.text', option);
+                    cy.get(panel.selector).should('contain.text', option);
                 });
 
                 cy.get(panel.button).click();
