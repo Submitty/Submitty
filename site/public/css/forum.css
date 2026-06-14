@@ -333,6 +333,13 @@
     justify-content: center;
 }
 
+.post-button-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
 .upduck-button {
     position: relative;
     display: inline-block;

@@ -64,8 +64,13 @@ const handleShowLikedUsers = () => {
       class="fas fa-users icon-mark-stats"
       data-testid="show-upduck-list"
       title="See who liked this post"
-      style="cursor: pointer; margin-left: 10px;"
       @click="handleShowLikedUsers"
     />
   </span>
 </template>
+
+<style scoped>
+.icon-mark-stats {
+    margin-left: 10px;
+}
+</style>

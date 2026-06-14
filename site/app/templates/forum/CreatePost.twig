@@ -39,7 +39,7 @@
 
     <hr style="margin-bottom: 3px;">
 
-    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+    <div class="post-button-bar">
 
     {% if display_option == 'tree' %}
 
@@ -78,7 +78,7 @@
 
     {% include "Vue.twig" with {
         type: "component",
-        name: "forum/PostButtonLike",
+        name: "forum/UpduckButton",
         args: {
             postId: post.id,
             threadId: post.thread.id,
