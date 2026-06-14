@@ -1450,8 +1450,7 @@ CREATE TABLE public.grading_cluster (
     id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     label character varying(255),
-    algorithm character varying(255) NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    algorithm character varying(255) NOT NULL
 );
 
 
@@ -3626,6 +3625,22 @@ ALTER TABLE ONLY public.grading_cluster
 
 ALTER TABLE ONLY public.grading_cluster_members
     ADD CONSTRAINT grading_cluster_members_cluster_id_fkey FOREIGN KEY (cluster_id) REFERENCES public.grading_cluster(id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_cluster_members grading_cluster_members_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_members
+    ADD CONSTRAINT grading_cluster_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_cluster_members grading_cluster_members_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_members
+    ADD CONSTRAINT grading_cluster_members_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(team_id) ON DELETE CASCADE;
 
 
 --

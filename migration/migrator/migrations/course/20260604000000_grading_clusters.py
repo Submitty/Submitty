@@ -4,11 +4,10 @@
 def up(config, database, semester, course):
     database.execute("""
         CREATE TABLE IF NOT EXISTS grading_cluster (
-            id SERIAL PRIMARY KEY,
+            id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             g_id CHARACTER VARYING(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
             label CHARACTER VARYING(255),
-            algorithm CHARACTER VARYING(255) NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+            algorithm CHARACTER VARYING(255) NOT NULL
         )
     """)
 
@@ -18,10 +17,10 @@ def up(config, database, semester, course):
 
     database.execute("""
         CREATE TABLE IF NOT EXISTS grading_cluster_members (
-            id SERIAL PRIMARY KEY,
+            id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             cluster_id INTEGER NOT NULL REFERENCES grading_cluster(id) ON DELETE CASCADE,
-            user_id CHARACTER VARYING(255) DEFAULT NULL,
-            team_id CHARACTER VARYING(255) DEFAULT NULL,
+            user_id CHARACTER VARYING(255) DEFAULT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+            team_id CHARACTER VARYING(255) DEFAULT NULL REFERENCES teams(team_id) ON DELETE CASCADE,
             CONSTRAINT cluster_member_check CHECK (
                 (user_id IS NOT NULL) OR (team_id IS NOT NULL)
             )
@@ -35,5 +34,4 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    database.execute("DROP TABLE IF EXISTS grading_cluster_members")
-    database.execute("DROP TABLE IF EXISTS grading_cluster")
+    pass

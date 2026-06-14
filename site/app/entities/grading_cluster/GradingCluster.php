@@ -26,9 +26,6 @@ class GradingCluster {
     #[ORM\Column(type: Types::STRING, enumType: GradingClusterAlgorithm::class)]
     private GradingClusterAlgorithm $algorithm;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    private \DateTime $created_at;
-
     /**
      * @var Collection<int, GradingClusterMember>
      */
@@ -39,7 +36,6 @@ class GradingCluster {
         $this->gradeable_id = $gradeable_id;
         $this->label        = $label;
         $this->algorithm    = $algorithm;
-        $this->created_at   = new \DateTime("now");
         $this->members      = new ArrayCollection();
     }
 
@@ -61,10 +57,6 @@ class GradingCluster {
 
     public function getAlgorithm(): GradingClusterAlgorithm {
         return $this->algorithm;
-    }
-
-    public function getCreatedAt(): \DateTime {
-        return $this->created_at;
     }
 
     /**
