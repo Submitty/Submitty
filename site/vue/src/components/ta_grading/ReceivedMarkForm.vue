@@ -117,6 +117,7 @@ onUnmounted(() => {
           <br>
           <br>
           <strong>Students:</strong>
+          <br>
           <span data-testid="student-names">
             <template v-if="studentLinks.length > 0">
               <span v-for="(student, index) in studentLinks" :key="student.name">
