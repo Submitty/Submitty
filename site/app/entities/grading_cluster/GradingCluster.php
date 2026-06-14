@@ -21,7 +21,7 @@ class GradingCluster {
     private string $gradeable_id;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $label;
+    private ?string $cluster_name;
 
     #[ORM\Column(type: Types::STRING, enumType: GradingClusterAlgorithm::class)]
     private GradingClusterAlgorithm $algorithm;
@@ -32,9 +32,9 @@ class GradingCluster {
     #[ORM\OneToMany(mappedBy: "cluster", targetEntity: GradingClusterMember::class, cascade: ["persist", "remove"], fetch: "EAGER")]
     private Collection $members;
 
-    public function __construct(string $gradeable_id, ?string $label, GradingClusterAlgorithm $algorithm) {
+    public function __construct(string $gradeable_id, ?string $cluster_name, GradingClusterAlgorithm $algorithm) {
         $this->gradeable_id = $gradeable_id;
-        $this->label        = $label;
+        $this->cluster_name = $cluster_name;
         $this->algorithm    = $algorithm;
         $this->members      = new ArrayCollection();
     }
@@ -47,12 +47,12 @@ class GradingCluster {
         return $this->gradeable_id;
     }
 
-    public function getLabel(): ?string {
-        return $this->label;
+    public function getClusterName(): ?string {
+        return $this->cluster_name;
     }
 
-    public function setLabel(?string $label): void {
-        $this->label = $label;
+    public function setClusterName(?string $cluster_name): void {
+        $this->cluster_name = $cluster_name;
     }
 
     public function getAlgorithm(): GradingClusterAlgorithm {

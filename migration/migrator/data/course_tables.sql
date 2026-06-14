@@ -1449,29 +1449,9 @@ CREATE TABLE public.gradeable_teams (
 CREATE TABLE public.grading_cluster (
     id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    label character varying(255),
+    cluster_name character varying(255),
     algorithm character varying(255) NOT NULL
 );
-
-
---
--- Name: grading_cluster_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.grading_cluster_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: grading_cluster_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.grading_cluster_id_seq OWNED BY public.grading_cluster.id;
 
 
 --
@@ -1488,23 +1468,31 @@ CREATE TABLE public.grading_cluster_members (
 
 
 --
--- Name: grading_cluster_members_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: grading_cluster id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.grading_cluster_members_id_seq
-    AS integer
+ALTER TABLE public.grading_cluster ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.grading_cluster_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
-    CACHE 1;
+    CACHE 1
+);
 
 
 --
--- Name: grading_cluster_members_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: grading_cluster_members id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.grading_cluster_members_id_seq OWNED BY public.grading_cluster_members.id;
+ALTER TABLE public.grading_cluster_members ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.grading_cluster_members_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
 
 
 --
@@ -2280,19 +2268,6 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET D
 
 ALTER TABLE ONLY public.gradeable_redaction ALTER COLUMN redaction_id SET DEFAULT nextval('public.gradeable_redaction_redaction_id_seq'::regclass);
 
-
---
--- Name: grading_cluster id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grading_cluster ALTER COLUMN id SET DEFAULT nextval('public.grading_cluster_id_seq'::regclass);
-
-
---
--- Name: grading_cluster_members id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grading_cluster_members ALTER COLUMN id SET DEFAULT nextval('public.grading_cluster_members_id_seq'::regclass);
 
 
 --
@@ -3640,7 +3615,7 @@ ALTER TABLE ONLY public.grading_cluster_members
 --
 
 ALTER TABLE ONLY public.grading_cluster_members
-    ADD CONSTRAINT grading_cluster_members_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(team_id) ON DELETE CASCADE;
+    ADD CONSTRAINT grading_cluster_members_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
 
 
 --

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
@@ -43,12 +44,12 @@ class GradingClusterController extends AbstractController {
             GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
         };
 
-        foreach ($cluster_groups as $label => $members) {
+        foreach ($cluster_groups as $cluster_name => $members) {
             if ($members === []) {
                 continue;
             }
 
-            $cluster = new GradingCluster($gradeable_id, $label, $algorithm);
+            $cluster = new GradingCluster($gradeable_id, $cluster_name, $algorithm);
             foreach ($members as $member) {
                 new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null);
             }
@@ -73,7 +74,7 @@ class GradingClusterController extends AbstractController {
         foreach ($clusters as $cluster) {
             $result[] = [
                 'id'           => $cluster->getId(),
-                'label'        => $cluster->getLabel(),
+                'cluster_name' => $cluster->getClusterName(),
                 'algorithm'    => $cluster->getAlgorithm()->value,
                 'member_count' => $cluster->getMemberCount(),
                 'members'      => array_map(
@@ -92,5 +93,4 @@ class GradingClusterController extends AbstractController {
             "clusters"     => $result,
         ]);
     }
-
 }
