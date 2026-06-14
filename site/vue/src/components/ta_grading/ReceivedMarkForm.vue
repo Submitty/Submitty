@@ -32,7 +32,9 @@ const stats = ref<MarkStats | null>(null);
 const { baseUrl, searchParams } = buildUrlParts();
 
 const studentLinks = computed<StudentLink[]>(() => {
-    if (!stats.value) return [];
+    if (!stats.value) {
+        return [];
+    }
     const params = new URLSearchParams(searchParams);
     return stats.value.submitter_ids.map((id) => {
         params.set('who_id', stats.value!.submitter_anon_ids[id] ?? id);
@@ -85,8 +87,15 @@ onUnmounted(() => {
     data-testid="mark-stats-popup"
     style="display: block;"
   >
-    <div class="popup-box" @click="close">
-      <div class="popup-window" @click.stop data-testid="popup-window">
+    <div
+      class="popup-box"
+      @click="close"
+    >
+      <div
+        class="popup-window"
+        data-testid="popup-window"
+        @click.stop
+      >
         <div class="form-title">
           <h1>Mark Statistics</h1>
           <button
@@ -95,7 +104,9 @@ onUnmounted(() => {
             tabindex="-1"
             type="button"
             @click="close"
-          >Close</button>
+          >
+            Close
+          </button>
         </div>
         <div class="form-body">
           <h3>
@@ -120,8 +131,14 @@ onUnmounted(() => {
           <br>
           <span data-testid="student-names">
             <template v-if="studentLinks.length > 0">
-              <span v-for="(student, index) in studentLinks" :key="student.name">
-                <a :href="student.url">{{ student.name }}</a><span v-if="index < studentLinks.length - 1">, </span>
+              <span
+                v-for="(student, index) in studentLinks"
+                :key="student.name"
+              >
+                <a :href="student.url">{{ student.name }}</a><span
+                  v-if="index < studentLinks.length - 1"
+                  :key="`comma-${index}`"
+                >, </span>
               </span>
             </template>
             <template v-else>
@@ -136,7 +153,9 @@ onUnmounted(() => {
                 tabindex="0"
                 type="button"
                 @click="close"
-              >Close</button>
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
