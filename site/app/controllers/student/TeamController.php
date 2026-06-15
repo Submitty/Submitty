@@ -550,7 +550,7 @@ class TeamController extends AbstractController {
 
         if (count($subsections) === 0) {
             $result = "No new teams created. All students are already on teams or aren't assigned subsections.";
-            return $this->core->getOutput()->renderJsonFail($result);
+            return $this->core->getOutput()->renderResultMessage($result, false);
         }
 
         $teams_created_count = 0;
@@ -581,7 +581,7 @@ class TeamController extends AbstractController {
             $teams_created_count++;
         }
         $result = "Successfully created {$teams_created_count} teams from registration subsections.";
-        return $this->core->getOutput()->renderJsonSuccess($result);
+        return $this->core->getOutput()->renderResultMessage($result, true);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]
