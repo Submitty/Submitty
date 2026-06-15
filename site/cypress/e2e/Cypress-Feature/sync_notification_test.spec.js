@@ -13,10 +13,11 @@ describe('Notification Settings Sync', () => {
 
     // Helper to create new course and add student
     const createNewCourse = (course = 'new_test_course') => {
-    	cy.login('instructor');
+		cy.login('instructor');
         cy.visit('/home/courses/new');
         cy.get('#course_title').type(course);
-        cy.get('#group_name').select(4);	// select the sample group
+        // select the sample group
+        cy.get('#group_name').select(4);
         cy.get('#course-creation-form button[type="submit"]').click();
         cy.visit([course, 'sections']);
         cy.get('.add-registration-section-btn').click();
@@ -25,14 +26,15 @@ describe('Notification Settings Sync', () => {
         cy.get('#new-section-id').type('1');
         cy.get('#new-course-id-num').click();
         cy.get('#new-course-id-num').type('11111');
-        cy.get('input[type="submit"][value="Add Section"]').click();	// submit added section
+        // submit added section
+        cy.get('input[type="submit"][value="Add Section"]').click();
         cy.visit([course, 'users']);
-        cy.get('a[href="javascript:newStudentForm()"]').click();
-        cy.get('#user_id').click();
+		cy.get('a[href="javascript:newStudentForm()"]').click();
+		cy.get('#user_id').click();
 		cy.get('#user_id').type('student');
 		cy.get('[data-testid="registration-section-dropdown"]').select('1');
 		cy.get('[data-testid="submit-user-form-button"]').click();
-        cy.logout();
+		cy.logout();
     }
 
     describe('Sync settings to other courses', () => {
@@ -54,10 +56,14 @@ describe('Notification Settings Sync', () => {
         it('Should sync notification settings to a selected course', () => {
             // Set a known state: check merge_threads, uncheck all_new_threads
             cy.get('input[name="merge_threads"]').then(($cb) => {
-                if (!$cb.is(':checked')) cy.wrap($cb).click();
+                if (!$cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
             cy.get('input[name="all_new_threads"]').then(($cb) => {
-                if ($cb.is(':checked')) cy.wrap($cb).click();
+                if ($cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
 
             openSyncPopup();
@@ -101,10 +107,14 @@ describe('Notification Settings Sync', () => {
         it('Should verify synced settings appear on the target course', () => {
             // Set a distinctive state on source course
             cy.get('input[name="team_invite"]').then(($cb) => {
-                if (!$cb.is(':checked')) cy.wrap($cb).click();
+                if (!$cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
             cy.get('input[name="all_new_posts"]').then(($cb) => {
-                if ($cb.is(':checked')) cy.wrap($cb).click();
+                if ($cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
 
             openSyncPopup();
@@ -144,10 +154,14 @@ describe('Notification Settings Sync', () => {
         it('Should save current settings as future course defaults', () => {
             // Set a known state
             cy.get('input[name="merge_threads"]').then(($cb) => {
-                if (!$cb.is(':checked')) cy.wrap($cb).click();
+                if (!$cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
             cy.get('input[name="all_new_threads"]').then(($cb) => {
-                if ($cb.is(':checked')) cy.wrap($cb).click();
+                if ($cb.is(':checked')) {
+                	cy.wrap($cb).click();
+                }
             });
 
             openSyncPopup();
@@ -183,7 +197,6 @@ describe('Notification Settings Sync', () => {
            	cy.login('student');
            	visitNotificationSettings('test_noti_new_course');
            	
-
             // cy.get('')
             // cy.waitPageChange(() => {
     			// cy.get('#course-creation-form button[type="submit"]').click();
