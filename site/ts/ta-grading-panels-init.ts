@@ -329,10 +329,6 @@ function openAutoGrading(num: string) {
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
 
-    // Check initially if its the mobile screen view or not
-    changeMobileView();
-    initializeTaLayout();
-
     window.addEventListener('resize', () => {
         const wasMobileView = isMobileView;
         changeMobileView();
@@ -362,6 +358,9 @@ $(() => {
             $('#grading-panel-student-name').hide();
         }
     });
+
+    // manually trigger resize at init so layout matches window dimensions at first page open
+    window.dispatchEvent(new Event('resize'));
 
     // Grading panel toggle buttons
     $('.grade-panel button').click(function () {
