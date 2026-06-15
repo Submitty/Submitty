@@ -216,6 +216,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_subsection' => '',
             'enforce_single_session' => false,
             'instructor_courses' => false,
+            'date_format' => 'YMD',
         ];
         $this->assertEquals($expected, $actual);
     }

@@ -68,6 +68,19 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             expect(test_json.grade_inquiries).to.eql(true);
             expect(test_json.rubric).to.eql(rubric);
             expect(test_json.dates.has_release_date).to.eql(false);
+            // Add testing for remaining date values in downloaded gradeable JSON
+            expect(test_json.dates.ta_view_start_date).to.eql('1970-01-01 23:59:59');
+            expect(test_json.dates.grade_start_date).to.eql('9997-12-31 23:59:59');
+            expect(test_json.dates.grade_due_date).to.eql('9998-12-31 23:59:59');
+            expect(test_json.dates.grade_released_date).to.eql('9998-12-31 23:59:59');
+            expect(test_json.dates.team_lock_date).to.eql('9996-12-31 23:59:59');
+            expect(test_json.dates.submission_open_date).to.eql('1971-01-01 23:59:59');
+            expect(test_json.dates.submission_due_date).to.eql('9996-12-31 23:59:59');
+            expect(test_json.dates.grade_inquiry_start_date).to.eql('9999-01-01 23:59:59');
+            expect(test_json.dates.grade_inquiry_due_date).to.eql('9999-01-06 23:59:59');
+            expect(test_json.dates.has_due_date).to.eql(false);
+            expect(test_json.dates.late_submission_allowed).to.eql(true);
+            expect(test_json.dates.late_days).to.eql(1);
         });
     });
 
