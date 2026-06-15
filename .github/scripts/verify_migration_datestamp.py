@@ -79,7 +79,7 @@ def _print_stale_migrations_report(stale_migrations, now):
     print("\n" + "=" * 70)
     print(" MIGRATION DATESTAMP CHECK FAILED")
     print("=" * 70)
-    print(f"\nMigrations must be ≤{MAX_AGE_DAYS} days old to prevent out-of-order execution.")
+    print(f"\nMigrations must be <={MAX_AGE_DAYS} days old to prevent out-of-order execution.")
     print("\nTo fix, rename the file with today's datestamp:")
     for filepath, filename, _datestamp, _age_days in stale_migrations:
         migration_type = os.path.basename(os.path.dirname(filepath))

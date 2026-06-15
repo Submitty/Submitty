@@ -49,8 +49,7 @@ jobs:
         run: python .github/scripts/verify_migration_datestamp.py
         env:
           MAX_MIGRATION_AGE_DAYS: 7
-
-          
+        
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-22.04
