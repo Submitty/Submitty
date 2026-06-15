@@ -537,7 +537,7 @@ class TeamController extends AbstractController {
         // Group users by their subsection
         foreach ($users as $user) {
             $subsection = $user->getRegistrationSubsection();
-            if (empty($subsection)){
+            if (empty($subsection)) {
                 continue;
             }
 
@@ -648,7 +648,7 @@ class TeamController extends AbstractController {
 
         $users_by_subsection = [];
 
-        foreach ($all_users as $user) {            
+        foreach ($all_users as $user) {
             if ($user->getGroup() !== \app\models\User::GROUP_STUDENT) {
                 continue;
             }
@@ -658,7 +658,7 @@ class TeamController extends AbstractController {
             if (!isset($users_by_subsection[$subsection])) {
                 $users_by_subsection[$subsection] = [];
             }
-        
+
             $users_by_subsection[$subsection][] = $user;
         }
 
