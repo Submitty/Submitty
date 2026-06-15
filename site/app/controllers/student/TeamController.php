@@ -523,6 +523,59 @@ class TeamController extends AbstractController {
     }
 
     /**
+     * Function to create single-student teams for all students without a team
+     *
+     * @param string $gradeable_id
+     * @return array<string>
+     */
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_single_student_teams", methods: ["POST"])]
+    public function createSingleStudentTeams($gradeable_id) {
+        $students = $this->core->getQueries()->getAllUsers();
+        $students_needing_teams = [];
+
+        foreach ($students as $student) {
+            // Skip null registration section users
+            if ($student->getRegistrationSection() === null) {
+                continue;
+            }
+
+            // Skip if user is already on a team for this gradeable
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $student->getId()) !== null) {
+                continue;
+            }
+
+            $students_needing_teams[] = $student;
+        }
+
+        if (count($students_needing_teams) === 0) {
+            $result = "No new teams created. All registered students are already on teams.";
+            return $this->core->getOutput()->renderResultMessage($result, false);
+        }
+
+        $teams_created_count = 0;
+
+        // Create a single-person team for each remaining student
+        foreach ($students_needing_teams as $student) {
+            $this->core->getQueries()->createTeam(
+                $gradeable_id,
+                $student->getId(),
+                $student->getRegistrationSection(),
+                $student->getRotatingSection(),
+                null
+            );
+
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $student->getId());
+            $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $student->getId());
+
+            $teams_created_count++;
+        }
+
+        $result = "Successfully created {$teams_created_count} single-student teams.";
+        return $this->core->getOutput()->renderResultMessage($result, true);
+    }
+
+    /**
     * Function to create teams from registration subsections.
     *
     * @param string $gradeable_id
@@ -645,35 +698,27 @@ class TeamController extends AbstractController {
 
         $all_users = $this->core->getQueries()->getAllUsers();
 
-        $users_by_subsection = [];
+        $students_on_teams_count = 0;
+        $students_not_on_teams_count = 0;
+        $all_students_count = 0;
 
         foreach ($all_users as $user) {
-            if ($user->getGroup() !== \app\models\User::GROUP_STUDENT) {
+            if ($user->getRegistrationSection() === null) {
                 continue;
             }
-
-            $subsection = $user->getRegistrationSubsection();
-
-            if (!isset($users_by_subsection[$subsection])) {
-                $users_by_subsection[$subsection] = [];
-            }
-
-            $users_by_subsection[$subsection][] = $user;
+            $all_students_count = $all_students_count + 1;
         }
 
-        krsort($users_by_subsection);
-
-        $user_team_map = [];
-        foreach ($teams as $team_var) {
-            foreach ($team_var->getMembers() as $member_id) {
-                $user_team_map[$member_id] = $team_var->getId();
-            }
+        foreach ($teams as $t) {
+            $students_on_teams_count = $students_on_teams_count + count($t->getMembers());
         }
+
+        $students_not_on_teams_count = $all_students_count - $students_on_teams_count;
 
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
-        $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $users_by_subsection, $user_team_map, $invites_received, $seeking_partner, $lock);
+        $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock, $students_not_on_teams_count, $students_on_teams_count);
     }
 
     /**

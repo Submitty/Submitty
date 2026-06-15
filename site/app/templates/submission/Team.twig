@@ -214,181 +214,73 @@
 {% endif %}
 
 {% if is_instructor %}
-
     <div class="content">
-
         <header>
-            <h1>Manage Teams</h1>
+            <h1>Manage Teams</h1>   
             <div class="btn-wrapper">
-                {# Need 'flex: 1' to preserve the space given by parent div #}
-                {% include 'Vue.twig' with {
-                    'type': 'component',
-                    'name': 'ToggleColumns',
-                    'style': 'flex: 1', 
-                    'args': {
-                        'buttonWrapped': true,
-                        'columns': [
-                            'registration-section',
-                            'team',
-                            'team name',
-                            'user-id',
-                            'given-name',
-                            'family-name',
-                            'email',
-                        ],
-                        'labels': [
-                            'Registration Section',
-                            'Team',
-                            'Team Name',
-                            'User ID',
-                            'Given Name',
-                            'Family Name',
-                            'Email',
-                        ],
-                        'cookie': 'active_team_columns',
-                    },
-                } %}
-                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="window.createTeamsFromSubsections()" style="cursor: pointer">
+                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="window.createTeamsFromSubsections()">
                    Create Teams from Registration Subsections
+                </button>
+                <button class="btn btn-primary" id="create_single_student_teams" onclick="window.createSingleStudentTeams()">
+                   Create Single-Student Teams
                 </button>
             </div>
         </header>
-        
-        {% set row_num = 1 %}
-        {% set not_in_null_section = true %}
-        {% if users_by_subsection|length > 0 %}
-        
-            <table id="student-table" class="table table-striped mobile-table directory-table">
-                <caption><h3>Students Organized by Subsection</h3><br /></caption>
-                <thead>
-                    <tr>
-                        {% set col_count = 1 %}
-                        <th>#</th>
-                        
-                        {% if active_team_columns[0] ?? true %}
-                            <th>Registration Section</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                        
-                        {% if active_team_columns[1] ?? true %}
-                            <th>Team</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
 
-                        {% if active_team_columns[2] ?? true %}
-                            <th>Team Name</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                        
-                        {% if active_team_columns[3] ?? true %}
-                            <th>User ID</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                        
-                        {% if active_team_columns[4] ?? true %}
-                            <th>Given Name</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                        
-                        {% if active_team_columns[5] ?? true %}
-                            <th>Family Name</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                        
-                        {% if active_team_columns[6] ?? true %}
-                            <th>Email</th>
-                            {% set col_count = col_count + 1 %}
-                        {% endif %}
-                    </tr>
-                </thead>
-                
-                {# Loop through each subsection #}
-                {% for subsection, subsection_users in users_by_subsection %}
-                    
-                    {# create a tbody for each subsection #}
-                    <tbody id="subsection-{{ subsection }}">
-                        
-                        <tr class="info">
-                            <td class="section-break" colspan="{{ col_count }}">
-                                {% if subsection %}
-                                Students Enrolled in Registration Subsection '{{ subsection }}'
-                                {% else %}
-                                Students Without a Registration Subsection
-                                {% endif %}
-                            </td>
-                        </tr>
-                        
-                        {# iterate through students in this subsection #}
-                        {% for current_user in subsection_users %}
-
-                            {# create a section break for the null section #}
-                            {% if not current_user.getRegistrationSection() and not_in_null_section %}
-                                <tr class="info">
-                                    <td class="section-break" colspan="{{ col_count }}">
-                                        Students Enrolled in Registration Section NULL
-                                        {% set not_in_null_section = false %}
-                                    </td>
-                                </tr>
-                            {% endif %}
-
-                            <tr id="user-{{ current_user.getId() }}">
-                                <td class="td-student-number">{{ row_num }}</td>
-                                
-                                {% if active_team_columns[0] ?? true %}
-                                <td class="td-registration-section">
-                                    {{ current_user.getRegistrationSection() ?? "NULL" }}
-                                    {% if current_user.getRegistrationSubsection() is not empty %}
-                                        - {{ current_user.getRegistrationSubsection() }}
-                                    {% endif %}
-                                </td>
-                                {% endif %}
-                                
-                                {% if active_team_columns[1] ?? true %}
-                                <td class="td-team">
-                                    {{ user_team_map[current_user.getId()] ?? "No Team" }}
-                                </td>
-                                {% endif %}
-
-                                {% if active_team_columns[2] ?? true %}
-                                <td class="td-team-name">
-                                    {% set team_id = user_team_map[current_user.getId()] ?? null %}
-                                    {% if team_id and teams[team_id] is defined %}
-                                        {{ teams[team_id].getTeamName() ?? "No Team Name Set" }}
-                                    {% endif %}
-                                </td>
-                                {% endif %}
-                                
-                                {% if active_team_columns[3] ?? true %}
-                                <td class="td-student-id">{{ current_user.getId() }}</td>
-                                {% endif %}
-                                
-                                {% if active_team_columns[4] ?? true %}
-                                <td class="td-given-name">{{ current_user.getDisplayedGivenName() }}</td>
-                                {% endif %}
-                                
-                                {% if active_team_columns[5] ?? true %}
-                                <td class="td-family-name">{{ current_user.getDisplayedFamilyName() }}</td>
-                                {% endif %}
-                                
-                                {% if active_team_columns[6] ?? true %}
-                                <td class="td-email">{{ current_user.getEmail() }}</td>
-                                {% endif %}
-                            </tr>
-                            {% set row_num = row_num + 1 %}
-                        {% endfor %}
-                    </tbody>
-                    {% set row_num = 1 %}
-                {% endfor %}
-            </table>
-        {% endif %}
+        {% set message_class = students_on_teams_count == 0 ? 'red-message' : 'message' %}
+        <p class="{{ message_class }}"> 
+            There are currently <b>{{ team_count }} existing teams</b> for this gradeable. 
+            There are currently <b>{{ students_not_on_teams_count }}</b> students not yet on a team and <b>{{ students_on_teams_count }}</b> students on existing teams for this gradeable.
+        </p>
+        <br>
+        <div class="team-management-links">
+            <p>
+                <b>View Teams: </b> 
+                <a href="{{ grading_overview_url }}">Grade Details</a>
+            </p>
+            <p>
+                <b>Manage Students: </b> 
+                <a href="{{ manage_students_url }}">Manage Students</a>
+            </p>
+        </div>
     </div>
 {% endif %}
 
 <script>
+    window.createSingleStudentTeams = function() {
+
+        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_single_student_teams']);
+        const message = "Are you sure you want to generate single-student teams?\n\n" +
+                        "{{ students_not_on_teams_count }} students currently without a team will be placed on their own individual teams.\n" +
+                        "{{ students_on_teams_count }} students on existing teams will be skipped.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    if (response.data && response.data.trim() !== "") {
+                        displayMessage(response.data);
+                    }
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
     window.createTeamsFromSubsections = function() {
 
         const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_teams_from_subsections']);
-        const message = "Are you sure you want to generate teams from registration subsections?\nStudents already on a team will be skipped.";
+        const message = "Are you sure you want to generate teams from registration subsections?\n\n" +
+                        "Up to {{ students_not_on_teams_count }} students currently without a team will be put on teams based on registration subsection.\n" +
+                        "{{ students_on_teams_count }} students on existing teams will be skipped.";
 
         const csrf_token = "{{ csrf_token }}";
         if(confirm(message)){
