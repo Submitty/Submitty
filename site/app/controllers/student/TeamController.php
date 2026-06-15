@@ -637,6 +637,46 @@ class TeamController extends AbstractController {
         return $this->core->getOutput()->renderResultMessage($result, true);
     }
 
+    /**
+     * Function to delete all teams without submissions for a given gradeable.
+     * Teams that have already made a submission will be skipped.
+     *
+     * @param string $gradeable_id
+     * @return array<string>
+    */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/delete_all_teams", methods: ["POST"])]
+    public function deleteTeams($gradeable_id) {
+        
+        $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+
+        if (count($teams) === 0) {
+            $result = "No teams exist to delete.";
+            return $this->core->getOutput()->renderResultMessage($result, false);
+        }
+
+        $deleted_count = 0;
+        $skipped_count = 0;
+
+        foreach ($teams as $team) {
+            $team_id = $team->getId();
+
+            // Check if the team has a submission. 
+            $has_submission = $this->core->getQueries()->getActiveVersionForTeam($gradeable_id, $team_id) > 0;
+
+            if ($has_submission) {
+                $skipped_count++;
+                continue;
+            }
+
+            $this->core->getQueries()->deleteTeam($team_id);
+            
+            $deleted_count++;
+        }
+
+        $result = "Successfully deleted {$deleted_count} teams. Skipped {$skipped_count} teams with submissions.";
+        return $this->core->getOutput()->renderResultMessage($result, true);
+    }
+
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]
     public function showPage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
