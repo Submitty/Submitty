@@ -97,7 +97,7 @@ function hasScore(componentId: string, peer: string): boolean {
 
 <template>
   <div>
-    <span>
+    <span data-testid="warning-text">
       Select the student whose marks you want to clear
       <br>WARNING this will remove all of the peer grading done by this student:
       <br>
@@ -134,10 +134,12 @@ function hasScore(componentId: string, peer: string): boolean {
       <div
         v-for="component in safeComponents"
         :key="component.id"
+        :data-testid="'component-block-' + component.id"
       >
         <div
           v-if="hasScore(component.id, peer)"
           class="box-badge"
+          data-testid="box-badge"
         >
           <span
             v-if="shouldShowBadge(scoreForComponent(component.id, peer) ?? 0, component.max)"
@@ -150,32 +152,36 @@ function hasScore(componentId: string, peer: string): boolean {
           <div
             v-else
             class="no-badge"
+            data-testid="no-badge"
           />
         </div>
-        <span class="component-title col-no-gutters">
+        <span class="component-title col-no-gutters" data-testid="component-title">
           <b>{{ component.title }}</b>
         </span>
-        <div class="received-marks-list container">
+        <div class="received-marks-list container" data-testid="marks-list">
           <div
             v-for="markId in component.marks"
             :key="markId"
             class="row"
+            :data-testid="'mark-row-' + markId"
           >
             <div class="col-no-gutters indicator">
               <i
                 v-if="isMarkAssigned(component.id, peer, markId)"
                 class="far fa-check-square fa-1g"
+                data-testid="mark-checked"
               />
               <i
                 v-else
                 class="far fa-square fa-1g"
+                data-testid="mark-unchecked"
               />
             </div>
             <div class="col-no-gutters point-value">
-              <span>{{ safeMarks[String(markId)]?.points }}</span>
+              <span data-testid="mark-points">{{ safeMarks[String(markId)]?.points }}</span>
             </div>
             <div class="col">
-              <span style="white-space: pre-wrap;">{{ safeMarks[String(markId)]?.title }}</span>
+              <span style="white-space: pre-wrap;" data-testid="mark-title">{{ safeMarks[String(markId)]?.title }}</span>
             </div>
           </div>
         </div>
