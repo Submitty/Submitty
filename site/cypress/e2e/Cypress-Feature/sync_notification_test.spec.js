@@ -108,7 +108,7 @@ describe('Notification Settings Sync', () => {
 
             openSyncPopup();
 
-            // Sync to 'tutorial' course (adjust value to match your dev data)
+            // Sync to 'tutorial' course
             cy.get('#sync-notification-popup .sync-course-checkbox').each(($cb) => {
                 if ($cb.val().includes('tutorial')) {
                     cy.wrap($cb).check({ force: true });
@@ -179,6 +179,7 @@ describe('Notification Settings Sync', () => {
             
            	createNewCourse('test_noti_new_course');
 
+           	cy.login('student');
            	visitNotificationSettings('test_noti_new_course');
            	
 
