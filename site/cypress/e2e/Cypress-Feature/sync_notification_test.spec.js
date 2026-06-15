@@ -13,17 +13,18 @@ describe('Notification Settings Sync', () => {
 
     // Helper to create new course and add student
     const createNewCourse = (course = 'new_test_course') => {
-    	cy.login('instructor')
-
+    	cy.login('instructor');
         cy.visit('/home/courses/new');
         cy.get('#course_title').type(course);
-        cy.get('#group_name').select(4);		// select the sample group
+        cy.get('#group_name').select(4);	// select the sample group
         cy.get('#course-creation-form button[type="submit"]').click();
         cy.visit([course, 'sections']);
         cy.get('.add-registration-section-btn').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
-        cy.get('#new-section-id').click().type('1');
-        cy.get('#new-course-id-num').click().type('11111');
+        cy.get('#new-section-id').click();
+        cy.get('#new-section-id').type('1');
+        cy.get('#new-course-id-num').click();
+        cy.get('#new-course-id-num').type('11111');
         cy.get('input[type="submit"][value="Add Section"]').click();	// submit added section
         cy.visit([course, 'users']);
         cy.get('a[href="javascript:newStudentForm()"]').click();
