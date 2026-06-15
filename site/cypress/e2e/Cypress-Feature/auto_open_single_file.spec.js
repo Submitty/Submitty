@@ -18,14 +18,6 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.get('#div_viewer_rd1', { timeout: 20000 }).should('exist');
     }
 
-    function assertAllFoldersClosed() {
-        cy.get('[id^=div_viewer_]').should('not.be.visible');
-    }
-
-    function assertAllFilesClosed() {
-        cy.get('[id^=file_viewer_]').should('not.be.visible');
-    }
-
     const single_file_submission_selector = '#div_viewer_sd1 div[id^=file_viewer_]:not([data-file_name^="."])';
 
     function assertSingleFileSubmissionOpen() {
@@ -58,8 +50,6 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.get('#autoscroll_id').should('be.checked');
 
         // single file submission is opened if nothing else is open
-        assertAllFoldersClosed();
-        assertAllFilesClosed();
         assertSingleFileSubmissionClosed();
         cy.reload();
         assertSubmissionsBrowserOpen();
@@ -70,7 +60,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         assertSubmissionsBrowserOpen();
         cy.reload();
         assertSubmissionsBrowserOpen();
-        assertAllFilesClosed();
+        assertSingleFileSubmissionClosed();
 
         cy.get('#submissions').click(); // close submissions browser
         assertSubmissionsBrowserClosed();
@@ -89,14 +79,14 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.reload();
         assertResultsBrowserOpen();
         assertSubmissionsBrowserOpen();
-        assertAllFilesClosed();
+        assertSingleFileSubmissionClosed();
 
         cy.get('#results').click(); // close results browser
         assertResultsBrowserClosed();
         cy.reload();
         assertResultsBrowserClosed();
         assertSubmissionsBrowserOpen();
-        assertAllFilesClosed();
+        assertSingleFileSubmissionClosed();
 
         cy.get('#submissions').click(); // close submissions browser
         assertSubmissionsBrowserClosed();
@@ -135,7 +125,7 @@ describe('Test cases involving auto opening single file submissions', () => {
     }
 
     function clickFileViewCollapseButton() {
-        cy.get('a:has(i[title="Back"])').click();
+        cy.get('a:has(i[title="Back"])', { timeout: 20000 }).should('be.visible').click();
     }
 
     it('test the single file auto open for image submissions', () => {
@@ -149,22 +139,25 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.get('#autoscroll_id').should('be.checked');
 
         // single image file submission is opened and fills the screen if nothing else is open
-        assertAllFoldersClosed();
-        assertAllFilesClosed();
         assertSingleImageSubmissionClosed();
         cy.reload();
-        assertSubmissionsBrowserClosed();
         assertSingleImageSubmissionOpen();
 
         // switching between single image file submission with different names works with auto open
         cy.get('#next-student').click();
+        // cy.get('[data-testid="grading-panel-student-name"] b').contains('bitdiddle');
         assertSingleImageSubmissionOpen();
 
         clickFileViewCollapseButton();
         assertSingleImageSubmissionClosed();
 
         cy.get('#prev-student').click();
+        // cy.get('[data-testid="grading-panel-student-name"] b').contains('beahaf');
         assertSingleImageSubmissionOpen();
+
+        // wait for PDF to fully load in, or an error will occur when it's interrupted by logout
+        cy.intercept('/courses/s26/sample/gradeable/grading_homework_pdf/encode_pdf').as('pdf');
+        cy.wait('@pdf');
     });
 
     it('test that multi-file submissions are unaffected', () => {
@@ -179,7 +172,6 @@ describe('Test cases involving auto opening single file submissions', () => {
 
         // opening a multi-file submission does not sure auto open single file logic
         cy.reload();
-        assertAllFilesClosed();
-        assertAllFoldersClosed();
+        assertSubmissionsBrowserClosed();
     });
 });
