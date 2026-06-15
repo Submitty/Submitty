@@ -13,7 +13,7 @@ describe('Notification Settings Sync', () => {
 
     // Helper to create new course and add student
     const createNewCourse = (course = 'new_test_course') => {
-		cy.login('instructor');
+        cy.login('instructor');
         cy.visit('/home/courses/new');
         cy.get('#course_title').type(course);
         // select the sample group
@@ -29,13 +29,13 @@ describe('Notification Settings Sync', () => {
         // submit added section
         cy.get('input[type="submit"][value="Add Section"]').click();
         cy.visit([course, 'users']);
-		cy.get('a[href="javascript:newStudentForm()"]').click();
+        cy.get('a[href="javascript:newStudentForm()"]').click();
 		cy.get('#user_id').click();
 		cy.get('#user_id').type('student');
-		cy.get('[data-testid="registration-section-dropdown"]').select('1');
-		cy.get('[data-testid="submit-user-form-button"]').click();
-		cy.logout();
-    }
+        cy.get('[data-testid="registration-section-dropdown"]').select('1');
+        cy.get('[data-testid="submit-user-form-button"]').click();
+        cy.logout();
+    };
 
     describe('Sync settings to other courses', () => {
         beforeEach(() => {
@@ -57,12 +57,12 @@ describe('Notification Settings Sync', () => {
             // Set a known state: check merge_threads, uncheck all_new_threads
             cy.get('input[name="merge_threads"]').then(($cb) => {
                 if (!$cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
             cy.get('input[name="all_new_threads"]').then(($cb) => {
                 if ($cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
 
@@ -108,12 +108,12 @@ describe('Notification Settings Sync', () => {
             // Set a distinctive state on source course
             cy.get('input[name="team_invite"]').then(($cb) => {
                 if (!$cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
             cy.get('input[name="all_new_posts"]').then(($cb) => {
                 if ($cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
 
@@ -145,22 +145,21 @@ describe('Notification Settings Sync', () => {
 
         it('Should show Save as Future Course Default button when no defaults exist', () => {
             openSyncPopup();
-            cy.get('[data-testid="save-notification-defaults"]')
-                .scrollIntoView()
-                .should('be.visible')
-                // .and('contain.text', 'Save as Future Course Default');
+            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView()
+            cy.get('[data-testid="save-notification-defaults"]').should('be.visible')
+            cy.get('[data-testid="save-notification-defaults"]').should('contain.text', 'Save as Future Course Default');
         });
 
         it('Should save current settings as future course defaults', () => {
             // Set a known state
             cy.get('input[name="merge_threads"]').then(($cb) => {
                 if (!$cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
             cy.get('input[name="all_new_threads"]').then(($cb) => {
                 if ($cb.is(':checked')) {
-                	cy.wrap($cb).click();
+                    cy.wrap($cb).click();
                 }
             });
 
@@ -181,10 +180,14 @@ describe('Notification Settings Sync', () => {
             cy.login('student');
             visitNotificationSettings('sample');
             cy.get('input[name="team_invite"]').then(($cb) => {
-                if (!$cb.is(':checked')) cy.wrap($cb).click();
+                if (!$cb.is(':checked')) {
+                    cy.wrap($cb).click();
+                }
             });
             cy.get('input[name="self_notification"]').then(($cb) => {
-                if ($cb.is(':checked')) cy.wrap($cb).click();
+                if ($cb.is(':checked')) {
+                    cy.wrap($cb).click();
+                }
             });
 
             openSyncPopup();
