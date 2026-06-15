@@ -6,7 +6,6 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\JsonResponse;
 use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -527,7 +526,7 @@ class TeamController extends AbstractController {
     * Function to create teams from registration subsections.
     *
     * @param string $gradeable_id
-    * @return JsonResponse
+    * @return array
     */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_teams_from_subsections", methods: ["POST"])]
     public function createTeamsFromSubsections($gradeable_id) {
@@ -537,7 +536,7 @@ class TeamController extends AbstractController {
         // Group users by their subsection
         foreach ($users as $user) {
             $subsection = $user->getRegistrationSubsection();
-            if (empty($subsection)) {
+            if ($subsection === '') {
                 continue;
             }
 
@@ -549,9 +548,9 @@ class TeamController extends AbstractController {
             $subsections[$subsection][] = $user;
         }
 
-        if (empty($subsections)) {
+        if (count($subsections) === 0) {
             $result = "No new teams created. All students are already on teams or aren't assigned subsections.";
-            return $this->core->getOutput()->renderResultMessage($result, false);
+            return $this->core->getOutput()->renderJsonFail($result);
         }
 
         $teams_created_count = 0;
@@ -582,7 +581,7 @@ class TeamController extends AbstractController {
             $teams_created_count++;
         }
         $result = "Successfully created {$teams_created_count} teams from registration subsections.";
-        return $this->core->getOutput()->renderResultMessage($result, true);
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]
@@ -665,9 +664,9 @@ class TeamController extends AbstractController {
         krsort($users_by_subsection);
 
         $user_team_map = [];
-        foreach ($teams as $team) {
-            foreach ($team->getMembers() as $member_id) {
-                $user_team_map[$member_id] = $team->getId();
+        foreach ($teams as $team_var) {
+            foreach ($team_var->getMembers() as $member_id) {
+                $user_team_map[$member_id] = $team_var->getId();
             }
         }
 

@@ -25,7 +25,7 @@ class TeamView extends AbstractView {
     public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $users_by_subsection, $user_team_map, $invites_received, bool $seeking_partner, bool $lock): string {
         $gradeable_id = $gradeable->getId();
         $is_instructor = $this->core->getUser()->getGroup() === 1;
-        
+
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
         $vcs_repo_exists = false;
