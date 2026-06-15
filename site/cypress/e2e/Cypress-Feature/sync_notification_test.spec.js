@@ -30,8 +30,8 @@ describe('Notification Settings Sync', () => {
         cy.get('input[type="submit"][value="Add Section"]').click();
         cy.visit([course, 'users']);
         cy.get('a[href="javascript:newStudentForm()"]').click();
-		cy.get('#user_id').click();
-		cy.get('#user_id').type('student');
+        cy.get('#user_id').click();
+        cy.get('#user_id').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.logout();
@@ -145,8 +145,8 @@ describe('Notification Settings Sync', () => {
 
         it('Should show Save as Future Course Default button when no defaults exist', () => {
             openSyncPopup();
-            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView()
-            cy.get('[data-testid="save-notification-defaults"]').should('be.visible')
+            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView();
+            cy.get('[data-testid="save-notification-defaults"]').should('be.visible');
             cy.get('[data-testid="save-notification-defaults"]').should('contain.text', 'Save as Future Course Default');
         });
 
@@ -194,20 +194,11 @@ describe('Notification Settings Sync', () => {
             cy.get('[data-testid="save-notification-defaults"]').click();
             cy.get('.alert-success, #success-alert, [data-testid="success-message"]')
                 .should('be.visible');
-            
-           	createNewCourse('test_noti_new_course');
 
-           	cy.login('student');
-           	visitNotificationSettings('test_noti_new_course');
-           	
-            // cy.get('')
-            // cy.waitPageChange(() => {
-    			// cy.get('#course-creation-form button[type="submit"]').click();
-			// });
+            createNewCourse('test_noti_new_course');
 
-			// visitNotificationSettings('test_noti_4');
-			// cy.get();
-
+            cy.login('student');
+            visitNotificationSettings('test_noti_new_course');
         });
     });
 });
