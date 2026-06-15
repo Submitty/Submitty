@@ -8,10 +8,8 @@
 declare global {
     interface Window {
         showSettings(): void;
-        restoreAllHotkeys(): void;
-        removeAllHotkeys(): void;
-        remapHotkey(i: number): void;
-        remapUnset(i: number): void;
+        registerKeyHandler(parameters: object, fn: Function): void;
+        __settingsPopupVisible?: boolean;
     }
 }
 
@@ -35,7 +33,7 @@ type SettingsData = {
         name: string;
         storageCode: string;
         options: Record<string, string>;
-        optionsGenerator?: (() => Record<string, string>);
+        optionsGenerator?: ((fullAccess?: boolean) => Record<string, string>);
         default: string;
         currValue?: string;
     }[];
@@ -63,8 +61,8 @@ export const settingsData: SettingsData = [
                 name: 'Prev/Next buttons navigate through',
                 storageCode: 'general-setting-navigate-assigned-students-only',
                 options: {},
-                optionsGenerator: function (): Record<string, string> {
-                    if ($('#ta-grading-settings-list').attr('data-full_access') !== 'true') {
+                optionsGenerator: function (fullAccess?: boolean): Record<string, string> {
+                    if (!fullAccess) {
                         return {};
                     }
                     return {
@@ -107,8 +105,8 @@ window.onkeydown = function (e) {
         return;
     }
 
-    // Disable hotkeys in the menu so we don't accidentally press anything
-    if (isSettingsVisible()) {
+    // Don't fire hotkeys when the settings popup is open
+    if (window.__settingsPopupVisible) {
         return;
     }
 
@@ -153,106 +151,18 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
     registerKeyHandler(parameters as KeymapEntry<unknown>, fn as (e: KeyboardEvent, options?: unknown) => void);
 };
 
-function isSettingsVisible() {
-    return $('#settings-popup').is(':visible');
-}
-
 export function showSettings() {
-    generateSettingList();
-    generateHotkeysList();
-    $('#settings-popup').show();
-    captureTabInModal('settings-popup');
+    document.dispatchEvent(new CustomEvent('toggle-settings-popup', { detail: { show: true } }));
 }
 window.showSettings = showSettings;
 
-window.restoreAllHotkeys = function () {
-    keymap.forEach((hotkey, index) => {
-        updateKeymapAndStorage(index, hotkey.originalCode!);
-    });
-};
+export { remapping, keymap as keymapArr };
 
-window.removeAllHotkeys = function () {
-    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unassigned'));
-};
-
-/**
- * Generate list of hotkeys on the ui
- */
-function generateHotkeysList() {
-    const parent = $('#hotkeys-list');
-
-    parent.replaceWith(window.Twig.twig({
-        ref: 'HotkeyList',
-    }).render({
-        keymap: keymap.map((hotkey) => ({
-            ...hotkey,
-            code: hotkey.code || hotkey.originalCode || 'Unassigned',
-        })),
-    }));
+export function getKeymap(): KeymapEntry<unknown>[] {
+    return keymap;
 }
 
-/**
- * Generate list of settings on the ui
- */
-function generateSettingList() {
-    const parent = $('#ta-grading-general-settings');
-    loadTAGradingSettingData();
-
-    parent.replaceWith(window.Twig.twig({
-        ref: 'GeneralSettingList',
-    }).render({
-        settings: settingsData,
-    }));
-}
-
-export function loadTAGradingSettingData() {
-    for (let i = 0; i < settingsData.length; i++) {
-        for (let x = 0; x < settingsData[i].values.length; x++) {
-            const generator = settingsData[i].values[x].optionsGenerator;
-            if (generator) {
-                settingsData[i].values[x].options = generator();
-            }
-            const inquiry = window.Cookies.get('inquiry_status');
-            if (inquiry === 'on') {
-                settingsData[i].values[x].currValue = 'active-inquiry';
-            }
-            else {
-                if (localStorage.getItem(settingsData[i].values[x].storageCode) !== 'default' && localStorage.getItem(settingsData[i].values[x].storageCode) !== 'active-inquiry') {
-                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode)!;
-                }
-                else {
-                    settingsData[i].values[x].currValue = 'default';
-                }
-            }
-            if (settingsData[i].values[x].currValue === null) {
-                localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
-                settingsData[i].values[x].currValue = settingsData[i].values[x].options[settingsData[i].values[x].default];
-            }
-        }
-    }
-}
-
-/**
- * Start rebinding a hotkey
- * @param {int} i Index of hotkey to rebind
- */
-window.remapHotkey = function (i: number) {
-    if (remapping.active) {
-        return;
-    }
-
-    const button = $(`#remap-${i}`);
-    button.text('Enter Key...');
-    remapping.active = true;
-    remapping.index = i;
-
-    $('.remap-disable').attr('disabled', 'disabled');
-    $('#settings-close').attr('disabled', 'disabled');
-    button.attr('disabled', null);
-    button.addClass('btn-success');
-};
-
-function updateKeymapAndStorage(index: number, code: string) {
+export function updateKeymapAndStorage(index: number, code: string): void {
     keymap[index].code = code;
     const keymapObject = keymap.reduce((obj, hotkey) => {
         obj[hotkey.name] = {
@@ -262,38 +172,93 @@ function updateKeymapAndStorage(index: number, code: string) {
         return obj;
     }, {} as Record<string, { code: string; originalCode: string }>);
     localStorage.setItem('keymap', JSON.stringify(keymapObject));
-    generateHotkeysList();
+}
+
+export function loadTAGradingSettingData(fullAccess?: boolean): void {
+    for (let i = 0; i < settingsData.length; i++) {
+        for (let x = 0; x < settingsData[i].values.length; x++) {
+            const generator = settingsData[i].values[x].optionsGenerator;
+            if (generator) {
+                settingsData[i].values[x].options = generator(fullAccess);
+            }
+            const inquiry = window.Cookies?.get('inquiry_status');
+            if (inquiry === 'on') {
+                settingsData[i].values[x].currValue = 'active-inquiry';
+            }
+            else {
+                const stored = localStorage.getItem(settingsData[i].values[x].storageCode);
+                if (stored !== null && stored !== 'default' && stored !== 'active-inquiry') {
+                    settingsData[i].values[x].currValue = stored;
+                }
+                else {
+                    settingsData[i].values[x].currValue = 'default';
+                }
+            }
+            if (settingsData[i].values[x].currValue === null) {
+                const defVal = settingsData[i].values[x].options[settingsData[i].values[x].default];
+                localStorage.setItem(settingsData[i].values[x].storageCode, defVal);
+                settingsData[i].values[x].currValue = defVal;
+            }
+        }
+    }
 }
 
 /**
- * Called when remapping has finished and should save (or discard) a pressed key
- * @param {int} index Index of the hotkey
- * @param {string} code New keycode for the hotkey
+ * Apply a setting change: persist to localStorage and trigger side effects.
+ * Returns the new value string.
  */
-function remapFinish(index: number, code: string) {
-    for (let i = 0; i < keymap.length; i++) {
-        if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
-            const button = $(`#remap-${index}`);
-            button.text('Enter Unique Key...');
-            button.addClass('btn-danger');
-            button.removeClass('btn-success');
-            return;
+export function applySettingChange(storageCode: string, value: string): string {
+    localStorage.setItem(storageCode, value);
+
+    // Side effect: arrow tooltip update is handled by calling changeStudentArrowTooltips
+    // via the existing settingsCallbacks; we dispatch a custom event so the old init code
+    // can pick it up, and also handle cookies directly here.
+    if (storageCode === 'general-setting-navigate-assigned-students-only') {
+        if (value === 'true') {
+            window.Cookies?.set('view', 'assigned', { path: '/' });
+        }
+        else {
+            window.Cookies?.set('view', 'all', { path: '/' });
         }
     }
 
-    updateKeymapAndStorage(index, code);
-    remapping.active = false;
-    $('.remap-disable').attr('disabled', null);
-    $('#settings-close').attr('disabled', null);
+    if (value !== 'active-inquiry') {
+        window.Cookies?.set('inquiry_status', 'off');
+    }
+    else {
+        window.Cookies?.set('inquiry_status', 'on');
+    }
+
+    window.dispatchEvent(new CustomEvent('settings-changed', { detail: { storageCode, value } }));
+    return value;
+}
+
+/**
+ * Check if a given key code is already bound to another hotkey (by index)
+ */
+export function isKeyAlreadyBound(index: number, code: string): boolean {
+    for (let i = 0; i < keymap.length; i++) {
+        if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
  * Revert a hotkey to its original code
- * @param {int} i Index of hotkey
  */
-window.remapUnset = function (index: number) {
+export function remapUnsetKey(index: number): void {
     remapFinish(index, 'Unassigned');
-};
+}
+
+function remapFinish(index: number, code: string): void {
+    if (isKeyAlreadyBound(index, code)) {
+        return;
+    }
+    updateKeymapAndStorage(index, code);
+    remapping.active = false;
+}
 
 /**
  * Get the keycode for a hotkey binding from localStorage
@@ -322,7 +287,7 @@ function remapGetLS(mapName: string): string | null {
  * @param {KeyboardEvent} e Event
  * @returns {string} String form of the event
  */
-function eventToKeyCode(e: KeyboardEvent): string {
+export function eventToKeyCode(e: KeyboardEvent): string {
     let codeName = e.code;
 
     // Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
