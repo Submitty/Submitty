@@ -550,7 +550,7 @@ class TeamController extends AbstractController {
         }
 
         if (empty($subsections)) {
-            $result = "No new teams to create. All students are already on teams or aren't assigned subsections.";
+            $result = "No new teams created. All students are already on teams or aren't assigned subsections.";
             return $this->core->getOutput()->renderResultMessage($result, false);
         }
 
