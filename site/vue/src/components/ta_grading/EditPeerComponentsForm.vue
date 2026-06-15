@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+declare global {
+    interface Window {
+        clearPeerMarks: (
+            submitterId: string,
+            gradeableId: string,
+            peer: string,
+            csrfToken: string,
+        ) => void;
+    }
+}
+
 interface PeerComponent {
     id: string;
     title: string;
@@ -48,11 +59,11 @@ function initProps() {
 initProps();
 
 function clearMarks() {
-    (window as any).clearPeerMarks(
-        props.submitterId ?? '', 
-        props.gradeableId ?? '', 
-        selectedPeer.value, // Pass the selected peer here
-        props.csrfToken ?? ''
+    window.clearPeerMarks(
+        props.submitterId ?? '',
+        props.gradeableId ?? '',
+        selectedPeer.value,
+        props.csrfToken ?? '',
     );
 }
 
@@ -118,8 +129,8 @@ function hasScore(componentId: string, peer: string): boolean {
     </select>
     <div
       v-for="peer in safePeers"
-      :key="peer"
       v-show="selectedPeer === peer"
+      :key="peer"
       class="edit-peer-components-block"
     >
       <button
@@ -155,10 +166,16 @@ function hasScore(componentId: string, peer: string): boolean {
             data-testid="no-badge"
           />
         </div>
-        <span class="component-title col-no-gutters" data-testid="component-title">
+        <span
+          class="component-title col-no-gutters"
+          data-testid="component-title"
+        >
           <b>{{ component.title }}</b>
         </span>
-        <div class="received-marks-list container" data-testid="marks-list">
+        <div
+          class="received-marks-list container"
+          data-testid="marks-list"
+        >
           <div
             v-for="markId in component.marks"
             :key="markId"
@@ -181,7 +198,10 @@ function hasScore(componentId: string, peer: string): boolean {
               <span data-testid="mark-points">{{ safeMarks[String(markId)]?.points }}</span>
             </div>
             <div class="col">
-              <span style="white-space: pre-wrap;" data-testid="mark-title">{{ safeMarks[String(markId)]?.title }}</span>
+              <span
+                style="white-space: pre-wrap;"
+                data-testid="mark-title"
+              >{{ safeMarks[String(markId)]?.title }}</span>
             </div>
           </div>
         </div>
