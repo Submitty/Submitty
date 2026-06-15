@@ -364,8 +364,7 @@ $(() => {
     });
 
     // manually trigger resize at init so layout matches window dimensions at first page open
-   window.dispatchEvent(new Event('resize'));
-
+    window.dispatchEvent(new Event('resize'));
 
     // Grading panel toggle buttons
     $('.grade-panel button').click(function () {
