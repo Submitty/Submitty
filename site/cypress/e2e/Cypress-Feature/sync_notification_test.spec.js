@@ -11,6 +11,29 @@ describe('Notification Settings Sync', () => {
         cy.get('#sync-notification-popup').should('be.visible');
     };
 
+    // Helper to create new course and add student
+    const createNewCourse = (course = 'new_test_course') => {
+    	cy.login('instructor')
+
+        cy.visit('/home/courses/new');
+        cy.get('#course_title').type(course);
+        cy.get('#group_name').select(4);		// select the sample group
+        cy.get('#course-creation-form button[type="submit"]').click();
+        cy.visit([course, 'sections']);
+        cy.get('.add-registration-section-btn').click();
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('#new-section-id').click().type('1');
+        cy.get('#new-course-id-num').click().type('11111');
+        cy.get('input[type="submit"][value="Add Section"]').click();	// submit added section
+        cy.visit([course, 'users']);
+        cy.get('a[href="javascript:newStudentForm()"]').click();
+        cy.get('#user_id').click();
+		cy.get('#user_id').type('student');
+		cy.get('[data-testid="registration-section-dropdown"]').select('1');
+		cy.get('[data-testid="submit-user-form-button"]').click();
+        cy.logout();
+    }
+
     describe('Sync settings to other courses', () => {
         beforeEach(() => {
             cy.login('instructor');
@@ -141,6 +164,7 @@ describe('Notification Settings Sync', () => {
         it('Should apply saved defaults to a newly created course', () => {
             // Step 1: Set and save defaults on source course
             cy.login('student');
+            visitNotificationSettings('sample');
             cy.get('input[name="team_invite"]').then(($cb) => {
                 if (!$cb.is(':checked')) cy.wrap($cb).click();
             });
@@ -152,21 +176,19 @@ describe('Notification Settings Sync', () => {
             cy.get('[data-testid="save-notification-defaults"]').click();
             cy.get('.alert-success, #success-alert, [data-testid="success-message"]')
                 .should('be.visible');
-            cy.login('instructor')
+            
+           	createNewCourse('test_noti_new_course');
 
-            cy.visit('/home/courses/new');
-            cy.get('#course_title').type('test_noti_4');
-            cy.get('#group_name').select(4);		//select the sample group
-            cy.get('#course-creation-form button[type="submit"]').click();
-            cy.visit('["test_noti_4", "users"]');
+           	visitNotificationSettings('test_noti_new_course');
+           	
 
-            cy.get('')
+            // cy.get('')
             // cy.waitPageChange(() => {
     			// cy.get('#course-creation-form button[type="submit"]').click();
 			// });
 
-			visitNotificationSettings('test_noti_4');
-			cy.get();
+			// visitNotificationSettings('test_noti_4');
+			// cy.get();
 
         });
     });
