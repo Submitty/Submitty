@@ -514,6 +514,19 @@ function checkWarningBanners() {
         }
     }
 
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        if ($('#has_release_date_yes').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+            // hide/show element when manual grading due date is after the grade release date
+            if (grades_release_date < manual_grading_due_date) {
+                $('#grading-due-after-grades-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#grading-due-after-grades-released-dates-warning').hide();
+            }
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
