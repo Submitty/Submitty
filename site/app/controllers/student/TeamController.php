@@ -526,7 +526,7 @@ class TeamController extends AbstractController {
     * Function to create teams from registration subsections.
     *
     * @param string $gradeable_id
-    * @return array
+    * @return array<string>
     */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_teams_from_subsections", methods: ["POST"])]
     public function createTeamsFromSubsections($gradeable_id) {
