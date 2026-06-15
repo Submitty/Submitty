@@ -6,6 +6,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\entities\grading_cluster\GradingCluster;
+use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
 use app\entities\grading_cluster\GradingClusterMember;
 use app\libraries\response\JsonResponse;
@@ -31,7 +32,8 @@ class GradingClusterController extends AbstractController {
 
         $em = $this->core->getCourseEntityManager();
 
-        $em->createQuery('DELETE FROM app\entities\grading_cluster\GradingCluster c WHERE c.gradeable_id = :gradeable_id')
+        // Deleting the config cascades and deletes all associated clusters and members
+        $em->createQuery('DELETE FROM app\entities\grading_cluster\GradingClusterConfig c WHERE c.gradeable_id = :gradeable_id')
            ->setParameter('gradeable_id', $gradeable_id)
            ->execute();
 
@@ -44,12 +46,15 @@ class GradingClusterController extends AbstractController {
             GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
         };
 
+        $config = new GradingClusterConfig($gradeable_id, $algorithm);
+        $em->persist($config);
+
         foreach ($cluster_groups as $cluster_name => $members) {
             if ($members === []) {
                 continue;
             }
 
-            $cluster = new GradingCluster($gradeable_id, $cluster_name, $algorithm);
+            $cluster = new GradingCluster($config, $cluster_name);
             foreach ($members as $member) {
                 new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null);
             }
@@ -66,16 +71,23 @@ class GradingClusterController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
-        $clusters = $this->core->getCourseEntityManager()
-            ->getRepository(GradingCluster::class)
-            ->findBy(['gradeable_id' => $gradeable_id], ['id' => 'ASC']);
+        $config = $this->core->getCourseEntityManager()
+            ->getRepository(GradingClusterConfig::class)
+            ->findOneBy(['gradeable_id' => $gradeable_id]);
+
+        if ($config === null) {
+            return JsonResponse::getSuccessResponse([
+                "gradeable_id" => $gradeable_id,
+                "clusters"     => [],
+            ]);
+        }
 
         $result = [];
-        foreach ($clusters as $cluster) {
+        foreach ($config->getClusters() as $cluster) {
             $result[] = [
                 'id'           => $cluster->getId(),
                 'cluster_name' => $cluster->getClusterName(),
-                'algorithm'    => $cluster->getAlgorithm()->value,
+                'algorithm'    => $config->getAlgorithm()->value,
                 'member_count' => $cluster->getMemberCount(),
                 'members'      => array_map(
                     fn(GradingClusterMember $m) => [

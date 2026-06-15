@@ -1442,15 +1442,38 @@ CREATE TABLE public.gradeable_teams (
 
 
 --
---
 -- Name: grading_cluster; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.grading_cluster (
     id integer NOT NULL,
+    config_id integer NOT NULL,
+    cluster_name character varying(255)
+);
+
+
+--
+-- Name: grading_cluster_config; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grading_cluster_config (
+    id integer NOT NULL,
     g_id character varying(255) NOT NULL,
-    cluster_name character varying(255),
     algorithm character varying(255) NOT NULL
+);
+
+
+--
+-- Name: grading_cluster_config_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.grading_cluster_config ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.grading_cluster_config_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -1495,6 +1518,7 @@ ALTER TABLE public.grading_cluster_members ALTER COLUMN id ADD GENERATED ALWAYS 
 );
 
 
+--
 -- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2642,6 +2666,13 @@ ALTER TABLE ONLY public.grade_inquiries
 
 
 --
+-- Name: grading_cluster_config grading_cluster_config_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_config
+    ADD CONSTRAINT grading_cluster_config_pkey PRIMARY KEY (id);
+
+
 --
 -- Name: grading_cluster_members grading_cluster_members_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
@@ -2658,6 +2689,7 @@ ALTER TABLE ONLY public.grading_cluster
     ADD CONSTRAINT grading_cluster_pkey PRIMARY KEY (id);
 
 
+--
 -- Name: grading_registration grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2969,11 +3001,17 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.grade_inquiries USING btree 
 
 
 --
---
--- Name: grading_cluster_g_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: grading_cluster_config_g_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX grading_cluster_g_id_idx ON public.grading_cluster USING btree (g_id);
+CREATE INDEX grading_cluster_config_g_id_idx ON public.grading_cluster_config USING btree (g_id);
+
+
+--
+-- Name: grading_cluster_config_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_cluster_config_id_idx ON public.grading_cluster USING btree (config_id);
 
 
 --
@@ -2983,6 +3021,7 @@ CREATE INDEX grading_cluster_g_id_idx ON public.grading_cluster USING btree (g_i
 CREATE INDEX grading_cluster_members_cluster_id_idx ON public.grading_cluster_members USING btree (cluster_id);
 
 
+--
 -- Name: grading_registration_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3585,6 +3624,21 @@ ALTER TABLE ONLY public.gradeable_teams
 
 
 --
+-- Name: grading_cluster_config grading_cluster_config_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_config
+    ADD CONSTRAINT grading_cluster_config_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_cluster grading_cluster_config_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster
+    ADD CONSTRAINT grading_cluster_config_id_fkey FOREIGN KEY (config_id) REFERENCES public.grading_cluster_config(id) ON DELETE CASCADE;
+
+
 --
 -- Name: grading_cluster_members grading_cluster_members_cluster_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -3610,13 +3664,6 @@ ALTER TABLE ONLY public.grading_cluster_members
 
 
 --
--- Name: grading_cluster grading_cluster_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.grading_cluster
-    ADD CONSTRAINT grading_cluster_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
-
-
 -- Name: grading_registration grading_registration_sections_registration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 

@@ -17,14 +17,12 @@ class GradingCluster {
     #[ORM\GeneratedValue]
     private int $id;
 
-    #[ORM\Column(name: "g_id", type: Types::STRING)]
-    private string $gradeable_id;
+    #[ORM\ManyToOne(targetEntity: GradingClusterConfig::class, inversedBy: "clusters")]
+    #[ORM\JoinColumn(name: "config_id", referencedColumnName: "id", nullable: false)]
+    private GradingClusterConfig $config;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $cluster_name;
-
-    #[ORM\Column(type: Types::STRING, enumType: GradingClusterAlgorithm::class)]
-    private GradingClusterAlgorithm $algorithm;
 
     /**
      * @var Collection<int, GradingClusterMember>
@@ -32,10 +30,9 @@ class GradingCluster {
     #[ORM\OneToMany(mappedBy: "cluster", targetEntity: GradingClusterMember::class, cascade: ["persist", "remove"], fetch: "EAGER")]
     private Collection $members;
 
-    public function __construct(string $gradeable_id, ?string $cluster_name, GradingClusterAlgorithm $algorithm) {
-        $this->gradeable_id = $gradeable_id;
+    public function __construct(GradingClusterConfig $config, ?string $cluster_name) {
+        $this->config       = $config;
         $this->cluster_name = $cluster_name;
-        $this->algorithm    = $algorithm;
         $this->members      = new ArrayCollection();
     }
 
@@ -43,8 +40,8 @@ class GradingCluster {
         return $this->id;
     }
 
-    public function getGradeableId(): string {
-        return $this->gradeable_id;
+    public function getConfig(): GradingClusterConfig {
+        return $this->config;
     }
 
     public function getClusterName(): ?string {
@@ -53,10 +50,6 @@ class GradingCluster {
 
     public function setClusterName(?string $cluster_name): void {
         $this->cluster_name = $cluster_name;
-    }
-
-    public function getAlgorithm(): GradingClusterAlgorithm {
-        return $this->algorithm;
     }
 
     /**
