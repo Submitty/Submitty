@@ -23,9 +23,7 @@ declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
-        changeCurrentPeer(): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
-        newEditPeerComponentsForm(): void;
+        clearPeerMarks: (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) => void;        newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
@@ -364,20 +362,16 @@ function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, pat
     return stored_paths;
 }
 
-window.changeCurrentPeer = function () {
-    const peer = $('#edit-peer-select').val() as string;
-    $('.edit-peer-components-block').hide();
-    $(`#edit-peer-components-form-${peer}`).show();
-};
 
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
         'grading',
         'clear_peer_marks',
     ]);
+
     $.ajax({
         url,
         data: {
