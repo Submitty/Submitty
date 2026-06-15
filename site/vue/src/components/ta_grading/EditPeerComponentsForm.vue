@@ -92,12 +92,10 @@ function badgeText(earned: number, max: number): string {
 }
 
 function isMarkAssigned(componentId: string, peer: string, markId: number): boolean {
-    // Add ?. after marks_assigned
     return safePeerDetails.value?.marks_assigned?.[componentId]?.[peer]?.includes(markId) ?? false;
 }
 
 function scoreForComponent(componentId: string, peer: string): number | undefined {
-    // Add ?. after componentScores
     return safeComponentScores.value?.[componentId]?.[peer];
 }
 
