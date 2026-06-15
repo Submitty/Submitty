@@ -255,6 +255,7 @@
         </header>
         
         {% set row_num = 1 %}
+        {% set not_in_null_section = true %}
         {% if users_by_subsection|length > 0 %}
         
             <table id="student-table" class="table table-striped mobile-table directory-table">
@@ -319,6 +320,17 @@
                         
                         {# iterate through students in this subsection #}
                         {% for current_user in subsection_users %}
+
+                            {# create a section break for the null section #}
+                            {% if not current_user.getRegistrationSection() and not_in_null_section %}
+                                <tr class="info">
+                                    <td class="section-break" colspan="{{ col_count }}">
+                                        Students Enrolled in Registration Section NULL
+                                        {% set not_in_null_section = false %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+
                             <tr id="user-{{ current_user.getId() }}">
                                 <td class="td-student-number">{{ row_num }}</td>
                                 
