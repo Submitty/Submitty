@@ -475,7 +475,7 @@ $(document).ready(() => {
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
                     if (response.data.utc_offset !== offset) {
-                        displayWarningMessage('Selected time-zone does not match system time-zone.');
+                        displayWarningMessage('Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
                     }
                 }
                 else {
