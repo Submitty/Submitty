@@ -247,8 +247,30 @@ onUnmounted(() => {
               </td>
             </tr>
           </table>
+
+          <br>
+          <div class="form-buttons">
+            <div class="form-button-container">
+              <button
+                class="btn btn-default close-button key_to_click"
+                tabindex="0"
+                @click="close"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.popup-form {
+    height: 100vh;
+}
+.popup-window {
+    height: calc(100vh - 20px);
+}
+</style>
