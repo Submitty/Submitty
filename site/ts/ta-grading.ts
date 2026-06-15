@@ -23,7 +23,7 @@ declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
-        clearPeerMarks: (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) => void;        
+        clearPeerMarks: (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) => void;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;

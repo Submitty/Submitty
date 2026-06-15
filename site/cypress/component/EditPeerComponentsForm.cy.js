@@ -212,7 +212,7 @@ describe('EditPeerComponentsForm', () => {
                 'submitter_xyz',
                 'gradeable_001',
                 'student_aaa',
-                'csrf_abc123'
+                'csrf_abc123',
             );
         });
 
@@ -227,7 +227,7 @@ describe('EditPeerComponentsForm', () => {
                 'submitter_xyz',
                 'gradeable_001',
                 'student_bbb',
-                'csrf_abc123'
+                'csrf_abc123',
             );
         });
     });
