@@ -1,17 +1,5 @@
 import ReceivedMarkForm from '../../vue/src/components/ta_grading/ReceivedMarkForm.vue';
 
-// Branch coverage:
-//   v-if="visible"                          → renders / does not render
-//   v-if="studentLinks.length > 0"          → student list shown / <br> fallback
-//   v-for with comma separator              → commas between items, none after last
-//   submitter_anon_ids[id] ?? id            → anon ID used when present, fallback to raw ID
-//   stats?.field ?? '0'                     → shows real value / '0' when null
-//   baseUrl.endsWith('update')              → strips /update suffix
-//   Escape key on keydown                   → closes popup
-//   overlay click                           → closes (via .popup-box @click)
-//   popup-window click.stop                 → does NOT close
-//   window event listener lifecycle          → mount adds / unmount removes
-
 function makeStats(overrides = {}) {
     return {
         section_submitter_count: '3',
