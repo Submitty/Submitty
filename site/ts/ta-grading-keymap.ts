@@ -210,9 +210,6 @@ export function loadTAGradingSettingData(fullAccess?: boolean): void {
 export function applySettingChange(storageCode: string, value: string): string {
     localStorage.setItem(storageCode, value);
 
-    // Side effect: arrow tooltip update is handled by calling changeStudentArrowTooltips
-    // via the existing settingsCallbacks; we dispatch a custom event so the old init code
-    // can pick it up, and also handle cookies directly here.
     if (storageCode === 'general-setting-navigate-assigned-students-only') {
         if (value === 'true') {
             window.Cookies?.set('view', 'assigned', { path: '/' });
