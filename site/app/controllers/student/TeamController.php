@@ -537,7 +537,9 @@ class TeamController extends AbstractController {
         // Group users by their subsection
         foreach ($users as $user) {
             $subsection = $user->getRegistrationSubsection();
-            if (empty($subsection)) continue;
+            if (empty($subsection)){
+                continue;
+            }
 
             // Skip if user is already on a team
             if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user->getId()) !== null) {
@@ -549,7 +551,7 @@ class TeamController extends AbstractController {
 
         if (empty($subsections)) {
             $result = "No new teams to create. All students are already on teams or aren't assigned subsections.";
-            return $this->core->getOutput()->renderResultMessage($result, false); 
+            return $this->core->getOutput()->renderResultMessage($result, false);
         }
 
         $teams_created_count = 0;
@@ -557,12 +559,12 @@ class TeamController extends AbstractController {
         foreach ($subsections as $members) {
             // use the first subsection member as team leader
             $team_leader = array_shift($members);
-        
+
             $team_id = $this->core->getQueries()->createTeam(
-                $gradeable_id, 
-                $team_leader->getId(), 
-                $team_leader->getRegistrationSection(), 
-                $team_leader->getRotatingSection(), 
+                $gradeable_id,
+                $team_leader->getId(),
+                $team_leader->getRegistrationSection(),
+                $team_leader->getRotatingSection(),
                 null
             );
 
@@ -580,7 +582,7 @@ class TeamController extends AbstractController {
             $teams_created_count++;
         }
         $result = "Successfully created {$teams_created_count} teams from registration subsections.";
-        return $this->core->getOutput()->renderResultMessage($result, true); 
+        return $this->core->getOutput()->renderResultMessage($result, true);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")]
@@ -643,15 +645,14 @@ class TeamController extends AbstractController {
         }
 
         $all_users = $this->core->getQueries()->getAllUsers();
-        
+
         $users_by_subsection = [];
-        
-        foreach ($all_users as $user) {
-            
+
+        foreach ($all_users as $user) {            
             if ($user->getGroup() !== \app\models\User::GROUP_STUDENT) {
                 continue;
             }
-        
+
             $subsection = $user->getRegistrationSubsection();
 
             if (!isset($users_by_subsection[$subsection])) {
@@ -669,7 +670,7 @@ class TeamController extends AbstractController {
                 $user_team_map[$member_id] = $team->getId();
             }
         }
-        
+
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
