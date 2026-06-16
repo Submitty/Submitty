@@ -1,4 +1,4 @@
-"""Migration to create tables for AI-assisted grading clusters."""
+"""Migration to create tables for student Submission Clustering"""
 
 
 def up(config, database, semester, course):
