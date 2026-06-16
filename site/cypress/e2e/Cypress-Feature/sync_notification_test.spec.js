@@ -5,6 +5,15 @@ describe('Notification Settings Sync', () => {
         cy.get('[data-testid="notification-settings-header"]').should('be.visible');
     };
 
+    const getRandomGradeableName = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let randomString = '';
+    for (let i = 0; i < 5; i++) {
+        randomString += characters[Math.floor(Math.random() * characters.length)];
+    }
+    return randomString;
+    };
+
     // Helper to open the sync popup
     const openSyncPopup = () => {
         cy.get('[data-testid="sync-notification-settings-top"]').first().click();
@@ -12,13 +21,15 @@ describe('Notification Settings Sync', () => {
     };
 
     // Helper to create new course and add student
-    const createNewCourse = (course = 'new_test_course') => {
+    const createNewCourse = () => {
         cy.login('instructor');
         cy.visit('/home/courses/new');
+        const course = getRandomGradeableName().toLowerCase() + "_noti_test";
         cy.get('#course_title').type(course);
         // select the sample group
         cy.get('#group_name').select(4);
         cy.get('#course-creation-form button[type="submit"]').click();
+        cy.reload();
         cy.visit([course, 'sections']);
         cy.get('.add-registration-section-btn').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
@@ -35,6 +46,7 @@ describe('Notification Settings Sync', () => {
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.logout();
+        return course;
     };
 
     describe('Sync settings to other courses', () => {
@@ -195,10 +207,14 @@ describe('Notification Settings Sync', () => {
             cy.get('.alert-success, #success-alert, [data-testid="success-message"]')
                 .should('be.visible');
 
-            createNewCourse('test_noti_new_course');
+            //create a new course and add student to it, also return the name of the new course
+            let course = createNewCourse();
 
             cy.login('student');
             visitNotificationSettings('test_noti_new_course');
+
+            cy.get('input[name="team_invite"]').should('be.checked');
+            cy.get('input[name="self_notification"]').should('not.be.checked');
         });
     });
 });
