@@ -56,7 +56,23 @@
                     {% endif %}
                 {% endfor %}
             {% endif %}
-            {% if student_download and (files|length + processed_files|length) > 1 %}
+            {% set downloadable_file_count = 0 %}
+            {% for file in files %}
+                {#Validate for actual notebook file submissions #}
+                {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+                    {% set downloadable_file_count = downloadable_file_count + 1 %}
+                {% elseif not is_notebook %}
+                    {% set downloadable_file_count = downloadable_file_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {% for file in processed_files %}
+                {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+                    {% set downloadable_file_count = downloadable_file_count + 1 %}
+                {% elseif not is_notebook %}
+                    {% set downloadable_file_count = downloadable_file_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {% if student_download and downloadable_file_count > 1 %}
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
