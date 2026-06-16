@@ -5,14 +5,11 @@ def up(config, database, semester, course):
     database.execute("""
         CREATE TABLE IF NOT EXISTS grading_cluster_config (
             id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            g_id CHARACTER VARYING(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
+            g_id CHARACTER VARYING(255) NOT NULL UNIQUE REFERENCES gradeable(g_id) ON DELETE CASCADE,
             algorithm CHARACTER VARYING(255) NOT NULL
         )
     """)
 
-    database.execute("""
-        CREATE INDEX IF NOT EXISTS grading_cluster_config_g_id_idx ON grading_cluster_config(g_id)
-    """)
 
     database.execute("""
         CREATE TABLE IF NOT EXISTS grading_cluster (
@@ -33,7 +30,7 @@ def up(config, database, semester, course):
             user_id CHARACTER VARYING(255) DEFAULT NULL REFERENCES users(user_id) ON DELETE CASCADE,
             team_id CHARACTER VARYING(255) DEFAULT NULL REFERENCES gradeable_teams(team_id) ON DELETE CASCADE,
             CONSTRAINT cluster_member_check CHECK (
-                (user_id IS NOT NULL) OR (team_id IS NOT NULL)
+                (user_id IS NOT NULL AND team_id IS NULL) OR (user_id IS NULL AND team_id IS NOT NULL)
             )
         )
     """)
@@ -41,6 +38,16 @@ def up(config, database, semester, course):
     database.execute("""
         CREATE INDEX IF NOT EXISTS grading_cluster_members_cluster_id_idx
         ON grading_cluster_members(cluster_id)
+    """)
+
+    database.execute("""
+        CREATE INDEX IF NOT EXISTS grading_cluster_members_user_id_idx
+        ON grading_cluster_members(user_id)
+    """)
+
+    database.execute("""
+        CREATE INDEX IF NOT EXISTS grading_cluster_members_team_id_idx
+        ON grading_cluster_members(team_id)
     """)
 
 

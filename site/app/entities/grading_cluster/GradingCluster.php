@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class GradingCluster {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
     private int $id;
 
     #[ORM\ManyToOne(targetEntity: GradingClusterConfig::class, inversedBy: "clusters")]
@@ -34,6 +34,7 @@ class GradingCluster {
         $this->config       = $config;
         $this->cluster_name = $cluster_name;
         $this->members      = new ArrayCollection();
+        $config->addCluster($this);
     }
 
     public function getId(): int {

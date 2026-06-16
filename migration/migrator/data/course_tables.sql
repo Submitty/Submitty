@@ -1500,7 +1500,7 @@ CREATE TABLE public.grading_cluster_members (
     cluster_id integer NOT NULL,
     user_id character varying(255) DEFAULT NULL::character varying,
     team_id character varying(255) DEFAULT NULL::character varying,
-    CONSTRAINT cluster_member_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT cluster_member_check CHECK ((((user_id IS NOT NULL) AND (team_id IS NULL)) OR ((user_id IS NULL) AND (team_id IS NOT NULL))))
 );
 
 
@@ -2666,6 +2666,14 @@ ALTER TABLE ONLY public.grade_inquiries
 
 
 --
+-- Name: grading_cluster_config grading_cluster_config_g_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grading_cluster_config
+    ADD CONSTRAINT grading_cluster_config_g_id_key UNIQUE (g_id);
+
+
+--
 -- Name: grading_cluster_config grading_cluster_config_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3001,13 +3009,6 @@ CREATE UNIQUE INDEX gradeable_user_unique ON public.grade_inquiries USING btree 
 
 
 --
--- Name: grading_cluster_config_g_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX grading_cluster_config_g_id_idx ON public.grading_cluster_config USING btree (g_id);
-
-
---
 -- Name: grading_cluster_config_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3019,6 +3020,20 @@ CREATE INDEX grading_cluster_config_id_idx ON public.grading_cluster USING btree
 --
 
 CREATE INDEX grading_cluster_members_cluster_id_idx ON public.grading_cluster_members USING btree (cluster_id);
+
+
+--
+-- Name: grading_cluster_members_team_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_cluster_members_team_id_idx ON public.grading_cluster_members USING btree (team_id);
+
+
+--
+-- Name: grading_cluster_members_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX grading_cluster_members_user_id_idx ON public.grading_cluster_members USING btree (user_id);
 
 
 --

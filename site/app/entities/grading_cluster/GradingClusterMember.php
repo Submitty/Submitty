@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class GradingClusterMember {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
     private int $id;
 
     #[ORM\ManyToOne(targetEntity: GradingCluster::class, inversedBy: "members")]

@@ -14,10 +14,10 @@ use Doctrine\ORM\Mapping as ORM;
 class GradingClusterConfig {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
     private int $id;
 
-    #[ORM\Column(name: "g_id", type: Types::STRING)]
+    #[ORM\Column(name: "g_id", type: Types::STRING, unique: true)]
     private string $gradeable_id;
 
     #[ORM\Column(type: Types::STRING, enumType: GradingClusterAlgorithm::class)]

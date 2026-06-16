@@ -9943,7 +9943,10 @@ ORDER BY
         $this->course_db->query(
             "SELECT DISTINCT egv.user_id, egv.team_id
              FROM electronic_gradeable_version egv
-             WHERE egv.g_id = ? AND egv.active_version > 0",
+             LEFT JOIN users u ON egv.user_id = u.user_id
+             LEFT JOIN gradeable_teams gt ON egv.team_id = gt.team_id
+             WHERE egv.g_id = ? AND egv.active_version > 0
+               AND (u.registration_section IS NOT NULL OR gt.registration_section IS NOT NULL)",
             [$gradeable_id]
         );
         return $this->course_db->rows();

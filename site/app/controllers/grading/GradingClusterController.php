@@ -19,7 +19,7 @@ class GradingClusterController extends AbstractController {
      * Generates clusters for a given gradeable using the specified algorithm.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
-    #[Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["POST"])]
     public function createClustering(string $gradeable_id): JsonResponse {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
@@ -32,11 +32,6 @@ class GradingClusterController extends AbstractController {
 
         $em = $this->core->getCourseEntityManager();
 
-        // Deleting the config cascades and deletes all associated clusters and members
-        $em->createQuery('DELETE FROM app\entities\grading_cluster\GradingClusterConfig c WHERE c.gradeable_id = :gradeable_id')
-           ->setParameter('gradeable_id', $gradeable_id)
-           ->execute();
-
         $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
         if ($submitters === []) {
             return JsonResponse::getErrorResponse("No active submissions found for this gradeable.");
@@ -45,6 +40,11 @@ class GradingClusterController extends AbstractController {
         $cluster_groups = match ($algorithm) {
             GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
         };
+
+        // Deleting the config cascades and deletes all associated clusters and members
+        $em->createQuery('DELETE FROM app\entities\grading_cluster\GradingClusterConfig c WHERE c.gradeable_id = :gradeable_id')
+           ->setParameter('gradeable_id', $gradeable_id)
+           ->execute();
 
         $config = new GradingClusterConfig($gradeable_id, $algorithm);
         $em->persist($config);
@@ -69,7 +69,7 @@ class GradingClusterController extends AbstractController {
      * Fetches all clusters and their members for a given gradeable.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
-    #[Route("/api/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
