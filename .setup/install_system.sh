@@ -800,13 +800,7 @@ fi
 # (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
 # operational at that time.)
 if [ ${WORKER} == 0 ]; then
-
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
-
-#else
-    #don't need to stop apache, not installed
-    #systemctl stop apache2.service
-
 fi
 
 
