@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
+use app\models\User;
 use app\models\Team;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -646,7 +647,7 @@ class TeamController extends AbstractController {
     */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/delete_all_teams", methods: ["POST"])]
     public function deleteTeams($gradeable_id) {
-        
+
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
 
         if (count($teams) === 0) {
@@ -660,7 +661,7 @@ class TeamController extends AbstractController {
         foreach ($teams as $team) {
             $team_id = $team->getId();
 
-            // Check if the team has a submission. 
+            // Check if the team has a submission.
             $has_submission = $this->core->getQueries()->getActiveVersionForTeam($gradeable_id, $team_id) > 0;
 
             if ($has_submission) {
@@ -668,8 +669,22 @@ class TeamController extends AbstractController {
                 continue;
             }
 
+            // Check if this is the instructor team
+            $members = $team->getMemberUsers();
+            $is_instructor_team = false;
+            foreach ($members as $member) {
+                if ($member->getGroup() === User::GROUP_INSTRUCTOR) {
+                    $is_instructor_team = true;
+                }
+            }
+
+            if ($is_instructor_team) {
+                $skipped_count++;
+                continue;
+            }
+
             $this->core->getQueries()->deleteTeam($team_id);
-            
+
             $deleted_count++;
         }
 
@@ -750,7 +765,13 @@ class TeamController extends AbstractController {
         }
 
         foreach ($teams as $t) {
-            $students_on_teams_count = $students_on_teams_count + count($t->getMembers());
+            $t_members = $t->getMemberUsers();
+            // handle the special case of instructor being on a team
+            foreach ($t_members as $t_member) {
+                if ($t_member->getRegistrationSection() !== null) {
+                    $students_on_teams_count++;
+                }
+            }
         }
 
         $students_not_on_teams_count = $all_students_count - $students_on_teams_count;

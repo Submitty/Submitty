@@ -3796,7 +3796,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * THIS FUNCTION SHOULD ONLY BE USED ON TEAMS WITHOUT SUBMISSIONS
      *
      * @param string $team_id
-    */
+     * @return void
+     */
     public function deleteTeam($team_id) {
         $this->course_db->query(
             "DELETE FROM gradeable_teams 
