@@ -55,34 +55,33 @@ describe('Self account creation tests', () => {
         clearTextFields(); // remove leftover inputs after frontend validation prevents sign up
 
         /*
-            FIX ME! Currently the assertions below aren't accurate tests for the
-            password complexity requirements, because these requirements are false by default in the configs
-            and we don't yet have a method for changing configurations within Cypress tests.
-            For reference, the relevant configs are:
-                require_uppercase, require_lowercase, require_numbers, require_special_chars
+            the following password tests will fail locally because the password complexity
+            requirements are disabled by default and only enabled in CI
         */
-        /*
-            // Password missing uppercase
-            inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
-            cy.get('[data-testid="sign-up-button"]').click();
-            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
-            clearTextFields();
-            // Password missing lowercase
-            inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
-            cy.get('[data-testid="sign-up-button"]').click();
-            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
-            clearTextFields();
-            // Password missing numbers
-            inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
-            cy.get('[data-testid="sign-up-button"]').click();
-            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
-            clearTextFields();
-            // Password missing special characters
-            inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
-            cy.get('[data-testid="sign-up-button"]').click();
-            cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
-            clearTextFields();
-        */
+        // Password missing uppercase
+        inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        console.log('a');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        clearTextFields();
+        // Password missing lowercase
+        inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        console.log('b');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        clearTextFields();
+        // Password missing numbers
+        inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
+        cy.get('[data-testid="sign-up-button"]').click();
+        console.log('c');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        clearTextFields();
+        // Password missing special characters
+        inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
+        cy.get('[data-testid="sign-up-button"]').click();
+        console.log('d');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        clearTextFields();
 
         // Passwords don't match
         inputData(undefined, undefined, 'Password123!', 'NotPassword123!');
