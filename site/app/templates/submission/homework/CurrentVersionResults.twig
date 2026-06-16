@@ -3,12 +3,30 @@
         <p class='green-message'>{{ incentive_message }}</p>
     </div>
 {% endif %}
-
+{% set downloadable_file_count = 0 %}
+{% for file in files %}
+    {# Validate for actual notebook file submissions #}
+    {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% elseif not is_notebook %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% endif %}
+{% endfor %}
+{% for file in processed_files %}
+    {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% elseif not is_notebook %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% endif %}
+{% endfor %}
 {# Submitted files #}
 {% if student_download or is_vcs or core.getUser().accessGrading() %}
-    <h4>Submitted Files</h4>
+    {% if downloadable_file_count > 0 %}
+        <h4>Submitted Files</h4>
+    {% endif %}
     <div class="row">
-        <div class="box col-md-6" id="submitted-files">
+        {% if downloadable_file_count > 0 %}
+            <div class="box col-md-6" id="submitted-files">
             {% for file in files %}
                 {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
                 {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
@@ -56,22 +74,6 @@
                     {% endif %}
                 {% endfor %}
             {% endif %}
-            {% set downloadable_file_count = 0 %}
-            {% for file in files %}
-                {#Validate for actual notebook file submissions #}
-                {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
-                    {% set downloadable_file_count = downloadable_file_count + 1 %}
-                {% elseif not is_notebook %}
-                    {% set downloadable_file_count = downloadable_file_count + 1 %}
-                {% endif %}
-            {% endfor %}
-            {% for file in processed_files %}
-                {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
-                    {% set downloadable_file_count = downloadable_file_count + 1 %}
-                {% elseif not is_notebook %}
-                    {% set downloadable_file_count = downloadable_file_count + 1 %}
-                {% endif %}
-            {% endfor %}
             {% if student_download and downloadable_file_count > 1 %}
                 <br />
                 <div class="flex-row">
@@ -85,7 +87,12 @@
                 </div>
             {% endif %}
         </div>
-        <div class="box col-md-6 submission-details">
+        {% endif %}
+        {% if downloadable_file_count > 0 %}
+            <div class="box col-md-6 submission-details">
+        {% else %}
+            <div class="box col-md-12 submission-details">
+        {% endif %}
             {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
                 <span class="flex-row">
                     <span>First access timestamp:</span>
