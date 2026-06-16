@@ -32,26 +32,29 @@ describe('Self account creation tests', () => {
         // current database contents on test (especially if this test is run multiple times)
         valid_user_id = Math.random().toString(36).substring(2, 8);
         valid_email = `${Math.random().toString(36).substring(2, 8)}@gmail.com`;
-
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
         // Not accepted email extension
         inputData('test.email.bad@bad.com', 'new_user_id');
         cy.get('[data-testid="sign-up-button"]').click();
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'This email is not accepted');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'This email is not accepted.');
+        cy.get('[data-testid="remove-message-popup"').click(); // unremoved popups eventually clog the screen
         // Id too short
         inputData(undefined, 'short');
         cy.get('[data-testid="sign-up-button"]').click();
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'This user id does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'This user id does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         // Id too long
         inputData(undefined, '123456789123456789123456789');
         cy.get('[data-testid="sign-up-button"]').click();
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'This user id does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'This user id does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
 
         // Password too short
         inputData(undefined, undefined, 'pass!123', 'pass!123');
         cy.get('[data-testid="sign-up-button"]').click();
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields(); // remove leftover inputs after frontend validation prevents sign up
 
         /*
@@ -62,31 +65,36 @@ describe('Self account creation tests', () => {
         inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
         cy.get('[data-testid="sign-up-button"]').click();
         console.log('a');
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing lowercase
         inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
         cy.get('[data-testid="sign-up-button"]').click();
         console.log('b');
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing numbers
         inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
         cy.get('[data-testid="sign-up-button"]').click();
         console.log('c');
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing special characters
         inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
         cy.get('[data-testid="sign-up-button"]').click();
         console.log('d');
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
+        cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
 
         // Passwords don't match
         inputData(undefined, undefined, 'Password123!', 'NotPassword123!');
         cy.get('[data-testid="confirm-password"]').blur();
-        cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match');
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match.');
+        cy.get('[data-testid="remove-message-popup"').click();
 
         // Correct information
         cy.get('[data-testid="confirm-password"]').type(valid_password);
@@ -95,10 +103,12 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="verification-code"]').type(incorrect_verification_code);
         cy.get('[data-testid="verify-email-button"').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'The verification code is not correct. Verify you entered the correct code or resend the verification email');
+        cy.get('[data-testid="remove-message-popup"').click();
         // Correct verification code
         cy.get('[data-testid="verification-code"]').type(valid_verification_code);
         cy.get('[data-testid="verify-email-button"').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'You have successfully verified your email.');
+        cy.get('[data-testid="remove-message-popup"').click();
         cy.login(valid_user_id, valid_password);
         cy.get('body').should('contain', 'My Courses');
 
