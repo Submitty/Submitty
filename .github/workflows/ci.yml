@@ -783,12 +783,13 @@ jobs:
           browser: chrome
 
       - name: Enable password complexity requirements
-        run: sudo sed -i
-          -e 's/"require_uppercase": false/"require_uppercase": true/g'
-          -e 's/"require_lowercase": false/"require_lowercase": true/g' 
-          -e 's/"require_numbers": false/"require_numbers": true/g'
-          -e 's/"require_special_chars": false/"require_special_chars": true/g'
-          ${SUBMITTY_INSTALL_DIR}/config/submitty.json
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": false/"require_uppercase": true/g' \
+            -e 's/"require_lowercase": false/"require_lowercase": true/g' \
+            -e 's/"require_numbers": false/"require_numbers": true/g' \
+            -e 's/"require_special_chars": false/"require_special_chars": true/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v7
@@ -799,12 +800,13 @@ jobs:
           browser: chrome
 
       - name: Disable password complexity requirements
-        run: sudo sed -i
-          -e 's/"require_uppercase": true/"require_uppercase": false/g'
-          -e 's/"require_lowercase": true/"require_lowercase": false/g'
-          -e 's/"require_numbers": true/"require_numbers": false/g'
-          -e 's/"require_special_chars": true/"require_special_chars": false/g'
-          ${SUBMITTY_INSTALL_DIR}/config/submitty.json
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": true/"require_uppercase": false/g' \
+            -e 's/"require_lowercase": true/"require_lowercase": false/g' \
+            -e 's/"require_numbers": true/"require_numbers": false/g' \
+            -e 's/"require_special_chars": true/"require_special_chars": false/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
