@@ -784,10 +784,10 @@ jobs:
 
       - name: Enable password complexity requirements
         run: sudo sed -ie 
-          's/"require_uppercase"\: false/"require_uppercase"\: true/g'
-          's/"require_lowercase"\: false/"require_lowercase"\: true/g' 
-          's/"require_numbers"\: false/"require_numbers"\: true/g'
-          's/"require_special_chars"\: false/"require_special_chars"\: true/g'
+          's/"require_uppercase": false/"require_uppercase": true/g'
+          's/"require_lowercase": false/"require_lowercase": true/g' 
+          's/"require_numbers": false/"require_numbers": true/g'
+          's/"require_special_chars": false/"require_special_chars": true/g'
           ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Run self-account-creation tests.
@@ -800,10 +800,10 @@ jobs:
 
       - name: Disable password complexity requirements
         run: sudo sed -ie 
-          's/"require_uppercase"\: true/"require_uppercase"\: false/g'
-          's/"require_lowercase"\: true/"require_lowercase"\: false/g'
-          's/"require_numbers"\: true/"require_numbers"\: false/g'
-          's/"require_special_chars"\: true/"require_special_chars"\: false/g'
+          's/"require_uppercase": true/"require_uppercase": false/g'
+          's/"require_lowercase": true/"require_lowercase": false/g'
+          's/"require_numbers": true/"require_numbers": false/g'
+          's/"require_special_chars": true/"require_special_chars": false/g'
           ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Switch to LDAP auth
