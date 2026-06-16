@@ -218,13 +218,13 @@
         <header>
             <h1>Manage Teams</h1>   
             <div class="btn-wrapper">
-                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="window.createTeamsFromSubsections()">
+                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="createTeamsFromSubsections()">
                    Create Teams from Registration Subsections
                 </button>
-                <button class="btn btn-primary" id="create_single_student_teams" onclick="window.createSingleStudentTeams()">
+                <button class="btn btn-primary" id="create_single_student_teams" onclick="createSingleStudentTeams()">
                    Create Single-Student Teams
                 </button>
-                <button class="btn btn-danger" id="delete_all_teams" onclick="window.deleteTeams()">
+                <button class="btn btn-danger" id="delete_all_teams" onclick="deleteTeams()">
                    Delete All Teams
                 </button>
             </div>
@@ -250,7 +250,7 @@
 {% endif %}
 
 <script>
-    window.createSingleStudentTeams = function() {
+    function createSingleStudentTeams() {
 
         const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_single_student_teams']);
         const message = "Are you sure you want to generate single-student teams?\n\n" +
@@ -278,7 +278,7 @@
             });
         }
     }
-    window.createTeamsFromSubsections = function() {
+    function createTeamsFromSubsections() {
 
         const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_teams_from_subsections']);
         const message = "Are you sure you want to generate teams from registration subsections?\n\n" +
@@ -306,7 +306,7 @@
             });
         }
     }
-    window.deleteTeams = function() {
+    function deleteTeams() {
         const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'delete_all_teams']);
         const message = "WARNING: Are you sure you want to all teams for this gradeable?\n\n" +
                         "Teams that have already made a submission will be SKIPPED and preserved.\n" +
