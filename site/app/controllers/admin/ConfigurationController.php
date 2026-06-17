@@ -32,6 +32,7 @@ class ConfigurationController extends AbstractController {
     public function viewConfiguration(): MultiResponse {
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
+        $course_info = $this->core->getQueries()->getCourseConfigFields($term, $course);
 
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
@@ -51,9 +52,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($term, $course),
+            'self_registration_type'         => (int) ($course_info['self_registration_type'] ?? self::NO_SELF_REGISTER),
             'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
-            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($term, $course),
+            'default_section'                => $course_info['default_section_id'] ?? null,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -62,8 +63,8 @@ class ConfigurationController extends AbstractController {
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
             'chat_enabled'                   => $this->core->getConfig()->isChatEnabled(),
-            'course_status'                  => $this->core->getQueries()->getCourseStatus($term, $course),
-            'unarchivable'                   => $this->core->getQueries()->isCourseUnarchivable($term, $course)
+            'course_status'                  => $course_info['status'] ?? null,
+            'unarchivable'                   => !empty($course_info['unarchivable']),
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;

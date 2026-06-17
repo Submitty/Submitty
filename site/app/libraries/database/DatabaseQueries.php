@@ -4954,6 +4954,15 @@ SQL;
         return $this->submitty_db->row()['status'];
     }
 
+    public function getCourseConfigFields(string $term, string $course): array {
+        $this->submitty_db->query(
+            "SELECT self_registration_type, default_section_id, status, unarchivable
+             FROM courses WHERE term=? AND course=?",
+            [$term, $course]
+        );
+        return $this->submitty_db->row(); // [] if no row
+    }
+
     /**
      * Set the status of a course (1 = active, 2 = archived)
      * @param string $term
