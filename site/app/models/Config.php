@@ -356,6 +356,9 @@ class Config extends AbstractModel {
      * @var string */
     protected $submitty_install_path;
     /** @prop
+     * @var string */
+    protected $submitty_data_path;
+    /** @prop
      * @var bool */
     protected $duck_banner_enabled;
     /** @prop
@@ -528,6 +531,7 @@ class Config extends AbstractModel {
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+        $this->submitty_data_path = $submitty_json['submitty_data_dir'];
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 

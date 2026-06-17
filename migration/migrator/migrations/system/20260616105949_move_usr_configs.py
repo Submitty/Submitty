@@ -18,7 +18,8 @@ def up(config):
     data_config_dir = Path(config.submitty['submitty_data_dir']) / "config"
 
     data_config_dir.mkdir(exist_ok=True)
-
+    data_config_dir.chmod(0o755)
+    
     for f in files_to_move:
         if (install_config_dir / f).exists():
             if (data_config_dir / f).exists():

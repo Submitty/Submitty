@@ -15,7 +15,7 @@ import threading
 
 
 INSTALL_CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
-DATA_CONFIG_PATH = path.join(path.dirname('/','var','local','submitty','config')
+DATA_CONFIG_PATH = path.join('/','var','local','submitty','config')
 SUBMITTY_CONFIG_PATH = path.join(INSTALL_CONFIG_PATH, 'submitty.json')
 AUTOGRADING_WORKERS_PATH = path.join(INSTALL_CONFIG_PATH, 'autograding_workers.json')
 AUTOGRADING_CONTAINERS_PATH = path.join(DATA_CONFIG_PATH, 'autograding_containers.json')
