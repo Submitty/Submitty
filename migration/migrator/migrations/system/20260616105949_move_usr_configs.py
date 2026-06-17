@@ -19,7 +19,7 @@ def up(config):
 
     data_config_dir.mkdir(exist_ok=True)
     data_config_dir.chmod(0o755)
-    
+
     for f in files_to_move:
         if (install_config_dir / f).exists():
             if (data_config_dir / f).exists():
@@ -29,7 +29,7 @@ def up(config):
                 (install_config_dir / f).rename(data_config_dir / f)
         else:
             raise RuntimeError(f+" does not exist in " + str(install_config_dir))
-    
+
 
 def down(config):
 
@@ -37,7 +37,6 @@ def down(config):
     data_config_dir = Path(config.submitty['submitty_data_dir']) / "config"
 
     for f in files_to_move:
-    
         if (data_config_dir / f).exists():
             if (install_config_dir / f).exists():
                 raise RuntimeError(f+" exists in both " + str(install_config_dir)
