@@ -456,6 +456,9 @@ class Access {
         $graded_gradeable = null;
         /** @var Gradeable|null $gradeable */
         $gradeable = null;
+
+        $peer_only_staff_grader = false;
+
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
             if (array_key_exists("graded_gradeable", $args)) {
                 $graded_gradeable = $args["graded_gradeable"];
