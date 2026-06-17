@@ -151,7 +151,7 @@ class AutoGradedVersion extends AbstractModel {
             $known_meta_files = [".submit.notebook", ".submit.timestamp", ".submit.VCS_CHECKOUT", ".user_assignment_access.json"];
             foreach ($submitted_files as $file => $details) {
                 $filename = basename($file);
-                if (in_array($filename, $known_meta_files)) { 
+                if (in_array($filename, $known_meta_files)) {
                     $this->meta_files[$dir][$file] = $details;
                 }
                 else {
