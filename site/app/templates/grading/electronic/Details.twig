@@ -444,29 +444,27 @@
             {% endif %}
             {# Peer View for Stoplights #}
             {% if core.getUser().getGroup() == 4 or peer_only_grader %}
-                    {# If no submission has been made, non peer should not be visible to peer grader #}
-                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Ungraded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-
-                            circle grader-NULL }}"></i>
-                        {% else %}
-                        {% endif %}
-                    {% else %}
-                        {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
-                        {%  if info.graded_groups[index] == "peer-no-submission" %}
-                            {# Indicates Not Submitted Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Submitted but Ungraded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] == 4 %}
-                            {# Indicates Submitted and Graded Peer Component #}
-                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
-                        {% else %}
-                        {% endif %}
+                {% set component = graded_gradeable.getGradeable().getComponents()[index] %}
+                {% set title = component.getTitle() %}
+                {# If no submission has been made, non peer should not be visible to peer grader #}
+                {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
+                    {% if info.graded_groups[index] == "peer-null" %}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% endif %}
+                {% else %}
+                    {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
+                    {% if info.graded_groups[index] == "peer-no-submission" %}
+                        {# Indicates Not Submitted Peer Component #}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-null" %}
+                        {# Indicates Submitted but Ungraded Peer Component #}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == 4 %}
+                        {# Indicates Submitted and Graded Peer Component #}
+                        <div title="{{ title }}" class="grading-circle grader-{{ info.graded_groups[index] }}"></div>
                     {% endif %}
                 {% endif %}
+            {% endif %}
             {%- endfor -%}
         </span>
     </td>
