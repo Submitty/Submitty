@@ -27,11 +27,14 @@ function clearTextFields() {
 }
 
 describe('Self account creation tests', () => {
-    it('Test all paths of account creation', () => {
+    before(() => {
         // create new randomized alphanumeric user id and email to limit interference of
         // current database contents on test (especially if this test is run multiple times)
         valid_user_id = Math.random().toString(36).substring(2, 8);
         valid_email = `${Math.random().toString(36).substring(2, 8)}@gmail.com`;
+    });
+
+    it('Test all paths of account creation', () => {
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
         // Not accepted email extension
@@ -64,28 +67,24 @@ describe('Self account creation tests', () => {
         // Password missing uppercase
         inputData(undefined, undefined, 'nouppercase#123', 'nouppercase#123');
         cy.get('[data-testid="sign-up-button"]').click();
-        console.log('a');
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing lowercase
         inputData(undefined, undefined, 'NOLOWERCASE#123', 'NOLOWERCASE#123');
         cy.get('[data-testid="sign-up-button"]').click();
-        console.log('b');
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing numbers
         inputData(undefined, undefined, 'NoNumbersHere!@', 'NoNumbersHere!@');
         cy.get('[data-testid="sign-up-button"]').click();
-        console.log('c');
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
         // Password missing special characters
         inputData(undefined, undefined, 'NoSpecialChar123', 'NoSpecialChar123');
         cy.get('[data-testid="sign-up-button"]').click();
-        console.log('d');
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         cy.get('[data-testid="remove-message-popup"').click();
         clearTextFields();
