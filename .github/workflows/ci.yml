@@ -798,7 +798,7 @@ jobs:
           spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-      
+
       - name: Run change-password tests.
         uses: cypress-io/github-action@v7
         with:
