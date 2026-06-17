@@ -358,6 +358,8 @@ $(() => {
 
         const overlap_margin = 15;
         const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
+        console.log(`overlap amount between student name and buttons: ${(panel_buttons_bbox.left - name_div_bbox.right)}`);
+        console.log(`overlapping? ${overlapping} (overlap margin = ${overlap_margin})`);
         if (overlapping || taLayoutDet.isFullLeftColumnMode) {
             $('#grading-panel-student-name').hide();
         }
