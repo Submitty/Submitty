@@ -4977,6 +4977,13 @@ SQL;
         return $this->submitty_db->row()['status'];
     }
 
+
+    /**
+     * Fetch all courses-table fields the config page needs in one query.
+     * Returns [] if the course row doesn't exist.
+     *
+     * @return array<string, mixed>
+     */
     public function getCourseConfigFields(string $term, string $course): array {
         $this->submitty_db->query(
             "SELECT self_registration_type, default_section_id, status, unarchivable

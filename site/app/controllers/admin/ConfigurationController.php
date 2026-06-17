@@ -64,7 +64,7 @@ class ConfigurationController extends AbstractController {
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
             'chat_enabled'                   => $this->core->getConfig()->isChatEnabled(),
             'course_status'                  => $course_info['status'] ?? null,
-            'unarchivable'                   => !empty($course_info['unarchivable']),
+            'unarchivable'                   => (bool) ($course_info['unarchivable'] ?? false),
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
