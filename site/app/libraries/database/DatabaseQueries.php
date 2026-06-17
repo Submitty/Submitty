@@ -4738,8 +4738,8 @@ SQL;
      * @param array<string, mixed> $source
      */
     public function insertNotificationSettingsForUser(string $user_id, array $source): void {
-        $this->course_db->query("
-            INSERT INTO notification_settings (
+        $this->course_db->query(
+            "INSERT INTO notification_settings (
                 user_id, merge_threads, all_new_threads, all_new_posts,
                 all_modifications_forum, reply_in_post_thread, team_invite,
                 team_joined, team_member_submission, self_notification,

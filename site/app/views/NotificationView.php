@@ -31,7 +31,7 @@ class NotificationView extends AbstractView {
      * @param array<string, bool> $notification_saves
      * @param int $self_registration_type
      * @param array <int, Course> $courses
-     * @param bool $has_defaults
+     * @param bool $is_default_course
      * @return void
      */
     public function showNotificationSettings(
@@ -52,6 +52,6 @@ class NotificationView extends AbstractView {
         'is_instructor'           => $this->core->getUser()->accessAdmin(),
         'is_self_registration'    => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,
         'courses'                 => $courses,
-    ]);
+        ]);
     }
 }
