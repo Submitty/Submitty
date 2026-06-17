@@ -78,7 +78,7 @@ preserve_files_backup() {
 }
 
 # Function to restore files from backup
-preserve_files_restoreX() {
+preserve_files_restore() {
     if [ ! -d "$PRESERVE_TMP_DIR" ] || [ ! -f "$PRESERVE_MANIFEST" ]; then
         return 0
     fi
@@ -103,11 +103,11 @@ preserve_files_restoreX() {
 }
 
 # ensure cleanup happens even on script failure
-trap preserve_files_restoreX EXIT
+trap preserve_files_restore EXIT
 EOF
 )
 
-#preserve_files_backup
+preserve_files_backup
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
@@ -591,7 +591,7 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 echo 'yo yo yo'
 
 #restore files to be preserved
-#preserve_files_restoreX
+preserve_files_restore
 
 ################################################################################################################
 ################################################################################################################
