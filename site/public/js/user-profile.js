@@ -475,12 +475,37 @@ $(document).ready(() => {
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
                     const offset = getCurrentUTCOffset();
                     if (response.data.utc_offset !== offset) {
-                        displayWarningMessage('Selected time-zone does not match system time-zone.');
+                        displayWarningMessage('Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
                     }
                 }
                 else {
                     console.log(response);
                     displayErrorMessage('Time-zone is not updated!');
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server!');
+                displayErrorMessage('Failed to parse response from server!');
+                console.log(response);
+            },
+        });
+    });
+
+    $('#date_format_select').on('change', function () {
+        $.getJSON({
+            type: 'POST',
+            url: buildUrl(['user_profile', 'change_date_format']),
+            data: {
+                csrf_token: csrfToken,
+                date_format: $(this).val(),
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    displaySuccessMessage('Date/time format updated successfully!');
+                }
+                else {
+                    console.log(response);
+                    displayErrorMessage('Failed to update date/time format!');
                 }
             },
             error: function (response) {
