@@ -8,13 +8,13 @@ const valid_verification_code = '00000000';
 const alternative_valid_password = 'Other12!Pass';
 
 function inputData(password = 'submitty-admin', confirm_password = password) {
-    cy.get('[#new_password]').type(password);
-    cy.get('[#confirm_new_password]').type(confirm_password);
+    cy.get('#new_password').type(password);
+    cy.get('#confirm_new_password').type(confirm_password);
 }
 
 function clearTextFields() {
-    cy.get('[#new_password]').clear();
-    cy.get('[#confirm_new_password]').clear();
+    cy.get('#new_password').clear();
+    cy.get('#confirm_new_password').clear();
 }
 
 describe('Change password test', () => {
@@ -48,7 +48,7 @@ describe('Change password test', () => {
 
         // Password too short
         inputData('short');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         clearTextFields(); // remove leftover inputs after frontend validation prevents change password
         /*
@@ -57,33 +57,33 @@ describe('Change password test', () => {
         */
         // Password missing uppercase
         inputData('nouppercase#123');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         clearTextFields();
         // Password missing lowercase
         inputData('NOLOWERCASE#123');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         clearTextFields();
         // Password missing numbers
         inputData('NoNumbersHere!@');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         clearTextFields();
         // Password missing special characters
         inputData('NoSpecialChar123');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements.');
         clearTextFields();
         // Passwords don't match
         inputData('Password123!', 'NotPassword123!');
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match.');
         clearTextFields();
 
         // Valid, matching passwords
         inputData(alternative_valid_password);
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Updated password');
 
         // Can't log in with old password
@@ -99,7 +99,7 @@ describe('Change password test', () => {
         cy.visit('/user_profile');
         cy.get('[data-testid="user-profile-change-password"]').click();
         inputData(valid_password);
-        cy.get('[data-testid="change-password-form-submit-button"]');
+        cy.get('[data-testid="change-password-form-submit-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Updated password');
 
         cy.logout();
