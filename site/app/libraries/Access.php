@@ -472,20 +472,17 @@ class Access {
             // we can't just immediately return false.
             $grading_checks = true;
 
+            $peer_only_staff_grader = $gradeable !== null && $gradeable->hasPeerComponent() && $user !== null && $user->accessGrading() && !$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup());
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
                     if (
-                        // Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
-                        // Users are allowed to access peer grading if this gradeable has peer components
-                        !((
-                            $group === User::GROUP_STUDENT
-                            || $group === User::GROUP_LIMITED_ACCESS_GRADER
-                            || $group === User::GROUP_FULL_ACCESS_GRADER
-                            || $group === User::GROUP_INSTRUCTOR
-                        ) && $gradeable->hasPeerComponent() && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        !(($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        &&
+                        !($peer_only_staff_grader
+                            && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         $grading_checks = false;
                     }
@@ -498,7 +495,7 @@ class Access {
                 }
             }
 
-            if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+            if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER && !$peer_only_staff_grader) {
                 //Check their grading section
                 if (array_key_exists("section", $args)) {
                     if (!$this->isSectionInGradingSections($gradeable, $args["section"], $user)) {
@@ -586,13 +583,6 @@ class Access {
             if ($component === null) {
                 return false;
             }
-
-            $peer_only_staff_grader =
-                $gradeable !== null
-                && $gradeable->hasPeerComponent()
-                && $user !== null
-                && $user->accessGrading()
-                && !$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup());
 
             if (
                 self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT)
