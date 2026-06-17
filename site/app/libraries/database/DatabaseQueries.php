@@ -4696,123 +4696,91 @@ SQL;
      * Inserts the preferred default notification settings
      *
      * @param string $user_id
-     * @param array <string, bool> $settings
+     * @param string $term
+     * @param string $course
      */
-    public function saveNotificationDefaults(string $user_id, array $settings): void {
+    public function saveNotificationDefaults(string $user_id, string $term, string $course): void {
         $this->submitty_db->query(
-            "INSERT INTO notification_default (
-            user_id, active, merge_threads, all_new_threads, all_new_posts,
-            all_modifications_forum, reply_in_post_thread, team_invite,
-            team_joined, team_member_submission, self_notification,
-            merge_threads_email, all_new_threads_email, all_new_posts_email,
-            all_modifications_forum_email, reply_in_post_thread_email,
-            team_invite_email, team_joined_email, team_member_submission_email,
-            self_notification_email, self_registration_email,
-            all_released_grades, all_released_grades_email,
-            all_gradeable_releases, all_gradeable_releases_email
-            ) VALUES (?, true, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT (user_id) DO UPDATE SET
-                active = true,
-                merge_threads                  = EXCLUDED.merge_threads,
-                all_new_threads                = EXCLUDED.all_new_threads,
-                all_new_posts                  = EXCLUDED.all_new_posts,
-                all_modifications_forum        = EXCLUDED.all_modifications_forum,
-                reply_in_post_thread           = EXCLUDED.reply_in_post_thread,
-                team_invite                    = EXCLUDED.team_invite,
-                team_joined                    = EXCLUDED.team_joined,
-                team_member_submission         = EXCLUDED.team_member_submission,
-                self_notification              = EXCLUDED.self_notification,
-                merge_threads_email            = EXCLUDED.merge_threads_email,
-                all_new_threads_email          = EXCLUDED.all_new_threads_email,
-                all_new_posts_email            = EXCLUDED.all_new_posts_email,
-                all_modifications_forum_email  = EXCLUDED.all_modifications_forum_email,
-                reply_in_post_thread_email     = EXCLUDED.reply_in_post_thread_email,
-                team_invite_email              = EXCLUDED.team_invite_email,
-                team_joined_email              = EXCLUDED.team_joined_email,
-                team_member_submission_email   = EXCLUDED.team_member_submission_email,
-                self_notification_email        = EXCLUDED.self_notification_email,
-                self_registration_email        = EXCLUDED.self_registration_email,
-                all_released_grades            = EXCLUDED.all_released_grades,
-                all_released_grades_email      = EXCLUDED.all_released_grades_email,
-                all_gradeable_releases         = EXCLUDED.all_gradeable_releases,
-                all_gradeable_releases_email   = EXCLUDED.all_gradeable_releases_email",
-            [
-                $user_id,
-                $settings['merge_threads'],
-                $settings['all_new_threads'],
-                $settings['all_new_posts'],
-                $settings['all_modifications_forum'],
-                $settings['reply_in_post_thread'],
-                $settings['team_invite'],
-                $settings['team_joined'],
-                $settings['team_member_submission'],
-                $settings['self_notification'],
-                $settings['merge_threads_email'],
-                $settings['all_new_threads_email'],
-                $settings['all_new_posts_email'],
-                $settings['all_modifications_forum_email'],
-                $settings['reply_in_post_thread_email'],
-                $settings['team_invite_email'],
-                $settings['team_joined_email'],
-                $settings['team_member_submission_email'],
-                $settings['self_notification_email'],
-                $settings['self_registration_email'],
-                $settings['all_released_grades'],
-                $settings['all_released_grades_email'],
-                $settings['all_gradeable_releases'],
-                $settings['all_gradeable_releases_email'],
-            ]
+            "INSERT INTO notification_default (user_id, term, course)
+             VALUES (?, ?, ?)
+             ON CONFLICT (user_id) DO UPDATE SET
+                term = EXCLUDED.term,
+                course = EXCLUDED.course",
+            [$user_id, $term, $course]
         );
     }
 
-    public function applyNotificationDefaults(string $user_id): void {
+    /**
+     * @return array{term: string, course: string}|null
+     */
+    public function getNotificationDefault(string $user_id): ?array {
         $this->submitty_db->query(
-            "SELECT * FROM notification_default WHERE user_id = ?",
+            "SELECT term, course FROM notification_default WHERE user_id = ?",
             [$user_id]
         );
         $row = $this->submitty_db->row();
-        if ($row === []) {
+        return empty($row) ? null : $row;
+    }
+
+    public function applyNotificationDefaults(string $user_id): void {
+        // Look up which course the user marked as their default
+        $this->submitty_db->query(
+            "SELECT term, course FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+        $default = $this->submitty_db->row();
+        if (empty($default)) {
             return;
         }
 
+        // The course the student was just added to
+        $target_term = $this->core->getConfig()->getTerm();
+        $target_course = $this->core->getConfig()->getCourse();
+
+        if ($default['term'] === $target_term && $default['course'] === $target_course) {
+            return;
+        }
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($default['term'], $default['course']);
+        $this->core->loadCourseDatabase();
         $this->course_db->query(
-            "INSERT INTO notification_settings (
-            user_id, merge_threads, all_new_threads, all_new_posts,
-            all_modifications_forum, reply_in_post_thread, team_invite,
-            team_joined, team_member_submission, self_notification,
-            merge_threads_email, all_new_threads_email, all_new_posts_email,
-            all_modifications_forum_email, reply_in_post_thread_email,
-            team_invite_email, team_joined_email, team_member_submission_email,
-            self_notification_email, self_registration_email,
-            all_released_grades, all_released_grades_email,
-            all_gradeable_releases, all_gradeable_releases_email
+            "SELECT * FROM notification_settings WHERE user_id = ?",
+            [$user_id]
+        );
+        $source = $this->course_db->row();
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        if (empty($source)) {
+            return;
+        }
+
+        $this->course_db->query("
+            INSERT INTO notification_settings (
+                user_id, merge_threads, all_new_threads, all_new_posts,
+                all_modifications_forum, reply_in_post_thread, team_invite,
+                team_joined, team_member_submission, self_notification,
+                merge_threads_email, all_new_threads_email, all_new_posts_email,
+                all_modifications_forum_email, reply_in_post_thread_email,
+                team_invite_email, team_joined_email, team_member_submission_email,
+                self_notification_email, self_registration_email,
+                all_released_grades, all_released_grades_email,
+                all_gradeable_releases, all_gradeable_releases_email
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (user_id) DO NOTHING",
             [
                 $user_id,
-                $row['merge_threads'],
-                $row['all_new_threads'],
-                $row['all_new_posts'],
-                $row['all_modifications_forum'],
-                $row['reply_in_post_thread'],
-                $row['team_invite'],
-                $row['team_joined'],
-                $row['team_member_submission'],
-                $row['self_notification'],
-                $row['merge_threads_email'],
-                $row['all_new_threads_email'],
-                $row['all_new_posts_email'],
-                $row['all_modifications_forum_email'],
-                $row['reply_in_post_thread_email'],
-                $row['team_invite_email'],
-                $row['team_joined_email'],
-                $row['team_member_submission_email'],
-                $row['self_notification_email'],
-                $row['self_registration_email'],
-                $row['all_released_grades'],
-                $row['all_released_grades_email'],
-                $row['all_gradeable_releases'],
-                $row['all_gradeable_releases_email'],
+                $source['merge_threads'], $source['all_new_threads'], $source['all_new_posts'],
+                $source['all_modifications_forum'], $source['reply_in_post_thread'], $source['team_invite'],
+                $source['team_joined'], $source['team_member_submission'], $source['self_notification'],
+                $source['merge_threads_email'], $source['all_new_threads_email'], $source['all_new_posts_email'],
+                $source['all_modifications_forum_email'], $source['reply_in_post_thread_email'],
+                $source['team_invite_email'], $source['team_joined_email'], $source['team_member_submission_email'],
+                $source['self_notification_email'], $source['self_registration_email'],
+                $source['all_released_grades'], $source['all_released_grades_email'],
+                $source['all_gradeable_releases'], $source['all_gradeable_releases_email'],
             ]
         );
     }

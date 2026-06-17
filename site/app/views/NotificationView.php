@@ -34,22 +34,15 @@ class NotificationView extends AbstractView {
      * @param bool $has_defaults
      * @return void
      */
-    public function showNotificationSettings(array $notification_saves, int $self_registration_type, array $courses = [], $has_defaults = false): void {
-        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildCourseUrl(['notifications']));
-        $this->core->getOutput()->addInternalCss('notifications.css');
-        $this->core->getOutput()->addBreadcrumb("Notification Settings");
+    public function showNotificationSettings(
+        array $notification_saves,
+        int $self_registration_type,
+        array $courses = [],
+        bool $is_default_course = false
+    ): void {
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
-            'notification_saves' => $notification_saves,
-            'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
-            'csrf_token' => $this->core->getCsrfToken(),
-            'defaults' => User::constructNotificationSettings([]),
-            'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings']),
-            'self_registration_type' => $self_registration_type,
-            'is_instructor' => $this->core->getUser()->accessAdmin(),
-            'is_self_registration' => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,
-            'courses' => $courses,
-            'has_defaults' => $has_defaults,
-            'save_defaults_url' => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
+            'save_defaults_url'  => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
+            'is_default_course'  => $is_default_course,
         ]);
     }
 }

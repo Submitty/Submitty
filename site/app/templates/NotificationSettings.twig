@@ -74,6 +74,11 @@
                     Sync notification settings
                 </button>
             {% endset %}
+            {% if is_default_course %}
+                <div class="alert alert-primary" data-testid="default-course-banner" style="margin-bottom: 16px;">
+                    This course is currently set as the default for your future courses.
+                </div>
+            {% endif %}
             <div class="header">
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
@@ -468,31 +473,28 @@
         }
 
         function saveNotificationDefaults() {
-        $.ajax({
-            type: "POST",
-            url: "{{ save_defaults_url }}",
-            data: { csrf_token: "{{ csrf_token }}" },
-            success: function(data) {
-                try {
-                    var json = JSON.parse(data);
-                    if (json['status'] === 'fail') {
-                        displayErrorMessage(json['message']);
-                    } else {
-                        displaySuccessMessage(json['data']);
-                        // Update button text to reflect defaults now exist
-                        $('[data-testid="save-notification-defaults"]')
-                        .text('Update Future Course Defaults');
-                        $('#sync-notification-popup').hide();
+            $.ajax({
+                type: "POST",
+                url: "{{ save_defaults_url }}",
+                data: { csrf_token: "{{ csrf_token }}" },
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if (json['status'] === 'fail') {
+                            displayErrorMessage(json['message']);
+                        } else {
+                            displaySuccessMessage(json['data']);
+                            location.reload();
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error saving defaults. Please try again.');
                     }
-                } catch(err) {
-                displayErrorMessage('Error saving defaults. Please try again.');
+                },
+                error: function() {
+                    displayErrorMessage('Failed to save notification defaults.');
                 }
-            },
-            error: function() {
-                displayErrorMessage('Failed to save notification defaults.');
-            }
-        });
-    }
+            });
+        }
 
         function setNotification(button) {
             const popup = $(button).closest('#sync-notification-popup');
@@ -563,4 +565,4 @@
         });
     </script>
 </div>
-{% include 'SyncSettingsPopup.twig' with { courses: courses, has_defaults: has_defaults } %}
+{% include 'SyncSettingsPopup.twig' with { courses: courses, is_default_course: is_default_course } %}

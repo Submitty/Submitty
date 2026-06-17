@@ -28,7 +28,7 @@
     <hr style="margin-top: 24px;">
     <label style="margin-top: 8px;">
         To apply these notification settings to any future courses you enroll in, click below.
-    </label>
+    </label >
 </div>
 {% endblock %}
 {% block buttons %}
@@ -37,6 +37,6 @@
         Sync Settings
     </button>
     <button class="btn btn-primary" onclick="saveNotificationDefaults()" data-testid="save-notification-defaults">
-        {{ has_defaults ? 'Update Future Course Defaults' : 'Save as Future Course Default' }}
+        {{ is_default_course ? 'This Course Is Your Default' : 'Save as Future Course Default' }}
     </button>
 {% endblock %}
