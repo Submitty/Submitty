@@ -417,7 +417,7 @@
         <span>
             {# check if current user is a peer only grader #}
             {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
-            {%- for index in range(0, info.graded_groups|length - 1) -%}
+            {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
             {% if core.getUser().accessGrading() and not peer_only_grader %}
                     {% set user_id = graded_gradeable.getSubmitter().getId() %}
