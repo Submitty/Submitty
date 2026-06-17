@@ -34,17 +34,25 @@ const getServerDateComponents = (date = new Date()) => {
     };
 };
 
-// Return a due-date string for N calendar days ago (in server timezone) at noon.
-// Using a fixed noon time avoids UTC/server-timezone calendar-day boundary issues
-// that occur when the CI runner and the Submitty server are in different timezones.
+// Due date `daysAgo` days before the current instant, expressed in the server's timezone.
+// Anchoring on the real instant means the gap to the actual submission
+// is always daysAgo*24h + test-runtime
 const getDueDateString = (daysAgo) => {
-    const { year, month, day } = getServerDateComponents();
-    // Use UTC arithmetic to subtract days without DST ambiguity
-    const due = new Date(Date.UTC(year, month - 1, day - daysAgo));
-    const y = due.getUTCFullYear();
-    const m = String(due.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(due.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${d} 12:00:00`;
+    const due = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: SERVER_TIMEZONE,
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).formatToParts(due);
+    const part = (type) => parts.find((p) => p.type === type).value;
+    // Some engines emit '24' for midnight under hour12:false; normalize to '00'.
+    const hour = part('hour') === '24' ? '00' : part('hour');
+    return `${part('year')}-${part('month')}-${part('day')} ${hour}:${part('minute')}:${part('second')}`;
 };
 
 // Return a date string for N calendar days ago at 6 AM in the server's timezone.
@@ -360,6 +368,7 @@ describe('Test warning messages for team gradeable', () => {
     it('Confirmation for the first submission with 2 remaining late days and 1 extension for teams', () => {
         // Part 1/2 of a test case
         // The first submission will be done 2 days after the due date and use 2 valid late days for each team member
+        cy.logout();
         cy.login('instructor');
         giveExtensions(team_gradeable);
         giveLateDays(getMorningDateString(3), 'student', 3); // this is important for part 2/2
