@@ -4722,41 +4722,22 @@ SQL;
         return empty($row) ? null : $row;
     }
 
-    public function applyNotificationDefaults(string $user_id): void {
-        // Look up which course the user marked as their default
-        $this->submitty_db->query(
-            "SELECT term, course FROM notification_default WHERE user_id = ?",
-            [$user_id]
-        );
-        $default = $this->submitty_db->row();
-        if (empty($default)) {
-            return;
-        }
-
-        // The course the student was just added to
-        $target_term = $this->core->getConfig()->getTerm();
-        $target_course = $this->core->getConfig()->getCourse();
-
-        if ($default['term'] === $target_term && $default['course'] === $target_course) {
-            return;
-        }
-
-        $original_config = clone $this->core->getConfig();
-        $this->core->loadCourseConfig($default['term'], $default['course']);
-        $this->core->loadCourseDatabase();
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getNotificationSettingsForUser(string $user_id): ?array {
         $this->course_db->query(
             "SELECT * FROM notification_settings WHERE user_id = ?",
             [$user_id]
         );
-        $source = $this->course_db->row();
+        $row = $this->course_db->row();
+        return empty($row) ? null : $row;
+    }
 
-        $this->core->setConfig($original_config);
-        $this->core->loadCourseDatabase();
-
-        if (empty($source)) {
-            return;
-        }
-
+    /**
+     * @param array<string, mixed> $source
+     */
+    public function insertNotificationSettingsForUser(string $user_id, array $source): void {
         $this->course_db->query("
             INSERT INTO notification_settings (
                 user_id, merge_threads, all_new_threads, all_new_posts,

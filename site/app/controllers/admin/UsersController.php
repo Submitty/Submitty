@@ -422,7 +422,7 @@ class UsersController extends AbstractController {
                     $user->getGroup() === User::GROUP_STUDENT
                     && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
                 ) {
-                    $this->core->getQueries()->applyNotificationDefaults($user->getId());
+                    $this->applyNotificationDefaultsForUser($user->getId());
                 }
                     $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
@@ -434,7 +434,7 @@ class UsersController extends AbstractController {
                     $user->getGroup() === User::GROUP_STUDENT
                     && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
                 ) {
-                    $this->core->getQueries()->applyNotificationDefaults($user->getId());
+                    $this->applyNotificationDefaultsForUser($user->getId());
                 }
                     $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
@@ -659,6 +659,34 @@ class UsersController extends AbstractController {
             'section_id' => $section_id,
             'course_id'  => $course_id,
         ]);
+    }
+
+    // Helper function for appying notifications
+    private function applyNotificationDefaultsForUser(string $user_id): void {
+        $default = $this->core->getQueries()->getNotificationDefault($user_id);
+        if ($default === null) {
+            return;
+        }
+
+        $target_term = $this->core->getConfig()->getTerm();
+        $target_course = $this->core->getConfig()->getCourse();
+        if ($default['term'] === $target_term && $default['course'] === $target_course) {
+            return;
+        }
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($default['term'], $default['course']);
+        $this->core->loadCourseDatabase();
+        $source = $this->core->getQueries()->getNotificationSettingsForUser($user_id);
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        if ($source === null) {
+            return;
+        }
+
+        $this->core->getQueries()->insertNotificationSettingsForUser($user_id, $source);
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
@@ -963,7 +991,7 @@ class UsersController extends AbstractController {
                             $user->getGroup() === User::GROUP_STUDENT
                             && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
                         ) {
-                            $this->core->getQueries()->applyNotificationDefaults($user->getId());
+                            $this->applyNotificationDefaultsForUser($user->getId());
                         }
                         break;
                     case 'update':

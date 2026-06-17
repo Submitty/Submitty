@@ -41,8 +41,17 @@ class NotificationView extends AbstractView {
         bool $is_default_course = false
     ): void {
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
-            'save_defaults_url'  => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
-            'is_default_course'  => $is_default_course,
-        ]);
+        'notification_saves'      => $notification_saves,
+        'email_enabled'           => $this->core->getConfig()->isEmailEnabled(),
+        'csrf_token'              => $this->core->getCsrfToken(),
+        'defaults'                => User::constructNotificationSettings([]),
+        'update_settings_url'     => $this->core->buildCourseUrl(['notifications', 'settings']),
+        'save_defaults_url'       => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
+        'is_default_course'       => $is_default_course,
+        'self_registration_type'  => $self_registration_type,
+        'is_instructor'           => $this->core->getUser()->accessAdmin(),
+        'is_self_registration'    => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,
+        'courses'                 => $courses,
+    ]);
     }
 }
