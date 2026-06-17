@@ -2,7 +2,6 @@
 ignore-paths=
     site/node_modules,
     more_autograding_examples,
-    grading/json_syntax_checker.py,
     grading/python/submitty_router.py,
     bin/regrade.py,
     bin/grading_done.py,
