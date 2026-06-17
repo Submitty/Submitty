@@ -78,7 +78,7 @@ preserve_files_backup() {
 }
 
 # Function to restore files from backup
-preserve_files_restore() {
+preserve_files_restoreX() {
     if [ ! -d "$PRESERVE_TMP_DIR" ] || [ ! -f "$PRESERVE_MANIFEST" ]; then
         return 0
     fi
@@ -103,11 +103,11 @@ preserve_files_restore() {
 }
 
 # ensure cleanup happens even on script failure
-trap preserve_files_restore EXIT
+trap preserve_files_restoreX EXIT
 EOF
 )
 
-preserve_files_backup
+#preserve_files_backup
 
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
@@ -588,8 +588,10 @@ installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.jso
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
+echo 'yo yo yo'
+
 #restore files to be preserved
-preserve_files_restore
+#preserve_files_restoreX
 
 ################################################################################################################
 ################################################################################################################

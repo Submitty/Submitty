@@ -174,7 +174,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
 
     # php & daemon needs to be able to read workers & containers config
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
-    chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
+    chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_DATA_DIR:?}/config/autograding_containers.json"
 fi
 
 # Set permissions of all files in the logs directories
