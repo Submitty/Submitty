@@ -147,8 +147,11 @@ class AutoGradedVersion extends AbstractModel {
 
             // Now load all files in the directory, flattening the results
             $submitted_files = FileUtils::getAllFiles($path, [], true);
+            //Common meta data files:
+            $known_meta_files = [".submit.notebook", ".submit.timestamp", ".submit.VCS_CHECKOUT", ".user_assignment_access.json"];
             foreach ($submitted_files as $file => $details) {
-                if (substr(basename($file), 0, 1) === '.') {
+                $filename = basename($file);
+                if (in_array($filename, $known_meta_files)) { 
                     $this->meta_files[$dir][$file] = $details;
                 }
                 else {
