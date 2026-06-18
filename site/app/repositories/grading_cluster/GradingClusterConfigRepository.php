@@ -6,6 +6,9 @@ namespace app\repositories\grading_cluster;
 
 use Doctrine\ORM\EntityRepository;
 
+/**
+ * @extends EntityRepository<\app\entities\grading_cluster\GradingClusterConfig>
+ */
 class GradingClusterConfigRepository extends EntityRepository {
     /**
      * Deletes the config cascades and deletes all associated clusters and members
