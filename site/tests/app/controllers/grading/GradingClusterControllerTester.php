@@ -7,7 +7,6 @@ use app\entities\grading_cluster\GradingClusterAlgorithm;
 use tests\BaseUnitTest;
 
 class GradingClusterControllerTester extends BaseUnitTest {
-
     public function setUp(): void {
         parent::setUp();
         $_POST = [];
@@ -20,7 +19,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
 
     public function testInvalidCsrfToken() {
         $core = $this->createMockCore();
-        // omitting $_POST['csrf_token'] to trigger CSRF failure
+        // Omitting $_POST['csrf_token'] to trigger CSRF failure
 
         $controller = new GradingClusterController($core);
         $response = $controller->createClustering('test_gradeable');
@@ -32,7 +31,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
     public function testMissingAlgorithm() {
         $core = $this->createMockCore();
         $_POST['csrf_token'] = 'valid';
-        // omitting algorithm from $_POST
+        // Omitting algorithm from $_POST
 
         $controller = new GradingClusterController($core);
         $response = $controller->createClustering('test_gradeable');
@@ -45,7 +44,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
         $core = $this->createMockCore();
         $_POST['csrf_token'] = 'valid';
         $_POST['algorithm'] = GradingClusterAlgorithm::DummySplit->value;
-        
+
         $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
         $queries->method('getActiveSubmittersForGradeable')->willReturn([]);
         $core->method('getQueries')->willReturn($queries);
@@ -62,12 +61,12 @@ class GradingClusterControllerTester extends BaseUnitTest {
 
     public function testGetClustersEmptyConfig() {
         $core = $this->createMockCore();
-        
+
         $em = $this->createMock(\Doctrine\ORM\EntityManager::class);
         $repository = $this->createMock(\app\repositories\grading_cluster\GradingClusterConfigRepository::class);
         $repository->method('findOneBy')->willReturn(null);
         $em->method('getRepository')->willReturn($repository);
-        
+
         $core->method('getCourseEntityManager')->willReturn($em);
 
         $controller = new GradingClusterController($core);
