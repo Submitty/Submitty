@@ -240,22 +240,12 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-    const scroll_pixel = parseFloat(window.Cookies.get('scroll_pixel') || '');
 
     const testcases = window.Cookies.get('testcases') || '';
 
     const files = window.Cookies.get('files') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
-
-    window.addEventListener('load', () => {
-        if (scroll_pixel > 0) {
-            const gradingRubric = document.getElementById(
-                'grading-rubric',
-            ) as HTMLElement;
-            gradingRubric.scrollTop = scroll_pixel;
-        }
-    });
 
     if (autoscroll === 'on') {
         ($('#autoscroll_id')[0] as HTMLInputElement).checked = true;
