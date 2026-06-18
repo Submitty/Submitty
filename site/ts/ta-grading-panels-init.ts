@@ -240,7 +240,6 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-    const opened_mark = window.Cookies.get('opened_mark') || '';
     const scroll_pixel = parseFloat(window.Cookies.get('scroll_pixel') || '');
 
     const testcases = window.Cookies.get('testcases') || '';
@@ -250,7 +249,6 @@ function readCookies() {
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
     window.addEventListener('load', () => {
-        $(`#title-${opened_mark}`).trigger('click');
         if (scroll_pixel > 0) {
             const gradingRubric = document.getElementById(
                 'grading-rubric',
