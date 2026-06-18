@@ -114,15 +114,15 @@ onUnmounted(() => {
             <em data-testid="mark-title">{{ markTitle }}</em>
           </h3>
           <br>
-          <strong># of submitters with mark:</strong>
+          <strong># of submitters with mark: </strong>
           <span data-testid="section-submitter-count">{{ stats?.section_submitter_count ?? '0' }}</span>
           (<span data-testid="total-submitter-count">{{ stats?.total_submitter_count ?? '0' }}</span>)
           <br>
-          <strong># of graded components:</strong>
+          <strong># of graded components: </strong>
           <span data-testid="section-graded-component-count">{{ stats?.section_graded_component_count ?? '0' }}</span>
           (<span data-testid="total-graded-component-count">{{ stats?.total_graded_component_count ?? '0' }}</span>)
           <br>
-          <strong># of total components:</strong>
+          <strong># of total components: </strong>
           <span data-testid="section-total-component-count">{{ stats?.section_total_component_count ?? '0' }}</span>
           (<span data-testid="total-total-component-count">{{ stats?.total_total_component_count ?? '0' }}</span>)
           <br>
