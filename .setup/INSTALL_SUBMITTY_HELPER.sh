@@ -588,6 +588,8 @@ installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.jso
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
+echo 'yo yo yo'
+
 #restore files to be preserved
 preserve_files_restore
 
