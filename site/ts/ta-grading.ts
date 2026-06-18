@@ -236,21 +236,28 @@ export function changeStudentArrowTooltips(data: string) {
     }
 }
 
-window.updateCookies = function () {
+window.updateCookies = function (clear_open_files: boolean = false) {
     window.Cookies.set('silent_edit_enabled', String(isSilentEditModeEnabled()), {
         path: '/',
     });
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
-    let open_files: string[] = [];
+    let open_files_array: string[] = [];
+    if(!clear_open_files) {
+        // keep open files persistent across cookie updates
+        const prev_open_files = window.Cookies.get('open_files') || '';
+        const prev_open_files_array = JSON.parse(prev_open_files) as string[];
+        open_files_array = open_files_array.concat(prev_open_files_array);
+    }
+
     $('#file-container')
         .children()
         .each(function () {
             $(this)
                 .children('div[id^=div_viewer_]')
                 .each(function () {
-                    open_files = open_files.concat(
+                    open_files_array = open_files_array.concat(
                         findAllOpenFiles(
                             $(this),
                             '',
@@ -262,7 +269,7 @@ window.updateCookies = function () {
                 });
         });
 
-    window.Cookies.set('open_files', JSON.stringify(open_files), { path: '/' });
+    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -361,6 +368,9 @@ function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string, path:
                 });
         });
 
+    if (first) {
+        console.log(stored_paths);
+    }
     return stored_paths;
 }
 
