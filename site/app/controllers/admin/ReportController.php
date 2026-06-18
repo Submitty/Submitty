@@ -834,6 +834,7 @@ class ReportController extends AbstractController {
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
+                'normalization_warnings' => $customization->getNormalizationWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
@@ -847,6 +848,7 @@ class ReportController extends AbstractController {
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
                 'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
+                'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
 
