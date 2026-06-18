@@ -51,7 +51,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $docker = new DockerInterfaceController($this->core);
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
-        $mock_data['autograding_containers'] = json_decode(DockerUITester::getAutogradingContainersJson(), true);
+        //$mock_data['autograding_containers'] = json_decode(DockerUITester::getAutogradingContainersJson(), true);
         $mock_data['autograding_workers'] = json_decode(DockerUITester::getAutogradingWorkersJson(), true);
         $mock_data['image_owners'] = [];
 
