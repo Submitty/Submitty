@@ -50,6 +50,12 @@ runs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Uninstall PHP 8.1 before setup
+      run: |
+        sudo apt-get --dry-run purge 'php8.1*'
+      shell: bash
+
     - uses: shivammathur/setup-php@2.37.0
       with:
         php-version: ${{ env.PHP_VER }}
@@ -226,6 +232,4 @@ runs:
         sudo systemctl status php8.2-fpm --no-pager || true
         echo "=== Apache Error Log ==="
         sudo tail -n 50 /var/log/apache2/error.log || true
-        echo "=== Apache Access Log ==="
-        sudo tail -n 50 /var/log/apache2/access.log || true
       shell: bash
