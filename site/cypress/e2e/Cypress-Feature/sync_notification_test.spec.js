@@ -30,24 +30,33 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
 
     const createCourseAndAddStudent = () => {
         const course = randomName() + '_noti_test';
+        cy.intercept('GET', '**/user_information').as('userInfo');
+        cy.intercept('POST', '**/users').as('addUser');
+
         cy.login('instructor');
         cy.visit('/home/courses/new');
         cy.get('#course_title').type(course);
         cy.get('#group_name').select(4);
         cy.get('#course-creation-form button[type="submit"]').click();
-        // If there is a frog robot error or something saying to restart php8.2-fpm, it's because we are trying to access the sections page too early
+        // If you see a frog/robot error about restarting php8.2-fpm, the sections page was trying to load too early
         cy.wait(1000);
+        cy.visit([course]);
         cy.visit([course, 'sections']);
+        cy.reload();
         cy.get('.add-registration-section-btn').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
         cy.get('#new-section-id').type('1');
         cy.get('#new-course-id-num').type('11111');
         cy.get('input[type="submit"][value="Add Section"]').click();
+
         cy.visit([course, 'users']);
+        cy.wait('@userInfo');
         cy.get('a[href="javascript:newStudentForm()"]').click();
         cy.get('#user_id').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
+
+        cy.visit('/home');
         cy.logout();
         return course;
     };
