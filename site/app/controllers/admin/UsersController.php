@@ -1190,11 +1190,12 @@ class UsersController extends AbstractController {
                             }
                         }
                         break;
-                    case "Registation Sub-Section":
+                    case "Registration Subsection":
                         /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-, .
                         Registration subsection is optional for graders, so automatically validate if not set.*/
-                        if (isset($vals[$col_num]) && strtolower($vals[$col_num]) === "null") {
+                        if (empty($vals[$col_num]) || strtolower($vals[$col_num]) === "null") {
                             $vals[$col_num] = null;
+                            break;
                         }
                         $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$col_num]));
                         if (!($unset_grader_registration_section || User::validateUserData('registration_subsection', $vals[$col_num]))) {
@@ -1397,7 +1398,7 @@ class UsersController extends AbstractController {
                                     break;
                             }
                             break;
-                        case "Registation Sub-Section":
+                        case "Registration Subsection":
                             if (!empty($row[$col_num])) {
                                 $user->setRegistrationSubsection($value);
                             }
@@ -1509,7 +1510,7 @@ class UsersController extends AbstractController {
                                     break;
                             }
                             break;
-                        case "Registation Sub-Section":
+                        case "Registration Subsection":
                             if (!empty($row[$col_num])) {
                                 $user->setRegistrationSubsection($value);
                             }
