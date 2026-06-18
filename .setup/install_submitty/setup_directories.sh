@@ -209,6 +209,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chmod  750                                        "${SUBMITTY_DATA_DIR:?}/in_progress_grading"
 fi
 
+
 # tmp folder
 mkdir -p        "${SUBMITTY_DATA_DIR:?}/tmp"
 chown root:root "${SUBMITTY_DATA_DIR:?}/tmp"
