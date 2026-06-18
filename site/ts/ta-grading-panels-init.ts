@@ -240,8 +240,14 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-    const testcases = window.Cookies.get('testcases') || '';
     const open_files = window.Cookies.get('open_files') || '';
+
+    /*
+        FIX ME! testcases cookie is currently never set, so opened test
+        cases never persist. To fix, set this cookie in ta-grading.ts as
+        an array of the numbers at the end of the testcases' ids (i.e. `#testcase_${num}` )
+    */
+    const testcases = window.Cookies.get('testcases') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
