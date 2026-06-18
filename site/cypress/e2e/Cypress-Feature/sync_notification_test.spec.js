@@ -35,7 +35,8 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         cy.get('#course_title').type(course);
         cy.get('#group_name').select(4);
         cy.get('#course-creation-form button[type="submit"]').click();
-        cy.reload();
+        // If there is a frog robot error or something saying to restart php8.2-fpm, it's because we are trying to access the sections page too early
+        cy.wait(1000);
         cy.visit([course, 'sections']);
         cy.get('.add-registration-section-btn').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
