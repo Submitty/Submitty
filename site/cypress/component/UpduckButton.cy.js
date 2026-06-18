@@ -4,7 +4,7 @@ describe('UpduckButton', () => {
     const baseProps = {
         postId: 123,
         threadId: 456,
-        currentUser: 'jndlansh',
+        currentUser: 'user1',
         userLiked: false,
         likeCount: 0,
         likedByStaff: false,
@@ -65,10 +65,10 @@ describe('UpduckButton', () => {
             win.toggleLike = cy.stub().as('toggleLike');
         });
 
-        cy.mount(UpduckButton, { props: { ...baseProps, showLikersIcon: false, postId: 11, threadId: 22, currentUser: 'JManion' } });
+        cy.mount(UpduckButton, { props: { ...baseProps, showLikersIcon: false, postId: 11, threadId: 22, currentUser: 'user2' } });
         cy.get('[data-testid="upduck-button"]').click();
 
-        cy.get('@toggleLike').should('have.been.calledOnceWith', 11, 22, 'JManion');
+        cy.get('@toggleLike').should('have.been.calledOnceWith', 11, 22, 'user2');
     });
 
     it('does not throw when window handlers are missing', () => {
@@ -91,10 +91,10 @@ describe('UpduckButton', () => {
             win.toggleLike = cy.stub().as('toggleLike');
         });
 
-        cy.mount(UpduckButton, { props: { ...baseProps, postId: 201, threadId: 202, currentUser: 'jndlansh' } });
+        cy.mount(UpduckButton, { props: { ...baseProps, postId: 201, threadId: 202, currentUser: 'user2' } });
         cy.get('[data-testid="upduck-button"]').focus();
         cy.get('[data-testid="upduck-button"]').type('{enter}');
-        cy.get('@toggleLike').should('have.been.calledOnceWith', 201, 202, 'jndlansh');
+        cy.get('@toggleLike').should('have.been.calledOnceWith', 201, 202, 'user2');
     });
 
     it('multiple clicks call toggleLike multiple times', () => {
@@ -102,7 +102,7 @@ describe('UpduckButton', () => {
             win.toggleLike = cy.stub().as('toggleLike');
         });
 
-        cy.mount(UpduckButton, { props: { ...baseProps, postId: 301, threadId: 302, currentUser: 'dan' } });
+        cy.mount(UpduckButton, { props: { ...baseProps, postId: 301, threadId: 302, currentUser: 'user2' } });
         cy.get('[data-testid="upduck-button"]').click();
         cy.get('[data-testid="upduck-button"]').click();
         cy.get('@toggleLike').should('have.been.calledTwice');
