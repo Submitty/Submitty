@@ -1193,7 +1193,7 @@ class UsersController extends AbstractController {
                     case "Registration Subsection":
                         /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-, .
                         Registration subsection is optional for graders, so automatically validate if not set.*/
-                        if (empty($vals[$col_num]) || strtolower($vals[$col_num]) === "null") {
+                        if (!isset($vals[$col_num]) || $vals[$col_num] === "" || strtolower($vals[$col_num]) === "null") {
                             $vals[$col_num] = null;
                             break;
                         }
