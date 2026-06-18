@@ -216,16 +216,14 @@ runs:
         cd $SUBMITTY_REPOSITORY
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
-        if ! bash tests/git_test.sh; then
-          echo "===================================================="
-          echo "GIT TEST FAILED. PRINT DEBUGGING"
-          echo "===================================================="
-          echo "--- APACHE ERROR LOG ---"
-          sudo tail -n 100 /var/log/apache2/error.log
-          echo "--- APACHE ACCESS LOG ---"
-          sudo tail -n 100 /var/log/apache2/access.log
-          echo "--- SUBMITTY AUTH / PAM LOGS ---"
-          [ -f /var/log/auth.log ] && sudo tail -n 50 /var/log/auth.log
-          exit 1
-        fi
+        bash tests/git_test.sh
+      shell: bash
+
+    - name: print debugging again
+      if: failure()
+      run: |
+        echo "=== PHP-FPM Service Status ==="
+        sudo systemctl status php8.2-fpm --no-pager || true
+        echo "=== Apache Error Log ==="
+        sudo tail -n 50 /var/log/apache2/error.log || true
       shell: bash
