@@ -131,7 +131,6 @@ runs:
         sudo apt-get install valgrind
         sudo apt-get install ca-certificates
         sudo apt-get install moreutils
-
       shell: bash
 
     - name: Install and start PHP-FPM
@@ -139,6 +138,7 @@ runs:
         sudo apt-get update
         sudo apt-get install -y php8.2-fpm
         sudo systemctl start php8.2-fpm
+      shell: bash
 
     - name: Install third party dependencies
       run: |
