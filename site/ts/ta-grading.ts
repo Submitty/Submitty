@@ -243,15 +243,15 @@ window.updateCookies = function () {
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
-    let files: string[] = [];
+    let open_files: string[] = [];
     $('#file-container')
         .children()
         .each(function () {
             $(this)
                 .children('div[id^=div_viewer_]')
                 .each(function () {
-                    files = files.concat(
-                        findAllOpenedFiles(
+                    open_files = open_files.concat(
+                        findAllOpenFiles(
                             $(this),
                             '',
                             $(this)[0].dataset.file_name!,
@@ -262,7 +262,7 @@ window.updateCookies = function () {
                 });
         });
 
-    window.Cookies.set('files', JSON.stringify(files), { path: '/' });
+    window.Cookies.set('open_files', JSON.stringify(open_files), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -312,7 +312,7 @@ function openDiv(num: string) {
 window.openDiv = openDiv;
 
 // finds all the open files and folder and stores them in stored_paths
-function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
+function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
     if (first === true) {
         current_path += path;
         if ($(elem)[0].classList.contains('open')) {
@@ -350,7 +350,7 @@ function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, pat
                         stored_paths.push(
                             `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
                         );
-                        stored_paths = findAllOpenedFiles(
+                        stored_paths = findAllOpenFiles(
                             $(this),
                             current_path,
                             $(this)[0].dataset.file_name!,

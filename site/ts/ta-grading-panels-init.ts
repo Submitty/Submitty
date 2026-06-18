@@ -240,17 +240,15 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-
     const testcases = window.Cookies.get('testcases') || '';
-
-    const files = window.Cookies.get('files') || '';
+    const open_files = window.Cookies.get('open_files') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
     if (autoscroll === 'on') {
         ($('#autoscroll_id')[0] as HTMLInputElement).checked = true;
-        const files_array = JSON.parse(files) as string[];
-        files_array.forEach((element: string) => {
+        const open_files_array = JSON.parse(open_files) as string[];
+        open_files_array.forEach((element: string) => {
             const file_path = element.split('#$SPLIT#$');
             let current = $('#file-container');
             for (let x = 0; x < file_path.length; x++) {
