@@ -641,6 +641,7 @@ class TeamController extends AbstractController {
     /**
      * Function to delete all teams without submissions for a given gradeable.
      * Teams that have already made a submission will be skipped.
+     * Teams with instructor-level users will be skipped.
      *
      * @param string $gradeable_id
      * @return array<string>
@@ -657,6 +658,7 @@ class TeamController extends AbstractController {
 
         $deleted_count = 0;
         $skipped_count = 0;
+        $instructor_skipped_count = 0;
 
         foreach ($teams as $team) {
             $team_id = $team->getId();
@@ -679,7 +681,7 @@ class TeamController extends AbstractController {
             }
 
             if ($is_instructor_team) {
-                $skipped_count++;
+                $instructor_skipped_count++;
                 continue;
             }
 
@@ -688,7 +690,7 @@ class TeamController extends AbstractController {
             $deleted_count++;
         }
 
-        $result = "Successfully deleted {$deleted_count} teams. Skipped {$skipped_count} teams with submissions.";
+        $result = "Successfully deleted {$deleted_count} teams. Skipped {$skipped_count} teams with submissions. Skipped {$instructor_skipped_count} teams with instructor-level users.";
         return $this->core->getOutput()->renderResultMessage($result, true);
     }
 
