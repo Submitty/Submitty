@@ -81,6 +81,7 @@ use app\libraries\FileUtils;
  * @method string getSeekMessageInstructions()
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
+ * @method string getSubmittyDataPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
  * @method string getSystemMessage()
