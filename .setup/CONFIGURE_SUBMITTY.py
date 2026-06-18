@@ -161,6 +161,7 @@ INSTALL_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
@@ -533,6 +534,10 @@ elif os.path.exists(CONFIG_INSTALL_DIR):
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
+
+os.makedirs(CONFIG_DATA_DIR, exist_ok=True)
+shutil.chown(CONFIG_DATA_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONFIG_DATA_DIR, 0o755)
 
 # Finish rescuing files.
 for full_file_name, tmp_file_name in rescued:
