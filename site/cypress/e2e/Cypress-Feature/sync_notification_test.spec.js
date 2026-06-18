@@ -28,7 +28,7 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
     };
 
     const createCourseAndAddStudent = () => {
-        const course = randomName() + '_noti_test';
+        const course = `${randomName()}_noti_test`;
         cy.intercept('GET', '**/user_information').as('userInfo');
         cy.intercept('POST', '**/users').as('addUser');
 
@@ -45,12 +45,10 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         cy.get('[data-testid="new-course-id-num"]').type('11111');
         cy.get('[data-testid="add-section-submit"]').click();
         cy.visit([course, 'users']);
-        // cy.wait('@userInfo');
         cy.get('[data-testid="new-student-form-btn"]').click();
         cy.get('[data-testid="user-id-input"]').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
-        // cy.wait('@addUser');
         cy.visit('/home');
         cy.logout();
         return course;
@@ -124,10 +122,9 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.login('instructor');
             visitNotificationSettings('sample');
             openSyncPopup();
-            cy.get('[data-testid="save-notification-defaults"]')
-                .scrollIntoView()
-                .should('be.visible')
-                .and('contain.text', 'Save as Future Course Default');
+            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView()
+            cy.get('[data-testid="save-notification-defaults"]').should('be.visible')
+            cy.get('[data-testid="save-notification-defaults"]').should('contain.text', 'Save as Future Course Default');
         });
 
         it('marks the course as default and shows the banner', () => {
