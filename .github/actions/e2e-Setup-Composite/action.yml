@@ -51,10 +51,10 @@ runs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Uninstall PHP 8.1 before setup
+    - name: Disable php8.1-fpm before setup
       run: |
-        sudo apt-get purge -qqy 'php8.1*'
-        sudo apt-get autoremove -qqy
+        sudo systemctl stop php8.1-fpm
+        sudo systemctl disable php8.1-fpm
       shell: bash
 
     - uses: shivammathur/setup-php@2.37.0
