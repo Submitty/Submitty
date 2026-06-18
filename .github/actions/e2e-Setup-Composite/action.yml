@@ -210,6 +210,16 @@ runs:
         sudo service apache2 restart
       shell: bash
 
+    - name: print debugging
+     run: |
+       echo "==== PHP-FPM STATUS ===="
+       sudo systemctl status php8.2-fpm --no-pager || true
+       echo "==== PHP-FPM LOGS ===="
+       sudo cat /var/log/php8.2-fpm.log || true
+       echo "==== APACHE ERROR LOGS ===="
+       sudo tail -n 100 /var/log/apache2/error.log || true
+     shell: bash
+
     - name: Run git tests
       if: contains(inputs.courses, 'sample')
       run: |
