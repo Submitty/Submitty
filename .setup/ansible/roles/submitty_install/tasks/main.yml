@@ -50,7 +50,7 @@
   ansible.builtin.file:
     path: /usr/local/submitty/config/preserve_file_list.json
     mode: "0644"
-    state: file
+    state: touch
   when: not submitty_install_preserved_list_stat.stat.exists
 
 - name: Run install_system.sh script
