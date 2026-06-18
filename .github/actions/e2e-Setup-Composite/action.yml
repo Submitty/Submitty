@@ -210,21 +210,22 @@ runs:
         sudo service apache2 restart
       shell: bash
 
-    - name: print debugging
-      run: |
-       echo "==== PHP-FPM STATUS ===="
-       sudo systemctl status php8.2-fpm --no-pager || true
-       echo "==== PHP-FPM LOGS ===="
-       sudo cat /var/log/php8.2-fpm.log || true
-       echo "==== APACHE ERROR LOGS ===="
-       sudo tail -n 100 /var/log/apache2/error.log || true
-      shell: bash
-
     - name: Run git tests
       if: contains(inputs.courses, 'sample')
       run: |
         cd $SUBMITTY_REPOSITORY
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
-        bash tests/git_test.sh
+        if ! bash tests/git_test.sh; then
+          echo "===================================================="
+          echo "GIT TEST FAILED. PRINT DEBUGGING"
+          echo "===================================================="
+          echo "--- APACHE ERROR LOG ---"
+          sudo tail -n 100 /var/log/apache2/error.log
+          echo "--- APACHE ACCESS LOG ---"
+          sudo tail -n 100 /var/log/apache2/access.log
+          echo "--- SUBMITTY AUTH / PAM LOGS ---"
+          [ -f /var/log/auth.log ] && sudo tail -n 50 /var/log/auth.log
+          exit 1
+        fi
       shell: bash
