@@ -226,4 +226,6 @@ runs:
         sudo systemctl status php8.2-fpm --no-pager || true
         echo "=== Apache Error Log ==="
         sudo tail -n 50 /var/log/apache2/error.log || true
+        echo "=== Apache Access Log ==="
+        sudo tail -n 50 /var/log/apache2/access.log || true
       shell: bash
