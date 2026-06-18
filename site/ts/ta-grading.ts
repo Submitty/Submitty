@@ -266,6 +266,15 @@ window.updateCookies = function (clear_open_files: boolean = false) {
                             true,
                         ),
                     );
+                    // open_files_array = open_files_array.filter((element) =>
+                    //     !new Set(findAllOpenFiles(
+                    //         $(this),
+                    //         '',
+                    //         $(this)[0].dataset.file_name!,
+                    //         [],
+                    //         true,
+                    //     )).has(element),
+                    // );
                 });
         });
 
@@ -318,7 +327,7 @@ function openDiv(num: string) {
 }
 window.openDiv = openDiv;
 
-// finds all the open files and folder and stores them in stored_paths
+// finds all the open files and folders and stores them in stored_paths
 function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
     if (first === true) {
         current_path += path;
@@ -368,9 +377,59 @@ function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string, path:
                 });
         });
 
-    if (first) {
-        console.log(stored_paths);
+    return stored_paths;
+}
+
+// finds all the closed files and folders and stores them in stored_paths
+function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
+    if (first === true) {
+        current_path += path;
+        if (!$(elem)[0].classList.contains('open')) {
+            stored_paths.push(path);
+        }
+        else {
+            return [];
+        }
     }
+    else {
+        current_path += `#$SPLIT#$${path}`;
+    }
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=file_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('shown')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                    }
+                });
+        });
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=div_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('open')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                        stored_paths = findAllClosedFiles(
+                            $(this),
+                            current_path,
+                            $(this)[0].dataset.file_name!,
+                            stored_paths,
+                            false,
+                        );
+                    }
+                });
+        });
+
     return stored_paths;
 }
 
