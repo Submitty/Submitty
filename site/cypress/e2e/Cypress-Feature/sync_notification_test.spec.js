@@ -122,8 +122,8 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.login('instructor');
             visitNotificationSettings('sample');
             openSyncPopup();
-            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView()
-            cy.get('[data-testid="save-notification-defaults"]').should('be.visible')
+            cy.get('[data-testid="save-notification-defaults"]').scrollIntoView();
+            cy.get('[data-testid="save-notification-defaults"]').should('be.visible');
             cy.get('[data-testid="save-notification-defaults"]').should('contain.text', 'Save as Future Course Default');
         });
 
