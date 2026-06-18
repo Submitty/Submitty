@@ -18,9 +18,8 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         cy.get('#sync-notification-popup').should('be.visible');
     };
 
-    // Toggle a checkbox to a known state and wait for the auto-save to persist
     const setCheckbox = (name, checked) => {
-        cy.get(`input[name="${name}"]`).then(($cb) => {
+        cy.get(`[data-testid="setting-${name}"]`).then(($cb) => {
             if ($cb.is(':checked') !== checked) {
                 cy.wrap($cb).click();
                 cy.wait('@saveSettings');
@@ -35,27 +34,23 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
 
         cy.login('instructor');
         cy.visit('/home/courses/new');
-        cy.get('#course_title').type(course);
-        cy.get('#group_name').select(4);
-        cy.get('#course-creation-form button[type="submit"]').click();
-        // If you see a frog/robot error about restarting php8.2-fpm, the sections page was trying to load too early
-        cy.wait(1000);
-        cy.visit([course]);
+        cy.get('[data-testid="course-title-input"]').type(course);
+        cy.get('[data-testid="course-group-select"]').select(4);
+        cy.get('[data-testid="create-course-submit"]').click();
+        cy.wait(5000);
         cy.visit([course, 'sections']);
-        cy.reload();
-        cy.get('.add-registration-section-btn').click();
+        cy.get('[data-testid="add-registration-section-btn"]').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
-        cy.get('#new-section-id').type('1');
-        cy.get('#new-course-id-num').type('11111');
-        cy.get('input[type="submit"][value="Add Section"]').click();
-
+        cy.get('[data-testid="new-section-id"]').type('1');
+        cy.get('[data-testid="new-course-id-num"]').type('11111');
+        cy.get('[data-testid="add-section-submit"]').click();
         cy.visit([course, 'users']);
-        cy.wait('@userInfo');
-        cy.get('a[href="javascript:newStudentForm()"]').click();
-        cy.get('#user_id').type('student');
+        // cy.wait('@userInfo');
+        cy.get('[data-testid="new-student-form-btn"]').click();
+        cy.get('[data-testid="user-id-input"]').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
-
+        // cy.wait('@addUser');
         cy.visit('/home');
         cy.logout();
         return course;
@@ -77,24 +72,24 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             openSyncPopup();
             cy.get('#sync-notification-popup').within(() => {
                 cy.contains('Sync Notification Settings').should('be.visible');
-                cy.get('.sync-course-list').should('be.visible');
-                cy.get('.sync-course-checkbox').should('have.length.at.least', 1);
+                cy.get('[data-testid="sync-course-list"]').should('exist');
+                cy.get('[data-testid="sync-course-checkbox"]').should('have.length.at.least', 1);
             });
         });
 
         it('selects all courses with Select All', () => {
             openSyncPopup();
-            cy.get('#sync-notification-popup').contains('button', 'Select All').click();
-            cy.get('#sync-notification-popup .sync-course-checkbox').each(($cb) => {
+            cy.get('[data-testid="sync-select-all"]').click();
+            cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 cy.wrap($cb).should('be.checked');
             });
         });
 
         it('clears selection with Clear Selection', () => {
             openSyncPopup();
-            cy.get('#sync-notification-popup').contains('button', 'Select All').click();
-            cy.get('#sync-notification-popup').contains('button', 'Clear Selection').click();
-            cy.get('#sync-notification-popup .sync-course-checkbox').each(($cb) => {
+            cy.get('[data-testid="sync-select-all"]').click();
+            cy.get('[data-testid="sync-clear-selection"]').click();
+            cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 cy.wrap($cb).should('not.be.checked');
             });
         });
@@ -110,17 +105,17 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             setCheckbox('all_new_threads', false);
 
             openSyncPopup();
-            cy.get('#sync-notification-popup .sync-course-checkbox').each(($cb) => {
+            cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 if ($cb.val().includes('tutorial')) {
                     cy.wrap($cb).check({ force: true });
                 }
             });
-            cy.get('#sync-notification-popup').contains('button', 'Sync Settings').click();
+            cy.get('[data-testid="sync-submit"]').click();
             cy.wait('@syncSettings');
 
             visitNotificationSettings('tutorial');
-            cy.get('input[name="merge_threads"]').should('be.checked');
-            cy.get('input[name="all_new_threads"]').should('not.be.checked');
+            cy.get('[data-testid="setting-merge_threads"]').should('be.checked');
+            cy.get('[data-testid="setting-all_new_threads"]').should('not.be.checked');
         });
     });
 
@@ -143,7 +138,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.get('[data-testid="save-notification-defaults"]').click();
             cy.wait('@saveDefaults');
 
-            // page reloads on success → banner should now be present
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
 
             openSyncPopup();
@@ -152,11 +146,10 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         });
 
         it('applies a student\'s saved defaults to a newly created course', () => {
-            // 1. Student sets NON-default values on sample, then saves sample as the default
             cy.login('student');
             visitNotificationSettings('sample');
-            setCheckbox('merge_threads', true);   // sample default is false
-            setCheckbox('team_invite', false);    // sample default is true
+            setCheckbox('merge_threads', true);
+            setCheckbox('team_invite', false);
 
             openSyncPopup();
             cy.get('[data-testid="save-notification-defaults"]').click();
@@ -164,14 +157,13 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
             cy.logout();
 
-            // 2. Instructor creates a new course and enrolls the student
             const course = createCourseAndAddStudent();
 
-            // 3. The student's settings in the new course should match the source course
             cy.login('student');
             visitNotificationSettings(course);
-            cy.get('input[name="merge_threads"]').should('be.checked');
-            cy.get('input[name="team_invite"]').should('not.be.checked');
+            cy.get('[data-testid="setting-merge_threads"]').scrollIntoView();
+            cy.get('[data-testid="setting-merge_threads"]').should('be.checked');
+            cy.get('[data-testid="setting-team_invite"]').should('not.be.checked');
         });
     });
 });
