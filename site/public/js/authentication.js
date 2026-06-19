@@ -63,8 +63,6 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
         return true;
     }
 
-    clearErrorMessages();
-
     const email = $('input[name="email"]').val().trim();
     const userId = $('input[name="user_id"]').val().trim();
     const password = $('#password-input').val();
@@ -102,6 +100,7 @@ function validateSignupForm(acceptedEmails, userIdRequirements) {
     // If any errors, display all and prevent submission
     if (errors.length > 0) {
         // Clear any existing messages first
+        clearErrorMessages();
         $('#message_box').hide();
         $('#message_box_items').empty();
 
