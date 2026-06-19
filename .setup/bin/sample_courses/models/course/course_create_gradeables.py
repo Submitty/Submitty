@@ -351,18 +351,39 @@ class Course_create_gradeables:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         # This is used to simulate unfinished grading.
                                         break
-                                    if status == 0 or random.random() < 0.4:
-                                        score = 0
+                                    grader_id = self.instructor.id
+
+                                    if gradeable.id == "closed_peer_student_graded_homework" and component.is_peer_component:
+                                        stmt = select(self.peer_assign.columns.grader_id).where(
+                                            self.peer_assign.columns.g_id == gradeable.id
+                                        ).where(
+                                            self.peer_assign.columns.user_id == user.id
+                                        )
+                                        peer_grader_id = self.conn.execute(stmt).scalar()
+
+                                        if peer_grader_id is None:
+                                            continue
+
+                                        grader_id = peer_grader_id
+                                        score = component.max_value
                                     else:
-                                        max_value_score = random.randint(int(component.lower_clamp * 2), int(component.max_value * 2)) / 2
-                                        uppser_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
-                                        score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
+                                        if status == 0 or random.random() < 0.4:
+                                            score = 0
+                                        else:
+                                            max_value_score = random.randint(int(component.lower_clamp * 2), int(component.max_value * 2)) / 2
+                                            uppser_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
+                                            score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
+
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                     self.conn.execute(
                                         insert(self.gradeable_component_data).values(
-                                            gc_id=component.key, gd_id=gd_id, gcd_score=score,
-                                            gcd_component_comment=generate_random_ta_comment(), gcd_grader_id=self.instructor.id,
-                                            gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit
+                                            gc_id=component.key,
+                                            gd_id=gd_id,
+                                            gcd_score=score,
+                                            gcd_component_comment=generate_random_ta_comment(),
+                                            gcd_grader_id=grader_id,
+                                            gcd_grade_time=grade_time,
+                                            gcd_graded_version=versions_to_submit
                                         )
                                     )
                                     first = True
@@ -371,12 +392,14 @@ class Course_create_gradeables:
                                         if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
                                             self.conn.execute(
                                                 insert(self.gradeable_component_mark_data).values(
-                                                    gc_id=component.key, gd_id=gd_id,
-                                                    gcm_id=mark.key, gcd_grader_id=self.instructor.id
+                                                    gc_id=component.key,
+                                                    gd_id=gd_id,
+                                                    gcm_id=mark.key,
+                                                    gcd_grader_id=grader_id
                                                 )
                                             )
-                                            if(first):
-                                                first_set = True
+                                        if(first):
+                                            first_set = True
                                         first = False
                                 self.conn.commit()
 
