@@ -9682,24 +9682,6 @@ parameters:
 			path: app/libraries/routers/AccessControl.php
 
 		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has parameter $annot with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has parameter $class with generic class ReflectionClass but does not specify its types: T'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
