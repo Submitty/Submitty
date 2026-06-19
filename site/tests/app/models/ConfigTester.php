@@ -369,6 +369,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'chat_enabled' => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
+            'submitty_data_path' => $this->temp_dir,
             "default_locale" => "default",
             "locale" => ['modified' => false],
             'course_material_file_upload_limit_mb' => 100,
