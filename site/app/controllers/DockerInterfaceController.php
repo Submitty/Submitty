@@ -36,7 +36,7 @@ class DockerInterfaceController extends AbstractController {
         $json = [];
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
-                $this->core->getConfig()->getSubmittyInstallPath(),
+                $this->core->getConfig()->getSubmittyDataPath(),
                 "config",
                 "autograding_containers.json"
             )
@@ -134,7 +134,7 @@ class DockerInterfaceController extends AbstractController {
         if ($found) {
             $json = FileUtils::readJsonFile(
                 FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyInstallPath(),
+                    $this->core->getConfig()->getSubmittyDataPath(),
                     "config",
                     "autograding_containers.json"
                 )
@@ -153,7 +153,7 @@ class DockerInterfaceController extends AbstractController {
             }
             FileUtils::writeJsonFile(
                 FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyInstallPath(),
+                    $this->core->getConfig()->getSubmittyDataPath(),
                     "config",
                     "autograding_containers.json"
                 ),
@@ -228,7 +228,7 @@ class DockerInterfaceController extends AbstractController {
         }
 
         $jsonFilePath = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
+            $this->core->getConfig()->getSubmittyDataPath(),
             "config",
             "autograding_containers.json"
         );
