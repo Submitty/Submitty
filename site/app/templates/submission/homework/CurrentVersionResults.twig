@@ -5,7 +5,12 @@
 {% endif %}
 {% set downloadable_file_count = 0 %}
 {% for file in files %}
-    {# Validate for actual notebook file submissions #}
+    {#
+        For notebook gradeables, files in the root directory are system-generated
+        notebook metadata files and should not be counted as downloadable student
+        submissions. Student notebook files are stored within part directories,
+        so we only count files whose relative path contains at least one '/'.
+    #}
     {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
         {% set downloadable_file_count = downloadable_file_count + 1 %}
     {% elseif not is_notebook %}
@@ -28,7 +33,6 @@
         {% if downloadable_file_count > 0 %}
             <div class="box col-md-6" id="submitted-files">
             {% for file in files %}
-                {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
                 {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                     <div class="flex-row">
                         <span>
