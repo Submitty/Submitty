@@ -50,7 +50,7 @@ runs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-
+    
     - name: Uninstall PHP 8.1 before setup
       run: |
         sudo apt-get --dry-run purge 'php8.1*'
