@@ -217,11 +217,6 @@ runs:
         sudo service apache2 restart
       shell: bash
 
-    - name: fix git config perms for all Submitty users
-      run: |
-        sudo git config --system --add safe.directory '*'
-      shell: bash
-
     - name: Run git tests
       if: contains(inputs.courses, 'sample')
       run: |
