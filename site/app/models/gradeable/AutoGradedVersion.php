@@ -138,7 +138,6 @@ class AutoGradedVersion extends AbstractModel {
         // Get the path to load files from (based on submission type)
         $dirs = $gradeable->isVcs() ? ['submissions', 'checkout'] : ['submissions'];
 
-
         foreach ($dirs as $dir) {
             $this->meta_files[$dir] = [];
             $this->files[$dir][0] = [];
@@ -147,14 +146,11 @@ class AutoGradedVersion extends AbstractModel {
 
             // Now load all files in the directory, flattening the results
             $submitted_files = FileUtils::getAllFiles($path, [], true);
-            //Common meta data files:
-            $known_meta_files = [".submit.notebook", ".submit.timestamp", ".submit.VCS_CHECKOUT", ".user_assignment_access.json"];
             foreach ($submitted_files as $file => $details) {
                 $filename = basename($file);
-                if (in_array($filename, $known_meta_files)) { 
+                if (FileUtils::isSubmissionMetaFile($filename)) {
                     $this->meta_files[$dir][$file] = $details;
-                }
-                else {
+                } else {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
