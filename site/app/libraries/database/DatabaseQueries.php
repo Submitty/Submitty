@@ -5059,6 +5059,44 @@ SQL;
         return $this->submitty_db->row()['status'];
     }
 
+
+    /**
+     * Fetch all courses-table fields the config page needs in one query.
+     * Returns [] if the course row doesn't exist.
+     *
+     * @return array<string, mixed>
+     */
+    public function getCourseConfigFields(string $term, string $course): array {
+        $this->submitty_db->query(
+            "SELECT self_registration_type, default_section_id, status, unarchivable
+             FROM courses WHERE term=? AND course=?",
+            [$term, $course]
+        );
+        return $this->submitty_db->row(); // [] if no row
+    }
+
+    /**
+     * Set the status of a course (1 = active, 2 = archived)
+     * @param string $term
+     * @param string $course
+     * @param int $status
+     */
+    public function setCourseStatus(string $term, string $course, int $status): void {
+        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $term, $course]);
+    }
+
+    /**
+     * Check if a course is marked as unarchivable
+     * @param string $term
+     * @param string $course
+     * @return bool
+     */
+    public function isCourseUnarchivable(string $term, string $course): bool {
+        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$term, $course]);
+        $result = $this->submitty_db->row();
+        return $result !== null && $result['unarchivable'];
+    }
+
     public function getPeerAssignment($gradeable_id, $grader) {
         $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", [$gradeable_id, $grader]);
         $return = [];
