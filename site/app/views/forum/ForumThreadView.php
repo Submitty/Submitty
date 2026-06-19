@@ -147,6 +147,7 @@ class ForumThreadView extends AbstractView {
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
                 "is_instructor" => $this->core->getUser()->accessAdmin(),
+                "email_enabled" => $generatePostContent["email_enabled"]
             ]);
         }
         else {
@@ -173,7 +174,9 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
-                "render_markdown" => $markdown_enabled
+                "render_markdown" => $markdown_enabled,
+                "show_reply_announcement" => $generatePostContent["show_reply_announcement"],
+                "email_enabled" => $generatePostContent["email_enabled"]
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -388,7 +391,9 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
+            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ];
         if ($render) {
             $generated_post_list = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", $generated_post_list);
@@ -877,6 +882,8 @@ class ForumThreadView extends AbstractView {
             "is_author_blocked" => ($user->accessAdmin() && $post->getAuthor()->getId() !== $user->getId())
                 ? $this->core->getQueries()->isUserBlockedFromForumPosts($post->getAuthor()->getId())
                 : false,
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];
 
         if ($render) {
@@ -914,17 +921,7 @@ class ForumThreadView extends AbstractView {
         $categories = $repo->getCategories();
         $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
-        $buttons = [
-            [
-                "required_rank" => 4,
-                "display_text" => 'Back to Threads',
-                "style" => 'position:relative;top:3px;float:right;',
-                "link" => [true, $this->core->buildCourseUrl(['forum'])],
-                "optional_class" => '',
-                "title" => 'Back to threads',
-                "onclick" => [false]
-            ]
-        ];
+        $back_to_threads_url = $this->core->buildCourseUrl(['forum']);
 
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
@@ -933,13 +930,13 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
-            "buttons" => $buttons,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "thread_exists" => $thread_exists,
             "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
+            "back_to_threads_url" => $back_to_threads_url,
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
-            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d'),
             "render_markdown" => isset($_COOKIE['markdown_enabled']) ? $_COOKIE['markdown_enabled'] : 0
