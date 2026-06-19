@@ -414,7 +414,9 @@ $(() => {
     // Check for the panels status initially
     adjustGradingPanelHeader();
     const resizeObserver = new ResizeObserver(() => {
-        adjustGradingPanelHeader();
+        requestAnimationFrame(() => {
+            adjustGradingPanelHeader();
+        });
     });
     // calling it for the first time i.e initializing
     adjustGradingPanelHeader();
