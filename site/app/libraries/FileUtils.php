@@ -13,7 +13,7 @@ class FileUtils {
     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
-    const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT', 
+    const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT',
     '.user_assignment_access.json', '.bulk_upload_data.json'];
 
     /**
