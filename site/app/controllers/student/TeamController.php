@@ -8,6 +8,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\User;
 use app\models\Team;
+use app\models\gradeable\LateDayInfo;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
@@ -666,22 +667,31 @@ class TeamController extends AbstractController {
             // Check if the team has a submission.
             $has_submission = $this->core->getQueries()->getActiveVersionForTeam($gradeable_id, $team_id) > 0;
 
-            if ($has_submission) {
-                $skipped_count++;
-                continue;
-            }
+            $gradeable = $this->tryGetGradeable($gradeable_id, false);
+            $cancelled_submission = false;
 
-            // Check if this is the instructor team
+            // Perform checks then delete team
             $members = $team->getMemberUsers();
             $is_instructor_team = false;
             foreach ($members as $member) {
+                // Check if this is the instructor team
                 if ($member->getGroup() === User::GROUP_INSTRUCTOR) {
                     $is_instructor_team = true;
                 }
+
+                // Check if the team has a cancelled submission
+                $user_id = $member->getId();
+                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+                $cancelled_submission = ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) && ($graded_gradeable->getAutoGradedGradeable()->hasSubmission());
             }
 
             if ($is_instructor_team) {
                 $instructor_skipped_count++;
+                continue;
+            }
+
+            if ($cancelled_submission || $has_submission) {
+                $skipped_count++;
                 continue;
             }
 
