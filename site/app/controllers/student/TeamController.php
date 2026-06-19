@@ -590,8 +590,9 @@ class TeamController extends AbstractController {
 
         // Group users by their subsection
         foreach ($users as $user) {
+            $section = $user->getRegistrationSection();
             $subsection = $user->getRegistrationSubsection();
-            if ($subsection === '') {
+            if ($section === null || $subsection === '') {
                 continue;
             }
 
