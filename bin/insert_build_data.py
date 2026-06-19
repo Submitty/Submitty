@@ -69,21 +69,21 @@ def send_data(db, metadata, engine, testcases):
 
     if check_invalidated(existing, testcases):
         print(f"Rebuilding gradeable '{GRADEABLE}': removing {len(existing)} existing testcase(s).")
-        db.execute(
-            delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
-        )
-        for order, testcase in enumerate(testcases):
+        with db.begin():
             db.execute(
-                insert(testcase_table).values(
-                    g_id=GRADEABLE,
-                    testcase_id=testcase['testcase_id'],
-                    testcase_order=order,
-                    hidden=testcase.get('hidden', False),
-                    extra_credit=testcase.get('extra_credit', False),
-                    points_possible=testcase.get('points', 0)
-                )
+                delete(testcase_table).where(testcase_table.c.g_id == GRADEABLE)
             )
-        db.commit()
+            for order, testcase in enumerate(testcases):
+                db.execute(
+                    insert(testcase_table).values(
+                        g_id=GRADEABLE,
+                        testcase_id=testcase['testcase_id'],
+                        testcase_order=order,
+                        hidden=testcase.get('hidden', False),
+                        extra_credit=testcase.get('extra_credit', False),
+                        points_possible=testcase.get('points', 0)
+                    )
+                )
         print(f"Inserted {len(testcases)} testcase(s) for gradeable '{GRADEABLE}'.")
     else:
         print(f"Gradeable '{GRADEABLE}' is up to date, skipping database insertion.")
