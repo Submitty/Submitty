@@ -150,7 +150,8 @@ class AutoGradedVersion extends AbstractModel {
                 $filename = basename($file);
                 if (FileUtils::isSubmissionMetaFile($filename)) {
                     $this->meta_files[$dir][$file] = $details;
-                } else {
+                }
+                else {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
