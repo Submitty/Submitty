@@ -42,6 +42,10 @@
     height: 100vh;
 }
 
+body:has(.full-screen-mode) {
+    overflow: hidden;
+}
+
 .leave-room {
     float: right;
     margin-right: 1rem;
