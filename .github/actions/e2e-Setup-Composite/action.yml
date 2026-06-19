@@ -225,16 +225,3 @@ runs:
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
       shell: bash
-
-    - name: print debugging again
-      if: failure()
-      run: |
-        echo "=== PHP-FPM Service Status ==="
-        sudo systemctl status php8.2-fpm --no-pager || true
-        echo "=== Submitty Apache Vhost Log ==="
-        sudo tail -n 100 /var/log/apache2/submitty.log || true
-        echo "=== Apache Error Log ==="
-        sudo tail -n 50 /var/log/apache2/error.log || true
-        echo "=== Manual curl against site ==="
-        curl -v http://localhost/ 2>&1 || true
-      shell: bash
