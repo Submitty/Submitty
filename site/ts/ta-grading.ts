@@ -249,25 +249,25 @@ window.updateCookies = function (clear_open_files: boolean = false) {
         const prev_open_files = window.Cookies.get('open_files') || '';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
+        // search for and add open files to our array, to be saved in cookies
+        $('#file-container')
+            .children()
+            .each(function () {
+                $(this)
+                    .children('div[id^=div_viewer_]')
+                    .each(function () {
+                        open_files_array = open_files_array.concat(
+                            findAllOpenFiles(
+                                $(this),
+                                '',
+                                $(this)[0].dataset.file_name!,
+                                [],
+                                true,
+                            ),
+                        );
+                    });
+            });
     }
-
-    $('#file-container')
-        .children()
-        .each(function () {
-            $(this)
-                .children('div[id^=div_viewer_]')
-                .each(function () {
-                    open_files_array = open_files_array.concat(
-                        findAllOpenFiles(
-                            $(this),
-                            '',
-                            $(this)[0].dataset.file_name!,
-                            [],
-                            true,
-                        ),
-                    );
-                });
-        });
 
     window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
