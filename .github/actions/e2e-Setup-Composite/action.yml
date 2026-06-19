@@ -53,8 +53,7 @@ runs:
 
     - name: Uninstall PHP 8.1 before setup
       run: |
-        sudo apt-get purge -qqy 'php8.1*'
-        sudo apt-get autoremove -qqy
+        sudo apt-get --dry-run purge 'php8.1*'
       shell: bash
 
     - uses: shivammathur/setup-php@2.37.0
