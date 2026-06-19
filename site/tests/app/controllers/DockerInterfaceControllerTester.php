@@ -12,7 +12,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
     private $core;
     /** Tmp area for file operations */
     private string $tmp_dir;
-private string $tmp_dir2;
+    private string $tmp_dir2;
 
     public function setUp(): void {
         $user_details = ['access_faculty' => true];
