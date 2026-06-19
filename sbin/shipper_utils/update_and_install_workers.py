@@ -32,8 +32,6 @@ DATA_CONFIG_PATH = path.join(SUBMITTY_DATA_DIR,'config')
 AUTOGRADING_WORKERS_PATH = path.join(INSTALL_CONFIG_PATH, 'autograding_workers.json')
 AUTOGRADING_CONTAINERS_PATH = path.join(DATA_CONFIG_PATH, 'autograding_containers.json')
 
-print("IN UPDATE AND INSTALL WORKERS1 "+AUTOGRADING_CONTAINERS_PATH)
-
 SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
 
 # Functions to highlight important part of the output
@@ -347,8 +345,6 @@ if __name__ == "__main__":
     # NEW: Helper function to retrieve the machine name for a given ip address
     def get_machine_by_ip(ip):
         return IP_TO_MACHINE.get(ip, ip)
-
-    print("IN UPDATE AND INSTALL WORKERS2 "+AUTOGRADING_CONTAINERS_PATH)
 
     with open(AUTOGRADING_CONTAINERS_PATH, 'r') as infile:
         autograding_containers = json.load(infile)
