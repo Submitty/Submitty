@@ -115,6 +115,21 @@ class MiscController extends AbstractController {
             );
         }
 
+        if ($directory === 'submissions') {
+                $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+                $pdf_pages_assigned = $gradeable->isPdfUpload();
+                $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
+
+                if ($pdf_pages_assigned || $blind_grading_enabled) {
+                    return new MultiResponse(
+                        JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
+                    );
+                }
+            }
+        }
+
         $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
 
         if (filesize($file_path) > $max_size && $max_size >= 0) {
@@ -199,6 +214,30 @@ class MiscController extends AbstractController {
 
         $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
+
+        if (
+            $dir === 'submissions'
+            && strtolower($file_name) === 'upload.pdf'
+            && $gradeable_id !== null
+            && $user_id !== null
+        ) {
+            $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+                $gradeable = $this->tryGetGradeable($gradeable_id, false);
+
+                if ($gradeable !== false) {
+                    $pdf_pages_assigned = $gradeable->isPdfUpload();
+                    $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
+
+                    if ($pdf_pages_assigned || $blind_grading_enabled) {
+                        $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                        return false;
+                    }
+                }
+            }
+        }
+
         $mime_type = mime_content_type($corrected_name);
         // Fix BMP image on Chrome/Edge
         if (str_contains(strtolower($mime_type), 'bmp')) {
@@ -217,11 +256,15 @@ class MiscController extends AbstractController {
             $this->core->getOutput()->setContentOnly(true);
             CodeMirrorUtils::loadDefaultDependencies($this->core);
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $notebook_result = NotebookUtils::jupyterToSubmittyNotebook($path);
             $this->core->getOutput()->renderString(
                 $this->core->getOutput()->renderTwigTemplate(
                     "notebook/Notebook.twig",
                     [
-                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'notebook' => $notebook_result['cells'],
+                        'notebook_size_exceeded' => $notebook_result['size_exceeded'],
+                        'notebook_skipped_content' => $notebook_result['skipped_content_count'],
+                        'notebook_skipped_output' => $notebook_result['skipped_output_count'],
                         'student_id' => $user_id,
                         'is_timed' => false,
                         'allowed_minutes' => 0,

@@ -106,9 +106,6 @@ function addCurrentQuery(query: string) {
   margin-top: 5px;
   margin-right: 5px;
 }
-#toolbox-textarea {
-  margin-bottom: 2px;
-}
 #sql-schema {
   margin-bottom: 5px;
 }
@@ -120,5 +117,6 @@ function addCurrentQuery(query: string) {
   width: 100%;
   min-height: 300px;
   resize: vertical;
+  margin-bottom: 2px;
 }
 </style>
