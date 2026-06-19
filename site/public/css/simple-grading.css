@@ -9,6 +9,26 @@
     flex-direction: column;
 }
 
+.full-screen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    z-index: 10;
+    overflow-y: auto;
+}
+
+.full-screen-mode .content {
+    margin: 0;
+}
+
+.fullscreen-btn-wrapper {
+    display: inline-block;
+    vertical-align: bottom;
+}
+
 th {
     background: var(--standard-light-gray);
 }

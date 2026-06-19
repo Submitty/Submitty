@@ -15,11 +15,9 @@ function toggle() {
 </script>
 
 <template>
-  <span class="fullscreen-btn-cont">
-    <button id="fullscreen-btn" class="invisible-btn" title="Toggle full screen mode" @click="toggle">
-      <i :class="`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'} fullscreen-icon`" />
-    </button>
-  </span>
+  <button id="fullscreen-btn" class="btn btn-default" title="Toggle full screen mode" @click="toggle">
+    <i :class="`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'}`" />
+  </button>
 </template>
 
 <style scoped>
