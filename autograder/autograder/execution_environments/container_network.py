@@ -72,6 +72,10 @@ class Container():
             self.directory: {
                 'bind': self.directory,
                 'mode': 'rw'
+            },
+            '/usr/local/submitty/grading_bin': {
+                'bind': '/usr/local/submitty/grading_bin',
+                'mode': 'ro'
             }
         }
 

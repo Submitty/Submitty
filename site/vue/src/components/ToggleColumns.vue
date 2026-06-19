@@ -86,7 +86,7 @@ onMounted(loadColumns);
         <a
           id="toggle-columns"
           data-testid="toggle-columns"
-          class="btn btn-primary"
+          class="btn btn-primary toggle-btn"
           @click="toggle"
         >Toggle Columns</a>
       </div>
@@ -94,7 +94,7 @@ onMounted(loadColumns);
         v-else
         id="toggle-columns"
         data-testid="toggle-columns"
-        class="btn btn-primary"
+        class="btn btn-primary toggle-btn"
         @click="toggle"
       >Toggle Columns</a>
     </template>
@@ -135,3 +135,8 @@ onMounted(loadColumns);
     </template>
   </Popup>
 </template>
+<style scoped>
+  .toggle-btn {
+    font-family: Arial, sans-serif;
+  }
+</style>

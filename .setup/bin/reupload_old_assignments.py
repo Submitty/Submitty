@@ -4,7 +4,7 @@ import json
 import shutil
 import argparse
 from submitty_utils import dateutils
-from sqlalchemy import create_engine, Table, MetaData, and_
+from sqlalchemy import create_engine, Table, MetaData, and_, insert, update
 import grp
 
 # This file gets installed to SUBMITTY_INSTALL_DIR/.setup/bin/
@@ -79,10 +79,10 @@ def main():
     engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                            database))
     conn = engine.connect()
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
+    electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload_with=engine)
+    electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload_with=engine)
     print("(connection made, metadata bound)...")
-    electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
-    electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
 
     course_group = grp.getgrgid(os.stat(os.path.join(SUBMITTY_DATA_DIR,"courses",args.semester,args.course_name)).st_gid)[0]
 
@@ -138,20 +138,23 @@ def main():
             #add each submission to the database.
             current_time_string = dateutils.write_submitty_date()
 
-            conn.execute(electronic_gradeable_data.insert(), g_id=args.assignment_name, user_id=user_name,
-                         g_version=submission, submission_time=current_time_string)
+            conn.execute(insert(electronic_gradeable_data).values(g_id=args.assignment_name, user_id=user_name,
+                         g_version=submission, submission_time=current_time_string))
+            conn.commit()
             #If this is the first submission, create a new entry in the table, otherwise, update.
             #TODO use a more reliable method of determining if this is the first submission.
             if int(submission) == 1:
                 print("Entered new user " + user_name + " because submission was " + submission)
-                conn.execute(electronic_gradeable_version.insert(), g_id=args.assignment_name, user_id=user_name,
-                         active_version=user_assignment_settings['active_version'])
+                conn.execute(insert(electronic_gradeable_version).values(g_id=args.assignment_name, user_id=user_name,
+                         active_version=user_assignment_settings['active_version']))
+                conn.commit()
             else:
                 print("UPDATED: where g_id is " + args.assignment_name + " and user id is " + user_name + " to value " + str(user_assignment_settings['active_version']))
-                stmt = electronic_gradeable_version.update().\
+                stmt = update(electronic_gradeable_version).\
                         where(and_(electronic_gradeable_version.c.g_id==args.assignment_name, electronic_gradeable_version.c.user_id==user_name)).\
                         values(active_version=user_assignment_settings['active_version'])
                 conn.execute(stmt)
+                conn.commit()
             with open(os.path.join(CURRENT_user_path, "user_assignment_settings.json"), "w") as open_file:
                 json.dump(user_assignment_settings, open_file, indent = 4)
 

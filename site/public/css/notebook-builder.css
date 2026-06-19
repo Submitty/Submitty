@@ -27,10 +27,13 @@
 .widget-controls {
     display: flex;
     flex-direction: column;
+    /* stylelint-disable-next-line color-named */
     border: 3px solid white;
     border-radius: 25px;
+    /* stylelint-disable-next-line color-named */
     background-color: white;
     justify-content: space-around;
+    height: fit-content;
 }
 
 .widget-controls input[type="button"] {
@@ -153,17 +156,20 @@
 .mc-table .entered-description-input {
     width: 95%;
     height: 80px;
+    resize: vertical;
 }
 
 .mc-table .mc-buttons {
     display: flex;
     flex-direction: row;
     align-items: center;
+    height: fit-content;
 }
 
 .multiple-choice-config {
     display: flex;
     align-items: center;
+    height: fit-content;
 }
 
 .multiple-choice-config fieldset {

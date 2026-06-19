@@ -11,7 +11,7 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData, Table, bindparam, text
+from sqlalchemy import create_engine, MetaData, Table, bindparam, text, update
 import sys
 import psutil
 
@@ -112,7 +112,7 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
+    metadata = MetaData()
     return db, metadata
 
 
@@ -138,7 +138,7 @@ def get_email_queue(db):
     WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
-    result = db.execute(text(query), format=domain_format)
+    result = db.execute(text(query), {"format": domain_format})
     queued_emails = []
     for row in result:
         queued_emails.append({
@@ -160,12 +160,12 @@ def get_external_queue(db, num):
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
     email_address NOT SIMILAR TO :format"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
-    result = db.execute(text(query), format=domain_format)
+    result = db.execute(text(query), {"format": domain_format})
     query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
     error = '' ORDER BY id LIMIT :lim;"""
-    result = db.execute(text(query), format=domain_format,
-                        lim=min(500-int(result.fetchone()[0]), num))
+    result = db.execute(text(query), {"format": domain_format,
+                        "lim": min(500-int(result.fetchone()[0]), num)})
     queued_emails = []
     for row in result:
         queued_emails.append({
@@ -183,17 +183,19 @@ def get_external_queue(db, num):
 
 def mark_sent(email_id, db):
     """Mark an email as sent in the database."""
-    query_string = "UPDATE emails SET sent=NOW() WHERE id = {};".format(email_id)
-    db.execute(query_string)
+    query_string = text("UPDATE emails SET sent=NOW() WHERE id = :email_id")
+    db.execute(query_string, {"email_id": email_id})
+    db.commit()
 
 
 def store_error(email_id, db, metadata, myerror):
     """Store an error string for the specified email."""
-    emails_table = Table('emails', metadata, autoload=True)
+    emails_table = Table('emails', metadata, autoload_with=db)
     # use bindparam to correctly handle a myerror string with single quote character
-    query = emails_table.update().where(
+    query = update(emails_table).where(
         emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
-    db.execute(query, b_myerror=myerror)
+    db.execute(query, {"b_myerror": myerror})
+    db.commit()
 
 
 def construct_mail_string(send_to, subject, body):

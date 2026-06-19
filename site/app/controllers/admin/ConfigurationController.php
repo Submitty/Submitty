@@ -3,13 +3,13 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\entities\forum\Category;
 use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
+use app\models\Course;
 use app\models\RainbowCustomizationJSON;
 use app\views\admin\ConfigurationView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -30,6 +30,10 @@ class ConfigurationController extends AbstractController {
     #[Route("/api/courses/{_semester}/{_course}/config", methods: ["GET"])]
     #[Route("/courses/{_semester}/{_course}/config", methods: ["GET"])]
     public function viewConfiguration(): MultiResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $course_info = $this->core->getQueries()->getCourseConfigFields($term, $course);
+
         $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
@@ -48,9 +52,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'self_registration_type'         => (int) ($course_info['self_registration_type'] ?? self::NO_SELF_REGISTER),
             'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
-            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'default_section'                => $course_info['default_section_id'] ?? null,
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -58,7 +62,9 @@ class ConfigurationController extends AbstractController {
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
-            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled()
+            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled(),
+            'course_status'                  => $course_info['status'] ?? null,
+            'unarchivable'                   => (bool) ($course_info['unarchivable'] ?? false),
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -183,17 +189,6 @@ class ConfigurationController extends AbstractController {
             $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry);
         }
 
-        if ($name === 'forum_enabled' && $entry == 1) {
-            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
-            // Only create default categories when there is no existing categories (only happens when first enabled)
-            if (count($repo->getCategories()) === 0) {
-                $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                foreach ($categories as $rank => $category) {
-                    $this->core->getQueries()->addNewCategory($category, $rank);
-                }
-            }
-        }
-
         $config_json = $this->core->getConfig()->getCourseJson();
         if (!isset($config_json['course_details'][$name]) && !str_contains($name, 'self_registration') && $name !== 'default_section_id') {
             return MultiResponse::JsonOnlyResponse(
@@ -216,6 +211,55 @@ class ConfigurationController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
         );
+    }
+
+    /**
+     * Archive a course
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/archive", methods: ["POST"])]
+    public function archiveCourse(): JsonResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        // Only instructors can archive their own course
+        if (!$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse('Only instructors can archive a course');
+        }
+
+        $this->core->getQueries()->setCourseStatus($term, $course, Course::ARCHIVED_STATUS);
+
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course archived successfully'
+        ]);
+    }
+
+    /**
+     * Unarchive a course
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/config/unarchive", methods: ["POST"])]
+    public function unarchiveCourse(): JsonResponse {
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        // Only instructors can unarchive their own course
+        if (!$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse('Only instructors can unarchive a course');
+        }
+
+        // Check if course is marked as unarchivable
+        if ($this->core->getQueries()->isCourseUnarchivable($term, $course)) {
+            return JsonResponse::getFailResponse('This course is marked as unarchivable by a system administrator');
+        }
+
+        $this->core->getQueries()->setCourseStatus($term, $course, Course::ACTIVE_STATUS);
+
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Course unarchived successfully'
+        ]);
     }
 
     private function getGradeableSeatingOptions(): array {

@@ -1,4 +1,5 @@
-{% set id = random() %}
+{# make sure edits are made in both site/public/templates/misc/Vue.twig and site/app/templates/Vue.twig #}
+{% set id = uniqid() %}
 <div
     id="vue-{{ id }}"
     class="{{ class is defined ? class }}"

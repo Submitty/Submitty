@@ -1,0 +1,16 @@
+{# make sure edits are made in both site/public/templates/misc/Vue.twig and site/app/templates/Vue.twig #}
+{% set id = random() %}
+<div
+    id="vue-{{ id }}"
+    class="{{ class is defined ? class }}"
+    style="{{ style is defined ? style : '' }}"
+>
+</div>
+<script>
+    window.submitty.render(
+        "#vue-{{ id }}",
+        "{{ type }}",
+        "{{ name }}",
+        {{ args | default({}) | json_encode() | raw() }}
+    );
+</script>

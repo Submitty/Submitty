@@ -6,6 +6,13 @@
 
     "one_part_only": true,
 
+    // needed for rust
+    "allow_system_calls" : [
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING"
+    ],
     "autograding": {
         "submission_to_compilation": ["**/*.rs", "**/*.c", "**/*.h", "**/*.cpp", "**/*.hpp"]
     },
@@ -13,6 +20,7 @@
         {
             "type": "Compilation",
             "title": "Rust Compilation",
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
             "containers": [
                 {
                     // Rust will use dynamic linking by default, and libraries may not be available in a different image.

@@ -46,6 +46,8 @@ aside {
 #bar_wrapper {
     box-sizing: content-box;
     padding: 6px 0;
+    display: flex;
+    align-items: center;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -156,12 +158,16 @@ button > i.fas:hover {
 }
 
 :root {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: black;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px black;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
+    /* stylelint-disable-next-line color-named */
     --default-border-color: grey;
+    /* stylelint-disable-next-line color-named */
     --default-box-shadow: 1px 1px 2px grey;
 }
 
@@ -538,6 +544,7 @@ progress::-webkit-progress-value {
 }
 
 .panel-instructions {
+    /* stylelint-disable-next-line color-named */
     color: dimgray;
     position: absolute;
     top: 50%;
@@ -547,10 +554,13 @@ progress::-webkit-progress-value {
 
 #grading-panel-student-name {
     position: absolute;
+    top: 0;
+    left: 0;
     overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
-    left: 5px;
-    top: 5px;
+    padding: 5px 10px 5px 5px;
+    flex-shrink: 0;
+    max-height: 85px;
 }
 
 #grading-scroll-message {
@@ -809,6 +819,7 @@ progress::-webkit-progress-value {
 }
 
 .file-viewer a:hover {
+    /* stylelint-disable-next-line color-no-hex */
     color: #6db7ff;
     text-decoration: none;
 }
@@ -1415,15 +1426,17 @@ tr.is_publish {
 #file-view {
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 .sticky-file-info {
-    position: absolute;
-    right: 5px;
-    left: 5px;
+    position: sticky;
+    top: 0;
+    margin: 0 5px;
     background-color: var(--standard-pale-blue-gray);
     padding: 10px 15px 0;
     z-index: 30;
+    flex: 0 0 auto;
 }
 
 #image-rotate-icons-bar,
@@ -1432,9 +1445,37 @@ tr.is_publish {
     padding: 0 10px;
 }
 
-#file-content {
+#file-content,
+#notebook-file-content {
     height: 90%;
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
+    overflow: auto;
+}
+
+@media (max-width: 900px) {
+    /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
+    #submission_browser.rubric_panel {
+        overflow-x: hidden;
+    }
+
+    .sticky-file-info .flex-row {
+        flex-wrap: wrap;
+    }
+}
+
+#file-zoom-controls {
+    display: inline-block;
+    margin-left: 24px;
+    position: relative;
+    bottom: 3px;
+}
+
+#file-zoom-controls button {
+    box-shadow: none;
+    border: none;
+    background: none;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -1471,9 +1512,9 @@ tr.is_publish {
     display: grid;
     grid-template-columns: repeat(auto-fill, 250px);
     max-width: 83vw;
-    grid-column-gap: 5px;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
-    grid-row-gap: 5px;
+    column-gap: 5px;
+    /* stylelint-disable-next-line */
+    row-gap: 5px;
 }
 
 .layout-option-item {

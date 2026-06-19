@@ -51,7 +51,7 @@
 }
 
 #gradeable-submission-cont #submit {
-    /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line declaration-no-important, color-named */
     color: white !important;
 }
 
@@ -91,6 +91,24 @@
 
 .disable-submit:hover {
     background-color: var(--good-green);
+}
+
+.submission-warning {
+    font-weight: bold;
+    color: var(--text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--standard-vibrant-orange);
+}
+
+.submission-error {
+    font-weight: bold;
+    color: var(--text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--danger-red);
 }
 
 #gradeable-info h1 {
@@ -199,4 +217,16 @@
     #submission-version-select {
         width: 100%;
     }
+}
+
+/* Image file clickable styles for annotator */
+.image-file {
+    /* stylelint-disable-next-line color-no-hex */
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.image-file:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }

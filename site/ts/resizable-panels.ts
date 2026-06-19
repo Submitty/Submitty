@@ -32,9 +32,7 @@ export function initializeResizablePanels(panelSel: string, dragBarSel: string, 
     // Width of left side
     const mouseDownHandler = (e: MouseEvent | TouchEvent | Touch) => {
         // Get the current mouse position
-        if (e instanceof TouchEvent) {
-            e = e.touches[0];
-        }
+        e = 'touches' in e ? e.touches[0] : e;
         xPos = e.clientX;
         yPos = e.clientY;
         panelHeight = panelEle.getBoundingClientRect().height;
@@ -68,9 +66,7 @@ export function initializeResizablePanels(panelSel: string, dragBarSel: string, 
     };
 
     const mouseMoveHandler = (e: MouseEvent | TouchEvent | Touch) => {
-        if (e instanceof TouchEvent) {
-            e = e.touches[0];
-        }
+        e = 'touches' in e ? e.touches[0] : e;
         let updateValue;
         if (isHorizontalResize) {
             const dy = e.clientY - yPos;

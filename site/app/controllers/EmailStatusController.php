@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\views\email\EmailStatusView;
 use app\libraries\routers\AccessControl;
 use app\repositories\email\EmailRepository;
+use app\libraries\response\JsonResponse;
 
 class EmailStatusController extends AbstractController {
     public function __construct(Core $core) {
@@ -41,7 +42,8 @@ class EmailStatusController extends AbstractController {
      */
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/email_status_page", methods: ["GET"])]
-    public function getEmailStatusesByPage(): WebResponse {
+    #[Route("/api/courses/{_semester}/{_course}/email/email_status_page", methods: ["GET"])]
+    public function getEmailStatusesByPage(): WebResponse|JsonResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
@@ -52,11 +54,41 @@ class EmailStatusController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return new WebResponse(
-            EmailStatusView::class,
-            'renderStatusPage',
-            $result
-        );
+
+        if (isset($_GET['format']) && $_GET['format'] === 'json') {
+            $subjectCounts = [];
+            foreach ($result as $emailIterable) {
+                foreach ($emailIterable as $email) {
+                    // Emails are uniquely identified by their subject and creation date with milliseconds precision for e2e testing
+                    $created = $email->getCreated();
+                    $timestamp = $created->format('Y-m-d H:i:s.') . substr($created->format('u'), 0, 3);
+                    $key = $email->getSubject() . '.' . $timestamp;
+                    if (!isset($subjectCounts[$key])) {
+                        $subjectCounts[$key] = 0;
+                    }
+                    $subjectCounts[$key]++;
+                }
+            }
+
+            $emails = [];
+            foreach ($subjectCounts as $key => $count) {
+                $parts = explode('.', $key);
+                $emails[] = [
+                    'subject' => $parts[0],
+                    'created' => $parts[1],
+                    'count' => $count,
+                ];
+            }
+
+            return JsonResponse::getSuccessResponse($emails);
+        }
+        else {
+            return new WebResponse(
+                EmailStatusView::class,
+                'renderStatusPage',
+                $result
+            );
+        }
     }
 
     /**

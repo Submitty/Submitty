@@ -1,0 +1,13 @@
+- name: Read JSON content from a file
+  ansible.builtin.set_fact:
+    submitty_homework_creation_var_json_list: "config_files/{{ lookup('file', 'json_list.txt') | split('\n')  }}"
+
+- name: Use task list to loop through gradeables
+  ansible.builtin.include_tasks:
+    file: create_gradeable.yml
+  loop: "{{ submitty_homework_creation_var_json_list }}"
+  loop_control:
+    loop_var: submitty_homework_api_json_file
+  vars:
+    submitty_homework_creation_var_json_file: "{{ submitty_homework_api_json_file }}"
+    submitty_homework_creation_api_key: "{{ passed_api_key }}"

@@ -62,6 +62,7 @@
             <li>
                 {% if indent == 1 %}
                     <a class="fas fa-pencil-alt key_to_click" tabindex="0" onclick="openRenamePopup('{{ file.path }}')"></a>
+                    <a class="fas fa-download key_to_click" tabindex="0" onclick="downloadConfig('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
                         <a class="fas fa-trash key_to_click" tabindex="0" onclick="openDeletePopup('{{ file.path }}')"></a>
                     {% endif %}

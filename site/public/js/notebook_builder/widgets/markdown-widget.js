@@ -29,30 +29,19 @@ class MarkdownWidget extends Widget {
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
         interactive_area.appendChild(label);
 
-        $.ajax({
-            url: buildUrl(['markdown', 'area']),
-            type: 'POST',
-            data: {
-                data: {
-                    markdown_area_id: `notebook-builder-markdown-${NUM_MARKDOWN}`,
-                    markdown_area_name: '',
-                    markdown_area_value: this.state.markdown_string,
-                    class: 'markdown-input',
-                    placeholder: 'Enter text or markdown...',
-                    preview_div_id: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-                    preview_div_name: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
-                    preview_button_id: `notebook-builder-preview-button-${NUM_MARKDOWN}`,
-                    render_header: true,
-                    min_height: '100px',
-                },
-                csrf_token: csrfToken,
-            },
-            success: function (data) {
-                $(interactive_area).append(data);
-            },
-            error: function () {
-                displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
-            },
+        const markdownArea = document.createElement('div');
+        interactive_area.appendChild(markdownArea);
+        window.submitty.render(markdownArea, 'component', 'MarkdownArea', {
+            markdownAreaId: `notebook-builder-markdown-${NUM_MARKDOWN}`,
+            markdownAreaName: '',
+            markdownAreaValue: this.state.markdown_string,
+            class: 'markdown-input',
+            placeholder: 'Enter text or markdown...',
+            previewDivId: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+            previewDivName: `notebook-builder-markdown-preview-${NUM_MARKDOWN}`,
+            previewButtonId: `notebook-builder-preview-button-${NUM_MARKDOWN}`,
+            renderHeader: true,
+            minHeight: '100px',
         });
 
         // eslint-disable-next-line no-global-assign

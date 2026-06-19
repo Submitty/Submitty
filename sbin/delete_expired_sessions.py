@@ -6,18 +6,19 @@ Deletes all expired sessions from the sessions table in the main Submitty databa
 
 import database_queries
 import datetime
+from sqlalchemy import text
 
 
 def delete_expired_sessions(db):
     """Delete the sessions which have expired."""
 
-    return db.execute("""
+    return db.execute(text("""
         WITH deleted AS (
             DELETE FROM sessions
             WHERE session_expires < current_timestamp
             RETURNING *
         ) SELECT COUNT(*) FROM deleted
-        """).fetchone()[0]
+        """)).fetchone()[0]
 
 
 def main():

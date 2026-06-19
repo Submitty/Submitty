@@ -188,6 +188,64 @@ class AutogradingConfigController extends AbstractController {
         );
     }
 
+    #[Route("/courses/{_semester}/{_course}/autograding_config/download_zip", methods: ["POST"])]
+    public function downloadConfigZip(): void {
+        $config_dir = $_POST['curr_config_name'] ?? null;
+
+        if ($config_dir === null) {
+            $this->core->addErrorMessage("No configuration directory provided.");
+            return;
+        }
+
+        $course = $this->core->getConfig()->getCourse();
+        $config_name = basename($config_dir);
+        $zip_filename = "{$course}_{$config_name}.zip";
+        $zip_path = FileUtils::joinPaths(sys_get_temp_dir(), $zip_filename);
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zip_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            $this->core->addErrorMessage("Failed to create ZIP archive.");
+            return;
+        }
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($config_dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        $failed_files = [];
+
+        foreach ($files as $file) {
+            $file_path = $file->getRealPath();
+            $relative_path = substr($file_path, strlen($config_dir) + 1);
+
+            $result = $zip->addFile($file_path, $relative_path);
+            if ($result !== true) {
+                $failed_files[] = $relative_path;
+            }
+        }
+
+        if (count($failed_files) > 0) {
+            $this->core->addErrorMessage("Failed to add the following files to the ZIP:<br>" . implode('<br>', $failed_files));
+            return;
+        }
+
+        $zip->close();
+
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zip_filename . '"');
+        header('Content-Length: ' . filesize($zip_path));
+        if (readfile($zip_path) === false) {
+            $this->core->addErrorMessage("Failed to read ZIP file for download.");
+            return;
+        }
+
+        if (!unlink($zip_path)) {
+            $this->core->addErrorMessage("Failed to delete temporary ZIP file.");
+            return;
+        }
+    }
+
     /**
      * @param string $g_id gradeable Id
      * @return MultiResponse

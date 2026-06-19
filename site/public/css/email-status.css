@@ -45,7 +45,7 @@
 }
 
 .status-message {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .divider {

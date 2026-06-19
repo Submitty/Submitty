@@ -79,7 +79,10 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
-        if (strpos($file_path, 'submissions') !== false) {
+        if (strpos($file_path, 'submissions_processed') !== false) {
+            $directory = 'submissions_processed';
+        }
+        elseif (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
         }
         elseif (strpos($file_path, 'checkout') !== false) {
@@ -110,6 +113,21 @@ class MiscController extends AbstractController {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
+        }
+
+        if ($directory === 'submissions') {
+                $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+                $pdf_pages_assigned = $gradeable->isPdfUpload();
+                $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
+
+                if ($pdf_pages_assigned || $blind_grading_enabled) {
+                    return new MultiResponse(
+                        JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
+                    );
+                }
+            }
         }
 
         $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
@@ -196,7 +214,35 @@ class MiscController extends AbstractController {
 
         $file_name = basename($path);
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
+
+        if (
+            $dir === 'submissions'
+            && strtolower($file_name) === 'upload.pdf'
+            && $gradeable_id !== null
+            && $user_id !== null
+        ) {
+            $user = $this->core->getUser();
+
+            if ($user->getGroup() === \app\models\User::GROUP_LIMITED_ACCESS_GRADER) {
+                $gradeable = $this->tryGetGradeable($gradeable_id, false);
+
+                if ($gradeable !== false) {
+                    $pdf_pages_assigned = $gradeable->isPdfUpload();
+                    $blind_grading_enabled = $gradeable->getLimitedAccessBlind() === 2;
+
+                    if ($pdf_pages_assigned || $blind_grading_enabled) {
+                        $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                        return false;
+                    }
+                }
+            }
+        }
+
         $mime_type = mime_content_type($corrected_name);
+        // Fix BMP image on Chrome/Edge
+        if (str_contains(strtolower($mime_type), 'bmp')) {
+            $mime_type = 'image/bmp';
+        }
         $file_type = FileUtils::getContentType($file_name);
         if ($mime_type === "application/pdf" || (str_starts_with($mime_type, "image/") && $mime_type !== "image/svg+xml")) {
             $this->core->getOutput()->useHeader(false);
@@ -210,11 +256,15 @@ class MiscController extends AbstractController {
             $this->core->getOutput()->setContentOnly(true);
             CodeMirrorUtils::loadDefaultDependencies($this->core);
             $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $notebook_result = NotebookUtils::jupyterToSubmittyNotebook($path);
             $this->core->getOutput()->renderString(
                 $this->core->getOutput()->renderTwigTemplate(
                     "notebook/Notebook.twig",
                     [
-                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'notebook' => $notebook_result['cells'],
+                        'notebook_size_exceeded' => $notebook_result['size_exceeded'],
+                        'notebook_skipped_content' => $notebook_result['skipped_content_count'],
+                        'notebook_skipped_output' => $notebook_result['skipped_output_count'],
                         'student_id' => $user_id,
                         'is_timed' => false,
                         'allowed_minutes' => 0,
@@ -431,6 +481,7 @@ class MiscController extends AbstractController {
         if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
+            $folder_names[] = "submissions_processed";
             $folder_names[] = "checkout";
         }
 
@@ -705,7 +756,7 @@ class MiscController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")]
     public function checkBulkProgress($gradeable_id) {
-        $job_path = "/var/local/submitty/daemon_job_queue/";
+        $job_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue") . "/";
         $result = [];
         $found = false;
         $job_data = null;

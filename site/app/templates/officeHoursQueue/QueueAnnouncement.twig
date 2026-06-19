@@ -12,15 +12,16 @@
     </span>
   </label>
   <br/>
-  {% include "misc/MarkdownArea.twig" with {
-    "markdown_area_id" : "queue-announcement-message",
-    "markdown_area_name" : "queue_announcement_message",
-    "markdown_area_value" : viewer.getQueueAnnouncementMessage(),
-    "placeholder" : "Enter announcement here...",
-    "preview_div_id" : "queue_announcement_message_preview",
-    "preview_div_name" : "queue_announcement_message_preview",
-    "onclick" : "previewQueueMarkdown",
-    "render_header" : true,
+  {% include "Vue.twig" with { "name" : "MarkdownArea",
+    "type": "component",
+    "args": {
+        "markdownAreaId" : "queue-announcement-message",
+        "markdownAreaName" : "queue_announcement_message",
+        "markdownAreaValue" : viewer.getQueueAnnouncementMessage(),
+        "placeholder" : "Enter announcement here...",
+        "previewDivId" : "queue_announcement_message_preview",
+        "renderHeader" : true,
+    }
   } only %}
 {% endblock %}
 {% block form %}

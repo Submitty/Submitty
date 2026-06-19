@@ -132,7 +132,7 @@ function initializeTaLayout() {
     }
     else if (taLayoutDet.numOfPanelsEnabled) {
         togglePanelLayoutModes(true);
-        if (taLayoutDet.isFullLeftColumnMode && $('#silent-edit-id').length !== 0) {
+        if (taLayoutDet.isFullLeftColumnMode) {
             toggleFullLeftColumnMode(true);
         }
         // initialize the layout\
@@ -363,6 +363,9 @@ $(() => {
         }
     });
 
+    // manually trigger resize at init so layout matches window dimensions at first page open
+    window.dispatchEvent(new Event('resize'));
+
     // Grading panel toggle buttons
     $('.grade-panel button').click(function () {
         const btnCont = $(this).parent();
@@ -411,7 +414,9 @@ $(() => {
     // Check for the panels status initially
     adjustGradingPanelHeader();
     const resizeObserver = new ResizeObserver(() => {
-        adjustGradingPanelHeader();
+        requestAnimationFrame(() => {
+            adjustGradingPanelHeader();
+        });
     });
     // calling it for the first time i.e initializing
     adjustGradingPanelHeader();

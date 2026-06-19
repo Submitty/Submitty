@@ -1,13 +1,11 @@
 """Migration for the Submitty system."""
-import pkg_resources
 import subprocess
 import sys
+from importlib.util import find_spec
 
 def up(config):
-    #get existing installed packages and check if opencv-python is there
-    #https://stackoverflow.com/questions/44210656/how-to-check-if-a-module-is-installed-in-python-and-if-not-install-it-within-t    
-    installed = {pkg.key for pkg in pkg_resources.working_set}
-    if 'opencv-python' in installed:
+    opencv_python_pkg = find_spec('opencv-python')
+    if opencv_python_pkg is not None:
         print("Uninstalling opencv-python")
         try:
             subprocess.check_call("python3 -m pip uninstall opencv-python --yes --no-input", shell=True, stderr=subprocess.STDOUT)

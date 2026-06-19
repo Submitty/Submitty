@@ -30,21 +30,23 @@ Required Parameters:
         </div>
     </div>
     <div class="row" id="overall-comments">
-        {% include "../misc/MarkdownArea.twig" with {
-            markdown_area_id : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
-            markdown_area_name : '',
-            markdown_area_value : (overall_comment["logged_in_user"]["comment"]|escape),
-            root_class : "general-comment-entry",
-            placeholder : "Overall message for student about the gradeable...",
-            preview_div_id : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
-            preview_div_name : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
-            preview_button_id : "overall-comment-markdown-preview-button",
-            onclick : "previewOverallCommentMarkdown.bind(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')", 
-            render_header : true,
-            min_height : "100px",
-            max_height : "150px",
-            textarea_onchange : grading_disabled ? '' : 'onChangeOverallComment()',
-            data_previous_comment : (overall_comment["logged_in_user"]["comment"]|escape)
+        {% include "../misc/Vue.twig" with { "name" : "MarkdownArea",
+            "type": "component",
+            "class": "markdown-area fill-available",
+            "args": {
+                "markdownAreaId" : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
+                "markdownAreaName" : '',
+                "markdownAreaValue" : overall_comment["logged_in_user"]["comment"],
+                "rootClass" : "general-comment-entry",
+                "placeholder" : "Overall message for student about the gradeable...",
+                "previewDivId" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
+                "previewButtonId" : "overall-comment-markdown-preview-button",
+                "renderHeader" : true,
+                "minHeight" : "100px",
+                "maxHeight" : "150px",
+                "textareaOnChange" : grading_disabled ? '' : 'onChangeOverallComment',
+                "dataPreviousComment" : overall_comment["logged_in_user"]["comment"]
+            }
         } only %}
         {% for user, comment in overall_comment["other_graders"] %}
             <div

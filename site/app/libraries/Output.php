@@ -105,8 +105,13 @@ class Output {
 
     public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
-        $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+
+        // cache must be in a directory that is not hardened by php fpm 'ProtectSystem=full' property
+        $cache_path = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'cache', 'twig');
+
         $debug = $full_load && $this->core->getConfig()?->isDebug();
+        // set this to false to force caching even on development machine
+        //$debug = false;
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
@@ -135,7 +140,7 @@ class Output {
         }));
 
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
-            return call_user_func_array('self::renderTemplate', $args);
+            return $this->renderTemplate(...$args);
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
@@ -151,7 +156,7 @@ HTML;
         }, ["is_safe" => ["html"]]));
 
         $this->twig->addFunction(new \Twig\TwigFunction("add_twig_module_js", function ($name) {
-            return call_user_func_array('self::addInternalModuleTwigJs', [$name]);
+            $this->addInternalModuleTwigJs($name);
         }));
 
         if ($full_load) {
@@ -165,6 +170,10 @@ HTML;
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
+        $this->twig->addFunction(new \Twig\TwigFunction('uniqid', function () {
+            // more entropy
+            return str_replace('.', '-', uniqid('', true));
+        }));
 
         $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
         $converter = new CommonMarkConverter($config);
@@ -210,6 +219,7 @@ HTML;
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
         $this->addInternalCss('markdown.css');
+        $this->addVendorCss(FileUtils::joinPaths('katex', 'katex.min.css'));
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));

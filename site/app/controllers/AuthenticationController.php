@@ -59,6 +59,7 @@ class AuthenticationController extends AbstractController {
         }
 
         Utils::setCookie('submitty_session', '', time() - 3600);
+        Utils::setCookie('submitty_websocket_token', '', time() - 3600);
         // Remove all history for checkpoint gradeables
         foreach (array_keys($_COOKIE) as $cookie) {
             if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
@@ -356,7 +357,8 @@ EMAIL;
             'signupForm',
             [
                 'accepted_emails' => $this->core->getConfig()->getAcceptedEmails(),
-                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements()
+                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements(),
+                'password_requirements' => $this->core->getConfig()->getPasswordRequirements()
             ]
         );
     }
@@ -472,7 +474,7 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!Utils::isValidPassword($password)) {
+        if (!Utils::isValidPassword($password, $this->core->getConfig()->getPasswordRequirements())) {
             $this->core->addErrorMessage('Password does not meet the requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }

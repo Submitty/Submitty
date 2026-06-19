@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, onMounted, type Ref } from 'vue';
+import { ref, computed, onMounted, type Ref } from 'vue';
 
 type Message = {
     type: 'error' | 'success' | 'warning';
@@ -104,6 +104,7 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
       <a
         id="remove_popup"
         class="fas fa-times key_to_click"
+        data-testid="remove-message-popup"
         tabindex="0"
         @click="removeMessagePopup(message.key)"
       />
@@ -129,6 +130,17 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
   margin: 0;
   /* stylelint-disable-next-line declaration-no-important */
   padding: 8px 14px !important;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.inner-message > span {
+  min-width: 0;
+}
+
+.inner-message > a {
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 span > i {

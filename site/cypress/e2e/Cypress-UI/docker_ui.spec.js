@@ -77,12 +77,12 @@ describe('Docker UI Test', () => {
         // This tag has no images
         cy.get('button[data-capability=\'et-cetera\']')
             .click();
-        cy.get('.image-row')
+        cy.get('[data-testid="image-row"]')
             .should('not.be.visible');
         // Default filter should have all images
         cy.get('button[data-capability=\'default\']')
             .click();
-        cy.get('.image-row')
+        cy.get('[data-testid="image-row"]')
             .should('be.visible');
     });
 
@@ -236,6 +236,9 @@ describe('Docker UI Test', () => {
             });
         }, 60000, 500);
 
+        // Wait for 2 seconds so that file modification times are different. See https://github.com/Submitty/Submitty/pull/12216 for details.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(2000);
         cy.reload();
 
         // Verify DockerUI status is "Up-to-Date"
@@ -301,5 +304,27 @@ describe('Docker UI Test', () => {
         // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
+    });
+
+    it('Should test instructor user permissions', () => {
+        // Logout current user
+        cy.logout();
+
+        // Login as an instructor but not a faculty member
+        cy.login('manne');
+        cy.visit(docker_ui_path);
+
+        // Update docker and machines button should not exist
+        cy.get('#update-machines').should('not.exist');
+
+        // images should be visible
+        cy.get('[data-testid="image-row"]').should('exist');
+        cy.get('[data-testid="image-row"]').contains('submitty/autograding-default');
+
+        // Add image to capability section should not exist
+        cy.get('[data-testid="add-image-to-capability"]').should('not.exist');
+
+        // Should show permission error message
+        cy.get('[data-testid="no-permission-banner"]').should('contain.text', 'You do not have permission to add images to capabilities.');
     });
 });

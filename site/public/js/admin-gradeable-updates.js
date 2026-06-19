@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, CodeMirror */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig, loadTemplates, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -75,6 +75,87 @@ function updatePdfPageSettings() {
         .catch((err) => {
             alert(`Failed to update pdf page setting! ${err.message}`);
         });
+}
+
+async function updateRedactionsDisplay(redactions = null) {
+    if (!redactions) {
+        const response = await $.get({
+            type: 'GET',
+            url: buildCourseUrl(['gradeable', $('#g_id').val(), 'redactions']),
+            dataType: 'json',
+        });
+        if (response.status === 'success') {
+            redactions = response.data;
+        }
+        else {
+            console.error('Error fetching redactions:', response.message);
+            return;
+        }
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    $('#redactions_container').html(Twig.twig({ ref: 'Redactions' }).render({ redactions: redactions }));
+}
+
+async function updateRedactionSettings() {
+    const files = $('#redactions_json').prop('files');
+    if (files.length === 0) {
+        return;
+    }
+    const file = files[0];
+    let data = await file.text();
+    try {
+        data = JSON.parse(data);
+    }
+    catch (e) {
+        errors['redactions'] = 'Invalid JSON format in redactions file.';
+        updateErrorMessage();
+        alert('Error saving redactions, please check the format of the JSON file.');
+        $('#redactions_json').val('');
+        return;
+    }
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: data,
+            csrf_token: csrfToken,
+        },
+    });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').show();
+        updateRedactionsDisplay(response.data);
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        $('#redactions_json').val('');
+        alert(response.message || 'Error saving redactions, please try again.');
+    }
+}
+
+async function removeRedactions() {
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: 'none',
+            csrf_token: csrfToken,
+        },
+    });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').hide();
+        $('#redactions_json').val('');
+        updateRedactionsDisplay([]);
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        alert('Error removing redactions, please try again.');
+    }
 }
 
 function onItemPoolOptionChange(componentId) {
@@ -164,6 +245,9 @@ $(document).ready(() => {
             event.returnValue = 1;
         }
     };
+    if (is_electronic) {
+        loadTemplates().then(() => updateRedactionsDisplay());
+    }
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
@@ -216,7 +300,12 @@ $(document).ready(() => {
             saveGraders();
             return;
         }
-        if ($(this).prop('id') === 'all_access' || $(this).prop('id') === 'minimum_grading_group') {
+        if ($(this).prop('id') === 'minimum_grading_group_autograding' || $(this).prop('id') === 'minimum_grading_group') {
+            $('#minimum_grading_group').val($(this).val());
+            $('#minimum_grading_group_autograding').val($(this).val());
+            saveGraders();
+        }
+        if ($(this).prop('id') === 'all_access') {
             saveGraders();
         }
         // Don't save if it we're ignoring it
@@ -235,7 +324,7 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
-        const notifications_sent = Number(document.querySelector('#container-rubric').dataset.notifications_sent);
+        const score_notifications_sent = Number(document.querySelector('#container-rubric').dataset.score_notifications_sent);
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -244,7 +333,7 @@ $(document).ready(() => {
                 $(val).val('0');
             }
             // Ask for confirmation if the release is delegated to the future and notifications have been sent already
-            if (notifications_sent > 0 && val.name === 'grade_released_date') {
+            if (score_notifications_sent > 0 && val.name === 'grade_released_date') {
                 const updating = new Date($(val).val());
                 const original = new Date($(val).attr('data-original'));
 
@@ -255,7 +344,7 @@ $(document).ready(() => {
                         + 'students when the new grades release date is reached?',
                     );
 
-                    data['notifications_sent'] = resend ? 0 : notifications_sent;
+                    data['score_notifications_sent'] = resend ? 0 : score_notifications_sent;
                 }
             }
             data[val.name] = $(val).val();
@@ -287,9 +376,9 @@ $(document).ready(() => {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
-                    if (key === 'grade_released_date' && data['notifications_sent'] === 0) {
+                    if (key === 'grade_released_date' && data['score_notifications_sent'] === 0) {
                         document.getElementById('gradeable-notifications-message').remove();
-                        document.querySelector('#container-rubric').dataset.notifications_sent = '0';
+                        document.querySelector('#container-rubric').dataset.score_notifications_sent = '0';
                     }
                 }
                 updateErrorMessage();
@@ -351,6 +440,93 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
+
+    const ta_beta_testing_start_date = $('#date_ta_view').val();
+    const submission_open_date = $('#date_submit').val();
+    const submission_due_date = $('#date_due').val();
+    const manual_grading_start_date = $('#date_grade').val();
+    const manual_grading_due_date = $('#date_grade_due').val();
+    const grades_release_date = $('#date_released').val();
+
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
+    }
+    else {
+        // hide/show element when ta beta testing date is after the grade start date
+        if (ta_beta_testing_start_date > manual_grading_start_date) {
+            $('#ta-beta-testing-after-grading-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-grading-dates-warning').hide();
+        }
+    }
+
+    if ($('#has_due_date_yes').is(':checked')) {
+        // hide/show element when open submission date is after the submission due date
+        if (submission_open_date > submission_due_date) {
+            $('#open-submission-after-submission-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#open-submission-after-submission-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#radio_electronic_file').is(':checked') && $('#has_due_date_yes').is(':checked')) {
+        if ($('#yes_ta_grade').is(':checked')) {
+            // hide/show element when submission due date is after the manual grading start date
+            if (submission_due_date > manual_grading_start_date) {
+                $('#submission-due-after-grading-open-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-open-dates-warning').hide();
+            }
+        }
+        else if ($('#has_release_date_yes').is(':checked')) {
+            // hide/show element when submission due date is after the grades release
+            if (submission_due_date > grades_release_date) {
+                $('#submission-due-after-grading-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-released-dates-warning').hide();
+            }
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        // hide/show element when manual grading open date is after the manual grading due date
+        if (manual_grading_due_date < manual_grading_start_date) {
+            $('#grading-open-after-grading-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#grading-open-after-grading-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        if ($('#has_release_date_yes').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+            // hide/show element when manual grading due date is after the grade release date
+            if (grades_release_date < manual_grading_due_date) {
+                $('#grading-due-after-grades-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#grading-due-after-grades-released-dates-warning').hide();
+            }
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
@@ -954,7 +1130,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // When the text editor opens, the user shouldn't have to manually scroll to see the contents
 function scrollToBottom() {
-    window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 820, left: 0, behavior: 'smooth' });
 }
 
 function updateGradeableEditor(g_id, file_path) {
@@ -967,6 +1143,25 @@ function updateGradeableEditor(g_id, file_path) {
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
     }
+    else {
+        document.querySelectorAll('.key_to_click').forEach((link) => {
+            link.classList.remove('selected');
+        });
+        cancelGradeableConfigEdit();
+    }
+}
+
+function isBinaryPath(path) {
+    const binaryExtensions = [
+        'png', 'jpg', 'jpeg', 'gif',
+        'bmp', 'bin', 'exe', 'dll',
+        'pdf', 'zip', 'tar', 'gz',
+        '7z', 'rar', 'iso',
+        'class', 'o', 'so',
+    ];
+
+    const ext = path.split('.').pop().toLowerCase();
+    return binaryExtensions.includes(ext);
 }
 
 // When you load the editor
@@ -1008,10 +1203,9 @@ function loadGradeableEditor(g_id, file_path) {
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
                 loadCodeMirror();
-                scrollToBottom();
             }
             catch {
-                displayErrorMessage('Error parsing data. Please try again');
+                displayErrorMessage('Error parsing data. File type not supported in the editor.');
             }
         },
     });
@@ -1041,6 +1235,24 @@ document.addEventListener('DOMContentLoaded', () => {
     updateEditorButtonStyle();
 });
 
+function toggleFolder(id) {
+    const div = document.getElementById(id);
+    const icon = document.getElementById(`${id}-icon`);
+    if (!div) {
+        return;
+    }
+    if (div.style.display === 'none') {
+        div.style.display = 'block';
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+    }
+    else {
+        div.style.display = 'none';
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
+    }
+}
+
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
     const editorButton = document.getElementById('open-config-editor');
@@ -1062,6 +1274,9 @@ function cancelGradeableConfigEdit() {
     isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
 
     closeCodeMirrorInstance();
 }
@@ -1244,14 +1459,85 @@ function loadCodeMirror() {
         {
             mode: { name: 'json', json: true },
             theme: localStorage.theme === 'light' ? 'eclipse' : 'monokai',
-            lineNumbers: false,
-            tabSize: 2,
-            indentUnit: 2,
+            lineNumbers: localStorage.getItem('enableLineNums') === 'true',
+            tabSize: Number(localStorage.getItem('setTabLength')) === 2 ? 2 : 4,
+            indentUnit: Number(localStorage.getItem('setTabLength')) === 2 ? 2 : 4,
             lineWrapping: true,
         },
     );
+    updateEditorIcons();
+    codeMirrorInstance.refresh();
+    codeMirrorInstance.focus();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
     });
+}
+
+// Toggle line nums in gradeable editor
+function toggleLineNums() {
+    const icon = document.getElementById('toggle-line-nums');
+    const current = localStorage.getItem('enableLineNums');
+    const newState = (!current || current === 'false') ? 'true' : 'false';
+
+    localStorage.setItem('enableLineNums', newState);
+    reloadCodeMirror();
+
+    if (newState === 'true') {
+        icon.classList.add('line-nums-selected');
+    }
+    else {
+        icon.classList.remove('line-nums-selected');
+    }
+}
+
+// Toggle between tab length of 2 and 4 for gradeable editor
+function toggleTabLength() {
+    const tabLength = Number(localStorage.getItem('setTabLength'));
+    const newLength = (!tabLength || tabLength === 2) ? 4 : 2;
+    localStorage.setItem('setTabLength', newLength);
+    reloadCodeMirror();
+
+    // Update icon
+    const icon = document.getElementById('toggle-tab-length');
+    if (icon) {
+        icon.classList.remove('fa-2', 'fa-4');
+        icon.classList.add(`fa-${newLength}`);
+    }
+}
+
+function reloadCodeMirror() {
+    if (codeMirrorInstance) {
+        const currentContent = codeMirrorInstance.getValue();
+        codeMirrorInstance.toTextArea();
+        document.getElementById('gradeable-config-edit').value = currentContent;
+    }
+    loadCodeMirror();
+}
+
+function updateEditorIcons() {
+    // Line Number Icon
+    const enableLineNumsIcon = document.getElementById('toggle-line-nums');
+    const lineNums = localStorage.getItem('enableLineNums');
+    if (lineNums === 'true') {
+        enableLineNumsIcon.classList.add('line-nums-selected');
+    }
+    else {
+        enableLineNumsIcon.classList.remove('line-nums-selected');
+    }
+
+    // Tab Length Icon
+    const tabLengthIcon = document.getElementById('toggle-tab-length');
+    const tabLength = localStorage.getItem('setTabLength') || '2';
+    tabLengthIcon.classList.remove('fa-2', 'fa-4');
+    tabLengthIcon.classList.add(`fa-${tabLength}`);
+}
+
+function markLastClicked(el) {
+    // Remove highlight from all
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
+    // Highlight the clicked one
+    el.classList.add('selected');
 }

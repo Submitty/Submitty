@@ -3,6 +3,7 @@
 --
 
 
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -750,7 +751,8 @@ CREATE TABLE public.chatroom_messages (
     display_name character varying,
     role character varying,
     content text NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL
 );
 
 
@@ -786,7 +788,8 @@ CREATE TABLE public.chatrooms (
     is_active boolean DEFAULT false NOT NULL,
     allow_anon boolean DEFAULT true NOT NULL,
     session_started_at timestamp with time zone,
-    is_deleted boolean DEFAULT false NOT NULL
+    is_deleted boolean DEFAULT false NOT NULL,
+    allow_read_only_after_end boolean DEFAULT false NOT NULL
 );
 
 
@@ -941,7 +944,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
-    eg_thread_ids json DEFAULT '{}'::json NOT NULL,
+    eg_thread_ids json DEFAULT '[]'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
     eg_limited_access_blind integer DEFAULT 1,
     eg_peer_blind integer DEFAULT 3,
@@ -953,10 +956,10 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
+    eg_release_notifications_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
@@ -1154,10 +1157,7 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
-    g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
-    CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
+    g_allow_custom_marks boolean DEFAULT true NOT NULL
 );
 
 
@@ -1389,6 +1389,45 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 
 
 --
+-- Name: gradeable_redaction; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_redaction (
+    redaction_id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    page integer NOT NULL,
+    x1 double precision NOT NULL,
+    x2 double precision NOT NULL,
+    y1 double precision NOT NULL,
+    y2 double precision NOT NULL,
+    CONSTRAINT x1_positive CHECK (((x1 >= (0)::double precision) AND (x1 <= x2))),
+    CONSTRAINT x2_positive CHECK (((x2 >= (0)::double precision) AND (x2 <= (1)::double precision))),
+    CONSTRAINT y1_positive CHECK (((y1 >= (0)::double precision) AND (y1 <= y2))),
+    CONSTRAINT y2_positive CHECK (((y2 >= (0)::double precision) AND (y2 <= (1)::double precision)))
+);
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gradeable_redaction_redaction_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gradeable_redaction_redaction_id_seq OWNED BY public.gradeable_redaction.redaction_id;
+
+
+--
 -- Name: gradeable_teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1562,7 +1601,9 @@ CREATE TABLE public.notification_settings (
     self_notification_email boolean DEFAULT false NOT NULL,
     self_registration_email boolean DEFAULT true NOT NULL,
     all_released_grades boolean DEFAULT true NOT NULL,
-    all_released_grades_email boolean DEFAULT true NOT NULL
+    all_released_grades_email boolean DEFAULT true NOT NULL,
+    all_gradeable_releases boolean DEFAULT true NOT NULL,
+    all_gradeable_releases_email boolean DEFAULT false NOT NULL
 );
 
 
@@ -1578,7 +1619,8 @@ CREATE TABLE public.notifications (
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
     created_at timestamp(0) with time zone NOT NULL,
-    seen_at timestamp(0) with time zone
+    seen_at timestamp(0) with time zone,
+    gradeable_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -2167,6 +2209,13 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET D
 
 
 --
+-- Name: gradeable_redaction redaction_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction ALTER COLUMN redaction_id SET DEFAULT nextval('public.gradeable_redaction_redaction_id_seq'::regclass);
+
+
+--
 -- Name: lichen id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2497,6 +2546,14 @@ ALTER TABLE ONLY public.gradeable_data
 
 ALTER TABLE ONLY public.gradeable
     ADD CONSTRAINT gradeable_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_pkey PRIMARY KEY (redaction_id);
 
 
 --
@@ -2864,10 +2921,24 @@ CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g
 
 
 --
+-- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
+
+
+--
 -- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
+
+
+--
+-- Name: notifications_user_gradeable_unseen_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications USING btree (to_user_id, gradeable_id) WHERE ((gradeable_id IS NOT NULL) AND (seen_at IS NULL));
 
 
 --
@@ -3063,19 +3134,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3396,6 +3467,14 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment
 
 ALTER TABLE ONLY public.gradeable_data_overall_comment
     ADD CONSTRAINT gradeable_data_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -3777,4 +3856,5 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
 

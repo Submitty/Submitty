@@ -182,6 +182,7 @@ alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SU
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
+alias refresh_vagrant_workers='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/refresh_vagrant_workers.py'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
@@ -197,7 +198,10 @@ if [ ${WORKER} == 1 ]; then
     if [ ${VAGRANT} == 1 ]; then
         # Setting it up to allow SSH as root by default
         mkdir -p -m 700 /root/.ssh
-        cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+        touch /root/.ssh/authorized_keys
+        # we need to append the worker root keys into authorized keys because worker provisioning overwrites the root keys. 
+        cat /home/vagrant/.ssh/authorized_keys >> /root/.ssh/authorized_keys
+        chmod 600 /root/.ssh/authorized_keys
 
         sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
     fi
@@ -329,18 +333,6 @@ fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}" -s /bin/bash
-    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
-        echo -e "attempting to create ssh key for submitty_daemon..."
-        su submitty_daemon -c "cd ~/"
-        su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
-        su submitty_daemon -c "echo 'successfully created ssh key'"
-
-        while read -r IP
-        do
-            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
-        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
-        echo "DONE"
-    fi
 fi
 
 # The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
@@ -359,83 +351,6 @@ echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
-
-#################################################################
-# JAR SETUP
-#################
-if [ -x "$(command -v javac)" ]; then
-
-    # -----------------------------------------
-    echo "Getting JUnit & Hamcrest..."
-
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
-
-    if [ ${WORKER} == 0 ]; then
-        chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-    fi
-    chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-    rm -rf junit*jar
-    wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
-    popd > /dev/null
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
-    rm -rf hamcrest*.jar
-    wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
-    popd > /dev/null
-
-    # TODO:  Want to Install JUnit 5.0
-    # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-    echo "Getting JaCoCo..."
-
-    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
-    wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
-    mkdir jacoco-${JACOCO_VERSION}
-    unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
-    mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
-    mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
-    rm -rf jacoco-${JACOCO_VERSION}
-    rm -f jacoco-${JACOCO_VERSION}.zip
-    chmod o+r . *.jar
-    popd > /dev/null
-
-
-    # fix all java_tools permissions
-    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
-fi
-
-
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
-
-pushd /tmp > /dev/null
-
-echo "Getting DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-popd > /dev/null
 
 #################################################################
 # TCLAPP SETUP
@@ -712,7 +627,6 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
-y
 submitty-admin
 y
 
@@ -863,6 +777,8 @@ fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
 
+su -c 'docker pull submitty/libreoffice-writer:latest' ${DAEMON_USER}
+
 #################################################################
 # RESTART SERVICES
 ###################
@@ -886,6 +802,9 @@ fi
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
+
+## Create a preserve_files directory
+jq -n '$ARGS.positional' --args "/usr/local/submitty/config/footer_links.json" "/usr/local/submitty/config/login.md" > /usr/local/submitty/config/preserve_file_list.json
 
 
 echo "

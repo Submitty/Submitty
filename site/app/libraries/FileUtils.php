@@ -696,12 +696,13 @@ class FileUtils {
      * - File or directory at $path is writable
      *
      * @param string $path Absolute path to file or directory
+     * @param string|null $current_user Current user, used to do a more thorough group check
      * @param string|null $expected_owner Expected owner name of the file, or null to omit this check
      * @param string|null $expected_group Expected group name owner of the file, or null to omit this check
      * @return array Empty array if no errors were detected or an array containing one or more error message strings if
      *               errors were detected.
      */
-    public static function checkForPermissionErrors(string $path, ?string $expected_owner, ?string $expected_group): array {
+    public static function checkForPermissionErrors(string $path, ?string $current_user, ?string $expected_owner, ?string $expected_group): array {
         $results = [];
 
         // Check exists
@@ -712,7 +713,7 @@ class FileUtils {
         }
 
         // Check owner
-        if ($expected_owner) {
+        if (!is_null($expected_owner)) {
             $owner_id = fileowner($path);
             $owner_name = posix_getpwuid($owner_id)['name'];
             if ($owner_name !== $expected_owner) {
@@ -721,9 +722,13 @@ class FileUtils {
         }
 
         // Check group
-        if ($expected_group) {
+        if (!is_null($expected_group) && !is_null($current_user)) {
             $group_id = filegroup($path);
-            $group_name = posix_getgrgid($group_id)['name'];
+            $group = posix_getgrgid($group_id);
+            $group_name = $group['name'];
+            if (!in_array($current_user, $group['members'], true)) {
+                $results[] = "Current user '{$current_user}' is not in the group '{$group_name}' that owns '{$path}'.";
+            }
             if ($group_name !== $expected_group) {
                 $results[] = "Expected '{$path}' to have group '{$expected_group}' but instead got '{$group_name}'.";
             }

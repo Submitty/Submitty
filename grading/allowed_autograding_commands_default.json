@@ -131,5 +131,8 @@
     // Matlab
     "matlab":                  { "path": "/usr/local/bin/matlab" },
 
-    "jupyter":                 { "path": "/usr/local/bin/jupyter" }
+    "jupyter":                 { "path": "/usr/local/bin/jupyter" },
+
+    // Jupyter Notebooks
+    "jupyter_notebook_grader": { "path": "/usr/local/submitty/grading_bin/jupyter_notebook_grader.py" }
 }
