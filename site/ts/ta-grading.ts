@@ -244,7 +244,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
     let open_files_array: string[] = [];
-    if(!clear_open_files) {
+    if (!clear_open_files) {
         // keep open files persistent across cookie updates
         const prev_open_files = window.Cookies.get('open_files') || '';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
@@ -266,15 +266,6 @@ window.updateCookies = function (clear_open_files: boolean = false) {
                             true,
                         ),
                     );
-                    // open_files_array = open_files_array.filter((element) =>
-                    //     !new Set(findAllOpenFiles(
-                    //         $(this),
-                    //         '',
-                    //         $(this)[0].dataset.file_name!,
-                    //         [],
-                    //         true,
-                    //     )).has(element),
-                    // );
                 });
         });
 
@@ -367,59 +358,6 @@ function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string, path:
                             `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
                         );
                         stored_paths = findAllOpenFiles(
-                            $(this),
-                            current_path,
-                            $(this)[0].dataset.file_name!,
-                            stored_paths,
-                            false,
-                        );
-                    }
-                });
-        });
-
-    return stored_paths;
-}
-
-// finds all the closed files and folders and stores them in stored_paths
-function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
-    if (first === true) {
-        current_path += path;
-        if (!$(elem)[0].classList.contains('open')) {
-            stored_paths.push(path);
-        }
-        else {
-            return [];
-        }
-    }
-    else {
-        current_path += `#$SPLIT#$${path}`;
-    }
-
-    $(elem)
-        .children()
-        .each(function () {
-            $(this)
-                .children('div[id^=file_viewer_]')
-                .each(function () {
-                    if (!$(this)[0].classList.contains('shown')) {
-                        stored_paths.push(
-                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
-                        );
-                    }
-                });
-        });
-
-    $(elem)
-        .children()
-        .each(function () {
-            $(this)
-                .children('div[id^=div_viewer_]')
-                .each(function () {
-                    if (!$(this)[0].classList.contains('open')) {
-                        stored_paths.push(
-                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
-                        );
-                        stored_paths = findAllClosedFiles(
                             $(this),
                             current_path,
                             $(this)[0].dataset.file_name!,
