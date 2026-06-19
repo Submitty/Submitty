@@ -50,6 +50,13 @@ runs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Disable php8.1-fpm before setup
+      run: |
+        sudo systemctl stop php8.1-fpm
+        sudo systemctl disable php8.1-fpm
+      shell: bash
+
     - uses: shivammathur/setup-php@2.37.0
       with:
         php-version: ${{ env.PHP_VER }}
@@ -182,6 +189,8 @@ runs:
 
     - name: Set up apache
       run: |
+        sudo add-apt-repository ppa:ondrej/php
+        sudo apt update
         sudo apt-get install apache2
         sudo apt-get install apache2-suexec-custom
         sudo apt-get install libapache2-mod-authnz-external
@@ -215,4 +224,17 @@ runs:
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
+      shell: bash
+
+    - name: print debugging again
+      if: failure()
+      run: |
+        echo "=== PHP-FPM Service Status ==="
+        sudo systemctl status php8.2-fpm --no-pager || true
+        echo "=== Submitty Apache Vhost Log ==="
+        sudo tail -n 100 /var/log/apache2/submitty.log || true
+        echo "=== Apache Error Log ==="
+        sudo tail -n 50 /var/log/apache2/error.log || true
+        echo "=== Manual curl against site ==="
+        curl -v http://localhost/ 2>&1 || true
       shell: bash
