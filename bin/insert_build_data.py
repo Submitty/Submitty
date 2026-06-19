@@ -118,8 +118,12 @@ def main():
     try:
         db, metadata, engine = setup_db()
         send_data(db, metadata, engine, config_data['testcases'])
+        db.close()
+        engine.dispose()
     except exc.IntegrityError as e:
         print(f"ERROR: IntegrityError - {e}")
+        db.close()
+        engine.dispose()
         sys.exit(1)
 
 
