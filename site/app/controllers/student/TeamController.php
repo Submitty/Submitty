@@ -684,7 +684,7 @@ class TeamController extends AbstractController {
                 $instructor_skipped_count++;
                 continue;
             }
-            
+
             try {
                 $this->core->getQueries()->deleteTeam($team_id);
             }
