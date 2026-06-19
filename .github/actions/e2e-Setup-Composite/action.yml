@@ -187,12 +187,15 @@ runs:
         sudo apt-get install libapache2-mod-authnz-external
         sudo apt-get install libapache2-mod-authz-unixgroup
         sudo apt-get install libapache2-mod-wsgi-py3
+
         # configure apt for php8.2-fpm install
+        
         sudo apt-get update
         sudo apt-get install software-properties-common
         sudo add-apt-repository ppa:ondrej/php
         sudo apt-get update
         sudo apt-get install php${PHP_VER}-fpm
+
         cd $SUBMITTY_REPOSITORY
         sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
