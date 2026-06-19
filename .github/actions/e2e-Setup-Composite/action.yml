@@ -217,11 +217,6 @@ runs:
         sudo service apache2 restart
       shell: bash
 
-    - name: fix git config perms for all Submitty users
-      run: |
-        sudo git config --system --add safe.directory '*'
-      shell: bash
-
     - name: Run git tests
       if: contains(inputs.courses, 'sample')
       run: |
@@ -236,6 +231,10 @@ runs:
       run: |
         echo "=== PHP-FPM Service Status ==="
         sudo systemctl status php8.2-fpm --no-pager || true
+        echo "=== Submitty Apache Vhost Log ==="
+        sudo tail -n 100 /var/log/apache2/submitty.log || true
         echo "=== Apache Error Log ==="
         sudo tail -n 50 /var/log/apache2/error.log || true
+        echo "=== Manual curl against site ==="
+        curl -v http://localhost/ 2>&1 || true
       shell: bash
