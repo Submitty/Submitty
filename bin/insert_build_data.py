@@ -66,6 +66,8 @@ def send_data(db, metadata, engine, testcases):
         .where(testcase_table.c.g_id == GRADEABLE)
         .order_by(testcase_table.c.testcase_order)
     ).fetchall()
+    # rollback the select before db.begin
+    db.rollback()
 
     if check_invalidated(existing, testcases):
         print(f"Rebuilding gradeable '{GRADEABLE}': removing {len(existing)} existing testcase(s).")
