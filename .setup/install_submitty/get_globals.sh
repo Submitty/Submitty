@@ -32,6 +32,9 @@ source "${SUBMITTY_REPOSITORY:?}/.setup/bin/versions.sh"
 if [ "${IS_WORKER:?}" == 0 ]; then
     ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
     RESTART_DAEMONS=( submitty_websocket_server submitty_daemon_jobs_handler )
+    if [ "${IS_VAGRANT:?}" == 1 ]; then
+        RESTART_DAEMONS=( "${RESTART_DAEMONS[@]}" nullsmtpd )
+    fi
 else
     ALL_DAEMONS=( submitty_autograding_worker )
     RESTART_DAEMONS=( )
