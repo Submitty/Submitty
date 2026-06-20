@@ -8,7 +8,7 @@
 declare global {
     interface Window {
         showSettings(): void;
-        registerKeyHandler(parameters: object, fn: Function): void;
+        registerKeyHandler(parameters: object, fn: (...args: unknown[]) => unknown): void;
         __settingsPopupVisible?: boolean;
     }
 }

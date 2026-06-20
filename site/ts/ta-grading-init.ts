@@ -37,14 +37,14 @@ $(() => {
                 )
             ) {
                 if (storageCode in settingsCallbacks) {
-                    settingsCallbacks[storageCode as keyof typeof settingsCallbacks](item);
+                    settingsCallbacks[storageCode](item);
                 }
             }
         }
     }
 
     // Listen for settings changes from the Vue component
-    document.addEventListener('settings-changed', function (e) {
+    document.addEventListener('settings-changed', (e) => {
         const { storageCode, value } = (e as CustomEvent).detail as { storageCode: string; value: string };
         if (
             storageCode
@@ -53,7 +53,7 @@ $(() => {
                 storageCode,
             )
         ) {
-            settingsCallbacks[storageCode as keyof typeof settingsCallbacks](value);
+            settingsCallbacks[storageCode](value);
         }
     });
 
