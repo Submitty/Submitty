@@ -156,21 +156,4 @@
     } %}
 {% endif %}
 
-{% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
-        <option class="panel-position-left" value="leftTop">
-            Open as top left panel
-        </option>
-        <option class="panel-position-left" value="leftBottom">
-            Open as bottom left panel
-        </option>
-        <option class="panel-position-left" value="rightTop">
-            Open as top right panel
-        </option>
-        <option class="panel-position-right" value="rightBottom">
-            Open as bottom right panel
-        </option>
-    </select>
-{% endmacro %}
-
 {% include 'grading/electronic/PanelSelectorModal.twig' %}
