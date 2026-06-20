@@ -632,4 +632,11 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
 export function updatePanelHeaderDataAttributes() {
     $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
     $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
+
+    window.dispatchEvent(new CustomEvent('panel-layout-changed', {
+        detail: {
+            numOfPanelsEnabled: taLayoutDet.numOfPanelsEnabled,
+            dividedColName: taLayoutDet.dividedColName,
+        },
+    }));
 }

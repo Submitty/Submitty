@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 type PanelPosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
 
@@ -9,29 +9,45 @@ interface PositionOption {
     side: 'left' | 'right';
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     panelId: string;
     currentPosition?: string | null;
-}>();
+    numOfPanels?: number;
+    dividedColName?: 'LEFT' | 'RIGHT';
+}>(), {
+    numOfPanels: 1,
+    dividedColName: 'LEFT',
+});
 
 const emit = defineEmits<{
     'position-change': [payload: { panelId: string; position: PanelPosition }];
 }>();
 
-const numOfPanelsEnabled = ref(1);
-const dividedColName = ref<'LEFT' | 'RIGHT'>('LEFT');
+const numOfPanelsEnabled = ref(props.numOfPanels);
+const dividedCol = ref(props.dividedColName);
+
+function onLayoutChange(event: Event) {
+    const detail = (event as CustomEvent).detail;
+    if (detail) {
+        numOfPanelsEnabled.value = detail.numOfPanelsEnabled ?? numOfPanelsEnabled.value;
+        dividedCol.value = detail.dividedColName ?? dividedCol.value;
+    }
+}
 
 onMounted(() => {
-    const header = document.getElementById('grading-panel-header');
-    if (header) {
-        numOfPanelsEnabled.value = parseInt(header.getAttribute('data-num-of-panels-enabled') || '1', 10);
-        dividedColName.value = (header.getAttribute('data-divided-col-name') || 'LEFT') as 'LEFT' | 'RIGHT';
-    }
+    window.addEventListener('panel-layout-changed', onLayoutChange);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('panel-layout-changed', onLayoutChange);
 });
 
 const options = computed<PositionOption[]>(() => {
     const numOfPanels = numOfPanelsEnabled.value;
-    const dividedRight = dividedColName.value === 'RIGHT';
+    if (numOfPanels <= 1) {
+        return [];
+    }
+    const dividedRight = dividedCol.value === 'RIGHT';
     const is2Panel = numOfPanels === 2;
     const is3PanelRight = numOfPanels === 3 && dividedRight;
 
