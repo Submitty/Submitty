@@ -60,7 +60,7 @@ aside {
 }
 
 .navigation-box {
-    margin: 0 0 0 32px;
+    margin: 0 auto;
     display: flex;
     width: max-content;
     max-width: 100%;
@@ -553,6 +553,9 @@ progress::-webkit-progress-value {
 }
 
 #grading-panel-student-name {
+    position: absolute;
+    top: 0;
+    left: 0;
     overflow-y: auto;
     border-right: 1px solid var(--standard-light-medium-gray);
     padding: 5px 10px 5px 5px;
