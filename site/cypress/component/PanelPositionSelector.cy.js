@@ -18,6 +18,14 @@ function triggerChange(value) {
     });
 }
 
+function updateLayout(numOfPanels, dividedColName) {
+    const store = window.__submittyPanelLayoutStore__;
+    if (store) {
+        store.state = { numOfPanels, dividedColName };
+        store.listeners.forEach(fn => fn(store.state));
+    }
+}
+
 describe('PanelPositionSelector', () => {
     it('renders all 4 positions in 4-panel mode', () => {
         mount({ numOfPanels: 4 });
@@ -65,34 +73,30 @@ describe('PanelPositionSelector', () => {
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
     });
 
-    it('updates options when panel-layout-changed event fires', () => {
+    it('updates options when layout store fires', () => {
         mount({ numOfPanels: 2 });
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 2);
         cy.window().then((win) => {
-            win.dispatchEvent(new CustomEvent('panel-layout-changed', {
-                detail: { numOfPanelsEnabled: 4, dividedColName: 'LEFT' },
-            }));
+            updateLayout.call(win, 4, 'LEFT');
         });
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
     });
 
-    it('updates divided column when panel-layout-changed event fires', () => {
+    it('updates divided column when layout store fires', () => {
         mount({ numOfPanels: 3, dividedColName: 'LEFT' });
         cy.get('[data-testid="panel-position-leftBottom"]').should('exist');
         cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
         cy.window().then((win) => {
-            win.dispatchEvent(new CustomEvent('panel-layout-changed', {
-                detail: { numOfPanelsEnabled: 3, dividedColName: 'RIGHT' },
-            }));
+            updateLayout.call(win, 3, 'RIGHT');
         });
         cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
         cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
     });
 
-    it('does not crash on panel-layout-changed with undefined detail', () => {
+    it('does not crash on layout store update with current values', () => {
         mount({ numOfPanels: 4 });
         cy.window().then((win) => {
-            win.dispatchEvent(new CustomEvent('panel-layout-changed', { detail: undefined }));
+            updateLayout.call(win, 4, 'LEFT');
         });
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
     });

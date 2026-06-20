@@ -9,6 +9,36 @@ interface PositionOption {
     side: 'left' | 'right';
 }
 
+type Listener = (state: { numOfPanels: number; dividedColName: 'LEFT' | 'RIGHT' }) => void;
+
+interface StoreData {
+    state: { numOfPanels: number; dividedColName: 'LEFT' | 'RIGHT' };
+    listeners: Listener[];
+}
+
+const GLOBAL_KEY = '__submittyPanelLayoutStore__';
+
+function getStore(): StoreData {
+    if (typeof window !== 'undefined' && !(window as any)[GLOBAL_KEY]) {
+        (window as any)[GLOBAL_KEY] = {
+            state: { numOfPanels: 1, dividedColName: 'LEFT' },
+            listeners: [],
+        };
+    }
+    return (window as any)[GLOBAL_KEY];
+}
+
+function onLayoutChange(fn: Listener): () => void {
+    const store = getStore();
+    store.listeners.push(fn);
+    return () => {
+        const idx = store.listeners.indexOf(fn);
+        if (idx >= 0) {
+            store.listeners.splice(idx, 1);
+        }
+    };
+}
+
 const props = withDefaults(defineProps<{
     panelId: string;
     currentPosition?: string | null;
@@ -24,41 +54,33 @@ const emit = defineEmits<{
     'position-change': [payload: { panelId: string; position: PanelPosition }];
 }>();
 
-interface LayoutChangeEventDetail {
-    numOfPanelsEnabled?: number;
-    dividedColName?: 'LEFT' | 'RIGHT';
-}
-
-const numOfPanelsEnabled = ref(props.numOfPanels);
+const numOfPanels = ref(props.numOfPanels);
 const dividedCol = ref(props.dividedColName);
 
-function onLayoutChange(event: Event) {
-    const detail = (event as CustomEvent<LayoutChangeEventDetail>).detail;
-    if (detail) {
-        numOfPanelsEnabled.value = detail.numOfPanelsEnabled ?? numOfPanelsEnabled.value;
-        dividedCol.value = detail.dividedColName ?? dividedCol.value;
-    }
-}
+let unsubscribe: (() => void) | null = null;
 
 onMounted(() => {
-    window.addEventListener('panel-layout-changed', onLayoutChange);
+    unsubscribe = onLayoutChange((layout) => {
+        numOfPanels.value = layout.numOfPanels;
+        dividedCol.value = layout.dividedColName;
+    });
 });
 
 onUnmounted(() => {
-    window.removeEventListener('panel-layout-changed', onLayoutChange);
+    unsubscribe?.();
 });
 
 const options = computed<PositionOption[]>(() => {
-    const numOfPanels = numOfPanelsEnabled.value;
-    if (numOfPanels <= 1) {
+    const panelCount = numOfPanels.value;
+    if (panelCount <= 1) {
         return [];
     }
     const dividedRight = dividedCol.value === 'RIGHT';
-    const is2Panel = numOfPanels === 2;
-    const is3PanelRight = numOfPanels === 3 && dividedRight;
+    const is2Panel = panelCount === 2;
+    const is3PanelRight = panelCount === 3 && dividedRight;
 
     const showLeftBottom = !is2Panel && !is3PanelRight;
-    const showRightBottom = !is2Panel && (numOfPanels === 4 || dividedRight);
+    const showRightBottom = !is2Panel && (panelCount === 4 || dividedRight);
 
     const leftTopText = (is2Panel || is3PanelRight) ? 'Open as left panel' : 'Open as top left panel';
     const rightTopText = !showRightBottom ? 'Open as right panel' : 'Open as top right panel';
