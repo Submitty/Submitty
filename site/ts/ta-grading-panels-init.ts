@@ -10,6 +10,7 @@ import {
     initializeHorizontalTwoPanelDrag,
     setPanelsVisibilities,
     updatePanelOptions,
+    updatePanelHeaderDataAttributes,
     isMobileView,
     changeMobileView,
     getSavedTaLayoutDetails,
@@ -330,6 +331,7 @@ function openAutoGrading(num: string) {
 
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+    updatePanelHeaderDataAttributes();
 
     // Check initially if its the mobile screen view or not
     changeMobileView();
@@ -402,7 +404,7 @@ $(() => {
 
     // panel position selector change event
     $('.grade-panel .panel-position-cont').change(function () {
-        const panelSpanId = $(this).parent().attr('id');
+        const panelSpanId = $(this).closest('.grade-panel').attr('id');
         const position = $(this).val() as string;
         if (panelSpanId) {
             const panelId = panelSpanId.split(/(_|-)btn/)[0];

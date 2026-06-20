@@ -305,8 +305,13 @@ export function updatePanelOptions() {
     }
 
     $('.grade-panel .panel-position-cont')
+         .not('[data-vue="true"]')
         .empty()
         .append(...newOptions)
+        .attr('size', newOptions.length);
+
+    // Update size on Vue-managed selects separately (they manage their own options)
+    $('.grade-panel .panel-position-cont[data-vue="true"]')
         .attr('size', newOptions.length);
 }
 
@@ -463,6 +468,7 @@ export function resetSinglePanelLayout() {
     if (taLayoutDet.currentOpenPanel) {
         setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
     }
+    updatePanelHeaderDataAttributes();
 }
 
 export function togglePanelLayoutModes(forceVal = false) {
@@ -494,6 +500,7 @@ export function togglePanelLayoutModes(forceVal = false) {
         updatePanelLayoutModes();
     }
     else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
+        updatePanelHeaderDataAttributes();
         twoPanelCont.addClass('active');
         $('.two-panel-item.two-panel-left, .two-panel-drag-bar').addClass(
             'active',
@@ -619,4 +626,10 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     if (!taLayoutDet.isFullLeftColumnMode) {
         $('#grading-panel-student-name').show();
     }
+    updatePanelHeaderDataAttributes();
 };
+
+export function updatePanelHeaderDataAttributes() {
+    $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
+    $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
+}
