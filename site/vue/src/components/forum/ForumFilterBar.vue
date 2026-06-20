@@ -18,7 +18,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     initialSelectedCategoryIds: () => [],
     initialSelectedThreadStatuses: () => [],
-    initialUnreadChecked: false,
 });
 
 const emit = defineEmits<{
@@ -65,7 +64,8 @@ function toggleCategory(categoryId: number): void {
     const index = selectedCategoryIds.value.indexOf(categoryId);
     if (index === -1) {
         selectedCategoryIds.value = [...selectedCategoryIds.value, categoryId];
-    } else {
+    }
+    else {
         selectedCategoryIds.value = selectedCategoryIds.value.filter((id) => id !== categoryId);
     }
     emit('save-state');
@@ -75,7 +75,8 @@ function toggleStatus(statusSelId: number): void {
     const index = selectedThreadStatuses.value.indexOf(statusSelId);
     if (index === -1) {
         selectedThreadStatuses.value = [...selectedThreadStatuses.value, statusSelId];
-    } else {
+    }
+    else {
         selectedThreadStatuses.value = selectedThreadStatuses.value.filter((id) => id !== statusSelId);
     }
     emit('save-state');
@@ -178,7 +179,8 @@ function isStatusSelected(statusSelId: number): boolean {
         :id="`categoryid_${category.id}`"
         :key="category.id"
         :data-cat_id="String(category.id)"
-        :class="['btn', 'btn-sm', isCategorySelected(category.id) ? 'filter-active' : 'filter-inactive']"
+        class="btn btn-sm"
+        :class="isCategorySelected(category.id) ? 'filter-active' : 'filter-inactive'"
         :data-btn-selected="String(isCategorySelected(category.id))"
         type="button"
         :data-testid="`thread-category-${category.id}`"

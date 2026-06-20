@@ -108,7 +108,7 @@ describe('ForumFilterBar', () => {
             cy.mount(ForumFilterBar, {
                 props: {
                     categories,
-                    'onClear': onClear,
+                    onClear,
                 },
             });
 
