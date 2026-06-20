@@ -305,7 +305,7 @@ export function updatePanelOptions() {
     }
 
     $('.grade-panel .panel-position-cont')
-         .not('[data-vue="true"]')
+        .not('[data-vue="true"]')
         .empty()
         .append(...newOptions)
         .attr('size', newOptions.length);

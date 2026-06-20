@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<{
     numOfPanels?: number;
     dividedColName?: 'LEFT' | 'RIGHT';
 }>(), {
+    currentPosition: null,
     numOfPanels: 1,
     dividedColName: 'LEFT',
 });
@@ -23,11 +24,16 @@ const emit = defineEmits<{
     'position-change': [payload: { panelId: string; position: PanelPosition }];
 }>();
 
+interface LayoutChangeEventDetail {
+    numOfPanelsEnabled?: number;
+    dividedColName?: 'LEFT' | 'RIGHT';
+}
+
 const numOfPanelsEnabled = ref(props.numOfPanels);
 const dividedCol = ref(props.dividedColName);
 
 function onLayoutChange(event: Event) {
-    const detail = (event as CustomEvent).detail;
+    const detail = (event as CustomEvent<LayoutChangeEventDetail>).detail;
     if (detail) {
         numOfPanelsEnabled.value = detail.numOfPanelsEnabled ?? numOfPanelsEnabled.value;
         dividedCol.value = detail.dividedColName ?? dividedCol.value;

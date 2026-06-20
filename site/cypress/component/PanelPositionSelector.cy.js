@@ -99,7 +99,7 @@ describe('PanelPositionSelector', () => {
 
     it('emits position-change with correct panelId and position', () => {
         const spy = cy.spy().as('onChange');
-        mount({ panelId: 'grading_rubric', numOfPanels: 4, 'onPosition-change': spy });
+        mount({ 'panelId': 'grading_rubric', 'numOfPanels': 4, 'onPosition-change': spy });
         triggerChange('leftTop');
         cy.get('@onChange')
             .should('have.been.calledOnce')
@@ -108,7 +108,7 @@ describe('PanelPositionSelector', () => {
 
     it('does not emit position-change on mount', () => {
         const spy = cy.spy().as('onChange');
-        mount({ numOfPanels: 4, 'onPosition-change': spy });
+        mount({ 'numOfPanels': 4, 'onPosition-change': spy });
         cy.get('@onChange').should('not.have.been.called');
     });
 
