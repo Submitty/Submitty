@@ -1819,23 +1819,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($status);
     }
 
-    /**
-     * Shifts all dates in the array up to and including $date_prop to be no later than $time
-     * @param array $dates
-     * @param string $date_prop
-     * @param \DateTime $time
-     */
-    private function shiftDates(array &$dates, string $date_prop, \DateTime $time) {
-        foreach (Gradeable::date_validated_properties as $d) {
-            if ($dates[$d] > $time) {
-                $dates[$d] = $time;
-            }
-            if ($date_prop === $d) {
-                break;
-            }
-        }
-    }
-
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")]
     public function openquickLink($gradeable_id, $action) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -1847,7 +1830,7 @@ class AdminGradeableController extends AbstractController {
         if ($action === "release_grades_now") {
             if ($gradeable->hasReleaseDate()) {
                 if ($dates['grade_released_date'] > $now) {
-                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $dates['grade_released_date'] = $now;
                     $message .= "Released grades for ";
                     $success = true;
                 }
