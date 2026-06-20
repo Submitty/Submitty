@@ -9682,6 +9682,12 @@ parameters:
 			path: app/libraries/routers/AccessControl.php
 
 		-
+			rawMessage: 'Method app\libraries\routers\AttributeRouteLoader::configureRoute() has parameter $class with generic class ReflectionClass but does not specify its types: T'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/routers/AttributeRouteLoader.php
+
+		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
