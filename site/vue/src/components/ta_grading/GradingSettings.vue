@@ -140,7 +140,7 @@ onUnmounted(() => {
 
 <template>
   <div v-if="visible" class="popup-form" data-testid="settings-popup">
-    <div class="popup-box" @click.self="close">
+    <div class="popup-box" data-testid="popup-overlay" @click.self="close">
       <div class="popup-window" data-testid="popup-window" @click.stop>
         <div class="form-title">
           <h1>Settings</h1>
@@ -163,11 +163,14 @@ onUnmounted(() => {
               <h2>{{ group.name }}</h2>
               <br>
               <table class="ta-grading-setting-list">
-                <tr>
-                  <th>Setting</th>
-                  <th>Option</th>
-                </tr>
-                <tr v-for="setting in group.values" :key="setting.storageCode">
+                <thead>
+                  <tr>
+                    <th>Setting</th>
+                    <th>Option</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="setting in group.values" :key="setting.storageCode">
                   <td v-if="setting.options && Object.keys(setting.options).length > 0">{{ setting.name }}</td>
                   <td v-if="setting.options && Object.keys(setting.options).length > 0">
                     <select
@@ -187,6 +190,7 @@ onUnmounted(() => {
                     </select>
                   </td>
                 </tr>
+                </tbody>
               </table>
             </div>
           </div>
@@ -214,12 +218,15 @@ onUnmounted(() => {
           </div>
 
           <table class="ta-grading-setting-list" data-testid="hotkeys-list">
-            <tr>
-              <th>Action</th>
-              <th>Hotkey</th>
-              <th>Remove</th>
-            </tr>
-            <tr v-for="(hotkey, index) in hotkeys" :key="index">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Hotkey</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(hotkey, index) in hotkeys" :key="index">
               <td>{{ hotkey.name || 'Unassigned' }}</td>
               <td>
                 <button
@@ -246,6 +253,7 @@ onUnmounted(() => {
                 </button>
               </td>
             </tr>
+            </tbody>
           </table>
 
           <br>
