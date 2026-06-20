@@ -64,6 +64,24 @@
     word-break: break-all;
 }
 
+.submitted-files-collapsed {
+    display: none;
+}
+
+.submitted-files-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.submitted-files-header h4 {
+    margin: 0;
+}
+
+#submission-files-toggle {
+    cursor: pointer;
+}
+
 #version-cont {
     display: flex;
     flex-wrap: wrap;
