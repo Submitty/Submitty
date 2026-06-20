@@ -29,7 +29,7 @@ const settings = ref<typeof settingsData>([]);
 
 function refreshSettings() {
     loadTAGradingSettingData(props.fullAccess);
-    settings.value = JSON.parse(JSON.stringify(settingsData));
+    settings.value = JSON.parse(JSON.stringify(settingsData)) as typeof settingsData;
 }
 
 function refreshHotkeys() {
@@ -56,7 +56,9 @@ function close() {
 }
 
 function onDocumentKeydown(e: KeyboardEvent) {
-    if (!visible.value) return;
+    if (!visible.value) {
+        return;
+    }
 
     if (e.key === 'Escape') {
         close();
@@ -69,7 +71,9 @@ function onDocumentKeydown(e: KeyboardEvent) {
 }
 
 function onDocumentKeyup(e: KeyboardEvent) {
-    if (!visible.value || !remapActive.value) return;
+    if (!visible.value || !remapActive.value) {
+        return;
+    }
 
     const code = eventToKeyCode(e);
     e.preventDefault();
@@ -85,7 +89,9 @@ function onDocumentKeyup(e: KeyboardEvent) {
 }
 
 function startRemap(index: number) {
-    if (remapActive.value) return;
+    if (remapActive.value) {
+        return;
+    }
     remapActive.value = true;
     remapIndex.value = index;
 }
@@ -139,9 +145,21 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="visible" class="popup-form" data-testid="settings-popup">
-    <div class="popup-box" data-testid="popup-overlay" @click.self="close">
-      <div class="popup-window" data-testid="popup-window" @click.stop>
+  <div
+    v-if="visible"
+    class="popup-form"
+    data-testid="settings-popup"
+  >
+    <div
+      class="popup-box"
+      data-testid="popup-overlay"
+      @click.self="close"
+    >
+      <div
+        class="popup-window"
+        data-testid="popup-window"
+        @click.stop
+      >
         <div class="form-title">
           <h1>Settings</h1>
           <button
@@ -154,7 +172,10 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <div id="settings-content" class="form-body">
+        <div
+          id="settings-content"
+          class="form-body"
+        >
           <div id="ta-grading-settings-list">
             <div
               v-for="group in settings"
@@ -170,26 +191,31 @@ onUnmounted(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="setting in group.values" :key="setting.storageCode">
-                  <td v-if="setting.options && Object.keys(setting.options).length > 0">{{ setting.name }}</td>
-                  <td v-if="setting.options && Object.keys(setting.options).length > 0">
-                    <select
-                      :data-testid="'ta-grading-setting-option-' + setting.storageCode"
-                      class="ta-grading-setting-option"
-                      :value="setting.currValue"
-                      @change="onSettingChange(setting.storageCode, ($event.target as HTMLSelectElement).value)"
-                    >
-                      <option
-                        v-for="(optValue, optKey) in setting.options"
-                        :key="optValue"
-                        :value="optValue"
-                        :selected="optValue === setting.currValue"
+                  <tr
+                    v-for="setting in group.values"
+                    :key="setting.storageCode"
+                  >
+                    <td v-if="setting.options && Object.keys(setting.options).length > 0">
+                      {{ setting.name }}
+                    </td>
+                    <td v-if="setting.options && Object.keys(setting.options).length > 0">
+                      <select
+                        :data-testid="'ta-grading-setting-option-' + setting.storageCode"
+                        class="ta-grading-setting-option"
+                        :value="setting.currValue"
+                        @change="onSettingChange(setting.storageCode, ($event.target as HTMLSelectElement).value)"
                       >
-                        {{ optKey }}
-                      </option>
-                    </select>
-                  </td>
-                </tr>
+                        <option
+                          v-for="(optValue, optKey) in setting.options"
+                          :key="optValue"
+                          :value="optValue"
+                          :selected="optValue === setting.currValue"
+                        >
+                          {{ optKey }}
+                        </option>
+                      </select>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -217,7 +243,10 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <table class="ta-grading-setting-list" data-testid="hotkeys-list">
+          <table
+            class="ta-grading-setting-list"
+            data-testid="hotkeys-list"
+          >
             <thead>
               <tr>
                 <th>Action</th>
@@ -226,33 +255,35 @@ onUnmounted(() => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(hotkey, index) in hotkeys" :key="index">
-              <td>{{ hotkey.name || 'Unassigned' }}</td>
-              <td>
-                <button
-                  :data-testid="'remap-' + index"
-                  :class="[
-                    'btn',
-                    'remap-button',
-                    remapActive && remapIndex === index ? 'btn-success' : 'btn-default',
-                  ]"
-                  tabindex="0"
-                  @click="startRemap(index)"
-                >
-                  {{ remapActive && remapIndex === index ? 'Enter Key...' : hotkey.code }}
-                </button>
-              </td>
-              <td class="button-cell">
-                <button
-                  :data-testid="'remap-unset-' + index"
-                  class="btn btn-danger"
-                  tabindex="0"
-                  @click="unsetRemap(index)"
-                >
-                  &times;
-                </button>
-              </td>
-            </tr>
+              <tr
+                v-for="(hotkey, index) in hotkeys"
+                :key="index"
+              >
+                <td>{{ hotkey.name || 'Unassigned' }}</td>
+                <td>
+                  <button
+                    :data-testid="'remap-' + index"
+                    class="btn remap-button"
+                    :class="[
+                      remapActive && remapIndex === index ? 'btn-success' : 'btn-default',
+                    ]"
+                    tabindex="0"
+                    @click="startRemap(index)"
+                  >
+                    {{ remapActive && remapIndex === index ? 'Enter Key...' : hotkey.code }}
+                  </button>
+                </td>
+                <td class="button-cell">
+                  <button
+                    :data-testid="'remap-unset-' + index"
+                    class="btn btn-danger"
+                    tabindex="0"
+                    @click="unsetRemap(index)"
+                  >
+                    &times;
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
 

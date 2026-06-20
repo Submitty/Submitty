@@ -125,7 +125,7 @@ describe('GradingSettings', () => {
                 doc.dispatchEvent(new CustomEvent('toggle-settings-popup', { detail: { show: true } }));
             });
             cy.get(
-                '[data-testid="ta-grading-setting-option-general-setting-navigate-assigned-students-only"]'
+                '[data-testid="ta-grading-setting-option-general-setting-navigate-assigned-students-only"]',
             ).should('not.exist');
         });
 
@@ -135,7 +135,7 @@ describe('GradingSettings', () => {
                 doc.dispatchEvent(new CustomEvent('toggle-settings-popup', { detail: { show: true } }));
             });
             cy.get(
-                '[data-testid="ta-grading-setting-option-general-setting-navigate-assigned-students-only"]'
+                '[data-testid="ta-grading-setting-option-general-setting-navigate-assigned-students-only"]',
             ).should('be.visible');
         });
     });
