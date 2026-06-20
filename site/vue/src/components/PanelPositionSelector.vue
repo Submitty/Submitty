@@ -88,7 +88,6 @@ function onChange(event: Event) {
     class="panel-position-cont"
     :size="options.length"
     data-testid="panel-position-select"
-    data-vue="true"
     @change="onChange"
   >
     <option

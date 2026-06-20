@@ -267,52 +267,9 @@ function checkForTwoPanelLayoutChange(
 }
 
 export function updatePanelOptions() {
-    if (taLayoutDet.numOfPanelsEnabled === 1) {
-        return;
-    }
-
-    const panels = taLayoutDet.numOfPanelsEnabled;
-    const dividedRight = taLayoutDet.dividedColName === 'RIGHT';
-    const is2Panel = panels === 2;
-    const is3PanelRight = panels === 3 && dividedRight;
-
-    const showLeftBottom = !is2Panel && !is3PanelRight;
-    const showRightBottom = !is2Panel && (panels === 4 || dividedRight);
-
-    const leftTopText = (is2Panel || is3PanelRight)
-        ? 'Open as left panel'
-        : 'Open as top left panel';
-    const rightTopText = !showRightBottom
-        ? 'Open as right panel'
-        : 'Open as top right panel';
-
-    const makeOption = (cls: string, value: string, text: string): JQuery<HTMLOptionElement> => {
-        return $('<option>')
-            .addClass(cls)
-            .attr('value', value)
-            .text(text) as JQuery<HTMLOptionElement>;
-    };
-
-    const newOptions: JQuery<HTMLOptionElement>[] = [
-        makeOption('panel-position-left', 'leftTop', leftTopText),
-    ];
-    if (showLeftBottom) {
-        newOptions.push(makeOption('panel-position-left', 'leftBottom', 'Open as bottom left panel'));
-    }
-    newOptions.push(makeOption('panel-position-right', 'rightTop', rightTopText));
-    if (showRightBottom) {
-        newOptions.push(makeOption('panel-position-right', 'rightBottom', 'Open as bottom right panel'));
-    }
-
-    $('.grade-panel .panel-position-cont')
-        .not('[data-vue="true"]')
-        .empty()
-        .append(...newOptions)
-        .attr('size', newOptions.length);
-
-    // Update size on Vue-managed selects separately (they manage their own options)
-    $('.grade-panel .panel-position-cont[data-vue="true"]')
-        .attr('size', newOptions.length);
+    // Panel options are now managed reactively by the Vue PanelPositionSelector
+    // component via the panel-layout-changed CustomEvent. This function is kept
+    // as a no-op for call-site compatibility.
 }
 
 export function setPanelsVisibilities(
