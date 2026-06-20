@@ -482,7 +482,7 @@ class Config extends AbstractModel {
             $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
         }
 
-        $this->password_requirements = $submitty_json['password_requirements'];
+        $this->password_requirements = $submitty_json['password_requirements'] ?? [];
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
