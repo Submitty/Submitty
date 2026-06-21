@@ -331,3 +331,11 @@ function randomizeRotatingGroupsButton() {
     captureTabInModal('randomize-button-warning');
     form.find('.form-body').scrollTop(0);
 }
+
+window.addEventListener('randomize-cancel', function () {
+    $('#randomize-button-warning').css('display', 'none');
+});
+
+window.addEventListener('randomize-confirm', function (ev) {
+    window.location.href = ev.detail.url;
+});
