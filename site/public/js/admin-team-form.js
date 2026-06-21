@@ -332,10 +332,10 @@ function randomizeRotatingGroupsButton() {
     form.find('.form-body').scrollTop(0);
 }
 
-window.addEventListener('randomize-cancel', function () {
+window.addEventListener('randomize-cancel', () => {
     $('#randomize-button-warning').css('display', 'none');
 });
 
-window.addEventListener('randomize-confirm', function (ev) {
+window.addEventListener('randomize-confirm', (ev) => {
     window.location.href = ev.detail.url;
 });
