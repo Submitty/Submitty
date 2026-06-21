@@ -64,6 +64,7 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     button-id="two-panel-mode-btn"
     title="Toggle the two panel mode"
     optional-spanid="two-panel-mode-btn"
+    optional-test-id="panel-selector-toggle"
   />
 
   <NavigationButton
