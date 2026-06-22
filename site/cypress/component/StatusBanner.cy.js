@@ -74,29 +74,15 @@ describe('StatusBanner', () => {
     describe('emits', () => {
         it('emits color-change exactly once on mount with the color value', () => {
             const onColorChange = cy.stub().as('onColorChange');
-            cy.mount(StatusBanner, {
-                props: { ...defaultProps, onColorChange },
-            });
+            cy.mount(StatusBanner, { props: { ...defaultProps, onColorChange } });
             cy.get('@onColorChange')
                 .should('have.callCount', 1)
                 .and('be.calledWith', defaultProps.color);
         });
+    });
 
-        it('emits color-change with the correct color for each status type', () => {
-            const onColorChange = cy.stub().as('onColorChange');
-            cy.mount(StatusBanner, {
-                props: {
-                    message: 'No Submission',
-                    color: 'var(--standard-light-pink)',
-                    onColorChange,
-                },
-            });
-            cy.get('@onColorChange')
-                .should('have.callCount', 1)
-                .and('be.calledWith', 'var(--standard-light-pink)');
-        });
-
-        it('dispatches status-banner-color-change CustomEvent on mount', () => {
+    describe('CustomEvent dispatch', () => {
+        it('dispatches status-banner-color-change with the color on mount', () => {
             cy.window().then((win) => {
                 cy.stub(win, 'dispatchEvent').as('dispatch');
             });
@@ -106,6 +92,20 @@ describe('StatusBanner', () => {
                 Cypress.sinon.match.instanceOf(CustomEvent)
                     .and(Cypress.sinon.match.has('type', 'status-banner-color-change'))
                     .and(Cypress.sinon.match((ev) => ev.detail === defaultProps.color)));
+        });
+
+        it('dispatches with the correct color for each status type', () => {
+            cy.window().then((win) => {
+                cy.stub(win, 'dispatchEvent').as('dispatch');
+            });
+
+            cy.mount(StatusBanner, {
+                props: { message: 'No Submission', color: 'var(--standard-light-pink)' },
+            });
+            cy.get('@dispatch').should('be.calledWith',
+                Cypress.sinon.match.instanceOf(CustomEvent)
+                    .and(Cypress.sinon.match.has('type', 'status-banner-color-change'))
+                    .and(Cypress.sinon.match((ev) => ev.detail === 'var(--standard-light-pink)')));
         });
     });
 
