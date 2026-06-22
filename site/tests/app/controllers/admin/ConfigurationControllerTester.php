@@ -115,7 +115,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
             'default_section'                => null,
-            'chat_enabled'                   => false
+            'chat_enabled'                   => false,
+            'course_status'                  => null,
+            'unarchivable'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -201,7 +203,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
             'default_section'                => null,
-            'chat_enabled'                   => false
+            'chat_enabled'                   => false,
+            'course_status'                  => null,
+            'unarchivable'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -294,7 +298,9 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
             'default_section'                => null,
-            'chat_enabled'                   => false
+            'chat_enabled'                   => false,
+            'course_status'                  => null,
+            'unarchivable'                   => false
         ];
 
         $gradeable_seating_options = [
