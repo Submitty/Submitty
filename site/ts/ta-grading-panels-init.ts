@@ -257,7 +257,11 @@ function readCookies() {
         open_files_array.forEach((element: string) => {
             const file_path = element.split('#$SPLIT#$');
             let current = $('#file-container');
+            // flags whether this path is invalid for this submission 
+            // (might be valid for other submissions)
+            let invalid_path: boolean;
             for (let x = 0; x < file_path.length; x++) {
+                invalid_path = true;
                 current.children().each(function () {
                     if (x === file_path.length - 1) {
                         $(this)
@@ -295,11 +299,17 @@ function readCookies() {
                                     $(this)[0].dataset.file_name === file_path[x]
                                 ) {
                                     current = $(this);
+                                    invalid_path = false;
                                     return false;
                                 }
                             });
                     }
                 });
+                // the path does not correlate with this submission's
+                // file structure, so let's stop following it
+                if (invalid_path) {
+                    break;
+                }
             }
         });
     }
