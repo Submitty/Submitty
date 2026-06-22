@@ -221,6 +221,10 @@ class User extends AbstractModel implements \JsonSerializable {
      */
     protected $instructor_courses = false;
 
+    /** @prop
+     * @var string The user's preferred date format specifier, must be one of DateTimeFormat::SPECIFIERS */
+    protected $date_format = 'YMD';
+
     /**
      * User constructor.
      *
@@ -313,6 +317,8 @@ class User extends AbstractModel implements \JsonSerializable {
 
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
+        // Load user's preferred date format. Defaults to 'YMD' if not available
+        $this->date_format = isset($details['date_format']) ? $details['date_format'] : 'YMD';
     }
 
     /**
@@ -367,12 +373,26 @@ class User extends AbstractModel implements \JsonSerializable {
     }
 
     /**
-     * Get the UTC offset for this user's time zone.
-     *
-     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     * Set $this->date_format
+     * @param string $date_format Appropriate date format string from DateTimeFormat::SPECIFIERS
+     * @return bool True if date format was able to be updated, False otherwise
      */
-    public function getUTCOffset(): string {
-        return DateUtils::getUTCOffset($this->time_zone);
+    public function setDateFormat(string $date_format): bool {
+        if (in_array($date_format, DateTimeFormat::SPECIFIERS, true)) {
+            $result = $this->core->getQueries()->updateSubmittyUserDateFormat($this, $date_format);
+            if ($result === 1) {
+                $this->date_format = $date_format;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the user's preferred date format specifier.
+     */
+    public function getDateFormat(): string {
+        return $this->date_format;
     }
 
     /**
@@ -388,6 +408,13 @@ class User extends AbstractModel implements \JsonSerializable {
         else {
             return new \DateTimeZone($this->time_zone);
         }
+    }
+
+    /**
+     * Get the UTC offset for the user's selected time zone.
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
     }
 
     /**

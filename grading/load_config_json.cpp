@@ -13,6 +13,7 @@
 #include "execute.h"
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
+#define SUBMITTY_DATA_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__")
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 template <typename T>
@@ -302,7 +303,7 @@ void ConfirmCapabilityExists(nlohmann::json &whole_config) {
 // Throw an error and stop building if the required images aren't under the required capability.
 void ConfirmCapabilityHasImages(nlohmann::json &testcases, nlohmann::json &whole_config) {
   // Get the config file
-  std::string containers_file = SUBMITTY_INSTALL_DIRECTORY + "/config/autograding_containers.json";
+  std::string containers_file = SUBMITTY_DATA_DIRECTORY + "/config/autograding_containers.json";
   std::ifstream cfs(containers_file);
   nlohmann::json containers_json;
   if (cfs.is_open()) {
