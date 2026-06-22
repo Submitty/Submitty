@@ -664,7 +664,7 @@ class TeamController extends AbstractController {
 
         foreach ($teams as $team) {
             $team_id = $team->getId();
-
+            $is_empty = $team->getSize() === 0;
             // Check if the team has a submission.
             $has_submission = $this->core->getQueries()->getActiveVersionForTeam($gradeable_id, $team_id) > 0;
 
@@ -684,6 +684,10 @@ class TeamController extends AbstractController {
                 $user_id = $member->getId();
                 $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
                 $cancelled_submission = ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) && ($graded_gradeable->getAutoGradedGradeable()->hasSubmission());
+            }
+
+            if ($is_empty) {
+                continue;
             }
 
             if ($is_instructor_team) {
