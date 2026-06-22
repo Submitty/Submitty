@@ -17,7 +17,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
         parent::tearDown();
     }
 
-    public function testInvalidCsrfToken() {
+    public function testInvalidCsrfToken(): void {
         $core = $this->createMockCore();
         // Omitting $_POST['csrf_token'] to trigger CSRF failure
 
@@ -28,7 +28,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
         $this->assertEquals('Invalid CSRF token.', $response->json['message']);
     }
 
-    public function testMissingAlgorithm() {
+    public function testMissingAlgorithm(): void {
         $core = $this->createMockCore();
         $_POST['csrf_token'] = 'valid';
         // Omitting algorithm from $_POST
@@ -40,7 +40,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
         $this->assertEquals('Invalid or missing algorithm parameter.', $response->json['message']);
     }
 
-    public function testNoActiveSubmitters() {
+    public function testNoActiveSubmitters(): void {
         $core = $this->createMockCore();
         $_POST['csrf_token'] = 'valid';
         $_POST['algorithm'] = GradingClusterAlgorithm::DummySplit->value;
@@ -59,7 +59,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
         $this->assertEquals('No active submissions found for this gradeable.', $response->json['message']);
     }
 
-    public function testGetClustersEmptyConfig() {
+    public function testGetClustersEmptyConfig(): void {
         $core = $this->createMockCore();
 
         $em = $this->createMock(\Doctrine\ORM\EntityManager::class);
