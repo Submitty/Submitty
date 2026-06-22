@@ -148,7 +148,7 @@ class Chatroom {
         return !$this->isActive() && $this->allowReadOnlyAfterEnd();
     }
 
-    public function calcAnonName(string $user_id, string $global_secret, ?\Doctrine\ORM\EntityManagerInterface $em = null): string {
+    public function calcAnonName(string $user_id, string $global_secret): string {
         $adjectives = [
             "Quick", "Lazy", "Cheerful", "Pensive", "Mysterious", "Bright", "Sly", "Brave",
             "Calm", "Eager", "Fierce", "Gentle", "Jolly", "Kind", "Lively", "Nice",
@@ -171,15 +171,7 @@ class Chatroom {
             "Moa", "Dodo", "Rook", "Fowl", "Chough", "Snipe", "Knot", "Teal"
         ]; // 64 items
 
-        $index = 0;
-        if ($em !== null) {
-            $conn = $em->getConnection();
-            $query = 'SELECT count(*) FROM users WHERE user_id < ?';
-            $index = (int) $conn->fetchOne($query, [$user_id]);
-        }
-        else {
-            $index = abs(crc32($user_id)) % 4096;
-        }
+        $index = abs(crc32($user_id)) % 4096;
 
         $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
         $info = "chatroom_" . $this->getId() . "_" . $session_started_at;

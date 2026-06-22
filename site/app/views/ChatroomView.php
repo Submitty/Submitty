@@ -45,7 +45,7 @@ class ChatroomView extends AbstractView {
     /**
      * @param Chatroom[] $chatrooms Array of Chatroom objets
      */
-    public function showAllChatrooms(array $chatrooms, bool $insufficient_names_warning = false): string {
+    public function showAllChatrooms(array $chatrooms): string {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
 
         $chatroom_rows = [];
@@ -66,18 +66,17 @@ class ChatroomView extends AbstractView {
             'base_url' => $this->core->buildCourseUrl() . '/chat',
             'semester' => $this->core->getConfig()->getTerm(),
             'chatrooms' => $chatroom_rows,
-            'user_admin' => $this->core->getUser()->accessAdmin(),
-            'insufficient_names_warning' => $insufficient_names_warning
+            'user_admin' => $this->core->getUser()->accessAdmin()
         ]);
     }
 
-    public function showChatroom(Chatroom $chatroom, bool $anonymous = false, bool $insufficient_names_warning = false): string {
+    public function showChatroom(Chatroom $chatroom, bool $anonymous = false): string {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
         $roomId = $chatroom->getId();
         if ($anonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId(), $this->core->getConfig()->getSecretSession(), $this->core->getCourseEntityManager());
+            $display_name = $chatroom->calcAnonName($user->getId(), $this->core->getConfig()->getSecretServer());
         }
         else {
             if (!$user->accessAdmin()) {
@@ -95,8 +94,7 @@ class ChatroomView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
             'user_display_name' => $display_name,
             'anonymous' => $anonymous,
-            'isReadOnly' => $chatroom->isReadOnly(),
-            'insufficient_names_warning' => $insufficient_names_warning
+            'isReadOnly' => $chatroom->isReadOnly()
         ]);
     }
 }
