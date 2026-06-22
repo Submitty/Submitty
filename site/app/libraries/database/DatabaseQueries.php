@@ -4722,6 +4722,13 @@ SQL;
         return empty($row) ? null : $row;
     }
 
+    public function deleteNotificationDefault(string $user_id): void {
+        $this->submitty_db->query(
+            "DELETE FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+    }
+
     /**
      * @return array<string, mixed>|null
      */

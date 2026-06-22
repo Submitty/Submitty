@@ -668,6 +668,12 @@ class UsersController extends AbstractController {
             return;
         }
 
+        // Source course no longer exists — drop the stale pointer so we don't re-check it
+        if (!$this->core->getQueries()->courseExists($default['term'], $default['course'])) {
+            $this->core->getQueries()->deleteNotificationDefault($user_id);
+            return;
+        }
+
         $target_term = $this->core->getConfig()->getTerm();
         $target_course = $this->core->getConfig()->getCourse();
         if ($default['term'] === $target_term && $default['course'] === $target_course) {
