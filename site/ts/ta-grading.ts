@@ -353,7 +353,7 @@ function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string = '', 
                         stored_paths.push(
                             `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
                         );
-                        stored_paths = findAllClosedFiles(
+                        stored_paths = findAllOpenFiles(
                             $(this),
                             current_path,
                             $(this)[0].dataset.file_name,
