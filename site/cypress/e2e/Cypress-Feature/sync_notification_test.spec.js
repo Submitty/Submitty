@@ -66,34 +66,22 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             visitNotificationSettings('sample');
         });
 
-        it('opens the sync popup', () => {
+        it('functionality of sync popup', () => {
             openSyncPopup();
             cy.get('#sync-notification-popup').within(() => {
                 cy.contains('Sync Notification Settings').should('be.visible');
                 cy.get('[data-testid="sync-course-list"]').should('exist');
                 cy.get('[data-testid="sync-course-checkbox"]').should('have.length.at.least', 1);
             });
-        });
-
-        it('selects all courses with Select All', () => {
-            openSyncPopup();
             cy.get('[data-testid="sync-select-all"]').click();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 cy.wrap($cb).should('be.checked');
             });
-        });
-
-        it('clears selection with Clear Selection', () => {
-            openSyncPopup();
             cy.get('[data-testid="sync-select-all"]').click();
             cy.get('[data-testid="sync-clear-selection"]').click();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 cy.wrap($cb).should('not.be.checked');
             });
-        });
-
-        it('closes the popup with Close', () => {
-            openSyncPopup();
             cy.get('#sync-notification-popup').contains('button', 'Close').first().click();
             cy.get('#sync-notification-popup').should('not.be.visible');
         });
