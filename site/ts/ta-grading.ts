@@ -258,10 +258,12 @@ window.updateCookies = function (clear_open_files: boolean = false) {
                     .each(function () {
                         open_files_array = open_files_array.concat(findAllOpenFiles($(this)));
                         const closed_files_array: string[] = findAllClosedFiles($(this));
-                        open_files_array = open_files_array.filter((el) => !closed_files_array.includes(el));
+                        open_files_array = open_files_array.filter((item) => !closed_files_array.includes(item));
                     });
             });
     }
+    // remove duplicates from the auto-open list
+    open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
     window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
