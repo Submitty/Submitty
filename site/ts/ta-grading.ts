@@ -249,7 +249,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
         const prev_open_files = window.Cookies.get('open_files') || '';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
-        // search for and add open files to our array, to be saved in cookies
+        // search for and add open files to our array, then remove closed files
         $('#file-container')
             .children()
             .each(function () {
@@ -257,15 +257,6 @@ window.updateCookies = function (clear_open_files: boolean = false) {
                     .children('div[id^=div_viewer_]')
                     .each(function () {
                         open_files_array = open_files_array.concat(findAllOpenFiles($(this)));
-                    });
-            });
-        // search for and remove all closed files from our array
-        $('#file-container')
-            .children()
-            .each(function () {
-                $(this)
-                    .children('div[id^=div_viewer_]')
-                    .each(function () {
                         const closed_files_array: string[] = findAllClosedFiles($(this));
                         open_files_array = open_files_array.filter((el) => !closed_files_array.includes(el));
                     });
