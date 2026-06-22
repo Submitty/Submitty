@@ -8,12 +8,12 @@ This script is intended to be run periodically (e.g. by cron) to cleanup stale l
 import os
 
 import database_queries
-from sqlalchemy import create_engine, text  # pylint: disable=import-error
-from sqlalchemy.exc import SQLAlchemyError  # pylint: disable=import-error
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def _cleanup_course(db_user, db_pass, db_host, db_name):
-    """Delete stale active_graders rows (older than 2 days) from one course database."""
+    """Delete stale active_graders rows (> 24 hours) from one course database."""
     if os.path.isdir(db_host):
         conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
     else:
@@ -25,7 +25,7 @@ def _cleanup_course(db_user, db_pass, db_host, db_name):
     # "timestamp" is quoted because it is a reserved word in SQL
     delete_query = text("""
         DELETE FROM active_graders
-        WHERE "timestamp" < NOW() - INTERVAL '2 day'
+        WHERE "timestamp" < NOW() - INTERVAL '1 day'
     """)
     course_conn.execute(delete_query)
     course_conn.close()
