@@ -95,6 +95,18 @@ describe('StatusBanner', () => {
                 .should('have.callCount', 1)
                 .and('be.calledWith', 'var(--standard-light-pink)');
         });
+
+        it('dispatches status-banner-color-change CustomEvent on mount', () => {
+            cy.window().then((win) => {
+                cy.stub(win, 'dispatchEvent').as('dispatch');
+            });
+
+            cy.mount(StatusBanner, { props: defaultProps });
+            cy.get('@dispatch').should('be.calledWith',
+                Cypress.sinon.match.instanceOf(CustomEvent)
+                    .and(Cypress.sinon.match.has('type', 'status-banner-color-change'))
+                    .and(Cypress.sinon.match((ev) => ev.detail === defaultProps.color)));
+        });
     });
 
     describe('edge cases', () => {
