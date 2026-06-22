@@ -93,6 +93,24 @@
     background-color: var(--good-green);
 }
 
+.submission-warning {
+    font-weight: bold;
+    color: var(--text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--standard-vibrant-orange);
+}
+
+.submission-error {
+    font-weight: bold;
+    color: var(--text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--danger-red);
+}
+
 #gradeable-info h1 {
     margin-right: auto;
 }
