@@ -19,12 +19,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div
-        id="bar_banner"
-        class="banner"
-        :style="{ 'background-color': color, color: 'black' }"
-        data-testid="status-banner"
-    >
-        {{ message }}
-    </div>
+  <div
+    id="bar_banner"
+    class="banner"
+    :style="{ 'background-color': color, color: 'black' }"
+    data-testid="status-banner"
+  >
+    {{ message }}
+  </div>
 </template>
