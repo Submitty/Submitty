@@ -1399,7 +1399,10 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "Registration Subsection":
-                            if (!empty($row[$col_num])) {
+                            if (!isset($row[$col_num]) || $row[$col_num] === "" || strtolower($row[$col_num]) === "null") {
+                                $user->setRegistrationSubsection("");
+                            }
+                            else {
                                 $user->setRegistrationSubsection($value);
                             }
                             break;
@@ -1511,7 +1514,10 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "Registration Subsection":
-                            if (!empty($row[$col_num])) {
+                            if (!isset($row[$col_num]) || $row[$col_num] === "" || strtolower($row[$col_num]) === "null") {
+                                $user->setRegistrationSubsection("");
+                            }
+                            else {
                                 $user->setRegistrationSubsection($value);
                             }
                             break;
