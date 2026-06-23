@@ -43,7 +43,7 @@ onUnmounted(() => {
     title="Toggle full screen mode"
     @click="toggle"
   >
-    <i 
+    <i
       class="fas"
       :class="iconClass"
       aria-hidden="true"
