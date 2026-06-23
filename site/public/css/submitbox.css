@@ -72,14 +72,16 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-top: 8px;
+}
+
+#submission-files-toggle {
+    padding: 3px 8px;
+    line-height: 1;
 }
 
 .submitted-files-header h4 {
     margin: 0;
-}
-
-#submission-files-toggle {
-    cursor: pointer;
 }
 
 #version-cont {

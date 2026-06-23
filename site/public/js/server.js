@@ -831,19 +831,21 @@ function toggleSubmittedFiles() {
     const toggleText = document.getElementById('submission-files-toggle-text');
     const toggleIcon = document.getElementById('submission-files-toggle-icon');
     const submissionDetails = document.getElementById('submission-details');
+
+    toggleDiv('submitted-files');
+
     if ($('#submitted-files').is(':hidden')) {
-        toggleText.textContent = 'Collapse All Files';
-        toggleIcon.className = 'fas fa-chevron-up';
-        submissionDetails.classList.remove('col-md-12');
-        submissionDetails.classList.add('col-md-6');
-    }
-    else {
-        toggleText.textContent = 'Expand All Files';
+        toggleText.textContent = 'Show All Files';
         toggleIcon.className = 'fas fa-chevron-down';
         submissionDetails.classList.remove('col-md-6');
         submissionDetails.classList.add('col-md-12');
     }
-    toggleDiv('submitted-files');
+    else {
+        toggleText.textContent = 'Hide All Files';
+        toggleIcon.className = 'fas fa-chevron-up';
+        submissionDetails.classList.remove('col-md-12');
+        submissionDetails.classList.add('col-md-6');
+    }
 }
 
 function checkRefreshPage(url, anon_id = '') {
