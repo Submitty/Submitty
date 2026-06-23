@@ -14,7 +14,7 @@ class FileUtils {
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
     const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT',
-    '.user_assignment_access.json', '.bulk_upload_data.json'];
+    '.user_assignment_access.json', '.bulk_upload_data.json', '.upload.pdf'];
 
     /**
      * Return all files from a given directory.  All subdirectories
