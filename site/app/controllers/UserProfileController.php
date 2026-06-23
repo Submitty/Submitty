@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -46,6 +47,20 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * API route to return user data
+     *
+     */
+    #[Route("/api/me", methods: ["GET"])]
+    public function apiMeResponse(): JsonResponse {
+        $user = $this->core->getUser();
+        return JsonResponse::getSuccessResponse([
+            'user_id' => $user->getId(),
+            'user_given_name' => $user->getDisplayedGivenName(),
+            'user_family_name' => $user->getDisplayedFamilyName()
+        ]);
+    }
+
+    /**
      *
      * Handle ajax request to update the currently logged in user's time zone data.
      *
@@ -73,6 +88,26 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Error encountered updating user time zone.');
     }
 
+    /**
+     * Handle ajax request to update the currently logged in user's date/time format.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
+    */
+    #[Route("/user_profile/change_date_format", methods: ["POST"])]
+    public function changeDateFormat(): JsonResponse {
+        if (isset($_POST['date_format'])) {
+            $updated = $this->core->getUser()->setDateFormat($_POST['date_format']);
+
+            if ($updated) {
+                return JsonResponse::getSuccessResponse([
+                    'date_format' => $this->core->getUser()->getDateFormat()
+                ]);
+            }
+        }
+
+        return JsonResponse::getFailResponse('Error encountered updating user date format.');
+    }
+
     #[Route("/user_profile/set_pref_locale", methods: ["POST"])]
     public function setPrefLocale(): JsonResponse {
         if (isset($_POST['locale'])) {
@@ -92,12 +127,17 @@ class UserProfileController extends AbstractController {
             && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']
         ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
+            if (!Utils::isValidPassword($_POST['new_password'], $this->core->getConfig()->getPasswordRequirements())) {
+                $this->core->addErrorMessage("Password does not meet the requirements.");
+            }
+            else {
+                $user->setPassword($_POST['new_password']);
+                $this->core->getQueries()->updateUser($user);
+                $this->core->addSuccessMessage("Updated password");
+            }
         }
         else {
-            $this->core->addErrorMessage("Must put same password in both boxes.");
+            $this->core->addErrorMessage("Passwords do not match.");
         }
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))

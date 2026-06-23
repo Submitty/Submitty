@@ -24,6 +24,7 @@ class ReportControllerTester extends BaseUnitTest {
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
+        FileUtils::createDir($this->course_path . '/reports/all_grades', true);
     }
 
     private function setupMockConfigs() {
@@ -50,8 +51,12 @@ class ReportControllerTester extends BaseUnitTest {
                 ['sections_registration_id' => '1'],
                 ['sections_registration_id' => '2'],
             ],
+            'getAllUsers' => [],
+            'getAllGradeablesIdsAndTitles' => [],
+            'checkIsInstructorInCourse' => true,
         ];
-        $this->controller = new ReportController($this->createMockCore($config, $user_config, $queries));
+        $this->core = $this->createMockCore($config, $user_config, $queries);
+        $this->controller = new ReportController($this->core);
     }
 
     private function getSampleCustomizationJson() {
@@ -227,5 +232,24 @@ class ReportControllerTester extends BaseUnitTest {
         // Test the addition of a gradeable in an unused bucket, leading to no changes
         $this->gradeables[] = $this->createMockGradeable('lab1', 'Lab 1', 'lab', 100, '2025-01-01 23:59:59-0500');
         $this->submitCustomization($content);
+    }
+
+    public function testGenerateCustomizationShowsNormalizationWarning() {
+        // Write a gui_customization.json with a legacy bucket containing "ids": null
+        $content = $this->getSampleCustomizationJson();
+        $content['gradeables'][] = [
+            'type' => 'legacy-bucket',
+            'count' => 1,
+            'remove_lowest' => 0,
+            'percent' => 0.25,
+            'ids' => null
+        ];
+        $this->writeCustomization($content, 'gui_customization.json');
+        $this->writeCustomization($content, 'customization.json');
+
+        $this->setupMockConfigs();
+        $response = $this->controller->saveGUICustomizations();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals('success', $response->json['status']);
     }
 }
