@@ -676,6 +676,55 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+-- Name: autograding_testcase; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    testcase_order integer NOT NULL,
+    hidden boolean NOT NULL,
+    extra_credit boolean NOT NULL,
+    points_possible numeric(10,0) NOT NULL
+);
+
+
+--
+-- Name: autograding_testcase_data; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase_data (
+    atd_id integer NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_version integer NOT NULL,
+    points_earned numeric(10,0) NOT NULL,
+    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) <> (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.autograding_testcase_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.autograding_testcase_id_seq OWNED BY public.autograding_testcase.id;
+
+
+--
 -- Name: calendar_messages; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2104,6 +2153,13 @@ ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: autograding_testcase id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase ALTER COLUMN id SET DEFAULT nextval('public.autograding_testcase_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2330,6 +2386,14 @@ ALTER TABLE ONLY public.gradeable_teams
 
 ALTER TABLE ONLY public.autograding_metrics
     ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id, g_version);
+
+
+--
+-- Name: autograding_testcase autograding_testcase_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase
+    ADD CONSTRAINT autograding_testcase_pkey PRIMARY KEY (id);
 
 
 --
@@ -3179,6 +3243,14 @@ ALTER TABLE ONLY public.lichen_run_access
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
+
+
+--
+-- Name: autograding_testcase_data fk_testcase; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase_data
+    ADD CONSTRAINT fk_testcase FOREIGN KEY (atd_id) REFERENCES public.autograding_testcase(id) ON DELETE CASCADE;
 
 
 --
