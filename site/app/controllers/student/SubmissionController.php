@@ -1181,17 +1181,13 @@ class SubmissionController extends AbstractController {
         //add new job to queue
         if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
             $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
-            if (isset($lock_fp)) {
-                flock($lock_fp, LOCK_UN);
-                fclose($lock_fp);
-            }
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
-        if (isset($lock_fp)) {
-            flock($lock_fp, LOCK_UN);
-            fclose($lock_fp);
-        }
+        flock($lock_fp, LOCK_UN);
+        fclose($lock_fp);
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
 

@@ -694,7 +694,7 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
                    "Removing broken queue file and skipping job.")
             config.logger.log_message(msg)
             config.logger.log_stack_trace(traceback.format_exc())
-            
+
             # Log to dedicated file with matching format
             now = dateutils.get_current_time()
             easy_to_read_date = dateutils.write_submitty_date(now, True)
@@ -734,7 +734,7 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
                        "Removing broken queue file and skipping job.")
                 config.logger.log_message(msg)
                 config.logger.log_stack_trace(traceback.format_exc())
-                
+
                 # Log to dedicated file with matching format
                 now = dateutils.get_current_time()
                 easy_to_read_date = dateutils.write_submitty_date(now, True)
