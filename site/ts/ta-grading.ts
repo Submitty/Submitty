@@ -246,7 +246,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
-        const prev_open_files = window.Cookies.get('open_files') || '';
+        const prev_open_files = window.Cookies.get('open_files') || '[]';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
         // search for and add open files to our array, then remove closed files
