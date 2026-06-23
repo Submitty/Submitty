@@ -122,6 +122,9 @@ class NotificationController extends AbstractController {
         $this->core->loadMasterConfig();
         $this->core->loadMasterDatabase();
         $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $courses = array_filter($courses, function ($c) use ($term, $course) {
+            return !($c->getTerm() === $term && $c->getTitle() === $course);
+        });
         $default = $this->core->getQueries()->getNotificationDefault($user_id);
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
@@ -137,7 +140,8 @@ class NotificationController extends AbstractController {
                 $this->core->getUser()->getNotificationSettings(),
                 $this->core->getQueries()->getSelfRegistrationType($term, $course),
                 $courses,
-                $is_default_course
+                $is_default_course,
+                $default
             )
         );
     }
@@ -185,6 +189,22 @@ class NotificationController extends AbstractController {
         $this->core->loadCourseDatabase();
 
         return JsonResponse::getSuccessResponse('This course is now set as your default for future courses.');
+    }
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/clear_defaults", methods: ["POST"])]
+    public function clearNotificationDefaults(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadMasterConfig();
+        $this->core->loadMasterDatabase();
+        $this->core->getQueries()->deleteNotificationDefault($user_id);
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse('This course is no longer set as your default.');
     }
 
     /**

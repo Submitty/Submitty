@@ -42,6 +42,16 @@
           border: 0;
           border-top: 1px solid var(--standard-light-gray);
       }
+      .sync-default-row {
+        margin-top: 16px;
+        display: flex;
+      }
+      .sync-default-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+      }
       .button-row {
           display: flex;
           flex-wrap: wrap;
@@ -79,9 +89,12 @@
                     Sync notification settings
                 </button>
             {% endset %}
-            {% if is_default_course %}
-                <div class="alert alert-primary" data-testid="default-course-banner" style="margin-bottom: 16px;">
-                    This course is currently set as the default for your notification settings in future courses.
+                <div class="alert alert-primary" data-testid="default-course-banner" style="margin-bottom: 16px; {{ is_default_course ? '' : 'display: none;' }}">
+                    This course is currently set as the default for your future courses.
+                </div>
+            {% if not is_default_course and default_course is not null %}
+                <div class="alert alert-primary" data-testid="other-default-course-banner" style="margin-bottom: 16px;">
+                    Your current default for future courses is ({{ default_course.term }}) {{ default_course.course }}.
                 </div>
             {% endif %}
             <div class="header">
@@ -514,7 +527,6 @@
                 data: $('#form_notification_settings').serialize() + '&' + $.param({ sync_course_ids: selected }),
                 success: function () {
                     displaySuccessMessage("Synced to selected courses.");
-                    $('#sync-notification-popup').hide();
                 },
                 error: function () {
                     displayErrorMessage("Failed to sync settings.");
@@ -529,6 +541,39 @@
         }
         function clearAllSyncCourses() {
             $('.sync-course-checkbox').prop('checked', false);
+        }
+        function toggleDefaultCourse(checkbox) {
+            var url = checkbox.checked
+                ? "{{ save_defaults_url }}"
+                : "{{ clear_defaults_url }}";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { csrf_token: "{{ csrf_token }}" },
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if (json['status'] === 'fail') {
+                            displayErrorMessage(json['message']);
+                            checkbox.checked = !checkbox.checked;
+                        } else {
+                            displaySuccessMessage(json['data']);
+                            $('[data-testid="default-course-banner"]').toggle(checkbox.checked);
+                            if (checkbox.checked) {
+                                $('[data-testid="other-default-course-banner"]').hide();
+                            }
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error updating default. Please try again.');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                },
+                error: function() {
+                    displayErrorMessage('Failed to update notification default.');
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
         }
         function toggleSyncRow(row) {
             const checkbox = row.querySelector('.sync-course-checkbox');
