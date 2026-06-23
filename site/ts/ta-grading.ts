@@ -363,9 +363,6 @@ function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string = '', 
                     }
                 });
         });
-    if (first) {
-        console.log(`open: ${(stored_paths).toString()}`);
-    }
     return stored_paths;
 }
 
@@ -415,9 +412,6 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
                     );
                 });
         });
-    if (first) {
-        console.log(`closed: ${(stored_paths).toString()}`);
-    }
     return stored_paths;
 }
 

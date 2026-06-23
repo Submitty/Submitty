@@ -257,7 +257,7 @@ function readCookies() {
         open_files_array.forEach((element: string) => {
             const file_path = element.split('#$SPLIT#$');
             let current = $('#file-container');
-            // flags whether this path is invalid for this submission 
+            // flags whether this path is invalid for this submission
             // (might be valid for other submissions)
             let invalid_path: boolean;
             for (let x = 0; x < file_path.length; x++) {
