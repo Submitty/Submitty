@@ -10,7 +10,7 @@
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python3 *.py",
             "command" : "python3 *.py",
-            "points" : 1,
+            "points" : 0,
             "validation" : [
                 {
                     "method" : "diff",

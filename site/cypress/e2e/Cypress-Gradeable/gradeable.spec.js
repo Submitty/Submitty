@@ -137,7 +137,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         });
 
         // users with 7+ points on open_homework
-        ['kinge'].forEach((user) => {
+        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
             cy.login(user);
             cy.visit(['testing']);
 
