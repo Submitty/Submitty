@@ -32,6 +32,7 @@ class NotificationView extends AbstractView {
      * @param int $self_registration_type
      * @param array <int, Course> $courses
      * @param bool $is_default_course
+     * @param array<string, string>|null $default_course
      * @return void
      */
     public function showNotificationSettings(
