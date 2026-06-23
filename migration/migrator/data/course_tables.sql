@@ -676,6 +676,7 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+<<<<<<< HEAD
 -- Name: block_user_action; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -687,14 +688,48 @@ CREATE TABLE public.block_user_action (
     created_by character varying(255) NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT block_user_action_action_check CHECK (((action)::text = 'no_forum_posts'::text))
+=======
+-- Name: autograding_testcase; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    testcase_order integer NOT NULL,
+    hidden boolean NOT NULL,
+    extra_credit boolean NOT NULL,
+    points_possible numeric(10,0) NOT NULL
+>>>>>>> origin/main
 );
 
 
 --
+<<<<<<< HEAD
 -- Name: block_user_action_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.block_user_action_id_seq
+=======
+-- Name: autograding_testcase_data; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase_data (
+    atd_id integer NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_version integer NOT NULL,
+    points_earned numeric(10,0) NOT NULL,
+    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) <> (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.autograding_testcase_id_seq
+>>>>>>> origin/main
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -704,10 +739,17 @@ CREATE SEQUENCE public.block_user_action_id_seq
 
 
 --
+<<<<<<< HEAD
 -- Name: block_user_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.block_user_action_id_seq OWNED BY public.block_user_action.id;
+=======
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.autograding_testcase_id_seq OWNED BY public.autograding_testcase.id;
+>>>>>>> origin/main
 
 
 --
@@ -2139,10 +2181,17 @@ ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+<<<<<<< HEAD
 -- Name: block_user_action id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.block_user_action ALTER COLUMN id SET DEFAULT nextval('public.block_user_action_id_seq'::regclass);
+=======
+-- Name: autograding_testcase id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase ALTER COLUMN id SET DEFAULT nextval('public.autograding_testcase_id_seq'::regclass);
+>>>>>>> origin/main
 
 
 --
@@ -2375,6 +2424,7 @@ ALTER TABLE ONLY public.autograding_metrics
 
 
 --
+<<<<<<< HEAD
 -- Name: block_user_action block_user_action_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2388,6 +2438,13 @@ ALTER TABLE ONLY public.block_user_action
 
 ALTER TABLE ONLY public.block_user_action
     ADD CONSTRAINT block_user_action_user_id_action_key UNIQUE (user_id, action);
+=======
+-- Name: autograding_testcase autograding_testcase_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase
+    ADD CONSTRAINT autograding_testcase_pkey PRIMARY KEY (id);
+>>>>>>> origin/main
 
 
 --
@@ -3253,6 +3310,14 @@ ALTER TABLE ONLY public.lichen_run_access
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
+
+
+--
+-- Name: autograding_testcase_data fk_testcase; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase_data
+    ADD CONSTRAINT fk_testcase FOREIGN KEY (atd_id) REFERENCES public.autograding_testcase(id) ON DELETE CASCADE;
 
 
 --
