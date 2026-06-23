@@ -376,7 +376,7 @@
     white-space: nowrap;
 }
 
-.full-screen-mode {
+/*.full-screen-mode {
     position: fixed;
     top: 0;
     left: 0;
@@ -388,7 +388,7 @@
 
 .full-screen-mode .content {
     margin: 0;
-}
+}*/
 
 .current-favorite i.fas,
 .active-thread-remove-announcement i.fas,

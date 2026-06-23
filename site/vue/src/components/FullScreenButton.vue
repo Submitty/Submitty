@@ -1,47 +1,59 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
-const main = () => document.querySelector('main#main');
-const isFullScreen = ref(main()?.classList.contains('full-screen-mode') ?? false);
+function getMain(): HTMLElement | null {
+    return document.querySelector('main#main');
+}
 
-function toggle() {
-    const el = main();
-    if (!el) {
+const isFullScreen = ref(getMain()?.classList.contains('full-screen-mode') ?? false);
+const iconClass = computed(() => (isFullScreen.value ? 'fa-compress' : 'fa-expand'));
+
+function setFullScreen(on: boolean) {
+    const main = getMain();
+    if (!main) {
         return;
     }
-    el.classList.toggle('full-screen-mode');
-    isFullScreen.value = el.classList.contains('full-screen-mode');
+    main.classList.toggle('full-screen-mode', on);
+    isFullScreen.value = on;
 }
+
+function toggle() {
+    setFullScreen(!isFullScreen.value);
+}
+
+function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && isFullScreen.value) {
+        setFullScreen(false);
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <template>
-  <button
-    id="fullscreen-btn"
-    data-testid="fullscreen-btn"
-    class="btn btn-default"
-    title="Toggle full screen mode"
-    @click="toggle"
-  >
-    <i :class="`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'}`" />
+  <button id="fullscreen-btn" class="btn btn-default" title="Toggle full screen mode" @click="toggle">
+    <i class="fas" :class="iconClass" aria-hidden="true" />
   </button>
 </template>
 
-<style scoped>
-.fullscreen-btn-cont {
-    display: inline-block;
-    position: relative;
-    margin-right: 4px;
-    border: 2px solid var(--text-black);
-    border-radius: 5px;
-    box-shadow: 1px 1px 2px var(--text-black);
+<style>
+.full-screen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    z-index: 10;
 }
-.fullscreen-btn-cont button {
-    cursor: pointer;
-}
-.fullscreen-icon {
-    font-size: 27px;
-    padding: 3px 8px;
-    margin: 1px;
-    color: var(--text-black);
+
+.full-screen-mode .content {
+    margin: 0;
 }
 </style>
