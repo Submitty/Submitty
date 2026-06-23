@@ -79,6 +79,7 @@ class SimpleGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('simple-grading.js');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
 
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
@@ -98,7 +99,8 @@ class SimpleGraderView extends AbstractView {
             "user_id" => $this->core->getUser()->getId(),
             "anon_ids" => $anon_ids,
             'show_grader' => isset($_COOKIE['show_grader']) ? ($_COOKIE['show_grader'] === 'true') : false,
-            'show_dates' => isset($_COOKIE['show_dates']) ? ($_COOKIE['show_dates'] === 'true') : false
+            'show_dates' => isset($_COOKIE['show_dates']) ? ($_COOKIE['show_dates'] === 'true') : false,
+            'expand_row_heights' => isset($_COOKIE['expand_row_heights']) && $_COOKIE['expand_row_heights'] === 'true',
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [

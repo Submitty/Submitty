@@ -3,6 +3,60 @@
       input[type="checkbox"]:disabled {
           background: gray;
       }
+      .sync-top-right {
+        display: flex;
+        align-items: center;
+          float: right;
+          text-align: right;
+          margin-right: 5px;
+      }
+      .sync-bottom-row {
+          margin-top: 30px;
+          display: flex;
+          justify-content: flex-end;
+      }
+      .sync-course-container {
+          cursor: pointer;
+      }
+      .sync-course-container:hover {
+          background-color: var(--hover-notification);
+      }
+      .sync-course-container.selected-row {
+          background-color: var(--viewed-content);
+      }
+      .sync-course-grid {
+          display: grid;
+          grid-template-columns: 1fr 9fr;
+          align-items: center;
+          gap: 24px;
+          margin-top: 12px;
+      }
+      .sync-buttons {
+          display: flex;
+          gap: 16px;
+          margin-top: 24px;
+      }
+      .sync-course-container hr {
+          margin: 0;
+          height: 0;
+          border: 0;
+          border-top: 1px solid var(--standard-light-gray);
+      }
+      .button-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+      }
+      .notification-setting-button {
+          flex-grow: 1;
+      }
+      .button-group {
+          margin-top: 8px;
+      }
+      .sync-help-text {
+          font-size: 13px;
+          white-space: nowrap;
+      }
   </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -12,9 +66,25 @@
             {% else %}
                 {% set header = "Notification Settings" %}
             {% endif %}
+            {% set sync_button %}
+                <button type="button"
+                    class="btn btn-primary sync-settings-btn"
+                    onclick="showSyncPopup()"
+                    data-testid="sync-notification-settings-top">
+                    Sync notification settings
+                </button>
+            {% endset %}
             <div class="header">
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
+                {% if email_enabled %}
+                    <div class="sync-top-right" style="display: flex; align-items: center; gap: 10px;">
+                        <span class="sync-help-text">
+                            To copy the notification settings from this course to other courses, click here.
+                        </span>
+                        {{ sync_button|raw }}
+                    </div>
+                {% endif %}
                 <div class="button-group" data-testid="notification-settings-button-group">
                     <div class="button-row">
                         <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".notification-setting-input" onclick="checkAll(this)" data-testid="subscribe-all-notifications">Subscribe to all notifications</button>
@@ -160,7 +230,7 @@
             {% endif %}
 
             <div class="heading row-spacing">
-                <h2>Grades</h2>
+                <h2>Gradeables</h2>
                 <hr>
             </div>
 
@@ -175,6 +245,20 @@
                 <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Release" name="all_released_grades" id="all_released_grades" {% if notification_saves['all_released_grades'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_released_grades'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Release" name="all_released_grades_email" id="all_released_grades_email" {% if notification_saves['all_released_grades_email'] %} checked="checked" {% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_released_grades_email'] ? 'true' : 'false' }}"></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <span>
+                        <span class="option-title">Gradeable Release</span>
+                        <br>
+                        <span class="option-alt">Alert me when any gradeable is available for submission</span>
+                    </span>
+                </div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All Gradeable Submissions" name="all_gradeable_releases" id="all_gradeable_releases" {% if notification_saves['all_gradeable_releases'] %}checked="checked"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All Gradeable Submissions" name="all_gradeable_releases_email" id="all_gradeable_releases_email" {% if notification_saves['all_gradeable_releases_email'] %}checked="checked"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -340,6 +424,14 @@
                     {% endif %}
                 </div>
             {% endif %}
+            {% if email_enabled %}
+            <div class="sync-bottom-row" style="display: flex; align-items: center; gap: 10px;">
+                <span class="sync-help-text">
+                    To copy the notification settings from this course to other courses, click here.
+                </span>
+                {{ sync_button|raw }}
+            </div>
+{% endif %}
         </div>
     </form>
     <script>
@@ -377,8 +469,51 @@
 
 
 
+        function setNotification(button) {
+            const popup = $(button).closest('#sync-notification-popup');
+            const selected = popup.find('input[name="sync_course_ids[]"]:checked').map(function () {return this.value;}).get();
+            if (!selected.length) {
+                displayErrorMessage("Please select at least one course.");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: buildCourseUrl(['notifications','sync']),
+                data: $('#form_notification_settings').serialize() + '&' + $.param({ sync_course_ids: selected }),
+                success: function () {
+                    displaySuccessMessage("Synced to selected courses.");
+                    $('#sync-notification-popup').hide();
+                },
+                error: function () {
+                    displayErrorMessage("Failed to sync settings.");
+                }
+            });
+        }
+        function showSyncPopup() {
+            $('#sync-notification-popup').css('display','block');
+        }
+        function selectAllSyncCourses() {
+            $('.sync-course-checkbox').prop('checked', true);
+        }
+        function clearAllSyncCourses() {
+            $('.sync-course-checkbox').prop('checked', false);
+        }
+        function toggleSyncRow(row) {
+            const checkbox = row.querySelector('.sync-course-checkbox');
+            checkbox.checked = !checkbox.checked;
+            updateRowHighlight(checkbox);
+        }
+        function updateRowHighlight(checkbox) {
+            const row = checkbox.closest('.sync-course-container');
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+            } else {
+                row.classList.remove('selected-row');
+            }
+        }
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
+            console.log(f);
             var url = f.attr('action');
             e.preventDefault();
             $.ajax({
@@ -403,3 +538,4 @@
         });
     </script>
 </div>
+{% include 'SyncSettingsPopup.twig' with { courses: courses } %}

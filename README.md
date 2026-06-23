@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-[![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
+[![CI](https://github.com/Submitty/Submitty/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/ci.yml)
 [![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
 
 # Usage
@@ -15,8 +15,8 @@ System instructions located at [https://submitty.org/](https://submitty.org/)
 # Background
 
 [Submitty](https://submitty.org) is an open source course management, assignment submission, exam and grading system
-from the [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/),
-[Department of Computer Science](https://science.rpi.edu/computer-science) at
+from the [Rensselaer Center for Open Source Software (RCOS)](https://new.rcos.io/),
+[Department of Computer Science](https://compsci.rpi.edu/) at
 [Rensselaer Polytechnic Institute](https://www.rpi.edu/).
 
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).

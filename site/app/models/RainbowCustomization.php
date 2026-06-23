@@ -5,6 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 
 /**
  * Class RainbowCustomization
@@ -44,8 +45,11 @@ class RainbowCustomization extends AbstractModel {
      * @var string[]
      */
     private array $available_buckets;
+    /**
+     * @var string[]
+     */
+    private array $normalization_warnings = [];
     private ?object $RCJSON;                            // This is the customization.json php object, or null if it wasn't found
-
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
      * On top of that, Rainbow Grades has its own enum internally. Since that's a separate repo it's probably
      * unavoidable, but the fewer places we can duplicate this, the better.
@@ -61,6 +65,8 @@ class RainbowCustomization extends AbstractModel {
         'project',
         'participation', 'note',
         'none'];
+
+    const allowed_show_notes = ['never', 'instructor_only', 'student_only', 'student_and_instructor'];
 
 
     public function __construct(Core $main_core) {
@@ -122,7 +128,9 @@ class RainbowCustomization extends AbstractModel {
                 "manual_grading_points" => $manual_grading_points,
                 "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override_percent" => false
+                "override_percent" => false,
+                "show_notes" => 'never',
+                "show_notes_applicable" => in_array($gradeable->getType(), [GradeableType::NUMERIC_TEXT, GradeableType::CHECKPOINTS], true)
             ];
         }
         // Determine which 'buckets' exist in the customization.json
@@ -136,9 +144,14 @@ class RainbowCustomization extends AbstractModel {
                 // entered a value which was greater than the number of gradeables in the database, we should use the
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
+                if (!array_key_exists($bucket, $this->bucket_counts)) {
+                    $this->bucket_counts[$bucket] = 0;
+                    $this->bucket_remove_lowest[$bucket] = 0;
+                }
+                $bucket_gradeables = $this->getBucketGradeables($bucket);
 
                 // Filter out removed gradeables or updated gradeable buckets
-                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                $this->customization_data[$bucket] = array_values(array_filter($bucket_gradeables, function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
                     $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
                     return !$removed && !$swapped;
@@ -177,16 +190,43 @@ class RainbowCustomization extends AbstractModel {
                 else {
                     continue;
                 }
+                // Create a map from id to percent for this bucket
+                $percent_map = [];
 
-                //loop through all gradeables in bucket and compare them
-                $j_index = 0;
-                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
-                        $c_gradeable['override_percent'] = true;
-                        $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'percent')) {
+                        $percent_map[$json_gradeable->id] = $json_gradeable->percent * 100;
                     }
-                    $j_index++;
                 }
+
+                // Assign percents to customization_data gradeables by matching ids
+                $bucket_gradeables = $this->getBucketGradeables($c_bucket);
+                foreach ($bucket_gradeables as &$c_gradeable) {
+                    if (isset($percent_map[$c_gradeable['id']])) {
+                        $c_gradeable['override_percent'] = true;
+                        $c_gradeable['percent'] = $percent_map[$c_gradeable['id']];
+                    }
+                }
+                unset($c_gradeable);
+                $this->customization_data[$c_bucket] = $bucket_gradeables;
+
+                // Assign show_notes to customization_data gradeables by matching ids
+                $show_notes_map = [];
+                if (!property_exists($json_bucket, 'ids') || !is_array($json_bucket->ids)) {
+                    continue;
+                }
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'show_notes') && in_array($json_gradeable->show_notes, self::allowed_show_notes, true)) {
+                        $show_notes_map[$json_gradeable->id] = $json_gradeable->show_notes;
+                    }
+                }
+
+                foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
+                    if (isset($show_notes_map[$c_gradeable['id']])) {
+                        $c_gradeable['show_notes'] = $show_notes_map[$c_gradeable['id']];
+                    }
+                }
+                unset($c_gradeable);
             }
         }
         //XXX: Assuming that the contents of these buckets will be lowercase
@@ -204,7 +244,7 @@ class RainbowCustomization extends AbstractModel {
             $json_buckets = $this->RCJSON->getGradeables();
             foreach ($json_buckets as $json_bucket) {
                 if (property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
-                    $json_buckets_gradeables[$json_bucket->type] = $json_bucket->ids;
+                    $json_buckets_gradeables[$json_bucket->type] = $this->getJsonBucketIds($json_bucket);
                 }
             }
         }
@@ -216,6 +256,15 @@ class RainbowCustomization extends AbstractModel {
             $temp_customization_data[$bucket] = $this->reorderBucket($gradeables, $json_bucket_ids);
         }
         $this->customization_data = $temp_customization_data;
+    }
+
+    //Normalization warning:
+    public function addNormalizationWarning(): void {
+        $this->normalization_warnings[] = 'Some Rainbow Grades customization buckets contained malformed legacy data (for example a null ids value or unknown bucket type) and were loaded as empty. Please review and resave your customization.';
+    }
+
+    public function hasNormalizationWarning(): bool {
+        return $this->normalization_warnings !== [];
     }
 
     /**
@@ -292,7 +341,7 @@ class RainbowCustomization extends AbstractModel {
             foreach ($json_buckets as $json_bucket) {
                 $retArray[$json_bucket->type] = [];
 
-                foreach ($json_bucket->ids as $json_gradeable) {
+                foreach ($this->getJsonBucketIds($json_bucket) as $json_gradeable) {
                     if (property_exists($json_gradeable, 'curve')) {
                         $curve_data = $json_gradeable->curve;
                         $curve_data_pos = 0;
@@ -320,6 +369,37 @@ class RainbowCustomization extends AbstractModel {
         return $retArray;
     }
 
+    /**
+     * Normalize stored bucket data so legacy null entries behave like empty buckets.
+     *
+     * @return array<mixed>
+     */
+    private function getBucketGradeables(string $bucket): array {
+        $bucket_gradeables = $this->customization_data[$bucket] ?? [];
+        if (!array_key_exists($bucket, $this->customization_data) || !is_array($bucket_gradeables)) {
+            $this->addNormalizationWarning();
+        }
+        if (!is_array($bucket_gradeables)) {
+            $bucket_gradeables = [];
+        }
+        return $bucket_gradeables;
+    }
+
+    /**
+     * Normalize legacy JSON buckets whose ids field may be null or malformed.
+     *
+     * @return array<mixed>
+     */
+    private function getJsonBucketIds(object $json_bucket): array {
+        $json_bucket_ids = $json_bucket->ids ?? [];
+        if (!property_exists($json_bucket, 'ids') || !is_array($json_bucket_ids)) {
+            $this->addNormalizationWarning();
+        }
+        if (!is_array($json_bucket_ids)) {
+            $json_bucket_ids = [];
+        }
+        return $json_bucket_ids;
+    }
     /**
      * Get an array containing what percentage of the grade the bucket counts toward.  The key is the name of the
      * bucket and the value is the percentage which has been cast back to a whole number integer.  This differs
@@ -404,8 +484,60 @@ class RainbowCustomization extends AbstractModel {
     /**
      * @return string[]
      */
+    public function getNormalizationWarnings(): array {
+        return $this->normalization_warnings;
+    }
+
+    /**
+     * @return string[]
+     */
     public function getMessages(): array {
         return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
+    }
+
+    public function getExtraCredit(): bool {
+        return !is_null($this->RCJSON) ? $this->RCJSON->getExtraCredit() : false;
+    }
+
+    public function getShowGradeableConfiguration(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getShowGradeableConfiguration()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: when notes customization is enabled,
+        // show the gradeable configuration section on refresh.
+        return $this->getCustomizeShowNotes();
+    }
+
+    public function getCustomizeShowNotes(): bool {
+        if (is_null($this->RCJSON)) {
+            return false;
+        }
+
+        if ($this->RCJSON->getCustomizeShowNotes()) {
+            return true;
+        }
+
+        // Backward-compatible fallback: if any gradeable has non-default show_notes,
+        // enable the toggle so existing custom values are visible on refresh.
+        foreach ($this->RCJSON->getGradeables() as $bucket) {
+            if (!property_exists($bucket, 'ids') || is_null($bucket->ids)) {
+                //Notify the user instead of silently skipping
+                $this->addNormalizationWarning();
+                continue;
+            }
+            foreach ($bucket->ids as $gradeable) {
+                if (property_exists($gradeable, 'show_notes') && $gradeable->show_notes !== 'never') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 
@@ -657,6 +789,18 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        if (isset($form_json->extra_credit)) {
+            $this->RCJSON->setExtraCredit($form_json->extra_credit);
+        }
+
+        if (isset($form_json->show_gradeable_configuration)) {
+            $this->RCJSON->setShowGradeableConfiguration($form_json->show_gradeable_configuration);
+        }
+
+        if (isset($form_json->customize_show_notes)) {
+            $this->RCJSON->setCustomizeShowNotes($form_json->customize_show_notes);
+        }
+
         if (isset($form_json->gradeables)) {
             foreach ($form_json->gradeables as $gradeable) {
                 $this->RCJSON->addGradeable($gradeable);
@@ -732,7 +876,7 @@ class RainbowCustomization extends AbstractModel {
         $customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'customization.json');
         $manual_customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'manual_customization.json');
 
-        $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
+        $customization_json = file_exists($customization_dest) ? json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT) : '';
         $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
 
         // Manual or GUI JSON contents are copied to the main customization.json file for the build processes

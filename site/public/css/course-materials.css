@@ -33,6 +33,20 @@ a.popout-item > .fas:hover {
     flex-wrap: nowrap;
 }
 
+.course-materials-header-container {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.course-materials-header {
+    flex-grow: 1;
+}
+
+.course-materials-key {
+    display: flex;
+    margin-bottom: 16px;
+}
+
 .action-buttons > a {
     margin: 4px;
 }
@@ -60,4 +74,31 @@ a.popout-item > .fas:hover {
 
 #new-file-name {
     width: 100%;
+}
+
+.course-materials-null {
+    color: var(--default-black);
+}
+
+.course-materials-never {
+    color: var(--standard-light-red);
+}
+
+.course-materials-released {
+    color: var(--standard-vibrant-green);
+}
+
+.course-materials-imminent {
+    color: var(--important-post);
+}
+
+#serious-storage-warning {
+    color: var(--standard-vibrant-red);
+}
+#exceeded-storage-warning {
+    color: var(--standard-vibrant-red);
+    font-weight: bold;
+}
+#medium-storage-warning {
+    color: var(--standard-vibrant-orange);
 }

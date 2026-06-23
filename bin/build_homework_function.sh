@@ -217,9 +217,9 @@ function build_homework {
         return 1
     fi
 
-    # build (in parallel, 8 threads)
+    # build (in parallel)
     # quit (don't continue on to build other homeworks) if there is a compile error
-    make -j 8
+    cmake --build . --parallel "$(nproc)"
 
     # capture exit code of make
     make_res="$?"
@@ -237,6 +237,9 @@ function build_homework {
 
     # generate queue file for generated_output
     "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
+
+    # insert the gradeable data into the db
+    "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
 
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
     popd > /dev/null

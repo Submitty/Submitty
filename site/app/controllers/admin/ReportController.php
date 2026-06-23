@@ -35,8 +35,10 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
+    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
+    private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
 
     #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
@@ -189,6 +191,95 @@ class ReportController extends AbstractController {
 
         //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
+    }
+
+    /**
+     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     *
+     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
+     * suggests the reports were manually generated and copied in.
+     * Result is cached to avoid repeated expensive directory walks on every request.
+     */
+    private function isRainbowGradesLikelyManuallyGenerated(): bool {
+        // Return cached result if available
+        if ($this->rg_manual_generation_cache !== null) {
+            return $this->rg_manual_generation_cache;
+        }
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
+        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+
+        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
+            $summary_html_dir,
+            function (string $file_path): bool {
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
+            }
+        );
+
+        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
+            $this->rg_manual_generation_cache = false;
+            return false;
+        }
+
+        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
+            $build_dir,
+            function (string $file_path): bool {
+                return str_contains(strtolower(basename($file_path)), 'meta');
+            }
+        );
+
+        if ($latest_build_meta_timestamp === null) {
+            $this->rg_manual_generation_cache = true;
+            return true;
+        }
+
+        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $this->rg_manual_generation_cache = $result;
+        return $result;
+    }
+
+    /**
+     * Get the most recent file modification timestamp in a directory tree.
+     *
+     * @param string $directory
+     * @param callable(string):bool|null $file_filter
+     * @return int|null Returns null if directory doesn't exist or can't be read, otherwise returns latest mtime or 0 if no matching files found.
+     * Catches and logs permission/read errors to distinguish from missing directories.
+     */
+    private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
+        if (!is_dir($directory)) {
+            return null;
+        }
+
+        $latest_timestamp = 0;  // Use 0 as default for "no files found" instead of null
+        $flags = \FilesystemIterator::SKIP_DOTS;
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, $flags));
+            foreach ($iterator as $file_info) {
+                if (!$file_info->isFile()) {
+                    continue;
+                }
+
+                $file_path = $file_info->getPathname();
+                if ($file_filter !== null && !$file_filter($file_path)) {
+                    continue;
+                }
+
+                $file_mtime = $file_info->getMTime();
+                if ($file_mtime > $latest_timestamp) {
+                    $latest_timestamp = $file_mtime;
+                }
+            }
+        }
+        catch (\UnexpectedValueException $e) {
+            // Permission denied or unreadable directory—log the error for debugging
+            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
+            return null;
+        }
+
+        return $latest_timestamp > 0 ? $latest_timestamp : 0;
     }
 
     /**
@@ -683,12 +774,34 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
             $this->core->getOutput()->addInternalCss('grade-report.css');
-            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Configuration');
             $this->core->getOutput()->addSelect2WidgetCSSAndJs();
             $students = $this->core->getQueries()->getAllUsers();
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            $course_json = $this->core->getConfig()->getCourseJson() ?? [];
+            $course_details = $course_json['course_details'] ?? [];
+            $nightly_from_course_json = isset($course_details['auto_rainbow_grades']) && $course_details['auto_rainbow_grades'];
+            $is_nightly_enabled = $nightly_from_course_json;
+
+            $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+            $show_warning = false;
+            $days_since_run = null;
+            $rainbow_grades_generated_manually = $this->isRainbowGradesLikelyManuallyGenerated();
+
+            if ($grade_summaries_last_run !== 'Never') {
+                // Make string parsable
+                $clean_date = preg_replace('/\s*@\s*/', ' ', $grade_summaries_last_run);
+                $last_run_date = date_create_from_format('Y-m-d h:i A T', $clean_date);
+
+                if ($last_run_date instanceof \DateTime) {
+                    $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+                    $days_since_run = $now->diff($last_run_date)->days;
+                    $show_warning = $days_since_run >= 7;
+                }
+            }
+
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
@@ -715,9 +828,13 @@ class ReportController extends AbstractController {
                 'omit_section_from_statistics' => $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'extra_credit' => $customization->getExtraCredit(),
+                'show_gradeable_configuration' => $customization->getShowGradeableConfiguration(),
+                'customize_show_notes' => $customization->getCustomizeShowNotes(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
+                'normalization_warnings' => $customization->getNormalizationWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
@@ -727,6 +844,11 @@ class ReportController extends AbstractController {
                     $this->core->getConfig()->getTerm()
                 ),
                 'csrfToken' => $this->core->getCsrfToken(),
+                'is_nightly_enabled' => $is_nightly_enabled,
+                'show_warning' => $show_warning,
+                'days_since_run' => $days_since_run,
+                'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
+                'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
 
@@ -750,11 +872,8 @@ class ReportController extends AbstractController {
 
         // Create path to new jobs queue json
 
-        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $path = FileUtils::joinPaths($daemon_job_queue_path, 'auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
 
         // Place in queue
         file_put_contents($path, $job_json);
@@ -897,17 +1016,10 @@ class ReportController extends AbstractController {
     #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
-        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $jobs_file = FileUtils::joinPaths($daemon_job_queue_path, 'auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
         // Create path to 'processing' file in jobs queue
-        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
-            $this->core->getConfig()->getTerm() .
-            '_' .
-            $this->core->getConfig()->getCourse() .
-            '.json';
+        $processing_jobs_file = FileUtils::joinPaths($daemon_job_queue_path, 'PROCESSING_auto_rainbow_' . $this->core->getConfig()->getTerm() . '_' . $this->core->getConfig()->getCourse() . '.json');
 
         // Get the max time to wait before timing out
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;

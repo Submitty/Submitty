@@ -55,7 +55,7 @@ tr:nth-child(odd) td:nth-child(n + 1):nth-child(-n + 5) {
 }
 
 tr:nth-child(even) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--standard-light-gray);
+    background: var(--standard-hover-light-gray);
 }
 
 #data-table td:focus,
@@ -89,16 +89,29 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+.simple-key-full-credit,
 .simple-full-credit {
-    background-color: var(--simple-full-credit-dark-blue);
+    color: var(--simple-full-credit-dark-blue);
 }
 
+.simple-key-half-credit,
 .simple-half-credit {
-    background-color: var(--simple-half-credit-light-blue);
+    color: var(--simple-half-credit-light-blue);
 }
 
+.simple-key-save-error,
 .simple-save-error {
     color: var(--simple-save-error-red);
+}
+
+.simple-key-no-credit,
+.simple-key-full-credit,
+.simple-key-half-credit,
+.simple-key-save-error {
+    min-width: 3.5rem;
+    margin-right: 1.25rem;
+    display: inline-block;
+    text-align: center;
 }
 
 /* styling for fields that aren't icons */
@@ -117,10 +130,28 @@ input[type="number"]::-webkit-outer-spin-button {
 .simple-icon {
     transform: scaleX(3);
     width: 20px;
-    margin-left: 20px;
 }
 
 #details-legend li {
-    margin-right: 6px;
     font-size: 0.9em;
+}
+
+.cell-grade {
+    border-left: 1px solid var(--standard-medium-gray);
+}
+
+.cell-text-entry {
+    overflow-y: scroll;
+    resize: vertical;
+    min-height: 30px;
+    cursor: text;
+}
+
+.cell-checkpoint {
+    cursor: pointer;
+}
+
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
 }

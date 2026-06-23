@@ -3,6 +3,7 @@
 --
 
 
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -675,6 +676,55 @@ CREATE TABLE public.autograding_metrics (
 
 
 --
+-- Name: autograding_testcase; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase (
+    id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    testcase_id character varying(255) NOT NULL,
+    testcase_order integer NOT NULL,
+    hidden boolean NOT NULL,
+    extra_credit boolean NOT NULL,
+    points_possible numeric(10,0) NOT NULL
+);
+
+
+--
+-- Name: autograding_testcase_data; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.autograding_testcase_data (
+    atd_id integer NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_version integer NOT NULL,
+    points_earned numeric(10,0) NOT NULL,
+    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) <> (team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.autograding_testcase_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: autograding_testcase_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.autograding_testcase_id_seq OWNED BY public.autograding_testcase.id;
+
+
+--
 -- Name: calendar_messages; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -750,7 +800,8 @@ CREATE TABLE public.chatroom_messages (
     display_name character varying,
     role character varying,
     content text NOT NULL,
-    "timestamp" timestamp(0) with time zone NOT NULL
+    "timestamp" timestamp(0) with time zone NOT NULL,
+    is_deleted boolean DEFAULT false NOT NULL
 );
 
 
@@ -786,7 +837,8 @@ CREATE TABLE public.chatrooms (
     is_active boolean DEFAULT false NOT NULL,
     allow_anon boolean DEFAULT true NOT NULL,
     session_started_at timestamp with time zone,
-    is_deleted boolean DEFAULT false NOT NULL
+    is_deleted boolean DEFAULT false NOT NULL,
+    allow_read_only_after_end boolean DEFAULT false NOT NULL
 );
 
 
@@ -953,10 +1005,10 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
+    eg_release_notifications_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
@@ -1154,10 +1206,7 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
-    g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
-    CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
+    g_allow_custom_marks boolean DEFAULT true NOT NULL
 );
 
 
@@ -1601,7 +1650,9 @@ CREATE TABLE public.notification_settings (
     self_notification_email boolean DEFAULT false NOT NULL,
     self_registration_email boolean DEFAULT true NOT NULL,
     all_released_grades boolean DEFAULT true NOT NULL,
-    all_released_grades_email boolean DEFAULT true NOT NULL
+    all_released_grades_email boolean DEFAULT true NOT NULL,
+    all_gradeable_releases boolean DEFAULT true NOT NULL,
+    all_gradeable_releases_email boolean DEFAULT false NOT NULL
 );
 
 
@@ -1617,7 +1668,8 @@ CREATE TABLE public.notifications (
     from_user_id character varying(255),
     to_user_id character varying(255) NOT NULL,
     created_at timestamp(0) with time zone NOT NULL,
-    seen_at timestamp(0) with time zone
+    seen_at timestamp(0) with time zone,
+    gradeable_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -2101,6 +2153,13 @@ ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: autograding_testcase id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase ALTER COLUMN id SET DEFAULT nextval('public.autograding_testcase_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2327,6 +2386,14 @@ ALTER TABLE ONLY public.gradeable_teams
 
 ALTER TABLE ONLY public.autograding_metrics
     ADD CONSTRAINT autograding_metrics_pkey PRIMARY KEY (user_id, team_id, g_id, testcase_id, g_version);
+
+
+--
+-- Name: autograding_testcase autograding_testcase_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase
+    ADD CONSTRAINT autograding_testcase_pkey PRIMARY KEY (id);
 
 
 --
@@ -2918,10 +2985,24 @@ CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g
 
 
 --
+-- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
+
+
+--
 -- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
+
+
+--
+-- Name: notifications_user_gradeable_unseen_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications USING btree (to_user_id, gradeable_id) WHERE ((gradeable_id IS NOT NULL) AND (seen_at IS NULL));
 
 
 --
@@ -3117,19 +3198,19 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 
 --
--- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.course_materials_sections
-    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
-
-
---
 -- Name: course_materials_access fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.course_materials_access
     ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id);
+
+
+--
+-- Name: course_materials_sections fk_course_material_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials_sections
+    ADD CONSTRAINT fk_course_material_id FOREIGN KEY (course_material_id) REFERENCES public.course_materials(id) ON DELETE CASCADE;
 
 
 --
@@ -3162,6 +3243,14 @@ ALTER TABLE ONLY public.lichen_run_access
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES public.sections_registration(sections_registration_id) ON DELETE CASCADE;
+
+
+--
+-- Name: autograding_testcase_data fk_testcase; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.autograding_testcase_data
+    ADD CONSTRAINT fk_testcase FOREIGN KEY (atd_id) REFERENCES public.autograding_testcase(id) ON DELETE CASCADE;
 
 
 --
@@ -3839,4 +3928,5 @@ ALTER TABLE ONLY public.viewed_responses
 --
 -- PostgreSQL database dump complete
 --
+
 

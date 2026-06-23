@@ -1,4 +1,5 @@
 #menu-button {
+    /* stylelint-disable-next-line color-no-hex */
     border: 1px solid #000000;
     border-radius: 3px;
     background: transparent;
@@ -13,8 +14,10 @@
     position: absolute;
     height: 100vh;
     width: 90%;
+    /* stylelint-disable-next-line color-no-hex */
     background: #316498;
     color: var(--text-white);
+    /* stylelint-disable-next-line color-no-hex */
     border-color: #ffffff;
     line-height: 31px;
     list-style-type: none;
@@ -56,10 +59,12 @@
 }
 
 #mobile-menu hr {
+    /* stylelint-disable-next-line color-no-hex */
     border-color: #ffffff;
 }
 
 #menu-header {
+    /* stylelint-disable-next-line color-no-hex */
     border-bottom: 2px solid #ffffff;
 }
 

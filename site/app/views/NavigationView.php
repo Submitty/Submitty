@@ -325,7 +325,7 @@ class NavigationView extends AbstractView {
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup() && $date_limitation;
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $date_limitation && $gradeable->hasPeerComponent() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
+        $im_a_peer_grader = $date_limitation && $gradeable->hasPeerComponent() && (($this->core->getUser()->getGroup() === User::GROUP_STUDENT && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()))) || $this->core->getUser()->accessGrading());
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
@@ -516,12 +516,15 @@ class NavigationView extends AbstractView {
             }
 
             // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
+            // Also treat all-hidden test cases (no visible points) as gray
+            $total_non_hidden = (int) $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+
             if (
                 $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete()
                 && (
                     !$gradeable->getAutogradingConfig()->anyPoints()
-                    || $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0
-                    && $points_percent >= 0.5
+                    || $total_non_hidden === 0
+                    || $points_percent >= 0.5
                 )
                 && $list_section == GradeableList::CLOSED
             ) {
@@ -687,8 +690,10 @@ class NavigationView extends AbstractView {
             if (!$gradeable->hasDueDate()) {
                 $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
                 $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
+                $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
+                $include_grade_override = ($_COOKIE["include_grade_override"] ?? 'omit') === "include";
 
-                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section);
+                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students, $include_grade_override);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -739,8 +744,10 @@ class NavigationView extends AbstractView {
                 if ($gradeable->isTaGrading()) {
                     $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
                     $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
+                    $include_withdrawn_students = ($_COOKIE["include_withdrawn_students"] ?? 'omit') === "include";
+                    $include_grade_override = ($_COOKIE["include_grade_override"] ?? 'omit') === "include";
 
-                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section);
+                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section, $include_withdrawn_students, $include_grade_override);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE

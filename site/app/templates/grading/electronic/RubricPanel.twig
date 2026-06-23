@@ -7,12 +7,10 @@
                     <span id="gradeable-version-container" data-gradeable_version="{{ display_version }}" hidden></span>
                     <span class="col grading_label" data-testid="grading-rubric-label">Grading Rubric</span>
                     {# Wrong version warnings #}
-                    {% if not has_active_version %}
+                    {% if not has_active_version and not has_overridden_grades %}
                         {% if has_submission %}
                             {# Cancelled submission #}
                             <div class="red-message">Cancelled Submission</div>
-                        {% elseif has_overridden_grades %}
-                            <div class="yellow-message">Overridden Grades</div>
                         {% else %}
                             {# No submission #}
                             <div class="red-message">No Submission</div>
@@ -21,6 +19,10 @@
                         {# Opened a different version #}
                         <div class="red-message">Select the correct submission version to grade</div>
                         <div id="version-conflict-indicator"></div>
+                    {% elseif is_withdrawn_student %}
+                        <div class="yellow-message">Withdrawn Student</div>
+                    {% elseif has_overridden_grades %}
+                        <div class="yellow-message">Overridden Grades</div>
                     {% endif %}
 
                     {# Verify all button #}

@@ -161,6 +161,7 @@ INSTALL_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 AUTHENTICATION_JSON = os.path.join(CONFIG_INSTALL_DIR, 'authentication.json')
@@ -487,8 +488,9 @@ DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
-CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
+CONTAINERS_JSON = os.path.join(CONFIG_DATA_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
+PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
 
 # Rescue submitty config data
 submitty_config = OrderedDict()
@@ -497,6 +499,15 @@ try:
         submitty_config = json.load(json_file, object_pairs_hook=OrderedDict)
 except FileNotFoundError:
     pass
+
+# Rescue preserve list
+preserve_list = OrderedDict()
+try:
+    with open(PRESERVE_LIST_JSON, 'r') as json_file:
+        preserve_list = json.load(json_file, object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    pass
+print("preserve list", preserve_list)
 
 #Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
@@ -523,6 +534,10 @@ elif os.path.exists(CONFIG_INSTALL_DIR):
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
+
+os.makedirs(CONFIG_DATA_DIR, exist_ok=True)
+shutil.chown(CONFIG_DATA_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONFIG_DATA_DIR, 0o755)
 
 # Finish rescuing files.
 for full_file_name, tmp_file_name in rescued:
@@ -657,6 +672,15 @@ user_id_requirements = {
     ]
 }
 
+password_requirements = {
+    "min_length": 12,
+    "max_length": 72,
+    "require_uppercase": False,
+    "require_lowercase": False,
+    "require_numbers": False,
+    "require_special_chars": False
+}
+
 
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
@@ -682,6 +706,7 @@ if not args.worker:
     config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
     config['user_create_account'] = USER_CREATE_ACCOUNT
     config['user_id_requirements'] = user_id_requirements
+    config['password_requirements'] = password_requirements
     
 config['worker'] = True if args.worker == 1 else False
 
@@ -761,6 +786,13 @@ if not args.worker:
         json.dump(config, json_file, indent=2)
     shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(EMAIL_JSON, 0o440)
+
+##############################################################################
+# preserve_list users json
+
+with open(PRESERVE_LIST_JSON, 'w') as json_file:
+    json.dump(preserve_list, json_file, indent=2)
+os.chmod(SUBMITTY_JSON, 0o444)
 
 ##############################################################################
 

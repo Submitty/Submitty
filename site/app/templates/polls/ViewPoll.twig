@@ -116,7 +116,7 @@
                 {% if not user_admin and poll.isOpen() %}
                     <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
                     <script>
-                        initializeStudentSocketClient('polls-{{ poll.getId() }}-student');
+                        initializeStudentSocketClient('{{ poll.getId() }}');
                     </script>
                 {% endif %}
             </form>
@@ -223,8 +223,7 @@
                 layout: layout,
                 responseIndices: responseIndices
             }
-           
-            initializeInstructorSocketClient('polls-{{ poll.getId() }}-instructor');
+            initializeInstructorSocketClient('{{ poll.getId() }}');
             {% endif %}
         }
     {% endif %}

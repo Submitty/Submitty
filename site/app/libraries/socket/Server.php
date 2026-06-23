@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace app\libraries\socket;
 
-use app\exceptions\DatabaseException;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use app\libraries\Core;
 use app\libraries\TokenManager;
+use Psr\Http\Message\RequestInterface;
 
 class Server implements MessageComponentInterface {
     // Holds the mapping between pages that have open socket clients and those clients
@@ -80,8 +80,10 @@ class Server implements MessageComponentInterface {
     }
 
     /**
-     * This function checks if a given connection object is authenticated
-     * It uses the submitty_session cookie in the header data to work
+     * This function checks if a given connection object is authenticated and authorized to access the requested page
+     * using the WebSocket authorization token provided in the cookie, which is managed by the web server, accounting
+     * for current login status and authorized pages.
+     *
      * @param ConnectionInterface $conn
      * @return bool
      */
@@ -89,30 +91,62 @@ class Server implements MessageComponentInterface {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
 
+        if (!$request instanceof RequestInterface) {
+            return false;
+        }
+
         if ($this->isWebSocketClient($conn)) {
             $this->php_websocket_clients[$conn->resourceId] = true;
             $this->log("New connection {$conn->resourceId} --> websocket-client-php");
             return true;
         }
 
+        // Parse the authorization token from the cookie
         $cookieString = $request->getHeader("cookie")[0] ?? '';
         parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-        if (empty($cookies['submitty_session'])) {
+        if (empty($cookies['submitty_websocket_token'])) {
             return false;
         }
-        $sessid = $cookies['submitty_session'];
+        $websocket_token = $cookies['submitty_websocket_token'];
 
+        // Parse and validate the WebSocket authorization token
         try {
-            $token = TokenManager::parseSessionToken($sessid);
-            $session_id = $token->claims()->get('session_id');
+            $token = TokenManager::parseWebSocketToken($websocket_token);
             $user_id = $token->claims()->get('sub');
-            $logged_in = $this->core->getSession($session_id, $user_id);
-            if ($logged_in) {
-                $this->setSocketClient($user_id, $conn);
+            $authorized_pages = $token->claims()->get('authorized_pages');
+
+            // Parse the query parameters for the page identifier
+            $params = [];
+            $query = $request->getUri()->getQuery();
+            parse_str($query, $params);
+
+            // If the required parameters are not provided, close the connection
+            if (!isset($params['page']) || !isset($params['course']) || !isset($params['term'])) {
+                return false;
             }
-            return $logged_in;
+
+            // Create the full page identifier for authorization checks
+            $authorized_page = Utils::buildWebSocketPageIdentifier($params);
+
+            if ($authorized_page === null) {
+                return false;
+            }
+            elseif (!array_key_exists($authorized_page, $authorized_pages) || time() > intval($authorized_pages[$authorized_page])) {
+                return false;
+            }
+
+            // Set up the connection
+            $this->setSocketClient($user_id, $conn);
+            if (!array_key_exists($authorized_page, $this->clients)) {
+                $this->clients[$authorized_page] = new \SplObjectStorage();
+            }
+            $this->clients[$authorized_page]->attach($conn);
+            $this->setSocketClientPage($authorized_page, $conn);
+
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $authorized_page . "'");
+            return true;
         }
-        catch (\InvalidArgumentException $exc) {
+        catch (\Exception $exc) {
             return false;
         }
     }
@@ -169,19 +203,7 @@ class Server implements MessageComponentInterface {
     public function onOpen(ConnectionInterface $conn): void {
         try {
             if (!$this->checkAuth($conn)) {
-                $conn->close();
-            }
-        }
-        catch (DatabaseException $de) {
-            try {
-                $this->core->loadMasterDatabase();
-                $this->logError($de, $conn);
-                $this->onOpen($conn);
-            }
-            catch (\Exception $e) {
-                $this->logError($de, $conn);
-                $this->logError($e, $conn);
-                $this->closeWithError($conn);
+                $this->closeWithError($conn, 'Authentication failed');
             }
         }
         catch (\Throwable $t) {
@@ -204,23 +226,8 @@ class Server implements MessageComponentInterface {
 
             $msg = json_decode($msgString, true);
 
-            if (isset($msg["type"]) && $msg["type"] === "new_connection") {
-                if (isset($msg['page']) && is_string($msg['page']) && !isset($this->pages[$from->resourceId])) {
-                    if (!array_key_exists($msg['page'], $this->clients)) {
-                        $this->clients[$msg['page']] = new \SplObjectStorage();
-                    }
-                    $this->clients[$msg['page']]->attach($from);
-                    $this->setSocketClientPage($msg['page'], $from);
-
-                    $course_page = explode('-', $this->getSocketClientPage($from));
-                    $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
-                }
-                else {
-                    $from->close();
-                }
-            }
-            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
-                // user_id is only sent with socket clients open from a php user_agent
+            if (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
+                // user_id is always sent with socket clients open from a php user_agent
                 unset($msg['user_id']);
                 $new_msg_string = json_encode($msg);
                 $this->broadcast($from, $new_msg_string, $msg['page']);
@@ -255,8 +262,8 @@ class Server implements MessageComponentInterface {
         }
     }
 
-    public function closeWithError(ConnectionInterface $conn): void {
-        $msg = ['error' => 'Server error'];
+    public function closeWithError(ConnectionInterface $conn, ?string $error_message = null): void {
+        $msg = ['error' => $error_message ?? 'Server error'];
         $conn->send(json_encode($msg));
         $conn->close();
     }

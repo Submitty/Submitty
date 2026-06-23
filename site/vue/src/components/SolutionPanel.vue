@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { ref } from 'vue';
 import MarkdownArea from './MarkdownArea.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
 
@@ -173,5 +173,3 @@ for (const component of props.solutionComponents) {
     </div>
   </div>
 </template>
-
-<style scoped></style>
