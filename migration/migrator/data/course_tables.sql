@@ -2424,7 +2424,6 @@ ALTER TABLE ONLY public.autograding_metrics
 
 
 --
-<<<<<<< HEAD
 -- Name: block_user_action block_user_action_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2438,13 +2437,11 @@ ALTER TABLE ONLY public.block_user_action
 
 ALTER TABLE ONLY public.block_user_action
     ADD CONSTRAINT block_user_action_user_id_action_key UNIQUE (user_id, action);
-=======
 -- Name: autograding_testcase autograding_testcase_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.autograding_testcase
     ADD CONSTRAINT autograding_testcase_pkey PRIMARY KEY (id);
->>>>>>> origin/main
 
 
 --
