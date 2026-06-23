@@ -1872,7 +1872,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 25
+			count: 23
 			path: app/controllers/admin/UsersController.php
 
 		-
