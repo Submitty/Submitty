@@ -37,8 +37,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <button id="fullscreen-btn" class="btn btn-default" title="Toggle full screen mode" @click="toggle">
-    <i class="fas" :class="iconClass" aria-hidden="true" />
+  <button id="fullscreen-btn" 
+  class="btn btn-default" 
+  title="Toggle full screen mode" 
+  @click="toggle">
+    <i class="fas" 
+    :class="iconClass" 
+    aria-hidden="true" />
   </button>
 </template>
 
