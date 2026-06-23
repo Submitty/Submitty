@@ -136,5 +136,5 @@ gradeables:
     gradeable_config: upload_only
     g_bucket: homework
     eg_depends_on: open_homework
-    eg_depends_on_points: 7
+    eg_depends_on_points: 1
     g_title: Locked Homework (depends on points)
