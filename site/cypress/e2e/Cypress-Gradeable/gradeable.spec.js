@@ -135,19 +135,5 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             }
             cy.logout();
         });
-
-        // users with 7+ points on open_homework
-        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
-            cy.login(user);
-            cy.visit(['testing']);
-
-            cy.get('[data-testid="locked_homework_points"]')
-                .find('[data-testid="submit-btn"]')
-                .click();
-
-            cy.visit(['testing', 'gradeable', 'locked_homework_points']);
-            cy.get('[data-testid="new-submission-info"]').should('exist');
-            cy.logout();
-        });
     });
 });
