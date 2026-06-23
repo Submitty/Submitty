@@ -376,20 +376,6 @@
     white-space: nowrap;
 }
 
-/*.full-screen-mode {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    z-index: 10;
-}
-
-.full-screen-mode .content {
-    margin: 0;
-}*/
-
 .current-favorite i.fas,
 .active-thread-remove-announcement i.fas,
 .active-thread-remove-expiring-announcement i.fas {
