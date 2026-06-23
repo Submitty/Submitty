@@ -19,16 +19,23 @@ def _cleanup_course(db_user, db_pass, db_host, db_name):
     else:
         conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
 
-    engine = create_engine(conn_string)
-    course_conn = engine.connect()
+    try:
+        engine = create_engine(conn_string)
+        course_conn = engine.connect()
+    except SQLAlchemyError as e:
+        print(f"Error connecting to course database {db_name}: {e}")
+        return
 
     # "timestamp" is quoted because it is a reserved word in SQL
     delete_query = text("""
         DELETE FROM active_graders
-        WHERE "timestamp" < NOW() - INTERVAL '1 day'
+        WHERE timestamp < NOW() - INTERVAL '1 day'
     """)
-    course_conn.execute(delete_query)
+
+    result = course_conn.execute(delete_query)
+    course_conn.commit()
     course_conn.close()
+    return result.rowcount
 
 
 def main():
@@ -50,6 +57,8 @@ def main():
         print(f"Error fetching courses: {e}")
         return
 
+    master_conn.close()
+
     db_user = database_queries.DB_USER
     db_pass = database_queries.DB_PASSWORD
     db_host = database_queries.DB_HOST
@@ -66,7 +75,9 @@ def main():
         db_name = f"submitty_{term}_{course}"
 
         try:
-            _cleanup_course(db_user, db_pass, db_host, db_name)
+            c = _cleanup_course(db_user, db_pass, db_host, db_name)
+            if c > 0:
+                print(f"Cleaned up {c} stale grader(s) from course {db_name}")
             count += 1
         except SQLAlchemyError as e:
             print(f"Failed to cleanup {db_name}: {e}")
