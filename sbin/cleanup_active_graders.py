@@ -24,7 +24,7 @@ def _cleanup_course(db_user, db_pass, db_host, db_name):
         course_conn = engine.connect()
     except SQLAlchemyError as e:
         print(f"Error connecting to course database {db_name}: {e}")
-        return
+        return 0
 
     # "timestamp" is quoted because it is a reserved word in SQL
     delete_query = text("""
