@@ -1124,7 +1124,7 @@ HTML;
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if (!FileUtils::isSubmissionMetaFile($key)) {
+                if (!FileUtils::isSubmissionMetaFile($key) && $key !== '.upload.pdf') {
                     $pattern_match_flag = true;
                 }
             }
