@@ -121,6 +121,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0"
           class="btn btn-default"
+          data-testid="toggle-unseen-only"
           @click="toggleUnseenOnly"
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
@@ -128,6 +129,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
+          data-testid="mark-seen-btn"
           @click="markSeen"
         >
           Mark as seen
