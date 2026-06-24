@@ -26,17 +26,23 @@
     </div>
 
     <hr style="margin-top: 24px;">
-    <label style="margin-top: 8px;">
-        To apply these notification settings to any future courses you enroll in, click below.
-    </label>
+
+    <div class="sync-default-row">
+        <label class="sync-default-label">
+            <input type="checkbox"
+                   id="set-default-course"
+                   data-testid="set-default-course"
+                   onchange="toggleDefaultCourse(this)"
+                   {{ is_default_course ? 'checked' : '' }}>
+            Use this course's notification settings as the default for any future courses I enroll in
+        </label>
+    </div>
 </div>
 {% endblock %}
+    
 {% block buttons %}
     {{ block('close_button') }}
     <button class="btn btn-primary" data-testid="sync-submit" onclick="setNotification(this)">
         Sync Settings
-    </button>
-    <button class="btn btn-secondary" data-testid="save-notification-defaults" onclick="saveNotificationDefaults()">
-        {{ is_default_course ? 'This Course Is Your Default' : 'Save as Future Course Default' }}
     </button>
 {% endblock %}

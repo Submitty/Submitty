@@ -32,13 +32,15 @@ class NotificationView extends AbstractView {
      * @param int $self_registration_type
      * @param array <int, Course> $courses
      * @param bool $is_default_course
+     * @param array<string, string>|null $default_course
      * @return void
      */
     public function showNotificationSettings(
         array $notification_saves,
         int $self_registration_type,
         array $courses = [],
-        bool $is_default_course = false
+        bool $is_default_course = false,
+        ?array $default_course = null
     ): void {
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
         'notification_saves'      => $notification_saves,
@@ -46,8 +48,10 @@ class NotificationView extends AbstractView {
         'csrf_token'              => $this->core->getCsrfToken(),
         'defaults'                => User::constructNotificationSettings([]),
         'update_settings_url'     => $this->core->buildCourseUrl(['notifications', 'settings']),
-        'save_defaults_url'       => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
-        'is_default_course'       => $is_default_course,
+        'save_defaults_url'  => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
+        'clear_defaults_url' => $this->core->buildCourseUrl(['notifications', 'clear_defaults']),
+        'is_default_course'   => $is_default_course,
+        'default_course'      => $default_course,
         'self_registration_type'  => $self_registration_type,
         'is_instructor'           => $this->core->getUser()->accessAdmin(),
         'is_self_registration'    => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,

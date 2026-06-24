@@ -4747,6 +4747,13 @@ SQL;
         return empty($row) ? null : $row;
     }
 
+    public function deleteNotificationDefault(string $user_id): void {
+        $this->submitty_db->query(
+            "DELETE FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+    }
+
     /**
      * @return array<string, mixed>|null
      */
@@ -4775,7 +4782,30 @@ SQL;
                 all_released_grades, all_released_grades_email,
                 all_gradeable_releases, all_gradeable_releases_email
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT (user_id) DO NOTHING",
+            ON CONFLICT (user_id) DO UPDATE SET
+                merge_threads                  = EXCLUDED.merge_threads,
+                all_new_threads                = EXCLUDED.all_new_threads,
+                all_new_posts                  = EXCLUDED.all_new_posts,
+                all_modifications_forum        = EXCLUDED.all_modifications_forum,
+                reply_in_post_thread           = EXCLUDED.reply_in_post_thread,
+                team_invite                    = EXCLUDED.team_invite,
+                team_joined                    = EXCLUDED.team_joined,
+                team_member_submission         = EXCLUDED.team_member_submission,
+                self_notification              = EXCLUDED.self_notification,
+                merge_threads_email            = EXCLUDED.merge_threads_email,
+                all_new_threads_email          = EXCLUDED.all_new_threads_email,
+                all_new_posts_email            = EXCLUDED.all_new_posts_email,
+                all_modifications_forum_email  = EXCLUDED.all_modifications_forum_email,
+                reply_in_post_thread_email     = EXCLUDED.reply_in_post_thread_email,
+                team_invite_email              = EXCLUDED.team_invite_email,
+                team_joined_email              = EXCLUDED.team_joined_email,
+                team_member_submission_email   = EXCLUDED.team_member_submission_email,
+                self_notification_email        = EXCLUDED.self_notification_email,
+                self_registration_email        = EXCLUDED.self_registration_email,
+                all_released_grades            = EXCLUDED.all_released_grades,
+                all_released_grades_email      = EXCLUDED.all_released_grades_email,
+                all_gradeable_releases         = EXCLUDED.all_gradeable_releases,
+                all_gradeable_releases_email   = EXCLUDED.all_gradeable_releases_email",
             [
                 $user_id,
                 $source['merge_threads'], $source['all_new_threads'], $source['all_new_posts'],
