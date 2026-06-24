@@ -5,7 +5,6 @@ if [ "$1" == "worker" ]; then
     WORKER=1
 fi
 
-
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -22,8 +21,6 @@ fi
 #################################################################
 # PACKAGE SETUP
 #################
-
-
 
 # Need to change this otherwise it will hang the script in interactive mode
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf

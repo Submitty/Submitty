@@ -231,7 +231,6 @@ else
     source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 fi
 
-
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
 #################################################################
@@ -802,7 +801,6 @@ fi
 if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 fi
-
 
 popd > /dev/null
 rm -rf "${INSTALL_SYS_DIR}"
