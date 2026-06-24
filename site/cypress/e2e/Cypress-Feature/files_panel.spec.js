@@ -1,3 +1,22 @@
+function assertSubmissionsBrowserClosed() {
+    cy.get('#div_viewer_sd1').should('not.be.visible');
+}
+
+function assertSubmissionsBrowserOpen() {
+    // have to increase timeout so that the file can be loaded properly in the CI
+    cy.get('#div_viewer_sd1', { timeout: 20000 }).should('be.visible');
+}
+
+function assertResultsBrowserClosed() {
+    cy.get('#div_viewer_rd1').should('not.be.visible');
+}
+
+function assertResultsBrowserOpen() {
+    // we can't check that it is visible because in the CI it's possible
+    // that autograding hasn't finished yet
+    cy.get('#div_viewer_rd1', { timeout: 20000 }).should('exist');
+}
+
 // for our testcase, we can assume dotfiles are not part of student submission
 const single_file_submission_selector = '#div_viewer_sd1 div[id^=file_viewer_]:not([data-file_name^="."])';
 
@@ -13,8 +32,7 @@ function assertSingleFileSubmissionClosed() {
     cy.get(single_file_submission_selector).should('not.be.visible');
 }
 
-// #div_viewer_sd1:has(div[id^=file_viewer_]:not([data-file_name^="."])) .openable-element-submissions
-const single_file_submission_clickable_selector = '#div_viewer_sd1 div:has(div[id^=file_viewer_]:not([data-file_name^="."])) .openable-element-submissions';
+const single_file_submission_clickable_selector = '#div_viewer_sd1 .openable-element-submissions:not([data-file_name^="."])';
 
 function clickSingleFileSubmission() {
     cy.get(single_file_submission_clickable_selector).should('length', 1);
@@ -22,25 +40,6 @@ function clickSingleFileSubmission() {
 }
 
 describe('Test cases involving the files panel', () => {
-    function assertSubmissionsBrowserClosed() {
-        cy.get('#div_viewer_sd1').should('not.be.visible');
-    }
-
-    function assertSubmissionsBrowserOpen() {
-        // have to increase timeout so that the file can be loaded properly in the CI
-        cy.get('#div_viewer_sd1', { timeout: 20000 }).should('be.visible');
-    }
-
-    function assertResultsBrowserClosed() {
-        cy.get('#div_viewer_rd1').should('not.be.visible');
-    }
-
-    function assertResultsBrowserOpen() {
-        // we can't check that it is visible because in the CI it's possible
-        // that autograding hasn't finished yet
-        cy.get('#div_viewer_rd1', { timeout: 20000 }).should('exist');
-    }
-
     beforeEach(() => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
