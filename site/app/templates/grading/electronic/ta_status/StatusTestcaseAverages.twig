@@ -1,0 +1,64 @@
+{# Setup for Autograding Testcase Average Graph #}
+
+<div id="testcase-averages" class="page-content">
+    <div id="Graph6"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+    <script>
+        (function () {
+            var xValue = [];
+            var yValue = [];   // average earned
+            var yValue2 = [];  // possible points
+            {% for tc in testcase_averages %}
+                xValue.push('{{ tc.getTitle()|escape("js") }}');
+                yValue.push({{ tc.getAverageScore() }});
+                yValue2.push({{ tc.getMaxValue() }});
+            {% endfor %}
+
+            var trace1 = {
+                x: xValue,
+                y: yValue,
+                name: 'Average Scores',
+                type: 'bar',
+                text: yValue,
+                textposition: 'auto',
+                hoverinfo: 'none',
+                marker: {
+                    color: 'rgb(48,99,152)',
+                    opacity: 1.0,
+                    line: { color: 'rbg(170,170,170)', width: 1.5 }
+                }
+            };
+
+            var trace2 = {
+                x: xValue,
+                y: yValue2,
+                name: 'Full Scores',
+                type: 'bar',
+                text: yValue2,
+                textposition: 'auto',
+                hoverinfo: 'none',
+                marker: {
+                    color: 'rgb(246,251,252)',
+                    opacity: 1.0,
+                    line: { color: 'rbg(170,170,170)', width: 1.5 }
+                }
+            };
+
+            var data = [trace2, trace1];
+
+            var layout = {
+                title: { text: 'Autograding Testcase Averages' },
+                barmode: 'overlay',
+                xaxis: { title: { text: 'Testcases' } },
+                yaxis: { title: { text: 'Scores' } },
+                font: { family: '"Source Sans Pro", sans-serif' }
+            };
+
+            Plotly.newPlot('Graph6', data, layout, { displayModeBar: false, displaylogo: false });
+        })();
+    </script>
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
