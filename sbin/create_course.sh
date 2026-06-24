@@ -12,10 +12,11 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
+CONF_DIR="/var/submitty/config"
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
+CONF_DIR="$SUBMITTY_INSTALL_DIR/config"
 
 SUBMITTY_REPOSITORY_DIR=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${CONF_DIR}/submitty.json")
 SUBMISSION_URL=$(jq -r '.submission_url' "${CONF_DIR}/submitty.json")
 
@@ -31,7 +32,7 @@ DATABASE_USER=$(jq -r '.database_user' "${CONF_DIR}/database.json")
 DATABASE_PASS=$(jq -r '.database_password' "${CONF_DIR}/database.json")
 DATABASE_COURSE_USER=$(jq -r '.database_course_user' "${CONF_DIR}/database.json")
 echo $DATABASE_COURSE_USER
-
+echo "--- $CONF_DIR"
 ########################################################################################################################
 ########################################################################################################################
 
@@ -308,7 +309,7 @@ replace_fillin_variables "$course_dir/BUILD_${course}.sh"
 
 
 # copy the config file for TA grading & replace the variables
-cp "${SUBMITTY_INSTALL_DIR}/site/config/course_template.json" "${course_dir}/config/config.json"
+cp "${SUBMITTY_REPOSITORY_DIR}/site/config/course_template.json" "${course_dir}/config/config.json"
 chown "${PHP_USER}:${ta_www_group}" "${course_dir}/config/config.json"
 chmod 660 "${course_dir}/config/config.json"
 replace_fillin_variables "${course_dir}/config/config.json"

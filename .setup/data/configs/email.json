@@ -1,0 +1,10 @@
+{                                                                                       
+  "email_enabled": true,
+  "email_user": "",
+  "email_password": "",
+  "email_sender": "submitty@vagrant",
+  "email_reply_to": "do-not-reply@vagrant",
+  "email_server_hostname": "localhost",
+  "email_server_port": 25,
+  "email_internal_domain": "example.com"
+}
