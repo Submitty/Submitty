@@ -17,6 +17,7 @@ function assertResultsBrowserOpen() {
     cy.get('#div_viewer_rd1', { timeout: 20000 }).should('exist');
 }
 
+// for our testcase, we can assume dotfiles are not part of student submission
 const single_file_submission_selector = '#div_viewer_sd1 div[id^=file_viewer_]:not([data-file_name^="."])';
 
 function assertSingleFileSubmissionOpen() {
