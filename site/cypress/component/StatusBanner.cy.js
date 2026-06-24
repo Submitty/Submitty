@@ -71,16 +71,6 @@ describe('StatusBanner', () => {
         });
     });
 
-    describe('emits', () => {
-        it('emits color-change exactly once on mount with the color value', () => {
-            const onColorChange = cy.stub().as('onColorChange');
-            cy.mount(StatusBanner, { props: { ...defaultProps, onColorChange } });
-            cy.get('@onColorChange')
-                .should('have.callCount', 1)
-                .and('be.calledWith', defaultProps.color);
-        });
-    });
-
     describe('CustomEvent dispatch', () => {
         it('dispatches status-banner-color-change with the color on mount', () => {
             cy.window().then((win) => {
@@ -106,6 +96,51 @@ describe('StatusBanner', () => {
                 Cypress.sinon.match.instanceOf(CustomEvent)
                     .and(Cypress.sinon.match.has('type', 'status-banner-color-change'))
                     .and(Cypress.sinon.match((ev) => ev.detail === 'var(--standard-light-pink)')));
+        });
+    });
+    
+    // these are edge cases too
+
+    describe('negative emit (Vue events)', () => {
+        it('does not emit a Vue color-change event', () => {
+            cy.mount(StatusBanner, {
+                props: { ...defaultProps, colorChange: cy.stub().as('colorChange') },
+            });
+            cy.get('@colorChange').should('not.have.been.called');
+        });
+    });
+
+    describe('CustomEvent lifecycle', () => {
+        it('dispatches the event exactly once per mount', () => {
+            cy.window().then((win) => {
+                cy.stub(win, 'dispatchEvent').as('dispatch');
+            });
+            cy.mount(StatusBanner, { props: defaultProps });
+            cy.get('@dispatch').should('have.callCount', 1);
+        });
+
+        it('dispatches a CustomEvent with correct type and detail structure', () => {
+            const events = [];
+            cy.window().then((win) => {
+                cy.stub(win, 'dispatchEvent').callsFake((ev) => events.push(ev));
+            });
+            cy.mount(StatusBanner, { props: defaultProps });
+            cy.then(() => {
+                expect(events).to.have.length(1);
+                expect(events[0]).to.be.instanceOf(CustomEvent);
+                expect(events[0].type).to.equal('status-banner-color-change');
+                expect(events[0].detail).to.equal(defaultProps.color);
+            });
+        });
+
+        it('dispatches a separate event per mount instance', () => {
+            cy.window().then((win) => {
+                cy.stub(win, 'dispatchEvent').as('dispatch');
+            });
+            cy.mount(StatusBanner, { props: defaultProps });
+            cy.get('@dispatch').should('have.callCount', 1);
+            cy.mount(StatusBanner, { props: defaultProps });
+            cy.get('@dispatch').should('have.callCount', 2);
         });
     });
 
