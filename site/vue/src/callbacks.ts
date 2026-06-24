@@ -1,4 +1,4 @@
-window.handleStatusBannerColorChange = function(color: string) {
+window.handleStatusBannerColorChange = function (color: string) {
     document.body.style.background = color;
 };
 

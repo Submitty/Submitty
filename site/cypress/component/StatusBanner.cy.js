@@ -98,7 +98,7 @@ describe('StatusBanner', () => {
                     .and(Cypress.sinon.match((ev) => ev.detail === 'var(--standard-light-pink)')));
         });
     });
-    
+
     // these are edge cases too
 
     describe('negative emit (Vue events)', () => {
