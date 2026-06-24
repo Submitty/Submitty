@@ -140,17 +140,15 @@
     </div>
 </div>
 {% if error_message != "" %}
-    <script>
-        window.addEventListener('status-banner-color-change', (ev) => {
-            $('body').css('background', ev.detail);
-        });
-    </script>
     {% include 'Vue.twig' with {
         'type': 'component',
         'name': 'StatusBanner',
         'args': {
             'message': error_message,
             'color': error_color
+        },
+        'callbacks': {
+            'status-banner-color-change': 'handleStatusBannerColorChange'
         }
     } %}
 {% endif %}

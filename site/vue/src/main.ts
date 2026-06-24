@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import Unknown from './components/Unknown.vue';
+import './callbacks';
 
 const exports = {
     async render(
@@ -7,6 +8,7 @@ const exports = {
         type: 'component' | 'page',
         name: string,
         args: Record<string, unknown> = {},
+        callbacks: Record<string, string> = {},
     ) {
         const app = await (async () => {
             try {
@@ -24,6 +26,15 @@ const exports = {
                 return createApp(Unknown, { type, name });
             }
         })();
+
+        Object.entries(callbacks).forEach(([eventName, fnName]) => {
+            window.addEventListener(eventName, (e: Event) => {
+                const fn = (window as unknown as Record<string, unknown>)[fnName];
+                if (typeof fn === 'function') {
+                    (fn as (detail: unknown) => void)((e as CustomEvent).detail);
+                }
+            });
+        });
 
         app.mount(target);
     },
