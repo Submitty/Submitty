@@ -2383,6 +2383,87 @@ ORDER BY merged_data.{$section_key}
         return $this->course_db->row()['cnt'];
     }
 
+    /**
+     * Average earned vs. possible points per autograding testcase, for the
+     * autograding testcase averages chart on the stats page.
+     *
+     * @return SimpleStat[]
+     */
+    public function getAverageAutogradingTestcaseScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        $bad_submissions_condition = '';
+        $null_section_condition = '';
+        $withdrawn_students_condition = '';
+        // placeholder order, top-to-bottom: egv subquery g_id, [bad submissions g_id], WHERE at.g_id
+        $params = [$g_id];
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        if ($null_section !== 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 )
+              ) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params[] = $g_id;
+        }
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
+        }
+        $params[] = $g_id; // WHERE at.g_id
+
+        $return = [];
+        $this->course_db->query("
+    SELECT
+        at.testcase_order,
+        at.testcase_id,
+        at.points_possible,
+        at.hidden,
+        at.extra_credit,
+        round(AVG(atd.points_earned), 2) AS avg_score,
+        round(stddev_pop(atd.points_earned), 2) AS std_dev,
+        COUNT(*) AS count
+    FROM autograding_testcase AS at
+    INNER JOIN autograding_testcase_data AS atd
+        ON atd.atd_id = at.id
+    INNER JOIN {$users_or_teams} AS {$u_or_t}
+        ON {$u_or_t}.{$user_or_team_id} = atd.{$user_or_team_id}
+    INNER JOIN (
+        SELECT {$user_or_team_id}, active_version
+        FROM electronic_gradeable_version
+        WHERE g_id=? AND active_version > 0
+    ) AS egv
+        ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+    {$bad_submissions_condition}
+    WHERE at.g_id=? AND atd.g_version = egv.active_version
+        {$null_section_condition}
+        {$withdrawn_students_condition}
+    GROUP BY at.id, at.testcase_order, at.testcase_id, at.points_possible, at.hidden, at.extra_credit
+    ORDER BY at.testcase_order
+        ", $params);
+
+        foreach ($this->course_db->rows() as $row) {
+            $stat = new SimpleStat($this->core, [
+                'max'       => $row['points_possible'],
+                'avg_score' => $row['avg_score'],
+                'std_dev'   => $row['std_dev'],
+                'count'     => $row['count'],
+            ]);
+            // default label is the config testcase_id; controller can override with the testcase title
+            $stat->setTitle($row['testcase_id']);
+            $stat->setOrder((int) $row['testcase_order']);
+            $return[] = $stat;
+        }
+        return $return;
+    }
+
     public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";
         $users_or_teams = "users";

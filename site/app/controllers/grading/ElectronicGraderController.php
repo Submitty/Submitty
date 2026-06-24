@@ -623,6 +623,7 @@ class ElectronicGraderController extends AbstractController {
         $sections = [];
         $total_users = [];
         $component_averages = [];
+        $testcase_averages = [];
         $histogram_data = [];
         $manual_average = null;
         $autograded_average = null;
@@ -678,6 +679,7 @@ class ElectronicGraderController extends AbstractController {
             $num_gradeables = count($this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId()));
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = [];
+            $testcase_averages = [];
             $manual_average = null;
             $autograded_average = null;
             $overall_average = null;
@@ -745,6 +747,19 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
+            $testcase_averages = $this->core->getQueries()->getAverageAutogradingTestcaseScores(
+                $gradeable_id, $section_key, $gradeable->isTeamAssignment(),
+                $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students
+            );
+            if (count($testcase_averages) > 0 && $gradeable->hasAutogradingConfig()) {
+                $config_testcases = $gradeable->getAutogradingConfig()->getAllTestCases();
+                foreach ($testcase_averages as $stat) {
+                    $idx = $stat->getOrder(); // testcase_order matches the config ordering
+                    if (isset($config_testcases[$idx]) && $config_testcases[$idx]->getName() !== '') {
+                        $stat->setTitle($config_testcases[$idx]->getName());
+                    }
+                }
+            }
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $manual_average = new SimpleStat($this->core, [
                 'avg_score' => $overall_average['manual_avg_score'],
@@ -984,6 +999,7 @@ class ElectronicGraderController extends AbstractController {
             $gradeable,
             $sections,
             $component_averages,
+            $testcase_averages,
             $manual_average,
             $autograded_average,
             $overall_scores,
