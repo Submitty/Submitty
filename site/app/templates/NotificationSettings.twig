@@ -1,3 +1,13 @@
+
+<div class="content" data-testid="default-course-banner" style="background-color: var(--standard-lightskyblue); margin-bottom: 12px; {{ is_default_course ? '' : 'display: none;' }}">
+    This course is currently set as the default for your future courses.
+</div>
+{% if not is_default_course and default_course is not null %}
+    <div class="content" data-testid="other-default-course-banner" style="background-color: var(--standard-lightskyblue); margin-bottom: 12px;">
+        Your current default for future courses is ({{ default_course.term }}) {{ default_course.course }}.
+    </div>
+{% endif %}
+
 <div class="content">
   <style>
       input[type="checkbox"]:disabled {
@@ -89,14 +99,6 @@
                     Sync notification settings
                 </button>
             {% endset %}
-                <div class="alert alert-primary" data-testid="default-course-banner" style="margin-bottom: 16px; {{ is_default_course ? '' : 'display: none;' }}">
-                    This course is currently set as the default for your future courses.
-                </div>
-            {% if not is_default_course and default_course is not null %}
-                <div class="alert alert-primary" data-testid="other-default-course-banner" style="margin-bottom: 16px;">
-                    Your current default for future courses is ({{ default_course.term }}) {{ default_course.course }}.
-                </div>
-            {% endif %}
             <div class="header">
                 <h1 data-testid="notification-settings-header">{{ header }}</h1>
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
