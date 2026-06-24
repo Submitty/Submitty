@@ -19,7 +19,7 @@ describe('notification sync and defaults test', () => {
     };
 
     const setCheckbox = (name, checked) => {
-        cy.get(`[data-testid="setting-${name}"]`).then(($cb) => {
+        cy.get(`input[name="${name}"]`).then(($cb) => {
             if ($cb.is(':checked') !== checked) {
                 cy.wrap($cb).click();
                 cy.wait('@saveSettings');
@@ -116,8 +116,8 @@ describe('notification sync and defaults test', () => {
             cy.wait('@syncSettings');
 
             visitNotificationSettings('tutorial');
-            cy.get('[data-testid="setting-merge_threads"]').should('be.checked');
-            cy.get('[data-testid="setting-all_new_threads"]').should('not.be.checked');
+            cy.get('input[name="merge_threads"]').should('be.checked');
+            cy.get('input[name="all_new_threads"]').should('not.be.checked');
         });
     });
 
@@ -202,9 +202,9 @@ describe('notification sync and defaults test', () => {
 
             cy.login('student');
             visitNotificationSettings(course);
-            cy.get('[data-testid="setting-merge_threads"]').scrollIntoView();
-            cy.get('[data-testid="setting-merge_threads"]').should('be.checked');
-            cy.get('[data-testid="setting-team_invite"]').should('not.be.checked');
+            cy.get('input[name="merge_threads"]').scrollIntoView();
+            cy.get('input[name="merge_threads"]').should('be.checked');
+            cy.get('input[name="team_invite"]').should('not.be.checked');
         });
     });
 });

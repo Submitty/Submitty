@@ -204,7 +204,7 @@
                     </span>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input notification-checkbox">
-                    <input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="setting-merge_threads" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}">
+                    <input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}">
                 </div>
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input email-checkbox">
@@ -221,7 +221,7 @@
                         <span class="option-alt">Alert me when a thread is created</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Threads" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="checked"{% endif %} data-testid="setting-all_new_threads" data-default-checked="{{ defaults['all_new_threads'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Threads" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_threads'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All New Threads" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_threads_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
@@ -368,7 +368,7 @@
                         <span class="option-alt">Alert me when I get an invitation to join a team</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Team Invitation" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="checked"{% endif %} data-testid="setting-team_invite" data-default-checked="{{ defaults['team_invite'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Team Invitation" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_invite'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Team Invitation" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_invite_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
