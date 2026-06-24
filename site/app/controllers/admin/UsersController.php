@@ -71,16 +71,19 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        //Get Active student Columns
+        // Get Active student Columns
         $active_student_columns = '';
-        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        // Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
         if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 17) {
             $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
-            //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_student_columns', implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false))), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_student_columns = implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false)));
+            $default_columns = array_merge(array_fill(0, 12, 1), array_fill(0, 5, 0));
+            $cookie_val = implode('-', $default_columns);
+
+            // Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_student_columns', $cookie_val, time() + (10 * 365 * 24 * 60 * 60), '/')) {
+                $active_student_columns = $cookie_val;
             }
         }
 
