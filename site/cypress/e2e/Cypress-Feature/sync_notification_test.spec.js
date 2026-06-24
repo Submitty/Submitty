@@ -1,4 +1,4 @@
-describe('Notification Settings: Sync & Future Course Defaults', () => {
+describe('notification sync and defaults test', () => {
     const visitNotificationSettings = (course = 'sample') => {
         cy.visit([course, 'notifications', 'settings']);
         cy.get('[data-testid="notification-settings-header"]').should('be.visible');
@@ -27,7 +27,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         });
     };
 
-    // Ensure the current course is NOT set as the default, so tests start clean
     const clearDefaultIfSet = () => {
         openSyncPopup();
         cy.get('[data-testid="set-default-course"]').then(($cb) => {
@@ -49,6 +48,7 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         cy.get('[data-testid="course-title-input"]').type(course);
         cy.get('[data-testid="course-group-select"]').select(4);
         cy.get('[data-testid="create-course-submit"]').click();
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('body').then(($body) => {
                 return $body.find(`[data-testid="${course}-button"]`).length > 0;
@@ -128,10 +128,9 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             clearDefaultIfSet();
 
             openSyncPopup();
-            cy.get('[data-testid="set-default-course"]')
-                .scrollIntoView()
-                .should('be.visible')
-                .and('not.be.checked');
+            cy.get('[data-testid="set-default-course"]').scrollIntoView();
+            cy.get('[data-testid="set-default-course"]').should('be.visible');
+            cy.get('[data-testid="set-default-course"]').should('not.be.checked');
         });
 
         it('marks the course as default and shows the banner live', () => {
@@ -143,7 +142,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.get('[data-testid="set-default-course"]').check();
             cy.wait('@saveDefaults');
 
-            // no reload — banner appears live
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
             cy.get('[data-testid="set-default-course"]').should('be.checked');
         });
@@ -152,7 +150,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
             cy.login('instructor');
             visitNotificationSettings('sample');
 
-            // ensure it's set
             openSyncPopup();
             cy.get('[data-testid="set-default-course"]').then(($cb) => {
                 if (!$cb.is(':checked')) {
@@ -161,7 +158,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
                 }
             });
 
-            // now uncheck
             cy.get('[data-testid="set-default-course"]').uncheck();
             cy.wait('@clearDefaults');
 
@@ -171,7 +167,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
         it('shows the other-course banner on a different course', () => {
             cy.login('instructor');
 
-            // set sample as the default
             visitNotificationSettings('sample');
             openSyncPopup();
             cy.get('[data-testid="set-default-course"]').then(($cb) => {
@@ -181,7 +176,6 @@ describe('Notification Settings: Sync & Future Course Defaults', () => {
                 }
             });
 
-            // visit a different course — it should announce sample as the default
             visitNotificationSettings('tutorial');
             cy.get('[data-testid="other-default-course-banner"]')
                 .should('be.visible')
