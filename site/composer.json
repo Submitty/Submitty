@@ -37,7 +37,7 @@
     "symfony/routing": "6.4.13",
     "textalk/websocket": "1.6.3",
     "twig/markdown-extra": "^3.24",
-    "twig/twig": "3.24.0"
+    "twig/twig": "3.27.1"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "1.2.0",
