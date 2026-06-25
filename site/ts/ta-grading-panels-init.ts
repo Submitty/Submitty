@@ -333,6 +333,7 @@ $(() => {
     changeMobileView();
     initializeTaLayout();
 
+    // switch between standard and mobile layout on resize
     window.addEventListener('resize', () => {
         const wasMobileView = isMobileView;
         changeMobileView();
@@ -342,10 +343,8 @@ $(() => {
         }
     });
 
+    // resize/hide the student's name in the top-left corner on resize
     window.addEventListener('resize', () => {
-        if ($('#silent-edit-id').length === 0) {
-            return;
-        }
         const name_div = $('#grading-panel-student-name');
         const panel_div = $('.panels-container');
         // have to calculate the height since the item is positioned absolutely
@@ -359,7 +358,7 @@ $(() => {
         const overlap_margin = 15;
         const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
         if (overlapping || taLayoutDet.isFullLeftColumnMode) {
-            $('#grading-panel-student-name').hide();
+            name_div.hide();
         }
     });
 
