@@ -5,7 +5,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.login('instructor');
 
         cy.log('Button should not exist if there is no version conflict');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=LHmpGciilVzjcEJ&sort=id&direction=ASC']);
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=hG1b13ljpDjKu32&sort=id&direction=ASC']);
         cy.get('[data-testid="grading-rubric-btn"]').click();
         cy.get('[data-testid="change-graded-version"]').should('not.exist');
         cy.get('[data-testid="version-warning"]').should('not.exist');
