@@ -87,7 +87,6 @@ describe('notification sync and defaults test', () => {
     });
 
     describe('Sync settings to other courses', () => {
-
         it('functionality of sync popup', () => {
             const course = createCourse();
             Cypress.env('test-course', course);
