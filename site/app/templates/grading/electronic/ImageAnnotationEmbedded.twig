@@ -11,18 +11,18 @@
         
         <div class="image-annotation-container">
             <div class="annotation-toolbar">
-                <button id="add-annotations-btn" class="btn btn-primary" onclick="if (typeof addAnnotations === 'function') addAnnotations();">
+                <button id="add-annotations-btn" class="btn btn-primary" title="Add annotations" onclick="if (typeof addAnnotations === 'function') addAnnotations();">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button id="save-annotations-btn" class="btn btn-success" onclick="if (typeof saveAnnotations === 'function') saveAnnotations();">
+                <button id="save-annotations-btn" class="btn btn-success" title="Save annotations" onclick="if (typeof saveAnnotations === 'function') saveAnnotations();">
                     <i class="fas fa-save"></i>
                 </button>
-                <button id="clear-annotations-btn" class="btn btn-warning" onclick="if (typeof clearAnnotations === 'function') clearAnnotations();">
+                <button id="clear-annotations-btn" class="btn btn-warning" title="Clear annotations" onclick="if (typeof clearAnnotations === 'function') clearAnnotations();">
                     <i class="fas fa-eraser"></i>
                 </button>
                 
                 {% if can_download %}
-                    <button id="download-image-btn" class="btn btn-secondary" onclick="if (typeof downloadImage === 'function') downloadImage();">
+                    <button id="download-image-btn" class="btn btn-secondary" title="Download image with annotations" onclick="if (typeof downloadImage === 'function') downloadImage();">
                         <i class="fas fa-download"></i>
                     </button>
                 {% endif %}
