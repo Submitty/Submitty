@@ -53,7 +53,7 @@ describe('notification sync and defaults test', () => {
             });
         }, 5000, 100);
         return course;
-    }
+    };
 
     const AddStudentToCourse = (course) => {
         cy.login('instructor');
@@ -77,7 +77,7 @@ describe('notification sync and defaults test', () => {
         cy.visit([course, 'config']);
         cy.get('[data-testid="course-archive"]').check();
         cy.on('window:confirm', () => true);
-    }
+    };
 
     beforeEach(() => {
         cy.intercept('POST', '**/notifications/settings').as('saveSettings');
@@ -109,7 +109,6 @@ describe('notification sync and defaults test', () => {
             });
             cy.get('#sync-notification-popup').contains('button', 'Close').first().click();
             cy.get('#sync-notification-popup').should('not.be.visible');
-
         });
 
         it('syncs settings to a new course', () => {
@@ -118,7 +117,7 @@ describe('notification sync and defaults test', () => {
 
             const course = createCourse();
             cy.login('instructor');
-            visitNotificationSettings('sample')
+            visitNotificationSettings('sample');
 
             openSyncPopup();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
@@ -138,7 +137,7 @@ describe('notification sync and defaults test', () => {
 
     describe('Future Course Default', () => {
         it('default checkbox is unchecked when this course is not the default', () => {
-            let course = createCourse();
+            const course = createCourse();
             Cypress.env('test-course', course);
             cy.login('instructor');
             visitNotificationSettings('sample');
@@ -215,8 +214,7 @@ describe('notification sync and defaults test', () => {
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
             cy.logout();
 
-            // const course = createCourseAndAddStudent();
-            const course = Cypress.env('test-course')
+            const course = Cypress.env('test-course');
             AddStudentToCourse(course);
 
             cy.login('student');
