@@ -69,4 +69,3 @@ declare global {
 }
 
 window.submitty = exports;
-
