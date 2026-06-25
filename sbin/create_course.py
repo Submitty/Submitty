@@ -9,6 +9,8 @@ import argparse
 import json
 import os
 import sys
+import grp
+import pwd
 
 
 # this script must be run by root or sudo
@@ -100,15 +102,64 @@ def parse_args():
     return args
 
 
+def validate(args, cfg):
+    instructor  = args.instructor
+    ta_group    = args.ta_group
+    php_user    = cfg["php_user"]
+    daemon_user = cfg["daemon_user"]
+    cgi_user    = cfg["cgi_user"]
+    builders    = cfg["course_builders_group"]
+
+    try:
+        pwd.getpwnam(instructor)
+    except KeyError:
+        print(f"ERROR: {instructor} user does not exist\n")
+        sys.exit(1)
+
+    try:
+        grp.getgrnam(ta_group)
+    except KeyError:
+        print(f"ERROR: {ta_group} group does not exist\n")
+        sys.exit(1)
+
+    def in_group(user, group):
+        try:
+            g = grp.getgrnam(group)
+        except KeyError:
+            return False
+        user_gid = pwd.getpwnam(user).pw_gid
+        return user in g.gr_mem or user_gid == g.gr_gid
+
+    if not in_group(instructor, builders):
+        print(f"ERROR: {instructor} is not in group {builders}\n")
+        sys.exit(1)
+
+    if not in_group(instructor, ta_group):
+        print(f"ERROR: {instructor} is not in group {ta_group}\n")
+        sys.exit(1)
+    if not in_group(php_user, ta_group):
+        print(f"ERROR: {php_user} is not in group {ta_group}\n")
+        sys.exit(1)
+    if not in_group(daemon_user, ta_group):
+        print(f"ERROR: {daemon_user} is not in group {ta_group}\n")
+        sys.exit(1)
+    if not in_group(cgi_user, ta_group):
+        print(f"ERROR: {cgi_user} is not in group {ta_group}\n")
+        sys.exit(1)
+
+
 def main():
     check_root()
+
     cfg = load_config()
+    print(cfg["database_course_user"])
+
     args = parse_args()
-    print("Config loaded successfully")
-    print(f"  install dir:  {cfg['submitty_install_dir']}")
-    print(f"  data dir:     {cfg['submitty_data_dir']}")
-    print(f"  submission url: {cfg['submission_url']}")
+
+    validate(args, cfg)
+    print("All user/group validation checks passed.")
 
 
 if __name__ == "__main__":
     main()
+    
