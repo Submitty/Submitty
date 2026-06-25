@@ -528,6 +528,7 @@
                 data: $('#form_notification_settings').serialize() + '&' + $.param({ sync_course_ids: selected }),
                 success: function () {
                     displaySuccessMessage("Synced to selected courses.");
+                    $('#sync-notification-popup').hide();
                 },
                 error: function () {
                     displayErrorMessage("Failed to sync settings.");
