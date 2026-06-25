@@ -116,7 +116,7 @@ onMounted(loadColumns);
             :disabled="forced?.includes(id)"
             :data-testid="`toggle-${id}`"
           />
-          <label :for="`toggle-${id}`">{{ labels[idx] }}</label>
+          <label :for="id">{{ labels[idx] }}</label>
         </div>
       </div>
       <div class="toggle-all-buttons">
