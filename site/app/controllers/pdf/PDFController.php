@@ -18,8 +18,8 @@ class PDFController extends AbstractController {
      * Load annotation JSON data for a given file path from the annotation directory
      * @param string $annotation_dir The directory containing annotation files
      * @param string $file_path The file path to generate MD5 hash for matching
-     * @param array|null $latest_timestamp Reference to track latest modification time (optional)
-     * @return array Array of annotation JSONs keyed by grader_id
+     * @param int|false|null $latest_timestamp Reference to track latest modification time (optional)
+     * @return array<mixed> Array of annotation JSONs keyed by grader_id
      */
     private function loadAnnotationJsons(string $annotation_dir, string $file_path, &$latest_timestamp = null): array {
         $annotation_jsons = [];
