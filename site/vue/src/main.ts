@@ -45,6 +45,7 @@ const exports = {
                         },
                         {} as Record<string, (detail: unknown) => void>,
                     );
+                    // eslint-disable-next-line vue/one-component-per-file
                     const wrapper = defineComponent({
                         setup() {
                             return () => h(mod as Parameters<typeof createApp>[0], { ...args, ...eventListeners });
@@ -56,6 +57,7 @@ const exports = {
                 return createApp(mod as Parameters<typeof createApp>[0], args);
             }
             catch {
+                // eslint-disable-next-line vue/one-component-per-file
                 return createApp(Unknown, { type, name });
             }
         })();
