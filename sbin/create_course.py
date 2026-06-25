@@ -11,6 +11,7 @@ import os
 import sys
 import grp
 import pwd
+import shutil
 
 
 # this script must be run by root or sudo
@@ -221,6 +222,41 @@ def create_directory_tree(course_dir, cfg, instructor, ta_group):
     for subdir in ["reports/all_grades", "reports/seating", "reports/polls"]:
         create_and_set(os.path.join(course_dir, subdir), W, php_user, ta_group)
 
+def replace_fillin_variables(path, cfg, semester, course):
+    database_name = f'submitty_{semester}_{course}'
+    replacements = {
+        "__CREATE_COURSE__FILLIN__SUBMITTY_INSTALL_DIR__": cfg["submitty_install_dir"],
+        "__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__":    cfg["submitty_data_dir"],
+        "__CREATE_COURSE__FILLIN__SUBMISSION_URL__":       cfg["submission_url"],
+        "__CREATE_COURSE__FILLIN__SEMESTER__":             semester,
+        "__CREATE_COURSE__FILLIN__COURSE__":               course,
+        "__CREATE_COURSE__FILLIN__DATABASE_NAME__":        database_name,
+    }
+    with open(path, "r") as f:
+        content = f.read()
+    for placeholder, value in replacements.items():
+        content = content.replace(placeholder, value)
+    with open(path, "w") as f:
+        f.write(content)
+
+def copy_and_template_files(course_dir, cfg, semester, course, instructor, ta_group):
+    install_dir = cfg["submitty_install_dir"]
+    php_user    = cfg["php_user"]
+
+    build_src  = os.path.join(install_dir, "sbin", "build_course.sh")
+    build_dst  = os.path.join(course_dir, f"BUILD_{course}.sh")
+    shutil.copy2(build_src, build_dst)
+    os.chown(build_dst, uid_of(instructor), gid_of(ta_group))
+    os.chmod(build_dst, 0o770)
+    replace_fillin_variables(build_dst, cfg, semester, course)
+
+    config_src = os.path.join(install_dir, "site", "config", "course_template.json")
+    config_dst = os.path.join(course_dir, "config", "config.json")
+    shutil.copy2(config_src, config_dst)
+    os.chown(config_dst, uid_of(php_user), gid_of(ta_group))
+    os.chmod(config_dst, 0o660)
+    replace_fillin_variables(config_dst, cfg, semester, course)
+
 def main():
     check_root()
 
@@ -239,6 +275,7 @@ def main():
 
     ensure_semester_directory(cfg, args.semester)
     create_directory_tree(course_dir, cfg, args.instructor, args.ta_group)
+    copy_and_template_files(course_dir, cfg, args.semester, args.course, args.instructor, args.ta_group)
 
 
 if __name__ == "__main__":
