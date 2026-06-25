@@ -679,7 +679,7 @@ function downloadCSV(code) {
         { header: 'Registration Section', key: 'reg_section', quote: true },
         { header: 'Registration Subsection', key: 'reg_subsection', quote: true },
         { header: 'Rotation Section', key: 'rot_section' },
-        { header: 'Group', key: 'group' }
+        { header: 'Group', key: 'group' },
     ];
 
     // Generate the CSV header row
@@ -687,8 +687,8 @@ function downloadCSV(code) {
     const required_user_id = [];
 
     // formats a single user into a CSV row
-    const generateRow = (user) => {
-        return columns.map(col => {
+    const generateRow = ((user) => {
+        return columns.map((col => {
             let val = user[col.key];
 
             if (val === undefined || val === null) {
@@ -699,8 +699,8 @@ function downloadCSV(code) {
                 return `"${val}"`;
             }
             return val;
-        }).join(',') + '\n';
-    };
+        })).join(',') + '\n';
+    });
 
     // adds a user to the CSV string only if they haven't been added yet
     const addUserToCSV = (user) => {
