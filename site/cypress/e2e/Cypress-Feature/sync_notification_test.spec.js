@@ -71,7 +71,7 @@ describe('notification sync and defaults test', () => {
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.get('[data-testid="popup-message').should('be.visible');
-        cy.get('[data-testid="popup-message').should('have.text' , "Existing Submitty user 'student' added");
+        cy.get('[data-testid="popup-message').should('have.text', 'Existing Submitty user \'student\' added');
         cy.visit('/home');
 
         cy.logout();
