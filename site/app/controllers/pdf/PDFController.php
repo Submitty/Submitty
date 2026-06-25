@@ -237,7 +237,7 @@ class PDFController extends AbstractController {
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
         // Explicit boolean parsing for is_anon
-        $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
+        $is_anon = (bool) filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
         $real_path = $is_anon ? "" : $file_path;
@@ -285,7 +285,7 @@ class PDFController extends AbstractController {
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         // Explicit boolean parsing for is_anon
-        $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
+        $is_anon = (bool) filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
         $real_path = $is_anon ? "" : $file_path;
