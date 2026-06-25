@@ -6,7 +6,6 @@
             <a href="{{ base_url }}" class="leave-room btn btn-danger" data-testid="leave-chat">Leave</a>
             {% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton', 'class': 'fullscreen-btn-wrapper' } %}
         </div>
-
         <div class="chatroom-content">
             <div class="messages-area"></div>
             {% if not isReadOnly %}

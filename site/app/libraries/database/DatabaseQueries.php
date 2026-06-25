@@ -148,7 +148,6 @@ class DatabaseQueries {
         $this->submitty_db->query("UPDATE users SET user_preferred_locale=? WHERE user_id=?", [$locale, $user->getId()]);
     }
 
-
     /**
      * Update a user's preferred date format in the master database.
      *
