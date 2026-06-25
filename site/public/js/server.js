@@ -827,6 +827,27 @@ function toggleDiv(id) {
     return true;
 }
 
+function toggleSubmittedFiles() {
+    const toggleText = document.getElementById('submission-files-toggle-text');
+    const toggleIcon = document.getElementById('submission-files-toggle-icon');
+    const submissionDetails = document.getElementById('submission-details');
+
+    toggleDiv('submitted-files');
+
+    if ($('#submitted-files').is(':hidden')) {
+        toggleText.textContent = 'Show All Files';
+        toggleIcon.className = 'fas fa-chevron-down';
+        submissionDetails.classList.remove('col-md-6');
+        submissionDetails.classList.add('col-md-12');
+    }
+    else {
+        toggleText.textContent = 'Hide All Files';
+        toggleIcon.className = 'fas fa-chevron-up';
+        submissionDetails.classList.remove('col-md-12');
+        submissionDetails.classList.add('col-md-6');
+    }
+}
+
 function checkRefreshPage(url, anon_id = '') {
     setTimeout(() => {
         check_server(url, anon_id);
