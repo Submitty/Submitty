@@ -244,6 +244,7 @@ class UsersController extends AbstractController {
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
+            'registration_subsection' => $user->getRegistrationSubsection(),
             'course_section_id' => $user->getCourseSectionId(),
             'rotating_section' => $user->getRotatingSection(),
             'user_updated' => $user->isUserUpdated(),
