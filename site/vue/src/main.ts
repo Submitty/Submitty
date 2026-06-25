@@ -21,6 +21,7 @@ const exports = {
     ) {
         const app = await (async () => {
             try {
+                // https://vite.dev/guide/features.html#glob-import
                 const modules = import.meta.glob(['./components/**/*.vue', './pages/*.vue'], { import: 'default' });
                 const path = `./${type}s/${name}.vue`;
                 if (!(path in modules)) {
@@ -54,8 +55,7 @@ const exports = {
 
                 return createApp(mod as Parameters<typeof createApp>[0], args);
             }
-            catch (e) {
-                console.error(`Could not find vue ${type} ${name}:`, e);
+            catch {
                 return createApp(Unknown, { type, name });
             }
         })();
@@ -69,3 +69,4 @@ declare global {
 }
 
 window.submitty = exports;
+

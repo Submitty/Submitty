@@ -12,7 +12,7 @@ function mountWithEmitSpy(props) {
         setup() {
             return () => h(StatusBanner, {
                 ...props,
-                'on-color-change': handler,
+                onColorChange: handler,
             });
         },
     });
@@ -110,7 +110,7 @@ describe('StatusBanner', () => {
                     setup() {
                         return () => h(StatusBanner, {
                             ...defaultProps,
-                            'on-color-change': handler,
+                            onColorChange: handler,
                         });
                     },
                 });
