@@ -56,6 +56,8 @@ describe('notification sync and defaults test', () => {
     };
 
     const AddStudentToCourse = (course) => {
+        cy.intercept('GET', '**/user_information').as('userInfo');
+        cy.intercept('POST', '**/users').as('addUser');
         cy.login('instructor');
         cy.visit([course, 'sections']);
         cy.get('[data-testid="add-registration-section-btn"]').click();
@@ -68,7 +70,10 @@ describe('notification sync and defaults test', () => {
         cy.get('[data-testid="user-id-input"]').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
+        cy.get('[data-testid="popup-message').should('be.visible');
+        cy.get('[data-testid="popup-message').should('have.text' , "Existing Submitty user 'student' added");
         cy.visit('/home');
+
         cy.logout();
     };
 
