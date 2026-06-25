@@ -56,133 +56,170 @@
         </div>
     </header>
 
-    {# Initialize columns #}
-    {% set active_cols = active_student_columns|map(v => v == '1') %}
-    {% set column_config = [] %}
-    {% for i in 0..16 %}
-        {% set column_config = column_config|merge([{
-            'id': [
-                'registration-section',
-                'user-id',
-                'first-name',
-                'last-name',
-                'pronouns',
-                'rotating-section',
-                'time-zone',
-                'view-grades',
-                'late-days',
-                'registration-type',
-                'edit-student',
-                'delete-student',
-                'user-numeric-id',
-                'legal-first-name',
-                'legal-last-name',
-                'email',
-                'secondary-email',
-            ][i],
-            'label': [
-                'Registration Section',
-                'User ID',
-                'Given Name',
-                'Family Name',
-                'Pronouns',
-                'Rotating Section',
-                'UTC Offset / Time Zone',
-                'View Grades',
-                'Late Days',
-                'Registration Type',
-                'Edit Student',
-                'Delete Student',
-                'User Numeric ID',
-                'Legal Given Name',
-                'Legal Family Name',
-                'Email',
-                'Secondary Email',
-            ][i],
-            'active': active_cols[i]
-        }]) %}
-    {% endfor %}
-
+    {# This is a data table #}
+    {% set count = 1 %}
     {% if sections|length > 0 %}
         <table id="student-table" class="table table-striped mobile-table directory-table">
             <caption>Students Enrolled</caption>
             <thead>
                 <tr>
                     <th>#</th>
-                    {% for col in column_config %}
-                        {% if col.active %}
-                            <th style="{{ col.id in ['user-id', 'first-name', 'last-name', 'pronouns'] ? 'text-align:left;' : '' }}">
-                                {{ col.label }}
-                            </th>
-                        {% endif %}
-                    {% endfor %}
+                    {% if active_student_columns[0] %}
+                        <th>Registration Section</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[1] %}
+                        <th style="text-align:left;">User ID</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[2] %}
+                        <th style="text-align:left;">Given Name</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[3] %}
+                        <th style="text-align:left;">Family Name</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[4] %}
+                        <th style="text-align:left;">Pronouns</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[5] %}
+                        <th>Rotating Section</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[6] %}
+                        <th>UTC Offset / Time Zone</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[7] %}
+                        <th>View Grades</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[8] %}
+                        <th>Late Days</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[9] %}
+                        <th>Registration Type</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[10] %}
+                        <th>Edit Student</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[11] %}
+                        <th>Delete Student</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[12] %}
+                        <th>User Numeric ID</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[13] %}
+                        <th>Legal Given Name</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[14] %}
+                        <th>Legal Family Name</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[15] %}
+                        <th>Email</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
+                    {% if active_student_columns[16] %}
+                        <th>Secondary Email</th>
+                        {% set count = count + 1 %}
+                    {% endif %}
                 </tr>
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="{{ 1 + (column_config|filter(c => c.active)|length) }}">
-                            Students Enrolled in Registration Section {{ registration }}
-                        </th>
+                        <th class="section-break" colspan="{{ count }}">Students Enrolled in Registration Section {{ registration }}</th>
                     </tr>
                     {% for student in students %}
-                        <tr id="user-{{ student.getId() }}" class="{{ student.accessGrading() ? 'access-grading' : '' }}">
+                        {% set class = "" %}
+                        {% if student.accessGrading() %}
+                            {% set class = "access-grading" %}
+                        {% endif %}
+                        <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
-                            {% for col in column_config %}
-                                {% if col.active %}
-                                    <td class="td-{{ col.id }}">
-                                        {% if col.id == 'registration-section' %}
-                                            {{ registration }}{{ student.getRegistrationSubsection ? ' - ' ~ student.getRegistrationSubsection : '' }}
-                                            {% if student.isManualRegistration() %}
-                                                <i class="fas fa-hammer" title="Manually Registered"></i>
-                                            {% endif %}
-                                            {% if student.getRegistrationSection() == null and can_rejoin[student.getId()] == true %}
-                                                <i class="fa-solid fa-circle-arrow-down" title="Recently Dropped"></i>
-                                            {% endif %}
-                                        {% elseif col.id == 'user-id' %}
-                                            {{ student.getId() }}
-                                        {% elseif col.id == 'first-name' %}
-                                            {{ student.getDisplayedGivenName() }}
-                                        {% elseif col.id == 'last-name' %}
-                                            {{ student.getDisplayedFamilyName() }}
-                                        {% elseif col.id == 'pronouns' %}
-                                            {{ student.getPronouns() }}
-                                        {% elseif col.id == 'rotating-section' %}
-                                            {{ student.getRotatingSection() ?? "NULL" }}
-                                        {% elseif col.id == 'time-zone' %}
-                                            {{ formatted_tzs[student.getId()] }}
-                                        {% elseif col.id == 'view-grades' %}
-                                            <form method="post" action="{{ view_grades_url }}">
-                                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                                <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
-                                                <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
-                                            </form>
-                                        {% elseif col.id == 'late-days' %}
-                                            <form method="get" action="{{ view_latedays_url }}">
-                                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                                <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
-                                                <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
-                                            </form>
-                                        {% elseif col.id == 'registration-type' %}
-                                            {{ student.getRegistrationType() }}
-                                        {% elseif col.id == 'edit-student' %}
-                                            <a href="javascript:editUserForm('{{ student.getId() }}');"><i class="fas fa-pencil-alt"></i></a>
-                                        {% elseif col.id == 'delete-student' %}
-                                            <a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');"><i class="fas fa-trash"></i></a>
-                                        {% elseif col.id == 'user-numeric-id' %}
-                                            {{ student.getNumericId() }}
-                                        {% elseif col.id == 'legal-first-name' %}
-                                            {{ student.getLegalGivenName() }}
-                                        {% elseif col.id == 'legal-last-name' %}
-                                            {{ student.getLegalFamilyName() }}
-                                        {% elseif col.id == 'email' %}
-                                            {{ student.getEmail() }}
-                                        {% elseif col.id == 'secondary-email' %}
-                                            {{ student.getSecondaryEmail() }}
-                                        {% endif %}
-                                    </td>
-                                {% endif %}
-                            {% endfor %}
+                            {% if active_student_columns[0] %}
+                                <td class="td-registration-section">
+                                    {{ registration }}
+                                    {% if  student.getRegistrationSubsection is not empty %}
+                                        -  {{ student.getRegistrationSubsection }}
+                                    {% endif %}
+                                    {% if student.isManualRegistration() %}
+                                        <i class="fas fa-hammer" title="Manually Registered"></i>
+                                    {% endif %}
+                                    {% if student.getRegistrationSection() == null and can_rejoin[student.getId()] == true %}
+                                        <i class="fa-solid fa-circle-arrow-down" title="Recently Dropped"></i>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[1] %}
+                                <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[2] %}
+                                <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[3] %}
+                                <td class="align-left td-family-name">{{ student.getDisplayedFamilyName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[4] %}
+                                <td class="align-left td-pronouns">{{ student.getPronouns() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[5] %}
+                                <td class="td-rotating-section">{{ student.getRotatingSection() ?? "NULL" }}</td>
+                            {% endif %}
+                            {% if active_student_columns[6] %}
+                                <td class="td-manual-registration">{{ formatted_tzs[student.getId()] }}</td>
+                            {% endif %}
+                            {% if active_student_columns[7] %}
+                                <td class="td-view-grades">
+                                    <form method="post" action="{{ view_grades_url }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                        <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                        <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
+                                    </form>
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[8] %}
+                                <td class="td-late-days">
+                                    <form method="get" action="{{ view_latedays_url }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                        <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                        <a onclick="$(this).parent().submit();"><i class="fa fa-calendar"></i></a>
+                                    </form>
+                                </td>
+                            {% endif %}
+                            {% if active_student_columns[9] %}
+                                <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[10] %}
+                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
+                            {% endif %}
+                            {% if active_student_columns[11] %}
+                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}" data-testid="delete-student-{{ student.getId() }}-button"><i class="fas fa-trash"></i></a></td>
+                            {% endif %}
+                            {% if active_student_columns[12] %}
+                                <td class="td-user-numeric-id">{{ student.getNumericId() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[13] %}
+                                <td class="td-legal-first-name">{{ student.getLegalGivenName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[14] %}
+                                <td class="td-legal-last-name">{{ student.getLegalFamilyName() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[15] %}
+                                <td class="td-email">{{ student.getEmail() }}</td>
+                            {% endif %}
+                            {% if active_student_columns[16] %}
+                                <td class="td-secondary-email">{{ student.getSecondaryEmail() }}</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -191,8 +228,7 @@
     {% else %}
         <p id="no-one-found" class="warning">No students found</p>
     {% endif %}
-
-    </div>
+</div>
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
