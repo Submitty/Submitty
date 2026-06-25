@@ -44,7 +44,7 @@ describe('notification sync and defaults test', () => {
         cy.login('instructor');
         cy.visit('/home/courses/new');
         cy.get('[data-testid="course-title-input"]').type(course);
-        cy.get('[data-testid="course-group-select"]').select(4);
+        cy.get('[data-testid="course-group-select"]').select('sample_tas_www');
         cy.get('[data-testid="create-course-submit"]').click();
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
@@ -87,10 +87,6 @@ describe('notification sync and defaults test', () => {
     });
 
     describe('Sync settings to other courses', () => {
-        // beforeEach(() => {
-        //     cy.login('instructor');
-        //     visitNotificationSettings('sample');
-        // });
 
         it('functionality of sync popup', () => {
             const course = createCourse();
@@ -120,10 +116,10 @@ describe('notification sync and defaults test', () => {
             const course = Cypress.env('test-course');
             cy.login('instructor');
             visitNotificationSettings('sample');
-            openSyncPopup();
             setCheckbox('merge_threads', true);
             setCheckbox('all_new_threads', false);
 
+            openSyncPopup();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 if ($cb.val().includes(course)) {
                     cy.wrap($cb).check({ force: true });
