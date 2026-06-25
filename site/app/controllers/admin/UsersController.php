@@ -39,6 +39,7 @@ class UsersController extends AbstractController {
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $reg_subsec = $student->getRegistrationSubsection();
             $formatted_tzs[$student->getId()] = $student->getNiceFormatTimeZone() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
@@ -66,6 +67,7 @@ class UsersController extends AbstractController {
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
+                'reg_subsection' => $reg_subsec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
