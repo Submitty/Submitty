@@ -87,13 +87,18 @@ describe('notification sync and defaults test', () => {
     });
 
     describe('Sync settings to other courses', () => {
-        beforeEach(() => {
-            cy.login('instructor');
-            visitNotificationSettings('sample');
-        });
+        // beforeEach(() => {
+        //     cy.login('instructor');
+        //     visitNotificationSettings('sample');
+        // });
 
         it('functionality of sync popup', () => {
+            const course = createCourse();
+            Cypress.env('test-course', course);
+            cy.login('instructor');
+            visitNotificationSettings('sample');
             openSyncPopup();
+
             cy.get('#sync-notification-popup').within(() => {
                 cy.contains('Sync Notification Settings').should('be.visible');
                 cy.get('[data-testid="sync-course-list"]').should('exist');
@@ -112,14 +117,13 @@ describe('notification sync and defaults test', () => {
         });
 
         it('syncs settings to a new course', () => {
+            const course = Cypress.env('test-course');
+            cy.login('instructor');
+            visitNotificationSettings('sample');
+            openSyncPopup();
             setCheckbox('merge_threads', true);
             setCheckbox('all_new_threads', false);
 
-            const course = createCourse();
-            cy.login('instructor');
-            visitNotificationSettings('sample');
-
-            openSyncPopup();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
                 if ($cb.val().includes(course)) {
                     cy.wrap($cb).check({ force: true });
@@ -131,14 +135,12 @@ describe('notification sync and defaults test', () => {
             visitNotificationSettings(course);
             cy.get('input[name="merge_threads"]').should('be.checked');
             cy.get('input[name="all_new_threads"]').should('not.be.checked');
-            archiveCourse(course);
         });
     });
 
     describe('Future Course Default', () => {
         it('default checkbox is unchecked when this course is not the default', () => {
-            const course = createCourse();
-            Cypress.env('test-course', course);
+            const course = Cypress.env('test-course');
             cy.login('instructor');
             visitNotificationSettings('sample');
             clearDefaultIfSet();
