@@ -68,6 +68,7 @@ describe('notification sync and defaults test', () => {
         cy.visit([course, 'users']);
         cy.get('[data-testid="new-student-form-btn"]').click();
         cy.get('[data-testid="user-id-input"]').type('student');
+        cy.get('input[name="user_password"]').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.get('[data-testid="popup-message').should('be.visible');
