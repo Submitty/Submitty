@@ -3793,6 +3793,31 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Deletes a team from the database and removes user associations.
+     * THIS FUNCTION SHOULD ONLY BE USED ON TEAMS WITHOUT SUBMISSIONS
+     *
+     * @param string $team_id
+     * @return void
+     */
+    public function deleteTeam($team_id) {
+        try {
+            $this->course_db->query(
+                "DELETE FROM gradeable_teams WHERE team_id=?",
+                [$team_id]
+            );
+
+            $this->course_db->query(
+                "DELETE FROM teams WHERE team_id=?",
+                [$team_id]
+            );
+        }
+        catch (\Exception $e) {
+            $this->course_db->rollback();
+            throw new \Exception("An error occurred while attempting to delete the team " . $team_id . ".");
+        }
+    }
+
+    /**
      * Set team $team_id's registration/rotating section to $section
      *
      * @param string $team_id
