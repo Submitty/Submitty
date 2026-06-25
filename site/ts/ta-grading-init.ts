@@ -1,6 +1,12 @@
 import { changeStudentArrowTooltips } from './ta-grading';
 import { loadTAGradingSettingData, settingsData } from './ta-grading-keymap';
 
+const submittyWindow = window as Window & {
+    submitty?: {
+        registerHandler: (name: string, handler: (color: string) => void) => void;
+    };
+};
+
 const settingsCallbacks = {
     'general-setting-arrow-function': changeStudentArrowTooltips,
     'general-setting-navigate-assigned-students-only': function (
@@ -15,6 +21,10 @@ const settingsCallbacks = {
         }
     },
 };
+
+submittyWindow.submitty?.registerHandler('handleStatusBannerColorChange', (color: string) => {
+    document.body.style.background = color;
+});
 
 window.Twig.twig({
     id: 'Attachments',

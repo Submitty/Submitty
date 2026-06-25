@@ -20,21 +20,3 @@ window.addEventListener('DOMContentLoaded', () => {
     // Remove table-striped to prevent CSS conflicts with JS-set colors
     $('table').removeClass('table-striped');
 });
-
-function registerHandlers() {
-    if (!window.submitty?.registerHandler) {
-        setTimeout(registerHandlers, 10);
-        return;
-    }
-    window.submitty.registerHandler('handleStatusBannerColorChange', (color) => {
-        const gradingContainer = document.getElementById('electronic-gradeable-container');
-        if (gradingContainer) {
-            gradingContainer.style.background = color;
-        }
-        document.querySelectorAll('.rubric_panel').forEach((el) => {
-            el.style.background = color;
-        });
-    });
-}
-
-registerHandlers();

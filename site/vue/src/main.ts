@@ -1,11 +1,15 @@
 import { createApp, h, defineComponent } from 'vue';
 import Unknown from './components/Unknown.vue';
 
-const handlerRegistry: Record<string, (detail: unknown) => void> = {};
+const handlerRegistry: Record<string, (detail: unknown) => void> = {}; // maps handler names to their functions
+const firedEvents: Record<string, unknown> = {}; // maps event names to their most recent detail(remembers events that fired before a handler was registered.)
 
 const exports = {
     registerHandler(name: string, fn: (detail: unknown) => void) {
         handlerRegistry[name] = fn;
+        if (name in firedEvents) {
+            fn(firedEvents[name]);
+        }
     },
 
     async render(
@@ -17,7 +21,6 @@ const exports = {
     ) {
         const app = await (async () => {
             try {
-                // https://vite.dev/guide/features.html#glob-import
                 const modules = import.meta.glob(['./components/**/*.vue', './pages/*.vue'], { import: 'default' });
                 const path = `./${type}s/${name}.vue`;
                 if (!(path in modules)) {
@@ -30,9 +33,8 @@ const exports = {
                     const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
                     const eventListeners = Object.entries(events).reduce(
                         (acc, [eventName, fnName]) => {
-                            // Vue 3's emit() looks up handlers via toHandlerKey(event) and toHandlerKey(camelize(event)),
-                            // so we must produce keys like onColorChange, not on-color-change.
                             acc[`on${capitalize(camelize(eventName))}`] = (detail: unknown) => {
+                                firedEvents[fnName] = detail;
                                 const fn = handlerRegistry[fnName];
                                 if (typeof fn === 'function') {
                                     fn(detail);
