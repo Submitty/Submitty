@@ -4,8 +4,25 @@ import path, { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-    plugins: [vue()],
+export default defineConfig(async () => {
+    const plugins = [vue()];
+
+    if (process.env.VITE_COVERAGE === 'true') {
+        const istanbul = (await import('vite-plugin-istanbul')).default;
+        plugins.push(istanbul({
+            include: ['vue/src/**/*'],
+            exclude: [
+                'node_modules',
+                'cypress',
+                '**/*.cy.ts',
+                '**/*.spec.ts',
+            ],
+            requireEnv: true,
+        }));
+    }
+
+    return {
+        plugins,
     define: {
         'process.env.NODE_ENV': '"production"',
     },
@@ -33,4 +50,6 @@ export default defineConfig({
         outDir: '../public/mjs/vue/',
         emptyOutDir: true,
     },
+    };
 });
+

@@ -1,6 +1,7 @@
 /.idea/
 /output/
 /.vagrant/
+/public/
 
 selenium*.jar
 .DS_Store
@@ -16,6 +17,7 @@ __pycache__/
 *.out
 *.synctex.gz
 .coverage
+.nyc_output/
 coverage.xml
 
 

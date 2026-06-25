@@ -1,0 +1,14 @@
+{
+  "all": false,
+  "reporter": [
+    "text-summary",
+    "html",
+    "lcov"
+  ],
+  "exclude": [
+    "cypress/**",
+    "**/*.cy.*",
+    "**/*.spec.*",
+    "node_modules/**"
+  ]
+}
