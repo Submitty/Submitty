@@ -38,10 +38,8 @@ describe('notification sync and defaults test', () => {
         cy.get('#sync-notification-popup').contains('button', 'Close').first().click();
     };
 
-    const createCourseAndAddStudent = () => {
+    const createCourse = () => {
         const course = `${randomName()}_noti_test`;
-        cy.intercept('GET', '**/user_information').as('userInfo');
-        cy.intercept('POST', '**/users').as('addUser');
 
         cy.login('instructor');
         cy.visit('/home/courses/new');
@@ -54,6 +52,11 @@ describe('notification sync and defaults test', () => {
                 return $body.find(`[data-testid="${course}-button"]`).length > 0;
             });
         }, 5000, 100);
+        return course;
+    }
+
+    const AddStudentToCourse = (course) => {
+        cy.login('instructor');
         cy.visit([course, 'sections']);
         cy.get('[data-testid="add-registration-section-btn"]').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
@@ -67,8 +70,14 @@ describe('notification sync and defaults test', () => {
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.visit('/home');
         cy.logout();
-        return course;
     };
+
+    const archiveCourse = (course) => {
+        cy.login('instructor');
+        cy.visit([course, 'config']);
+        cy.get('[data-testid="course-archive"]').check();
+        cy.on('window:confirm', () => true);
+    }
 
     beforeEach(() => {
         cy.intercept('POST', '**/notifications/settings').as('saveSettings');
@@ -100,29 +109,37 @@ describe('notification sync and defaults test', () => {
             });
             cy.get('#sync-notification-popup').contains('button', 'Close').first().click();
             cy.get('#sync-notification-popup').should('not.be.visible');
+
         });
 
-        it('syncs settings to the tutorial course', () => {
+        it('syncs settings to a new course', () => {
             setCheckbox('merge_threads', true);
             setCheckbox('all_new_threads', false);
 
+            const course = createCourse();
+            cy.login('instructor');
+            visitNotificationSettings('sample')
+
             openSyncPopup();
             cy.get('[data-testid="sync-course-checkbox"]').each(($cb) => {
-                if ($cb.val().includes('tutorial')) {
+                if ($cb.val().includes(course)) {
                     cy.wrap($cb).check({ force: true });
                 }
             });
             cy.get('[data-testid="sync-submit"]').click();
             cy.wait('@syncSettings');
 
-            visitNotificationSettings('tutorial');
+            visitNotificationSettings(course);
             cy.get('input[name="merge_threads"]').should('be.checked');
             cy.get('input[name="all_new_threads"]').should('not.be.checked');
+            archiveCourse(course);
         });
     });
 
     describe('Future Course Default', () => {
         it('default checkbox is unchecked when this course is not the default', () => {
+            let course = createCourse();
+            Cypress.env('test-course', course);
             cy.login('instructor');
             visitNotificationSettings('sample');
             clearDefaultIfSet();
@@ -133,7 +150,7 @@ describe('notification sync and defaults test', () => {
             cy.get('[data-testid="set-default-course"]').should('not.be.checked');
         });
 
-        it('marks the course as default and shows the banner live', () => {
+        it('marks the course as default and shows the banner', () => {
             cy.login('instructor');
             visitNotificationSettings('sample');
             clearDefaultIfSet();
@@ -175,8 +192,8 @@ describe('notification sync and defaults test', () => {
                     cy.wait('@saveDefaults');
                 }
             });
-
-            visitNotificationSettings('tutorial');
+            const course = Cypress.env('test-course');
+            visitNotificationSettings(course);
             cy.get('[data-testid="other-default-course-banner"]')
                 .should('be.visible')
                 .and('contain.text', 'sample');
@@ -198,13 +215,19 @@ describe('notification sync and defaults test', () => {
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
             cy.logout();
 
-            const course = createCourseAndAddStudent();
+            // const course = createCourseAndAddStudent();
+            const course = Cypress.env('test-course')
+            AddStudentToCourse(course);
 
             cy.login('student');
+
             visitNotificationSettings(course);
             cy.get('input[name="merge_threads"]').scrollIntoView();
             cy.get('input[name="merge_threads"]').should('be.checked');
             cy.get('input[name="team_invite"]').should('not.be.checked');
+            cy.logout();
+            cy.login('instructor');
+            archiveCourse(course);
         });
     });
 });
