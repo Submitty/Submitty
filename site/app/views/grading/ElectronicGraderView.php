@@ -1012,6 +1012,7 @@ HTML;
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
+        $this->core->getOutput()->addInternalJs('electronic-grading.js'); 
         $isPeerPanel = false;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;

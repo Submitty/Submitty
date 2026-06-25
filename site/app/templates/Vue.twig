@@ -12,6 +12,6 @@
         "{{ type }}",
         "{{ name }}",
         {{ args | default({}) | json_encode() | raw() }},
-        {{ callbacks | default({}) | json_encode() | raw() }}
+        {{ events | default({}) | json_encode() | raw() }}
     );
 </script>

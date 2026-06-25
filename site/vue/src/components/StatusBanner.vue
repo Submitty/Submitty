@@ -6,10 +6,12 @@ const props = defineProps<{
     color: string;
 }>();
 
+const emit = defineEmits<{
+    'color-change': [color: string];
+}>();
+
 onMounted(() => {
-    window.dispatchEvent(new CustomEvent('status-banner-color-change', {
-        detail: props.color,
-    }));
+    emit('color-change', props.color);
 });
 </script>
 
