@@ -158,7 +158,7 @@ function setupAnnotationEditor(): void {
         if (editorWrapper) {
             editorWrapper.style.display = 'none';
         }
-        $('#annotation-status').text('Annotations modified (not saved)').css('color', 'green');
+        $('#annotation-status').text('Annotations modified (not saved)').css('color', 'blue');
         // Render the annotations on the image
         renderAnnotationsOnImage();
     });
