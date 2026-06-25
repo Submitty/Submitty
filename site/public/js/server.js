@@ -683,12 +683,12 @@ function downloadCSV(code) {
     ];
 
     // Generate the CSV header row
-    let csv_data = columns.map(col => col.header).join(',') + '\n';
+    let csv_data = `${columns.map((col) => col.header).join(',')}\n`;
     const required_user_id = [];
 
     // formats a single user into a CSV row
-    const generateRow = ((user) => {
-        return columns.map((col => {
+    const generateRow = (user) => {
+        return `${columns.map((col) => {
             let val = user[col.key];
 
             if (val === undefined || val === null) {
@@ -699,8 +699,8 @@ function downloadCSV(code) {
                 return `"${val}"`;
             }
             return val;
-        })).join(',') + '\n';
-    });
+        }).join(',')}\n`;
+    };
 
     // adds a user to the CSV string only if they haven't been added yet
     const addUserToCSV = (user) => {
