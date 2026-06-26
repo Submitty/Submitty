@@ -129,34 +129,50 @@
     border: none; /* .btn-primary has border on hover */
 }
 
-.btn-primary {
-    background-color: var(--standard-aqua);
+.btn-primary,
+.btn-primary:active,
+.btn-primary:hover:active {
+background-color: var(--standard-aqua);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active:focus {
     background-color: var(--standard-medium-blue);
 }
 
-.btn-success {
-    background-color: var(--standard-vibrant-green);
+.btn-success,
+.btn-success:active,
+.btn-success:hover:active {
+background-color: var(--standard-vibrant-green);
 }
 
-.btn-success:hover {
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active:focus {
     background-color: var(--standard-medium-green);
 }
 
-.btn-warning {
-    background-color: var(--standard-light-red);
+.btn-warning,
+.btn-warning:active,
+.btn-warning:hover:active {
+background-color: var(--standard-light-red);
 }
 
-.btn-warning:hover {
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active:focus {
     background-color: var(--standard-medium-red);
 }
 
-.btn-secondary {
-    background-color: var(--standard-light-orange);
+.btn-secondary,
+.btn-secondary:active,
+.btn-secondary:hover:active {
+background-color: var(--standard-light-orange);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active:focus {
     background-color: var(--standard-medium-orange);
 }
