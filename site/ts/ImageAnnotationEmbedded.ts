@@ -88,6 +88,10 @@ const emptyState: AnnotationState = {
 
 let annotationEditorOpen = false;
 
+export function isAnnotationEditorOpen() {
+    return annotationEditorOpen;
+}
+
 // TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
 function createEditorWrapper(): HTMLElement {
     const editorWrapper = document.createElement('div');

@@ -18,6 +18,7 @@ import {
     toggleComponent as oldToggleComponent,
 } from './ta-grading-rubric';
 import { gotoNextStudent, gotoPrevStudent } from './ta-grading-toolbar';
+import { isAnnotationEditorOpen } from './ImageAnnotationEmbedded';
 
 declare global {
     interface Window {
@@ -1029,7 +1030,7 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 }
 
 $(() => {
-// Navigate to the prev / next student buttons
+    // Navigate to the prev / next student buttons
     registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
         gotoPrevStudent();
     });
