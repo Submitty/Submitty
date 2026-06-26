@@ -86,6 +86,57 @@ const emptyState: AnnotationState = {
     markers: [],
 };
 
+let annotationEditorOpen = false;
+
+// TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
+function createEditorWrapper(): HTMLElement {
+    const editorWrapper = document.createElement('div');
+    editorWrapper.id = 'global-annotation-editor-wrapper';
+    editorWrapper.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    if (annotationManager.globalAnnotationEditor) {
+        annotationManager.globalAnnotationEditor.style.cssText = `
+            width: 90vw;
+            height: 90vh;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        `;
+    }
+
+    if (annotationManager.globalAnnotationEditor) {
+        editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
+    }
+    document.body.appendChild(editorWrapper);
+    editorWrapper.style.display = 'flex';
+
+    annotationEditorOpen = true;
+    return editorWrapper;
+}
+
+function hideEditorWrapper(also_remove: boolean = false): void {
+    const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
+    if (editorWrapper) {
+        editorWrapper.style.display = 'none';
+        if (also_remove) {
+            editorWrapper.remove();
+        }
+    }
+
+    annotationEditorOpen = false;
+}
+
 function addAnnotations(): void {
     if (!annotationManager.originalImg) {
         console.error('No target image provided to addAnnotations');
@@ -126,12 +177,7 @@ function addAnnotations(): void {
         configureEditorForImage();
 
         // Create and show wrapper
-        const editorWrapper = createEditorWrapper();
-        if (annotationManager.globalAnnotationEditor) {
-            editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
-        }
-        document.body.appendChild(editorWrapper);
-        editorWrapper.style.display = 'flex';
+        createEditorWrapper();
     }
     catch (error) {
         console.error('Error opening annotation editor:', error);
@@ -154,21 +200,16 @@ function setupAnnotationEditor(): void {
         }
 
         // Hide the annotation editor
-        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
-        if (editorWrapper) {
-            editorWrapper.style.display = 'none';
-        }
+        hideEditorWrapper();
         $('#annotation-status').text('Annotations modified (not saved)').css('color', 'blue');
+
         // Render the annotations on the image
         renderAnnotationsOnImage();
     });
 
     annotationManager.globalAnnotationEditor.addEventListener('editorclose', () => {
         // Hide the annotation editor
-        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
-        if (editorWrapper) {
-            editorWrapper.style.display = 'none';
-        }
+        hideEditorWrapper();
         $('#annotation-status').text('Annotation editor closed').css('color', 'blue');
 
         // Render the annotations on the image if any exist
@@ -183,36 +224,6 @@ function setupAnnotationEditor(): void {
     annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = 'image/png';
     annotationManager.globalAnnotationEditor.settings.rendererSettings.imageQuality = 1;
     annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
-}
-
-// TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
-function createEditorWrapper(): HTMLElement {
-    const editorWrapper = document.createElement('div');
-    editorWrapper.id = 'global-annotation-editor-wrapper';
-    editorWrapper.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 10000;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    `;
-
-    if (annotationManager.globalAnnotationEditor) {
-        annotationManager.globalAnnotationEditor.style.cssText = `
-            width: 90vw;
-            height: 90vh;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        `;
-    }
-
-    return editorWrapper;
 }
 
 function configureEditorForImage(): void {
@@ -266,10 +277,7 @@ function clearAnnotations(): void {
         annotationManager.annotatedImageDataUrl = null;
 
         // Hide any open annotation editor instead of removing it
-        const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
-        if (editorWrapper) {
-            editorWrapper.style.display = 'none';
-        }
+        hideEditorWrapper();
 
         // Restore original image if it was replaced with MarkerView
         const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
@@ -326,13 +334,8 @@ function cleanupAnnotationEditor(): void {
     // Clear the global annotation editor reference
     annotationManager.globalAnnotationEditor = null;
 
-    // Hide and remove any existing annotation editor wrapper
-    const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
-    if (editorWrapper) {
-        editorWrapper.style.display = 'none';
-        // Remove it completely to ensure fresh start
-        editorWrapper.remove();
-    }
+    // Hide and remove any existing annotation editor wrapper to ensure fresh start
+    hideEditorWrapper(true);
 
     // Restore original image if it was replaced with MarkerView
     const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
