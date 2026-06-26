@@ -21,6 +21,16 @@ let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
 let maxNavbarWidth = 0;
 
+const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT',
+    '.user_assignment_access.json', '.bulk_upload_data.json'];
+
+function isSubmissionMetaFile(filename: string) {
+    if (SUBMISSION_META_FILES.includes(filename)) {
+        return true;
+    }
+    return filename.startsWith('.upload_page_') || filename.startsWith('.upload_version_');
+}
+
 function checkNotebookScroll() {
     if (
         taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
@@ -320,7 +330,12 @@ function readCookies() {
         // the number of files and folders that are open in the submissions and results browser
         const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
         // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)
-        const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions:not([data-file_name^="."])');
+
+        // const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions:not([data-file_name^="."])');
+        const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions').toArray().filter(
+            (element: HTMLElement) => !isSubmissionMetaFile(element.getAttribute('data-file_name') || ''),
+        );
+
         if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
             const elem = SubmissionFiles[0];
             const fileName = elem.dataset.file_name!;
