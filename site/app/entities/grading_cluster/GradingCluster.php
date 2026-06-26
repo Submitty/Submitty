@@ -10,7 +10,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: "grading_cluster")]
+#[ORM\Table(name: "ta_grading_clusters")]
 class GradingCluster {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]

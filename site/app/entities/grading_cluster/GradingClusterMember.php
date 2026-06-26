@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: "grading_cluster_members")]
+#[ORM\Table(name: "ta_grading_clusters_members")]
 class GradingClusterMember {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
@@ -25,10 +25,14 @@ class GradingClusterMember {
     #[ORM\Column(name: "team_id", type: Types::STRING, nullable: true)]
     private ?string $team_id;
 
-    public function __construct(GradingCluster $cluster, ?string $user_id, ?string $team_id) {
+    #[ORM\Column(type: Types::INTEGER)]
+    private int $active_version;
+
+    public function __construct(GradingCluster $cluster, ?string $user_id, ?string $team_id, int $active_version) {
         $this->cluster  = $cluster;
         $this->user_id  = $user_id;
         $this->team_id  = $team_id;
+        $this->active_version = $active_version;
         $cluster->addMember($this);
     }
 
@@ -46,5 +50,9 @@ class GradingClusterMember {
 
     public function getTeamId(): ?string {
         return $this->team_id;
+    }
+
+    public function getActiveVersion(): int {
+        return $this->active_version;
     }
 }

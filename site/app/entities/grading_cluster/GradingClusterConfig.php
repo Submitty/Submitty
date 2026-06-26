@@ -10,7 +10,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: \app\repositories\grading_cluster\GradingClusterConfigRepository::class)]
-#[ORM\Table(name: "grading_cluster_config")]
+#[ORM\Table(name: "ta_grading_clustering_configs")]
 class GradingClusterConfig {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
@@ -23,6 +23,9 @@ class GradingClusterConfig {
     #[ORM\Column(type: Types::STRING, enumType: GradingClusterAlgorithm::class)]
     private GradingClusterAlgorithm $algorithm;
 
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    private \DateTime $created_at;
+
     /**
      * @var Collection<int, GradingCluster>
      */
@@ -33,6 +36,7 @@ class GradingClusterConfig {
         $this->gradeable_id = $gradeable_id;
         $this->algorithm    = $algorithm;
         $this->clusters     = new ArrayCollection();
+        $this->created_at   = new \DateTime();
     }
 
     public function getId(): int {
@@ -45,6 +49,10 @@ class GradingClusterConfig {
 
     public function getAlgorithm(): GradingClusterAlgorithm {
         return $this->algorithm;
+    }
+
+    public function getCreatedAt(): \DateTime {
+        return $this->created_at;
     }
 
     /**

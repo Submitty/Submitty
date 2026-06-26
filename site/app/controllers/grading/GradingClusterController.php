@@ -54,7 +54,7 @@ class GradingClusterController extends AbstractController {
 
             $cluster = new GradingCluster($config, $cluster_name);
             foreach ($members as $member) {
-                new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null);
+                new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null, $member['active_version']);
             }
             $em->persist($cluster);
         }
@@ -92,6 +92,7 @@ class GradingClusterController extends AbstractController {
                         'id'      => $m->getId(),
                         'user_id' => $m->getUserId(),
                         'team_id' => $m->getTeamId(),
+                        'active_version' => $m->getActiveVersion(),
                     ],
                     $cluster->getMembers()->toArray()
                 ),

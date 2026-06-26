@@ -10004,14 +10004,9 @@ ORDER BY
      */
     public function getActiveSubmittersForGradeable(string $gradeable_id): array {
         $this->course_db->query(
-            "SELECT DISTINCT egv.user_id, egv.team_id
+            "SELECT DISTINCT egv.user_id, egv.team_id, egv.active_version
              FROM electronic_gradeable_version egv
-             LEFT JOIN users u ON egv.user_id = u.user_id
-             LEFT JOIN gradeable_teams gt ON egv.team_id = gt.team_id
-             LEFT JOIN late_day_cache ldc ON egv.g_id = ldc.g_id AND (egv.user_id = ldc.user_id OR (egv.user_id IS NULL AND egv.team_id = ldc.team_id))
-             WHERE egv.g_id = ? AND egv.active_version > 0
-               AND (u.registration_section IS NOT NULL OR gt.registration_section IS NOT NULL)
-               AND (ldc.late_day_status IS NULL OR ldc.late_day_status < 2)",
+             WHERE egv.g_id = ? AND egv.active_version > 0",
             [$gradeable_id]
         );
         return $this->course_db->rows();
