@@ -80,22 +80,34 @@ class GradingClusterController extends AbstractController {
             ]);
         }
 
+        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+        $active_versions = [];
+        foreach ($submitters as $submitter) {
+            $id = $submitter['user_id'] ?? $submitter['team_id'];
+            $active_versions[$id] = $submitter['active_version'];
+        }
+
         $result = [];
         foreach ($config->getClusters() as $cluster) {
-            $result[] = [
-                'id'           => $cluster->getId(),
-                'cluster_name' => $cluster->getClusterName(),
-                'algorithm'    => $config->getAlgorithm()->value,
-                'member_count' => $cluster->getMemberCount(),
-                'members'      => array_map(
-                    fn(GradingClusterMember $m) => [
+            $valid_members = [];
+            foreach ($cluster->getMembers() as $m) {
+                $member_id = $m->getUserId() ?? $m->getTeamId();
+                if (isset($active_versions[$member_id]) && $active_versions[$member_id] === $m->getActiveVersion()) {
+                    $valid_members[] = [
                         'id'      => $m->getId(),
                         'user_id' => $m->getUserId(),
                         'team_id' => $m->getTeamId(),
                         'active_version' => $m->getActiveVersion(),
-                    ],
-                    $cluster->getMembers()->toArray()
-                ),
+                    ];
+                }
+            }
+
+            $result[] = [
+                'id'           => $cluster->getId(),
+                'cluster_name' => $cluster->getClusterName(),
+                'algorithm'    => $config->getAlgorithm()->value,
+                'member_count' => count($valid_members),
+                'members'      => $valid_members,
             ];
         }
 
