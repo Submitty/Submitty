@@ -70,6 +70,7 @@ describe('Test cases involving the files panel', () => {
         cy.get('#autoscroll_id').click();
         cy.get('#autoscroll_id').should('be.checked');
 
+        cy.get('#grading-panel-student-name').should('contain.text', 'mccule');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
         cy.get('#submissions').click(); // open submissions browser
@@ -77,25 +78,63 @@ describe('Test cases involving the files panel', () => {
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
 
+        assertSingleFileSubmissionClosed();
+        clickSingleFileSubmission(); // open this student's single file submission
+        assertSingleFileSubmissionOpen();
+
+        // this second student has the same submission as the first
         cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
+        assertSingleFileSubmissionOpen();
 
-        cy.get('#submissions').click(); // close submissions browser
-        assertSubmissionsBrowserClosed();
+        // this third student has a different submission from the first and second
+        cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
+        assertSingleFileSubmissionClosed();
 
+        // second submission name should still open; close it for later
         cy.get('#prev-student').click();
-        assertSubmissionsBrowserClosed();
-        assertResultsBrowserOpen();
+        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        assertSingleFileSubmissionOpen();
+        clickSingleFileSubmission();
+        assertSingleFileSubmissionClosed();
 
+        // third submission name should still be closed; open it for later
+        cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        assertSingleFileSubmissionClosed();
+        clickSingleFileSubmission();
+        assertSingleFileSubmissionOpen();
+
+        // second submission name was closed; it should still be so
+        cy.get('#prev-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        assertSingleFileSubmissionClosed();
+
+        // third submission name was opened; it should still be so
+        cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        assertSingleFileSubmissionOpen();
+
+        // closing should work as well
+        assertSubmissionsBrowserOpen();
+        assertResultsBrowserOpen();
+        cy.get('#submissions').click(); // close submissions browser
         cy.get('#results').click(); // close results browser
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
 
-        cy.get('#next-student').click();
+        cy.get('#prev-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
+
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('not.be.checked');
     });
 
     it('test the full panel view', () => {
