@@ -42,7 +42,8 @@ def insert_cells(instructor_path, student_path, output_path):
     # Aided to prevent inteference with grading
     for cell in student_nb.cells:
         if cell.metadata.get('grade_id', 'N/A') is not None:
-            print(f"Warning: Student cell with id '{cell.id}' has 'grade_id' metadata set. This may indicate an attempt to interfere with grading.")
+            print(f"Warning: Student cell with id '{cell.id}' has 'grade_id' "
+                  "metadata set. This may indicate an attempt to interfere with grading.")
 
     new_cells = []
     inserted_count = 0
