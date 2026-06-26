@@ -148,7 +148,7 @@
             'color': error_color
         },
         'events': {
-            'color-change': 'handleStatusBannerColorChange'
+            'color-change': '(event) => { document.body.style.background = event; }'
         }
     } %}
 {% endif %}
