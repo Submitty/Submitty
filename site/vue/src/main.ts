@@ -19,30 +19,29 @@ const exports = {
                 }
                 const mod = await modules[path]();
 
-            if (Object.keys(events).length > 0) {
-                const camelize = (str: string) => str.replace(/-(\w)/g, (_, c: string) => (c ? c.toUpperCase() : ''));
-                const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-                const eventListeners = Object.entries(events).reduce(
-                    (acc, [eventName, jsExpression]) => {
-                        acc[`on${capitalize(camelize(eventName))}`] = (detail: unknown) => {
-                            // eslint-disable-next-line no-new-func
-                            const fn = new Function(`return ${jsExpression}`)();
-                            fn(detail);
-                        };
-                        return acc;
-                    },
-                    {} as Record<string, (detail: unknown) => void>,
-                );
-                // eslint-disable-next-line vue/one-component-per-file
-                const wrapper = defineComponent({
-                    setup() {
-                        return () => h(mod as Parameters<typeof createApp>[0], { ...args, ...eventListeners });
-                    },
-                });
-                return createApp(wrapper);
-            }
+                if (Object.keys(events).length > 0) {
+                    const camelize = (str: string) => str.replace(/-(\w)/g, (_, c: string) => (c ? c.toUpperCase() : ''));
+                    const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+                    const eventListeners = Object.entries(events).reduce(
+                        (acc, [eventName, jsExpression]) => {
+                            acc[`on${capitalize(camelize(eventName))}`] = (detail: unknown) => {
+                                const fn = new Function(`return ${jsExpression}`)();
+                                fn(detail);
+                            };
+                            return acc;
+                        },
+                        {} as Record<string, (detail: unknown) => void>,
+                    );
+                    // eslint-disable-next-line vue/one-component-per-file
+                    const wrapper = defineComponent({
+                        setup() {
+                            return () => h(mod as Parameters<typeof createApp>[0], { ...args, ...eventListeners });
+                        },
+                    });
+                    return createApp(wrapper);
+                }
 
-            return createApp(mod as Parameters<typeof createApp>[0], args);
+                return createApp(mod as Parameters<typeof createApp>[0], args);
             }
             catch {
                 // eslint-disable-next-line vue/one-component-per-file
