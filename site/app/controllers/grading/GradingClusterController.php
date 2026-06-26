@@ -25,6 +25,10 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
+        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
         $algorithm = GradingClusterAlgorithm::tryFrom($_POST['algorithm'] ?? '');
         if ($algorithm === null) {
             return JsonResponse::getErrorResponse("Invalid or missing algorithm parameter.");
@@ -69,6 +73,10 @@ class GradingClusterController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
+        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
             ->findOneBy(['gradeable_id' => $gradeable_id]);
