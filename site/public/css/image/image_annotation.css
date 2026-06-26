@@ -126,8 +126,7 @@
 }
 
 .btn-primary,
-.btn-primary:active,
-.btn-primary:active:focus {
+.btn-primary:active {
     background-color: var(--standard-aqua);
 }
 
@@ -136,9 +135,12 @@
     background-color: var(--standard-medium-blue);
 }
 
+.btn-primary:active:focus {
+    background-color: var(--standard-aqua);
+}
+
 .btn-success,
-.btn-success:active,
-.btn-success:active:focus {
+.btn-success:active {
     background-color: var(--standard-vibrant-green);
 }
 
@@ -147,9 +149,12 @@
     background-color: var(--standard-medium-green);
 }
 
+.btn-success:active:focus {
+    background-color: var(--standard-vibrant-green);
+}
+
 .btn-warning,
-.btn-warning:active,
-.btn-warning:active:focus {
+.btn-warning:active {
     background-color: var(--standard-light-red);
 }
 
@@ -158,13 +163,20 @@
     background-color: var(--standard-medium-red);
 }
 
+.btn-warning:active:focus {
+    background-color: var(--standard-light-red);
+}
+
 .btn-secondary,
-.btn-secondary:active,
-.btn-secondary:active:focus {
+.btn-secondary:active {
     background-color: var(--standard-light-orange);
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
     background-color: var(--standard-medium-orange);
+}
+
+.btn-secondary:active:focus {
+    background-color: var(--standard-light-orange);
 }
