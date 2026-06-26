@@ -104,12 +104,12 @@ def parse_args():
 
 
 def validate(args, cfg):
-    instructor  = args.instructor
-    ta_group    = args.ta_group
-    php_user    = cfg["php_user"]
+    instructor = args.instructor
+    ta_group = args.ta_group
+    php_user = cfg["php_user"]
     daemon_user = cfg["daemon_user"]
-    cgi_user    = cfg["cgi_user"]
-    builders    = cfg["course_builders_group"]
+    cgi_user = cfg["cgi_user"]
+    builders = cfg["course_builders_group"]
 
     try:
         pwd.getpwnam(instructor)
@@ -148,19 +148,24 @@ def validate(args, cfg):
         print(f"ERROR: {cgi_user} is not in group {ta_group}\n")
         sys.exit(1)
 
+
 def uid_of(username):
     return pwd.getpwnam(username).pw_uid
+
 
 def gid_of(groupname):
     return grp.getgrnam(groupname).gr_gid
 
+
 MODE_SHARED_WRITE = 0o2770
-MODE_SHARED_READ  = 0o2750
+MODE_SHARED_READ = 0o2750
+
 
 def create_and_set(path, mode, owner, group):
     os.mkdir(path, mode)
     os.chown(path, uid_of(owner), gid_of(group))
     os.chmod(path, mode)
+
 
 def ensure_semester_directory(cfg, semester):
     data_dir = cfg["submitty_data_dir"]
@@ -181,8 +186,9 @@ def ensure_semester_directory(cfg, semester):
 
     return semester_dir
 
+
 def create_directory_tree(course_dir, cfg, instructor, ta_group):
-    php_user    = cfg["php_user"]
+    php_user = cfg["php_user"]
     daemon_user = cfg["daemon_user"]
 
     W = MODE_SHARED_WRITE
@@ -222,6 +228,7 @@ def create_directory_tree(course_dir, cfg, instructor, ta_group):
     for subdir in ["reports/all_grades", "reports/seating", "reports/polls"]:
         create_and_set(os.path.join(course_dir, subdir), W, php_user, ta_group)
 
+
 def replace_fillin_variables(path, cfg, semester, course):
     database_name = f'submitty_{semester}_{course}'
     replacements = {
@@ -239,12 +246,13 @@ def replace_fillin_variables(path, cfg, semester, course):
     with open(path, "w") as f:
         f.write(content)
 
+
 def copy_and_template_files(course_dir, cfg, semester, course, instructor, ta_group):
     install_dir = cfg["submitty_install_dir"]
-    php_user    = cfg["php_user"]
+    php_user = cfg["php_user"]
 
-    build_src  = os.path.join(install_dir, "sbin", "build_course.sh")
-    build_dst  = os.path.join(course_dir, f"BUILD_{course}.sh")
+    build_src = os.path.join(install_dir, "sbin", "build_course.sh")
+    build_dst = os.path.join(course_dir, f"BUILD_{course}.sh")
     shutil.copy2(build_src, build_dst)
     os.chown(build_dst, uid_of(instructor), gid_of(ta_group))
     os.chmod(build_dst, 0o770)
@@ -256,6 +264,7 @@ def copy_and_template_files(course_dir, cfg, semester, course, instructor, ta_gr
     os.chown(config_dst, uid_of(php_user), gid_of(ta_group))
     os.chmod(config_dst, 0o660)
     replace_fillin_variables(config_dst, cfg, semester, course)
+
 
 def main():
     check_root()
@@ -280,4 +289,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
