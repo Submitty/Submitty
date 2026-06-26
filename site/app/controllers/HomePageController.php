@@ -484,6 +484,7 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     #[Route("/term/new", methods: ["POST"])]
+    #[Route("/api/terms", methods: ["POST"])]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -520,7 +521,11 @@ class HomePageController extends AbstractController {
             $url = $this->core->buildUrl(['home', 'courses', 'new']);
             $response = $response->RedirectOnlyResponse(new RedirectResponse($url));
         }
-        return $response;
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse(null),
+            null,
+            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+        );
     }
 
     /**
