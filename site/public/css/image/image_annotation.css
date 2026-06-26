@@ -55,7 +55,7 @@
     max-height: calc(100% - 120px); /* Account for toolbar and padding */
     height: auto;
     display: block;
-    border: 1px solid #cccccc;
+    border: 1px solid var(--standard-light-medium-gray);
     border-radius: 3px;
     box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
     margin: 0 auto;
@@ -93,9 +93,9 @@
 }
 
 #image-error-message {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    color: var(--alert-danger-red);
+    background-color: var(--alert-background-danger-red);
+    border: 1px solid var(--alert-border-danger-red);
     border-radius: 3px;
     padding: 10px;
     margin-bottom: 10px;
@@ -123,6 +123,10 @@
 .fas,
 .fas:hover {
     color: var(--btn-text-black);
+}
+
+.btn {
+    border: none; /* .btn-primary has border on hover */
 }
 
 .btn-primary {
