@@ -524,7 +524,6 @@ class HomePageController extends AbstractController {
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
-        
         elseif ($end_date < $start_date) {
             $error = "End date should be after Start date.";
             $this->core->addErrorMessage($error);
@@ -534,7 +533,6 @@ class HomePageController extends AbstractController {
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
-
         else {
             $term = new Term(
                 $term_id,
@@ -546,9 +544,9 @@ class HomePageController extends AbstractController {
             $em->flush();
             $this->core->addSuccessMessage("Term added successfully.");
             return new MultiResponse(
-            JsonResponse::getSuccessResponse(null),
-            null,
-            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+                JsonResponse::getSuccessResponse(null),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
     }
