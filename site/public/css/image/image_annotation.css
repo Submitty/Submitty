@@ -126,45 +126,45 @@
 }
 
 .btn-primary,
-.btn-primary:active {
+.btn-primary:active,
+.btn-primary:active:focus {
     background-color: var(--standard-aqua);
 }
 
 .btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active:focus {
+.btn-primary:focus {
     background-color: var(--standard-medium-blue);
 }
 
 .btn-success,
-.btn-success:active {
+.btn-success:active,
+.btn-success:active:focus {
     background-color: var(--standard-vibrant-green);
 }
 
 .btn-success:hover,
-.btn-success:focus,
-.btn-success:active:focus {
+.btn-success:focus {
     background-color: var(--standard-medium-green);
 }
 
 .btn-warning,
-.btn-warning:active {
+.btn-warning:active,
+.btn-warning:active:focus {
     background-color: var(--standard-light-red);
 }
 
 .btn-warning:hover,
-.btn-warning:focus,
-.btn-warning:active:focus {
+.btn-warning:focus {
     background-color: var(--standard-medium-red);
 }
 
 .btn-secondary,
-.btn-secondary:active {
+.btn-secondary:active,
+.btn-secondary:active:focus {
     background-color: var(--standard-light-orange);
 }
 
 .btn-secondary:hover,
-.btn-secondary:focus,
-.btn-secondary:active:focus {
+.btn-secondary:focus {
     background-color: var(--standard-medium-orange);
 }
