@@ -737,11 +737,7 @@ class Gradeable extends AbstractModel {
         $outside_folder = $path_array[count($path_array) - 2];
         $file_name = $path_array[count($path_array) - 1];
         //Automatically remove these special files
-        if (
-            $file_name === ".submit.timestamp"
-            || $file_name === ".submit.notebook"
-            || $file_name === ".user_assignment_access.json"
-        ) {
+        if (FileUtils::isSubmissionMetaFile($file_name)) {
             return false;
         }
 

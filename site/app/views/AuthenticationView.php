@@ -67,7 +67,8 @@ class AuthenticationView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("CreateNewAccount.twig", [
             "signup_url" => $this->core->buildUrl(['authentication', 'self_add_user']),
             "signup_content" => $signup_content,
-            "requirements" => $content
+            "requirements" => $content,
+            "form_values" => $content['form_values'] ?? []
         ]);
     }
 
