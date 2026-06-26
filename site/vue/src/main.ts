@@ -25,7 +25,8 @@ const exports = {
                     const eventListeners = Object.entries(events).reduce(
                         (acc, [eventName, jsExpression]) => {
                             acc[`on${capitalize(camelize(eventName))}`] = (detail: unknown) => {
-                                const fn = new Function(`return ${jsExpression}`)();
+                                // eslint-disable-next-line @typescript-eslint/no-implied-eval
+                                const fn = new Function(`return ${jsExpression}`)() as (detail: unknown) => void;
                                 fn(detail);
                             };
                             return acc;
