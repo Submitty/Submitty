@@ -26,8 +26,8 @@ const exports = {
                         (acc, [eventName, jsExpression]) => {
                             acc[`on${capitalize(camelize(eventName))}`] = (detail: unknown) => {
                                 // eslint-disable-next-line @typescript-eslint/no-implied-eval
-                                const fn = new Function(`return ${jsExpression}`)() as (detail: unknown) => void;
-                                fn(detail);
+                                const fn = new Function(`return ${jsExpression}`) as () => (detail: unknown) => void;
+                                fn()(detail);
                             };
                             return acc;
                         },
