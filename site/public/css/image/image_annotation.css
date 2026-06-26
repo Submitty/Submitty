@@ -24,7 +24,7 @@
     white-space: nowrap;
     vertical-align: middle;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none; /* .btn-primary has border on hover */
     border-radius: 4px;
     text-decoration: none;
 }
@@ -125,14 +125,9 @@
     color: var(--btn-text-black);
 }
 
-.btn {
-    border: none; /* .btn-primary has border on hover */
-}
-
 .btn-primary,
-.btn-primary:active,
-.btn-primary:hover:active {
-background-color: var(--standard-aqua);
+.btn-primary:active {
+    background-color: var(--standard-aqua);
 }
 
 .btn-primary:hover,
@@ -142,9 +137,8 @@ background-color: var(--standard-aqua);
 }
 
 .btn-success,
-.btn-success:active,
-.btn-success:hover:active {
-background-color: var(--standard-vibrant-green);
+.btn-success:active {
+    background-color: var(--standard-vibrant-green);
 }
 
 .btn-success:hover,
@@ -154,9 +148,8 @@ background-color: var(--standard-vibrant-green);
 }
 
 .btn-warning,
-.btn-warning:active,
-.btn-warning:hover:active {
-background-color: var(--standard-light-red);
+.btn-warning:active {
+    background-color: var(--standard-light-red);
 }
 
 .btn-warning:hover,
@@ -166,9 +159,8 @@ background-color: var(--standard-light-red);
 }
 
 .btn-secondary,
-.btn-secondary:active,
-.btn-secondary:hover:active {
-background-color: var(--standard-light-orange);
+.btn-secondary:active {
+    background-color: var(--standard-light-orange);
 }
 
 .btn-secondary:hover,
