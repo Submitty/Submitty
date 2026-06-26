@@ -463,7 +463,7 @@ class FileUtils {
         }
         return str_starts_with($filename, '.upload_page_') || str_starts_with($filename, '.upload_version_');
     }
-    
+
     /**
      * Given a filename (with or without the fully formed path), this function will return a string that
      * acts as a pseudo content-type for that file in any text based file that is recognized can use
