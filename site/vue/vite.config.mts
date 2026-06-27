@@ -1,3 +1,4 @@
+import process from 'node:process';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 import path, { resolve } from 'path';
@@ -23,33 +24,32 @@ export default defineConfig(async () => {
 
     return {
         plugins,
-    define: {
-        'process.env.NODE_ENV': '"production"',
-    },
-    resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url)),
+        define: {
+            'process.env.NODE_ENV': '"production"',
         },
-    },
-    build: {
-        rollupOptions: {
-            external: ['vue'],
-            output: {
-                globals: {
-                    vue: 'Vue',
-                },
+        resolve: {
+            alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
             },
         },
-        lib: {
-            name: 'submitty-vue',
-            entry: resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/main.ts'),
-            fileName: 'submitty-vue',
+        build: {
+            rollupOptions: {
+                external: ['vue'],
+                output: {
+                    globals: {
+                        vue: 'Vue',
+                    },
+                },
+            },
+            lib: {
+                name: 'submitty-vue',
+                entry: resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/main.ts'),
+                fileName: 'submitty-vue',
 
-            formats: ['umd'],
+                formats: ['umd'],
+            },
+            outDir: '../public/mjs/vue/',
+            emptyOutDir: true,
         },
-        outDir: '../public/mjs/vue/',
-        emptyOutDir: true,
-    },
     };
 });
-
