@@ -5,8 +5,6 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
-    console.log('Loaded vite.config.mts');
-    console.log('VITE_COVERAGE =', process.env.VITE_COVERAGE);
     const plugins = [vue()];
 
     if (process.env.VITE_COVERAGE === 'true') {
