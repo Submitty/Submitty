@@ -1,0 +1,18 @@
+{
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+
+    // Submitty preprocesses config.json, so comments and #include are supported.
+    "autograding": {
+        #include "includes/autograding_paths.jsoninc"
+    },
+
+    "testcases": [
+        #include "includes/visible_greeting_test.jsoninc"
+        ,
+        #include "includes/hidden_greeting_test.jsoninc"
+    ]
+}

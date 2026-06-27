@@ -1,0 +1,14 @@
+{
+    "title": "Visible greeting",
+    "details": "python3 *.py < ada.txt",
+    "command": "python3 *.py < ada.txt",
+    "points": 1,
+    "validation": [
+        {
+            "method": "diff",
+            "actual_file": "STDOUT.txt",
+            "description": "Greeting for Ada",
+            "expected_file": "ada.txt"
+        }
+    ]
+}
