@@ -39,6 +39,7 @@ class UsersController extends AbstractController {
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $reg_subsec = $student->getRegistrationSubsection();
             $formatted_tzs[$student->getId()] = $student->getNiceFormatTimeZone() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
@@ -66,21 +67,25 @@ class UsersController extends AbstractController {
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
+                'reg_subsection' => $reg_subsec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
         }
 
-        //Get Active student Columns
+        // Get Active student Columns
         $active_student_columns = '';
-        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        // Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
         if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 17) {
             $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
-            //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_student_columns', implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false))), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_student_columns = implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false)));
+            $default_columns = array_merge(array_fill(0, 12, 1), array_fill(0, 5, 0));
+            $cookie_val = implode('-', $default_columns);
+
+            // Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_student_columns', $cookie_val, time() + (10 * 365 * 24 * 60 * 60), '/')) {
+                $active_student_columns = $cookie_val;
             }
         }
 
@@ -244,6 +249,7 @@ class UsersController extends AbstractController {
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
+            'registration_subsection' => $user->getRegistrationSubsection(),
             'course_section_id' => $user->getCourseSectionId(),
             'rotating_section' => $user->getRotatingSection(),
             'user_updated' => $user->isUserUpdated(),
@@ -1190,11 +1196,12 @@ class UsersController extends AbstractController {
                             }
                         }
                         break;
-                    case "Registation Sub-Section":
+                    case "Registration Subsection":
                         /* Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-, .
                         Registration subsection is optional for graders, so automatically validate if not set.*/
-                        if (isset($vals[$col_num]) && strtolower($vals[$col_num]) === "null") {
+                        if (!isset($vals[$col_num]) || $vals[$col_num] === "" || strtolower($vals[$col_num]) === "null") {
                             $vals[$col_num] = null;
+                            break;
                         }
                         $unset_grader_registration_section = ($list_type === 'graderlist' && empty($vals[$col_num]));
                         if (!($unset_grader_registration_section || User::validateUserData('registration_subsection', $vals[$col_num]))) {
@@ -1397,8 +1404,11 @@ class UsersController extends AbstractController {
                                     break;
                             }
                             break;
-                        case "Registation Sub-Section":
-                            if (!empty($row[$col_num])) {
+                        case "Registration Subsection":
+                            if (!isset($row[$col_num]) || $row[$col_num] === "" || strtolower($row[$col_num]) === "null") {
+                                $user->setRegistrationSubsection("");
+                            }
+                            else {
                                 $user->setRegistrationSubsection($value);
                             }
                             break;
@@ -1509,8 +1519,11 @@ class UsersController extends AbstractController {
                                     break;
                             }
                             break;
-                        case "Registation Sub-Section":
-                            if (!empty($row[$col_num])) {
+                        case "Registration Subsection":
+                            if (!isset($row[$col_num]) || $row[$col_num] === "" || strtolower($row[$col_num]) === "null") {
+                                $user->setRegistrationSubsection("");
+                            }
+                            else {
                                 $user->setRegistrationSubsection($value);
                             }
                             break;
