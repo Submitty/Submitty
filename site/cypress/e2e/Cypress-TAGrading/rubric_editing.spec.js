@@ -25,6 +25,24 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
         cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
+        cy.get('[data-testid="mark-title-input"]').then(($titles) => {
+            const initialMarkCount = $titles.length;
+            $titles.each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('input[aria-label="mark value"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('[data-testid="save-tools-cancel"]').click();
+            cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
+            cy.get('[data-testid="mark-title-input"]').should('have.length', initialMarkCount);
+            cy.get('[data-testid="mark-title-input"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('input[aria-label="mark value"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+        });
         cy.get('[data-testid="add-new-mark-button"]').click();
         cy.get('[data-testid="mark-title-input"]').eq(-1).type('First New Mark');
         cy.get('[data-testid="add-new-mark-button"]').click();
