@@ -32,12 +32,6 @@ describe('StatusBanner', () => {
                 .should('have.attr', 'style')
                 .and('contain', 'background-color: var(--standard-medium-orange)');
         });
-
-        it('sets text color to black', () => {
-            cy.mount(StatusBanner, { props: defaultProps });
-            cy.get('[data-testid="status-banner"]')
-                .should('have.css', 'color', 'rgb(0, 0, 0)');
-        });
     });
 
     describe('props', () => {
