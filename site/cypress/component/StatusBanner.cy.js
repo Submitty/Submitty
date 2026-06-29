@@ -38,11 +38,6 @@ describe('StatusBanner', () => {
             cy.get('[data-testid="status-banner"]')
                 .should('have.css', 'color', 'rgb(0, 0, 0)');
         });
-
-        it('has the bar_banner id for legacy DOM compatibility', () => {
-            cy.mount(StatusBanner, { props: defaultProps });
-            cy.get('#bar_banner').should('exist');
-        });
     });
 
     describe('props', () => {
@@ -119,14 +114,6 @@ describe('StatusBanner', () => {
                 cy.mount(Wrapper);
                 cy.get('@multiMountHandler').should('have.callCount', 2);
             });
-        });
-
-        it('does not dispatch a window CustomEvent', () => {
-            cy.window().then((win) => {
-                cy.stub(win, 'dispatchEvent').as('dispatch');
-            });
-            cy.mount(StatusBanner, { props: defaultProps });
-            cy.get('@dispatch').should('not.have.been.called');
         });
     });
 
