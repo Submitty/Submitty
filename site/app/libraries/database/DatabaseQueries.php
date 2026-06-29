@@ -2384,12 +2384,40 @@ ORDER BY merged_data.{$section_key}
     }
 
     /**
-     * Average earned vs. possible points per autograding testcase (active versions only).
+     * Average earned vs. possible points per autograding testcase, honoring the
+     * null-section / withdrawn / bad-submission filters used across the stats page.
      *
      * @return array<int, array>
      */
-    public function getAverageAutogradingTestcaseScores(string $g_id, bool $is_team) {
-        $id_col = $is_team ? 'team_id' : 'user_id';
+    public function getAverageAutogradingTestcaseScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        $bad_submissions_condition = '';
+        $null_section_condition = '';
+        $withdrawn_students_condition = '';
+        // placeholder order, top-to-bottom: egv subquery g_id, [bad submissions g_id], WHERE at.g_id
+        $params = [$g_id];
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        if ($null_section !== 'include') {
+            $null_section_condition = "AND {$u_or_t}.{$section_key} IS NOT NULL";
+        }
+        if ($bad_submissions !== 'include' && $this->getBadSubmissionsCount($g_id, $section_key, $is_team, $null_section) > 0) {
+            $bad_submissions_condition = "INNER JOIN(
+                SELECT DISTINCT ldc.{$user_or_team_id}
+                FROM late_day_cache AS ldc
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 )
+              ) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
+            $params[] = $g_id;
+        }
+        if (!$include_withdrawn_students && $u_or_t === 'u') {
+            $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
+        }
+        $params[] = $g_id; // WHERE at.g_id
 
         $this->course_db->query("
             SELECT
@@ -2403,14 +2431,21 @@ ORDER BY merged_data.{$section_key}
             FROM autograding_testcase AS at
             INNER JOIN autograding_testcase_data AS atd
                 ON atd.atd_id = at.id
-            INNER JOIN electronic_gradeable_version AS egv
-                ON egv.g_id = at.g_id
-               AND egv.{$id_col} = atd.{$id_col}
-               AND egv.active_version = atd.g_version
-            WHERE at.g_id = ?
+            INNER JOIN {$users_or_teams} AS {$u_or_t}
+                ON {$u_or_t}.{$user_or_team_id} = atd.{$user_or_team_id}
+            INNER JOIN (
+                SELECT {$user_or_team_id}, active_version
+                FROM electronic_gradeable_version
+                WHERE g_id=? AND active_version > 0
+            ) AS egv
+                ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+            {$bad_submissions_condition}
+            WHERE at.g_id=? AND atd.g_version = egv.active_version
+                {$null_section_condition}
+                {$withdrawn_students_condition}
             GROUP BY at.id
             ORDER BY at.testcase_order
-        ", [$g_id]);
+        ", $params);
 
         $return = [];
         foreach ($this->course_db->rows() as $row) {
