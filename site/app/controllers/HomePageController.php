@@ -544,7 +544,12 @@ class HomePageController extends AbstractController {
             $em->flush();
             $this->core->addSuccessMessage("Term added successfully.");
             return new MultiResponse(
-                JsonResponse::getSuccessResponse(null),
+                JsonResponse::getSuccessResponse([
+                    "term_id" => $term_id,
+                    "term_name" => $term_name,
+                    "start_date" => $start_date,
+                    "end_date" => $end_date
+                ]),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
