@@ -1,6 +1,6 @@
 describe('Test cases involving the files panel', () => {
     // Constants for repeated values
-    const studentName = 'Evie McCullough (mccule)';
+    const studentName = 'Bonita Rogahn (rogahb)';
     const submissionNumber = 'Submission Number: 2 / 3';
 
     beforeEach(() => {
