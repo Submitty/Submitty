@@ -16,7 +16,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install vagrant
-        run: brew install vagrant
+        run: |
+          brew trust hashicorp/tap
+          brew install vagrant
 
       - name: install virtual box 7.0.20
         run: |
