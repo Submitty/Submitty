@@ -15,15 +15,12 @@ import {
     changeMobileView,
     getSavedTaLayoutDetails,
 } from './ta-grading-panels';
+import { isSubmissionMetaFile } from './utils/file-utils';
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
 let maxNavbarWidth = 0;
-
-// also update in 'FileUtils.php'
-const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT',
-    '.user_assignment_access.json', '.bulk_upload_data.json'];
 
 function checkNotebookScroll() {
     if (
@@ -239,14 +236,6 @@ function adjustGradingPanelHeader() {
         });
 
     panelsContainer.style.height = `calc(100% - ${height}px)`;
-}
-
-// also update in 'FileUtils.php'
-function isSubmissionMetaFile(filename: string) {
-    if (SUBMISSION_META_FILES.includes(filename)) {
-        return true;
-    }
-    return filename.startsWith('.upload_page_') || filename.startsWith('.upload_version_');
 }
 
 function readCookies() {
