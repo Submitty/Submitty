@@ -2384,10 +2384,15 @@ ORDER BY merged_data.{$section_key}
     }
 
     /**
-     * Average earned vs. possible points per autograding testcase, taking into
-     * account filters.
-     *
-     * @return array<int, array>
+     * @return list<array{
+     *     title: string,
+     *     order: int,
+     *     avg_score: float,
+     *     max: float,
+     *     hidden: bool,
+     *     extra_credit: bool,
+     *     submission_limit: bool
+     * }>
      */
     public function getAverageAutogradingTestcaseScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section, bool $include_withdrawn_students) {
         $u_or_t = "u";

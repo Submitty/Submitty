@@ -747,11 +747,8 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
-            $testcase_averages = $this->core->getQueries()->getAverageAutogradingTestcaseScores(
-                $gradeable_id, $section_key, $gradeable->isTeamAssignment(),
-                $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students
-            );
-            if (count($testcase_averages) > 0 && $gradeable->hasAutogradingConfig()) {
+            $testcase_averages = $this->core->getQueries()->getAverageAutogradingTestcaseScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
+            if (count($testcase_averages) > 0) {
                 $config_testcases = $gradeable->getAutogradingConfig()->getAllTestCases();
                 foreach ($testcase_averages as &$tc) {
                     $idx = $tc['order']; // testcase_order matches the config testcase ordering
