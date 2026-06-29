@@ -20,7 +20,7 @@ onMounted(() => {
     id="bar_banner"
     class="banner"
     :style="{ 'background-color': color, color: 'black' }"
-    data-testid="status-banner"
+    data-testid="bar-banner"
   >
     {{ message }}
   </div>

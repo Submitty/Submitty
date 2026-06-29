@@ -1,23 +1,11 @@
 import { h, defineComponent } from 'vue';
 import StatusBanner from '../../vue/src/components/StatusBanner.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
 const defaultProps = {
     message: 'Late Submission (Using one or more late days)',
     color: 'var(--standard-medium-orange)',
 };
-
-function mountWithEmitSpy(props) {
-    const handler = cy.stub().as('colorChangeHandler');
-    const Wrapper = defineComponent({
-        setup() {
-            return () => h(StatusBanner, {
-                ...props,
-                onColorChange: handler,
-            });
-        },
-    });
-    cy.mount(Wrapper);
-}
 
 describe('StatusBanner', () => {
     describe('rendering', () => {
@@ -76,19 +64,19 @@ describe('StatusBanner', () => {
 
     describe('Vue emit', () => {
         it('emits color-change with the color on mount', () => {
-            mountWithEmitSpy(defaultProps);
+            mountWithEmitSpy(StatusBanner, 'colorChange', defaultProps, 'colorChangeHandler');
             cy.get('@colorChangeHandler').should('have.been.calledWith', defaultProps.color);
         });
 
         it('emits with the correct color for each status type', () => {
-            mountWithEmitSpy({ message: 'No Submission', color: 'var(--standard-light-pink)' });
+            mountWithEmitSpy(StatusBanner, 'colorChange', { message: 'No Submission', color: 'var(--standard-light-pink)' }, 'colorChangeHandler');
             cy.get('@colorChangeHandler').should('have.been.calledWith', 'var(--standard-light-pink)');
         });
     });
 
     describe('emit lifecycle', () => {
         it('emits the event exactly once per mount', () => {
-            mountWithEmitSpy(defaultProps);
+            mountWithEmitSpy(StatusBanner, 'colorChange', defaultProps, 'colorChangeHandler');
             cy.get('@colorChangeHandler').should('have.callCount', 1);
         });
 
