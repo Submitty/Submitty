@@ -86,12 +86,6 @@ const emptyState: AnnotationState = {
     markers: [],
 };
 
-let annotationEditorOpen = false;
-
-export function isAnnotationEditorOpen() {
-    return annotationEditorOpen;
-}
-
 // TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
 function createEditorWrapper(): HTMLElement {
     const editorWrapper = document.createElement('div');
@@ -125,7 +119,6 @@ function createEditorWrapper(): HTMLElement {
     document.body.appendChild(editorWrapper);
     editorWrapper.style.display = 'flex';
 
-    annotationEditorOpen = true;
     return editorWrapper;
 }
 
@@ -137,8 +130,6 @@ function hideEditorWrapper(also_remove: boolean = false): void {
             editorWrapper.remove();
         }
     }
-
-    annotationEditorOpen = false;
 }
 
 function addAnnotations(): void {
