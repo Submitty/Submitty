@@ -3,6 +3,8 @@
 {% set email_reqs = requirements["user_id_requirements"]["email_requirements"] %}
 {% set pwd_reqs = requirements["password_requirements"] is defined ? requirements["password_requirements"] : {} %}
 <script>
+    var acceptedEmails = {{ requirements["accepted_emails"] | json_encode | raw }};
+    var userIdRequirements = {{ user_id_reqs | json_encode | raw }};
     var passwordRequirements = {{ pwd_reqs | json_encode | raw }};
 </script>
 <div class="content shadow" id="login-box">
@@ -12,7 +14,7 @@
         </a> </h1>
     </div>
 
-    <form action="{{ signup_url }}" method="post" onsubmit="checkSubmittedPassword(event, 'password-input', 'confirm-password-input', passwordRequirements)">
+    <form action="{{ signup_url }}" method="post" onsubmit="return validateSignupForm(event, acceptedEmails, userIdRequirements, passwordRequirements);">
         <div class="display-box">
             <p style="display:block">Email <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="email">Show Requirements</button></p>
             <div class="hidden-helper" id="email-helper">

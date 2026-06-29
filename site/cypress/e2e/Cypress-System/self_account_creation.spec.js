@@ -39,7 +39,20 @@ describe('Self account creation tests', () => {
         valid_user_id = Math.random().toString(36).substring(2, 8);
         valid_email = `${Math.random().toString(36).substring(2, 8)}@gmail.com`;
     });
+    it('Test client-side validation preserves form fields', () => {
+        cy.visit();
+        cy.get('[data-testid="new-account-button"]').click();
 
+        inputData('test@gmail.com', 'testuser');
+
+        cy.get('[data-testid="sign-up-button"]').click();
+
+        cy.get('[data-testid="popup-message"]').contains('email').should('exist');
+
+        cy.get('[data-testid="email"]').should('not.have.value', '');
+        cy.get('[data-testid="user-id"]').should('not.have.value', '');
+    });
+    
     it('Test all paths of account creation', () => {
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
@@ -108,16 +121,18 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="remove-message-popup"').click();
 
         // Correct information
+        cy.get('[data-testid="confirm-password"]').clear();
         cy.get('[data-testid="confirm-password"]').type(valid_password);
         cy.get('[data-testid="sign-up-button"]').click();
         // Incorrect verification code
         cy.get('[data-testid="verification-code"]').type(incorrect_verification_code);
-        cy.get('[data-testid="verify-email-button"').click();
+        cy.get('[data-testid="verify-email-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'The verification code is not correct. Verify you entered the correct code or resend the verification email');
         cy.get('[data-testid="remove-message-popup"').click();
         // Correct verification code
+        cy.get('[data-testid="verification-code"]').clear();
         cy.get('[data-testid="verification-code"]').type(valid_verification_code);
-        cy.get('[data-testid="verify-email-button"').click();
+        cy.get('[data-testid="verify-email-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'You have successfully verified your email.');
         cy.get('[data-testid="remove-message-popup"').click();
         cy.login(valid_user_id, valid_password);
