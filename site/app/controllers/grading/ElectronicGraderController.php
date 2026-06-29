@@ -1009,7 +1009,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")]
-    public function showDetails(string $gradeable_id) {
+    public function showDetails(string $gradeable_id, ?string $cluster_mode = null) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -1180,7 +1180,26 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders);
+        $is_clustering_mode = $cluster_mode === '1';
+        $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findOneBy(['gradeable_id' => $gradeable->getId()]);
+        $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
+        
+        $cluster_map = [];
+        if ($is_clustering_mode && $config !== null) {
+            foreach ($config->getClusters() as $cluster) {
+                foreach ($cluster->getMembers() as $member) {
+                    $id = $member->getUserId() ?? $member->getTeamId();
+                    $cluster_map[$id] = $cluster->getClusterName();
+                }
+            }
+        }
+
+        $algorithms = [];
+        foreach (\app\entities\grading_cluster\GradingClusterAlgorithm::cases() as $case) {
+            $algorithms[$case->value] = $case->name;
+        }
+
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_clustering_mode, $algorithms, $current_algorithm, $cluster_map);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();

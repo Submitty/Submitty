@@ -89,6 +89,33 @@ function hideGradeableMessage() {
     message.css('display', 'none');
 }
 
+let clusteringWarningCallback = null;
+
+function showClusteringWarningMessage(callback) {
+    clusteringWarningCallback = callback;
+    const message = $('#clustering-warning-popup');
+    message.css('display', 'block');
+}
+
+function clusteringWarningMessageAgree() {
+    const dataElement = document.getElementById('gradeable-message-data');
+    if (dataElement && dataElement.dataset.gradeable) {
+        sessionStorage.setItem('clusteringWarningAccepted_' + dataElement.dataset.gradeable, 'true');
+    }
+    const message = $('#clustering-warning-popup');
+    message.css('display', 'none');
+    if (clusteringWarningCallback) {
+        clusteringWarningCallback();
+        clusteringWarningCallback = null;
+    }
+}
+
+function clusteringWarningMessageCancel() {
+    const message = $('#clustering-warning-popup');
+    message.css('display', 'none');
+    clusteringWarningCallback = null;
+}
+
 function getCollapsedSections() {
     return JSON.parse(Cookies.get('collapsed_sections') || '[]');
 }
