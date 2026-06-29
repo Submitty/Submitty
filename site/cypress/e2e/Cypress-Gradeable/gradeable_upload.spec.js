@@ -264,7 +264,7 @@ describe('Tests cases revolving around term creation', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                expect(response.body.status).to.eql('success')
+                expect(response.body.status).to.eql('success');
                 expect(response.body.data.term_id).to.eql('s20');
                 expect(response.body.data.term_name).to.eql('Spring 2020');
                 expect(response.body.data.start_date).to.eql('2020-01-01');
