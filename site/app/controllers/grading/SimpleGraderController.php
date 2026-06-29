@@ -8,12 +8,14 @@ use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
+use app\entities\poll\Response;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+use app\libraries\response\DownloadResponse;
 use WebSocket;
 
 /**
@@ -207,6 +209,141 @@ class SimpleGraderController extends AbstractController {
         );
     }
 
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods:["GET"])]
+    public function downloadNumericCsv($gradeable_id, $sort = "section_subsection"): ResponseInterface {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return new WebResponse('Error', 'noGradeable', $gradeable_id);
+        }
+
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            $this->core->addErrorMessage('This gradeable is not a numeric text gradeable');
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        // TODO: copy the same student/section/rows setup from gradePage()
+        // so access rules + sort match the actual grading page.
+
+        //If you can see the page, you can grade the page
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+        if ($gradeable->isGradeByRegistration()) {
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else {
+            $grading_count = count(
+                $this->core->getQueries()->getRotatingSectionsForGradeableAndUser(
+                    $gradeable->getId(),
+                    $this->core->getUser()->getId()
+                )
+            );
+        }
+
+        $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
+        $show_all = $grading_count === 0 && $can_show_all;
+
+        if ($show_all) {
+            $sections = $gradeable->getAllGradingSections();
+        }
+        else {
+            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
+        }
+
+        $students = [];
+        foreach ($sections as $section) {
+            $students = array_merge($students, $section->getUsers());
+        }
+
+        $student_ids = array_map(function (User $user) {
+            return $user->getId();
+        }, $students);
+
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
+        }
+        else {
+            $section_key = "rotating_section";
+        }
+        //Sort the page:
+        if ($sort === "id") {
+            $sort_key = "u.user_id";
+        }
+
+        elseif ($sort === "first") {
+            $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
+        }
+
+        elseif ($sort === "last") {
+            $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
+        }
+        else {
+            $sort_key = "u.registration_subsection";
+        }
+
+        $fp = fopen('php://temp', 'r+');
+
+        $numeric_components = [];
+        $text_components = [];
+
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
+            }
+        }
+
+        $header = [
+            "User ID",
+            "Given Name",
+            "Family Name",
+        ];
+
+        foreach ($numeric_components as $component) {
+            $header[] = $component->getTitle();
+        }
+
+        $header[] = "Total points earned";
+
+        foreach ($text_components as $component) {
+            $header[] = $component->getTitle();
+        }
+
+        fputcsv($fp, $header);
+
+        // TODO: foreach ($rows as $row) build data rows here
+        $rows = $this->core->getQueries()->getGradedGradeables(
+            [$gradeable],
+            $student_ids,
+            null,
+            [$section_key, $sort_key, "u.user_id"]
+        );
+        foreach ($rows as $row) {
+            $user = $row->getSubmitter()->getUser();
+            $csv_row = [
+                $user->getId(),
+                $user->getDisplayedGivenName(),
+                $user->getDisplayedFamilyName(),
+            ];
+
+            fputcsv($fp, $csv_row);
+        }
+        
+        rewind($fp);
+        $csv = stream_get_contents($fp);
+        fclose($fp);
+
+        return DownloadResponse::getDownloadResponse(
+            $csv,
+            "{$gradeable_id}.csv",
+            "application/csv"
+        );
+    }
     /**
      * @param string $gradeable_id
      *
