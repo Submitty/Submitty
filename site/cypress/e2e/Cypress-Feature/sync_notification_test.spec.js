@@ -1,6 +1,5 @@
 // This test will not pass locally unless your authentication is set to database authentication
 
-
 describe('notification sync and defaults test', () => {
     const visitNotificationSettings = (course = 'sample') => {
         cy.visit([course, 'notifications', 'settings']);
