@@ -109,8 +109,26 @@ def main():
         running_services.append(service)
         subprocess.check_call(["systemctl", "stop", service])
 
+    # save the current autograding_containers.json file
+    shutil.move("/var/local/submitty/config/autograding_containers.json",
+                "/tmp/autograding_containers.json")
+
+    # remove the submitty data directory
     shutil.rmtree('/var/local/submitty', True)
+
+    # create from scratch the data directory & courses subdirectory
     Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
+
+    # create the data config subdirectory & set the permissions, etc.
+    Path(SUBMITTY_DATA_DIR, 'config').mkdir(parents=True)
+    shutil.chown("/var/local/submitty/config/", user="root", group="submitty_course_builders")
+    os.chmod("/var/local/submitty/config/", 0o755)
+
+    # restore the autograding_containers.json file to its proper location & set the permissions, etc.
+    shutil.move("/tmp/autograding_containers.json",
+                "/var/local/submitty/config/autograding_containers.json")
+    shutil.chown("/var/local/submitty/config/autograding_containers.json", user="submitty_php", group="submitty_daemonphp")
+    os.chmod("/var/local/submitty/config/autograding_containers.json", 0o660)
 
     with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
         submitty_config_json = json.load(submitty_config)

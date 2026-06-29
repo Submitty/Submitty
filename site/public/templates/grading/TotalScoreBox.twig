@@ -9,7 +9,8 @@ Required Parameters:
 -user_group
 l
 #}
-{% if user_group < 4 %}
+
+{% if user_group < 4 and not peer_only_grader %}
     {% set show_total = true %}
     {% if auto_grading_total is defined %}
         <div class="box-title badge-container">
@@ -69,7 +70,7 @@ l
     {% endif %}
 {% endif %}
 
-{% if user_group == 4 %}
+{% if user_group == 4 or peer_only_grader %}
     <div class="box-title badge-container">
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned, peer_total) }}">
             {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
