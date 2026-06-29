@@ -514,8 +514,7 @@ class AutoGradingView extends AbstractView {
                     $annotation_file_parts = explode("_", $file_info->getFilename());
 
                     if ($annotation_file_parts[0] === $image_path_md5 && file_get_contents($file_info->getPathname()) !== "") {
-                        $img_annotation_paths[$image_file['name']] = $file_info->getPathname();
-                        break;
+                        $img_annotation_paths[$image_file['name']][] = $file_info->getPathname();
                     }
                 }
             }
