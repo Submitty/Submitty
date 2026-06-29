@@ -142,11 +142,6 @@ jobs:
         run: npx cypress run --component --browser chrome
         env:
           VITE_COVERAGE: "true"
-      # TEMPORARY DEBUG STEP
-      - name: Verify coverage output
-        run: |
-          ls -R coverage
-
       - name: Upload Cypress Component Coverage
         uses: codecov/codecov-action@v5
         with:

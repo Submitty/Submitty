@@ -21,9 +21,6 @@ flags:
   php:
     paths:
       - site/app
-  cypress-component:
-    paths:
-      - site/vue
   autograder:
     paths:
       - autograder/autograder
@@ -36,6 +33,9 @@ flags:
   submitty_daemon_jobs:
     paths:
       - sbin/submitty_daemon_jobs
+  cypress-component:
+    paths:
+      - site/vue
 
 comment:
   layout: "reach, diff, flags"
