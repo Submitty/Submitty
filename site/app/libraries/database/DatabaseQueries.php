@@ -2384,8 +2384,8 @@ ORDER BY merged_data.{$section_key}
     }
 
     /**
-     * Average earned vs. possible points per autograding testcase, honoring the
-     * null-section / withdrawn / bad-submission filters used across the stats page.
+     * Average earned vs. possible points per autograding testcase, taking into
+     * account filters.
      *
      * @return array<int, array>
      */
@@ -2396,7 +2396,6 @@ ORDER BY merged_data.{$section_key}
         $bad_submissions_condition = '';
         $null_section_condition = '';
         $withdrawn_students_condition = '';
-        // placeholder order, top-to-bottom: egv subquery g_id, [bad submissions g_id], WHERE at.g_id
         $params = [$g_id];
         if ($is_team) {
             $u_or_t = "t";
@@ -2417,7 +2416,7 @@ ORDER BY merged_data.{$section_key}
         if (!$include_withdrawn_students && $u_or_t === 'u') {
             $withdrawn_students_condition = "AND {$u_or_t}.registration_type != 'withdrawn'";
         }
-        $params[] = $g_id; // WHERE at.g_id
+        $params[] = $g_id;
 
         $this->course_db->query("
             SELECT
