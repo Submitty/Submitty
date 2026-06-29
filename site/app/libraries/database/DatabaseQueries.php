@@ -9996,4 +9996,19 @@ ORDER BY
 
         $this->course_db->commit();
     }
+
+    /**
+     * Returns all submitters with an active version for a given gradeable.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getActiveSubmittersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT DISTINCT egv.user_id, egv.team_id, egv.active_version
+             FROM electronic_gradeable_version egv
+             WHERE egv.g_id = ? AND egv.active_version > 0",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
 }
