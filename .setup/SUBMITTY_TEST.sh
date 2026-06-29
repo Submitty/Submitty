@@ -17,22 +17,12 @@ run_php_cs() {
 
 run_js_es() {
     npm install
-    node node_modules/.bin/eslint .
-}
-
-run_js_es_fix() {
-    npm install
-    node node_modules/.bin/eslint . --fix
+    node node_modules/.bin/eslint . "${@:2}"
 }
 
 run_css_style() {
     npm install
-    node node_modules/stylelint/bin/stylelint.mjs "**/*.{css,vue}"
-}
-
-run_css_style_fix() {
-    npm install
-    node node_modules/stylelint/bin/stylelint.mjs "**/*.{css,vue}"
+    node node_modules/stylelint/bin/stylelint.mjs "**/*.{css,vue}" "${@:2}"
 }
 
 run_php_unit() {
@@ -59,13 +49,9 @@ elif [ "$1" == "php-lint" ]; then
 elif [ "$1" == "php-unit" ]; then
     run_php_unit "$@"
 elif [ "$1" == "js-lint" ]; then
-    run_js_es
-elif [ "$1" == "js-lint --fix" ]; then
-    run_js_es_fix
+    run_js_es "$@"
 elif [ "$1" == "css-lint" ]; then
-    run_css_style
-elif [ "$1" == "css-lint --fix" ]; then
-    run_css_style_fix
+    run_css_style "$@"
 else
     echo "Unknown test type: $1
         use phpstan, phpcs, php-lint, php-unit, js-lint, css-lint
