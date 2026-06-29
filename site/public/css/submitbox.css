@@ -115,7 +115,7 @@
 
 .submission-warning {
     font-weight: bold;
-    color: var(--text-black);
+    color: var(--btn-text-black);
     text-align: center;
     padding: 20px;
     margin-top: 20px;
@@ -124,7 +124,7 @@
 
 .submission-error {
     font-weight: bold;
-    color: var(--text-black);
+    color: var(--btn-text-black);
     text-align: center;
     padding: 20px;
     margin-top: 20px;
