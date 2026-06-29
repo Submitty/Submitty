@@ -1,3 +1,6 @@
+// This test will not pass locally unless your authentication is set to database authentication
+
+
 describe('notification sync and defaults test', () => {
     const visitNotificationSettings = (course = 'sample') => {
         cy.visit([course, 'notifications', 'settings']);
@@ -69,7 +72,8 @@ describe('notification sync and defaults test', () => {
         cy.get('[data-testid="new-student-form-btn"]').click();
         cy.get('[data-testid="user-id-input"]').type('student');
         // somewhere the authentication is set to database, so we need to type a password
-        cy.get('input[name="user_password"]').type('student');
+        // if you are testing locally, comment this line out
+        cy.get('[data-testid="password-input"]').type('student');
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
         cy.get('[data-testid="popup-message').should('be.visible');
