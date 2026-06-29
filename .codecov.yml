@@ -21,6 +21,9 @@ flags:
   php:
     paths:
       - site/app
+  cypress-component:
+    paths:
+      - site/vue
   autograder:
     paths:
       - autograder/autograder
