@@ -11,12 +11,12 @@ describe('StatusBanner', () => {
     describe('rendering', () => {
         it('renders the message text in the banner', () => {
             cy.mount(StatusBanner, { props: defaultProps });
-            cy.get('[data-testid="status-banner"]').should('have.text', defaultProps.message);
+            cy.get('[data-testid="bar-banner"]').should('have.text', defaultProps.message);
         });
 
         it('applies the correct background color via inline style', () => {
             cy.mount(StatusBanner, { props: defaultProps });
-            cy.get('[data-testid="status-banner"]')
+            cy.get('[data-testid="bar-banner"]')
                 .should('have.attr', 'style')
                 .and('contain', 'background-color: var(--standard-medium-orange)');
         });
@@ -27,8 +27,8 @@ describe('StatusBanner', () => {
             cy.mount(StatusBanner, {
                 props: { message: 'No Submission', color: 'var(--standard-light-pink)' },
             });
-            cy.get('[data-testid="status-banner"]').should('have.text', 'No Submission');
-            cy.get('[data-testid="status-banner"]')
+            cy.get('[data-testid="bar-banner"]').should('have.text', 'No Submission');
+            cy.get('[data-testid="bar-banner"]')
                 .should('have.attr', 'style')
                 .and('contain', 'background-color: var(--standard-light-pink)');
         });
@@ -37,8 +37,8 @@ describe('StatusBanner', () => {
             cy.mount(StatusBanner, {
                 props: { message: 'Cancelled Submission', color: 'var(--standard-creamsicle-orange)' },
             });
-            cy.get('[data-testid="status-banner"]').should('have.text', 'Cancelled Submission');
-            cy.get('[data-testid="status-banner"]')
+            cy.get('[data-testid="bar-banner"]').should('have.text', 'Cancelled Submission');
+            cy.get('[data-testid="bar-banner"]')
                 .should('have.attr', 'style')
                 .and('contain', 'background-color: var(--standard-creamsicle-orange)');
         });
@@ -47,8 +47,8 @@ describe('StatusBanner', () => {
             cy.mount(StatusBanner, {
                 props: { message: 'Withdrawn Student', color: 'var(--standard-vibrant-yellow)' },
             });
-            cy.get('[data-testid="status-banner"]').should('have.text', 'Withdrawn Student');
-            cy.get('[data-testid="status-banner"]')
+            cy.get('[data-testid="bar-banner"]').should('have.text', 'Withdrawn Student');
+            cy.get('[data-testid="bar-banner"]')
                 .should('have.attr', 'style')
                 .and('contain', 'background-color: var(--standard-vibrant-yellow)');
         });
@@ -58,7 +58,7 @@ describe('StatusBanner', () => {
             cy.mount(StatusBanner, {
                 props: { message, color: 'var(--standard-vibrant-yellow)' },
             });
-            cy.get('[data-testid="status-banner"]').should('have.text', message);
+            cy.get('[data-testid="bar-banner"]').should('have.text', message);
         });
     });
 
@@ -102,31 +102,31 @@ describe('StatusBanner', () => {
     describe('edge cases', () => {
         it('renders with an empty message string', () => {
             cy.mount(StatusBanner, { props: { message: '', color: 'red' } });
-            cy.get('[data-testid="status-banner"]').should('have.text', '');
-            cy.get('[data-testid="status-banner"]').should('exist');
+            cy.get('[data-testid="bar-banner"]').should('have.text', '');
+            cy.get('[data-testid="bar-banner"]').should('exist');
         });
 
         it('renders with an empty color string', () => {
             cy.mount(StatusBanner, { props: { message: 'Test', color: '' } });
-            cy.get('[data-testid="status-banner"]').should('have.text', 'Test');
+            cy.get('[data-testid="bar-banner"]').should('have.text', 'Test');
         });
 
         it('renders a very long message without breaking layout', () => {
             const longMessage = 'A'.repeat(500);
             cy.mount(StatusBanner, { props: { message: longMessage, color: 'red' } });
-            cy.get('[data-testid="status-banner"]').should('have.text', longMessage);
+            cy.get('[data-testid="bar-banner"]').should('have.text', longMessage);
         });
 
         it('renders special characters in message as escaped text, not HTML', () => {
             const specialMessage = '<script>alert("xss")</script>';
             cy.mount(StatusBanner, { props: { message: specialMessage, color: 'red' } });
-            cy.get('[data-testid="status-banner"]').should('have.text', specialMessage);
+            cy.get('[data-testid="bar-banner"]').should('have.text', specialMessage);
         });
 
         it('renders ampersand and quotes in message', () => {
             const message = 'User1 & User2 said "hello" and \'goodbye\'';
             cy.mount(StatusBanner, { props: { message, color: 'red' } });
-            cy.get('[data-testid="status-banner"]').should('have.text', message);
+            cy.get('[data-testid="bar-banner"]').should('have.text', message);
         });
     });
 });
