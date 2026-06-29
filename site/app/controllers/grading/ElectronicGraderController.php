@@ -747,15 +747,23 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment(), $include_withdrawn_students);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
-            $testcase_averages = $this->core->getQueries()->getAverageAutogradingTestcaseScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
-            if (count($testcase_averages) > 0) {
+            $testcase_averages = $this->core->getQueries()->getAverageAutogradingTestcaseScores(
+                $gradeable_id, $gradeable->isTeamAssignment()
+            );
+            if (count($testcase_averages) > 0 && $gradeable->hasAutogradingConfig()) {
                 $config_testcases = $gradeable->getAutogradingConfig()->getAllTestCases();
-                foreach ($testcase_averages as $stat) {
-                    $idx = $stat->getOrder(); // testcase_order matches the config ordering
-                    if (isset($config_testcases[$idx]) && $config_testcases[$idx]->getName() !== '') {
-                        $stat->setTitle($config_testcases[$idx]->getName());
+                foreach ($testcase_averages as &$tc) {
+                    $idx = $tc['order']; // testcase_order matches the config testcase ordering
+                    if (isset($config_testcases[$idx])) {
+                        $name = $config_testcases[$idx]->getName();
+                        if ($name !== '') {
+                            $tc['title'] = $name;
+                        }
+                        // Submitty reserves the title 'Submission Limit' for the submission-limit check
+                        $tc['submission_limit'] = ($name === 'Submission Limit');
                     }
                 }
+                unset($tc);
             }
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
             $manual_average = new SimpleStat($this->core, [
