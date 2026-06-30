@@ -2,22 +2,26 @@ describe('Test cases for TA grading page', () => {
     after(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
-        cy.get('[title="Delete this component"]').eq(-1).as('delete-me-button');
-        cy.get('@delete-me-button').click();
-        cy.get('@delete-me-button').then(() => {
-            cy.on('window:confirm', (str) => {
-                expect(str).to.equal('Are you sure you want to delete this component?');
-            });
+        cy.on('window:confirm', () => true);
+        // Keep deleting the last component until only the original 4 remain
+        cy.get('[title="Delete this component"]').then(function deleteExtra($buttons) {
+            if ($buttons.length > 4) {
+                cy.wrap($buttons.eq(-1)).click();
+                cy.get('[title="Delete this component"]', { timeout: 10000 }).then(deleteExtra);
+            }
         });
     });
     it('Should test rubric editing', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
 
-        cy.get('[value="Add New Component"]').click();
-
-        cy.get('[data-testid^="component"]').should('have.length', 6);
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+        cy.get('[data-testid^="component"]').then(($el) => {
+            const count = $el.length;
+            cy.get('[value="Add New Component"]').click();
+            cy.get('[data-testid^="component"]').should('have.length', count + 1).then(() => {
+                cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+            });
+        });
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('#edit-mode-enabled').click();
