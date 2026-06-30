@@ -35,7 +35,7 @@ flags:
       - sbin/submitty_daemon_jobs
   cypress-component:
     paths:
-      - site/vue/src
+      - site/vue/src/components
 
 comment:
   layout: "reach, diff, flags"
