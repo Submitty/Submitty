@@ -20,21 +20,23 @@ run_npm_scripts_in_tmp_dir() {
     local script="$1"
     local option="$2"
 
-    echo "Copying node_modules to /tmp to bypass permissions..."
+    echo "Copying site/ to /tmp/submitty_test to bypass permissions..."
 
-    # Create a random temporary folder for node_modules
-    TMP_FOLDER=$(mktemp -d /tmp/submitty_test_XXXXXX)
+    # copy site/ to a folder in /tmp
+    TMP_FOLDER="/tmp/submitty_test"
+
+    mkdir -p "$TMP_FOLDER"
 
     if [ ! -d "$TMP_FOLDER" ]; then
-        echo "ERROR: The temporary folder could not be generated."
+        echo "ERROR: The /tmp/submitty_test folder could not be generated."
         exit 1
     fi
 
-    rsync -a --exclude='node_modules' . "$TMP_FOLDER/"
+    rsync -a --delete --exclude='node_modules' . "$TMP_FOLDER/"
 
     # change to tmp folder
     pushd "$TMP_FOLDER" > /dev/null || {
-        echo "Failed to change to the temporary folder."
+        echo "Failed to change to /tmp/submitty_test"
         exit 1
     }
 
@@ -57,10 +59,9 @@ run_npm_scripts_in_tmp_dir() {
 
     # exit and clean up the temporary directory
     popd > /dev/null || {
-        echo "ERROR: failed to exit the temporary directory."
+        echo "ERROR: failed to exit /tmp/submitty_test"
         exit 1
     }
-    rm -rf "$TMP_FOLDER"
 
     return $result
 
