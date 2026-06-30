@@ -23,17 +23,16 @@
     }
 
     function fillBuckets(range, increment, betterBuckets, xValue, yValue, xBuckets, mode, modeCount, max, min) {
-        // number of buckets
         let numBuckets;
         if (increment === 1) {
-            numBuckets = Math.round(range / increment) + 1; // one bucket per value, max inclusive
+            numBuckets = Math.round(range / increment) + 1;
         } else {
             numBuckets = Math.max(1, Math.ceil(range / increment));
         }
 
         const counts = new Array(numBuckets).fill(0);
 
-        // labels (kept identical to the original formatting)
+        // labels
         for (let b = 0; b < numBuckets; b++) {
             const lo = +parseFloat(min + b * increment).toPrecision(4);
             const hi = +parseFloat(min + (b + 1) * increment).toPrecision(4);
@@ -44,15 +43,14 @@
             }
         }
 
-        // assign each score to exactly one bucket — conserves the total
+        // assign each score to exactly one bucket
         for (let s = 0; s < xValue.length; s++) {
             let idx = Math.floor((xValue[s] - min) / increment);
             if (idx < 0) idx = 0;
-            if (idx >= numBuckets) idx = numBuckets - 1; // also catches score === max
+            if (idx >= numBuckets) idx = numBuckets - 1;
             counts[idx]++;
         }
 
-        // counts -> yValue, and compute mode from the actual bucket
         mode = xBuckets[0];
         modeCount = -1;
         for (let b = 0; b < numBuckets; b++) {
