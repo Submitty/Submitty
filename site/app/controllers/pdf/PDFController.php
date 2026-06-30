@@ -284,23 +284,15 @@ class PDFController extends AbstractController {
         // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
-        // Explicit boolean parsing for is_anon
-        $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
+        // this file_path is assumed to be an anonymous path
         $file_path = urldecode($_POST['file_path']);
-        $real_path = $is_anon ? "" : $file_path;
-        $anon_path = $is_anon ? $file_path : "";
 
-        if ($is_anon) {
-            $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-            $real_path = $this->getPath($file_path, $id, true);
-            if (!file_exists($real_path)) {
-                $this->core->getOutput()->renderJsonFail('The image file could not be found');
-                return;
-            }
-        }
-        else {
-            $anon_path = $this->getPath($file_path, $gradeable_id, false);
+        $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
+        $real_path = $this->getPath($file_path, $id, true);
+        if (!file_exists($real_path)) {
+            $this->core->getOutput()->renderJsonFail('The image file could not be found');
+            return;
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -328,7 +320,7 @@ class PDFController extends AbstractController {
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
-        $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, $is_peer_grader);
+        $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $file_path, $annotation_jsons, false, $is_peer_grader);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img/{target_dir}", methods: ["POST"])]

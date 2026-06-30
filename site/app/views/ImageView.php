@@ -26,7 +26,7 @@ class ImageView extends AbstractView {
 
         $display_file_url = $this->core->buildCourseUrl(['display_file']);
 
-        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));        
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
