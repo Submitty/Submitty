@@ -3,5 +3,9 @@
     name: 'RandomizeButtonWarning',
     args: {
         randomizeUrl: randomize_team_rotating_sections_url
+    },
+    events: {
+        cancel: '() => { document.getElementById(\'randomize-button-warning\').style.display = \'none\'; }',
+        confirm: '(url) => { location.href = url; }'
     }
 } %}

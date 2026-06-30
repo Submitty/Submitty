@@ -4,20 +4,16 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    confirm: [];
     cancel: [];
+    confirm: [url: string];
 }>();
 
 function cancel() {
     emit('cancel');
-    window.dispatchEvent(new CustomEvent('randomize-cancel'));
 }
 
 function confirm() {
-    emit('confirm');
-    window.dispatchEvent(new CustomEvent('randomize-confirm', {
-        detail: { url: props.randomizeUrl },
-    }));
+    emit('confirm', props.randomizeUrl);
 }
 </script>
 

@@ -79,20 +79,10 @@ describe('RandomizeButtonWarning', () => {
             cy.get('.popup-window').click();
             cy.get('@onCancel').should('not.have.been.called');
         });
-
-        it('dispatches randomize-cancel CustomEvent on cancel', () => {
-            cy.window().then((win) => {
-                cy.stub(win, 'dispatchEvent').as('dispatch');
-            });
-
-            cy.get('[data-testid="randomize-cancel"]').click();
-            cy.get('@dispatch').should('be.calledWith', Cypress.sinon.match.instanceOf(CustomEvent)
-                .and(Cypress.sinon.match.has('type', 'randomize-cancel')));
-        });
     });
 
     describe('confirm behavior', () => {
-        it('emits confirm when confirm button is clicked', () => {
+        it('emits confirm with the randomize URL when confirm button is clicked', () => {
             const onConfirm = cy.stub().as('onConfirm');
 
             cy.mount(RandomizeButtonWarning, {
@@ -102,17 +92,7 @@ describe('RandomizeButtonWarning', () => {
 
             cy.get('[data-testid="randomize-confirm"]').click();
             cy.get('@onConfirm').should('have.callCount', 1);
-        });
-
-        it('dispatches randomize-confirm CustomEvent with the correct URL', () => {
-            cy.window().then((win) => {
-                cy.stub(win, 'dispatchEvent').as('dispatch');
-            });
-
-            cy.get('[data-testid="randomize-confirm"]').click();
-            cy.get('@dispatch').should('be.calledWith', Cypress.sinon.match.instanceOf(CustomEvent)
-                .and(Cypress.sinon.match.has('type', 'randomize-confirm'))
-                .and(Cypress.sinon.match((ev) => ev.detail.url === randomizeUrl)));
+            cy.get('@onConfirm').should('have.been.calledWith', randomizeUrl);
         });
     });
 });
