@@ -4,13 +4,13 @@ describe('GradingClustering', () => {
     const defaultProps = {
         isClusteringMode: false,
         algorithms: {
-            'DummySplit': 'Dummy Split',
+            DummySplit: 'Dummy Split',
         },
         currentAlgorithm: '',
         createClusteringUrl: '/test/clustering',
         csrfToken: 'test-token',
         canCreateClustering: true,
-        gradeableId: 'test_gradeable'
+        gradeableId: 'test_gradeable',
     };
 
     it('renders "Go to Clustering Mode" button when not in clustering mode', () => {
@@ -23,8 +23,8 @@ describe('GradingClustering', () => {
         cy.mount(GradingClustering, {
             props: {
                 ...defaultProps,
-                isClusteringMode: true
-            }
+                isClusteringMode: true,
+            },
         });
         cy.get('button').should('contain', 'Exit Clustering Mode');
         cy.get('select').should('exist');
@@ -37,8 +37,8 @@ describe('GradingClustering', () => {
             props: {
                 ...defaultProps,
                 isClusteringMode: true,
-                algorithms: {}
-            }
+                algorithms: {},
+            },
         });
         cy.get('select').should('not.exist');
     });
@@ -48,8 +48,8 @@ describe('GradingClustering', () => {
             props: {
                 ...defaultProps,
                 isClusteringMode: true,
-                canCreateClustering: false
-            }
+                canCreateClustering: false,
+            },
         });
         cy.get('select').should('not.exist');
     });
@@ -58,8 +58,8 @@ describe('GradingClustering', () => {
         cy.mount(GradingClustering, {
             props: {
                 ...defaultProps,
-                isClusteringMode: true
-            }
+                isClusteringMode: true,
+            },
         });
 
         cy.get('button').click();
@@ -92,14 +92,14 @@ describe('GradingClustering', () => {
     it('sends POST request when algorithm is changed', () => {
         cy.intercept('POST', '/test/clustering', {
             statusCode: 200,
-            body: { status: 'success' }
+            body: { status: 'success' },
         }).as('createClustering');
 
         cy.mount(GradingClustering, {
             props: {
                 ...defaultProps,
-                isClusteringMode: true
-            }
+                isClusteringMode: true,
+            },
         });
 
         cy.get('select').select('DummySplit');
@@ -112,14 +112,14 @@ describe('GradingClustering', () => {
     it('alerts on failure when algorithm is changed', () => {
         cy.intercept('POST', '/test/clustering', {
             statusCode: 200,
-            body: { status: 'fail', message: 'Custom error message' }
+            body: { status: 'fail', message: 'Custom error message' },
         }).as('createClusteringFail');
 
         cy.mount(GradingClustering, {
             props: {
                 ...defaultProps,
-                isClusteringMode: true
-            }
+                isClusteringMode: true,
+            },
         });
 
         const alertStub = cy.stub();

@@ -14,7 +14,7 @@ describe('Grading Clustering Mode', () => {
         // Warning popup should appear
         cy.get('#clustering-warning-popup').should('be.visible');
         cy.get('#clustering-warning-popup').contains('Are you sure you want to enter Clustering Mode?');
-        
+
         // Agree to the warning
         cy.get('.popup-window .btn-primary').contains('Yes, enter clustering mode').click();
 
