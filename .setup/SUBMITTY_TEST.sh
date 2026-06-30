@@ -22,7 +22,6 @@ run_npm_scripts_in_tmp_dir() {
 
     echo "Copying site/ to /tmp/submitty_test to bypass permissions..."
 
-    # copy site/ to a folder in /tmp
     TMP_FOLDER="/tmp/submitty_test"
 
     mkdir -p "$TMP_FOLDER"
@@ -57,7 +56,7 @@ run_npm_scripts_in_tmp_dir() {
         rsync -a --exclude='node_modules' . "$OLDPWD/"
     fi
 
-    # exit and clean up the temporary directory
+    # exit /tmp/submitty_test
     popd > /dev/null || {
         echo "ERROR: failed to exit /tmp/submitty_test"
         exit 1
