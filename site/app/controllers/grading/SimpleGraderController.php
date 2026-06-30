@@ -349,8 +349,8 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
 
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            return JsonResponse::getFailResponse('This gradeable is not a checkpoint or numeric text gradeable');
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            return JsonResponse::getFailResponse('This gradeable is not a numeric text gradeable');
         }
         $grader = $this->core->getUser();
 
