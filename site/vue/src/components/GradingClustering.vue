@@ -90,8 +90,7 @@ async function onAlgorithmChange() {
 
 <template>
     <button
-      class="btn"
-      :class="isClusteringMode ? 'btn-default' : 'btn-primary'"
+      class="btn btn-primary"
       @click="toggleClusteringMode"
     >
       {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
