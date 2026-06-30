@@ -515,13 +515,17 @@ HTML;
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
      * @param array<string,bool> $grading_details_columns
-     * @param array<string,array<number,array{
+     * @param array<string, array<number, array{
      *      gc_id: number,
      *      gc_title: string,
      *      grader_id: string,
      *      ag_user_id: ?string,
      *      ag_team_id: ?string,
      * }>> $active_graders
+     * @param bool $is_clustering_mode
+     * @param array<string, string> $algorithms
+     * @param ?string $current_algorithm
+     * @param array<string, string> $cluster_map
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_clustering_mode = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
