@@ -328,7 +328,7 @@ class PDFController extends AbstractController {
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
-        $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, false, $is_peer_grader);
+        $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, $is_peer_grader);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img/{target_dir}", methods: ["POST"])]

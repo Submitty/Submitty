@@ -19,7 +19,6 @@ class ImageView extends AbstractView {
         ?string $download_path,
         array $annotation_jsons,
         bool $is_student,
-        bool $jquery = false,
         bool $is_peer_grader = false
     ): void {
         $this->core->getOutput()->useFooter(false);
@@ -32,11 +31,6 @@ class ImageView extends AbstractView {
 
         // $localjs = [];
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));        
-
-        if ($jquery) {
-            //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
-            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
-        }
 
         $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
