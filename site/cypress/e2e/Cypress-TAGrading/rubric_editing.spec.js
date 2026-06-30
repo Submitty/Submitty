@@ -3,12 +3,15 @@ describe('Test cases for TA grading page', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
         cy.on('window:confirm', () => true);
-        // Keep deleting the last component until only the original 4 remain
-        cy.get('[title="Delete this component"]').then(function deleteExtra($buttons) {
-            if ($buttons.length > 4) {
-                cy.wrap($buttons.eq(-1)).click();
-                cy.get('[title="Delete this component"]', { timeout: 10000 }).then(deleteExtra);
+        // Delete any extra components, keeping only the original 4
+        cy.get('[title="Delete this component"]').then(($buttons) => {
+            const toDelete = $buttons.length - 4;
+            if (toDelete <= 0) {
+                return;
             }
+            Cypress._.times(toDelete, () => {
+                cy.get('[title="Delete this component"]').eq(-1).click({ force: true });
+            });
         });
     });
     it('Should test rubric editing', () => {
@@ -37,7 +40,7 @@ describe('Test cases for TA grading page', () => {
             cy.get('input[aria-label="mark value"]').each((_, element) => {
                 expect(element.value).to.not.equal('');
             });
-            cy.get('[data-testid="save-tools-cancel"]').click();
+            cy.get('.save-tools-cancel').click();
             cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
             cy.get('[data-testid="mark-title-input"]').should('have.length', initialMarkCount);
             cy.get('[data-testid="mark-title-input"]').each((_, element) => {
