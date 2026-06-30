@@ -101,25 +101,6 @@
     margin-bottom: 10px;
 }
 
-@media (max-width: 768px) {
-    .annotation-toolbar {
-        flex-direction: column;
-        align-items: normal;
-    }
-
-    .annotation-toolbar .btn {
-        margin-right: 0;
-        margin-bottom: 10px;
-        width: 100%;
-    }
-
-    #annotation-status {
-        margin-left: 0;
-        margin-top: 10px;
-        text-align: center;
-    }
-}
-
 .fas,
 .fas:hover {
     color: var(--btn-text-black);
@@ -179,4 +160,23 @@
 
 .btn-secondary:active:focus {
     background-color: var(--standard-light-orange);
+}
+
+@media (max-width: 768px) {
+    .annotation-toolbar {
+        flex-direction: column;
+        align-items: normal;
+    }
+
+    .annotation-toolbar .btn {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #annotation-status {
+        margin-left: 0;
+        margin-top: 10px;
+        text-align: center;
+    }
 }
