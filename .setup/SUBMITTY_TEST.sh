@@ -15,14 +15,63 @@ run_php_cs() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script lint 2>/dev/null
 }
 
-run_js_es() {
+run_npm_scripts_in_tmp_dir() {
+
+    local script="$1"
+    local option="$2"
+
+    echo "Copying node_modules to /tmp to bypass permissions..."
+
+    # Create a random temporary folder for node_modules
+    TMP_FOLDER=$(mktemp -d /tmp/submitty_test_XXXXXX)
+
+    if [ ! -d "$TMP_FOLDER" ]; then
+        echo "ERROR: The temporary folder could not be generated."
+        exit 1
+    fi
+
+    rsync -a --exclude='node_modules' . "$TMP_FOLDER/"
+
+    # change to tmp folder
+    pushd "$TMP_FOLDER" > /dev/null || {
+        echo "Failed to change to the temporary folder."
+        exit 1
+    }
+
+    # set up npm
     npm install
-    node node_modules/.bin/eslint . "${@:2}"
+    chmod -R +x node_modules/.bin/
+
+    if [ "$option" = "--fix" ]; then
+        npm run "${script}:fix"
+    else
+        npm run "$script"
+    fi
+
+    local result=$?
+
+    if [ "$option" = "--fix" ]; then
+        echo "Syncing fixed files back to the shared mount..."
+        rsync -a --exclude='node_modules' . "$OLDPWD/"
+    fi
+
+    # exit and clean up the temporary directory
+    popd > /dev/null || {
+        echo "ERROR: failed to exit the temporary directory."
+        exit 1
+    }
+    rm -rf "$TMP_FOLDER"
+
+    return $result
+
+}
+
+run_js_es() {
+    run_npm_scripts_in_tmp_dir "eslint" "$2"
 }
 
 run_css_style() {
-    npm install
-    node node_modules/stylelint/bin/stylelint.mjs "**/*.{css,vue}" "${@:2}"
+    run_npm_scripts_in_tmp_dir "css-stylelint" "$2"
 }
 
 run_php_unit() {
