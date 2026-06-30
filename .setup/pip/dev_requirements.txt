@@ -9,4 +9,4 @@ flake8==7.3.0
 black==26.5.1
 
 # For cleanup_active_graders.py
-sqlalchemy==2.0.48
+sqlalchemy==2.0.51
