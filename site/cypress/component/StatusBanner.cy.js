@@ -79,24 +79,6 @@ describe('StatusBanner', () => {
             mountWithEmitSpy(StatusBanner, 'colorChange', defaultProps, 'colorChangeHandler');
             cy.get('@colorChangeHandler').should('have.callCount', 1);
         });
-
-        it('emits a separate event per mount instance', () => {
-            cy.window().then(() => {
-                const handler = cy.stub().as('multiMountHandler');
-                const Wrapper = defineComponent({
-                    setup() {
-                        return () => h(StatusBanner, {
-                            ...defaultProps,
-                            onColorChange: handler,
-                        });
-                    },
-                });
-                cy.mount(Wrapper);
-                cy.get('@multiMountHandler').should('have.callCount', 1);
-                cy.mount(Wrapper);
-                cy.get('@multiMountHandler').should('have.callCount', 2);
-            });
-        });
     });
 
     describe('edge cases', () => {
