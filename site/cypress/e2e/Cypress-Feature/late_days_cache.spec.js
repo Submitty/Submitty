@@ -127,7 +127,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
             const testfile = 'cypress/fixtures/file1.txt';
             // Make a new submission
-            cy.get('#startnew').click();
             cy.get('#upload1').selectFile(testfile, { action: 'drag-drop' });
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
