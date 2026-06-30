@@ -3,7 +3,7 @@ import { getApiKey } from '../../support/utils';
 describe('Tests cases revolving around term creation', () => {
     const timestamp = Date.now();
 
-    it('Should create a new term', () => {
+    it('Should create a new term and show error when term already exists', () => {
         getApiKey('superuser', 'superuser').then((key) => {
             cy.request({
                 method: 'POST',
@@ -23,26 +23,22 @@ describe('Tests cases revolving around term creation', () => {
                 expect(response.body.data.term_name).to.eql(`Test Term ${timestamp}`);
                 expect(response.body.data.start_date).to.eql('2020-01-01');
                 expect(response.body.data.end_date).to.eql('2020-05-31');
-            });
-        });
-    });
-    // if the first test fails, this test will naturally also fail
-    it('Should show error when term already exists', () => {
-        getApiKey('superuser', 'superuser').then((key) => {
-            cy.request({
-                method: 'POST',
-                url: `${Cypress.config('baseUrl')}/api/terms`,
-                body: {
-                    term_id: `test${timestamp}`,
-                    term_name: `Test Term ${timestamp}`,
-                    start_date: '2020-01-01',
-                    end_date: '2020-05-31',
-                },
-                headers: {
-                    Authorization: key,
-                },
-            }).then((response) => {
-                expect(response.body.message).to.eql('Term with that ID already exists.');
+
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/terms`,
+                    body: {
+                        term_id: `test${timestamp}`,
+                        term_name: `Test Term ${timestamp}`,
+                        start_date: '2020-01-01',
+                        end_date: '2020-05-31',
+                    },
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then((response) => {
+                    expect(response.body.message).to.eql('Term with that ID already exists.');
+                });
             });
         });
     });
