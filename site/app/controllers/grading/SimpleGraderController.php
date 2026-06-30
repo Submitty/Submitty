@@ -386,6 +386,14 @@ class SimpleGraderController extends AbstractController {
                 // Get the user grade for this gradeable
                 $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
+                // components of value zero should not be added to the numeric gradeable
+                foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+                    $component = $container->getComponent();
+                    if ($component->getNumericScore() === 0) {
+                        $ta_graded_gradeable->deleteGradedComponent($component, $grader);
+                    }
+                }
+
                 //Makes an array with all the values and their status.
                 foreach ($gradeable->getComponents() as $component) {
                     $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
