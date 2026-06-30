@@ -13,9 +13,9 @@ coverage:
         flags:
           - migrator
         target: 99%
-      cypress-component:
+      vue:
         flags:
-          - cypress-component
+          - vue
         target: 95%
     patch: false
     changes: false
@@ -37,7 +37,7 @@ flags:
   submitty_daemon_jobs:
     paths:
       - sbin/submitty_daemon_jobs
-  cypress-component:
+  vue:
     paths:
       - site/vue/src
 
