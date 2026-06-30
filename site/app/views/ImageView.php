@@ -27,13 +27,15 @@ class ImageView extends AbstractView {
 
         $display_file_url = $this->core->buildCourseUrl(['display_file']);
 
-        $localcss = [];
-        $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('image', 'image_annotation.css'), 'css');
+        // $localcss = [];
+        // $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('image', 'image_annotation.css'), 'css');
 
-        $localjs = [];
+        // $localjs = [];
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));        
 
         if ($jquery) {
-            $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+            //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         }
 
         $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
@@ -47,8 +49,8 @@ class ImageView extends AbstractView {
             'can_download' => !$is_peer_grader,
             'display_file_url' => $display_file_url,
             'directory' => $this->getDirectoryFromPath($file_path),
-            'localcss' => $localcss,
-            'localjs' => $localjs,
+            //'localcss' => $localcss,
+            //'localjs' => $localjs,
             'csrfToken' => $this->core->getCsrfToken(),
             'anon_path' => $anon_path,
             'download_path' => $download_path
