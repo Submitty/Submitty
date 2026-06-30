@@ -223,9 +223,6 @@ class SimpleGraderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl());
         }
 
-        // TODO: copy the same student/section/rows setup from gradePage()
-        // so access rules + sort match the actual grading page.
-
         //If you can see the page, you can grade the page
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
@@ -305,7 +302,7 @@ class SimpleGraderController extends AbstractController {
         ];
 
         foreach ($numeric_components as $component) {
-            $header[] = $component->getTitle();
+            $header[] = $component->getTitle() . "(" . $component->getMaxValue() . ")";
         }
 
         $header[] = "Total points earned";
@@ -316,7 +313,6 @@ class SimpleGraderController extends AbstractController {
 
         fputcsv($fp, $header);
 
-        // TODO: foreach ($rows as $row) build data rows here
         $rows = $this->core->getQueries()->getGradedGradeables(
             [$gradeable],
             $student_ids,
@@ -331,9 +327,24 @@ class SimpleGraderController extends AbstractController {
                 $user->getDisplayedFamilyName(),
             ];
 
+            $ta_grade = $row->getTaGradedGradeable();
+            $total = 0;
+            foreach ($numeric_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $component_score = $component_grade !== null ? $component_grade->getScore() : 0;
+                $csv_row[] = $component_score;
+                $total += $component_score;
+            }
+
+            $csv_row[] = $total;
+            foreach ($text_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $csv_row[] = $component_grade !== null ? $component_grade->getComment() : "";
+            }
+
             fputcsv($fp, $csv_row);
         }
-        
+
         rewind($fp);
         $csv = stream_get_contents($fp);
         fclose($fp);
