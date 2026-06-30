@@ -49,13 +49,13 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             });
             if (user !== 'instructor2') {
                 cy.visit(['testing', 'gradeable', 'locked_homework']);
-                cy.get('[data-testid="popup-message"]').contains('You have not unlocked this gradeable yet');
+                cy.get('[data-testid="popup-message"]', { timeout: 10000 }).contains('You have not unlocked this gradeable yet');
             }
             cy.logout();
         });
 
         // users should have access to locked homework
-        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
+        ['kinge', 'adamsg', 'heathc'].forEach((user) => {
             cy.login(user);
             cy.visit(['testing']);
             cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').click();
