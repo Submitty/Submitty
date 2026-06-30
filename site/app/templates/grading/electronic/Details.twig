@@ -120,6 +120,11 @@
         {{ message|nl2br }}
     </div>
     {% endif %}
+    {% if is_clustering_mode and current_algorithm is null %}
+    <div class="details-warning-box details-warning-highlight">
+        No clusters have been generated for this assignment. Please select an algorithm from the dropdown to begin.
+    </div>
+    {% endif %}
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}

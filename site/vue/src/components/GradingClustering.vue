@@ -11,51 +11,30 @@ const props = defineProps<{
     gradeableId: string;
 }>();
 
-const selectedAlgorithm = ref(props.currentAlgorithm || Object.keys(props.algorithms)[0] || '');
+const selectedAlgorithm = ref(props.currentAlgorithm || '');
 
-async function toggleClusteringMode() {
+function toggleClusteringMode() {
     const urlParams = new URLSearchParams(window.location.search);
     if (props.isClusteringMode) {
         urlParams.delete('cluster_mode');
         urlParams.delete('algorithm');
         window.location.search = urlParams.toString();
-    } else {
-        const hasAcceptedWarning = sessionStorage.getItem('clusteringWarningAccepted_' + props.gradeableId) === 'true';
-        if (!hasAcceptedWarning && typeof (window as any).showClusteringWarningMessage === 'function') {
-            (window as any).showClusteringWarningMessage(() => enterClusteringMode(urlParams));
-        } else {
+    }
+    else {
+        const hasAcceptedWarning = sessionStorage.getItem(`clusteringWarningAccepted_${props.gradeableId}`) === 'true';
+        const win = window as unknown as { showClusteringWarningMessage?: (cb: () => void) => void };
+        if (!hasAcceptedWarning && typeof win.showClusteringWarningMessage === 'function') {
+            win.showClusteringWarningMessage(() => enterClusteringMode(urlParams));
+        }
+        else {
             enterClusteringMode(urlParams);
         }
     }
 }
 
-async function enterClusteringMode(urlParams: URLSearchParams) {
-    // If we don't have a config yet, automatically run the default algorithm
-    if (!props.currentAlgorithm && selectedAlgorithm.value && props.canCreateClustering) {
-        const formData = new FormData();
-        formData.append('csrf_token', props.csrfToken);
-        formData.append('algorithm', selectedAlgorithm.value);
-
-        try {
-            const response = await fetch(props.createClusteringUrl, {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                urlParams.set('cluster_mode', '1');
-                window.location.search = urlParams.toString();
-            } else {
-                alert(result.message || 'Error creating clusters');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to connect to the server.');
-        }
-    } else {
-        urlParams.set('cluster_mode', '1');
-        window.location.search = urlParams.toString();
-    }
+function enterClusteringMode(urlParams: URLSearchParams) {
+    urlParams.set('cluster_mode', '1');
+    window.location.search = urlParams.toString();
 }
 
 async function onAlgorithmChange() {
@@ -67,20 +46,22 @@ async function onAlgorithmChange() {
         try {
             const response = await fetch(props.createClusteringUrl, {
                 method: 'POST',
-                body: formData
+                body: formData,
             });
 
-            const result = await response.json();
+            const result = (await response.json()) as { status: string; message?: string };
             if (result.status === 'success') {
                 const urlParams = new URLSearchParams(window.location.search);
                 urlParams.set('cluster_mode', '1');
                 window.location.search = urlParams.toString();
-            } else {
+            }
+            else {
                 alert(result.message || 'Error creating clusters');
                 // Revert selection if it failed
-                selectedAlgorithm.value = props.currentAlgorithm || Object.keys(props.algorithms)[0] || '';
+                selectedAlgorithm.value = props.currentAlgorithm || '';
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Error:', error);
             alert('Failed to connect to the server.');
         }
@@ -89,25 +70,31 @@ async function onAlgorithmChange() {
 </script>
 
 <template>
-    <button
-      class="btn btn-primary"
-      @click="toggleClusteringMode"
+  <button
+    class="btn btn-primary"
+    @click="toggleClusteringMode"
+  >
+    {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
+  </button>
+  <select
+    v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
+    v-model="selectedAlgorithm"
+    class="form-control"
+    style="width: auto;"
+    @change="onAlgorithmChange"
+  >
+    <option
+      value=""
+      disabled
     >
-      {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
-    </button>
-    <select
-      v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
-      v-model="selectedAlgorithm"
-      @change="onAlgorithmChange"
-      class="form-control"
-      style="width: auto;"
+      Select an algorithm...
+    </option>
+    <option
+      v-for="(name, id) in algorithms"
+      :key="id"
+      :value="id"
     >
-      <option
-        v-for="(name, id) in algorithms"
-        :key="id"
-        :value="id"
-      >
-        {{ name }}
-      </option>
-    </select>
+      {{ name }}
+    </option>
+  </select>
 </template>

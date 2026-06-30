@@ -100,7 +100,7 @@ function showClusteringWarningMessage(callback) {
 function clusteringWarningMessageAgree() {
     const dataElement = document.getElementById('gradeable-message-data');
     if (dataElement && dataElement.dataset.gradeable) {
-        sessionStorage.setItem('clusteringWarningAccepted_' + dataElement.dataset.gradeable, 'true');
+        sessionStorage.setItem(`clusteringWarningAccepted_${dataElement.dataset.gradeable}`, 'true');
     }
     const message = $('#clustering-warning-popup');
     message.css('display', 'none');
