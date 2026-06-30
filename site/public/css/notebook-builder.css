@@ -18,6 +18,7 @@
     justify-content: space-between;
 }
 
+
 .widget-main {
     padding: 10px;
     margin-right: 10px;
@@ -70,6 +71,11 @@
     width: 100%;
     margin-right: 10px;
     min-height: 75px;
+}
+
+.markdown-widget .markdown-area-wrapper {
+    flex: 1;
+    min-width: 0;
 }
 
 /**
