@@ -273,7 +273,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         assertSingleImageSubmissionOpen();
 
         // wait for PDF to fully load in, or an error will occur when it's interrupted by logout
-        cy.intercept(`/courses/${getCurrentSemester()}/sample/gradeable/grading_homework_pdf/encode_pdf').as('pdf`);
+        cy.intercept(`/courses/${getCurrentSemester()}/sample/gradeable/grading_homework_pdf/encode_pdf`).as('pdf');
         cy.wait('@pdf');
     });
 
