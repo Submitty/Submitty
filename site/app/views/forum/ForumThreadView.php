@@ -146,6 +146,7 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
+                "is_instructor" => $this->core->getUser()->accessAdmin(),
                 "email_enabled" => $generatePostContent["email_enabled"]
             ]);
         }
@@ -271,6 +272,15 @@ class ForumThreadView extends AbstractView {
                     "onclick" => [false, ''],
                     "link" => $this->core->buildCourseUrl(['forum', 'stats']),
                     "required_rank" => 2
+                ],
+                [
+                    "display_text" => 'View Blocked Users',
+                    "id" => 'view_blocked_users',
+                    "optional_class" => [false, ''],
+                    "title" => 'View users blocked from forum posting',
+                    "onclick" => [true, "showBlockedUsersModal()"],
+                    "link" => '#',
+                    "required_rank" => 1
                 ]
             ];
             $other_buttons = [
@@ -869,6 +879,9 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "is_author_blocked" => ($user->accessAdmin() && $post->getAuthor()->getId() !== $user->getId())
+                ? $this->core->getQueries()->isUserBlockedFromForumPosts($post->getAuthor()->getId())
+                : false,
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];
