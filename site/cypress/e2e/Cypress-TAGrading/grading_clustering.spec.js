@@ -6,17 +6,17 @@ describe('Grading Clustering Mode', () => {
 
         // Verify initial state
         cy.get('button').contains('Go to Clustering Mode').should('be.visible');
-        cy.get('select').contains('Dummy Split').should('not.exist');
+        cy.get('select').should('not.exist');
 
         // Click to enter clustering mode
         cy.get('button').contains('Go to Clustering Mode').click();
 
         // Warning popup should appear
         cy.get('#clustering-warning-popup').should('be.visible');
-        cy.get('#clustering-warning-popup').contains('Are you sure you want to enter Clustering Mode?');
+        cy.get('#clustering-warning-popup').contains('In clustering mode, any student you grade within a cluster');
 
         // Agree to the warning
-        cy.get('.popup-window .btn-primary').contains('Yes, enter clustering mode').click();
+        cy.get('[data-testid="clustering-agree-popup-btn"]').click();
 
         // The URL should now have ?cluster_mode=1 and page reloads
         cy.url().should('include', 'cluster_mode=1');

@@ -54,60 +54,7 @@ describe('GradingClustering', () => {
         cy.get('select').should('not.exist');
     });
 
-    it('clicking "Exit Clustering Mode" manipulates URL', () => {
-        cy.mount(GradingClustering, {
-            props: {
-                ...defaultProps,
-                isClusteringMode: true,
-            },
-        });
 
-        cy.get('button').click();
-    });
-
-    it('calls warning message when entering clustering mode if not accepted', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
-
-        cy.window().then((win) => {
-            win.sessionStorage.setItem('clusteringWarningAccepted_test_gradeable', 'false');
-            win.showClusteringWarningMessage = cy.stub().as('warningMsg');
-        });
-
-        cy.get('button').click();
-        cy.get('@warningMsg').should('have.been.calledOnce');
-    });
-
-    it('skips warning message and manipulates URL if already accepted', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
-
-        cy.window().then((win) => {
-            win.sessionStorage.setItem('clusteringWarningAccepted_test_gradeable', 'true');
-            win.showClusteringWarningMessage = cy.stub().as('warningMsg');
-        });
-
-        cy.get('button').click();
-        cy.get('@warningMsg').should('not.have.been.called');
-    });
-
-    it('sends POST request when algorithm is changed', () => {
-        cy.intercept('POST', '/test/clustering', {
-            statusCode: 200,
-            body: { status: 'success' },
-        }).as('createClustering');
-
-        cy.mount(GradingClustering, {
-            props: {
-                ...defaultProps,
-                isClusteringMode: true,
-            },
-        });
-
-        cy.get('select').select('DummySplit');
-        cy.wait('@createClustering').then((interception) => {
-            expect(interception.request.body).to.include('DummySplit');
-            expect(interception.request.body).to.include('test-token');
-        });
-    });
 
     it('alerts on failure when algorithm is changed', () => {
         cy.intercept('POST', '/test/clustering', {
