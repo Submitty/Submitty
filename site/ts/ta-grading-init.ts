@@ -1,7 +1,7 @@
 import { changeStudentArrowTooltips } from './ta-grading';
 import { loadTAGradingSettingData, settingsData } from './ta-grading-keymap';
 
-const settingsCallbacks = {
+const settingsCallbacks: Record<string, (value: string) => void> = {
     'general-setting-arrow-function': changeStudentArrowTooltips,
     'general-setting-navigate-assigned-students-only': function (
         value: string,
@@ -37,38 +37,25 @@ $(() => {
                 )
             ) {
                 if (storageCode in settingsCallbacks) {
-                    settingsCallbacks[storageCode as keyof typeof settingsCallbacks](item);
+                    settingsCallbacks[storageCode](item);
                 }
             }
         }
     }
 
-    $('#settings-popup').on(
-        'change',
-        '.ta-grading-setting-option',
-        function () {
-            const storageCode = $(this).attr('data-storage-code');
-            if (storageCode) {
-                localStorage.setItem(storageCode, (this as HTMLSelectElement).value);
-                if (
-                    settingsCallbacks
-                    && Object.prototype.hasOwnProperty.call(
-                        settingsCallbacks,
-                        storageCode,
-                    )
-                ) {
-                    settingsCallbacks[storageCode as keyof typeof settingsCallbacks]((this as HTMLSelectElement).value);
-                    if ((this as HTMLSelectElement).value !== 'active-inquiry') {
-                        // if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page
-                        window.Cookies.set('inquiry_status', 'off');
-                    }
-                    else {
-                        window.Cookies.set('inquiry_status', 'on');
-                    }
-                }
-            }
-        },
-    );
+    // Listen for settings changes from the Vue component
+    document.addEventListener('settings-changed', (e) => {
+        const { storageCode, value } = (e as CustomEvent).detail as { storageCode: string; value: string };
+        if (
+            storageCode
+            && Object.prototype.hasOwnProperty.call(
+                settingsCallbacks,
+                storageCode,
+            )
+        ) {
+            settingsCallbacks[storageCode](value);
+        }
+    });
 
     // Progress bar value
     const value = $('.progressbar').val() ?? 0;
