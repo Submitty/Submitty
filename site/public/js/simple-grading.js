@@ -580,6 +580,7 @@ function setupNumericTextCells() {
                             { csrf_token: csrfToken, users: user_ids,
                                 num_numeric: num_numeric, big_file: reader.result },
                             (returned_data) => {
+                                console.log(returned_data);
                                 for (let x = 0; x < returned_data['data'].length; x++) {
                                     const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
                                     if (rowElement.length) {

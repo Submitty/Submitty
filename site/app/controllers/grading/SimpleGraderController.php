@@ -386,14 +386,6 @@ class SimpleGraderController extends AbstractController {
                 // Get the user grade for this gradeable
                 $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
-                // components of value zero should not be added to the numeric gradeable
-                foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
-                    $component = $container->getComponent();
-                    if ($component->getNumericScore() === 0) {
-                        $ta_graded_gradeable->deleteGradedComponent($component, $grader);
-                    }
-                }
-
                 //Makes an array with all the values and their status.
                 foreach ($gradeable->getComponents() as $component) {
                     $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
@@ -412,14 +404,19 @@ class SimpleGraderController extends AbstractController {
                         }
                         else {
                             // numeric component
-                            // if the data is empty, we should just input 0. If it is not a number, we should fail.
+                            // if the data is not a number, we should fail.
                             if ($component_data !== '' && !is_numeric($component_data)) {
                                 $temp_array[$value_temp_str] = $component_data;
                                 $temp_array[$status_temp_str] = "ERROR";
                             }
                             else {
+                                // empty data is read as an input of 0
                                 $component_data = floatval($component_data);
-                                if ($component->getUpperClamp() < $component_data) {
+                                if ($component_data === 0.0) { 
+                                    // components of value zero should not be saved in the database
+                                    $ta_graded_gradeable->deleteGradedComponent($component);
+                                }
+                                elseif ($component->getUpperClamp() < $component_data) {
                                     $temp_array[$value_temp_str] = $component_data;
                                     $temp_array[$status_temp_str] = "ERROR";
                                 }
