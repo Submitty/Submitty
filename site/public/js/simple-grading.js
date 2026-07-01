@@ -442,7 +442,6 @@ function setupNumericTextCells() {
         const old_scores = {};
         let total = 0;
 
-        let value = this.value;
         const numbers = /^[0-9]*\.?[0-9]*$/;
 
         if (this.tagName.toLowerCase() === 'input') {
@@ -488,8 +487,6 @@ function setupNumericTextCells() {
             elem.data('origval', elem.val());
             elem.attr('data-origval', elem.val());
         });
-
-        value = this.value;
 
         submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
