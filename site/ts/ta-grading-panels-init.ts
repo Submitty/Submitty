@@ -9,7 +9,6 @@ import {
     saveResizedColsDimensions,
     initializeHorizontalTwoPanelDrag,
     setPanelsVisibilities,
-    updatePanelOptions,
     updatePanelHeaderDataAttributes,
     isMobileView,
     changeMobileView,
@@ -151,7 +150,6 @@ function initializeTaLayout() {
         }
     }
     updateLayoutDimensions();
-    updatePanelOptions();
     readCookies();
 }
 
@@ -399,18 +397,6 @@ $(() => {
             else {
                 selectEle.show();
             }
-        }
-    });
-
-    // panel position selector change event
-    $('.grade-panel .panel-position-cont').change(function () {
-        const panelSpanId = $(this).closest('.grade-panel').attr('id');
-        const position = $(this).val() as string;
-        if (panelSpanId) {
-            const panelId = panelSpanId.split(/(_|-)btn/)[0];
-            setPanelsVisibilities(panelId, null, position);
-            $(`select#${panelId}_select`).hide();
-            checkNotebookScroll();
         }
     });
 

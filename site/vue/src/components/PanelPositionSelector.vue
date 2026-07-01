@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { onLayoutChange } from '../../../ts/panel-layout-store';
 
 type PanelPosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
 

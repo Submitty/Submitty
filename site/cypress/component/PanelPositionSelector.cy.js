@@ -1,4 +1,5 @@
 import PanelPositionSelector from '../../vue/src/components/PanelPositionSelector.vue';
+import { updateLayout } from '../../ts/panel-layout-store';
 
 function mount(overrides = {}) {
     return cy.mount(PanelPositionSelector, {
@@ -79,6 +80,7 @@ describe('PanelPositionSelector', () => {
         cy.window().then((win) => {
             updateLayout.call(win, 4, 'LEFT');
         });
+        updateLayout(4, 'LEFT');
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
     });
 
@@ -89,6 +91,7 @@ describe('PanelPositionSelector', () => {
         cy.window().then((win) => {
             updateLayout.call(win, 3, 'RIGHT');
         });
+        updateLayout(3, 'RIGHT');
         cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
         cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
     });
@@ -98,6 +101,7 @@ describe('PanelPositionSelector', () => {
         cy.window().then((win) => {
             updateLayout.call(win, 4, 'LEFT');
         });
+        updateLayout(4, 'LEFT');
         cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
     });
 

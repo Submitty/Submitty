@@ -1,10 +1,12 @@
 import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
+import { updateLayout } from './panel-layout-store';
 
 declare global {
     interface Window {
         updateThePanelsElements(panelsAvailabilityObj: Record<PanelElement, boolean>): void;
         changePanelsLayout (panelsCount: string | number, isLeftTaller: boolean, twoOnRight: boolean): void;
+        setPanelsVisibilities (ele: string, forceVisible: boolean | null, position: string | null): void;
     }
 }
 
@@ -266,12 +268,6 @@ function checkForTwoPanelLayoutChange(
     saveTaLayoutDetails();
 }
 
-export function updatePanelOptions() {
-    // Panel options are now managed reactively by the Vue PanelPositionSelector
-    // component via the panel-layout-changed CustomEvent. This function is kept
-    // as a no-op for call-site compatibility.
-}
-
 export function setPanelsVisibilities(
     ele: string,
     forceVisible: boolean | null = null,
@@ -365,7 +361,6 @@ export function exchangeTwoPanels() {
         )
             ? 'RIGHT'
             : 'LEFT';
-        updatePanelOptions();
         updatePanelLayoutModes();
         initializeHorizontalTwoPanelDrag();
     }
@@ -524,7 +519,7 @@ export function togglePanelLayoutModes(forceVal = false) {
             rightBottom: null,
         };
     }
-    updatePanelOptions();
+    updateLayout(taLayoutDet.numOfPanelsEnabled, taLayoutDet.dividedColName as 'LEFT' | 'RIGHT');
 }
 
 export function toggleFullLeftColumnMode(forceVal = false) {
@@ -590,6 +585,8 @@ export function updatePanelHeaderDataAttributes() {
     $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
     $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
 
+    updateLayout(taLayoutDet.numOfPanelsEnabled, taLayoutDet.dividedColName as 'LEFT' | 'RIGHT');
+
     window.dispatchEvent(new CustomEvent('panel-layout-changed', {
         detail: {
             numOfPanelsEnabled: taLayoutDet.numOfPanelsEnabled,
@@ -597,3 +594,4 @@ export function updatePanelHeaderDataAttributes() {
         },
     }));
 }
+window.setPanelsVisibilities = setPanelsVisibilities;
