@@ -412,7 +412,7 @@ class SimpleGraderController extends AbstractController {
                             else {
                                 // empty data is read as an input of 0
                                 $component_data = floatval($component_data);
-                                if ($component_data === 0.0) { 
+                                if ($component_data === 0.0) {
                                     // components of value zero should not be saved in the database
                                     $ta_graded_gradeable->deleteGradedComponent($component);
                                     $temp_array[$value_temp_str] = $component_data;
