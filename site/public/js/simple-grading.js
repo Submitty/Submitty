@@ -600,12 +600,7 @@ function setupNumericTextCells() {
                                                 cellElement.val(returned_data['data'][x][value]);
                                                 y++;
 
-                                                if (Number(cellElement.val()) === 0) {
-                                                    cellElement.css('color', 'var(--standard-light-medium-gray)');
-                                                }
-                                                else {
-                                                    cellElement.css('color', '');
-                                                }
+                                                cellElement.css('color', '');
                                                 total += Number(cellElement.val());
                                             }
                                             else {
