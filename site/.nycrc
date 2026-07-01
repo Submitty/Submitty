@@ -1,4 +1,5 @@
 {
+  "cwd": "..",
   "all": false,
   "reporter": [
     "text-summary",
