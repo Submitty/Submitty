@@ -7,9 +7,9 @@
     "lcov"
   ],
   "exclude": [
-    "cypress/**",
+    "site/cypress/**",
     "**/*.cy.*",
     "**/*.spec.*",
-    "node_modules/**"
+    "site/node_modules/**"
   ]
 }
