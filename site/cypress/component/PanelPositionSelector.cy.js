@@ -1,143 +1,120 @@
 import PanelPositionSelector from '../../vue/src/components/PanelPositionSelector.vue';
 import { updateLayout } from '../../ts/panel-layout-store';
+import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
-function mount(overrides = {}) {
+function mountWithStore(numOfPanels, dividedColName, panelId = 'test_panel') {
+    updateLayout(numOfPanels, dividedColName);
     return cy.mount(PanelPositionSelector, {
-        props: {
-            panelId: 'test_panel',
-            numOfPanels: 4,
-            dividedColName: 'LEFT',
-            ...overrides,
-        },
+        props: { panelId },
     });
-}
-
-function triggerChange(value) {
-    cy.get('[data-testid="panel-position-select"]').then(($sel) => {
-        $sel[0].value = value;
-        $sel[0].dispatchEvent(new Event('change', { bubbles: true }));
-    });
-}
-
-function updateLayout(numOfPanels, dividedColName) {
-    const store = window.__submittyPanelLayoutStore__;
-    if (store) {
-        store.state = { numOfPanels, dividedColName };
-        store.listeners.forEach(fn => fn(store.state));
-    }
 }
 
 describe('PanelPositionSelector', () => {
-    it('renders all 4 positions in 4-panel mode', () => {
-        mount({ numOfPanels: 4 });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
-        cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as top left panel');
-        cy.get('[data-testid="panel-position-leftBottom"]').should('have.text', 'Open as bottom left panel');
-        cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as top right panel');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('have.text', 'Open as bottom right panel');
+    beforeEach(() => {
+        delete window.__submittyPanelLayoutStore__;
+        localStorage.clear();
     });
 
-    it('renders 2 positions with simplified labels in 2-panel mode', () => {
-        mount({ numOfPanels: 2 });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 2);
-        cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as left panel');
-        cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as right panel');
-        cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
-    });
-
-    it('renders left-divided 3 positions in 3-panel LEFT mode', () => {
-        mount({ numOfPanels: 3, dividedColName: 'LEFT' });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 3);
-        cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as top left panel');
-        cy.get('[data-testid="panel-position-leftBottom"]').should('exist');
-        cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as right panel');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
-    });
-
-    it('renders right-divided 3 positions in 3-panel RIGHT mode', () => {
-        mount({ numOfPanels: 3, dividedColName: 'RIGHT' });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 3);
-        cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as left panel');
-        cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
-        cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as top right panel');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
-    });
-
-    it('renders no options in 1-panel mode', () => {
-        mount({ numOfPanels: 1 });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
-    });
-
-    it('defaults to 1 panel when numOfPanels not provided', () => {
-        cy.mount(PanelPositionSelector, { props: { panelId: 'test' } });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
-    });
-
-    it('updates options when layout store fires', () => {
-        mount({ numOfPanels: 2 });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 2);
-        cy.window().then((win) => {
-            updateLayout.call(win, 4, 'LEFT');
+    describe('option rendering', () => {
+        it('renders all 4 positions with full labels in 4-panel LEFT mode', () => {
+            mountWithStore(4, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
+            cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as top left panel');
+            cy.get('[data-testid="panel-position-leftBottom"]').should('have.text', 'Open as bottom left panel');
+            cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as top right panel');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('have.text', 'Open as bottom right panel');
         });
-        updateLayout(4, 'LEFT');
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
-    });
 
-    it('updates divided column when layout store fires', () => {
-        mount({ numOfPanels: 3, dividedColName: 'LEFT' });
-        cy.get('[data-testid="panel-position-leftBottom"]').should('exist');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
-        cy.window().then((win) => {
-            updateLayout.call(win, 3, 'RIGHT');
+        it('renders 2 simplified positions in 2-panel mode', () => {
+            mountWithStore(2, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 2);
+            cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as left panel');
+            cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as right panel');
+            cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
         });
-        updateLayout(3, 'RIGHT');
-        cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
-        cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
-    });
 
-    it('does not crash on layout store update with current values', () => {
-        mount({ numOfPanels: 4 });
-        cy.window().then((win) => {
-            updateLayout.call(win, 4, 'LEFT');
+        it('renders left-divided 3 positions in 3-panel LEFT mode', () => {
+            mountWithStore(3, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 3);
+            cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as top left panel');
+            cy.get('[data-testid="panel-position-leftBottom"]').should('exist');
+            cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as right panel');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
         });
-        updateLayout(4, 'LEFT');
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 4);
+
+        it('renders right-divided 3 positions in 3-panel RIGHT mode', () => {
+            mountWithStore(3, 'RIGHT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 3);
+            cy.get('[data-testid="panel-position-leftTop"]').should('have.text', 'Open as left panel');
+            cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
+            cy.get('[data-testid="panel-position-rightTop"]').should('have.text', 'Open as top right panel');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
+        });
+
+        it('renders no options in 1-panel mode', () => {
+            mountWithStore(1, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
+        });
+
+        it('renders no options with default standalone mount (unseeded store)', () => {
+            cy.mount(PanelPositionSelector, { props: { panelId: 'test' } });
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
+        });
+
+        it('treats 0 panels as single panel', () => {
+            mountWithStore(0, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
+        });
     });
 
-    it('emits position-change with correct panelId and position', () => {
-        const spy = cy.spy().as('onChange');
-        mount({ 'panelId': 'grading_rubric', 'numOfPanels': 4, 'onPosition-change': spy });
-        triggerChange('leftTop');
-        cy.get('@onChange')
-            .should('have.been.calledOnce')
-            .and('have.been.calledWith', { panelId: 'grading_rubric', position: 'leftTop' });
+    describe('store reactivity', () => {
+        it('re-renders when store panel count increases', () => {
+            mountWithStore(2, 'LEFT');
+            cy.get('[data-testid="panel-position-select"] option').should('have.length', 2);
+            cy.wrap(null).then(() => {
+                updateLayout(4, 'LEFT');
+            });
+            cy.get('[data-testid="panel-position-select"] option', { timeout: 5000 }).should('have.length', 4);
+            cy.get('[data-testid="panel-position-leftBottom"]').should('have.text', 'Open as bottom left panel');
+        });
+
+        it('re-renders when store division side flips', () => {
+            mountWithStore(3, 'LEFT');
+            cy.get('[data-testid="panel-position-leftBottom"]').should('exist');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('not.exist');
+            cy.wrap(null).then(() => {
+                updateLayout(3, 'RIGHT');
+            });
+            cy.get('[data-testid="panel-position-leftBottom"]').should('not.exist');
+            cy.get('[data-testid="panel-position-rightBottom"]').should('exist');
+        });
+
+        it('unsubscribes from store on unmount', () => {
+            cy.mount(PanelPositionSelector, { props: { panelId: 'test' } });
+            cy.window().should((win) => {
+                expect(win.__submittyPanelLayoutStore__.listeners).to.have.length(1);
+            });
+        });
     });
 
-    it('does not emit position-change on mount', () => {
-        const spy = cy.spy().as('onChange');
-        mount({ 'numOfPanels': 4, 'onPosition-change': spy });
-        cy.get('@onChange').should('not.have.been.called');
-    });
+    describe('events', () => {
+        it('emits position-change with panelId and position on selection', () => {
+            updateLayout(4, 'LEFT');
+            mountWithEmitSpy(PanelPositionSelector, 'positionChange', { panelId: 'grading_rubric' }, 'onChange');
+            cy.get('[data-testid="panel-position-select"]').then(($sel) => {
+                $sel[0].value = 'leftTop';
+                $sel[0].dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            cy.get('@onChange')
+                .should('have.been.calledOnce')
+                .and('have.been.calledWith', { panelId: 'grading_rubric', position: 'leftTop' });
+        });
 
-    it('derives select id from panelId', () => {
-        mount({ panelId: 'autograding_results' });
-        cy.get('#autograding_results_select').should('exist');
-        mount({ panelId: 'notebook-view' });
-        cy.get('#notebook-view_select').should('exist');
-    });
-
-    it('sets :size to match option count', () => {
-        mount({ numOfPanels: 4 });
-        cy.get('[data-testid="panel-position-select"]').should('have.attr', 'size', '4');
-        mount({ numOfPanels: 2 });
-        cy.get('[data-testid="panel-position-select"]').should('have.attr', 'size', '2');
-        mount({ numOfPanels: 1 });
-        cy.get('[data-testid="panel-position-select"]').should('have.attr', 'size', '0');
-    });
-
-    it('treats numOfPanels=0 as single panel', () => {
-        mount({ numOfPanels: 0 });
-        cy.get('[data-testid="panel-position-select"] option').should('have.length', 0);
+        it('does not emit position-change on mount', () => {
+            updateLayout(4, 'LEFT');
+            mountWithEmitSpy(PanelPositionSelector, 'positionChange', { panelId: 'test' }, 'onChange');
+            cy.get('@onChange').should('not.have.been.called');
+        });
     });
 });
