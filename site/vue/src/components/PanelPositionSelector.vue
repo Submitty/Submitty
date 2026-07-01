@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { onLayoutChange } from '../../../ts/panel-layout-store';
+import { getLayoutState, onLayoutChange } from '../../../ts/panel-layout-store';
 
 type PanelPosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
 
@@ -10,60 +10,23 @@ interface PositionOption {
     side: 'left' | 'right';
 }
 
-type Listener = (state: { numOfPanels: number; dividedColName: 'LEFT' | 'RIGHT' }) => void;
-
-interface StoreData {
-    state: { numOfPanels: number; dividedColName: 'LEFT' | 'RIGHT' };
-    listeners: Listener[];
-}
-
-const GLOBAL_KEY = '__submittyPanelLayoutStore__';
-
-function getStore(): StoreData {
-    if (typeof window !== 'undefined' && !(window as any)[GLOBAL_KEY]) {
-        (window as any)[GLOBAL_KEY] = {
-            state: { numOfPanels: 1, dividedColName: 'LEFT' },
-            listeners: [],
-        };
-    }
-    return (window as any)[GLOBAL_KEY];
-}
-
-function onLayoutChange(fn: Listener): () => void {
-    const store = getStore();
-    store.listeners.push(fn);
-    return () => {
-        const idx = store.listeners.indexOf(fn);
-        if (idx >= 0) {
-            store.listeners.splice(idx, 1);
-        }
-    };
-}
-
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     panelId: string;
-    currentPosition?: string | null;
-    numOfPanels?: number;
-    dividedColName?: 'LEFT' | 'RIGHT';
-}>(), {
-    currentPosition: null,
-    numOfPanels: 1,
-    dividedColName: 'LEFT',
-});
+}>();
 
 const emit = defineEmits<{
     'position-change': [payload: { panelId: string; position: PanelPosition }];
 }>();
 
-const numOfPanels = ref(props.numOfPanels);
-const dividedCol = ref(props.dividedColName);
+const layout = ref(getLayoutState());
+const numOfPanels = computed(() => layout.value.numOfPanels);
+const dividedCol = computed(() => layout.value.dividedColName);
 
 let unsubscribe: (() => void) | null = null;
 
 onMounted(() => {
-    unsubscribe = onLayoutChange((layout) => {
-        numOfPanels.value = layout.numOfPanels;
-        dividedCol.value = layout.dividedColName;
+    unsubscribe = onLayoutChange((newState) => {
+        layout.value = newState;
     });
 });
 
