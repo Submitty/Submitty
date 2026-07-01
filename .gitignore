@@ -50,4 +50,5 @@ Pipfile.lock
 .phpunit.result.cache
 
 .env
-.github_actions_ci_flagtools/submitty-cli/uv.lock
+.github_actions_ci_flag
+tools/submitty-cli/uv.lock
