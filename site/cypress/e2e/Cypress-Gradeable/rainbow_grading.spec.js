@@ -132,11 +132,14 @@ describe('Test Rainbow Grading', () => {
         cy.get('@plagiarism-table-elements').eq(3).find('a').click();
     });
     it('Upload Manual Customization', () => {
+        // Intercept the upload request so we can wait for it later
+        cy.intercept('POST', '**/reports/rainbow_grades_customization_save').as('uploadCustomization');
         // Upload manual customization
         cy.get('[data-testid="btn-upload-customization"]').should('exist');
         cy.get('[data-testid="config-upload"]').should('exist');
         // TODO: select file using the Upload button instead of force clicking a hidden element
         cy.get('[data-testid="config-upload"]').selectFile('cypress/fixtures/manual_customization.json', { force: true });
+        // Wait for the upload to complete
         // Ensure that elements requiring a manual_customization.json appear
         cy.get('[data-testid="ask-which-customization"]').should('not.be.hidden');
 
