@@ -21,7 +21,7 @@ describe('Limited Access Grader Submission View Restriction', () => {
             }
         });
         cy.contains('td', 'boehmd').siblings('td').find('a[data-testid="grade-button"]').click();
-        cy.url().should('include', '/courses/${getCurrentSemester()}/sample');
+        cy.url().should('include', `/courses/${getCurrentSemester()}/sample`);
         cy.url().should('not.include', 'grading/grade');
         cy.get('[data-testid="popup-message"]').should('be.visible').and('contain', 'You do not have permission to view submissions until grading opens.');
     });
