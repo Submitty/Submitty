@@ -11,6 +11,7 @@
         "#vue-{{ id }}",
         "{{ type }}",
         "{{ name }}",
-        {{ args | default({}) | json_encode() | raw() }}
+        {{ args | default({}) | json_encode() | raw() }},
+        {{ events | default({}) | json_encode() | raw() }}
     );
 </script>
