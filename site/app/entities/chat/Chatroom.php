@@ -171,25 +171,29 @@ class Chatroom {
             "Moa", "Dodo", "Rook", "Fowl", "Chough", "Snipe", "Knot", "Teal"
         ]; // 64 items
 
-        $index = abs(crc32($user_id)) % 4096;
+        $index = abs(crc32($user_id));
 
         $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
         $info = "chatroom_" . $this->getId() . "_" . $session_started_at;
 
         $randomizer_key = hash_hkdf('sha256', $global_secret, 32, $info, '');
 
-        $a = intdiv($index, 64) % 64;
-        $b = $index % 64;
+        $a = ($index >> 16) & 0xFFFF;
+        $b = $index & 0xFFFF;
 
         for ($i = 0; $i < 10; $i++) {
             $hmac = hash_hmac('sha256', $i . '+' . $b, $randomizer_key, true);
-            $hash_val = ord($hmac[0]);
-            $a = ($a ^ $hash_val) % 64;
+            $hash_val = (ord($hmac[0]) << 8) | ord($hmac[1]);
+            $a = ($a ^ $hash_val) & 0xFFFF;
             $temp = $a;
             $a = $b;
             $b = $temp;
         }
 
-        return "Anonymous {$adjectives[$a]} {$nouns[$b]}";
+        $final_index = (($a << 16) | $b) % 4096;
+        $adj_idx = intdiv($final_index, 64);
+        $noun_idx = $final_index % 64;
+
+        return "Anonymous {$adjectives[$adj_idx]} {$nouns[$noun_idx]}";
     }
 }

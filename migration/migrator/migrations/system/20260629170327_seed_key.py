@@ -26,6 +26,8 @@ def up(config):
                     json.dump(secret_dict, open_file, indent=2)
                 secrets_path.chmod(0o440)
                 shutil.chown(str(secrets_path), 'root', config.submitty_users['php_user'])
+        else:
+            raise FileNotFoundError(f"Could not find secrets file at {secrets_path}")
 
 def down(config):
     """

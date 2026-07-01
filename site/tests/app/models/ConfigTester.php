@@ -112,7 +112,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = [
             'session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
-            'server' => 'ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+            'seed_key' => 'ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "secrets_submitty_php.json"), $config);
@@ -255,7 +255,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
-        $this->assertEquals('ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretServer());
+        $this->assertEquals('ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSeedKey());
 
         $this->assertEquals("default", $config->getLocale()->getName());
         $this->assertEquals([ "key" => "val" ], $config->getLocale()->getLangData());
@@ -356,7 +356,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             ],
             'accepted_emails' => null,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
-            'secret_server' => 'ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
+            'secret_seed_key' => 'ABC0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
             'latest_commit' => 'd150131c',

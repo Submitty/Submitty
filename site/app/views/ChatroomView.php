@@ -76,7 +76,7 @@ class ChatroomView extends AbstractView {
         $display_name = $user->getDisplayFullName();
         $roomId = $chatroom->getId();
         if ($anonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId(), $this->core->getConfig()->getSecretServer());
+            $display_name = $chatroom->calcAnonName($user->getId(), $this->core->getConfig()->getSecretSeedKey());
         }
         else {
             if (!$user->accessAdmin()) {
