@@ -430,7 +430,7 @@ class UsersController extends AbstractController {
                 ) {
                     $this->applyNotificationDefaultsForUser($user->getId());
                 }
-                    $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
+                $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
@@ -442,7 +442,7 @@ class UsersController extends AbstractController {
                 ) {
                     $this->applyNotificationDefaultsForUser($user->getId());
                 }
-                    $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
+                $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
             $all_gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();

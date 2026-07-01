@@ -4826,7 +4826,7 @@ SQL;
             "SELECT 1 FROM notification_default WHERE user_id = ?",
             [$user_id]
         );
-        return count($this->submitty_db->rows()) > 0;
+        return count($this->submitty_db->row()) > 0;
     }
 
     /**
