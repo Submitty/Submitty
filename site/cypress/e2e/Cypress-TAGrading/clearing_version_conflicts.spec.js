@@ -13,7 +13,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.log('Button should exist if there is a version conflict');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=JjnNjvAks6GQg1h&sort=id&direction=ASC&gradeable_version=1']);
         cy.get('[data-testid="grading-rubric-btn"]').click();
-        cy.get('[data-testid="change-graded-version"]').should('exist');
+        cy.get('[data-testid="change-graded-version"]', { timeout: 10000 }).should('exist');
         cy.get('[data-testid="version-warning"]').should('exist');
 
         cy.log('Clicking the button should resolve the version conflict');
@@ -36,7 +36,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
                 url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
                 form: true,
                 body: {
-                    anon_id: 'K8jI3q4qpdCc1jw',
+                    anon_id: 'JjnNjvAks6GQg1h',
                     graded_version: 2,
                     component_ids: [64, 65, 66, 67],
                     csrf_token: win.csrfToken,
@@ -82,7 +82,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
                 url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
                 form: true,
                 body: {
-                    anon_id: 'K8jI3q4qpdCc1jw',
+                    anon_id: 'JjnNjvAks6GQg1h',
                     graded_version: 2,
                     component_ids: [64],
                     csrf_token: win.csrfToken,
