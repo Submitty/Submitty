@@ -58,8 +58,6 @@ describe('notification sync and defaults test', () => {
     };
 
     const AddStudentToCourse = (course) => {
-        cy.intercept('GET', '**/user_information').as('userInfo');
-        cy.intercept('POST', '**/users').as('addUser');
         cy.login('instructor');
         cy.visit([course, 'sections']);
         cy.get('[data-testid="add-registration-section-btn"]').click();
