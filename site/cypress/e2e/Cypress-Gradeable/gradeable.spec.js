@@ -40,7 +40,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
 
     it('Should test whether or not certain users have access to gradeable', () => {
         // users should not have access to locked homework
-        ['smithj', 'student', 'instructor2'].forEach((user) => {
+        ['kinge', 'student', 'instructor2'].forEach((user) => {
             cy.login(user);
             cy.visit(['testing']);
             cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').click();
@@ -55,7 +55,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         });
 
         // users should have access to locked homework
-        ['kinge', 'adamsg', 'heathc'].forEach((user) => {
+        ['smithj', 'adamsg', 'aphacker'].forEach((user) => {
             cy.login(user);
             cy.visit(['testing']);
             cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').click();
