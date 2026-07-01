@@ -1,4 +1,4 @@
-import { getCurrentSemester } from 'site/cypress/support/utils.js'
+import { getCurrentSemester } from '/cypress/support/utils.js'
 
 describe('TA Grading Panel Switcher', () => {
     const panels = [

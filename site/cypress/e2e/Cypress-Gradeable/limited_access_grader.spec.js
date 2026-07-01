@@ -1,4 +1,4 @@
-import { getCurrentSemester } from 'site/cypress/support/utils.js'
+import { getCurrentSemester } from '/cypress/support/utils.js'
 
 describe('Limited Access Grader Submission View Restriction', () => {
     it('Should redirect limited access grader trying to view submission before grade start date', () => {
