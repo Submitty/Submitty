@@ -30,6 +30,26 @@ concurrency:
 
 
 jobs:
+  verify-migration-freshness:
+    name: Verify Migration Datestamp
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Verify migration datestamp freshness
+        run: python .github/scripts/verify_migration_datestamp.py
+        env:
+          MAX_MIGRATION_AGE_DAYS: 7
+
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-22.04
@@ -119,6 +139,38 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  cypress-component:
+    name: Cypress Component
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run cypress component tests
+        run: npx cypress run --component --browser chrome
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Screenshots
+          path: cypress/screenshots
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: Cypress-Component-Videos
+          path: cypress/videos
+
   twig-lint:
     name: Twig Lint
     runs-on: ubuntu-22.04
@@ -127,7 +179,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -154,7 +206,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -190,7 +242,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.0
+      - uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -425,7 +477,7 @@ jobs:
 
     services:
       postgres-main:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -435,7 +487,7 @@ jobs:
           - 5432
 
       postgres-branch:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
@@ -452,7 +504,7 @@ jobs:
 
           sudo apt-get update
           sudo apt-get autoremove -y postgresql-14 postgresql-client-common
-          sudo apt-get install -y postgresql-12
+          sudo apt-get install -y postgresql-14 postgresql-client-14
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
@@ -570,11 +622,12 @@ jobs:
       - name: Create Database Dumper
         run: | # the original dumper requires a `su`, which is not needed when psql as a service
           (
-              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres '
+              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres'
               echo 'sed -i -e "'"/SELECT pg_catalog.set_config('search_path'/d"'"\'
               echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
               echo '       -e "/SET default_table_access_method = /d"            \'
               echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"'
+              echo 'sed -i -e "/^[\\]restrict/d;/^[\\]unrestrict/d;" "$2"'
           ) > dbdump.sh
           chmod +x dbdump.sh
 
@@ -769,6 +822,15 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Enable password complexity requirements
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": false/"require_uppercase": true/g' \
+            -e 's/"require_lowercase": false/"require_lowercase": true/g' \
+            -e 's/"require_numbers": false/"require_numbers": true/g' \
+            -e 's/"require_special_chars": false/"require_special_chars": true/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
+
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v7
         with:
@@ -776,6 +838,23 @@ jobs:
           spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+
+      - name: Run change-password tests.
+        uses: cypress-io/github-action@v7
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/change_password.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Disable password complexity requirements
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": true/"require_uppercase": false/g' \
+            -e 's/"require_lowercase": true/"require_lowercase": false/g' \
+            -e 's/"require_numbers": true/"require_numbers": false/g' \
+            -e 's/"require_special_chars": true/"require_special_chars": false/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
@@ -900,6 +979,11 @@ jobs:
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
           npm ci
+
+      - name: Get status of daemons
+        run: |
+          sudo systemctl status submitty_daemon_jobs_handler
+        shell: bash
 
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v7

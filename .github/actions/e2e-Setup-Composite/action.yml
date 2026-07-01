@@ -50,6 +50,13 @@ runs:
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Disable php8.1-fpm before setup
+      run: |
+        sudo systemctl stop php8.1-fpm
+        sudo systemctl disable php8.1-fpm
+      shell: bash
+
     - uses: shivammathur/setup-php@2.37.0
       with:
         php-version: ${{ env.PHP_VER }}
@@ -182,6 +189,8 @@ runs:
 
     - name: Set up apache
       run: |
+        sudo add-apt-repository ppa:ondrej/php
+        sudo apt update
         sudo apt-get install apache2
         sudo apt-get install apache2-suexec-custom
         sudo apt-get install libapache2-mod-authnz-external
