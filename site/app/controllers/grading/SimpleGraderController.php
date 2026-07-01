@@ -415,6 +415,8 @@ class SimpleGraderController extends AbstractController {
                                 if ($component_data === 0.0) { 
                                     // components of value zero should not be saved in the database
                                     $ta_graded_gradeable->deleteGradedComponent($component);
+                                    $temp_array[$value_temp_str] = $component_data;
+                                    $temp_array[$status_temp_str] = "OK";
                                 }
                                 elseif ($component->getUpperClamp() < $component_data) {
                                     $temp_array[$value_temp_str] = $component_data;
