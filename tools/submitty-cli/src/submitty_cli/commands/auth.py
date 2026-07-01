@@ -56,17 +56,27 @@ def login(
         print_error(f"Could not reach server: {exc}")
         raise typer.Exit(1) from exc
 
-    if response.status_code == 401 or response.json().get("status") == "fail":
-        print_error(response.json().get("message", "Invalid credentials"))
+    if response.status_code == 401:
+        print_error("Invalid credentials")
         raise typer.Exit(1)
 
     if response.is_error:
         print_error(f"Login failed ({response.status_code})")
         raise typer.Exit(1)
 
-    new_token = response.json().get("data", {}).get("token", "")
+    try:
+        body = response.json()
+    except Exception:
+        print_error("Login failed: server returned non-JSON response")
+        raise typer.Exit(1)
+
+    if body.get("status") == "fail":
+        print_error(body.get("message", "Invalid credentials"))
+        raise typer.Exit(1)
+
+    new_token = body.get("data", {}).get("token", "")
     if not new_token:
-        print_error(f"Login succeeded but no token in response. Raw body: {response.json()}")
+        print_error(f"Login succeeded but no token in response")
         raise typer.Exit(1)
 
     save_server(server_url)
