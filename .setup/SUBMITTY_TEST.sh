@@ -15,14 +15,63 @@ run_php_cs() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script lint 2>/dev/null
 }
 
-run_js_es() {
+run_npm_scripts_in_tmp_dir() {
+
+    local script="$1"
+    local option="$2"
+
+    echo "Copying site/ to /tmp/submitty_test to bypass permissions..."
+
+    TMP_FOLDER="/tmp/submitty_test"
+
+    mkdir -p "$TMP_FOLDER"
+
+    if [ ! -d "$TMP_FOLDER" ]; then
+        echo "ERROR: The /tmp/submitty_test folder could not be generated."
+        exit 1
+    fi
+
+    rsync -a --delete --exclude='node_modules' . "$TMP_FOLDER/"
+
+    # change to tmp folder
+    pushd "$TMP_FOLDER" > /dev/null || {
+        echo "Failed to change to /tmp/submitty_test"
+        exit 1
+    }
+
+    # set up npm
     npm install
-    npm run eslint
+    chmod -R +x node_modules/.bin/
+
+    if [ "$option" = "--fix" ]; then
+        npm run "${script}:fix"
+    else
+        npm run "$script"
+    fi
+
+    local result=$?
+
+    if [ "$option" = "--fix" ]; then
+        echo "Syncing fixed files back to the shared mount..."
+        rsync -a --exclude='node_modules' . "$OLDPWD/"
+    fi
+
+    # exit /tmp/submitty_test
+    popd > /dev/null || {
+        echo "ERROR: failed to exit /tmp/submitty_test"
+        exit 1
+    }
+
+    return $result
+
+}
+
+run_js_es() {
+    run_npm_scripts_in_tmp_dir "eslint" "$2"
 }
 
 run_css_style() {
-    npm install
-    npm run css-stylelint
+    run_npm_scripts_in_tmp_dir "css-stylelint" "$2"
 }
 
 run_php_unit() {
@@ -49,9 +98,9 @@ elif [ "$1" == "php-lint" ]; then
 elif [ "$1" == "php-unit" ]; then
     run_php_unit "$@"
 elif [ "$1" == "js-lint" ]; then
-    run_js_es
+    run_js_es "$@"
 elif [ "$1" == "css-lint" ]; then
-    run_css_style
+    run_css_style "$@"
 else
     echo "Unknown test type: $1
         use phpstan, phpcs, php-lint, php-unit, js-lint, css-lint
