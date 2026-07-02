@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import httpx
 import pytest
 import respx
