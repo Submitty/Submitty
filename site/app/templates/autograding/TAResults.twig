@@ -9,9 +9,6 @@ $( document ).ready(function() {
         $("#gradeInquiryBoxSection").show();
         $("#ShowGradeInquiryButton").hide();
     }
-    {% if not active_same_as_graded %}
-        $(".ta-results-box").css('background-color', 'var(--standard-light-red)')
-    {% endif %}
 });
 </script>
 {% if not been_ta_graded %}
@@ -28,13 +25,15 @@ $( document ).ready(function() {
         {% endif %}
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
-            <div class="box submission-page-total-header" data-testid="ta-total-score">
-                <div class="box-title-total key_to_click" tabindex="0">
-
-                    {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
-                    <h4>TA / Instructor Grading Total</h4>
-                </div>
-            </div>
+            {% include 'Vue.twig' with {
+                type: "component",
+                name: "ScoreBox",
+                args: {
+                    taScore: ta_score,
+                    taMax: ta_max,
+                    activeSameAsGraded: active_same_as_graded
+                }
+            } only %}
             {# /TA/Instructor Manual total #}
 
             {# TA Component boxes #}
