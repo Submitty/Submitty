@@ -392,7 +392,8 @@ const checkTextbox = (testId, expectedInitial, input) => {
     cy.get(testId).as('textbox');
     cy.get('@textbox').should('have.value', expectedInitial);
 
-    cy.get('@textbox').clear().type(input);
+    cy.get('@textbox').clear();
+    cy.get('@textbox').type(input);
     cy.get('@textbox').should('have.value', input);
     cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
 
@@ -430,7 +431,7 @@ const reset = () => {
         '[data-testid="display-benchmarks-lowest_a-"]',
         '[data-testid="display-benchmarks-lowest_b-"]',
         '[data-testid="display-benchmarks-lowest_c-"]',
-        '[data-testid="display-benchmarks-lowest_d"]'
+        '[data-testid="display-benchmarks-lowest_d"]',
     ];
 
     checkboxes.forEach((testId) => {
