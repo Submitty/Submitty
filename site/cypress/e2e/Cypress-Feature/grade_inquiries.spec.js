@@ -71,6 +71,8 @@ describe('Test cases revolving around grade inquiries', () => {
                 verifyWebSocketStatus();
             });
 
+            cy.visit('/');
+
             // need to clear local storage to refresh grader's responsibility page
             cy.logout();
             cy.clearCookies();
@@ -110,3 +112,4 @@ describe('Test cases revolving around grade inquiries', () => {
         setGradeInquiriesForGradeable(gradeableId, originalGradeInquiryDate);
     });
 });
+
