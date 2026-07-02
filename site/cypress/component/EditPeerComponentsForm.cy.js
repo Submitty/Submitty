@@ -188,46 +188,45 @@ describe('EditPeerComponentsForm', () => {
     });
 
     describe('clearMarks', () => {
-        beforeEach(() => {
-            cy.window().then((win) => {
-                win.clearPeerMarks = () => {};
-                cy.stub(win, 'clearPeerMarks').as('clearPeerMarks');
-            });
+        it('does not emit clear-marks on mount', () => {
+            const onClearMarks = cy.stub().as('onClearMarks');
+            cy.mount(EditPeerComponentsForm, { props: { ...baseProps, onClearMarks } });
+            cy.get('@onClearMarks').should('not.have.been.called');
         });
 
-        it('does not call clearPeerMarks on mount', () => {
-            cy.mount(EditPeerComponentsForm, { props: baseProps });
-            cy.get('@clearPeerMarks').should('not.have.been.called');
-        });
+        it('emits clear-marks with the correct detail when clicked', () => {
+            const onClearMarks = cy.stub().as('onClearMarks');
+            cy.mount(EditPeerComponentsForm, { props: { ...baseProps, onClearMarks } });
 
-        it('calls clearPeerMarks with the correct submitterId, gradeableId, peer, and csrfToken', () => {
-            cy.mount(EditPeerComponentsForm, { props: baseProps });
-
-            // Default selected peer is student_aaa (first in list)
             cy.get('[data-testid="clear-peer-marks"]').first().click();
 
-            cy.get('@clearPeerMarks').should('have.been.calledOnce');
-            cy.get('@clearPeerMarks').should(
-                'have.been.calledWithExactly',
-                'submitter_xyz',
-                'gradeable_001',
-                'student_aaa',
-                'csrf_abc123',
+            cy.get('@onClearMarks').should('have.been.calledOnce');
+            cy.get('@onClearMarks').should(
+                'have.been.calledWith',
+                {
+                    submitterId: 'submitter_xyz',
+                    gradeableId: 'gradeable_001',
+                    peer: 'student_aaa',
+                    csrfToken: 'csrf_abc123',
+                },
             );
         });
 
         it('passes the currently selected peer — not always the first one', () => {
-            cy.mount(EditPeerComponentsForm, { props: baseProps });
+            const onClearMarks = cy.stub().as('onClearMarks');
+            cy.mount(EditPeerComponentsForm, { props: { ...baseProps, onClearMarks } });
 
             cy.get('[data-testid="edit-peer-select"]').select('student_bbb');
             cy.get('[data-testid="clear-peer-marks"]').eq(1).click();
 
-            cy.get('@clearPeerMarks').should(
-                'have.been.calledWithExactly',
-                'submitter_xyz',
-                'gradeable_001',
-                'student_bbb',
-                'csrf_abc123',
+            cy.get('@onClearMarks').should(
+                'have.been.calledWith',
+                {
+                    submitterId: 'submitter_xyz',
+                    gradeableId: 'gradeable_001',
+                    peer: 'student_bbb',
+                    csrfToken: 'csrf_abc123',
+                },
             );
         });
     });

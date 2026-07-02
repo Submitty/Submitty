@@ -1,17 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-declare global {
-    interface Window {
-        clearPeerMarks: (
-            submitterId: string,
-            gradeableId: string,
-            peer: string,
-            csrfToken: string,
-        ) => void;
-    }
-}
-
 interface PeerComponent {
     id: string;
     title: string;
@@ -40,6 +29,15 @@ const props = defineProps<{
     marks: Record<string, MarkInfo>;
 }>();
 
+const emit = defineEmits<{
+    'clear-marks': [detail: {
+        submitterId: string;
+        gradeableId: string;
+        peer: string;
+        csrfToken: string;
+    }];
+}>();
+
 const safePeers = ref<string[]>([]);
 const safeComponents = ref<PeerComponent[]>([]);
 const safeComponentScores = ref<Record<string, Record<string, number>>>({});
@@ -59,12 +57,12 @@ function initProps() {
 initProps();
 
 function clearMarks() {
-    window.clearPeerMarks(
-        props.submitterId ?? '',
-        props.gradeableId ?? '',
-        selectedPeer.value,
-        props.csrfToken ?? '',
-    );
+    emit('clear-marks', {
+        submitterId: props.submitterId ?? '',
+        gradeableId: props.gradeableId ?? '',
+        peer: selectedPeer.value,
+        csrfToken: props.csrfToken ?? '',
+    });
 }
 
 function badgeClass(earned: number, max: number): string {

@@ -14,6 +14,9 @@
             'componentScores': component_scores,
             'peerDetails': peer_details,
             'marks': marks,
+        },
+        'events': {
+            'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, detail.csrfToken); }',
         }
     } %}
 {% endblock %}
