@@ -71,6 +71,7 @@ describe('Test cases revolving around grade inquiries', () => {
                 verifyWebSocketStatus();
             });
 
+            // redirect page in order to avoid race condition
             cy.visit('/');
 
             // need to clear local storage to refresh grader's responsibility page
@@ -112,4 +113,3 @@ describe('Test cases revolving around grade inquiries', () => {
         setGradeInquiriesForGradeable(gradeableId, originalGradeInquiryDate);
     });
 });
-

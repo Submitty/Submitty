@@ -241,4 +241,3 @@ function loadAllTestCaseOutput(div_name, expand_all, num_test_cases, gradeable_i
 
     CheckStatesOfAllTestCases(num_test_cases, expand_all);
 }
-
