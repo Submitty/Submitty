@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6029ddef78fecd6795b74f674429ba00",
+    "content-hash": "8ddaf5a664d6acc15ebbb6db9d2b901a",
     "packages": [
         {
             "name": "brick/math",
@@ -2526,33 +2526,36 @@
         },
         {
             "name": "php-ds/php-ds",
-            "version": "v1.7.0",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-ds/polyfill.git",
-                "reference": "017fb5cdfa52a1f13126c94987b04b884c44f9cd"
+                "reference": "890702aa2b2e74b027a51800b3c1f58148124d14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-ds/polyfill/zipball/017fb5cdfa52a1f13126c94987b04b884c44f9cd",
-                "reference": "017fb5cdfa52a1f13126c94987b04b884c44f9cd",
+                "url": "https://api.github.com/repos/php-ds/polyfill/zipball/890702aa2b2e74b027a51800b3c1f58148124d14",
+                "reference": "890702aa2b2e74b027a51800b3c1f58148124d14",
                 "shasum": ""
             },
             "require": {
-                "ext-json": "*",
-                "php": ">=7.4"
+                "php": ">=8.2"
             },
             "provide": {
-                "ext-ds": "1.5.0"
+                "ext-ds": "2.0.0"
             },
             "require-dev": {
-                "php-ds/tests": "^1.5"
+                "php-ds/tests": "@dev",
+                "phpunit/phpunit": "^11.0"
             },
             "suggest": {
                 "ext-ds": "to improve performance and reduce memory usage"
             },
             "type": "library",
             "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
                 "psr-4": {
                     "Ds\\": "src"
                 }
@@ -2576,9 +2579,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-ds/polyfill/issues",
-                "source": "https://github.com/php-ds/polyfill/tree/v1.7.0"
+                "source": "https://github.com/php-ds/polyfill/tree/v2.0.1"
             },
-            "time": "2025-05-18T04:50:53+00:00"
+            "time": "2026-05-17T18:41:55+00:00"
         },
         {
             "name": "phrity/net-uri",
@@ -8956,5 +8959,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

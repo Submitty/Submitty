@@ -13,6 +13,7 @@ class FileUtils {
     const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
     const IGNORE_FILES = ['.ds_store'];
     const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+    // also update in 'file-utils.ts'
     const SUBMISSION_META_FILES = ['.submit.notebook', '.submit.timestamp', '.submit.VCS_CHECKOUT',
     '.user_assignment_access.json', '.bulk_upload_data.json'];
 
@@ -450,18 +451,19 @@ class FileUtils {
         return preg_replace('#' . preg_quote($sep) . '+#', $sep, join($sep, $paths));
     }
 
+    // also update in 'file-utils.ts'
     /**
      * Given a filename, checks whether it is a Submitty metadata file.
      * @param string $filename
      * @return bool
      */
-
     public static function isSubmissionMetaFile(string $filename): bool {
         if (in_array($filename, self::SUBMISSION_META_FILES, true)) {
             return true;
         }
         return str_starts_with($filename, '.upload_page_') || str_starts_with($filename, '.upload_version_');
     }
+
     /**
      * Given a filename (with or without the fully formed path), this function will return a string that
      * acts as a pseudo content-type for that file in any text based file that is recognized can use
