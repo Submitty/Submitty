@@ -234,6 +234,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
+                    wasmUrl: '../../vendor/pdfjs/wasm/',
                 }).promise.then((pdf) => {
                     const doc = new jspdf.jsPDF('p', 'mm');
                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
@@ -367,6 +368,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
+                    wasmUrl: '../../vendor/pdfjs/wasm/',
                 }).promise.then((pdf) => {
                     window.RENDER_OPTIONS.pdfDocument = pdf;
                     if (window.GENERAL_INFORMATION.broken) {
