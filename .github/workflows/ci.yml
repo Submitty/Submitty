@@ -160,6 +160,15 @@ jobs:
       - run: npm ci
       - name: Run cypress component tests
         run: npx cypress run --component --browser chrome
+        env:
+          VITE_COVERAGE: "true"
+      - name: Upload Cypress Component Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: site/coverage/lcov.info
+          flags: vue
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
