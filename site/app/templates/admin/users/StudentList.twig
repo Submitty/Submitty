@@ -1,5 +1,10 @@
 {% import 'misc/TableHeaderSort.twig' as table_sort %}
 
+{# Specialize the sortable header for this table #}
+{% macro student_table_sortable_header(title, sort_key) %}
+    {{ table_sort.sortable_header('sortStudentTableByColumn', title, sort_key) }}
+{% endmacro %}
+
 <div class="content">
     <header>
         <h1>Manage Students</h1>
@@ -68,22 +73,22 @@
                     <th>#</th>
 
                     {% if active_student_columns[0] %}
-                        {{ table_sort.sortable_header('Registration Section', 'registration_section') }}
+                        {{ _self.student_table_sortable_header('Registration Section', 'registration_section') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[1] %}
-                        {{ table_sort.sortable_header('User ID', 'user_id') }}
+                        {{ _self.student_table_sortable_header('User ID', 'user_id') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[2] %}
-                        {{ table_sort.sortable_header('Given Name', 'first_name') }}
+                        {{ _self.student_table_sortable_header('Given Name', 'first_name') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[3] %}
-                        {{ table_sort.sortable_header('Family Name', 'last_name') }}
+                        {{ _self.student_table_sortable_header('Family Name', 'last_name') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -93,7 +98,7 @@
                     {% endif %}
 
                     {% if active_student_columns[5] %}
-                        {{ table_sort.sortable_header('Rotating Section', 'rotating_section') }}
+                        {{ _self.student_table_sortable_header('Rotating Section', 'rotating_section') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -133,12 +138,12 @@
                     {% endif %}
 
                     {% if active_student_columns[13] %}
-                        {{ table_sort.sortable_header('Legal Given Name', 'legal_first_name') }}
+                        {{ _self.student_table_sortable_header('Legal Given Name', 'legal_first_name') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[14] %}
-                        {{ table_sort.sortable_header('Legal Family Name', 'legal_last_name') }}
+                        {{ _self.student_table_sortable_header('Legal Family Name', 'legal_last_name') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -148,7 +153,7 @@
                     {% endif %}
 
                     {% if active_student_columns[16] %}
-                        {{ table_sort.sortable_header('Secondary Email', 'secondary_email') }}
+                        {{ _self.student_table_sortable_header('Secondary Email', 'secondary_email') }}
                         {% set count = count + 1 %}
                     {% endif %}
                 </tr>
@@ -250,70 +255,20 @@
 </div>
 
 <script>
-    let currentSortKey = null;
-    let currentDirection = 'ASC';
-
-    /**
-    * Sorts the student table by sortKey
-    * Also allows for toggling direction
-    */
-    function sortTableByColumn(sortKey) {
-        // determine direction
-        if (sortKey === currentSortKey) {
-            currentDirection = (currentDirection === 'ASC') ? 'DESC' : 'ASC';
-        }
-        else {
-            currentSortKey = sortKey;
-            currentDirection = 'ASC';
-        }
-
-        // list of sortable columns
-        const table = document.getElementById('student-table');
-        const columnSelectorMap = {
-            'registration_section': '.td-registration-section',
-            'rotating_section': '.td-rotating-section',
-            'user_id': '.td-student-id',
-            'first_name': '.td-given-name',
-            'last_name': '.td-family-name',
-            'legal_first_name': '.td-legal-first-name',
-            'legal_last_name': '.td-legal-last-name',
-            'secondary_email': '.td-secondary-email',
-        };
-        const selector = columnSelectorMap[sortKey];
-        if (!selector) return;
-
-        // do the sorting
-        const sectionBodies = table.querySelectorAll('tbody');
-        sectionBodies.forEach(tbody => {
-            const studentRows = Array.from(tbody.querySelectorAll('tr[id^="user-"]'));
-
-            studentRows.sort((a, b) => {
-                const valA = a.querySelector(selector)?.textContent.trim().toLowerCase() || '';
-                const valB = b.querySelector(selector)?.textContent.trim().toLowerCase() || '';
-
-                return currentDirection === 'ASC'
-                    ? valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' })
-                    : valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' });
-            });
-
-            studentRows.forEach(row => tbody.appendChild(row));
-        });
-
-        // update the sorting arrows
-        updateSortIcons(sortKey, currentDirection);
+    const colMap = {
+        'registration_section': { colIndex: 1, colDataType: 'number' },
+        'user_id': { colIndex: 2, colDataType: 'string' },
+        'first_name': { colIndex: 3, colDataType: 'string' },
+        'last_name': { colIndex: 4, colDataType: 'string' },
+        'rotating_section': { colIndex: 6, colDataType: 'number' },
     }
 
-    function updateSortIcons(activeKey, direction) {
-        document.querySelectorAll('.sortable-header').forEach(el => {
-            const icon = el.querySelector('i');
-            icon.className = 'fa fa-sort'; // Reset all
-
-            if (el.dataset.sortKey === activeKey) {
-                icon.className = (direction === 'ASC') ? 'fa fa-sort-up' : 'fa fa-sort-down';
-            }
-        });
+    function sortStudentTableByColumn(sortKey) {
+        console.log('test 1');
+        sortTableByColumn('student-table', colMap, sortKey);
     }
 </script>
+
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
