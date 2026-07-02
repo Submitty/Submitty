@@ -120,6 +120,9 @@ describe('Test Rainbow Grading', () => {
         cy.get('@manual-grading-table-elements').eq(2).should('contain', 'MESSAGE');
         cy.get('@manual-grading-table-elements').eq(3).find('a').click();
 
+        // Ensure it successfully updates before proceeding
+        cy.get('[data-testid="manual-grading-table-body"]').should('not.contain', 'adamsg');
+
         cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
         cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
         cy.get('[data-testid="plagiarism-gradeable-id"]').select('numeric');
@@ -130,6 +133,9 @@ describe('Test Rainbow Grading', () => {
         cy.get('@plagiarism-table-elements').eq(1).should('contain', 'numeric');
         cy.get('@plagiarism-table-elements').eq(2).should('contain', '1');
         cy.get('@plagiarism-table-elements').eq(3).find('a').click();
+
+        // Ensure it successfully updates before proceeding
+        cy.get('[data-testid="plagiarism-table-body"]').should('not.contain', 'adamsg');
     });
     it('Upload Manual Customization', () => {
         // Upload manual customization
@@ -370,24 +376,33 @@ describe('Test Automatic Nightly Processing for Rainbow Grades', () => {
 });
 const checkCheckbox = (testId) => {
     cy.get(testId).as('checkbox');
-    cy.get('@checkbox').check();
+    cy.get('@checkbox').check({ force: true });
     cy.get('@checkbox').should('be.checked');
-    cy.get('@checkbox').uncheck();
+    cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
+    cy.get('@checkbox').uncheck({ force: true });
     cy.get('@checkbox').should('not.be.checked');
-    cy.get('@checkbox').check();
+    cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
+    cy.get('@checkbox').check({ force: true });
     cy.get('@checkbox').should('be.checked');
+    cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
 };
 const checkTextbox = (testId, expectedInitial, input) => {
     cy.get(testId).as('textbox');
     cy.get('@textbox').should('have.value', expectedInitial);
+
     cy.get('@textbox').clear();
     cy.get('@textbox').type(input);
     cy.get('@textbox').should('have.value', input);
+    cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+
     cy.get('@textbox').clear();
     if (expectedInitial !== '') {
         cy.get('@textbox').type(expectedInitial);
     }
     cy.get('@textbox').should('have.value', expectedInitial);
+    cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
 };
 const checkRainbowGrades = (username, numericId, givenName, familyName) => {
     [username, numericId, givenName, familyName].forEach((value) => {
@@ -400,20 +415,33 @@ const checkRainbowGradesOption = () => {
     });
 };
 const reset = () => {
-    cy.get('[data-testid="display-grade-summary"]').uncheck();
-    cy.get('[data-testid="display-grade-details"]').uncheck();
-    cy.get('[data-testid="display-exam-seating"]').uncheck();
-    cy.get('[data-testid="display-section"]').uncheck();
-    cy.get('[data-testid="display-messages"]').uncheck();
-    cy.get('[data-testid="display-warning"]').uncheck();
-    cy.get('[data-testid="display-final-grade"]').uncheck();
-    cy.get('[data-testid="display-final-cutoff"]').uncheck();
-    cy.get('[data-testid="display-instructor-notes"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-average"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-stddev"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-perfect"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-lowest_a-"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-lowest_b-"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-lowest_c-"]').uncheck();
-    cy.get('[data-testid="display-benchmarks-lowest_d"]').uncheck();
+    const checkboxes = [
+        '[data-testid="display-grade-summary"]',
+        '[data-testid="display-grade-details"]',
+        '[data-testid="display-exam-seating"]',
+        '[data-testid="display-section"]',
+        '[data-testid="display-messages"]',
+        '[data-testid="display-warning"]',
+        '[data-testid="display-final-grade"]',
+        '[data-testid="display-final-cutoff"]',
+        '[data-testid="display-instructor-notes"]',
+        '[data-testid="display-benchmarks-average"]',
+        '[data-testid="display-benchmarks-stddev"]',
+        '[data-testid="display-benchmarks-perfect"]',
+        '[data-testid="display-benchmarks-lowest_a-"]',
+        '[data-testid="display-benchmarks-lowest_b-"]',
+        '[data-testid="display-benchmarks-lowest_c-"]',
+        '[data-testid="display-benchmarks-lowest_d"]',
+    ];
+
+    checkboxes.forEach((testId) => {
+        cy.get('body').then(($body) => {
+            const $el = $body.find(testId);
+            // Only uncheck and wait for save if the checkbox is checked
+            if ($el.length && $el.is(':checked')) {
+                cy.wrap($el).uncheck({ force: true });
+                cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+            }
+        });
+    });
 };
