@@ -2906,13 +2906,12 @@ async function openComponentGrading(component_id: number) {
         displayAjaxError(err);
         throw err;
     }
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
+    OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
     if (isEditModeEnabled()) {
         await reloadGradingComponent(component_id, true, true);
     }
     else {
-        window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
-        OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
-
         await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id]!, false, true);
     }
     const page = getComponentPageNumber(component_id);
