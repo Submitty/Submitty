@@ -8,7 +8,6 @@ use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
-use app\entities\poll\Response;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
@@ -270,11 +269,11 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "u.user_id";
         }
 
-        elseif ($sort === "first") {
+        else if ($sort === "first") {
             $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
 
-        elseif ($sort === "last") {
+        else if ($sort === "last") {
             $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
         else {
