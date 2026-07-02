@@ -80,7 +80,7 @@ async function onAlgorithmChange() {
     v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
     v-model="selectedAlgorithm"
     class="form-control"
-    style="width: auto;"
+    style="width: auto; margin: 0;"
     @change="onAlgorithmChange"
   >
     <option
