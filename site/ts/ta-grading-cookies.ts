@@ -8,7 +8,7 @@ declare global {
         changeSections: () => void;
         changeInquiry: () => void;
         changeSortOrder: () => void;
-        sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
+        // sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
         changeAnon: () => void;
         updateSimpleGradingRowNumbersAndColors: () => void;
         updateElectronicGradingRowNumbersAndColors: () => void;
@@ -141,11 +141,11 @@ window.changeSortOrder = () => {
     location.reload();
 };
 
-window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
-    window.Cookies.set('sort', sort_type, cookieArguments);
-    window.Cookies.set('direction', direction, cookieArguments);
-    location.reload();
-};
+// window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
+//     window.Cookies.set('sort', sort_type, cookieArguments);
+//     window.Cookies.set('direction', direction, cookieArguments);
+//     location.reload();
+// };
 
 window.changeAnon = () => {
     window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', cookieArguments);

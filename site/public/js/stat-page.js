@@ -28,85 +28,85 @@ function getGroupedRows(tbody) {
     return groups;
 }
 
-function sortTableByColumn(sortKey) {
-    const table = getForumStatsTable();
-    if (table === null || sortColumns[sortKey] === undefined) {
-        return;
-    }
+// function sortTableByColumn(sortKey) {
+//     const table = getForumStatsTable();
+//     if (table === null || sortColumns[sortKey] === undefined) {
+//         return;
+//     }
 
-    const currentSort = table.dataset.sortKey;
-    const currentDirection = table.dataset.sortDirection || 'ASC';
+//     const currentSort = table.dataset.sortKey;
+//     const currentDirection = table.dataset.sortDirection || 'ASC';
 
-    let newDirection;
-    if (currentSort === sortKey) {
-        newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
-    }
-    else {
-        newDirection = sortKey === 'user' ? 'ASC' : 'DESC';
-    }
+//     let newDirection;
+//     if (currentSort === sortKey) {
+//         newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
+//     }
+//     else {
+//         newDirection = sortKey === 'user' ? 'ASC' : 'DESC';
+//     }
 
-    table.dataset.sortKey = sortKey;
-    table.dataset.sortDirection = newDirection;
+//     table.dataset.sortKey = sortKey;
+//     table.dataset.sortDirection = newDirection;
 
-    applySort(sortKey, newDirection);
-    updateSortIcons(sortKey, newDirection);
-}
+//     applySort(sortKey, newDirection);
+//     updateSortIcons(sortKey, newDirection);
+// }
 
-window.sortTableByColumn = sortTableByColumn;
+// window.sortTableByColumn = sortTableByColumn;
 
-function applySort(sortKey, direction) {
-    const table = getForumStatsTable();
-    if (table === null) {
-        return;
-    }
+// function applySort(sortKey, direction) {
+//     const table = getForumStatsTable();
+//     if (table === null) {
+//         return;
+//     }
 
-    const tbody = table.querySelector('tbody');
-    const groups = getGroupedRows(tbody);
-    const colIndex = sortColumns[sortKey];
+//     const tbody = table.querySelector('tbody');
+//     const groups = getGroupedRows(tbody);
+//     const colIndex = sortColumns[sortKey];
 
-    groups.sort((groupA, groupB) => {
-        const aText = groupA[0].children[colIndex].textContent.trim();
-        const bText = groupB[0].children[colIndex].textContent.trim();
-        let cmp = 0;
+//     groups.sort((groupA, groupB) => {
+//         const aText = groupA[0].children[colIndex].textContent.trim();
+//         const bText = groupB[0].children[colIndex].textContent.trim();
+//         let cmp = 0;
 
-        if (sortKey === 'user') {
-            cmp = aText.localeCompare(bText);
-        }
-        else {
-            cmp = Number(aText) - Number(bText);
-        }
+//         if (sortKey === 'user') {
+//             cmp = aText.localeCompare(bText);
+//         }
+//         else {
+//             cmp = Number(aText) - Number(bText);
+//         }
 
-        return direction === 'ASC' ? cmp : -cmp;
-    });
+//         return direction === 'ASC' ? cmp : -cmp;
+//     });
 
-    groups.forEach((group) => {
-        group.forEach((row) => tbody.appendChild(row));
-    });
-}
+//     groups.forEach((group) => {
+//         group.forEach((row) => tbody.appendChild(row));
+//     });
+// }
 
-function updateSortIcons(activeKey = null, direction = 'ASC') {
-    document.querySelectorAll('#forum_stats_table .sortable-header').forEach((link) => {
-        const icon = link.querySelector('i');
-        const key = link.dataset.sortKey;
+// function updateSortIcons(activeKey = null, direction = 'ASC') {
+//     document.querySelectorAll('#forum_stats_table .sortable-header').forEach((link) => {
+//         const icon = link.querySelector('i');
+//         const key = link.dataset.sortKey;
 
-        if (icon === null || key === undefined) {
-            return;
-        }
+//         if (icon === null || key === undefined) {
+//             return;
+//         }
 
-        icon.classList.remove('fa-sort-up', 'fa-sort-down');
-        icon.classList.add('fa-sort');
+//         icon.classList.remove('fa-sort-up', 'fa-sort-down');
+//         icon.classList.add('fa-sort');
 
-        if (key === activeKey) {
-            icon.classList.remove('fa-sort');
-            icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-        }
-    });
-}
+//         if (key === activeKey) {
+//             icon.classList.remove('fa-sort');
+//             icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+//         }
+//     });
+// }
 
 $(document).ready(() => {
     const forumStatsTable = $('#forum_stats_table');
 
-    updateSortIcons();
+    // updateSortIcons();
 
     forumStatsTable.on('click', 'button[data-action]', function (event) {
         event.preventDefault();
