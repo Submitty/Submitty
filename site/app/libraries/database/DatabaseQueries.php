@@ -3792,6 +3792,31 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Deletes a team from the database and removes user associations.
+     * THIS FUNCTION SHOULD ONLY BE USED ON TEAMS WITHOUT SUBMISSIONS
+     *
+     * @param string $team_id
+     * @return void
+     */
+    public function deleteTeam($team_id) {
+        try {
+            $this->course_db->query(
+                "DELETE FROM gradeable_teams WHERE team_id=?",
+                [$team_id]
+            );
+
+            $this->course_db->query(
+                "DELETE FROM teams WHERE team_id=?",
+                [$team_id]
+            );
+        }
+        catch (\Exception $e) {
+            $this->course_db->rollback();
+            throw new \Exception("An error occurred while attempting to delete the team " . $team_id . ".");
+        }
+    }
+
+    /**
      * Set team $team_id's registration/rotating section to $section
      *
      * @param string $team_id
@@ -9970,5 +9995,20 @@ ORDER BY
         );
 
         $this->course_db->commit();
+    }
+
+    /**
+     * Returns all submitters with an active version for a given gradeable.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getActiveSubmittersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT DISTINCT egv.user_id, egv.team_id, egv.active_version
+             FROM electronic_gradeable_version egv
+             WHERE egv.g_id = ? AND egv.active_version > 0",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
     }
 }
