@@ -1181,7 +1181,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $is_clustering_mode = $cluster_mode === '1';
-        $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findOneBy(['gradeable_id' => $gradeable->getId()]);
+        $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findWithClustersAndMembers($gradeable->getId());
         $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
 
         $cluster_map = [];

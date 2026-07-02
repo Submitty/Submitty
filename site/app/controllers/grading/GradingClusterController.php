@@ -79,7 +79,7 @@ class GradingClusterController extends AbstractController {
 
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
-            ->findOneBy(['gradeable_id' => $gradeable_id]);
+            ->findWithClustersAndMembers($gradeable_id);
 
         if ($config === null) {
             return JsonResponse::getSuccessResponse([
