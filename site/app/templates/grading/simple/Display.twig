@@ -21,9 +21,9 @@
         <div>
             {% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton', 'class': 'fullscreen-btn-wrapper' } %}
             {% if action == 'numeric' and core.getUser().accessAdmin() %}
-                <label for="csvUpload" class="btn btn-primary" tabindex="0">
+                <a href="javascript:newNumericCsvUploadForm()" class="btn btn-primary">
                     Upload CSV
-                </label>
+                </a>
                 <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt" style="display: none;">
                 <a 
                     class="btn btn-primary"
@@ -124,13 +124,6 @@
             </option>
         </select>
     </div>
-        {% if action == 'numeric' and core.getUser().accessAdmin() %}
-            <p>
-                The CSV file should be formatted as such:
-                <br />
-                user id,given name,family name,grade1,grade2,...,total points earned,text1,text2,...
-            </p>
-    {% endif %}
     <div class="scrollable-table">
 
     {# This is a data table #}
@@ -368,6 +361,8 @@
         </td>
     {% endfor %}
 {% endmacro %}
+
+{% include "grading/simple/NumericGradeableUploadForm.twig" %}
 
 <script>
     // Set global variables for simple-grading JavaScript

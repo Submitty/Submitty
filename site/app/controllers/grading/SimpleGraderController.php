@@ -362,16 +362,89 @@ class SimpleGraderController extends AbstractController {
 
         $num_numeric = intval($_POST['num_numeric']);
 
-        $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
+        $csv_array = preg_split("/\r\n|\n|\r/", trim($_POST['big_file']));
         $arr_length = count($csv_array);
         $return_data = [];
 
         $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
-            $temp_array = explode(',', $csv_array[$i]);
+            $temp_array = str_getcsv($csv_array[$i]);
             $data_array[] = $temp_array;
         }
 
+        $header_present = (
+            $arr_length > 0 && 
+            (
+                stripos($csv_array[0], 'user id') !== false ||
+                stripos($csv_array[0], 'given name') !== false ||
+                stripos($csv_array[0], 'family name') !== false
+            )
+        );
+        $start_row = $header_present ? 1 : 0;
+
+        if ($header_present) {
+            $column_titles = $data_array[0];
+            $expected_prefix = ['User ID', 'Given Name', 'Family Name'];
+            $errors = [];
+            foreach ($expected_prefix as $i => $expected) {
+                $actual = $column_titles[$i] ?? null;
+                if ($actual === null || trim($actual) !== $expected) {
+                    $errors[] = "Column " . ($i + 1) . " has invalid title \"" . ($actual ?? '(missing)') . "\". Expected \"{$expected}\".";
+                }
+            }
+            if (!empty($errors)) {
+                $msg = implode(" ", $errors);
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getFailResponse($msg);
+            }
+        }
+        $num_text_components = 0;
+        foreach($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $num_text_components++;
+            }
+        }
+        $expected_length = 3 + $num_numeric + $num_text_components + ($num_numeric > 0 ? 1 : 0);
+
+        $has_section_cols = false;
+        if ($header_present) {
+            $trailing_titles = array_slice($column_titles, $expected_length);
+            $has_section_cols = (
+                isset($trailing_titles[0]) && stripos($trailing_titles[0], 'registration section') !== false &&
+                isset($trailing_titles[1]) && stripos($trailing_titles[1], 'registration subsection') !== false
+            );
+        }
+
+        foreach($data_array as $row_num => $row) {
+            if ($row_num < $start_row) {
+                continue;
+            }
+            $valid_lengths = $has_section_cols ? [$expected_length, $expected_length + 2] : [$expected_length];
+            if (!in_array(count($row), $valid_lengths, true)) {
+                $msg = "Row " . ($row_num + 1) . " of the CSV has the incorrect length. Expected {$expected_length} columns"
+                    . ($header_present ? "" : ", or {$expected_length}+2 with a Registration Section/Subsection header")
+                    . ", found " . count($row) . ".";
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getFailResponse($msg);
+            }
+            if ($num_numeric > 0) {
+                $total = 0;
+                $col = 3;
+            for (; $col < 3 + $num_numeric; $col++) {
+                if (!is_numeric($row[$col])) {
+                    $msg = "Row " . ($row_num + 1) . " of the CSV's column " . ($col + 1) . " should be a number. Found \"{$row[$col]}\".";
+                    $this->core->addErrorMessage($msg);
+                    return JsonResponse::getFailResponse($msg);
+                }
+                $total += floatval($row[$col]);
+            }
+            if (!is_numeric($row[$col]) || abs($total - floatval($row[$col])) > 0.0000001) {
+                $msg = "Row " . ($row_num + 1) . " of the CSV does not have the correct total for numeric elements. Expected {$total}, found \"" . ($row[$col] ?? '') . "\".";
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getFailResponse($msg);
+            }
+        }
+    }
         /** @var GradedGradeable $graded_gradeable */
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
             for ($j = 0; $j < $arr_length; $j++) {
@@ -441,7 +514,6 @@ class SimpleGraderController extends AbstractController {
                 $j = $arr_length; //stops the for loop early to not waste resources
             }
         }
-
         return JsonResponse::getSuccessResponse($return_data);
     }
 
