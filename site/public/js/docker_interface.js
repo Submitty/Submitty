@@ -181,6 +181,12 @@ function applySort(sortKey, direction) {
     const colMap = { name: 0, size: 4, created: 5 };
     const colIndex = colMap[sortKey];
 
+    /*
+    NOTE: Current implementation of docker table is that name column and
+    tag column are both used when sorting name column. New implementation
+    will require that each of these columns be individually sortable
+    */
+
     rows.sort((rowA, rowB) => {
         const aText = rowA.children[colIndex].textContent.trim();
         const bText = rowB.children[colIndex].textContent.trim();
