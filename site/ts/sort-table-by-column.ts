@@ -19,7 +19,6 @@ enum colDataTypes {
  * @returns none
  */
 function sortTableByColumn(tableId: string, sortKey: string, colDataType: colDataTypes): void {
-    console.log(`${tableId} ${sortKey} ${colDataType}`);
     const table: HTMLElement = document.querySelector(`#${tableId}`)!;
     if (table === null) {
         return;
@@ -44,10 +43,15 @@ function sortTableByColumn(tableId: string, sortKey: string, colDataType: colDat
     table.dataset.sortKey = sortKey;
     table.dataset.sortDirection = newDirection;
 
-    // get the index of the column we're sorting by
+    // get the index of the column we're sorting by (necessary for togglable columns)
     const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
-    const header_keys: string[] = table_headers.map((el) => el.dataset.sortKey) as string[];
-    console.log(header_keys);
+    const header_keys: string[] = table_headers.map((el) => {
+        const clickable: HTMLElement | null = el.querySelector('a.sortable-header');
+        if (clickable === null || clickable.dataset.sortKey === undefined) {
+            return '';
+        }
+        return clickable.dataset.sortKey;
+    });
     const colIndex: number = header_keys.indexOf(sortKey);
 
     applySort(tableId, colIndex, colDataType, newDirection);
@@ -71,7 +75,6 @@ export function restoreSort() {
 }
 
 function applySort(tableId: string, colIndex: number, colDataType: colDataTypes, direction: string) {
-    console.log(`${tableId} ${colIndex} ${colDataType} ${direction}`);
     const tbody: HTMLTableSectionElement = document.querySelector(`#${tableId} tbody`)!;
     // TODO: allow row groups? this is used on the stat-page, I think for the sections
     // ignore section break rows during sorting
