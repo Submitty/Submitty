@@ -256,16 +256,16 @@
 
 <script>
     const colMap = {
-        'registration_section': { colIndex: 1, colDataType: 'number' },
-        'user_id': { colIndex: 2, colDataType: 'string' },
-        'first_name': { colIndex: 3, colDataType: 'string' },
-        'last_name': { colIndex: 4, colDataType: 'string' },
-        'rotating_section': { colIndex: 6, colDataType: 'number' },
+        'registration_section': 'number',
+        'user_id': 'string',
+        'first_name': 'string',
+        'last_name': 'string',
+        'rotating_section': 'number',
     }
 
     function sortStudentTableByColumn(sortKey) {
         console.log('test 1');
-        sortTableByColumn('student-table', colMap, sortKey);
+        sortTableByColumn('student-table', sortKey, colMap);
     }
 </script>
 
