@@ -37,17 +37,20 @@ function enterClusteringMode(urlParams: URLSearchParams) {
     window.location.search = urlParams.toString();
 }
 
-async function onAlgorithmChange() {
-    if (props.isClusteringMode && selectedAlgorithm.value) {
+async function onAlgorithmChange(event?: Event) {
+    const value = event ? (event.target as HTMLSelectElement).value : selectedAlgorithm.value;
+    if (props.isClusteringMode && value) {
+        document.body.setAttribute('data-clustering-status', 'fetching');
         const formData = new FormData();
         formData.append('csrf_token', props.csrfToken);
-        formData.append('algorithm', selectedAlgorithm.value);
+        formData.append('algorithm', value);
 
         try {
             const response = await fetch(props.createClusteringUrl, {
                 method: 'POST',
                 body: formData,
             });
+            document.body.setAttribute('data-clustering-status', 'done');
 
             const result = (await response.json()) as { status: string; message?: string };
             if (result.status === 'success') {
@@ -63,6 +66,7 @@ async function onAlgorithmChange() {
         }
         catch (error) {
             console.error('Error:', error);
+            document.body.setAttribute('data-clustering-status', 'error');
             alert('Failed to connect to the server.');
         }
     }

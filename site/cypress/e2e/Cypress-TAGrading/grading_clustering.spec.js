@@ -2,6 +2,7 @@ describe('Grading Clustering Mode', () => {
     it('allows toggling clustering mode and generating clusters', () => {
         // Login as instructor (default)
         cy.login();
+        cy.setCookie('view', 'all');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
 
         // Verify initial state
@@ -27,10 +28,13 @@ describe('Grading Clustering Mode', () => {
         cy.get('select option').contains('DummySplit').should('be.visible');
 
         // Select the algorithm
+        cy.intercept('POST', '**').as('createClustering');
         cy.get('select').select('dummy_split');
+        cy.get('select').trigger('change');
+        cy.wait('@createClustering');
 
         // Page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
-        cy.get('.details-info-header').contains('Cluster A').should('exist');
+        cy.get('.details-info-header', { timeout: 10000 }).contains('Cluster A').should('exist');
         cy.get('.details-info-header').contains('Cluster B').should('exist');
 
         // Exit clustering mode

@@ -26,10 +26,10 @@ class GradingClusterConfigRepository extends EntityRepository {
      */
     public function findWithClustersAndMembers(string $gradeable_id): ?\app\entities\grading_cluster\GradingClusterConfig {
         return $this->getEntityManager()->createQuery('
-            SELECT c
-            FROM app\entities\grading_cluster\GradingClusterConfig c
-            LEFT JOIN FETCH c.clusters cl
-            LEFT JOIN FETCH cl.members m
+            SELECT c, cl, m
+            FROM \app\entities\grading_cluster\GradingClusterConfig c
+            LEFT JOIN c.clusters cl
+            LEFT JOIN cl.members m
             WHERE c.gradeable_id = :gradeable_id
         ')
         ->setParameter('gradeable_id', $gradeable_id)
