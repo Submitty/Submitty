@@ -1,4 +1,5 @@
 [MASTER]
+ignore=.venv
 ignore-paths=
     site/node_modules,
     more_autograding_examples,
@@ -148,4 +149,5 @@ disable=
     missing-function-docstring,
     wrong-import-order,
     too-many-branches,
+    redefined-outer-name,
 
