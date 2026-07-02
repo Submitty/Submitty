@@ -1,10 +1,5 @@
 {% import 'misc/TableHeaderSort.twig' as table_sort %}
 
-{# Specialize the sortable header for this table #}
-{% macro student_table_sortable_header(title, sort_key) %}
-    {{ table_sort.sortable_header('sortStudentTableByColumn', title, sort_key) }}
-{% endmacro %}
-
 <div class="content">
     <header>
         <h1>Manage Students</h1>
@@ -73,22 +68,22 @@
                     <th>#</th>
 
                     {% if active_student_columns[0] %}
-                        {{ _self.student_table_sortable_header('Registration Section', 'registration_section') }}
+                        {{ table_sort.sortable_header('Registration Section', 'registration_section', 'number') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[1] %}
-                        {{ _self.student_table_sortable_header('User ID', 'user_id') }}
+                        {{ table_sort.sortable_header('User ID', 'user_id', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[2] %}
-                        {{ _self.student_table_sortable_header('Given Name', 'first_name') }}
+                        {{ table_sort.sortable_header('Given Name', 'first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[3] %}
-                        {{ _self.student_table_sortable_header('Family Name', 'last_name') }}
+                        {{ table_sort.sortable_header('Family Name', 'last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -98,7 +93,7 @@
                     {% endif %}
 
                     {% if active_student_columns[5] %}
-                        {{ _self.student_table_sortable_header('Rotating Section', 'rotating_section') }}
+                        {{ table_sort.sortable_header('Rotating Section', 'rotating_section', 'number') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -138,12 +133,12 @@
                     {% endif %}
 
                     {% if active_student_columns[13] %}
-                        {{ _self.student_table_sortable_header('Legal Given Name', 'legal_first_name') }}
+                        {{ table_sort.sortable_header('Legal Given Name', 'legal_first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[14] %}
-                        {{ _self.student_table_sortable_header('Legal Family Name', 'legal_last_name') }}
+                        {{ table_sort.sortable_header('Legal Family Name', 'legal_last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -153,7 +148,7 @@
                     {% endif %}
 
                     {% if active_student_columns[16] %}
-                        {{ _self.student_table_sortable_header('Secondary Email', 'secondary_email') }}
+                        {{ table_sort.sortable_header('Secondary Email', 'secondary_email', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
                 </tr>
@@ -255,17 +250,8 @@
 </div>
 
 <script>
-    const colMap = {
-        'registration_section': 'number',
-        'user_id': 'string',
-        'first_name': 'string',
-        'last_name': 'string',
-        'rotating_section': 'number',
-    }
-
-    function sortStudentTableByColumn(sortKey) {
-        console.log('test 1');
-        sortTableByColumn('student-table', sortKey, colMap);
+    function sortSpecificTableByColumn(sortKey, colDataType) {
+        sortTableByColumn('student-table', sortKey, colDataType);
     }
 </script>
 

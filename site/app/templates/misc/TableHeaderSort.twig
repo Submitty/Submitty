@@ -2,10 +2,10 @@
 Function for sorting tables by ascending or descending
 #}
 
-{% macro sortable_header(sort_fn, title, sort_key) %}
+{% macro sortable_header(title, sort_key, col_data_type) %}
     <th>
         <a href="#"
-        onclick="event.preventDefault(); {{ sort_fn }}('{{ sort_key }}')"
+        onclick="event.preventDefault(); sortSpecificTableByColumn('{{ sort_key }}', '{{ col_data_type }}')"
         class="sortable-header"
         data-sort-key="{{ sort_key }}">
             {{ title }}

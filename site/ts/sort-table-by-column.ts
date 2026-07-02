@@ -1,6 +1,6 @@
 declare global {
     interface Window {
-        sortTableByColumn(tableId: string, sortKey: string, colMap: colMapType): void;
+        sortTableByColumn(tableId: string, sortKey: string, colDataType: colDataTypes): void;
     }
 }
 // See TableHeaderSort.twig
@@ -10,15 +10,21 @@ enum colDataTypes {
     Number = 'number',
     Date = 'date',
 };
-type colMapType = {
-    [ k: string ]: colDataTypes;
-};
 
-function sortTableByColumn(tableId: string, sortKey: string, colMap: colMapType) {
-    const table: HTMLElement = document.querySelector('#tableId')!;
+/**
+ * Sort the rows of a table by one column.
+ * @param tableId the id of the table element
+ * @param sortKey the header's value of data-sort-key (dataset.sortKey) of the column we're sorting
+ * @param colDataType the datatype of the column we're sorting (defines how rows are compared while sorting)
+ * @returns none
+ */
+function sortTableByColumn(tableId: string, sortKey: string, colDataType: colDataTypes): void {
+    console.log(`${tableId} ${sortKey} ${colDataType}`);
+    const table: HTMLElement = document.querySelector(`#${tableId}`)!;
     if (table === null) {
         return;
     }
+
     // const currentSort = Cookies.get('docker_table_key');
     // const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
     const currentSortKey: string | undefined = table.dataset.sortKey;
@@ -41,9 +47,8 @@ function sortTableByColumn(tableId: string, sortKey: string, colMap: colMapType)
     // get the index of the column we're sorting by
     const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
     const header_keys: string[] = table_headers.map((el) => el.dataset.sortKey) as string[];
+    console.log(header_keys);
     const colIndex: number = header_keys.indexOf(sortKey);
-    // and get its datatype from the colMap (defines how rows are compared while sorting)
-    const colDataType: colDataTypes = colMap[sortKey];
 
     applySort(tableId, colIndex, colDataType, newDirection);
     updateSortIcons(tableId, sortKey, newDirection);
@@ -66,6 +71,7 @@ export function restoreSort() {
 }
 
 function applySort(tableId: string, colIndex: number, colDataType: colDataTypes, direction: string) {
+    console.log(`${tableId} ${colIndex} ${colDataType} ${direction}`);
     const tbody: HTMLTableSectionElement = document.querySelector(`#${tableId} tbody`)!;
     // TODO: allow row groups? this is used on the stat-page, I think for the sections
     // ignore section break rows during sorting
