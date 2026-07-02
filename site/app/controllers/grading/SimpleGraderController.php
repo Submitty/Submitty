@@ -268,15 +268,12 @@ class SimpleGraderController extends AbstractController {
         if ($sort === "id") {
             $sort_key = "u.user_id";
         }
-
         elseif ($sort === "first") {
             $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
-
         elseif ($sort === "last") {
             $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
-
         else {
             $sort_key = "u.registration_subsection";
         }
