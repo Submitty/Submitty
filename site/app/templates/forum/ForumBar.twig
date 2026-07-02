@@ -136,21 +136,25 @@
 				}
 			{% endfor %}
 		</style>
-		<div id="forum_filter_bar">
-			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
-			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
-				{% for category in categories %}
-					{% if category.visibleDate is null or category.diff >= 0 %}
-						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.id }}" data-cat_id="{{ category.id }}" data-btn-selected="false">{{ category.description }}</button>
-					{% endif %}
-				{% endfor %}
-			</div>
-			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="0" data-btn-selected="false">Comment</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="-1" data-btn-selected="false">Unresolved</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="1" data-btn-selected="false">Resolved</button>
-			</div>
-		</div>
+		{% set forum_filter_categories = [] %}
+		{% for category in categories %}
+			{% set forum_filter_categories = forum_filter_categories | merge([{
+				id: category.id,
+				description: category.description,
+				visibleDate: category.visibleDate is not null ? category.visibleDate|date('c') : null,
+				diff: category.diff,
+			}]) %}
+		{% endfor %}
+		{% include "Vue.twig" with {
+			type: "component",
+			name: "forum/ForumFilterBar",
+			args: {
+				categories: forum_filter_categories,
+				initialSelectedCategoryIds: cookie_selected_categories|default([]),
+				initialSelectedThreadStatuses: cookie_selected_thread_status|default([]),
+				initialUnreadChecked: cookie_selected_unread_value|default(false),
+			}
+		} only %}
 	{% endif %}
 </div>
 <hr/>
@@ -162,31 +166,49 @@
 		{% endif %}
 	}
 
+	function saveFilterState() {
+		const state = {
+			'categories': window.selectedCategoryIds ? [...window.selectedCategoryIds.value] : [],
+			'thread-status': window.selectedThreadStatuses ? [...window.selectedThreadStatuses.value] : [],
+			'search-content': (document.getElementById('search-content'))?.value ?? '',
+		};
+		history.pushState(state, '');
+	}
+
+	function getFilterState() {
+		return {
+			'categories': window.selectedCategoryIds ? [...window.selectedCategoryIds.value] : [],
+			'thread-status': window.selectedThreadStatuses ? [...window.selectedThreadStatuses.value] : [],
+			'search-content': (document.getElementById('search-content'))?.value ?? '',
+		};
+	}
+
+	function checkUnread() {
+		const clearBtn = document.getElementById('clear_filter_button');
+		if (window.selectedUnreadChecked && window.selectedUnreadChecked.value) {
+			if (clearBtn) {
+				clearBtn.style.visibility = 'visible';
+			}
+			return true;
+		}
+		return false;
+	}
+
+	function updateClearFilterButton() {
+		const state = getFilterState();
+		const hasFilters = state.categories.length > 0 || state['thread-status'].length > 0 || state['search-content'] !== '' || (window.selectedUnreadChecked && window.selectedUnreadChecked.value);
+		const clearBtn = document.getElementById('clear_filter_button');
+		if (clearBtn) {
+			clearBtn.style.visibility = hasFilters ? 'visible' : 'hidden';
+		}
+	}
+
 	$( document ).ready(function() {
-		loadFilterHandlers();
 		updateThreads(true, null);
-		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
-		{% for category in cookie_selected_categories %}
-		$('#thread_category button[data-cat_id="{{ category }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_category button[data-cat_id="{{ category }}"]').text(), function(e) {
-			return e === $('#thread_category button[data-cat_id="{{ category }}"]').text();
-		});
-		{% endfor %}
-		{% for status in cookie_selected_thread_status %}
-		$('#thread_status_select button[data-sel_id="{{ status }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_status_select button[data-cat_id="{{ status }}"]').text(), function(e) {
-			return e === $('#thread_status_select button[data-sel_id="{{ status }}"]').text();
-		});
-		{% endfor %}
-
-		var unread_marked = false;
-
-		$('#unread').prop("checked", {{cookie_selected_unread_value}});
-
-		unread_marked = checkUnread();
+		checkUnread();
 		updateClearFilterButton();
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
