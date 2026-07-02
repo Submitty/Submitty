@@ -7,6 +7,15 @@ declare global {
         csrfToken: string;
         $: JQueryStatic;
         Twig: typeof Twig;
+        submitty: {
+            render: (
+                target: string | Element,
+                type: 'component' | 'page',
+                name: string,
+                args?: Record<string, unknown>,
+                events?: Record<string, string>,
+            ) => Promise<void>;
+        };
         removeMessagePopup: (key: number) => void;
         displayErrorMessage: (message: string) => void;
         displaySuccessMessage: (message: string) => void;
