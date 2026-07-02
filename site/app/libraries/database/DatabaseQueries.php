@@ -3792,6 +3792,31 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Deletes a team from the database and removes user associations.
+     * THIS FUNCTION SHOULD ONLY BE USED ON TEAMS WITHOUT SUBMISSIONS
+     *
+     * @param string $team_id
+     * @return void
+     */
+    public function deleteTeam($team_id) {
+        try {
+            $this->course_db->query(
+                "DELETE FROM gradeable_teams WHERE team_id=?",
+                [$team_id]
+            );
+
+            $this->course_db->query(
+                "DELETE FROM teams WHERE team_id=?",
+                [$team_id]
+            );
+        }
+        catch (\Exception $e) {
+            $this->course_db->rollback();
+            throw new \Exception("An error occurred while attempting to delete the team " . $team_id . ".");
+        }
+    }
+
+    /**
      * Set team $team_id's registration/rotating section to $section
      *
      * @param string $team_id
@@ -4975,6 +5000,44 @@ SQL;
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);
         return $this->submitty_db->row()['status'];
+    }
+
+
+    /**
+     * Fetch all courses-table fields the config page needs in one query.
+     * Returns [] if the course row doesn't exist.
+     *
+     * @return array<string, mixed>
+     */
+    public function getCourseConfigFields(string $term, string $course): array {
+        $this->submitty_db->query(
+            "SELECT self_registration_type, default_section_id, status, unarchivable
+             FROM courses WHERE term=? AND course=?",
+            [$term, $course]
+        );
+        return $this->submitty_db->row(); // [] if no row
+    }
+
+    /**
+     * Set the status of a course (1 = active, 2 = archived)
+     * @param string $term
+     * @param string $course
+     * @param int $status
+     */
+    public function setCourseStatus(string $term, string $course, int $status): void {
+        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $term, $course]);
+    }
+
+    /**
+     * Check if a course is marked as unarchivable
+     * @param string $term
+     * @param string $course
+     * @return bool
+     */
+    public function isCourseUnarchivable(string $term, string $course): bool {
+        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$term, $course]);
+        $result = $this->submitty_db->row();
+        return $result !== null && $result['unarchivable'];
     }
 
     public function getPeerAssignment($gradeable_id, $grader) {
@@ -9932,5 +9995,20 @@ ORDER BY
         );
 
         $this->course_db->commit();
+    }
+
+    /**
+     * Returns all submitters with an active version for a given gradeable.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getActiveSubmittersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT DISTINCT egv.user_id, egv.team_id, egv.active_version
+             FROM electronic_gradeable_version egv
+             WHERE egv.g_id = ? AND egv.active_version > 0",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
     }
 }
