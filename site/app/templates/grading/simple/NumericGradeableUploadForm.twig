@@ -1,0 +1,27 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}numeric-csv-upload-form{% endblock %}
+{% block title %}Upload Numeric Grade CSV{% endblock %}
+{% block body %}
+    <p>
+        Upload a .csv file to update numeric/text grades. Uploading will overwrite existing values for included students.
+    </p>
+    <ol class="full-list">
+        <li>"User ID": The user id associated with the student (mandatory).</li>
+        <li>"Given Name": Only read for new students.</li>
+        <li>"Family Name": Only read for new students.</li>
+        <li>"Preferred Given Name": Only read for new students.</li>
+        <li>"Preferred Family Name": Only read for new students.</li>
+        <li>"Registration Section": Optional; included for readability and ignored by upload.</li>
+        <li>"Registration Subsection": Optional; included for readability and ignored by upload.</li>
+    </ol>
+    <p>
+        Columns must match the order of the numeric/text items shown in the grading table.
+    </p>
+    <br />
+    <p>&emsp;</p>
+    <input type="file" id="numeric-csv-upload-file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="button" id="submit-numeric-csv-upload" value="Submit" />
+{% endblock %}
