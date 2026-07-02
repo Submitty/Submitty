@@ -30,8 +30,8 @@ describe('Grading Clustering Mode', () => {
         cy.get('select').select('dummy_split');
 
         // Page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
-        cy.get('.section-heading').contains('Cluster A').should('exist');
-        cy.get('.section-heading').contains('Cluster B').should('exist');
+        cy.get('.details-info-header').contains('Cluster A').should('exist');
+        cy.get('.details-info-header').contains('Cluster B').should('exist');
 
         // Exit clustering mode
         cy.get('button').contains('Exit Clustering Mode').click();
@@ -39,6 +39,6 @@ describe('Grading Clustering Mode', () => {
         // Verify exit
         cy.url().should('not.include', 'cluster_mode=1');
         cy.get('button').contains('Go to Clustering Mode').should('be.visible');
-        cy.get('.section-heading').contains('Cluster A').should('not.exist');
+        cy.get('.details-info-header').contains('Cluster A').should('not.exist');
     });
 });
