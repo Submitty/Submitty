@@ -1817,19 +1817,46 @@ function toggleDOMCustomMark(component_id: number) {
 }
 
 /**
- * Dispatches mark stats data to the Vue ReceivedMarkForm component via CustomEvent.
+ * Computes student links for the mark stats popup.
+ */
+function computeStudentLinks(stats: Stats): { name: string; url: string }[] {
+    const loc = window.location.href.split('?');
+    let base = loc[0];
+    if (base.endsWith('update')) {
+        base = `${base.slice(0, -6)}grading/grade`;
+    }
+    const params = new URLSearchParams(loc[1] ?? '');
+    return stats.submitter_ids.map((id) => {
+        params.set('who_id', stats.submitter_anon_ids[id] ?? id);
+        return { name: id, url: `${base}?${params.toString()}` };
+    });
+}
+
+/**
+ * Reloads the Vue ReceivedMarkForm component with updated mark stats data.
  * @param {string} component_title
  * @param {string} mark_title
  * @param {Object} stats
  */
 function openMarkStatsPopup(component_title: string, mark_title: string, stats: Stats) {
-    window.dispatchEvent(new CustomEvent('show-mark-stats', {
-        detail: {
-            componentTitle: component_title,
-            markTitle: mark_title,
-            stats: stats,
-        },
-    }));
+    $('.popup-form').hide();
+
+    const el = document.querySelector('.js-received-mark-form');
+    if (!el) {
+        return;
+    }
+
+    const studentLinks = computeStudentLinks(stats);
+
+    void window.submitty.render(el, 'component', 'ta_grading/ReceivedMarkForm', {
+        show: true,
+        componentTitle: component_title,
+        markTitle: mark_title,
+        stats: stats,
+        studentLinks: studentLinks,
+    }, {
+        close: '() => { const el = document.querySelector(".js-received-mark-form"); if (el) { window.submitty.render(el, "component", "ta_grading/ReceivedMarkForm", { show: false, componentTitle: "", markTitle: "", stats: null, studentLinks: [] }); } }',
+    });
 }
 
 /**

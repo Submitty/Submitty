@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
-interface MarkStats {
+export interface MarkStats {
     section_submitter_count: string;
     total_submitter_count: string;
     section_graded_component_count: string;
@@ -12,80 +12,43 @@ interface MarkStats {
     submitter_anon_ids: Record<string, string>;
 }
 
-interface ShowMarkStatsEvent extends CustomEvent {
-    detail: {
-        componentTitle: string;
-        markTitle: string;
-        stats: MarkStats;
-    };
-}
-
-interface StudentLink {
+export interface StudentLink {
     name: string;
     url: string;
 }
 
-const visible = ref(false);
-const componentTitle = ref('');
-const markTitle = ref('');
-const stats = ref<MarkStats | null>(null);
-const { baseUrl, searchParams } = buildUrlParts();
+const props = defineProps<{
+    show: boolean;
+    componentTitle: string;
+    markTitle: string;
+    stats: MarkStats | null;
+    studentLinks: StudentLink[];
+}>();
 
-const studentLinks = computed<StudentLink[]>(() => {
-    if (!stats.value) {
-        return [];
-    }
-    const params = new URLSearchParams(searchParams);
-    return stats.value.submitter_ids.map((id) => {
-        params.set('who_id', stats.value!.submitter_anon_ids[id] ?? id);
-        return { name: id, url: `${baseUrl}?${params.toString()}` };
-    });
-});
+const emit = defineEmits<{
+    close: [];
+}>();
 
-function buildUrlParts() {
-    const loc = window.location.href.split('?');
-    let base = loc[0];
-    if (base.endsWith('update')) {
-        base = `${base.slice(0, -6)}grading/grade`;
-    }
-    return { baseUrl: base, searchParams: loc[1] ?? '' };
-}
-
-function onShowMarkStats(e: Event) {
-    const detail = (e as ShowMarkStatsEvent).detail;
-    componentTitle.value = detail.componentTitle;
-    markTitle.value = detail.markTitle;
-    stats.value = detail.stats;
-    visible.value = true;
-}
+const popupRef = ref<HTMLElement | null>(null);
 
 function close() {
-    visible.value = false;
-}
-
-function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && visible.value) {
-        close();
-    }
+    emit('close');
 }
 
 onMounted(() => {
-    window.addEventListener('show-mark-stats', onShowMarkStats);
-    document.addEventListener('keydown', onKeydown);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('show-mark-stats', onShowMarkStats);
-    document.removeEventListener('keydown', onKeydown);
+    popupRef.value?.focus();
 });
 </script>
 
 <template>
   <div
-    v-if="visible"
+    v-if="show"
+    ref="popupRef"
+    tabindex="-1"
     class="popup-form"
     data-testid="mark-stats-popup"
-    style="display: block;"
+    style="display: block; outline: none;"
+    @keydown.escape="close"
   >
     <div
       class="popup-box"

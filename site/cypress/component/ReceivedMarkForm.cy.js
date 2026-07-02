@@ -14,25 +14,23 @@ function makeStats(overrides = {}) {
     };
 }
 
-function dispatchShowMarkStats(detail) {
-    cy.window().then((win) => {
-        win.dispatchEvent(new CustomEvent('show-mark-stats', { detail }));
-    });
-}
-
 describe('ReceivedMarkForm', () => {
     describe('visibility', () => {
         it('is hidden by default', () => {
-            cy.mount(ReceivedMarkForm);
+            cy.mount(ReceivedMarkForm, {
+                props: { show: false, componentTitle: '', markTitle: '', stats: null },
+            });
             cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
         });
 
-        it('becomes visible after show-mark-stats event', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats(),
+        it('is visible when show is true', () => {
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                },
             });
             cy.get('[data-testid="mark-stats-popup"]').should('be.visible');
         });
@@ -40,11 +38,13 @@ describe('ReceivedMarkForm', () => {
 
     describe('rendering', () => {
         beforeEach(() => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Question 1',
-                markTitle: 'Partial Credit',
-                stats: makeStats(),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Question 1',
+                    markTitle: 'Partial Credit',
+                    stats: makeStats(),
+                },
             });
         });
 
@@ -69,19 +69,21 @@ describe('ReceivedMarkForm', () => {
 
     describe('stats default values', () => {
         it('shows zeros when stats fields are null', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: {
-                    section_submitter_count: null,
-                    total_submitter_count: null,
-                    section_graded_component_count: null,
-                    total_graded_component_count: null,
-                    section_total_component_count: null,
-                    total_total_component_count: null,
-                    submitter_ids: [],
-                    submitter_anon_ids: {},
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: {
+                        section_submitter_count: null,
+                        total_submitter_count: null,
+                        section_graded_component_count: null,
+                        total_graded_component_count: null,
+                        section_total_component_count: null,
+                        total_total_component_count: null,
+                        submitter_ids: [],
+                        submitter_anon_ids: {},
+                    },
                 },
             });
             cy.get('[data-testid="section-submitter-count"]').should('have.text', '0');
@@ -93,12 +95,14 @@ describe('ReceivedMarkForm', () => {
         });
 
         it('shows zeros when stats fields are undefined (except submitter_ids)', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: {
-                    submitter_ids: [],
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: {
+                        submitter_ids: [],
+                    },
                 },
             });
             cy.get('[data-testid="section-submitter-count"]').should('have.text', '0');
@@ -107,17 +111,16 @@ describe('ReceivedMarkForm', () => {
     });
 
     describe('student list', () => {
-        beforeEach(() => {
-            cy.mount(ReceivedMarkForm);
-        });
-
         it('renders student links when there are students', () => {
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats({
-                    submitter_ids: ['alice', 'bob', 'carol'],
-                }),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats({
+                        submitter_ids: ['alice', 'bob', 'carol'],
+                    }),
+                },
             });
             cy.get('[data-testid="student-names"]').within(() => {
                 cy.contains('a', 'alice').should('be.visible');
@@ -128,23 +131,29 @@ describe('ReceivedMarkForm', () => {
         });
 
         it('separates student names with commas', () => {
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats({
-                    submitter_ids: ['alice', 'bob'],
-                }),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats({
+                        submitter_ids: ['alice', 'bob'],
+                    }),
+                },
             });
             cy.get('[data-testid="student-names"]').should('contain.text', 'alice, bob');
         });
 
         it('shows only <br> when there are no students', () => {
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats({
-                    submitter_ids: [],
-                }),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats({
+                        submitter_ids: [],
+                    }),
+                },
             });
             cy.get('[data-testid="student-names"]').within(() => {
                 cy.get('a').should('not.exist');
@@ -155,14 +164,16 @@ describe('ReceivedMarkForm', () => {
 
     describe('anonymous IDs', () => {
         it('uses anon ID in student link when present', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats({
-                    submitter_ids: ['student1'],
-                    submitter_anon_ids: { student1: 'anon_student1' },
-                }),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats({
+                        submitter_ids: ['student1'],
+                        submitter_anon_ids: { student1: 'anon_student1' },
+                    }),
+                },
             });
             cy.get('[data-testid="student-names"]')
                 .find('a')
@@ -171,14 +182,16 @@ describe('ReceivedMarkForm', () => {
         });
 
         it('falls back to raw ID when anon ID is missing', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats({
-                    submitter_ids: ['student1'],
-                    submitter_anon_ids: {},
-                }),
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats({
+                        submitter_ids: ['student1'],
+                        submitter_anon_ids: {},
+                    }),
+                },
             });
             cy.get('[data-testid="student-names"]')
                 .find('a')
@@ -188,81 +201,137 @@ describe('ReceivedMarkForm', () => {
     });
 
     describe('close interactions', () => {
-        beforeEach(() => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats(),
-            });
-        });
-
         it('closes when overlay behind popup is clicked', () => {
-            cy.get('[data-testid="popup-window"]').should('be.visible');
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
+            cy.get('[data-testid="mark-stats-popup"]').should('be.visible');
             cy.get('.popup-box').click({ force: true });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
+            cy.get('@onClose').should('have.been.calledOnce');
         });
 
         it('does not close when clicking inside the popup window', () => {
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
             cy.get('[data-testid="popup-window"]').click({ force: true });
-            cy.get('[data-testid="mark-stats-popup"]').should('be.visible');
+            cy.get('@onClose').should('not.have.been.called');
         });
 
         it('closes when close button is clicked', () => {
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
             cy.get('[data-testid="close-button"]').click({ force: true });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
+            cy.get('@onClose').should('have.been.calledOnce');
         });
 
         it('closes when popup close button is clicked', () => {
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
             cy.get('[data-testid="popup-close-button"]').click({ force: true });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
+            cy.get('@onClose').should('have.been.calledOnce');
         });
 
         it('closes on Escape key', () => {
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.document().trigger('keydown', { key: 'Escape' });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
+            cy.get('[data-testid="mark-stats-popup"]').focus();
+            cy.get('[data-testid="mark-stats-popup"]').type('{esc}');
+            cy.get('@onClose').should('have.been.calledOnce');
         });
 
         it('does not close on non-Escape key', () => {
-            cy.document().trigger('keydown', { key: 'Enter' });
-            cy.get('[data-testid="mark-stats-popup"]').should('be.visible');
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q1',
+                    markTitle: 'Full Credit',
+                    stats: makeStats(),
+                    onClose,
+                },
+            });
+            cy.get('[data-testid="mark-stats-popup"]').focus();
+            cy.get('[data-testid="mark-stats-popup"]').type('{enter}');
+            cy.get('@onClose').should('not.have.been.called');
+        });
+
+        it('does not close on Escape when show is false', () => {
+            const onClose = cy.stub().as('onClose');
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: false,
+                    componentTitle: '',
+                    markTitle: '',
+                    stats: null,
+                    onClose,
+                },
+            });
+            cy.window().trigger('keydown', { key: 'Escape' });
+            cy.get('@onClose').should('not.have.been.called');
         });
     });
 
     describe('reopening', () => {
-        it('can be reopened after being closed, with new data', () => {
-            cy.mount(ReceivedMarkForm);
-            dispatchShowMarkStats({
-                componentTitle: 'Q1',
-                markTitle: 'Full Credit',
-                stats: makeStats(),
-            });
-            cy.get('[data-testid="close-button"]').click({ force: true });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
-
-            dispatchShowMarkStats({
-                componentTitle: 'Q2',
-                markTitle: 'No Credit',
-                stats: makeStats({ section_submitter_count: '0' }),
-            });
-            cy.get('[data-testid="mark-stats-popup"]').should('be.visible');
-            cy.get('[data-testid="question-title"]').should('have.text', 'Q2');
-            cy.get('[data-testid="mark-title"]').should('have.text', 'No Credit');
-        });
-    });
-
-    describe('event listener lifecycle', () => {
-        it('cleans up event listeners on unmount', () => {
-            cy.mount(ReceivedMarkForm).then(({ wrapper }) => {
-                wrapper.unmount();
-                dispatchShowMarkStats({
+        it('can render with new data by remounting', () => {
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
                     componentTitle: 'Q1',
                     markTitle: 'Full Credit',
                     stats: makeStats(),
-                });
+                },
             });
-            cy.get('[data-testid="mark-stats-popup"]').should('not.exist');
+            cy.get('[data-testid="question-title"]').should('have.text', 'Q1');
+
+            cy.mount(ReceivedMarkForm, {
+                props: {
+                    show: true,
+                    componentTitle: 'Q2',
+                    markTitle: 'No Credit',
+                    stats: makeStats({ section_submitter_count: '0' }),
+                },
+            });
+            cy.get('[data-testid="question-title"]').should('have.text', 'Q2');
+            cy.get('[data-testid="mark-title"]').should('have.text', 'No Credit');
         });
     });
 });
