@@ -2906,14 +2906,33 @@ async function openComponentGrading(component_id: number) {
         displayAjaxError(err);
         throw err;
     }
-    window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
-    OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
-    if (isEditModeEnabled()) {
-        await reloadGradingComponent(component_id, true, true);
+    const component = await ajaxGetComponentRubric(getGradeableId(), component_id);
+    let graded_component = await ajaxGetGradedComponent(getGradeableId(), component_id, getAnonId());
+
+    if (graded_component === undefined) {
+        // create a new empty one to pass down.
+        graded_component = {
+            ...component,
+            comment: '',
+            score: 0.0,
+            custom_mark_selected: false,
+            mark_ids: [],
+            graded_version: getDisplayVersion(),
+            grade_time: '',
+            grader_id: '',
+            verifier_id: '',
+            custom_mark_enabled: CUSTOM_MARK_ID,
+            component_id: component.id,
+        };
     }
-    else {
-        await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id]!, false, true);
-    }
+
+    OLD_MARK_LIST[component_id] = component.marks;
+    COMPONENT_RUBRIC_LIST[component_id] = component;
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+    GRADED_COMPONENTS_LIST[component_id] = graded_component;
+
+    await injectGradingComponent(component, graded_component, isEditModeEnabled(), true);
+
     const page = getComponentPageNumber(component_id);
     if (page) {
         scrollToPage(page);
