@@ -111,7 +111,7 @@ class SimpleGraderView extends AbstractView {
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
-        
+
         return $return;
     }
 

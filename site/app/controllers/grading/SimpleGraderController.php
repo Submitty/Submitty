@@ -8,14 +8,12 @@ use app\libraries\response\ResponseInterface;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
-use app\entities\poll\Response;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
-use app\libraries\response\DownloadResponse;
 use WebSocket;
 
 /**
@@ -373,7 +371,7 @@ class SimpleGraderController extends AbstractController {
         }
 
         $header_present = (
-            $arr_length > 0 && 
+            $arr_length > 0 &&
             (
                 stripos($csv_array[0], 'user id') !== false ||
                 stripos($csv_array[0], 'given name') !== false ||
@@ -399,7 +397,7 @@ class SimpleGraderController extends AbstractController {
             }
         }
         $num_text_components = 0;
-        foreach($gradeable->getComponents() as $component) {
+        foreach ($gradeable->getComponents() as $component) {
             if ($component->isText()) {
                 $num_text_components++;
             }
@@ -415,7 +413,7 @@ class SimpleGraderController extends AbstractController {
             );
         }
 
-        foreach($data_array as $row_num => $row) {
+        foreach ($data_array as $row_num => $row) {
             if ($row_num < $start_row) {
                 continue;
             }
@@ -430,21 +428,21 @@ class SimpleGraderController extends AbstractController {
             if ($num_numeric > 0) {
                 $total = 0;
                 $col = 3;
-            for (; $col < 3 + $num_numeric; $col++) {
-                if (!is_numeric($row[$col])) {
-                    $msg = "Row " . ($row_num + 1) . " of the CSV's column " . ($col + 1) . " should be a number. Found \"{$row[$col]}\".";
+                for (; $col < 3 + $num_numeric; $col++) {
+                    if (!is_numeric($row[$col])) {
+                        $msg = "Row " . ($row_num + 1) . " of the CSV's column " . ($col + 1) . " should be a number. Found \"{$row[$col]}\".";
+                        $this->core->addErrorMessage($msg);
+                        return JsonResponse::getFailResponse($msg);
+                    }
+                    $total += floatval($row[$col]);
+                }
+                if (!is_numeric($row[$col]) || abs($total - floatval($row[$col])) > 0.0000001) {
+                    $msg = "Row " . ($row_num + 1) . " of the CSV does not have the correct total for numeric elements. Expected {$total}, found \"" . ($row[$col] ?? '') . "\".";
                     $this->core->addErrorMessage($msg);
                     return JsonResponse::getFailResponse($msg);
                 }
-                $total += floatval($row[$col]);
-            }
-            if (!is_numeric($row[$col]) || abs($total - floatval($row[$col])) > 0.0000001) {
-                $msg = "Row " . ($row_num + 1) . " of the CSV does not have the correct total for numeric elements. Expected {$total}, found \"" . ($row[$col] ?? '') . "\".";
-                $this->core->addErrorMessage($msg);
-                return JsonResponse::getFailResponse($msg);
             }
         }
-    }
         /** @var GradedGradeable $graded_gradeable */
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
             for ($j = 0; $j < $arr_length; $j++) {
