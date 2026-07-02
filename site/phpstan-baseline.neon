@@ -593,15 +593,6 @@ parameters:
 
 		-
 			rawMessage: '''
-				Call to deprecated method RedirectOnlyResponse() of class app\libraries\response\MultiResponse:
-				should not be used, just return RedirectResponse directly
-			'''
-			identifier: staticMethod.deprecated
-			count: 1
-			path: app/controllers/NotificationController.php
-
-		-
-			rawMessage: '''
 				Call to deprecated method webOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return WebResponse directly
 			'''

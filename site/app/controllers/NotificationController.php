@@ -75,7 +75,7 @@ class NotificationController extends AbstractController {
      * @param string $nid
      * @param string|null $seen
      *
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
     public function openNotification($nid, $seen) {
