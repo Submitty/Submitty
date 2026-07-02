@@ -390,7 +390,7 @@ class SimpleGraderController extends AbstractController {
                     $errors[] = "Column " . ($i + 1) . " has invalid title \"" . ($actual ?? '(missing)') . "\". Expected \"{$expected}\".";
                 }
             }
-            if (!empty($errors)) {
+            if (count($errors) > 0) {
                 $msg = implode(" ", $errors);
                 $this->core->addErrorMessage($msg);
                 return JsonResponse::getFailResponse($msg);
