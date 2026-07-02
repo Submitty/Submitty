@@ -17,7 +17,7 @@ export interface StudentLink {
     url: string;
 }
 
-const props = defineProps<{
+defineProps<{
     show: boolean;
     componentTitle: string;
     markTitle: string;
