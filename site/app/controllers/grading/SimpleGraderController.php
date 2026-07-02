@@ -209,7 +209,7 @@ class SimpleGraderController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods:["GET"])]
-    public function downloadNumericCsv($gradeable_id, $sort = "section_subsection"): ResponseInterface {
+    public function downloadNumericCsv(string $gradeable_id, string $sort = "section_subsection"): ResponseInterface {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
