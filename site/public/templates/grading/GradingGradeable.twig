@@ -50,7 +50,8 @@
                 'ta_grading_total': graded_gradeable.ta_grading_total,
                 'decimal_precision': decimal_precision,
                 'peer_gradeable' : graded_gradeable.peer_gradeable,
-                'combined_peer_score' : graded_gradeable.combined_peer_score
+                'combined_peer_score' : graded_gradeable.combined_peer_score,
+                'peer_only_grader': graded_gradeable.peer_only_grader
             } only %}
         {% endif %}
         {% if graded_gradeable.user_group == 4 %}
@@ -63,7 +64,8 @@
                 'ta_grading_earned': graded_gradeable.ta_grading_earned,
                 'ta_grading_total': graded_gradeable.ta_grading_total,
                 'decimal_precision': decimal_precision,
-                'peer_gradeable' : graded_gradeable.peer_gradeable
+                'peer_gradeable' : graded_gradeable.peer_gradeable,
+                'peer_only_grader': graded_gradeable.peer_only_grader
             } only %}
         {% endif %}
     </div>
