@@ -24,10 +24,10 @@ describe('Grading Clustering Mode', () => {
         // Verify clustering state
         cy.get('button').contains('Exit Clustering Mode').should('be.visible');
         cy.get('select').should('be.visible');
-        cy.get('select option').contains('Dummy Split').should('be.visible');
+        cy.get('select option').contains('DummySplit').should('be.visible');
 
         // Select the algorithm
-        cy.get('select').select('DummySplit');
+        cy.get('select').select('dummy_split');
 
         // Page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
         cy.get('.section-heading').contains('Cluster A').should('exist');

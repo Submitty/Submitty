@@ -4,7 +4,7 @@ describe('GradingClustering', () => {
     const defaultProps = {
         isClusteringMode: false,
         algorithms: {
-            DummySplit: 'Dummy Split',
+            dummy_split: 'DummySplit',
         },
         currentAlgorithm: '',
         createClusteringUrl: '/test/clustering',
@@ -28,8 +28,8 @@ describe('GradingClustering', () => {
         });
         cy.get('button').should('contain', 'Exit Clustering Mode');
         cy.get('select').should('exist');
-        cy.get('select option').should('have.length', 2); // 'Select an algorithm...' + 'Dummy Split'
-        cy.get('select option').eq(1).should('contain', 'Dummy Split');
+        cy.get('select option').should('have.length', 2); // 'Select an algorithm...' + 'DummySplit'
+        cy.get('select option').eq(1).should('contain', 'DummySplit');
     });
 
     it('does not render dropdown if no algorithms are available', () => {
@@ -54,8 +54,6 @@ describe('GradingClustering', () => {
         cy.get('select').should('not.exist');
     });
 
-
-
     it('alerts on failure when algorithm is changed', () => {
         cy.intercept('POST', '/test/clustering', {
             statusCode: 200,
@@ -72,7 +70,7 @@ describe('GradingClustering', () => {
         const alertStub = cy.stub();
         cy.on('window:alert', alertStub);
 
-        cy.get('select').select('DummySplit');
+        cy.get('select').select('dummy_split');
         cy.wait('@createClusteringFail').then(() => {
             expect(alertStub).to.have.been.calledWith('Custom error message');
         });
