@@ -2,11 +2,15 @@ describe('Test cases for TA grading page', () => {
     after(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
-        cy.get('[title="Delete this component"]').eq(-1).as('delete-me-button');
-        cy.get('@delete-me-button').click();
-        cy.get('@delete-me-button').then(() => {
-            cy.on('window:confirm', (str) => {
-                expect(str).to.equal('Are you sure you want to delete this component?');
+        cy.on('window:confirm', () => true);
+        // Delete any extra components, keeping only the original 4
+        cy.get('[title="Delete this component"]').then(($buttons) => {
+            const toDelete = $buttons.length - 4;
+            if (toDelete <= 0) {
+                return;
+            }
+            Cypress._.times(toDelete, () => {
+                cy.get('[title="Delete this component"]').eq(-1).click({ force: true });
             });
         });
     });
@@ -14,10 +18,13 @@ describe('Test cases for TA grading page', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
 
-        cy.get('[value="Add New Component"]').click();
-
-        cy.get('[data-testid^="component"]').should('have.length', 6);
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+        cy.get('[data-testid^="component"]').then(($el) => {
+            const count = $el.length;
+            cy.get('[value="Add New Component"]').click();
+            cy.get('[data-testid^="component"]').should('have.length', count + 1).then(() => {
+                cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+            });
+        });
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('#edit-mode-enabled').click();
@@ -25,6 +32,24 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
         cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
+        cy.get('[data-testid="mark-title-input"]').then(($titles) => {
+            const initialMarkCount = $titles.length;
+            $titles.each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('input[aria-label="mark value"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('.save-tools-cancel').click();
+            cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
+            cy.get('[data-testid="mark-title-input"]').should('have.length', initialMarkCount);
+            cy.get('[data-testid="mark-title-input"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+            cy.get('input[aria-label="mark value"]').each((_, element) => {
+                expect(element.value).to.not.equal('');
+            });
+        });
         cy.get('[data-testid="add-new-mark-button"]').click();
         cy.get('[data-testid="mark-title-input"]').eq(-1).type('First New Mark');
         cy.get('[data-testid="add-new-mark-button"]').click();
