@@ -75,7 +75,7 @@ class NotificationController extends AbstractController {
      * @param string $nid
      * @param string|null $seen
      *
-     * @return MultiResponse
+     * @return RedirectResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
     public function openNotification($nid, $seen) {
@@ -85,9 +85,19 @@ class NotificationController extends AbstractController {
             $thread_id = Notification::getThreadIdIfExists($metadata);
             $this->core->getQueries()->markNotificationAsSeen($user_id, intval($nid), $thread_id);
         }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse(Notification::getUrl($this->core, $metadata))
-        );
+        $url = Notification::getUrl($this->core, $metadata);
+
+        $thread_id = Notification::getThreadIdIfExists($metadata);
+        if ($thread_id !== null && $thread_id > 0 && !$this->core->getQueries()->existsThread((string) $thread_id)) {
+            $this->core->addErrorMessage("The content for this notification has been deleted or is no longer available.");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        if ($url === null) {
+            $this->core->addErrorMessage("The content for this notification has been deleted or is no longer available.");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+        return new RedirectResponse($url);
     }
 
     /**
