@@ -1,47 +1,21 @@
 declare global {
     interface Window {
-        sortTableByColumn(tableId: string, colMap: colMapType, sortKey: string): void;
+        sortTableByColumn(tableId: string, sortKey: string, colMap: colMapType): void;
     }
 }
-
 // See TableHeaderSort.twig
 
-// New data types to be used when making column maps of sortable tables
-// enum colDataTypes {
-//     String,
-//     Number,
-//     Date,
-// };
-
-// script tags cannot compile TS, so enums cannot be used to create column data
-// within the twig files for the tables.
-// For now, use the following strings:
-// 'string', 'number', 'date'
-
+enum colDataTypes {
+    String = 'string',
+    Number = 'number',
+    Date = 'date',
+};
 type colMapType = {
-    [ k: string ]: {
-        colIndex: number;
-        colDataType: string; // colDataTypes;
-    };
+    [ k: string ]: colDataTypes;
 };
 
-// Example colMap from docker interface table
-/*
-{
-    const colMap = {
-        'registration_section': { colIndex: 1, colDataType: colDataTypes.Number },
-        'user_id': { colIndex: 2, colDataType: colDataTypes.String },
-        'first_name': { colIndex: 3, colDataType: colDataTypes.String },
-        'last_name': { colIndex: 4, colDataType: colDataTypes.String },
-        'rotating_section': { colIndex: 6, colDataType: colDataTypes.Number }
-    }
-}
-*/
-
-function sortTableByColumn(tableId: string, colMap: colMapType, sortKey: string) {
-    console.log(`test 2: ${tableId} ${sortKey}`);
-    console.log(colMap);
-    const table: HTMLElement = document.getElementById(tableId)!;
+function sortTableByColumn(tableId: string, sortKey: string, colMap: colMapType) {
+    const table: HTMLElement = document.querySelector('#tableId')!;
     if (table === null) {
         return;
     }
@@ -64,7 +38,14 @@ function sortTableByColumn(tableId: string, colMap: colMapType, sortKey: string)
     table.dataset.sortKey = sortKey;
     table.dataset.sortDirection = newDirection;
 
-    applySort(tableId, colMap, sortKey, newDirection);
+    // get the index of the column we're sorting by
+    const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
+    const header_keys: string[] = table_headers.map((el) => el.dataset.sortKey) as string[];
+    const colIndex: number = header_keys.indexOf(sortKey);
+    // and get its datatype from the colMap (defines how rows are compared while sorting)
+    const colDataType: colDataTypes = colMap[sortKey];
+
+    applySort(tableId, colIndex, colDataType, newDirection);
     updateSortIcons(tableId, sortKey, newDirection);
 }
 window.sortTableByColumn = sortTableByColumn;
@@ -84,18 +65,11 @@ export function restoreSort() {
 //     }
 }
 
-function applySort(tableId: string, colMap: colMapType, sortKey: string, direction: string) {
-    console.log('test 3');
+function applySort(tableId: string, colIndex: number, colDataType: colDataTypes, direction: string) {
     const tbody: HTMLTableSectionElement = document.querySelector(`#${tableId} tbody`)!;
-
-    /*
-    TODO: allow row groups? this is used on the stat-page, I think for the sections
-    */
-
+    // TODO: allow row groups? this is used on the stat-page, I think for the sections
     // ignore section break rows during sorting
     const rows = Array.from(tbody.querySelectorAll('tr:not(.info)'));
-    const colIndex: number = colMap[sortKey]['colIndex'];
-    const colDataType: string = colMap[sortKey]['colDataType'];
 
     rows.sort((rowA, rowB) => {
         const aText = rowA.children[colIndex].textContent.trim();
@@ -103,14 +77,14 @@ function applySort(tableId: string, colMap: colMapType, sortKey: string, directi
         let cmp = 0;
 
         switch (colDataType) {
-            case 'number': {
+            case colDataTypes.Number: {
                 // parsing for when comparing file size; || 0 because NaN is falsy
                 const valA = parseFloat(aText.replace('MB', '')) || 0;
                 const valB = parseFloat(bText.replace('MB', '')) || 0;
                 cmp = valA - valB;
                 break;
             }
-            case 'date': {
+            case colDataTypes.Date: {
                 const cleanedA = aText.replace('@', '').replace('EST', '').trim();
                 const cleanedB = bText.replace('@', '').replace('EST', '').trim();
                 const dateA = new Date(cleanedA);
@@ -118,7 +92,7 @@ function applySort(tableId: string, colMap: colMapType, sortKey: string, directi
                 cmp = dateA.getTime() - dateB.getTime();
                 break;
             }
-            case 'string':
+            case colDataTypes.String:
             default:
             {
                 cmp = aText.localeCompare(bText);
@@ -158,14 +132,12 @@ function applySort(tableId: string, colMap: colMapType, sortKey: string, directi
                 // }
             }
         }
-        console.log(cmp);
         return direction === 'ASC' ? cmp : -cmp;
     });
     rows.forEach((row) => tbody.appendChild(row));
 }
 
 function updateSortIcons(tableId: string, activeKey: string, direction: string) {
-    console.log('test 4');
     document.querySelectorAll<HTMLElement>(`#${tableId} .sortable-header`)
         .forEach((el) => {
             const icon = el.querySelector('i');
