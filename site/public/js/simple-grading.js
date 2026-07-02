@@ -507,82 +507,82 @@ function setupNumericTextCells() {
     });
 
     $(document).off('mousedown', '#submit-numeric-csv-upload').on('mousedown', '#submit-numeric-csv-upload', () => {
-    const f = $('#numeric-csv-upload-file').get(0).files[0];
-    if (f) {
-        const reader = new FileReader();
-        reader.readAsText(f);
-        reader.onload = function () {
-            const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
-            const gradeable_id = $('[data-gradeable]').first().data('gradeable');
-            const num_text = parseInt($('[data-numtext]').first().data('numtext'));
-            const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
+        const f = $('#numeric-csv-upload-file').get(0).files[0];
+        if (f) {
+            const reader = new FileReader();
+            reader.readAsText(f);
+            reader.onload = function () {
+                const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
+                const gradeable_id = $('[data-gradeable]').first().data('gradeable');
+                const num_text = parseInt($('[data-numtext]').first().data('numtext'));
+                const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
 
-            const user_ids = [];
-            $('.cell-all').each(function () {
-                user_ids.push($(this).parent().data('user'));
-            });
+                const user_ids = [];
+                $('.cell-all').each(function () {
+                    user_ids.push($(this).parent().data('user'));
+                });
 
-            submitAJAX(
-                buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
-                { csrf_token: csrfToken, users: user_ids, num_numeric: num_numeric, big_file: reader.result },
-                (returned_data) => {
-                    closePopup('numeric-csv-upload-form');
-                    displaySuccessMessage('CSV uploaded successfully.');
-                    for (let x = 0; x < returned_data['data'].length; x++) {
-                        const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
-                        if (rowElement.length) {
-                            let total = 0;
-                            for (let col = 0, y = 0; col < csvLength - 3; col++) {
-                                if (num_numeric && col === num_numeric) {
-                                    const split_row = rowElement.attr('id').split('-');
-                                    $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
-                                    continue;
-                                }
-                                const value = `value_${y}`;
-                                const status = `status_${y}`;
-                                let cellElement;
-
-                                if (col < num_numeric) {
-                                    cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col}`);
-                                    if (returned_data['data'][x][status] === 'OK') {
-                                        cellElement.val(returned_data['data'][x][value]);
+                submitAJAX(
+                    buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
+                    { csrf_token: csrfToken, users: user_ids, num_numeric: num_numeric, big_file: reader.result },
+                    (returned_data) => {
+                        closePopup('numeric-csv-upload-form');
+                        displaySuccessMessage('CSV uploaded successfully.');
+                        for (let x = 0; x < returned_data['data'].length; x++) {
+                            const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
+                            if (rowElement.length) {
+                                let total = 0;
+                                for (let col = 0, y = 0; col < csvLength - 3; col++) {
+                                    if (num_numeric && col === num_numeric) {
+                                        const split_row = rowElement.attr('id').split('-');
+                                        $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
+                                        continue;
                                     }
-                                    y++;
-                                    if (Number(cellElement.val()) === 0) {
-                                        cellElement.css('color', 'var(--standard-light-medium-gray)');
+                                    const value = `value_${y}`;
+                                    const status = `status_${y}`;
+                                    let cellElement;
+
+                                    if (col < num_numeric) {
+                                        cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col}`);
+                                        if (returned_data['data'][x][status] === 'OK') {
+                                            cellElement.val(returned_data['data'][x][value]);
+                                        }
+                                        y++;
+                                        if (Number(cellElement.val()) === 0) {
+                                            cellElement.css('color', 'var(--standard-light-medium-gray)');
+                                        }
+                                        else {
+                                            cellElement.css('color', '');
+                                        }
+                                        total += Number(cellElement.val());
                                     }
                                     else {
-                                        cellElement.css('color', '');
+                                        cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
+                                        cellElement.text(returned_data['data'][x][value]);
+                                        y++;
                                     }
-                                    total += Number(cellElement.val());
-                                }
-                                else {
-                                    cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
-                                    cellElement.text(returned_data['data'][x][value]);
-                                    y++;
-                                }
 
-                                if (returned_data['data'][x][status] === 'OK') {
-                                    cellElement.css('background-color', 'var(--default-white)');
-                                }
-                                else {
-                                    cellElement.css('background-color', 'var(--simple-save-error-red)');
+                                    if (returned_data['data'][x][status] === 'OK') {
+                                        cellElement.css('background-color', 'var(--default-white)');
+                                    }
+                                    else {
+                                        cellElement.css('background-color', 'var(--simple-save-error-red)');
+                                    }
                                 }
                             }
+                            else {
+                                alert(`User ${returned_data['data'][x]['username']} does not exist.`);
+                            }
                         }
-                        else {
-                            alert(`User ${returned_data['data'][x]['username']} does not exist.`);
-                        }
-                    }
-                },
-                () => {
-                    closePopup('numeric-csv-upload-form');
-                    window.location.reload();
-                },
-            );
-        };
-    }
-});
+                    },
+                    () => {
+                        closePopup('numeric-csv-upload-form');
+                        window.location.reload();
+                    },
+                );
+            };
+        }
+    });
 }
 
 function setupSimpleGrading(action) {
@@ -1035,11 +1035,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function newNumericCsvUploadForm() {
-    $('.popup-form').css('display','none');
+    $('.popup-form').css('display', 'none');
     const form = $('#numeric-csv-upload-form');
     showPopup('#numeric-csv-upload-form');
     captureTabInModal('numeric-csv-upload-form');
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
-
