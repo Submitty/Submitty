@@ -223,7 +223,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                 let pdfData;
                 try {
                     pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
+                    pdfData = Uint8Array.from(atob(pdfData['data']), (c) => c.charCodeAt(0));
                 }
                 catch (err) {
                     console.log(err);
@@ -357,7 +357,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                         $('#pdf-error-message').text(pdfData.message).show();
                         return;
                     }
-                    pdfData = atob(pdfData['data']);
+                    pdfData = Uint8Array.from(atob(pdfData['data']), (c) => c.charCodeAt(0));
                 }
                 catch (err) {
                     console.log(err);
