@@ -64,6 +64,21 @@ class GradingCluster {
         return $this->members->count();
     }
 
+    /**
+     * @param array<string, int> $active_versions
+     * @return GradingClusterMember[]
+     */
+    public function getValidMembers(array $active_versions): array {
+        $valid = [];
+        foreach ($this->members as $m) {
+            $id = $m->getUserId() ?? $m->getTeamId();
+            if (isset($active_versions[$id]) && $active_versions[$id] === $m->getActiveVersion()) {
+                $valid[] = $m;
+            }
+        }
+        return $valid;
+    }
+
     public function addMember(GradingClusterMember $member): void {
         $this->members->add($member);
     }

@@ -1,0 +1,104 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const props = defineProps<{
+    isClusteringMode: boolean;
+    algorithms: Record<string, string>;
+    currentAlgorithm?: string;
+    createClusteringUrl: string;
+    csrfToken: string;
+    canCreateClustering: boolean;
+    gradeableId: string;
+}>();
+
+const selectedAlgorithm = ref(props.currentAlgorithm || '');
+
+function toggleClusteringMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (props.isClusteringMode) {
+        urlParams.delete('cluster_mode');
+        urlParams.delete('algorithm');
+        window.location.search = urlParams.toString();
+    }
+    else {
+        const hasAcceptedWarning = sessionStorage.getItem(`clusteringWarningAccepted_${props.gradeableId}`) === 'true';
+        const win = window as unknown as { showClusteringWarningMessage?: (cb: () => void) => void };
+        if (!hasAcceptedWarning && typeof win.showClusteringWarningMessage === 'function') {
+            win.showClusteringWarningMessage(() => enterClusteringMode(urlParams));
+        }
+        else {
+            enterClusteringMode(urlParams);
+        }
+    }
+}
+
+function enterClusteringMode(urlParams: URLSearchParams) {
+    urlParams.set('cluster_mode', '1');
+    window.location.search = urlParams.toString();
+}
+
+async function onAlgorithmChange(event?: Event) {
+    const value = event ? (event.target as HTMLSelectElement).value : selectedAlgorithm.value;
+    if (props.isClusteringMode && value) {
+        document.body.setAttribute('data-clustering-status', 'fetching');
+        const formData = new FormData();
+        formData.append('csrf_token', props.csrfToken);
+        formData.append('algorithm', value);
+
+        try {
+            const response = await fetch(props.createClusteringUrl, {
+                method: 'POST',
+                body: formData,
+            });
+            document.body.setAttribute('data-clustering-status', 'done');
+
+            const result = (await response.json()) as { status: string; message?: string };
+            if (result.status === 'success') {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('cluster_mode', '1');
+                window.location.search = urlParams.toString();
+            }
+            else {
+                alert(result.message || 'Error creating clusters');
+                // Revert selection if it failed
+                selectedAlgorithm.value = props.currentAlgorithm || '';
+            }
+        }
+        catch (error) {
+            console.error('Error:', error);
+            document.body.setAttribute('data-clustering-status', 'error');
+            alert('Failed to connect to the server.');
+        }
+    }
+}
+</script>
+
+<template>
+  <button
+    class="btn btn-primary"
+    @click="toggleClusteringMode"
+  >
+    {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
+  </button>
+  <select
+    v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
+    v-model="selectedAlgorithm"
+    class="form-control"
+    style="width: auto; margin: 0;"
+    @change="onAlgorithmChange"
+  >
+    <option
+      value=""
+      disabled
+    >
+      Select an algorithm...
+    </option>
+    <option
+      v-for="(name, id) in algorithms"
+      :key="id"
+      :value="id"
+    >
+      {{ name }}
+    </option>
+  </select>
+</template>

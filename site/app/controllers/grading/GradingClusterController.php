@@ -79,7 +79,7 @@ class GradingClusterController extends AbstractController {
 
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
-            ->findOneBy(['gradeable_id' => $gradeable_id]);
+            ->findWithClustersAndMembers($gradeable_id);
 
         if ($config === null) {
             return JsonResponse::getSuccessResponse([
@@ -98,16 +98,13 @@ class GradingClusterController extends AbstractController {
         $result = [];
         foreach ($config->getClusters() as $cluster) {
             $valid_members = [];
-            foreach ($cluster->getMembers() as $m) {
-                $member_id = $m->getUserId() ?? $m->getTeamId();
-                if (isset($active_versions[$member_id]) && $active_versions[$member_id] === $m->getActiveVersion()) {
-                    $valid_members[] = [
-                        'id'      => $m->getId(),
-                        'user_id' => $m->getUserId(),
-                        'team_id' => $m->getTeamId(),
-                        'active_version' => $m->getActiveVersion(),
-                    ];
-                }
+            foreach ($cluster->getValidMembers($active_versions) as $m) {
+                $valid_members[] = [
+                    'id'      => $m->getId(),
+                    'user_id' => $m->getUserId(),
+                    'team_id' => $m->getTeamId(),
+                    'active_version' => $m->getActiveVersion(),
+                ];
             }
 
             $result[] = [
