@@ -67,12 +67,11 @@ describe('GradingClustering', () => {
             },
         });
 
-        const alertStub = cy.stub();
+        const alertStub = cy.stub().as('alertStub');
         cy.on('window:alert', alertStub);
 
         cy.get('select').select('dummy_split');
-        cy.wait('@createClusteringFail').then(() => {
-            expect(alertStub).to.have.been.calledWith('Custom error message');
-        });
+        cy.wait('@createClusteringFail');
+        cy.get('@alertStub').should('have.been.calledWith', 'Custom error message');
     });
 });
