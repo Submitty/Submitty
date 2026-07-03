@@ -22,6 +22,9 @@ class SubmittySchemaException(Exception):
         self.title = title
         self.schema_message = error_message
 
+    def __str__(self):
+        return self.schema_message or str(self.my_message)
+
     def print_human_readable_error(self):
         """Use to print a human readable version of this exception."""
         print(file=sys.stderr)
