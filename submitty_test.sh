@@ -9,7 +9,7 @@ echo "Setting up Docker image '$IMAGE_NAME'..."
 docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
 
 # define the docker run command
-DOCKER_RUN=(docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp \
+DOCKER_RUN=(docker run --rm -t -u "$(id -u):$(id -g)" -e HOME=/tmp \
     -v "$SCRIPT_DIR/site:/site" \
     -v /site/vendor \
     -v /site/node_modules \
