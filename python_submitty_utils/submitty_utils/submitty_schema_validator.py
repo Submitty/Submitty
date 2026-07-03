@@ -15,7 +15,7 @@ class SubmittySchemaException(Exception):
         """Use to aid in printing helpful information about schema errors."""
         error_message = schema_error.message if schema_error is not None else ''
 
-        super().__init__(error_message)
+        super().__init__(config_json, schema, message, title, error_message)
         self.config_json = config_json
         self.schema = schema
         self.my_message = message
