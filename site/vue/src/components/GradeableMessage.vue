@@ -157,11 +157,11 @@ function close(): void {
               </p>
             </div>
             <div
-              v-if="canAgree"
               class="form-buttons"
             >
               <div class="form-button-container">
                 <button
+                  v-if="canAgree"
                   id="cancel-button"
                   class="btn btn-default close-button"
                   type="button"
@@ -170,6 +170,7 @@ function close(): void {
                   Cancel
                 </button>
                 <button
+                  v-if="canAgree"
                   id="agree-button"
                   class="btn btn-primary"
                   type="button"
@@ -178,13 +179,6 @@ function close(): void {
                 >
                   Agree
                 </button>
-              </div>
-            </div>
-            <div
-              v-else
-              class="form-buttons"
-            >
-              <div class="form-button-container">
                 <button
                   class="btn btn-default close-button"
                   type="button"
