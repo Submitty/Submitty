@@ -64,6 +64,26 @@
     word-break: break-all;
 }
 
+.submitted-files-collapsed {
+    display: none;
+}
+
+.submitted-files-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+#submission-files-toggle {
+    padding: 3px 8px;
+    line-height: 1;
+}
+
+.submitted-files-header h4 {
+    margin: 0;
+}
+
 #version-cont {
     display: flex;
     flex-wrap: wrap;
@@ -91,6 +111,24 @@
 
 .disable-submit:hover {
     background-color: var(--good-green);
+}
+
+.submission-warning {
+    font-weight: bold;
+    color: var(--btn-text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--standard-vibrant-orange);
+}
+
+.submission-error {
+    font-weight: bold;
+    color: var(--btn-text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--danger-red);
 }
 
 #gradeable-info h1 {
