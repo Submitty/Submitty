@@ -35,6 +35,7 @@ describe('GradeableMessage', () => {
             localStorage.setItem(STORAGE_KEY, 'agreed');
             cy.mount(GradeableMessage, { props: { ...baseProps, userGroup: 2 } });
             cy.get('[data-testid="popup-window"]').should('not.exist');
+            cy.get('[data-testid="grader-responsibility"]').should('be.visible');
         });
     });
 
@@ -84,10 +85,30 @@ describe('GradeableMessage', () => {
             cy.get('[data-testid="agree-popup-btn"]').should('be.visible');
         });
 
-        it('shows only Close when canAgree is false (review mode)', () => {
+        it('shows only Close when canAgree is false', () => {
             localStorage.setItem(STORAGE_KEY, 'agreed');
             cy.mount(GradeableMessage, { props: baseProps });
-            cy.window().then((win) => win.dispatchEvent(new CustomEvent('show-gradeable-message-review')));
+            cy.get('[data-testid="popup-window"]').should('not.exist');
+            cy.get('[data-testid="close-hidden-button"]').should('not.exist');
+        });
+    });
+
+    describe('grader responsibility button', () => {
+        it('shows button when popup is hidden and not instructor', () => {
+            localStorage.setItem(STORAGE_KEY, 'agreed');
+            cy.mount(GradeableMessage, { props: baseProps });
+            cy.get('[data-testid="grader-responsibility"]').should('be.visible');
+        });
+
+        it('does not show button for instructor', () => {
+            cy.mount(GradeableMessage, { props: { ...baseProps, userGroup: 1 } });
+            cy.get('[data-testid="grader-responsibility"]').should('not.exist');
+        });
+
+        it('opens popup with Close button when clicked after agreement', () => {
+            localStorage.setItem(STORAGE_KEY, 'agreed');
+            cy.mount(GradeableMessage, { props: baseProps });
+            cy.get('[data-testid="grader-responsibility"]').click();
             cy.get('[data-testid="popup-window"]').should('be.visible');
             cy.get('[data-testid="agree-popup-btn"]').should('not.exist');
             cy.get('[data-testid="close-hidden-button"]').should('be.visible');
@@ -129,24 +150,6 @@ describe('GradeableMessage', () => {
             cy.contains('button', 'Cancel').click();
             cy.get('[data-testid="popup-window"]').should('not.exist');
             cy.get('@eventHandler').should('have.been.calledOnce');
-        });
-    });
-
-    describe('Escape key', () => {
-        it('closes popup when Escape is pressed while visible', () => {
-            cy.mount(GradeableMessage, { props: baseProps });
-            cy.window().then((win) => win.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })));
-            cy.get('[data-testid="popup-window"]').should('not.exist');
-        });
-    });
-
-    describe('show-gradeable-message-review custom event', () => {
-        it('opens popup in review mode from hidden state', () => {
-            localStorage.setItem(STORAGE_KEY, 'agreed');
-            cy.mount(GradeableMessage, { props: baseProps });
-            cy.window().then((win) => win.dispatchEvent(new CustomEvent('show-gradeable-message-review')));
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.get('[data-testid="agree-popup-btn"]').should('not.exist');
         });
     });
 
