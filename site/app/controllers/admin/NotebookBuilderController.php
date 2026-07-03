@@ -178,6 +178,7 @@ class NotebookBuilderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/multiple-choice-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/short-answer-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/image-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/file-submission-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/itempool-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/item-widget.js');
 
