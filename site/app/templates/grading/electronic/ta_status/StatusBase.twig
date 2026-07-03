@@ -223,6 +223,7 @@
             <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">Data</a>
             <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Manual Grading Histogram</a>
+            <a class="nav-bar key_to_click" id="page_6_nav" onclick="onChangeNavTab(6);">Autograding Testcase Component Averages</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Autograding Histogram</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
@@ -245,6 +246,11 @@
             {% endif %}
 
             {% if autograding_enabled %}
+                {% if testcase_averages|length == 0 %}
+                    <div class="page-content missing-data-container" id="page_6_content"><p>No autograding testcase data available.</p></div>
+                {% else %}
+                    <div class="page-content" id="page_6_content">{{ include('grading/electronic/ta_status/StatusTestcaseAverages.twig') }}</div>
+                {% endif %}
                 {% if autograded_average == null or autograded_average.getCount() == 0 or histograms['bAuto']|length == 0 %}
                     <div class="page-content missing-data-container" id="page_3_content"><p>No autograding data available.</p></div>
                 {% else %}
@@ -354,7 +360,7 @@
     let adminGradeableNavTab = 0;
 
     function onChangeNavTab(tab) {
-        if (tab > 5 || tab < 0) {
+        if (tab > 6 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -365,7 +371,7 @@
 
         //$('.page-content').hide();
         
-        for (var i =0 ; i<6 ;i++) {
+        for (var i =0 ; i<7 ;i++) {
             $('#page_' + i + '_nav').removeClass('active-btn');
             $('#page_' + i + '_content').hide();
         }
