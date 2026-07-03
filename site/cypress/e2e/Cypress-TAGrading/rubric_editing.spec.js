@@ -54,4 +54,4 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-2).should('contain', 'First New Mark');
         */
     });
-}
+});
