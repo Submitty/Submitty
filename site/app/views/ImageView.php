@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\libraries\FileUtils;
-
 class ImageView extends AbstractView {
     /**
      * adds to our buffer a twig output of image annotation interface.

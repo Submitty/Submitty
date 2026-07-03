@@ -14,22 +14,6 @@
     box-sizing: border-box;
 }
 
-.annotation-toolbar {
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid var(--standard-light-medium-gray);
-    background-color: var(--always-default-white);
-    border-radius: 3px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    max-width: 90%;
-    width: 100%;
-    justify-content: left;
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
-
 /* Annotation Image CSS */
 
 #annotatable-image {
@@ -85,9 +69,25 @@
     display: inline-block;
 }
 
-/* Annotation Buttons CSS */
+/* Annotation Toolbar CSS */
 
 .annotation-toolbar {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--standard-light-medium-gray);
+    background-color: var(--always-default-white);
+    border-radius: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: 90%;
+    width: 100%;
+    justify-content: left;
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    /* Annotation Buttons CSS */
+
     .btn {
         display: inline-block;
         padding: 6px 12px;
