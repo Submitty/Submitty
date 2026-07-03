@@ -410,7 +410,7 @@ class SimpleGraderController extends AbstractController {
             }
         }
 
-        if (empty($present_numeric) && empty($present_text)) {
+        if (count($present_numeric) === 0 && count($present_text) === 0) {
             $msg = "CSV must include at least one recognized question column to update.";
             $this->core->addErrorMessage($msg);
             return JsonResponse::getFailResponse($msg);
