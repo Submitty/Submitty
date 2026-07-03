@@ -19,12 +19,10 @@ enum colDataTypes {
  * @returns none
  */
 function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes): void {
-    console.log(`${table_id}, ${sort_key}, ${col_data_type}`);
     const table: HTMLElement = document.querySelector(`#${table_id}`)!;
     if (table === null) {
         return;
     }
-    console.log(table);
 
     // const currentSort = Cookies.get('docker_table_key');
     // const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
@@ -61,8 +59,6 @@ function sortTableByColumn(table_id: string, sort_key: string, col_data_type: co
         return header_key;
     });
     const col_index: number = header_keys.indexOf(sort_key);
-    console.log(header_keys);
-    console.log(col_index);
 
     applySort(table_id, col_index, new_direction, col_data_type);
     updateSortIcons(table_id, sort_key, new_direction);
@@ -153,7 +149,6 @@ function applySort(table_id: string, col_index: number, direction: string, col_d
                     // }
                 }
             }
-            console.log(cmp);
             return direction === 'ASC' ? cmp : -cmp;
         });
         rows.forEach((row) => tbody.appendChild(row));
