@@ -4,14 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_NAME="submitty_test"
 
-# suppress docker print output if it's already set up
-if docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-    echo "Docker image '$IMAGE_NAME' already set up."
-    docker build -q -t "$IMAGE_NAME" "$SCRIPT_DIR" >/dev/null
-else
-    echo "Setting up Docker image '$IMAGE_NAME'..."
-    docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
-fi
+# build docker image
+echo "Setting up Docker image '$IMAGE_NAME'..."
+docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
 
 # define the docker run command
 DOCKER_RUN=(docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp \
