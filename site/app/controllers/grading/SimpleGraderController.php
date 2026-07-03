@@ -358,161 +358,179 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("You do not have permission to grade {$gradeable->getTitle()}");
         }
 
-        $num_numeric = intval($_POST['num_numeric']);
-
         $csv_array = preg_split("/\r\n|\n|\r/", trim($_POST['big_file']));
         $arr_length = count($csv_array);
         $return_data = [];
 
         $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
-            $temp_array = str_getcsv($csv_array[$i]);
-            $data_array[] = $temp_array;
+            $data_array[] = str_getcsv($csv_array[$i]);
         }
 
-        $header_present = (
-            $arr_length > 0 &&
-            (
-                stripos($csv_array[0], 'user id') !== false ||
-                stripos($csv_array[0], 'given name') !== false ||
-                stripos($csv_array[0], 'family name') !== false
-            )
-        );
-        $start_row = $header_present ? 1 : 0;
+        if ($arr_length < 1) {
+            $msg = "CSV file is empty.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
 
-        if ($header_present) {
-            $column_titles = $data_array[0];
-            $expected_prefix = ['User ID', 'Given Name', 'Family Name'];
-            $errors = [];
-            foreach ($expected_prefix as $i => $expected) {
-                $actual = $column_titles[$i] ?? null;
-                if ($actual === null || trim($actual) !== $expected) {
-                    $errors[] = "Column " . ($i + 1) . " has invalid title \"" . ($actual ?? '(missing)') . "\". Expected \"{$expected}\".";
-                }
-            }
-            if (count($errors) > 0) {
-                $msg = implode(" ", $errors);
-                $this->core->addErrorMessage($msg);
-                return JsonResponse::getFailResponse($msg);
+        $column_titles = array_map('trim', $data_array[0]);
+        if (!in_array('User ID', $column_titles, true)) {
+            $msg = "CSV must include a header row with a \"User ID\" column.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
+
+        $col_index = [];
+        foreach ($column_titles as $i => $title) {
+            if ($title !== '') {
+                $col_index[$title] = $i;
             }
         }
-        $num_text_components = 0;
+
+        $numeric_components = [];
+        $text_components = [];
         foreach ($gradeable->getComponents() as $component) {
             if ($component->isText()) {
-                $num_text_components++;
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
             }
         }
-        $expected_length = 3 + $num_numeric + $num_text_components + ($num_numeric > 0 ? 1 : 0);
 
-        $has_section_cols = false;
-        if ($header_present) {
-            $trailing_titles = array_slice($column_titles, $expected_length);
-            $has_section_cols = (
-                isset($trailing_titles[0]) && stripos($trailing_titles[0], 'registration section') !== false &&
-                isset($trailing_titles[1]) && stripos($trailing_titles[1], 'registration subsection') !== false
-            );
+        $present_numeric = [];
+        foreach ($numeric_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_numeric[] = $component;
+            }
+        }
+        $present_text = [];
+        foreach ($text_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_text[] = $component;
+            }
         }
 
-        foreach ($data_array as $row_num => $row) {
-            if ($row_num < $start_row) {
+        if (empty($present_numeric) && empty($present_text)) {
+            $msg = "CSV must include at least one recognized question column to update.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
+
+        $has_total_col = isset($col_index['Total']);
+
+        for ($row_num = 1; $row_num < $arr_length; $row_num++) {
+            $row = $data_array[$row_num];
+            if (count($row) === 1 && trim($row[0]) === '') {
                 continue;
             }
-            $valid_lengths = $has_section_cols ? [$expected_length, $expected_length + 2] : [$expected_length];
-            if (!in_array(count($row), $valid_lengths, true)) {
-                $msg = "Row " . ($row_num + 1) . " of the CSV has the incorrect length. Expected {$expected_length} columns"
-                    . ($header_present ? "" : ", or {$expected_length}+2 with a Registration Section/Subsection header")
-                    . ", found " . count($row) . ".";
+
+            $user_id = $row[$col_index['User ID']] ?? null;
+            if ($user_id === null || trim($user_id) === '') {
+                $msg = "Row " . ($row_num + 1) . ", Column \"User ID\" is required but was empty.";
                 $this->core->addErrorMessage($msg);
                 return JsonResponse::getFailResponse($msg);
             }
-            if ($num_numeric > 0) {
-                $total = 0;
-                $col = 3;
-                for (; $col < 3 + $num_numeric; $col++) {
-                    if (!is_numeric($row[$col])) {
-                        $msg = "Row " . ($row_num + 1) . " of the CSV's column " . ($col + 1) . " should be a number. Found \"{$row[$col]}\".";
-                        $this->core->addErrorMessage($msg);
-                        return JsonResponse::getFailResponse($msg);
-                    }
-                    $total += floatval($row[$col]);
+
+            $total = 0;
+            $any_numeric_present_in_row = false;
+            foreach ($present_numeric as $component) {
+                $idx = $col_index[$component->getTitle()];
+                $val = $row[$idx] ?? '';
+                if ($val === '') {
+                    continue;
                 }
-                if (!is_numeric($row[$col]) || abs($total - floatval($row[$col])) > 0.0000001) {
-                    $msg = "Row " . ($row_num + 1) . " of the CSV does not have the correct total for numeric elements. Expected {$total}, found \"" . ($row[$col] ?? '') . "\".";
+                if (!is_numeric($val)) {
+                    $msg = "Row " . ($row_num + 1) . ", Column \"" . $component->getTitle() . "\" (column " . ($idx + 1) . ") should be a number. Found \"{$val}\".";
+                    $this->core->addErrorMessage($msg);
+                    return JsonResponse::getFailResponse($msg);
+                }
+                $total += floatval($val);
+                $any_numeric_present_in_row = true;
+            }
+
+            if ($has_total_col && $any_numeric_present_in_row) {
+                $idx = $col_index['Total'];
+                $total_val = $row[$idx] ?? '';
+                if ($total_val !== '' && (!is_numeric($total_val) || abs($total - floatval($total_val)) > 0.0000001)) {
+                    $msg = "Row " . ($row_num + 1) . ", Column \"Total\" (column " . ($idx + 1) . ") does not match the sum of included numeric columns. Expected {$total}, found \"{$total_val}\".";
                     $this->core->addErrorMessage($msg);
                     return JsonResponse::getFailResponse($msg);
                 }
             }
         }
-        /** @var GradedGradeable $graded_gradeable */
+
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
-            for ($j = 0; $j < $arr_length; $j++) {
-                $username = $graded_gradeable->getSubmitter()->getId();
-                if ($username !== $data_array[$j][0]) {
+            $username = $graded_gradeable->getSubmitter()->getId();
+            $matched_row = null;
+            for ($j = 1; $j < $arr_length; $j++) {
+                if (($data_array[$j][$col_index['User ID']] ?? null) === $username) {
+                    $matched_row = $data_array[$j];
+                    break;
+                }
+            }
+            if ($matched_row === null) {
+                continue;
+            }
+
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+            $temp_array = ['username' => $username];
+            $index1 = 0;
+
+            foreach ($gradeable->getComponents() as $component) {
+                $value_temp_str = "value_" . $index1;
+                $status_temp_str = "status_" . $index1;
+
+                if (!isset($col_index[$component->getTitle()])) {
+                    // If column isn't included in the CSV, leave the grading untouched.
+                    $index1++;
                     continue;
                 }
 
-                $temp_array = [];
-                $temp_array['username'] = $username;
-                $index1 = 0;
-                $index2 = 3; //3 is the starting index of the grades in the csv
+                $idx = $col_index[$component->getTitle()];
+                $component_data = $matched_row[$idx] ?? '';
 
-                // Get the user grade for this gradeable
-                $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-                //Makes an array with all the values and their status.
-                foreach ($gradeable->getComponents() as $component) {
-                    $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                    $component_grade->setGrader($grader);
-
-                    $value_temp_str = "value_" . $index1;
-                    $status_temp_str = "status_" . $index1;
-                    if (isset($data_array[$j][$index2])) {
-                        $component_data = $data_array[$j][$index2];
-                        // text component
-                        if ($component->isText()) {
-                            $component_grade->setComment($component_data);
-                            $component_grade->setGradeTime($this->core->getDateTimeNow());
-                            $temp_array[$value_temp_str] = $component_data;
-                            $temp_array[$status_temp_str] = "OK";
-                        }
-                        else {
-                            // numeric component
-                            // if the data is empty, we should just input 0. If it is not a number, we should fail.
-                            if ($component_data !== '' && !is_numeric($component_data)) {
-                                $temp_array[$value_temp_str] = $component_data;
-                                $temp_array[$status_temp_str] = "ERROR";
-                            }
-                            else {
-                                $component_data = floatval($component_data);
-                                if ($component->getUpperClamp() < $component_data) {
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "ERROR";
-                                }
-                                else {
-                                    $component_grade->setScore($component_data);
-                                    $component_grade->setGradeTime($this->core->getDateTimeNow());
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                            }
-                        }
-                    }
+                if ($component_data === '') {
                     $index1++;
-                    $index2++;
-                    //skips the index of the total points in the csv file
-                    if ($index1 === $num_numeric) {
-                        $index2++;
-                    }
+                    continue;
                 }
 
-                // Reset the overall comment because we're overwriting the grade anyway
-                $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
 
-                $return_data[] = $temp_array;
-                $j = $arr_length; //stops the for loop early to not waste resources
+                if ($component->isText()) {
+                    $component_grade->setComment($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                else {
+                    $component_data = floatval($component_data);
+                    if ($component->getUpperClamp() < $component_data) {
+                        $msg = "User \"{$username}\", Column \"" . $component->getTitle() . "\" exceeds the maximum value of " . $component->getUpperClamp() . ". Found \"{$component_data}\".";
+                        $this->core->addErrorMessage($msg);
+                        return JsonResponse::getFailResponse($msg);
+                    }
+                    $component_grade->setScore($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                $index1++;
             }
+
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $return_data[] = $temp_array;
         }
-        return JsonResponse::getSuccessResponse($return_data);
+
+        $updated_columns = array_merge(
+            array_map(fn($c) => $c->getTitle(), $present_numeric),
+            array_map(fn($c) => $c->getTitle(), $present_text)
+        );
+        return JsonResponse::getSuccessResponse([
+            'updated_students' => $return_data,
+            'updated_columns' => $updated_columns,
+        ]);
     }
 
     /**
