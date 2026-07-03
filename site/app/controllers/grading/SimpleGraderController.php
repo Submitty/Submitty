@@ -5,7 +5,6 @@ namespace app\controllers\grading;
 use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
-use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
