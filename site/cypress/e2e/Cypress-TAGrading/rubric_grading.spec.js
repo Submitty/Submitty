@@ -1,18 +1,4 @@
 describe('Test cases for TA grading page', () => {
-    before(() => {
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=2']);
-        cy.on('window:confirm', () => true);
-        cy.get('[title="Delete this component"]').then(($buttons) => {
-            const toDelete = $buttons.length - 4;
-            if (toDelete <= 0) {
-                return;
-            }
-            Cypress._.times(toDelete, () => {
-                cy.get('[title="Delete this component"]').eq(-1).click({ force: true });
-            });
-        });
-    });
     it('Grader should be able to add and remove overall comments', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
