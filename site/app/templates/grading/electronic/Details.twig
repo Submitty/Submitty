@@ -1,3 +1,5 @@
+{% import 'misc/TableHeaderSort.twig' as table_sort %}
+
 <div class="content">
     {#
         Default is viewing your sections
@@ -149,20 +151,7 @@
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
-                        <th style="text-align: center" data-col-title="{{ column.title }}">
-                            <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
-                            {% if sort == column.sort_type %}
-                                class="active-sort"
-                            {% endif %}
-                            >
-                                {{ column.title }}
-                                {% if sort == column.sort_type %}
-                                    <i class="fa {{ direction == 'ASC' ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
-                                {% else %}
-                                    <i class="fa fa-sort"></i>
-                                {% endif %}
-                            </a>
-                        </th>
+                        {{ table_sort.sortable_header('details-table', column.title, column.function, 'string') }}
                     {% else %}
                         <th style="text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
