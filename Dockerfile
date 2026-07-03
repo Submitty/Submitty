@@ -22,8 +22,9 @@ RUN chmod 1777 /tmp
 # Install dependencies
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \
-    && npm ci \
-    && chmod -R 777 vendor node_modules
+    && npm ci
 
 # Copy the rest of the site directory
 COPY site/ .
+
+RUN chmod -R 777 /site
