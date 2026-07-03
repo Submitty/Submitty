@@ -1,0 +1,4 @@
+# Root .dockerignore
+*
+!site/**
+!Dockerfile
