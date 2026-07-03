@@ -1,4 +1,4 @@
-# Root .dockerignore
+# submitty_test .dockerignore
 *
 !site/**
 !Dockerfile
