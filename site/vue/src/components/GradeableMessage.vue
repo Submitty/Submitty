@@ -7,14 +7,26 @@ const props = defineProps<{
     gradeableId: string;
     userGroup: number;
     blindStatus: number;
+    courseUrl: string;
 }>();
 
-const visible = ref(false);
-const canAgree = ref(true);
+const emit = defineEmits<{
+    cancel: [url: string];
+}>();
+
 const storageKey = `${props.semester}-${props.course}-${props.gradeableId}-message`;
 const isGrader = props.userGroup === 2 || props.userGroup === 3;
 const isPeer = props.userGroup === 4;
-const courseUrl = document.body.dataset.courseUrl ?? '/';
+
+const visible = ref(false);
+const canAgree = ref(true);
+
+if (props.userGroup === 1 || localStorage.getItem(storageKey) === 'agreed') {
+    canAgree.value = false;
+}
+else {
+    visible.value = true;
+}
 
 function agree(): void {
     localStorage.setItem(storageKey, 'agreed');
@@ -24,7 +36,7 @@ function agree(): void {
 
 function cancel(): void {
     visible.value = false;
-    window.location.href = courseUrl;
+    emit('cancel', props.courseUrl);
 }
 
 function close(): void {
@@ -43,21 +55,13 @@ function onKeydown(e: KeyboardEvent): void {
 }
 
 onMounted(() => {
-    if (props.userGroup !== 1 && localStorage.getItem(storageKey) !== 'agreed') {
-        canAgree.value = true;
-        visible.value = true;
-    }
-    else {
-        canAgree.value = false;
-    }
-
-    document.addEventListener('keydown', onKeydown);
     window.addEventListener('show-gradeable-message-review', showForReview);
+    window.addEventListener('keydown', onKeydown);
 });
 
 onUnmounted(() => {
-    document.removeEventListener('keydown', onKeydown);
     window.removeEventListener('show-gradeable-message-review', showForReview);
+    window.removeEventListener('keydown', onKeydown);
 });
 </script>
 

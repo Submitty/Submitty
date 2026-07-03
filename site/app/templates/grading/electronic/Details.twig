@@ -862,6 +862,10 @@
         'course': course,
         'gradeableId': gradeable.getId,
         'userGroup': core.getUser().getGroup(),
-        'blindStatus': blind_status
+        'blindStatus': blind_status,
+        'courseUrl': course_url
+    },
+    'events': {
+        'cancel': '(url) => { window.location.href = url; }',
     }
 }%}
