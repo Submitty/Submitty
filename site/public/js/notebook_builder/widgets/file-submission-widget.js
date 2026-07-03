@@ -19,6 +19,7 @@ class FileSubmissionWidget extends Widget {
         container.classList.add('file-submission-widget');
 
         const interactive_area = container.querySelector('.interactive-container');
+        // eslint-disable-next-line no-unsanitized/property
         interactive_area.innerHTML = this.getFileSubmissionTemplate(this.state.label, this.state.directory);
 
         this.dom_pointer = container;

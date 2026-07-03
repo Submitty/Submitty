@@ -115,7 +115,7 @@ function getBadMarkdownContents() {
 }
 
 /**
- * Determines if any file submission widget has a blank directory.  
+ * Determines if any file submission widget has a blank directory.
  *
  * @returns {Array[]} Returns an array containing the directory inputs which were found to be blank.
 */
