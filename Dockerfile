@@ -1,7 +1,8 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies (Node 20 & PHP 8.2)
+# Install dependencies, including Node 20 and PHP 8.2
+# which are not available by default in Ubuntu 22.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
         software-properties-common curl git gnupg2 ca-certificates unzip \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
