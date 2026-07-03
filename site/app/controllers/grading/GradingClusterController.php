@@ -51,18 +51,34 @@ class GradingClusterController extends AbstractController {
         $config = new GradingClusterConfig($gradeable_id, $algorithm);
         $em->persist($config);
 
+        $clusters = [];
         foreach ($cluster_groups as $cluster_name => $members) {
             if ($members === []) {
                 continue;
             }
 
             $cluster = new GradingCluster($config, $cluster_name);
-            foreach ($members as $member) {
-                new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null, (int) $member['active_version']);
-            }
             $em->persist($cluster);
+            $clusters[] = ['cluster' => $cluster, 'members' => $members];
         }
         $em->flush();
+
+        $bulkMembersData = [];
+        foreach ($clusters as $c) {
+            $cluster_id = $c['cluster']->getId();
+            foreach ($c['members'] as $member) {
+                $bulkMembersData[] = [
+                    'cluster_id'     => $cluster_id,
+                    'user_id'        => $member['user_id'] ?? null,
+                    'team_id'        => $member['team_id'] ?? null,
+                    'active_version' => (int) $member['active_version']
+                ];
+            }
+        }
+
+        if (!empty($bulkMembersData)) {
+            $em->getRepository(GradingClusterConfig::class)->bulkInsertMembers($bulkMembersData);
+        }
 
         return JsonResponse::getSuccessResponse([]);
     }

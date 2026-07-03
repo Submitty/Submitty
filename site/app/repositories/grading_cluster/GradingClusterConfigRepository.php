@@ -35,4 +35,36 @@ class GradingClusterConfigRepository extends EntityRepository {
         ->setParameter('gradeable_id', $gradeable_id)
         ->getOneOrNullResult();
     }
+
+    /**
+     * Performs a bulk insert of cluster members to avoid N+1 query limits.
+     * @param array<int, array<string, mixed>> $membersData Array of member arrays
+     */
+    public function bulkInsertMembers(array $membersData): void {
+        if (empty($membersData)) {
+            return;
+        }
+
+        $sql = "INSERT INTO ta_grading_clusters_members (cluster_id, user_id, team_id, active_version) VALUES ";
+        $values = [];
+        $params = [];
+
+        foreach ($membersData as $member) {
+            $values[] = "(?, ?, ?, ?)";
+            $params[] = $member['cluster_id'];
+            $params[] = $member['user_id'];
+            $params[] = $member['team_id'];
+            $params[] = $member['active_version'];
+        }
+
+        $sql .= implode(", ", $values);
+        
+        $conn = $this->getEntityManager()->getConnection();
+        if (method_exists($conn, 'executeStatement')) {
+            $conn->executeStatement($sql, $params);
+        } else {
+            // Fallback for older Doctrine DBAL versions
+            $conn->executeUpdate($sql, $params);
+        }
+    }
 }
