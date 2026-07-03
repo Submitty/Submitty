@@ -434,12 +434,51 @@ const reset = () => {
         '[data-testid="display-benchmarks-lowest_d"]',
     ];
 
+    const textboxes = [
+        '[data-testid="cust-messages-textarea"]',
+        '[data-testid="benchmark-lowest_a-"]',
+        '[data-testid="benchmark-lowest_b-"]',
+        '[data-testid="benchmark-lowest_c-"]',
+        '[data-testid="benchmark-lowest_d"]',
+        '[data-testid="section-and-labels-1"]',
+        '[data-testid="section-and-labels-2"]',
+        '[data-testid="section-and-labels-3"]',
+        '[data-testid="section-and-labels-4"]',
+        '[data-testid="section-and-labels-5"]',
+        '[data-testid="section-and-labels-6"]',
+        '[data-testid="section-and-labels-7"]',
+        '[data-testid="section-and-labels-8"]',
+        '[data-testid="section-and-labels-9"]',
+        '[data-testid="section-and-labels-10"]',
+        '[data-testid="cutoff-A"]',
+        '[data-testid="cutoff-A-"]',
+        '[data-testid="cutoff-B+"]',
+        '[data-testid="cutoff-B"]',
+        '[data-testid="cutoff-B-"]',
+        '[data-testid="cutoff-C+"]',
+        '[data-testid="cutoff-C"]',
+        '[data-testid="cutoff-C-"]',
+        '[data-testid="cutoff-D+"]',
+        '[data-testid="cutoff-D"]',
+    ];
+
     checkboxes.forEach((testId) => {
         cy.get('body').then(($body) => {
             const $el = $body.find(testId);
             // Only uncheck and wait for save if the checkbox is checked
-            if ($el.length && $el.is(':checked')) {
+            if ($el.is(':visible') && $el.length && $el.is(':checked')) {
                 cy.wrap($el).uncheck({ force: true });
+                cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
+            }
+        });
+    });
+
+    textboxes.forEach((testId) => {
+        cy.get('body').then(($body) => {
+            const $el = $body.find(testId);
+            // Only clear and wait for save if the textbox is not empty
+            if ($el.is(':visible') && $el.length && $el.val() !== '') {
+                cy.wrap($el).clear();
                 cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
             }
         });
