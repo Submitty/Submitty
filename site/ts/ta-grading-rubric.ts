@@ -1472,17 +1472,18 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
         comment = rawComment?.toString() ?? '';
     }
 
-    const dataDOMElement = domElement.find('.graded-component-data');
-    let gradedVersion = dataDOMElement.attr('data-graded_version')!;
+    const dataDOMElement = domElement.find('.graded-component-data, .peer-graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version') ?? '';
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion().toString();
     }
+    const parsedGradedVersion = parseInt(gradedVersion);
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(gradedVersion),
+        graded_version: Number.isNaN(parsedGradedVersion) ? getDisplayVersion() : parsedGradedVersion,
         grade_time: dataDOMElement.attr('data-grade_time')!,
         grader_id: dataDOMElement.attr('data-grader_id')!,
         verifier_id: dataDOMElement.attr('data-verifier_id')!,
