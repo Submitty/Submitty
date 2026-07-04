@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { getLayoutState, onLayoutChange } from '../../../ts/panel-layout-store';
+import { computed, onMounted, ref } from 'vue';
 
 type PanelPosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
 
@@ -8,6 +7,11 @@ interface PositionOption {
     value: PanelPosition;
     label: string;
     side: 'left' | 'right';
+}
+
+interface TaLayoutDet {
+    numOfPanelsEnabled?: number;
+    dividedColName?: string;
 }
 
 const props = defineProps<{
@@ -18,20 +22,30 @@ const emit = defineEmits<{
     'position-change': [payload: { panelId: string; position: PanelPosition }];
 }>();
 
-const layout = ref(getLayoutState());
+function loadLayoutState(): { numOfPanels: number; dividedColName: 'LEFT' | 'RIGHT' } {
+    try {
+        const saved = localStorage.getItem('taLayoutDetails');
+        if (saved) {
+            const data = JSON.parse(saved) as TaLayoutDet;
+            return {
+                numOfPanels: data.numOfPanelsEnabled ?? 1,
+                dividedColName: (data.dividedColName ?? 'LEFT') as 'LEFT' | 'RIGHT',
+            };
+        }
+    }
+    catch {
+        // Ignore parse errors
+    }
+    return { numOfPanels: 1, dividedColName: 'LEFT' };
+}
+
+const layout = ref(loadLayoutState());
 const numOfPanels = computed(() => layout.value.numOfPanels);
 const dividedCol = computed(() => layout.value.dividedColName);
 
-let unsubscribe: (() => void) | null = null;
-
 onMounted(() => {
-    unsubscribe = onLayoutChange((newState) => {
-        layout.value = newState;
-    });
-});
-
-onUnmounted(() => {
-    unsubscribe?.();
+    // Re-read on mount in case layout changed between renders
+    layout.value = loadLayoutState();
 });
 
 const options = computed<PositionOption[]>(() => {

@@ -1,6 +1,5 @@
 import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
-import { updateLayout } from './panel-layout-store';
 
 declare global {
     interface Window {
@@ -331,6 +330,12 @@ export function setPanelsVisibilities(
     else {
         saveTaLayoutDetails();
     }
+
+    // Hide the panel's <select> listbox after a position is chosen
+    // so it doesn't block subsequent clicks on the button area
+    if (position !== null) {
+        $(`select#${ele}_select`).hide();
+    }
 }
 
 // Exchanges positions of left and right panels
@@ -519,7 +524,8 @@ export function togglePanelLayoutModes(forceVal = false) {
             rightBottom: null,
         };
     }
-    updateLayout(taLayoutDet.numOfPanelsEnabled, taLayoutDet.dividedColName as 'LEFT' | 'RIGHT');
+    // Intentionally no shared state layer: PanelLayoutPopup reloads on change
+    // until it's migrated to Vue (see #12937)
 }
 
 export function toggleFullLeftColumnMode(forceVal = false) {
@@ -579,19 +585,16 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
         $('#grading-panel-student-name').show();
     }
     updatePanelHeaderDataAttributes();
+    // Reload the page so Vue components receive updated layout state from Twig.
+    // This will be removed when PanelLayoutPopup is migrated to Vue (see #12937)
+    location.reload();
 };
 
 export function updatePanelHeaderDataAttributes() {
     $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
     $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
 
-    updateLayout(taLayoutDet.numOfPanelsEnabled, taLayoutDet.dividedColName as 'LEFT' | 'RIGHT');
-
-    window.dispatchEvent(new CustomEvent('panel-layout-changed', {
-        detail: {
-            numOfPanelsEnabled: taLayoutDet.numOfPanelsEnabled,
-            dividedColName: taLayoutDet.dividedColName,
-        },
-    }));
+    // Intentionally no shared state layer: PanelLayoutPopup reloads on change
+    // until it's migrated to Vue (see #12937)
 }
 window.setPanelsVisibilities = setPanelsVisibilities;
