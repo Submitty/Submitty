@@ -1,37 +1,30 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-
-const props = defineProps<{
-    visible?: boolean;
-}>();
+import { onMounted, ref } from 'vue';
 
 const emit = defineEmits<{
-    close: [];
+    'close': [];
+    'select-layout': [panels: number, isLeftTaller: boolean, twoInRight?: boolean];
 }>();
 
-const show = ref(props.visible);
-
-function onTogglePanelModal(e: CustomEvent<boolean>) {
-    show.value = e.detail;
+function selectLayout(panels: number, isLeftTaller: boolean, twoInRight = false) {
+    emit('select-layout', panels, isLeftTaller, twoInRight);
 }
 
 function close() {
-    show.value = false;
     emit('close');
 }
 
-function selectLayout(panels: number, isLeftTaller: boolean, twoInRight = false) {
-    window.changePanelsLayout(panels, isLeftTaller, twoInRight);
-}
+const singlePanel = ref<HTMLCanvasElement | null>(null);
+const equalHeight = ref<HTMLCanvasElement | null>(null);
+const tallLeft = ref<HTMLCanvasElement | null>(null);
+const equalTwoInLeft = ref<HTMLCanvasElement | null>(null);
+const equalTwoInRight = ref<HTMLCanvasElement | null>(null);
+const tallLeftTwoInLeft = ref<HTMLCanvasElement | null>(null);
+const tallLeftTwoInRight = ref<HTMLCanvasElement | null>(null);
+const equalFourPanel = ref<HTMLCanvasElement | null>(null);
+const tallLeftFourPanel = ref<HTMLCanvasElement | null>(null);
 
-function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && show.value) {
-        close();
-    }
-}
-
-function fillCanvas(id: string, draw: (ctx: CanvasRenderingContext2D) => void) {
-    const canvas = document.getElementById(id) as HTMLCanvasElement | null;
+function fillCanvas(canvas: HTMLCanvasElement | null, draw: (ctx: CanvasRenderingContext2D) => void) {
     const ctx = canvas?.getContext('2d');
     if (ctx) {
         draw(ctx);
@@ -39,7 +32,7 @@ function fillCanvas(id: string, draw: (ctx: CanvasRenderingContext2D) => void) {
 }
 
 function drawCanvases() {
-    fillCanvas('single-panel', (ctx) => {
+    fillCanvas(singlePanel.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -47,7 +40,7 @@ function drawCanvases() {
         ctx.fillRect(5, 20, 288, 120);
     });
 
-    fillCanvas('equal-height', (ctx) => {
+    fillCanvas(equalHeight.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -56,7 +49,7 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    fillCanvas('tall-left', (ctx) => {
+    fillCanvas(tallLeft.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -65,7 +58,7 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    fillCanvas('equal-two-in-left', (ctx) => {
+    fillCanvas(equalTwoInLeft.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -75,7 +68,7 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    fillCanvas('equal-two-in-right', (ctx) => {
+    fillCanvas(equalTwoInRight.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -85,7 +78,7 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    fillCanvas('tall-left-two-in-left', (ctx) => {
+    fillCanvas(tallLeftTwoInLeft.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -95,7 +88,7 @@ function drawCanvases() {
         ctx.fillRect(153, 20, 140, 120);
     });
 
-    fillCanvas('tall-left-two-in-right', (ctx) => {
+    fillCanvas(tallLeftTwoInRight.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -105,7 +98,7 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    fillCanvas('equal-four-panel', (ctx) => {
+    fillCanvas(equalFourPanel.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -116,7 +109,7 @@ function drawCanvases() {
         ctx.fillRect(153, 82, 140, 58);
     });
 
-    fillCanvas('tall-left-four-panel', (ctx) => {
+    fillCanvas(tallLeftFourPanel.value, (ctx) => {
         ctx.fillStyle = 'aliceblue';
         ctx.fillRect(0, 0, 350, 200);
         ctx.fillStyle = '#6d91b5';
@@ -128,21 +121,11 @@ function drawCanvases() {
     });
 }
 
-onMounted(() => {
-    window.addEventListener('toggle-panel-modal', onTogglePanelModal as EventListener);
-    document.addEventListener('keydown', onKeydown);
-    drawCanvases();
-});
-
-onUnmounted(() => {
-    window.removeEventListener('toggle-panel-modal', onTogglePanelModal as EventListener);
-    document.removeEventListener('keydown', onKeydown);
-});
+onMounted(drawCanvases);
 </script>
 
 <template>
   <div
-    v-show="show"
     id="panels-selector-modal"
     class="popup-form"
   >
@@ -178,7 +161,7 @@ onUnmounted(() => {
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="single-panel" />
+                <canvas ref="singlePanel" />
                 <div class="flex-col">
                   <span>single panel</span>
                   <button
@@ -202,7 +185,7 @@ onUnmounted(() => {
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-height" />
+                <canvas ref="equalHeight" />
                 <div class="flex-col">
                   <span>side-by-side</span>
                   <button
@@ -215,7 +198,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left" />
+                <canvas ref="tallLeft" />
                 <div class="flex-col">
                   <span>side-by-side, taller left</span>
                   <button
@@ -239,7 +222,7 @@ onUnmounted(() => {
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-two-in-left" />
+                <canvas ref="equalTwoInLeft" />
                 <div class="flex-col">
                   <span>two on left, one on right</span>
                   <button
@@ -252,7 +235,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-left" />
+                <canvas ref="tallLeftTwoInLeft" />
                 <div class="flex-col">
                   <span>two on left, one on right, taller left</span>
                   <button
@@ -265,7 +248,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="equal-two-in-right" />
+                <canvas ref="equalTwoInRight" />
                 <div class="flex-col">
                   <span>one on left, two on right</span>
                   <button
@@ -278,7 +261,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-two-in-right" />
+                <canvas ref="tallLeftTwoInRight" />
                 <div class="flex-col">
                   <span>one on left, two on right, taller left</span>
                   <button
@@ -302,7 +285,7 @@ onUnmounted(() => {
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas id="equal-four-panel" />
+                <canvas ref="equalFourPanel" />
                 <div class="flex-col">
                   <span>two on left, two on right</span>
                   <button
@@ -315,7 +298,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas id="tall-left-four-panel" />
+                <canvas ref="tallLeftFourPanel" />
                 <div class="flex-col">
                   <span>two on left, two on right, taller left</span>
                   <button
