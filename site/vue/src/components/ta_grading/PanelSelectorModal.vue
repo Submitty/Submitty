@@ -161,7 +161,10 @@ onMounted(drawCanvases);
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas ref="singlePanel" />
+                <canvas
+                  id="single-panel"
+                  ref="singlePanel"
+                />
                 <div class="flex-col">
                   <span>single panel</span>
                   <button
@@ -185,7 +188,10 @@ onMounted(drawCanvases);
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas ref="equalHeight" />
+                <canvas
+                  id="equal-height"
+                  ref="equalHeight"
+                />
                 <div class="flex-col">
                   <span>side-by-side</span>
                   <button
@@ -198,7 +204,10 @@ onMounted(drawCanvases);
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas ref="tallLeft" />
+                <canvas
+                  id="tall-left"
+                  ref="tallLeft"
+                />
                 <div class="flex-col">
                   <span>side-by-side, taller left</span>
                   <button
@@ -222,7 +231,10 @@ onMounted(drawCanvases);
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas ref="equalTwoInLeft" />
+                <canvas
+                  id="equal-two-in-left"
+                  ref="equalTwoInLeft"
+                />
                 <div class="flex-col">
                   <span>two on left, one on right</span>
                   <button
@@ -235,7 +247,10 @@ onMounted(drawCanvases);
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas ref="tallLeftTwoInLeft" />
+                <canvas
+                  id="tall-left-two-in-left"
+                  ref="tallLeftTwoInLeft"
+                />
                 <div class="flex-col">
                   <span>two on left, one on right, taller left</span>
                   <button
@@ -248,7 +263,10 @@ onMounted(drawCanvases);
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas ref="equalTwoInRight" />
+                <canvas
+                  id="equal-two-in-right"
+                  ref="equalTwoInRight"
+                />
                 <div class="flex-col">
                   <span>one on left, two on right</span>
                   <button
@@ -261,7 +279,10 @@ onMounted(drawCanvases);
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas ref="tallLeftTwoInRight" />
+                <canvas
+                  id="tall-left-two-in-right"
+                  ref="tallLeftTwoInRight"
+                />
                 <div class="flex-col">
                   <span>one on left, two on right, taller left</span>
                   <button
@@ -285,7 +306,10 @@ onMounted(drawCanvases);
             <hr />
             <div class="layout-option-cont">
               <div class="layout-option-item">
-                <canvas ref="equalFourPanel" />
+                <canvas
+                  id="equal-four-panel"
+                  ref="equalFourPanel"
+                />
                 <div class="flex-col">
                   <span>two on left, two on right</span>
                   <button
@@ -298,7 +322,10 @@ onMounted(drawCanvases);
                 </div>
               </div>
               <div class="layout-option-item">
-                <canvas ref="tallLeftFourPanel" />
+                <canvas
+                  id="tall-left-four-panel"
+                  ref="tallLeftFourPanel"
+                />
                 <div class="flex-col">
                   <span>two on left, two on right, taller left</span>
                   <button
