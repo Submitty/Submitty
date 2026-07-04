@@ -2,7 +2,6 @@
 ignore-paths=
     site/node_modules,
     more_autograding_examples,
-    grading/json_syntax_checker.py,
     grading/python/submitty_router.py,
     bin/regrade.py,
     bin/grading_done.py,
@@ -134,8 +133,7 @@ ignore-paths=
     migration/tests/test_handle_migration.py,
     migration/tests/test_dumper.py,
     sample_files/sample_CSV/test_grades.py,
-    sample_files/sample_CSV/verify.py,
-    vagrant-workers/workers.py
+    sample_files/sample_CSV/verify.py
 
 [FORMAT]
 max-line-length=100

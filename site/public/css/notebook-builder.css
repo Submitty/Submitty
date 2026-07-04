@@ -72,6 +72,11 @@
     min-height: 75px;
 }
 
+.markdown-widget .markdown-area-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
 /**
  * Short answer widget styles
  */
