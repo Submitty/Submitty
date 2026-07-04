@@ -5,8 +5,6 @@ Deletes old entries from the active_graders table in all course databases.
 This script is intended to be run periodically (e.g. by cron) to cleanup stale locks.
 """
 
-import os
-
 import database_queries
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
