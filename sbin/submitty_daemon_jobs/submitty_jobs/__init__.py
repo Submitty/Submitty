@@ -24,6 +24,11 @@ try:
 except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err
+    else:
+        # Provide fallback values for testing
+        INSTALL_DIR = '/usr/local/submitty'
+        DATA_DIR = '/var/local/submitty'
+        QUEUE_DIR = Path(DATA_DIR, 'daemon_job_queue')
 
 
 try:
@@ -34,3 +39,7 @@ try:
 except Exception as err:
     if os.environ.get('PYTEST') is None:
         raise err
+    else:
+        # Provide fallback values for testing
+        DAEMON_USER = 'submitty_daemon'
+        VERIFIED_ADMIN_USER = 'submitty_admin'
