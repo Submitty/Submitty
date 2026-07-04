@@ -3,7 +3,6 @@
 import sys
 import os
 import argparse
-from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
 import database_queries
@@ -21,18 +20,9 @@ def main():
 
     # Setup DB connection for this specific course
     db_name = f"submitty_{args.semester}_{args.course}"
-    db_user = database_queries.DB_USER
-    db_pass = database_queries.DB_PASSWORD
-    db_host = database_queries.DB_HOST
-
-    if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
-    else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
 
     try:
-        engine = create_engine(conn_string)
-        course_conn = engine.connect()
+        course_conn = database_queries.setup_course_db(db_name)
     except SQLAlchemyError as e:
         print(f"Error connecting to course database {db_name}: {e}")
         sys.exit(1)
@@ -47,11 +37,13 @@ def main():
             print(f"Unknown algorithm: {args.algorithm}")
             sys.exit(1)
 
-        database_queries.bulk_insert_clustering(course_conn, args.gradeable_id, args.algorithm, cluster_groups)
+        database_queries.bulk_insert_clustering(
+            course_conn, args.gradeable_id, args.algorithm, cluster_groups
+        )
 
         print(f"Successfully ran {args.algorithm} clustering for {args.gradeable_id}")
-    except Exception as e:
-        print(f"Error generating clusters: {e}")
+    except SQLAlchemyError as e:
+        print(f"Database error while generating clusters: {e}")
         sys.exit(1)
     finally:
         course_conn.close()

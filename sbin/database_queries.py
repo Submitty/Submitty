@@ -64,6 +64,19 @@ def setup_db():
     return db, metadata
 
 
+def setup_course_db(db_name):
+    """Set up a connection with a specific course database."""
+    if os.path.isdir(DB_HOST):
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+            DB_USER, DB_PASSWORD, db_name, DB_HOST)
+    else:
+        conn_string = "postgresql://{}:{}@{}/{}".format(
+            DB_USER, DB_PASSWORD, DB_HOST, db_name)
+
+    engine = create_engine(conn_string)
+    return engine.connect()
+
+
 def get_active_submitters(conn, gradeable_id):
     """Fetch active submitters for a gradeable to pass to the clustering algorithm."""
     query = text("""
