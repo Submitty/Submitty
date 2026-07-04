@@ -37,6 +37,41 @@ class GradingClusterConfigRepository extends EntityRepository {
     }
 
     /**
+     * @param int $config_id
+     * @param string[] $cluster_names
+     * @return array<string, int> Map of cluster_name => id
+     */
+    public function bulkInsertClusters(int $config_id, array $cluster_names): array {
+        if (empty($cluster_names)) {
+            return [];
+        }
+
+        $sql = "INSERT INTO ta_grading_clusters (config_id, cluster_name) VALUES ";
+        $values = [];
+        $params = [];
+
+        foreach ($cluster_names as $name) {
+            $values[] = "(?, ?)";
+            $params[] = $config_id;
+            $params[] = $name;
+        }
+
+        $sql .= implode(", ", $values);
+        $sql .= " RETURNING id, cluster_name";
+
+        $conn = $this->getEntityManager()->getConnection();
+        
+        $stmt = $conn->executeQuery($sql, $params);
+        $rows = $stmt->fetchAllAssociative();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[$row['cluster_name']] = (int) $row['id'];
+        }
+        return $map;
+    }
+
+    /**
      * Performs a bulk insert of cluster members to avoid N+1 query limits.
      * @param array<int, array<string, mixed>> $membersData Array of member arrays
      */
@@ -60,11 +95,6 @@ class GradingClusterConfigRepository extends EntityRepository {
         $sql .= implode(", ", $values);
         
         $conn = $this->getEntityManager()->getConnection();
-        if (method_exists($conn, 'executeStatement')) {
-            $conn->executeStatement($sql, $params);
-        } else {
-            // Fallback for older Doctrine DBAL versions
-            $conn->executeUpdate($sql, $params);
-        }
+        $conn->executeStatement($sql, $params);
     }
 }

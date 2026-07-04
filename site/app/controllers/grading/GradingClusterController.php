@@ -50,34 +50,41 @@ class GradingClusterController extends AbstractController {
 
         $config = new GradingClusterConfig($gradeable_id, $algorithm);
         $em->persist($config);
+        $em->flush(); // Save config to get its ID
 
-        $clusters = [];
+        $cluster_names = [];
         foreach ($cluster_groups as $cluster_name => $members) {
-            if ($members === []) {
-                continue;
-            }
-
-            $cluster = new GradingCluster($config, $cluster_name);
-            $em->persist($cluster);
-            $clusters[] = ['cluster' => $cluster, 'members' => $members];
-        }
-        $em->flush();
-
-        $bulkMembersData = [];
-        foreach ($clusters as $c) {
-            $cluster_id = $c['cluster']->getId();
-            foreach ($c['members'] as $member) {
-                $bulkMembersData[] = [
-                    'cluster_id'     => $cluster_id,
-                    'user_id'        => $member['user_id'] ?? null,
-                    'team_id'        => $member['team_id'] ?? null,
-                    'active_version' => (int) $member['active_version']
-                ];
+            if ($members !== []) {
+                $cluster_names[] = $cluster_name;
             }
         }
 
-        if (!empty($bulkMembersData)) {
-            $em->getRepository(GradingClusterConfig::class)->bulkInsertMembers($bulkMembersData);
+        if (!empty($cluster_names)) {
+            $cluster_ids_map = $em->getRepository(GradingClusterConfig::class)
+                ->bulkInsertClusters($config->getId(), $cluster_names);
+
+            $bulkMembersData = [];
+            foreach ($cluster_groups as $cluster_name => $members) {
+                if ($members === []) {
+                    continue;
+                }
+                $cluster_id = $cluster_ids_map[$cluster_name] ?? null;
+                if ($cluster_id === null) {
+                    continue;
+                }
+                foreach ($members as $member) {
+                    $bulkMembersData[] = [
+                        'cluster_id'     => $cluster_id,
+                        'user_id'        => $member['user_id'] ?? null,
+                        'team_id'        => $member['team_id'] ?? null,
+                        'active_version' => (int) $member['active_version']
+                    ];
+                }
+            }
+
+            if (!empty($bulkMembersData)) {
+                $em->getRepository(GradingClusterConfig::class)->bulkInsertMembers($bulkMembersData);
+            }
         }
 
         return JsonResponse::getSuccessResponse([]);
