@@ -2,6 +2,7 @@
 Placeholder dummy split algorithm: splits submitters A-M into Cluster A, N-Z into Cluster B.
 """
 
+
 def run(submitters):
     cluster_a = []
     cluster_b = []

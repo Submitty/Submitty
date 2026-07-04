@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
-use app\entities\grading_cluster\GradingCluster;
 use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
-use app\entities\grading_cluster\GradingClusterMember;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;

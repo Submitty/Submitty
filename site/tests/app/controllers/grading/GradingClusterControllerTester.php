@@ -3,7 +3,6 @@
 namespace tests\app\controllers\grading;
 
 use app\controllers\grading\GradingClusterController;
-use app\entities\grading_cluster\GradingClusterAlgorithm;
 use tests\BaseUnitTest;
 
 class GradingClusterControllerTester extends BaseUnitTest {

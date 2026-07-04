@@ -107,7 +107,7 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
     row = result.fetchone()
     config_id = row.id if hasattr(row, 'id') else row[0]
 
-    #Bulk insert clusters to prevent excessive queries
+    # Bulk insert clusters to prevent excessive queries
     cluster_names = [name for name, members in cluster_groups.items() if members]
     if not cluster_names:
         if hasattr(conn, 'commit'):
@@ -120,11 +120,11 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
     for i, name in enumerate(cluster_names):
         cluster_values.append(f"(:config_id, :name_{i})")
         cluster_params[f"name_{i}"] = name
-    
+
     cluster_insert_sql = "INSERT INTO ta_grading_clusters (config_id, cluster_name) VALUES " + ", ".join(cluster_values) + " RETURNING id, cluster_name"
     cluster_query = text(cluster_insert_sql)
     result = conn.execute(cluster_query, cluster_params)
-    
+
     cluster_id_map = {}
     for row in result:
         cluster_id = row.id if hasattr(row, 'id') else row[0]
@@ -146,11 +146,11 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
             member_params[f"tid_{m_idx}"] = m['team_id']
             member_params[f"av_{m_idx}"] = m['active_version']
             m_idx += 1
-            
+
     if member_values:
         member_insert_sql = "INSERT INTO ta_grading_clusters_members (cluster_id, user_id, team_id, active_version) VALUES " + ", ".join(member_values)
         member_query = text(member_insert_sql)
         conn.execute(member_query, member_params)
-        
+
     if hasattr(conn, 'commit'):
         conn.commit()
