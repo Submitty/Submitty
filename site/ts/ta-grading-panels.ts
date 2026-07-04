@@ -524,8 +524,6 @@ export function togglePanelLayoutModes(forceVal = false) {
             rightBottom: null,
         };
     }
-    // Intentionally no shared state layer: PanelLayoutPopup reloads on change
-    // until it's migrated to Vue (see #12937)
 }
 
 export function toggleFullLeftColumnMode(forceVal = false) {
@@ -586,15 +584,11 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     }
     updatePanelHeaderDataAttributes();
     // Reload the page so Vue components receive updated layout state from Twig.
-    // This will be removed when PanelLayoutPopup is migrated to Vue (see #12937)
     location.reload();
 };
 
 export function updatePanelHeaderDataAttributes() {
     $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
     $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
-
-    // Intentionally no shared state layer: PanelLayoutPopup reloads on change
-    // until it's migrated to Vue (see #12937)
 }
 window.setPanelsVisibilities = setPanelsVisibilities;
