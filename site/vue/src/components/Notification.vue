@@ -74,6 +74,7 @@ function markSeen(course: string, id: number) {
     tabindex="0"
     class="notification"
     :class="{ unseen: !notification.seen }"
+    data-testid="notification"
   >
     <a
       class="main-notification-content"
@@ -106,6 +107,7 @@ function markSeen(course: string, id: number) {
             <span
               class="course-notification-link"
               title="Go to notifications"
+              data-testid="course-notification-link"
               @click.stop.prevent="goToCourseNotifications(notification.course)"
             >
               {{ notification.course_name ? notification.course_name : notification.course }}
