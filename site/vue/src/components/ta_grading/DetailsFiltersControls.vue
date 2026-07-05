@@ -1,17 +1,5 @@
 <script setup lang="ts">
-/* eslint-disable vue/no-ref-object-reactivity-loss */
 import { onMounted, ref } from 'vue';
-
-declare global {
-    interface Window {
-        Cookies: {
-            get: (key: string) => string | undefined;
-            set: (key: string, value: string, options?: { path?: string; expires?: number }) => void;
-        };
-        updateSimpleGradingRowNumbersAndColors: () => void;
-        updateElectronicGradingRowNumbersAndColors: () => void;
-    }
-}
 
 const props = withDefaults(defineProps<{
     showAllSections: boolean;
@@ -21,146 +9,59 @@ const props = withDefaults(defineProps<{
     anonMode: boolean;
     gradeableId?: string;
     isTeamAssignment: boolean;
+    initialViewSections?: boolean;
+    initialRandomOrder?: boolean;
+    initialInquiryOnly?: boolean;
+    initialHideWithdrawn?: boolean;
 }>(), {
     gradeableId: undefined,
 });
 
-const viewSectionsChecked = ref(false);
-const randomOrderChecked = ref(false);
-const inquiryOnlyChecked = ref(false);
-const withdrawnHiddenChecked = ref(false);
+const emit = defineEmits<{
+    'mounted': [{ inquiryOnly: boolean }];
+    'view-sections-change': [checked: boolean];
+    'sort-order-change': [checked: boolean];
+    'anon-change': [checked: boolean];
+    'inquiry-change': [checked: boolean];
+    'withdrawn-change': [checked: boolean];
+}>();
 
-const showAllSections = props.showAllSections;
-const gradeInquiryOnly = props.gradeInquiryOnly;
-const canFilterWithdrawn = props.canFilterWithdrawn;
-const isTeamAssignment = props.isTeamAssignment;
-
-const coursePath = document.body.dataset.coursePath ?? '';
-const cookieArguments = { path: coursePath, expires: 365 };
+const viewSectionsChecked = ref(props.initialViewSections ?? false);
+const randomOrderChecked = ref(props.initialRandomOrder ?? false);
+const inquiryOnlyChecked = ref(props.initialInquiryOnly ?? false);
+const withdrawnHiddenChecked = ref(props.initialHideWithdrawn ?? false);
 
 onMounted(() => {
-    const inquiryFilterStatus = window.Cookies?.get('inquiry_status');
-    const assignedFilterStatus = window.Cookies?.get('view');
-    const randomFilterStatus = window.Cookies?.get('sort');
-    const withdrawnFilterStatus = window.Cookies?.get('include_withdrawn_students') || 'omit';
-
-    if (showAllSections) {
-        viewSectionsChecked.value = assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined;
-    }
-
-    randomOrderChecked.value = randomFilterStatus === 'random';
-
-    if (gradeInquiryOnly) {
-        inquiryOnlyChecked.value = inquiryFilterStatus === 'on';
-    }
-
-    const applyDomUpdates = () => {
-        const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-        withdrawnFilterElements.hide();
-
-        if (canFilterWithdrawn) {
-            if (withdrawnFilterStatus === 'omit') {
-                withdrawnHiddenChecked.value = true;
-                withdrawnFilterElements.hide();
-            }
-            else {
-                withdrawnHiddenChecked.value = false;
-                withdrawnFilterElements.show();
-            }
-        }
-
-        if (isTeamAssignment) {
-            withdrawnFilterElements.show();
-        }
-
-        window.updateElectronicGradingRowNumbersAndColors();
-        $('table').removeClass('table-striped');
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyDomUpdates);
-    }
-    else {
-        applyDomUpdates();
-    }
-
-    if (props.gradeInquiryOnly && inquiryOnlyChecked.value) {
-        applyInquiryFilter();
-    }
+    emit('mounted', { inquiryOnly: inquiryOnlyChecked.value });
 });
-
-const applyInquiryFilter = () => {
-    if (inquiryOnlyChecked.value) {
-        $('.grade-button').each(function () {
-            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').addClass('inquiry-only-disabled');
-            }
-        });
-    }
-    else {
-        $('.grade-button').each(function () {
-            $(this).closest('.grade-table').removeClass('inquiry-only-disabled');
-        });
-    }
-};
 
 const onChangeSections = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     viewSectionsChecked.value = checked;
-    window.Cookies.set('view', checked ? 'assigned' : 'all', cookieArguments);
-    localStorage.setItem(
-        'general-setting-navigate-assigned-students-only',
-        checked ? 'true' : 'false',
-    );
-    location.reload();
+    emit('view-sections-change', checked);
 };
 
 const onChangeSortOrder = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     randomOrderChecked.value = checked;
-    window.Cookies.set('sort', checked ? 'random' : 'id', cookieArguments);
-    location.reload();
+    emit('sort-order-change', checked);
 };
 
 const onChangeInquiry = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     inquiryOnlyChecked.value = checked;
-    window.Cookies.set('inquiry_status', checked ? 'on' : 'off', cookieArguments);
-    applyInquiryFilter();
-
-    const banner = document.getElementById('inquiry-banner');
-    if (banner) {
-        banner.style.display = checked ? '' : 'none';
-    }
+    emit('inquiry-change', checked);
 };
 
 const onChangeAnon = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
-    window.Cookies.set('anon_mode', checked ? 'on' : 'off', cookieArguments);
-    location.reload();
+    emit('anon-change', checked);
 };
 
 const onFilterWithdrawn = (event: Event) => {
     const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
     withdrawnHiddenChecked.value = checked;
-
-    const withdrawnElectronic = $('[data-student="electronic-grade-withdrawn"]');
-    const withdrawnSimple = $('[data-student="simple-grade-withdrawn"]');
-
-    if (checked) {
-        withdrawnElectronic.hide();
-        withdrawnSimple.hide();
-        window.Cookies.set('include_withdrawn_students', 'omit', cookieArguments);
-    }
-    else {
-        withdrawnElectronic.show();
-        withdrawnSimple.show();
-        window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
-    }
-
-    $('table').removeClass('table-striped');
-    window.updateSimpleGradingRowNumbersAndColors();
-    window.updateElectronicGradingRowNumbersAndColors();
+    emit('withdrawn-change', checked);
 };
 </script>
 

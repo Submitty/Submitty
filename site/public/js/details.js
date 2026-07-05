@@ -1,5 +1,6 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* exported handleDetailsFiltersMounted, handleViewSectionsChange, handleSortOrderChange, handleAnonChange, handleInquiryChange, handleWithdrawnChange */
 
 const MOBILE_BREAKPOINT = 951;
 
@@ -156,4 +157,67 @@ function inquiryUpdate() {
             $(this).closest('.grade-table').removeClass('inquiry-only-disabled'); // show all gradeable items
         });
     }
+}
+
+function handleDetailsFiltersMounted(state) {
+    const w = $('[data-student="electronic-grade-withdrawn"]');
+    w.hide();
+    if ((Cookies.get('include_withdrawn_students') || 'omit') === 'include') {
+        w.show();
+    }
+    if (window.is_team_assignment) {
+        w.show();
+    }
+    if (state.inquiryOnly) {
+        $('.grade-button').each(function () {
+            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
+                $(this).closest('.grade-table').addClass('inquiry-only-disabled');
+            }
+        });
+        document.getElementById('inquiry-banner').style.display = '';
+    }
+    $('table').removeClass('table-striped');
+    window.updateElectronicGradingRowNumbersAndColors?.();
+}
+
+function handleViewSectionsChange(checked) {
+    Cookies.set('view', checked ? 'assigned' : 'all', { path: document.body.dataset.coursePath, expires: 365 });
+    localStorage.setItem('general-setting-navigate-assigned-students-only', checked ? 'true' : 'false');
+    location.reload();
+}
+
+function handleSortOrderChange(checked) {
+    Cookies.set('sort', checked ? 'random' : 'id', { path: document.body.dataset.coursePath, expires: 365 });
+    location.reload();
+}
+
+function handleAnonChange(checked) {
+    Cookies.set('anon_mode', checked ? 'on' : 'off', { path: document.body.dataset.coursePath, expires: 365 });
+    location.reload();
+}
+
+function handleInquiryChange(checked) {
+    Cookies.set('inquiry_status', checked ? 'on' : 'off', { path: document.body.dataset.coursePath, expires: 365 });
+    if (checked) {
+        $('.grade-button').each(function () {
+            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
+                $(this).closest('.grade-table').addClass('inquiry-only-disabled');
+            }
+        });
+    }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').removeClass('inquiry-only-disabled');
+        });
+    }
+    document.getElementById('inquiry-banner').style.display = checked ? '' : 'none';
+}
+
+function handleWithdrawnChange(checked) {
+    Cookies.set('include_withdrawn_students', checked ? 'omit' : 'include', { path: document.body.dataset.coursePath, expires: 365 });
+    $('[data-student="electronic-grade-withdrawn"]').toggle(!checked);
+    $('[data-student="simple-grade-withdrawn"]').toggle(!checked);
+    $('table').removeClass('table-striped');
+    window.updateSimpleGradingRowNumbersAndColors?.();
+    window.updateElectronicGradingRowNumbersAndColors?.();
 }
