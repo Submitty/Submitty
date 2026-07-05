@@ -160,13 +160,13 @@ function inquiryUpdate() {
 }
 
 function handleDetailsFiltersMounted(state) {
-    const w = $('[data-student="electronic-grade-withdrawn"]');
-    w.hide();
+    const withdrawnRow = $('[data-student="electronic-grade-withdrawn"]');
+    withdrawnRow.hide();
     if ((Cookies.get('include_withdrawn_students') || 'omit') === 'include') {
-        w.show();
+        withdrawnRow.show();
     }
     if (window.is_team_assignment) {
-        w.show();
+        withdrawnRow.show();
     }
     if (state.inquiryOnly) {
         $('.grade-button').each(function () {
