@@ -1,3 +1,4 @@
+import '@cypress/code-coverage/support';
 import { mount } from 'cypress/vue';
 import $ from 'jquery';
 

@@ -4,13 +4,13 @@
 {% block body %}
 <div class="form-group sync-popup-body">
     <label>To copy the notification settings from this course to other courses, select them from the list below.</label>
-    <div class="sync-course-list">
+    <div class="sync-course-list" data-testid="sync-course-list">
         {% for course in courses %}
-            <div class="sync-course-container"
-                 onclick="toggleSyncRow(this)">
+            <div class="sync-course-container" onclick="toggleSyncRow(this)">
                 <div class="sync-course-grid">
                     <input type="checkbox"
                            class="sync-course-checkbox"
+                           data-testid="sync-course-checkbox"
                            name="sync_course_ids[]"
                            value="{{ course.getTerm() }}|{{ course.getTitle() }}"
                            onclick="event.stopPropagation(); updateRowHighlight(this)">
@@ -21,14 +21,28 @@
         {% endfor %}
     </div>
     <div class="sync-buttons">
-        <button type="button" class="btn btn-primary" onclick="selectAllSyncCourses()">Select All</button>
-        <button type="button" class="btn btn-primary" onclick="clearAllSyncCourses()">Clear Selection</button>
+        <button type="button" class="btn btn-primary" data-testid="sync-select-all" onclick="selectAllSyncCourses()">Select All</button>
+        <button type="button" class="btn btn-primary" data-testid="sync-clear-selection" onclick="clearAllSyncCourses()">Clear Selection</button>
+    </div>
+
+    <hr style="margin-top: 24px;">
+
+    <div class="sync-default-row">
+        <label class="sync-default-label">
+            <input type="checkbox"
+                   id="set-default-course"
+                   data-testid="set-default-course"
+                   onchange="toggleDefaultCourse(this)"
+                   {{ is_default_course ? 'checked' : '' }}>
+            Use this course's notification settings as the default for any future courses I enroll in
+        </label>
     </div>
 </div>
 {% endblock %}
+    
 {% block buttons %}
-    {{block('close_button')}}
-<button class="btn btn-primary" onclick="setNotification(this)">
-    Sync Settings
-</button>
+    {{ block('close_button') }}
+    <button class="btn btn-primary" data-testid="sync-submit" onclick="setNotification(this)">
+        Sync Settings
+    </button>
 {% endblock %}
