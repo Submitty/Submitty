@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     showAllSections: boolean;
     toggleAnon: boolean;
     gradeInquiryOnly: boolean;
     canFilterWithdrawn: boolean;
     anonMode: boolean;
-    gradeableId?: string;
+    gradeableId: string;
     isTeamAssignment: boolean;
     initialViewSections?: boolean;
     initialRandomOrder?: boolean;
     initialInquiryOnly?: boolean;
     initialHideWithdrawn?: boolean;
-}>(), {
-    gradeableId: undefined,
-});
+}>();
 
 const emit = defineEmits<{
     'mounted': [{ inquiryOnly: boolean }];
