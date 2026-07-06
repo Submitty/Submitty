@@ -125,15 +125,11 @@
         </select>
     </div>
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
-        <div class="column-wrapper">
-            <label for="csvUpload">Upload CSV
-                <input type="file" id="csvUpload" accept=".csv, .txt">
-            </label>
-            <p>
-                The CSV file should be formatted as such:
-                <br />
-                user id,given name,family name,grade1,grade2,...,total points earned,text1,text2,...
-            </p>
+        <p>
+            The CSV file should be formatted as such:
+            <br />
+            user id,given name,family name,grade1,grade2,...,total points earned,text1,text2,...
+        </p> 
     {% endif %}
     <div class="scrollable-table">
 
