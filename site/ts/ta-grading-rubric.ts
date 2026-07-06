@@ -91,6 +91,7 @@ type MarkConflictInfo = {
     localDeleted: boolean;
 };
 type GradedGradeable = {
+    peer_only_grader: boolean;
     peer_gradeable: boolean;
     user_group: number;
     active_graders: Record<string, string[]>;
@@ -1471,17 +1472,18 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
         comment = rawComment?.toString() ?? '';
     }
 
-    const dataDOMElement = domElement.find('.graded-component-data');
-    let gradedVersion = dataDOMElement.attr('data-graded_version')!;
+    const dataDOMElement = domElement.find('.graded-component-data, .peer-graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version') ?? '';
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion().toString();
     }
+    const parsedGradedVersion = parseInt(gradedVersion);
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(gradedVersion),
+        graded_version: Number.isNaN(parsedGradedVersion) ? getDisplayVersion() : parsedGradedVersion,
         grade_time: dataDOMElement.attr('data-grade_time')!,
         grader_id: dataDOMElement.attr('data-grader_id')!,
         verifier_id: dataDOMElement.attr('data-verifier_id')!,
@@ -1503,6 +1505,7 @@ function getScoresFromDOM() {
         auto_grading_earned?: number;
         auto_grading_total?: number;
         auto_grading_complete: boolean;
+        peer_only_grader: boolean;
     } = {
         user_group: GRADED_GRADEABLE!.user_group,
         ta_grading_earned: getTaGradingEarned(),
@@ -1510,6 +1513,7 @@ function getScoresFromDOM() {
         peer_grade_earned: getPeerGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false,
+        peer_only_grader: GRADED_GRADEABLE!.peer_only_grader,
     };
 
     // Then check if auto grading scorse exist before adding them
