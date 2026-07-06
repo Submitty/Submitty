@@ -12,10 +12,11 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-
-// site/cypress/plugins/index.js
 import vnuJar from 'vnu-jar';
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 export default function (on /*, config */) {
     on('task', {
         async vnuValidate(htmlPath) {

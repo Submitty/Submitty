@@ -61,7 +61,8 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
         cy.fixture('accessibility_baseline').then((data) => {
             expect(data).to.be.an('object');
             baseline = new Map(Object.entries(data));
-            Object.assign(regeneratedBaseline, data);   // preserve existing keys
+            //preserve existing keys
+            Object.assign(regeneratedBaseline, data);
         });
 
         cy.exec(rm_command, { failOnNonZeroExit: false });
@@ -110,7 +111,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                                 continue;
                             }
                             if (!nonSkipped.includes(error.message)) {
-                                nonSkipped.push(error.message);   // raw message, curly quotes intact
+                                nonSkipped.push(error.message);
                             }
                             if ((baseline.get(url) || []).includes(error.message)
                                 || foundErrorMessages.includes(error.message)) {
