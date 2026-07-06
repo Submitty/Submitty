@@ -31,23 +31,6 @@ $(document).ready(() => {
         }
     });
 
-    // Creating and adding style for the pseudo selector in the details-table
-    const style = document.createElement('style');
-    let content = '';
-    // loop over the head row of `details-table`
-    $('#details-table thead tr th').each(function (idx) {
-        if (idx) {
-            // the content to be added is inside this data attr
-            content = $(this).data('col-title');
-            style.innerHTML += `
-              #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
-                  content: "${escapeSpecialChars(content)}";
-              }
-            `;
-        }
-    });
-    document.head.appendChild(style);
-
     if (!localStorage.getItem(gradeableMessageStorageKey()) && document.getElementById('gradeable-message-data').dataset.userlevel !== '1') {
         const form = $('#gradeable-message-popup');
         form.css('display', 'block');
