@@ -1090,6 +1090,20 @@ WHERE term=? AND course=? AND user_id=?",
     }
 
     /**
+     * Updates the date_registered timestamp for a user in a course to the current time.
+     * Used for self-registration and self-rejoin, NOT for manual adds/edits by an instructor.
+     * 
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     */
+    public function updateRegistrationDate(string $user_id, string $semester, string $course): void {
+        $this->submitty_db->query(
+            "UPDATE course_users SET date_registered=NOW() WHERE user_id=? AND term=? AND course=?",
+            [$user_id, $semester, $course]
+        );
+    }
+    /**
      * @param string    $user_id
      * @param integer   $user_group
      * @param integer[] $sections
