@@ -28,7 +28,7 @@ RUN pip3 install --no-cache-dir \
     coverage flake8 pylint
 
 COPY python_submitty_utils /submitty/python_submitty_utils
-RUN pip3 install --no-cache-dir -e /submitty/python/submitty_utils
+RUN pip3 install --no-cache-dir -e /submitty/python_submitty_utils
 
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \
