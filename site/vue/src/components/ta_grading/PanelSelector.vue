@@ -7,6 +7,10 @@ const props = defineProps<{
     draw: (ctx: CanvasRenderingContext2D) => void;
 }>();
 
+defineEmits<{
+    select: [];
+}>();
+
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 onMounted(() => {
