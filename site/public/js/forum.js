@@ -1998,7 +1998,7 @@ function checkInputMaxLength(obj) {
 }
 
 function sortTable(sort_element_index, reverse = false) {
-    const table = document.getElementById('forum_stats_table');
+    const table = document.getElementById('forum-stats-table');
     let switching = true;
     while (switching) {
         switching = false;

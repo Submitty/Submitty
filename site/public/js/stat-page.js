@@ -8,7 +8,7 @@ const sortColumns = {
 };
 
 function getForumStatsTable() {
-    return document.getElementById('forum_stats_table');
+    return document.getElementById('forum-stats-table');
 }
 
 function getGroupedRows(tbody) {
@@ -85,7 +85,7 @@ function getGroupedRows(tbody) {
 // }
 
 // function updateSortIcons(activeKey = null, direction = 'ASC') {
-//     document.querySelectorAll('#forum_stats_table .sortable-header').forEach((link) => {
+//     document.querySelectorAll('#forum-stats-table .sortable-header').forEach((link) => {
 //         const icon = link.querySelector('i');
 //         const key = link.dataset.sortKey;
 
@@ -104,7 +104,7 @@ function getGroupedRows(tbody) {
 // }
 
 $(document).ready(() => {
-    const forumStatsTable = $('#forum_stats_table');
+    const forumStatsTable = $('#forum-stats-table');
 
     // updateSortIcons();
 
