@@ -86,39 +86,14 @@ const emptyState: AnnotationState = {
     markers: [],
 };
 
-// TODO: Store these styles somewhere else, and evaluate what of these are actually necessary.
 function createEditorWrapper(): HTMLElement {
     const editorWrapper = document.createElement('div');
     editorWrapper.id = 'global-annotation-editor-wrapper';
-    editorWrapper.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 10000;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    `;
-
-    if (annotationManager.globalAnnotationEditor) {
-        annotationManager.globalAnnotationEditor.style.cssText = `
-            width: 90vw;
-            height: 90vh;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        `;
-    }
-
     if (annotationManager.globalAnnotationEditor) {
         editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
     }
     document.body.appendChild(editorWrapper);
     editorWrapper.style.display = 'flex';
-
     return editorWrapper;
 }
 
@@ -164,6 +139,7 @@ function addAnnotations(): void {
 
         // Create fresh annotation editor
         annotationManager.globalAnnotationEditor = new window.markerjsUI.AnnotationEditor();
+        annotationManager.globalAnnotationEditor.id = 'global-annotation-editor';
 
         // Set up event listeners
         setupAnnotationEditor();

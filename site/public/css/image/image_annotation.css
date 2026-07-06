@@ -176,6 +176,31 @@
     }
 }
 
+/* Annotation Editor CSS */
+
+#global-annotation-editor-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#global-annotation-editor {
+    width: 90vw;
+    height: 90vh;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile Media Queries */
+
 @media (max-width: 768px) {
     .annotation-toolbar {
         flex-direction: column;
