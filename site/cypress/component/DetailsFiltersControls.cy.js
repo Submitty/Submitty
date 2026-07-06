@@ -39,7 +39,7 @@ describe('DetailsFiltersControls', () => {
     });
 
     describe('initial state from props', () => {
-        it('respects initial* boolean props as checkbox checked state and defaults to false when undefined', () => {
+        it('respects initial* boolean props as checkbox checked state', () => {
             cy.mount(DetailsFiltersControls, {
                 props: {
                     ...defaultProps(),
@@ -56,6 +56,12 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="random-order-checkbox"]').should('be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('be.checked');
+        });
+
+        it('respects anonMode prop directly as anon checkbox state', () => {
+            cy.mount(DetailsFiltersControls, {
+                props: { ...defaultProps(), toggleAnon: true, anonMode: true },
+            });
             cy.get('[data-testid="anon-students-checkbox"]').should('be.checked');
         });
 
