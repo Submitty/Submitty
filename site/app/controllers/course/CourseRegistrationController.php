@@ -79,10 +79,12 @@ class CourseRegistrationController extends AbstractController {
         if ($this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
             $this->core->getUser()->setRegistrationSection($default_section);
             $this->core->getQueries()->updateUser($user, $term, $course);
+            $this->core->getQueries()->updateRegistrationDate($user_id, $term, $course);
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
             $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+            $this->core->getQueries()->updateRegistrationDate($user_id, $term, $course);
         }
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
