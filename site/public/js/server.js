@@ -1469,6 +1469,10 @@ function escapeSpecialChars(text) {
         '\'': '&#039;',
     };
 
+    if (!text) {
+        return;
+    }
+
     return text.replace(/[&<>"']/g, (m) => {
         return map[m];
     });
