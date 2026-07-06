@@ -4,23 +4,25 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_NAME="submitty_test"
 
+# handle rebuild vs run
 if [ "${1:-}" == "rebuild" ]; then
     echo "Rebuilding Docker image '$IMAGE_NAME' from scratch..."
     docker build --pull --no-cache -t "$IMAGE_NAME" "$SCRIPT_DIR"
+    shift
+else
+    # build docker image
+    echo "Setting up Docker image '$IMAGE_NAME'..."
+    docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
 fi
-
-# build docker image
-echo "Setting up Docker image '$IMAGE_NAME'..."
-docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
 
 # runs a command in the container with a given working directory
 run_in_container() {
     local workdir="$1"
     shift
     docker run --rm -t -u "$(id -u):$(id -g)" -e HOME=/tmp \
-        -v "$SCRIPT_DIR:/submitty" \
-        -v /submitty/site/vendor \
-        -v /submitty/site/node_modules \
+        --mount type=bind,source="$SCRIPT_DIR",target=/submitty \
+        --mount type=volume,target=/submitty/site/vendor \
+        --mount type=volume,target=/submitty/site/node_modules \
         -w "$workdir" \
         --init \
         "$IMAGE_NAME" "$@"
