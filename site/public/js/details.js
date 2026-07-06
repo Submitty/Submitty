@@ -162,10 +162,7 @@ function inquiryUpdate() {
 function handleDetailsFiltersMounted(state) {
     const withdrawnRow = $('[data-student="electronic-grade-withdrawn"]');
     withdrawnRow.hide();
-    if ((Cookies.get('include_withdrawn_students') || 'omit') === 'include') {
-        withdrawnRow.show();
-    }
-    if (window.is_team_assignment) {
+    if (((Cookies.get('include_withdrawn_students') || 'omit') === 'include') || (window.is_team_assignment)) {
         withdrawnRow.show();
     }
     if (state.inquiryOnly) {
