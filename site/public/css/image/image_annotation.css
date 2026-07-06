@@ -185,7 +185,7 @@
     width: 100vw;
     height: 100vh;
     z-index: 10000;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgb(0 0 0 / 80%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -194,9 +194,9 @@
 #global-annotation-editor {
     width: 90vw;
     height: 90vh;
-    background: white;
+    background: var(--always-default-white);
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
 }
 
 /* Mobile Media Queries */
