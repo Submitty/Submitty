@@ -533,7 +533,7 @@ HTML;
         }
         //Each table column is represented as an array with the following entries:
         // title => displayed title in the table header
-        // function => maps to a macro in Details.twig:render_student
+        // header_key => unique key of the table header
         $columns = [];
         $columns[] = ["title" => "#", "header_key" => "index"];
         $columns[] = ["title" => "Section", "header_key" => "section"];
