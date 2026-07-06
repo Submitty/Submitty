@@ -1,9 +1,11 @@
+// sortTableByColumn function to be used for all sortable tables
+// See TableHeaderSort.twig
+
 declare global {
     interface Window {
         sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes): void;
     }
 }
-// See TableHeaderSort.twig
 
 enum colDataTypes {
     String = 'string',
