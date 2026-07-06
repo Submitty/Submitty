@@ -1,4 +1,4 @@
-{% import "misc/TableHeaderSort.twig" as sort %}
+{% import "misc/TableHeaderSort.twig" as table_sort %}
 
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
@@ -99,12 +99,12 @@
     <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                {{ sort.sortable_header('Image Name', 'name') }}
+                {{ table_sort.sortable_header('docker-table', 'Image Name', 'name', 'string') }}
                 <th>Tag</th>
                 <th>Alias</th>
                 <th>Digest</th>
-                {{ sort.sortable_header('Size', 'size') }}
-                {{ sort.sortable_header('Created', 'created') }}
+                {{ table_sort.sortable_header('docker-table', 'Size', 'size', 'number') }}
+                {{ table_sort.sortable_header('docker-table', 'Created', 'created', 'date') }}
                 <th>Capabilities Containing This Image</th>
                 <th>Owner</th>
                 <th>Remove</th>
