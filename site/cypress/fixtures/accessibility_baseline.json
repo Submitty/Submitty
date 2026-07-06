@@ -3,35 +3,35 @@
     "/home/courses/new": [],
     "/courses/{}/{}": [],
     "/courses/{}/{}/gradeable/future_no_tas_homework/update?nav_tab=0": [
-        "Attribute “placeholder” not allowed on element “input” at this point.",
-        "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
-        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level.",
+        "The heading “h4” (with computed level 4) follows the heading “h1” (with computed level 1), skipping 2 heading levels."
     ],
-    "/courses/{}/{}/autograding_config?g_id=future_no_tas_homework": [],
+    "/courses/{}/{}/autograding_config?g_id=future_no_tas_homework": [
+        "Element “div” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)"
+    ],
     "/courses/{}/{}/gradeable/future_no_tas_lab/grading?view=all": [
-        "Attribute “unselectable” not allowed on element “ul” at this point.",
-        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
+        "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
     "/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all": [
-        "Attribute “unselectable” not allowed on element “ul” at this point.",
-        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
+        "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
     "/courses/{}/{}/gradeable/open_homework/grading/status": [],
-    "/courses/{}/{}/gradeable/open_homework/bulk_stats": [],
+    "/courses/{}/{}/gradeable/open_homework/bulk_stats": [
+        "This document has heading elements but none of them has a computed heading level of 1."
+    ],
     "/courses/{}/{}/gradeable/open_homework/grading/details": [],
     "/courses/{}/{}/gradeable/open_homework": [
         "Bad value “text” for attribute “role” on element “div”.",
-        "Attribute “fname” not allowed on element “tr” at this point.",
-        "Attribute “unselectable” not allowed on element “ul” at this point."
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
     ],
-    "/courses/{}/{}/gradeable/open_team_homework/team": [],
+    "/courses/{}/{}/gradeable/open_team_homework/team": [
+        "The heading “h4” (with computed level 4) follows the heading “h1” (with computed level 1), skipping 2 heading levels."
+    ],
     "/courses/{}/{}/gradeable/grades_released_homework_autota": [
         "Bad value “text” for attribute “role” on element “div”.",
-        "Attribute “fname” not allowed on element “tr” at this point.",
-        "Duplicate ID “confetti_canvas”.",
-        "The first occurrence of ID “confetti_canvas” was here.",
-        "CSS: The value “break-word” is deprecated",
-        "Attribute “unselectable” not allowed on element “ul” at this point."
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
     ],
     "/courses/{}/{}/notifications": [],
     "/courses/{}/{}/notifications/settings": [
@@ -41,56 +41,86 @@
     "/courses/{}/{}/config": [],
     "/courses/{}/{}/theme": [],
     "/courses/{}/{}/office_hours_queue": [
-        "Attribute “unselectable” not allowed on element “ul” at this point.",
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be used on any “label” element that is an ancestor of a labelable element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Attribute “help_time” not allowed on element “td” at this point."
+        "Attribute “help_time” not allowed on element “td” at this point.",
+        "Attribute “unselectable” not allowed on element “ul” at this point.",
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
     ],
     "/courses/s20/sample/polls": [],
     "/courses/s20/sample/polls/newPoll": [],
     "/courses/{}/{}/course_materials": [
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
         "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
     ],
     "/courses/{}/{}/forum": [
-        "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Element “pre” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
-        "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).",
-        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
+        "The “aria-label” attribute must not be specified on any “div” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “i” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-labelledby” attribute must not be specified on any “div” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”."
     ],
     "/courses/{}/{}/forum/threads/new": [
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Attribute “maxlength” is only allowed when the input type is “email”, “password”, “search”, “tel”, “text”, or “url”."
+        "The “aria-label” attribute must not be specified on any “i” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-labelledby” attribute must not be specified on any “div” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
     ],
-    "/courses/{}/{}/forum/categories": [],
+    "/courses/{}/{}/forum/categories": [
+        "The “aria-label” attribute must not be specified on any “i” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "This document has heading elements but none of them has a computed heading level of 1."
+    ],
     "/courses/{}/{}/forum/stats": [
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+        "The “aria-label” attribute must not be specified on any “div” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "This document has heading elements but none of them has a computed heading level of 1."
     ],
-    "/courses/{}/{}/users": [],
+    "/courses/{}/{}/users": [
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”."
+    ],
     "/courses/{}/{}/graders": [
+        "The “aria-label” attribute must not be specified on any “a” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
     "/courses/{}/{}/sections": [],
     "/courses/{}/{}/student_photos": [],
     "/courses/{}/{}/late_days": [
-        "Attribute “unselectable” not allowed on element “ul” at this point."
+        "Attribute “unselectable” not allowed on element “ul” at this point.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”."
     ],
     "/courses/{}/{}/extensions": [
-        "Attribute “unselectable” not allowed on element “ul” at this point."
+        "Attribute “unselectable” not allowed on element “ul” at this point.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
     ],
     "/courses/{}/{}/grade_override": [
         "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
     "/courses/{}/{}/plagiarism": [
-        "Attribute “name” not allowed on element “div” at this point."
+        "Attribute “name” not allowed on element “div” at this point.",
+        "The “name” attribute is never allowed on the “div” element."
     ],
     "/courses/{}/{}/plagiarism/configuration/new": [
-        "Attribute “name” not allowed on element “div” at this point.",
-        "Attribute “name” not allowed on element “span” at this point."
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”."
     ],
     "/courses/{}/{}/reports": [],
     "/courses/{}/{}/reports/rainbow_grades_customization": [
+        "The “aria-label” attribute must not be used on any “label” element that is an ancestor of a labelable element.",
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”.",
         "Attribute “unselectable” not allowed on element “ul” at this point."
     ],
-    "/courses/{}/{}/late_table": [],
-    "/courses/{}/{}/grades": []
+    "/courses/{}/{}/late_table": [
+        "The heading “h3” (with computed level 3) follows the heading “h1” (with computed level 1), skipping 1 heading level."
+    ],
+    "/courses/{}/{}/grades": [],
+    "/courses/{}/{}/polls": [],
+    "/courses/{}/{}/polls/newPoll": [
+        "The “aria-label” attribute must not be specified on any “span” element unless the element has a “role” value other than “caption”, “code”, “deletion”, “emphasis”, “generic”, “insertion”, “paragraph”, “presentation”, “strong”, “subscript”, or “superscript”."
+    ],
+    "/courses/{}/{}/sql_toolbox": [],
+    "/admin/docker": []
 }
