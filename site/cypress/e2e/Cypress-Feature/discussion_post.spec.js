@@ -7,7 +7,7 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="yes-discussion"]').click();
         cy.get('[data-testid="yes-discussion"]').should('be.checked');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=L1LdxbPPN5GiLb4&sort=id&direction=ASC']);
-        cy.get('[data-testid="discussion-browser-btn"]').type('{D}');
+        cy.get('[data-testid="discussion-browser-btn"]').click();
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts');
         cy.get('[data-testid="posts-list"]').should('contain', 'No thread id specified.');
         cy.get('[data-testid="posts-list"]').should('not.contain', 'Go to thread');
