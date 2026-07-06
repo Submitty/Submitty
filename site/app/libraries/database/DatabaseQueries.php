@@ -1099,8 +1099,12 @@ WHERE term=? AND course=? AND user_id=?",
      */
     public function updateRegistrationDate(string $user_id, string $semester, string $course): void {
         $this->submitty_db->query(
-            "UPDATE courses_users SET date_registered=NOW() WHERE user_id=? AND semester=? AND course=?",
+            "UPDATE courses_users SET date_registered=NOW() WHERE user_id=? AND term=? AND course=?",
             [$user_id, $semester, $course]
+        );
+        $this->course_db->query(
+            "UPDATE users SET date_registered=NOW() WHERE user_id=?",
+            [$user_id]
         );
     }
     /**

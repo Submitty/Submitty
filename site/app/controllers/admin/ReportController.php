@@ -512,6 +512,9 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['date_registered'] = $user->getDateRegistered() !== null
+            ? $user->getDateRegistered()->format(\DateTime::ATOM)
+            : null;
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
