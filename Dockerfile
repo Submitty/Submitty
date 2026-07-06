@@ -1,8 +1,8 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies, including Node 20 and PHP 8.2
-# which are not available by default in Ubuntu 22.04
+# Install dependencies, including Node 20 and PHP 8.2 manually
+# since they are not available by default in Ubuntu 22.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common curl git gnupg2 ca-certificates unzip \
     python3 python3-pip python3-setuptools poppler-utils libzbar0 \
@@ -17,8 +17,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /submitty/site
 
+# Set up container directory structure
 ENV HOME=/tmp
 RUN chmod 1777 /tmp
+# needed for python unit tests
+RUN mkdir -p /test_suite && chmod 1777 /test_suite
 
 # Install dependencies
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt /tmp/pip/
