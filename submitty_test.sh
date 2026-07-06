@@ -128,9 +128,12 @@ run_py_unit() {
             exit 1
         fi
     else
+        # run all unit tests except migration
+        echo "Running unit test: utils..."
         run_in_container /submitty/python_submitty_utils coverage run -m unittest discover
-        run_in_container /submitty/migration coverage run -m unittest discover
+        echo "Running unit test: autograder..."
         run_in_container /submitty/autograder coverage run -m unittest discover
+        echo "Running unit test: daemon..."
         run_in_container /submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t .
     fi
 }
@@ -145,7 +148,7 @@ if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
           js-lint   : eslint [option: --fix]
           css-lint  : css-stylelint [option: --fix]
           py-lint   : run flake8 and pylint [option: specific_file.py]
-          py-unit   : run all python unit tests [option: utils|migration|autograder|daemon]
+          py-unit   : run python unit tests except migration [option: utils|migration|autograder|daemon]
           "
 elif [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
