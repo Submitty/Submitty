@@ -31,22 +31,31 @@ class NotificationView extends AbstractView {
      * @param array<string, bool> $notification_saves
      * @param int $self_registration_type
      * @param array <int, Course> $courses
+     * @param bool $is_default_course
+     * @param array<string, string>|null $default_course
      * @return void
      */
-    public function showNotificationSettings(array $notification_saves, int $self_registration_type, array $courses = []): void {
-        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildCourseUrl(['notifications']));
-        $this->core->getOutput()->addInternalCss('notifications.css');
-        $this->core->getOutput()->addBreadcrumb("Notification Settings");
+    public function showNotificationSettings(
+        array $notification_saves,
+        int $self_registration_type,
+        array $courses = [],
+        bool $is_default_course = false,
+        ?array $default_course = null
+    ): void {
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
-            'notification_saves' => $notification_saves,
-            'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
-            'csrf_token' => $this->core->getCsrfToken(),
-            'defaults' => User::constructNotificationSettings([]),
-            'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings']),
-            'self_registration_type' => $self_registration_type,
-            'is_instructor' => $this->core->getUser()->accessAdmin(),
-            'is_self_registration' => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,
-            'courses' => $courses
+        'notification_saves'      => $notification_saves,
+        'email_enabled'           => $this->core->getConfig()->isEmailEnabled(),
+        'csrf_token'              => $this->core->getCsrfToken(),
+        'defaults'                => User::constructNotificationSettings([]),
+        'update_settings_url'     => $this->core->buildCourseUrl(['notifications', 'settings']),
+        'save_defaults_url'  => $this->core->buildCourseUrl(['notifications', 'save_defaults']),
+        'clear_defaults_url' => $this->core->buildCourseUrl(['notifications', 'clear_defaults']),
+        'is_default_course'   => $is_default_course,
+        'default_course'      => $default_course,
+        'self_registration_type'  => $self_registration_type,
+        'is_instructor'           => $this->core->getUser()->accessAdmin(),
+        'is_self_registration'    => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER,
+        'courses'                 => $courses,
         ]);
     }
 }
