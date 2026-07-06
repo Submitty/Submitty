@@ -114,20 +114,34 @@ class NotificationController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
+        $user_id = $this->core->getUser()->getId();
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
         $original_config = clone $this->core->getConfig();
         $this->core->loadMasterConfig();
         $this->core->loadMasterDatabase();
-        $courses = $this->core->getQueries()->getCourseForUserId($this->core->getUser()->getId());
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $courses = array_filter($courses, function ($c) use ($term, $course) {
+            return !($c->getTerm() === $term && $c->getTitle() === $course);
+        });
+        $default = $this->core->getQueries()->getNotificationDefault($user_id);
         $this->core->setConfig($original_config);
         $this->core->loadCourseDatabase();
+
+        $is_default_course = $default !== null
+            && $default['term'] === $term
+            && $default['course'] === $course;
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
                 $this->core->getUser()->getNotificationSettings(),
-                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
-                $courses
+                $this->core->getQueries()->getSelfRegistrationType($term, $course),
+                $courses,
+                $is_default_course,
+                $default
             )
         );
     }
@@ -156,6 +170,41 @@ class NotificationController extends AbstractController {
             }
         }
         return JsonResponse::getSuccessResponse("Notification settings have been synced successfully.");
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/save_defaults", methods: ["POST"])]
+    public function saveNotificationDefaults(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadMasterConfig();
+        $this->core->loadMasterDatabase();
+        $this->core->getQueries()->saveNotificationDefaults($user_id, $term, $course);
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse('This course is now set as your default for future courses.');
+    }
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/notifications/clear_defaults", methods: ["POST"])]
+    public function clearNotificationDefaults(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadMasterConfig();
+        $this->core->loadMasterDatabase();
+        $this->core->getQueries()->deleteNotificationDefault($user_id);
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse('This course is no longer set as your default.');
     }
 
     /**
