@@ -212,10 +212,8 @@ const clearAllNotifications = () => {
     cy.logout();
 };
 
-const clearIndividualNotifications = (count) => {
-    for (let i = 0; i < count; i++) {
-        cy.get('[data-testid="notification"]').first().find('.notification-seen').click();
-    }
+const clearIndividualNotification = () => {
+    cy.get('[data-testid="notification"]').first().find('.notification-seen').click();
 };
 
 const assertDisplayedNotifications = (count) => {
@@ -268,7 +266,7 @@ describe('Tests for managing and displaying notifications', () => {
         /* Ideally, this should be the other message, but since Vue only receives a count, it doesn't know that
         these additional notifications aren't coming until there are less than 10 displayed. */
         cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 2 additional unseen notifications.');
-        clearIndividualNotifications(1);
+        clearIndividualNotification();
         assertDisplayedNotifications(9);
         cy.get('[data-testid="never-displayed-message"]').should('contain', 'You have 2 older unseen notifications in your course notifications not displayed here.');
         cy.visit(buildUrl(['sample', 'notifications']));
@@ -276,7 +274,7 @@ describe('Tests for managing and displaying notifications', () => {
         cy.visit();
         cy.get('[data-testid="never-displayed-message"]').should('contain', 'You have 1 older unseen notification in your course notifications not displayed here.');
         assertDisplayedNotifications(9);
-        clearIndividualNotifications(1);
+        clearIndividualNotification(1);
         assertDisplayedNotifications(8);
     });
 
@@ -287,13 +285,13 @@ describe('Tests for managing and displaying notifications', () => {
         cy.visit();
         assertDisplayedNotifications(10);
         cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 2 additional unseen notifications.');
-        clearIndividualNotifications(1);
+        clearIndividualNotification();
         assertDisplayedNotifications(10);
         cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 1 additional unseen notification.');
-        clearIndividualNotifications(1);
+        clearIndividualNotification();
         assertDisplayedNotifications(10);
         cy.get('[data-testid="not-displayed-message"]').should('not.exist');
-        clearIndividualNotifications(1);
+        clearIndividualNotification();
         assertDisplayedNotifications(9);
     });
 
@@ -304,7 +302,7 @@ describe('Tests for managing and displaying notifications', () => {
         cy.visit(buildUrl(['sample', 'notifications']));
         assertDisplayedNotifications(3);
         cy.get('.notification.unseen').should('have.length', 3);
-        clearIndividualNotifications(1);
+        clearIndividualNotifications();
         assertDisplayedNotifications(2);
         cy.get('[data-testid="toggle-unseen-only"]').click();
         cy.get('.notification.unseen').should('have.length', 2);
