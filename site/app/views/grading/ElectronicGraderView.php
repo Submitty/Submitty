@@ -27,6 +27,7 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
+     * @param SimpleStat[] $testcase_averages
      * @param SimpleStat|null $manual_average
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
@@ -47,6 +48,7 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
+        array $testcase_averages,
         $manual_average,
         $autograded_average,
         $overall_scores,
@@ -362,6 +364,7 @@ class ElectronicGraderView extends AbstractView {
             "autograded_average" => $autograded_average,
             "manual_average" => $manual_average,
             "component_averages" => $component_averages,
+            "testcase_averages" => $testcase_averages,
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
@@ -1122,15 +1125,9 @@ HTML;
             ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
-            $pattern1 = "upload.pdf";
-            $pattern2 = "/\.upload_page_\d+/";
-            $pattern3 = "/\.upload_version_\d+_page\d+/";
-            $pattern4 = ".submit.timestamp";
-            $pattern5 = ".bulk_upload_data.json";
-
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if ($pattern1 !== $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 !== $key && $pattern5 !== $key) {
+                if (!FileUtils::isSubmissionMetaFile($key) && $key !== 'upload.pdf') {
                     $pattern_match_flag = true;
                 }
             }
