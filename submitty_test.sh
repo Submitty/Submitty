@@ -8,7 +8,7 @@ IMAGE_NAME="submitty_test"
 if [ "${1:-}" == "rebuild" ]; then
     echo "Rebuilding Docker image '$IMAGE_NAME' from scratch..."
     docker build --pull --no-cache -t "$IMAGE_NAME" "$SCRIPT_DIR"
-    shift
+    exit 0
 else
     # build docker image
     echo "Setting up Docker image '$IMAGE_NAME'..."
@@ -19,7 +19,10 @@ fi
 run_in_container() {
     local workdir="$1"
     shift
-    docker run --rm -t -u "$(id -u):$(id -g)" -e HOME=/tmp \
+    # check if the environment supports -t (in this case, just used for color output)
+    local terminal_flag=""
+    [ -t 0 ] && terminal_flag="-t"
+    docker run --rm $terminal_flag -u "$(id -u):$(id -g)" -e HOME=/tmp \
         --mount type=bind,source="$SCRIPT_DIR",target=/submitty \
         --mount type=volume,target=/submitty/site/vendor \
         --mount type=volume,target=/submitty/site/node_modules \
