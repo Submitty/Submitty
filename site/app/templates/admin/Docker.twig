@@ -100,7 +100,7 @@
         <thead>
             <tr>
                 {{ table_sort.sortable_header('docker-table', 'Image Name', 'name', 'string') }}
-                <th>Tag</th>
+                {{ table_sort.sortable_header('docker-table', 'Tag', 'tag', 'string') }}
                 <th>Alias</th>
                 <th>Digest</th>
                 {{ table_sort.sortable_header('docker-table', 'Size', 'size', 'number') }}
