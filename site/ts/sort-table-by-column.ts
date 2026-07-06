@@ -109,46 +109,13 @@ function applySort(table_id: string, col_index: number, direction: string, col_d
                     const date_a = new Date(cleaned_a);
                     const date_b = new Date(cleaned_b);
                     cmp = date_a.getTime() - date_b.getTime();
+                    console.log(`${date_a.toString()} vs ${date_b.toString()} = ${cmp}`);
                     break;
                 }
                 case colDataTypes.String:
-                default:
-                {
+                default: {
                     cmp = text_a.localeCompare(text_b);
                     break;
-                    /*
-                    TODO: add a setting to allow sort to look at next column over?
-                    This looks like a common feature, see below 2 examples
-                    */
-
-                    // const courseA = rowA.children[0].textContent.trim();
-                    // const courseB = rowB.children[0].textContent.trim();
-                    // cmp = courseA.localeCompare(courseB);
-                    // if (cmp === 0) {
-                    //     const gradeableA = rowA.children[1].textContent.trim();
-                    //     const gradeableB = rowB.children[1].textContent.trim();
-                    //     cmp = gradeableA.localeCompare(gradeableB);
-                    // }
-
-                    // const nameA = rowA.children[0].textContent.trim();
-                    // const nameB = rowB.children[0].textContent.trim();
-                    // cmp = nameA.localeCompare(nameB);
-                    // if (cmp === 0) {
-                    //     const tagA = rowA.children[1].textContent.trim();
-                    //     const tagB = rowB.children[1].textContent.trim();
-                    //     const numA = parseFloat(tagA);
-                    //     const numB = parseFloat(tagB);
-                    //     const isNumA = !isNaN(numA);
-                    //     const isNumB = !isNaN(numB);
-                    //     // Tag is descending regardless of Image Name
-                    //     if (isNumA && isNumB) {
-                    //         cmp = numB - numA;
-                    //     }
-                    //     else {
-                    //         cmp = tagB.localeCompare(tagA);
-                    //     }
-                    //     return cmp;
-                    // }
                 }
             }
             return direction === 'ASC' ? cmp : -cmp;
