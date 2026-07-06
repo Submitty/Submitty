@@ -302,7 +302,7 @@ describe('Tests for managing and displaying notifications', () => {
         cy.visit(buildUrl(['sample', 'notifications']));
         assertDisplayedNotifications(3);
         cy.get('.notification.unseen').should('have.length', 3);
-        clearIndividualNotifications();
+        clearIndividualNotification();
         assertDisplayedNotifications(2);
         cy.get('[data-testid="toggle-unseen-only"]').click();
         cy.get('.notification.unseen').should('have.length', 2);
