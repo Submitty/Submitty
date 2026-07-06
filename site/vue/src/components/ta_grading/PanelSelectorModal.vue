@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import PanelSelector from './PanelSelector.vue';
 
 const emit = defineEmits<{
     'close': [];
@@ -14,114 +14,150 @@ function close() {
     emit('close');
 }
 
-const singlePanel = ref<HTMLCanvasElement | null>(null);
-const equalHeight = ref<HTMLCanvasElement | null>(null);
-const tallLeft = ref<HTMLCanvasElement | null>(null);
-const equalTwoInLeft = ref<HTMLCanvasElement | null>(null);
-const equalTwoInRight = ref<HTMLCanvasElement | null>(null);
-const tallLeftTwoInLeft = ref<HTMLCanvasElement | null>(null);
-const tallLeftTwoInRight = ref<HTMLCanvasElement | null>(null);
-const equalFourPanel = ref<HTMLCanvasElement | null>(null);
-const tallLeftFourPanel = ref<HTMLCanvasElement | null>(null);
-
-function fillCanvas(canvas: HTMLCanvasElement | null, draw: (ctx: CanvasRenderingContext2D) => void) {
-    const ctx = canvas?.getContext('2d');
-    if (ctx) {
-        draw(ctx);
-    }
+function rect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, fill = '#6d91b5') {
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, w, h);
 }
 
-function drawCanvases() {
-    fillCanvas(singlePanel.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(5, 2, 288, 15);
-        ctx.fillRect(5, 20, 288, 120);
-    });
-
-    fillCanvas(equalHeight.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(5, 2, 288, 15);
-        ctx.fillRect(5, 20, 140, 120);
-        ctx.fillRect(153, 20, 140, 120);
-    });
-
-    fillCanvas(tallLeft.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(153, 2, 140, 15);
-        ctx.fillRect(0, 0, 145, 150);
-        ctx.fillRect(153, 20, 140, 120);
-    });
-
-    fillCanvas(equalTwoInLeft.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(5, 2, 288, 15);
-        ctx.fillRect(5, 20, 145, 58);
-        ctx.fillRect(5, 82, 145, 58);
-        ctx.fillRect(153, 20, 140, 120);
-    });
-
-    fillCanvas(equalTwoInRight.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(5, 2, 288, 15);
-        ctx.fillRect(5, 20, 145, 120);
-        ctx.fillRect(153, 20, 140, 58);
-        ctx.fillRect(153, 82, 140, 58);
-    });
-
-    fillCanvas(tallLeftTwoInLeft.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(153, 2, 140, 15);
-        ctx.fillRect(0, 0, 145, 73);
-        ctx.fillRect(0, 77, 145, 73);
-        ctx.fillRect(153, 20, 140, 120);
-    });
-
-    fillCanvas(tallLeftTwoInRight.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(153, 2, 140, 15);
-        ctx.fillRect(0, 0, 145, 150);
-        ctx.fillRect(153, 20, 140, 58);
-        ctx.fillRect(153, 82, 140, 58);
-    });
-
-    fillCanvas(equalFourPanel.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(5, 2, 288, 15);
-        ctx.fillRect(5, 20, 145, 58);
-        ctx.fillRect(5, 82, 145, 58);
-        ctx.fillRect(153, 20, 140, 58);
-        ctx.fillRect(153, 82, 140, 58);
-    });
-
-    fillCanvas(tallLeftFourPanel.value, (ctx) => {
-        ctx.fillStyle = 'aliceblue';
-        ctx.fillRect(0, 0, 350, 200);
-        ctx.fillStyle = '#6d91b5';
-        ctx.fillRect(153, 2, 140, 15);
-        ctx.fillRect(0, 0, 145, 73);
-        ctx.fillRect(0, 77, 145, 73);
-        ctx.fillRect(153, 20, 140, 58);
-        ctx.fillRect(153, 82, 140, 58);
-    });
+interface LayoutOption {
+    id: string;
+    label: string;
+    draw: (ctx: CanvasRenderingContext2D) => void;
+    onSelect: () => void;
 }
 
-onMounted(drawCanvases);
+const sections: { id: string; title: string; options: LayoutOption[] }[] = [
+    {
+        id: 'layout-option-1',
+        title: 'Single panel option',
+        options: [
+            {
+                id: 'single-panel',
+                label: 'single panel',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 5, 2, 288, 15);
+                    rect(ctx, 5, 20, 288, 120);
+                },
+                onSelect: () => selectLayout(1, false),
+            },
+        ],
+    },
+    {
+        id: 'layout-option-2',
+        title: 'Two panel options',
+        options: [
+            {
+                id: 'equal-height',
+                label: 'side-by-side',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 5, 2, 288, 15);
+                    rect(ctx, 5, 20, 140, 120);
+                    rect(ctx, 153, 20, 140, 120);
+                },
+                onSelect: () => selectLayout(2, false),
+            },
+            {
+                id: 'tall-left',
+                label: 'side-by-side, taller left',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 153, 2, 140, 15);
+                    rect(ctx, 0, 0, 145, 150);
+                    rect(ctx, 153, 20, 140, 120);
+                },
+                onSelect: () => selectLayout(2, true),
+            },
+        ],
+    },
+    {
+        id: 'layout-option-3',
+        title: 'Three panel options',
+        options: [
+            {
+                id: 'equal-two-in-left',
+                label: 'two on left, one on right',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 5, 2, 288, 15);
+                    rect(ctx, 5, 20, 145, 58);
+                    rect(ctx, 5, 82, 145, 58);
+                    rect(ctx, 153, 20, 140, 120);
+                },
+                onSelect: () => selectLayout(3, false),
+            },
+            {
+                id: 'tall-left-two-in-left',
+                label: 'two on left, one on right, taller left',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 153, 2, 140, 15);
+                    rect(ctx, 0, 0, 145, 73);
+                    rect(ctx, 0, 77, 145, 73);
+                    rect(ctx, 153, 20, 140, 120);
+                },
+                onSelect: () => selectLayout(3, true),
+            },
+            {
+                id: 'equal-two-in-right',
+                label: 'one on left, two on right',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 5, 2, 288, 15);
+                    rect(ctx, 5, 20, 145, 120);
+                    rect(ctx, 153, 20, 140, 58);
+                    rect(ctx, 153, 82, 140, 58);
+                },
+                onSelect: () => selectLayout(3, false, true),
+            },
+            {
+                id: 'tall-left-two-in-right',
+                label: 'one on left, two on right, taller left',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 153, 2, 140, 15);
+                    rect(ctx, 0, 0, 145, 150);
+                    rect(ctx, 153, 20, 140, 58);
+                    rect(ctx, 153, 82, 140, 58);
+                },
+                onSelect: () => selectLayout(3, true, true),
+            },
+        ],
+    },
+    {
+        id: 'layout-option-4',
+        title: 'Four panel options',
+        options: [
+            {
+                id: 'equal-four-panel',
+                label: 'two on left, two on right',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 5, 2, 288, 15);
+                    rect(ctx, 5, 20, 145, 58);
+                    rect(ctx, 5, 82, 145, 58);
+                    rect(ctx, 153, 20, 140, 58);
+                    rect(ctx, 153, 82, 140, 58);
+                },
+                onSelect: () => selectLayout(4, false),
+            },
+            {
+                id: 'tall-left-four-panel',
+                label: 'two on left, two on right, taller left',
+                draw: (ctx) => {
+                    rect(ctx, 0, 0, 350, 200, 'aliceblue');
+                    rect(ctx, 153, 2, 140, 15);
+                    rect(ctx, 0, 0, 145, 73);
+                    rect(ctx, 0, 77, 145, 73);
+                    rect(ctx, 153, 20, 140, 58);
+                    rect(ctx, 153, 82, 140, 58);
+                },
+                onSelect: () => selectLayout(4, true),
+            },
+        ],
+    },
+];
 </script>
 
 <template>
@@ -152,191 +188,24 @@ onMounted(drawCanvases);
         </div>
         <div class="form-body">
           <div
-            id="layout-option-1"
+            v-for="section in sections"
+            :id="section.id"
+            :key="section.title"
             class="layout-option"
           >
             <div class="layout-option-title">
-              <h2>Single panel option</h2>
+              <h2>{{ section.title }}</h2>
             </div>
             <hr />
             <div class="layout-option-cont">
-              <div class="layout-option-item">
-                <canvas
-                  id="single-panel"
-                  ref="singlePanel"
-                />
-                <div class="flex-col">
-                  <span>single panel</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(1, false)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            id="layout-option-2"
-            class="layout-option"
-          >
-            <div class="layout-option-title">
-              <h2>Two panel options</h2>
-            </div>
-            <hr />
-            <div class="layout-option-cont">
-              <div class="layout-option-item">
-                <canvas
-                  id="equal-height"
-                  ref="equalHeight"
-                />
-                <div class="flex-col">
-                  <span>side-by-side</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(2, false)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-              <div class="layout-option-item">
-                <canvas
-                  id="tall-left"
-                  ref="tallLeft"
-                />
-                <div class="flex-col">
-                  <span>side-by-side, taller left</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(2, true)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            id="layout-option-3"
-            class="layout-option"
-          >
-            <div class="layout-option-title">
-              <h2>Three panel options</h2>
-            </div>
-            <hr />
-            <div class="layout-option-cont">
-              <div class="layout-option-item">
-                <canvas
-                  id="equal-two-in-left"
-                  ref="equalTwoInLeft"
-                />
-                <div class="flex-col">
-                  <span>two on left, one on right</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(3, false)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-              <div class="layout-option-item">
-                <canvas
-                  id="tall-left-two-in-left"
-                  ref="tallLeftTwoInLeft"
-                />
-                <div class="flex-col">
-                  <span>two on left, one on right, taller left</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(3, true)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-              <div class="layout-option-item">
-                <canvas
-                  id="equal-two-in-right"
-                  ref="equalTwoInRight"
-                />
-                <div class="flex-col">
-                  <span>one on left, two on right</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(3, false, true)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-              <div class="layout-option-item">
-                <canvas
-                  id="tall-left-two-in-right"
-                  ref="tallLeftTwoInRight"
-                />
-                <div class="flex-col">
-                  <span>one on left, two on right, taller left</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(3, true, true)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            id="layout-option-4"
-            class="layout-option"
-          >
-            <div class="layout-option-title">
-              <h2>Four panel options</h2>
-            </div>
-            <hr />
-            <div class="layout-option-cont">
-              <div class="layout-option-item">
-                <canvas
-                  id="equal-four-panel"
-                  ref="equalFourPanel"
-                />
-                <div class="flex-col">
-                  <span>two on left, two on right</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(4, false)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-              <div class="layout-option-item">
-                <canvas
-                  id="tall-left-four-panel"
-                  ref="tallLeftFourPanel"
-                />
-                <div class="flex-col">
-                  <span>two on left, two on right, taller left</span>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    @click="selectLayout(4, true)"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
+              <PanelSelector
+                v-for="opt in section.options"
+                :key="opt.id"
+                :option-id="opt.id"
+                :label="opt.label"
+                :draw="opt.draw"
+                @select="opt.onSelect"
+              />
             </div>
           </div>
         </div>
