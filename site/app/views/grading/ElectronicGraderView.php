@@ -608,7 +608,7 @@ HTML;
                     $columns[] = ["title" => "Student", "header_key" => "user_id_anon"];
                 }
                 else {
-                    $columns[] = ["title" => "User ID", "header_key" => "user_id", "data_type" => "number"];
+                    $columns[] = ["title" => "User ID", "header_key" => "user_id", "data_type" => "string"];
                     $columns[] = ["title" => "First Name", "header_key" => "user_given", "data_type" => "string"];
                     $columns[] = ["title" => "Last Name", "header_key" => "user_family", "data_type" => "string"];
                 }
