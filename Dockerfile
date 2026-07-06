@@ -22,10 +22,13 @@ RUN chmod 1777 /tmp
 
 # Install dependencies
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt /tmp/pip/
-RUN pip3 install \
+RUN pip3 install --no-cache-dir \
     -r /tmp/pip/dev_requirements.txt \
     -r /tmp/pip/system_requirements.txt \
     coverage flake8 pylint
+
+COPY python_submitty_utils /submitty/python_submitty_utils
+RUN pip3 install --no-cache-dir -e /submitty/python/submitty_utils
 
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \

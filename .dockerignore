@@ -2,6 +2,7 @@
 *
 !.setup/pip/dev_requirements.txt
 !.setup/pip/system_requirements.txt
+!python_submitty_utils
 !site/**
 !Dockerfile
 .git

@@ -114,9 +114,6 @@ run_py_lint() {
 run_py_unit() {
     parse_args "${@:2}"
 
-    # install in editable mode rather than local user
-    run_in_container /submitty/python_submitty_utils pip3 install --user -e .
-
     if [ ${#ARGS[@]} -gt 0 ]; then
         if [ "${ARGS[0]}" == "utils" ]; then
             run_in_container /submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]:1}"
