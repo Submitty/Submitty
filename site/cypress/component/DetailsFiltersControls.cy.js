@@ -56,7 +56,10 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="random-order-checkbox"]').should('be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('be.checked');
+            cy.get('[data-testid="anon-students-checkbox"]').should('be.checked');
+        });
 
+        it('defaults all initial* props to false when undefined', () => {
             cy.mount(DetailsFiltersControls, {
                 props: { ...defaultProps(), showAllSections: true, gradeInquiryOnly: true, canFilterWithdrawn: true },
             });
@@ -64,13 +67,6 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="random-order-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('not.be.checked');
-        });
-
-        it('respects anonMode prop directly as anon checkbox state', () => {
-            cy.mount(DetailsFiltersControls, {
-                props: { ...defaultProps(), toggleAnon: true, anonMode: true },
-            });
-            cy.get('[data-testid="anon-students-checkbox"]').should('be.checked');
         });
     });
 
