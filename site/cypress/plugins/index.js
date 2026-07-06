@@ -14,10 +14,10 @@
 
 import vnuJar from 'vnu-jar';
 
-/** 
+/**
  * @type {Cypress.PluginConfig}
  */
-export default function (on /*, config */) {
+export default function (on /* , config */) {
     on('task', {
         async vnuValidate(htmlPath) {
             let output;
