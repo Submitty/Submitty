@@ -421,7 +421,6 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, pe
         'grading',
         'clear_peer_marks',
     ]);
-
     $.ajax({
         url,
         data: {
