@@ -524,56 +524,22 @@ function setupNumericTextCells() {
 
                 submitAJAX(
                     buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
-                    { csrf_token: csrfToken, users: user_ids, num_numeric: num_numeric, big_file: reader.result },
+                    { csrf_token: csrfToken, users: user_ids, big_file: reader.result },
                     (returned_data) => {
                         closePopup('numeric-csv-upload-form');
-                        displaySuccessMessage('CSV uploaded successfully.');
-                        for (let x = 0; x < returned_data['data'].length; x++) {
-                            const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
-                            if (rowElement.length) {
-                                let total = 0;
-                                for (let col = 0, y = 0; col < csvLength - 3; col++) {
-                                    if (num_numeric && col === num_numeric) {
-                                        const split_row = rowElement.attr('id').split('-');
-                                        $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
-                                        continue;
-                                    }
-                                    const value = `value_${y}`;
-                                    const status = `status_${y}`;
-                                    let cellElement;
 
-                                    if (col < num_numeric) {
-                                        cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col}`);
-                                        if (returned_data['data'][x][status] === 'OK') {
-                                            cellElement.val(returned_data['data'][x][value]);
-                                        }
-                                        y++;
-                                        if (Number(cellElement.val()) === 0) {
-                                            cellElement.css('color', 'var(--standard-light-medium-gray)');
-                                        }
-                                        else {
-                                            cellElement.css('color', '');
-                                        }
-                                        total += Number(cellElement.val());
-                                    }
-                                    else {
-                                        cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
-                                        cellElement.text(returned_data['data'][x][value]);
-                                        y++;
-                                    }
-
-                                    if (returned_data['data'][x][status] === 'OK') {
-                                        cellElement.css('background-color', 'var(--default-white)');
-                                    }
-                                    else {
-                                        cellElement.css('background-color', 'var(--simple-save-error-red)');
-                                    }
-                                }
-                            }
-                            else {
-                                alert(`User ${returned_data['data'][x]['username']} does not exist.`);
-                            }
+                        const updated_columns = returned_data['data']['updated_columns'] || [];
+                        let msg = 'CSV uploaded successfully.';
+                        if (updated_columns.length > 0) {
+                            msg += 'Updated: ' + updated_columns.join(', ') + '.';
                         }
+                        displaySuccessMessage(msg);
+                        setTimeout(() => {
+                            displaySuccessMessage('Refreshing page...');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }, 3000);
                     },
                     () => {
                         closePopup('numeric-csv-upload-form');
@@ -581,7 +547,7 @@ function setupNumericTextCells() {
                     },
                 );
             };
-        }
+        };
     });
 }
 
