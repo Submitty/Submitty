@@ -21,20 +21,20 @@
         <div>
             {% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton', 'class': 'fullscreen-btn-wrapper' } %}
             {% if action == 'numeric' and core.getUser().accessAdmin() %}
-                <label for="csvUpload" class="btn btn-primary" tabindex="0">
+                <a href="javascript:newNumericCsvUploadForm()" class="btn btn-primary">
                     Upload CSV
-                </label>
+                </a>
                 <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt" style="display: none;">
-                
+                <a 
                     class="btn btn-primary"
                     id="csvDownload"
                     href="{{ csv_download_url }}?view={{ view_all ? 'all'}}&sort={{ sort}}"
                 >
                     Download CSV
                 </a>
-                <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
-                <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
             {%endif %}
+            <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
 
