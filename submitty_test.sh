@@ -196,7 +196,6 @@ elif [ "$1" == "py-unit" ]; then
     run_py_unit_autograder "$@"
     echo "Running unit test: 'daemon'..."
     run_py_unit_daemon "$@"
-fi
 else
     echo "Unknown test type: $1
         use rebuild, phpstan, phpcs, php-lint, php-unit, js-lint, css-lint, py-flake8, py-pylint, py-lint, py-unit, or py-unit-*
