@@ -1278,6 +1278,8 @@ HTML;
         // Add MarkerJS libraries globally for image annotation
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
+        // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
@@ -1291,8 +1293,6 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
         $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
-        // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
-        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
