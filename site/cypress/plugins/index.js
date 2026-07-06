@@ -14,7 +14,7 @@
 
 import vnuJar from 'vnu-jar';
 
-/**
+/** 
  * @type {Cypress.PluginConfig}
  */
 export default function (on /*, config */) {

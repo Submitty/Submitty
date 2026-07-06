@@ -61,7 +61,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
         cy.fixture('accessibility_baseline').then((data) => {
             expect(data).to.be.an('object');
             baseline = new Map(Object.entries(data));
-            //preserve existing keys
+            // preserve existing keys
             Object.assign(regeneratedBaseline, data);
         });
 
