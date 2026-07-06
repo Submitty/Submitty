@@ -53,6 +53,7 @@ run_php_stan() {
         run_in_container /submitty/site composer run-script static-analysis
     fi
 }
+
 run_php_cs() {
     parse_args "${@:2}"
     if $FIX; then
@@ -63,6 +64,7 @@ run_php_cs() {
         run_in_container /submitty/site composer run-script lint
     fi
 }
+
 run_js_es() {
     parse_args "${@:2}"
     if $FIX; then
@@ -79,6 +81,7 @@ run_js_es() {
         fi
     fi
 }
+
 run_css_style() {
     parse_args "${@:2}"
     if $FIX; then
@@ -95,48 +98,50 @@ run_css_style() {
         fi
     fi
 }
+
 run_php_unit() {
     parse_args "${@:2}"
     run_in_container /submitty/site php vendor/bin/phpunit "${ARGS[@]}"
 }
 
-run_py_lint() {
+run_py_flake8() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /submitty python3 -m flake8 "${ARGS[@]}"
-        run_in_container /submitty python3 -m pylint "${ARGS[@]}"
     else
         run_in_container /submitty python3 -m flake8
+    fi
+}
+
+run_py_pylint() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /submitty python3 -m pylint "${ARGS[@]}"
+    else
         run_in_container /submitty python3 -m pylint --recursive=y .
     fi
 }
 
-run_py_unit() {
+run_py_unit_utils() {
     parse_args "${@:2}"
-
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        if [ "${ARGS[0]}" == "utils" ]; then
-            run_in_container /submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]:1}"
-        elif [ "${ARGS[0]}" == "migration" ]; then
-            run_in_container /submitty/migration coverage run -m unittest discover "${ARGS[@]:1}"
-        elif [ "${ARGS[0]}" == "autograder" ]; then
-            run_in_container /submitty/autograder coverage run -m unittest discover "${ARGS[@]:1}"
-        elif [ "${ARGS[0]}" == "daemon" ]; then
-            run_in_container /submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t . "${ARGS[@]:1}"
-        else
-            echo "Unknown python unit test: ${ARGS[0]}. Use: utils, migration, autograder, or daemon"
-            exit 1
-        fi
-    else
-        # run all unit tests except migration
-        echo "Running unit test: utils..."
-        run_in_container /submitty/python_submitty_utils coverage run -m unittest discover
-        echo "Running unit test: autograder..."
-        run_in_container /submitty/autograder coverage run -m unittest discover
-        echo "Running unit test: daemon..."
-        run_in_container /submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t .
-    fi
+    run_in_container /submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]}"
 }
+
+run_py_unit_migration() {
+    parse_args "${@:2}"
+    run_in_container /submitty/migration coverage run -m unittest discover "${ARGS[@]}"
+}
+
+run_py_unit_autograder() {
+    parse_args "${@:2}"
+    run_in_container /submitty/autograder coverage run -m unittest discover "${ARGS[@]}"
+}
+
+run_py_unit_daemon() {
+    parse_args "${@:2}"
+    run_in_container /submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t . "${ARGS[@]}"
+}
+
 # process input arguments
 if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
     echo "
@@ -147,8 +152,14 @@ if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
           php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
           js-lint   : eslint [option: --fix]
           css-lint  : css-stylelint [option: --fix]
-          py-lint   : run flake8 and pylint [option: specific_file.py]
-          py-unit   : run python unit tests except migration [option: utils|migration|autograder|daemon]
+          py-flake8 : run flake8 [option: specific_file.py]
+          py-pylint : run pylint [option: specific_file.py]
+          py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+          py-unit   : run all python unit tests except migration [option: utils|migration|autograder|daemon]
+          py-unit-utils      : run just the utils python unit tests
+          py-unit-migration  : run just the migration python unit tests
+          py-unit-autograder : run just the autograder python unit tests
+          py-unit-daemon     : run just the daemon python unit tests
           "
 elif [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
@@ -163,12 +174,31 @@ elif [ "$1" == "js-lint" ]; then
     run_js_es "$@"
 elif [ "$1" == "css-lint" ]; then
     run_css_style "$@"
+elif [ "$1" == "py-flake8" ]; then
+    run_py_flake8 "$@"
+elif [ "$1" == "py-pylint" ]; then
+    run_py_pylint "$@"
 elif [ "$1" == "py-lint" ]; then
-    run_py_lint "$@"
+    run_py_flake8 "$@"
+    run_py_pylint "$@"
+elif [ "$1" == "py-unit-utils" ]; then
+    run_py_unit_utils "$@"
+elif [ "$1" == "py-unit-migration" ]; then
+    run_py_unit_migration "$@"
+elif [ "$1" == "py-unit-autograder" ]; then
+    run_py_unit_autograder "$@"
+elif [ "$1" == "py-unit-daemon" ]; then
+    run_py_unit_daemon "$@"
 elif [ "$1" == "py-unit" ]; then
-    run_py_unit "$@"
+    echo "Running unit test: 'utils'..."
+    run_py_unit_utils "$@"
+    echo "Running unit test: 'autograder'..."
+    run_py_unit_autograder "$@"
+    echo "Running unit test: 'daemon'..."
+    run_py_unit_daemon "$@"
+fi
 else
     echo "Unknown test type: $1
-        use rebuild, phpstan, phpcs, php-lint, php-unit, js-lint, css-lint, py-lint, py-unit
+        use rebuild, phpstan, phpcs, php-lint, php-unit, js-lint, css-lint, py-flake8, py-pylint, py-lint, py-unit, or py-unit-*
         or help for detail"
 fi
