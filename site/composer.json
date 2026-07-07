@@ -54,6 +54,7 @@
   "scripts": {
     "test": "phpunit",
     "lint": "php vendor/bin/phpcs --extensions=php ./app",
+    "lint:fix": "php vendor/bin/phpcbf --extensions=php ./app",
     "static-analysis": "php vendor/bin/phpstan analyze"
   }
 }

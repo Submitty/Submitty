@@ -48,6 +48,7 @@ RUN mkdir -p /test_suite && chmod 1777 /test_suite
 WORKDIR $HOME/site
 # =====================================================
 
+# =====================================================
 # Install testing / linting dependencies
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt $HOME/pip/
 RUN pip3 install --no-cache-dir \
@@ -61,3 +62,5 @@ COPY site/composer.json site/composer.lock site/package.json site/package-lock.j
 RUN composer install --no-scripts --no-interaction --prefer-dist \
     && npm ci \
     && chmod -R 777 .
+
+# =====================================================

@@ -50,19 +50,26 @@ run_php_stan() {
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site composer run-script static-analysis -- "${ARGS[@]}"
     else
-        run_in_container /home/submitty/site composer run-script static-analysis
+        run_in_container /home/submitty/site composer run-script static-analysis -- --memory-limit 4G
     fi
 }
 
 run_php_cs() {
     parse_args "${@:2}"
     if $FIX; then
-        run_in_container /home/submitty/site vendor/bin/phpcbf "${ARGS[@]}"
-    elif [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty/site composer run-script lint -- "${ARGS[@]}"
+        if [ ${#ARGS[@]} -gt 0 ]; then
+            run_in_container /home/submitty/site composer run-script lint:fix -- "${ARGS[@]}"
+        else
+            run_in_container /home/submitty/site composer run-script lint:fix
+        fi
     else
-        run_in_container /home/submitty/site composer run-script lint
+        if [ ${#ARGS[@]} -gt 0 ]; then
+            run_in_container /home/submitty/site composer run-script lint -- "${ARGS[@]}"
+        else
+            run_in_container /home/submitty/site composer run-script lint
+        fi
     fi
+
 }
 
 run_js_es() {
@@ -146,7 +153,7 @@ run_py_unit_daemon() {
 if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
     echo "
           rebuild   : force rebuild the docker container, including base image
-          phpstan   : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
+          phpstan   : php static analysis [option: --memory-limit 2G, --generate-baseline ...]
           phpcs     : php CodeSniffer [option: --fix]
           php-lint  : phpcs & phpstan [option: --fix]
           php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
