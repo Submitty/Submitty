@@ -171,8 +171,8 @@ case "${1:-}" in
         run_py_pylint "$@"
         ;;
     py-lint)
-        run_py_flake8 "$@"
         run_py_pylint "$@"
+        run_py_flake8 "$@"
         ;;
     py-unit-utils)
         run_py_unit_utils "$@"
@@ -214,5 +214,4 @@ case "${1:-}" in
               py-unit-daemon     : run just the daemon python unit tests
              "
         ;;
-
 esac
