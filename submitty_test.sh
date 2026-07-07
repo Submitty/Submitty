@@ -153,7 +153,7 @@ run_py_unit_daemon() {
 if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
     echo "
           rebuild   : force rebuild the docker container, including base image
-          phpstan   : php static analysis [option: --memory-limit 2G, --generate-baseline ...]
+          phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
           phpcs     : php CodeSniffer [option: --fix]
           php-lint  : phpcs & phpstan [option: --fix]
           php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
