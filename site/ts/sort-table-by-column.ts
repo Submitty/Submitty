@@ -108,7 +108,9 @@ function applySort(table_id: string, col_index: number, direction: string, col_d
                     const cleaned_b = text_b.replace('@', '').replace('EST', '').trim();
                     const date_a = new Date(cleaned_a);
                     const date_b = new Date(cleaned_b);
-                    cmp = date_a.getTime() - date_b.getTime();
+                    // https://stackoverflow.com/questions/56612302/sort-array-by-date-in-javascript
+                    // sorting and comparing dates when one may be invalid
+                    cmp = (date_a.getTime() || -Infinity) - (date_b.getTime() || -Infinity);
                     console.log(`${date_a.toString()} vs ${date_b.toString()} = ${cmp}`);
                     break;
                 }
