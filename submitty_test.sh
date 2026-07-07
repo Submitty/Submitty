@@ -143,61 +143,76 @@ run_py_unit_daemon() {
 }
 
 # process input arguments
-if [ -z "${1:-}" ] || [ "$1" == "help" ]; then
-    echo "
-          rebuild   : force rebuild the docker container, including base image
-          phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
-          phpcs     : php CodeSniffer [option: --fix]
-          php-lint  : phpcs & phpstan [option: --fix]
-          php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
-          js-lint   : eslint [option: --fix]
-          css-lint  : css-stylelint [option: --fix]
-          py-flake8 : run flake8 [option: specific_file.py]
-          py-pylint : run pylint [option: specific_file.py]
-          py-lint   : py-flake8 & py-pylint [option: specific_file.py]
-          py-unit   : run all python unit tests except migration [option: utils|migration|autograder|daemon]
-          py-unit-utils      : run just the utils python unit tests
-          py-unit-migration  : run just the migration python unit tests
-          py-unit-autograder : run just the autograder python unit tests
-          py-unit-daemon     : run just the daemon python unit tests
-          "
-elif [ "$1" == "phpstan" ]; then
-    run_php_stan "$@"
-elif [ "$1" == "phpcs" ]; then
-    run_php_cs "$@"
-elif [ "$1" == "php-lint" ]; then
-    run_php_cs "$@"
-    run_php_stan "$@"
-elif [ "$1" == "php-unit" ]; then
-    run_php_unit "$@"
-elif [ "$1" == "js-lint" ]; then
-    run_js_es "$@"
-elif [ "$1" == "css-lint" ]; then
-    run_css_style "$@"
-elif [ "$1" == "py-flake8" ]; then
-    run_py_flake8 "$@"
-elif [ "$1" == "py-pylint" ]; then
-    run_py_pylint "$@"
-elif [ "$1" == "py-lint" ]; then
-    run_py_flake8 "$@"
-    run_py_pylint "$@"
-elif [ "$1" == "py-unit-utils" ]; then
-    run_py_unit_utils "$@"
-elif [ "$1" == "py-unit-migration" ]; then
-    run_py_unit_migration "$@"
-elif [ "$1" == "py-unit-autograder" ]; then
-    run_py_unit_autograder "$@"
-elif [ "$1" == "py-unit-daemon" ]; then
-    run_py_unit_daemon "$@"
-elif [ "$1" == "py-unit" ]; then
-    echo "Running unit test: 'utils'..."
-    run_py_unit_utils "$@"
-    echo "Running unit test: 'autograder'..."
-    run_py_unit_autograder "$@"
-    echo "Running unit test: 'daemon'..."
-    run_py_unit_daemon "$@"
-else
-    echo "Unknown test type: $1
-        use rebuild, phpstan, phpcs, php-lint, php-unit, js-lint, css-lint, py-flake8, py-pylint, py-lint, py-unit, or py-unit-*
-        or help for detail"
-fi
+
+case "${1:-}" in
+    phpstan)
+        run_php_stan "$@"
+        ;;
+    phpcs)
+        run_php_cs "$@"
+        ;;
+    php-lint)
+        run_php_cs
+        run_php_stan
+        ;;
+    php-unit)
+        run_php_unit "$@"
+        ;;
+    js-lint)
+        run_js_es "$@"
+        ;;
+    css-lint)
+        run_css_style "$@"
+        ;;
+    py-flake8)
+        run_py_flake8 "$@"
+        ;;
+    py-pylint)
+        run_py_pylint "$@"
+        ;;
+    py-lint)
+        run_py_flake8 "$@"
+        run_py_pylint "$@"
+        ;;
+    py-unit-utils)
+        run_py_unit_utils "$@"
+        ;;
+    py-unit-migration)
+        run_py_unit_migration "$@"
+        ;;
+    py-unit-autograder)
+        run_py_unit_autograder "$@"
+        ;;
+    py-unit-daemon)
+        run_py_unit_daemon "$@"
+        ;;
+    py-unit)
+        echo "Running unit test: 'utils'..."
+        run_py_unit_utils "$@"
+        echo "Running unit test: 'autograder'..."
+        run_py_unit_autograder "$@"
+        echo "Running unit test: 'daemon'..."
+        run_py_unit_daemon "$@"
+        ;;
+    help|*)
+        echo "
+              Usage:
+              help      : see usage details
+              phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
+              phpcs     : php CodeSniffer [option: --fix]
+              php-lint  : phpcs & phpstan (with default options only)
+              php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
+              js-lint   : eslint [option: --fix]
+              css-lint  : css-stylelint [option: --fix]
+              py-flake8 : run flake8 [option: specific_file.py]
+              py-pylint : run pylint [option: specific_file.py]
+              py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+              py-unit   : run all python unit tests except migration [option: utils|migration|autograder|daemon]
+              py-unit-utils      : run just the utils python unit tests
+              py-unit-migration  : run just the migration python unit tests
+              py-unit-autograder : run just the autograder python unit tests
+              py-unit-daemon     : run just the daemon python unit tests
+             "
+        ;;
+
+esac

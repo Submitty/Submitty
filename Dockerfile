@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # =====================================================
-# Install everything necessary for testing
+# Install base requirements for testing
 RUN apt-get update
 
 # Install system utils
