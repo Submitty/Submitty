@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import {
     settingsData,
     loadTAGradingSettingData,
@@ -8,10 +8,16 @@ import {
     updateKeymapAndStorage,
     isKeyAlreadyBound,
     eventToKeyCode,
+    onSettingsVisibilityChange,
+    notifySettingsVisibility,
 } from '../../../../ts/ta-grading-keymap';
 
 const props = defineProps<{
     fullAccess: boolean;
+}>();
+
+const emit = defineEmits<{
+    close: [];
 }>();
 
 const visible = ref(false);
@@ -41,37 +47,24 @@ function refreshHotkeys() {
     }));
 }
 
-function show() {
-    refreshSettings();
-    refreshHotkeys();
-    visible.value = true;
-    window.__settingsPopupVisible = true;
-}
-
-function close() {
+function handleClose() {
     visible.value = false;
-    remapActive.value = false;
-    remapIndex.value = -1;
-    window.__settingsPopupVisible = false;
+    notifySettingsVisibility(false);
+    emit('close');
 }
 
-function onDocumentKeydown(e: KeyboardEvent) {
-    if (!visible.value) {
-        return;
-    }
-
+function onKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-        close();
+        handleClose();
         return;
     }
-
     if (remapActive.value) {
         e.preventDefault();
     }
 }
 
-function onDocumentKeyup(e: KeyboardEvent) {
-    if (!visible.value || !remapActive.value) {
+function onKeyup(e: KeyboardEvent) {
+    if (!remapActive.value) {
         return;
     }
 
@@ -121,26 +114,32 @@ function onSettingChange(storageCode: string, value: string) {
     applySettingChange(storageCode, value);
 }
 
-function onTogglePopup(e: Event) {
-    const detail = (e as CustomEvent).detail as { show?: boolean } | undefined;
-    if (detail?.show) {
-        show();
+const closeBtn = ref<HTMLButtonElement | null>(null);
+
+watch(visible, (v) => {
+    if (v) {
+        void nextTick(() => closeBtn.value?.focus());
     }
-    else {
-        close();
-    }
-}
+});
+
+let unsubscribe: (() => void) | null = null;
 
 onMounted(() => {
-    document.addEventListener('toggle-settings-popup', onTogglePopup);
-    document.addEventListener('keydown', onDocumentKeydown);
-    document.addEventListener('keyup', onDocumentKeyup);
+    unsubscribe = onSettingsVisibilityChange((v) => {
+        if (v) {
+            refreshSettings();
+            refreshHotkeys();
+        }
+        visible.value = v;
+        if (!v) {
+            remapActive.value = false;
+            remapIndex.value = -1;
+        }
+    });
 });
 
 onUnmounted(() => {
-    document.removeEventListener('toggle-settings-popup', onTogglePopup);
-    document.removeEventListener('keydown', onDocumentKeydown);
-    document.removeEventListener('keyup', onDocumentKeyup);
+    unsubscribe?.();
 });
 </script>
 
@@ -149,11 +148,13 @@ onUnmounted(() => {
     v-if="visible"
     class="popup-form"
     data-testid="settings-popup"
+    @keydown="onKeydown"
+    @keyup="onKeyup"
   >
     <div
       class="popup-box"
       data-testid="popup-overlay"
-      @click.self="close"
+      @click.self="handleClose"
     >
       <div
         class="popup-window"
@@ -163,10 +164,11 @@ onUnmounted(() => {
         <div class="form-title">
           <h1>Settings</h1>
           <button
+            ref="closeBtn"
             class="btn btn-default close-button"
             data-testid="close-button"
             tabindex="-1"
-            @click="close"
+            @click="handleClose"
           >
             Close
           </button>
@@ -209,7 +211,6 @@ onUnmounted(() => {
                           v-for="(optValue, optKey) in setting.options"
                           :key="optValue"
                           :value="optValue"
-                          :selected="optValue === setting.currValue"
                         >
                           {{ optKey }}
                         </option>
@@ -293,7 +294,7 @@ onUnmounted(() => {
               <button
                 class="btn btn-default close-button key_to_click"
                 tabindex="0"
-                @click="close"
+                @click="handleClose"
               >
                 Close
               </button>

@@ -3,5 +3,8 @@
     'name': 'ta_grading/GradingSettings',
     'args': {
         'fullAccess': core.getUser().getGroup() <= 2
+    },
+    'events': {
+        'close': '(event) => { window.hideSettings(); }'
     }
 } %}

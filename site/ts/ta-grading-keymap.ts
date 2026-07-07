@@ -5,19 +5,43 @@
 
 // -----------------------------------------------------------------------------
 // Keyboard shortcut handling
+
+type _Listener = (visible: boolean) => void;
+let _visible = false;
+const _listeners: _Listener[] = [];
+
+export function notifySettingsVisibility(visible: boolean): void {
+    if (_visible === visible) {
+        return;
+    }
+    _visible = visible;
+    _listeners.forEach((fn) => fn(visible));
+}
+
+export function onSettingsVisibilityChange(fn: _Listener): () => void {
+    _listeners.push(fn);
+    fn(_visible);
+    return () => {
+        const idx = _listeners.indexOf(fn);
+        if (idx >= 0) {
+            _listeners.splice(idx, 1);
+        }
+    };
+}
+
+export function isSettingsVisible(): boolean {
+    return _visible;
+}
+
 declare global {
     interface Window {
         showSettings(): void;
+        hideSettings(): void;
         registerKeyHandler(parameters: object, fn: (...args: unknown[]) => unknown): void;
-        __settingsPopupVisible?: boolean;
     }
 }
 
 const keymap: KeymapEntry<unknown>[] = [];
-const remapping = {
-    active: false,
-    index: 0,
-};
 type KeymapEntry<T> = {
     name: string;
     code: string;
@@ -91,22 +115,9 @@ export const settingsData: SettingsData = [
     },
 ];
 
-window.onkeyup = function (e) {
-    if (remapping.active) {
-        remapFinish(remapping.index, eventToKeyCode(e));
-        e.preventDefault();
-        return;
-    }
-};
-
 window.onkeydown = function (e) {
-    if (remapping.active) {
-        e.preventDefault();
-        return;
-    }
-
     // Don't fire hotkeys when the settings popup is open
-    if (window.__settingsPopupVisible) {
+    if (isSettingsVisible()) {
         return;
     }
 
@@ -152,11 +163,14 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
 };
 
 export function showSettings() {
-    document.dispatchEvent(new CustomEvent('toggle-settings-popup', { detail: { show: true } }));
+    notifySettingsVisibility(true);
 }
 window.showSettings = showSettings;
 
-export { remapping, keymap as keymapArr };
+export function hideSettings() {
+    notifySettingsVisibility(false);
+}
+window.hideSettings = hideSettings;
 
 export function getKeymap(): KeymapEntry<unknown>[] {
     return keymap;
@@ -240,21 +254,6 @@ export function isKeyAlreadyBound(index: number, code: string): boolean {
         }
     }
     return false;
-}
-
-/**
- * Revert a hotkey to its original code
- */
-export function remapUnsetKey(index: number): void {
-    remapFinish(index, 'Unassigned');
-}
-
-function remapFinish(index: number, code: string): void {
-    if (isKeyAlreadyBound(index, code)) {
-        return;
-    }
-    updateKeymapAndStorage(index, code);
-    remapping.active = false;
 }
 
 /**
