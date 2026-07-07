@@ -106,7 +106,7 @@
                 {{ table_sort.sortable_header('docker-table', 'Size', 'size', 'number') }}
                 {{ table_sort.sortable_header('docker-table', 'Created', 'created', 'date') }}
                 <th>Capabilities Containing This Image</th>
-                <th>Owner</th>
+                {{ table_sort.sortable_header('docker-table', 'Owner', 'owner', 'string') }}
                 <th>Remove</th>
             </tr>
         </thead>
