@@ -115,6 +115,19 @@ export const settingsData: SettingsData = [
     },
 ];
 
+function getKeyCode(name: string): string {
+    const stored = remapGetLS(name);
+    if (stored !== null) {
+        return stored;
+    }
+    for (let i = 0; i < keymap.length; i++) {
+        if (keymap[i].name === name) {
+            return keymap[i].originalCode ?? 'Unassigned';
+        }
+    }
+    return 'Unassigned';
+}
+
 window.onkeydown = function (e) {
     // Don't fire hotkeys when the settings popup is open
     if (isSettingsVisible()) {
@@ -129,7 +142,8 @@ window.onkeydown = function (e) {
     const codeName = eventToKeyCode(e);
 
     for (let i = 0; i < keymap.length; i++) {
-        if (keymap[i].code === codeName) {
+        const code = getKeyCode(keymap[i].name);
+        if (code === codeName) {
             keymap[i].fn?.(e, keymap[i].options);
         }
     }
