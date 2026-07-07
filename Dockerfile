@@ -3,35 +3,36 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # =====================================================
 # Install base requirements for testing
-RUN apt-get update
 
 # Install system utils
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         software-properties-common curl git gnupg2 ca-certificates unzip \
         poppler-utils \
         libzbar0 \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
 # Node 20 manually installed since it's not avb in default Ubuntu 22.04 packages
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP
 # PHP 8.2 manually installed since it's not avb in default Ubuntu 22.04 packages
-RUN add-apt-repository ppa:ondrej/php -y \
+RUN apt-get update \
+    && add-apt-repository ppa:ondrej/php -y \
     && apt-get update \
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends \
         php8.2-cli php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 \
         python3-pip \
         python3-setuptools \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -46,6 +47,7 @@ RUN mkdir -p $HOME/site && chmod 1777 $HOME
 # /test_suite needed for python unit tests
 RUN mkdir -p /test_suite && chmod 1777 /test_suite
 WORKDIR $HOME/site
+
 # =====================================================
 
 # =====================================================
@@ -61,6 +63,8 @@ RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \
     && npm ci \
+    && npm cache clean --force \
+    && rm -rf /root/.composer/cache ~/.npm \
     && chmod -R 777 .
 
 # =====================================================
