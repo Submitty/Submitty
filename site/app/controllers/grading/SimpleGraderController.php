@@ -524,71 +524,7 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse($msg);
         }
 
-                // Get the user grade for this gradeable
-                $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-                //Makes an array with all the values and their status.
-                foreach ($gradeable->getComponents() as $component) {
-                    $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                    $component_grade->setGrader($grader);
-
-                    $value_temp_str = "value_" . $index1;
-                    $status_temp_str = "status_" . $index1;
-                    if (isset($data_array[$j][$index2])) {
-                        $component_data = $data_array[$j][$index2];
-                        // text component
-                        if ($component->isText()) {
-                            $component_grade->setComment($component_data);
-                            $component_grade->setGradeTime($this->core->getDateTimeNow());
-                            $temp_array[$value_temp_str] = $component_data;
-                            $temp_array[$status_temp_str] = "OK";
-                        }
-                        else {
-                            // numeric component
-                            // if the data is not a number, we should fail.
-                            if ($component_data !== '' && !is_numeric($component_data)) {
-                                $temp_array[$value_temp_str] = $component_data;
-                                $temp_array[$status_temp_str] = "ERROR";
-                            }
-                            else {
-                                // empty data is read as an input of 0
-                                $component_data = floatval($component_data);
-                                if ($component_data === 0.0) {
-                                    // components of value zero should not be saved in the database
-                                    $ta_graded_gradeable->deleteGradedComponent($component);
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                                elseif ($component->getUpperClamp() < $component_data) {
-                                    // components with invalid values should not be saved to the database
-                                    $ta_graded_gradeable->deleteGradedComponent($component);
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "ERROR";
-                                }
-                                else {
-                                    $component_grade->setScore($component_data);
-                                    $component_grade->setGradeTime($this->core->getDateTimeNow());
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                            }
-                        }
-                    }
-                    $index1++;
-                    $index2++;
-                    //skips the index of the total points in the csv file
-                    if ($index1 === $num_numeric) {
-                        $index2++;
-                    }
-                }
-
-                // Reset the overall comment because we're overwriting the grade anyway
-                $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-                $return_data[] = $temp_array;
-                $j = $arr_length; //stops the for loop early to not waste resources
-            }
-        }
+        $col_index = array_flip($column_titles);
 
         $numeric_components = [];
         $text_components = [];
@@ -735,7 +671,6 @@ class SimpleGraderController extends AbstractController {
             'updated_columns' => $updated_columns,
         ]);
     }
-
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array<mixed> $msg_array
