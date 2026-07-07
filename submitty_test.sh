@@ -4,16 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_NAME="submitty_test"
 
-# handle rebuild vs run
-if [ "${1:-}" == "rebuild" ]; then
-    echo "Rebuilding Docker image '$IMAGE_NAME' from scratch..."
-    docker build --pull --no-cache -t "$IMAGE_NAME" "$SCRIPT_DIR"
-    exit 0
-else
-    # build docker image
-    echo "Setting up Docker image '$IMAGE_NAME'..."
-    docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
-fi
+# build docker image
+echo "Setting up Docker image '$IMAGE_NAME'..."
+docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
 
 # runs a command in the container with a given working directory
 run_in_container() {
