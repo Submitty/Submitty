@@ -545,7 +545,6 @@ function setupNumericTextCells() {
                 );
             };
         };
-
     });
 }
 

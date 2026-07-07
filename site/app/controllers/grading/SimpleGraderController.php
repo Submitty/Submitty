@@ -586,7 +586,6 @@ class SimpleGraderController extends AbstractController {
                 $total += floatval($val);
                 $any_numeric_present_in_row = true;
             }
-
         }
 
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
