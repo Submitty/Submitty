@@ -52,10 +52,11 @@ WORKDIR $HOME/site
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt $HOME/pip/
 RUN pip3 install --no-cache-dir \
     -r $HOME/pip/dev_requirements.txt \
-    -r $HOME/pip/system_requirements.txt
+    -r $HOME/pip/system_requirements.txt \
+    coverage
 
-COPY python_submitty_utils /submitty/python_submitty_utils
-RUN pip3 install --no-cache-dir -e /submitty/python_submitty_utils
+COPY python_submitty_utils $HOME/python_submitty_utils
+RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
 
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \

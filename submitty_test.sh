@@ -23,9 +23,9 @@ run_in_container() {
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
     docker run --rm $terminal_flag -u "$(id -u):$(id -g)" -e HOME=/tmp \
-        --mount type=bind,source="$SCRIPT_DIR",target=/submitty \
-        --mount type=volume,target=/submitty/site/vendor \
-        --mount type=volume,target=/submitty/site/node_modules \
+        --mount type=bind,source="$SCRIPT_DIR",target=/home/submitty \
+        --mount type=volume,target=/home/submitty/site/vendor \
+        --mount type=volume,target=/home/submitty/site/node_modules \
         -w "$workdir" \
         --init \
         "$IMAGE_NAME" "$@"
@@ -48,20 +48,20 @@ parse_args() {
 run_php_stan() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /submitty/site composer run-script static-analysis -- "${ARGS[@]}"
+        run_in_container /home/submitty/site composer run-script static-analysis -- "${ARGS[@]}"
     else
-        run_in_container /submitty/site composer run-script static-analysis
+        run_in_container /home/submitty/site composer run-script static-analysis
     fi
 }
 
 run_php_cs() {
     parse_args "${@:2}"
     if $FIX; then
-        run_in_container /submitty/site vendor/bin/phpcbf "${ARGS[@]}"
+        run_in_container /home/submitty/site vendor/bin/phpcbf "${ARGS[@]}"
     elif [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /submitty/site composer run-script lint -- "${ARGS[@]}"
+        run_in_container /home/submitty/site composer run-script lint -- "${ARGS[@]}"
     else
-        run_in_container /submitty/site composer run-script lint
+        run_in_container /home/submitty/site composer run-script lint
     fi
 }
 
@@ -69,15 +69,15 @@ run_js_es() {
     parse_args "${@:2}"
     if $FIX; then
         if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /submitty/site npm run eslint:fix -- "${ARGS[@]}"
+            run_in_container /home/submitty/site npm run eslint:fix -- "${ARGS[@]}"
         else
-            run_in_container /submitty/site npm run eslint:fix
+            run_in_container /home/submitty/site npm run eslint:fix
         fi
     else
         if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /submitty/site npm run eslint -- "${ARGS[@]}"
+            run_in_container /home/submitty/site npm run eslint -- "${ARGS[@]}"
         else
-            run_in_container /submitty/site npm run eslint
+            run_in_container /home/submitty/site npm run eslint
         fi
     fi
 }
@@ -86,60 +86,60 @@ run_css_style() {
     parse_args "${@:2}"
     if $FIX; then
         if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /submitty/site npm run css-stylelint:fix -- "${ARGS[@]}"
+            run_in_container /home/submitty/site npm run css-stylelint:fix -- "${ARGS[@]}"
         else
-            run_in_container /submitty/site npm run css-stylelint:fix
+            run_in_container /home/submitty/site npm run css-stylelint:fix
         fi
     else
         if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /submitty/site npm run css-stylelint -- "${ARGS[@]}"
+            run_in_container /home/submitty/site npm run css-stylelint -- "${ARGS[@]}"
         else
-            run_in_container /submitty/site npm run css-stylelint
+            run_in_container /home/submitty/site npm run css-stylelint
         fi
     fi
 }
 
 run_php_unit() {
     parse_args "${@:2}"
-    run_in_container /submitty/site php vendor/bin/phpunit "${ARGS[@]}"
+    run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
 }
 
 run_py_flake8() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /submitty python3 -m flake8 "${ARGS[@]}"
+        run_in_container /home/submitty python3 -m flake8 "${ARGS[@]}"
     else
-        run_in_container /submitty python3 -m flake8
+        run_in_container /home/submitty python3 -m flake8
     fi
 }
 
 run_py_pylint() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /submitty python3 -m pylint "${ARGS[@]}"
+        run_in_container /home/submitty python3 -m pylint "${ARGS[@]}"
     else
-        run_in_container /submitty python3 -m pylint --recursive=y .
+        run_in_container /home/submitty python3 -m pylint --recursive=y .
     fi
 }
 
 run_py_unit_utils() {
     parse_args "${@:2}"
-    run_in_container /submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_migration() {
     parse_args "${@:2}"
-    run_in_container /submitty/migration coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/migration coverage run -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_autograder() {
     parse_args "${@:2}"
-    run_in_container /submitty/autograder coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/autograder coverage run -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_daemon() {
     parse_args "${@:2}"
-    run_in_container /submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t . "${ARGS[@]}"
+    run_in_container /home/submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t . "${ARGS[@]}"
 }
 
 # process input arguments
