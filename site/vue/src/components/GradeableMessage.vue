@@ -2,19 +2,14 @@
 import { ref, nextTick, onMounted } from 'vue';
 
 const props = defineProps<{
-    semester: string;
-    course: string;
-    gradeableId: string;
+    storageKey: string;
     userGroup: number;
     blindStatus: number;
-    courseUrl: string;
 }>();
 
 const emit = defineEmits<{
-    cancel: [url: string];
+    cancel: [];
 }>();
-
-const storageKey = `${props.semester}-${props.course}-${props.gradeableId}-message`;
 const isGrader = props.userGroup === 2 || props.userGroup === 3;
 const isPeer = props.userGroup === 4;
 const isInstructor = props.userGroup === 1;
@@ -22,7 +17,7 @@ const isInstructor = props.userGroup === 1;
 const visible = ref(false);
 const canAgree = ref(true);
 
-if (isInstructor || localStorage.getItem(storageKey) === 'agreed') {
+if (isInstructor || localStorage.getItem(props.storageKey) === 'agreed') {
     canAgree.value = false;
 }
 else {
@@ -47,14 +42,14 @@ function showReview(): void {
 }
 
 function agree(): void {
-    localStorage.setItem(storageKey, 'agreed');
+    localStorage.setItem(props.storageKey, 'agreed');
     canAgree.value = false;
     visible.value = false;
 }
 
 function cancel(): void {
     visible.value = false;
-    emit('cancel', props.courseUrl);
+    emit('cancel');
 }
 
 function close(): void {

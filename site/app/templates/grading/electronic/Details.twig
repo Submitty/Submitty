@@ -74,15 +74,12 @@
                 'type': 'component',
                 'name': 'GradeableMessage',
                 'args': {
-                    'semester': semester,
-                    'course': course,
-                    'gradeableId': gradeable.getId,
+                    'storageKey': storage_key,
                     'userGroup': core.getUser().getGroup(),
                     'blindStatus': blind_status,
-                    'courseUrl': course_url
                 },
                 'events': {
-                    'cancel': '(url) => { window.location.href = url; }',
+                    'cancel': '() => { window.location.href = \'' ~ course_url ~ '\'; }',
                 }
             } %}
         {% endif %}

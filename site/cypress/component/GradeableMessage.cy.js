@@ -1,18 +1,12 @@
 import GradeableMessage from '../../vue/src/components/GradeableMessage.vue';
 import { mountWithEmitSpy } from '../support/component_test_utils';
 
-const SEMESTER = 's25';
-const COURSE = 'csci101';
-const GRADEABLE_ID = 'hw1';
-const STORAGE_KEY = `${SEMESTER}-${COURSE}-${GRADEABLE_ID}-message`;
+const STORAGE_KEY = 's25-csci101-hw1-message';
 
 const baseProps = {
-    semester: SEMESTER,
-    course: COURSE,
-    gradeableId: GRADEABLE_ID,
+    storageKey: STORAGE_KEY,
     userGroup: 2,
     blindStatus: 0,
-    courseUrl: window.location.href,
 };
 
 describe('GradeableMessage', () => {
@@ -150,17 +144,6 @@ describe('GradeableMessage', () => {
             cy.contains('button', 'Cancel').click();
             cy.get('[data-testid="popup-window"]').should('not.exist');
             cy.get('@eventHandler').should('have.been.calledOnce');
-        });
-    });
-
-    describe('edge cases', () => {
-        it('works with special characters in semester and course', () => {
-            const specialKey = 'spéçïäl-çøürße-gr@de-message';
-            cy.mount(GradeableMessage, {
-                props: { ...baseProps, semester: 'spéçïäl', course: 'çøürße', gradeableId: 'gr@de' },
-            });
-            cy.get('[data-testid="agree-popup-btn"]').click();
-            cy.window().its('localStorage').invoke('getItem', specialKey).should('equal', 'agreed');
         });
     });
 });
