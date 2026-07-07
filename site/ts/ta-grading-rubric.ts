@@ -1472,17 +1472,18 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
         comment = rawComment?.toString() ?? '';
     }
 
-    const dataDOMElement = domElement.find('.graded-component-data');
-    let gradedVersion = dataDOMElement.attr('data-graded_version')!;
+    const dataDOMElement = domElement.find('.graded-component-data, .peer-graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version') ?? '';
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion().toString();
     }
+    const parsedGradedVersion = parseInt(gradedVersion);
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(gradedVersion),
+        graded_version: Number.isNaN(parsedGradedVersion) ? getDisplayVersion() : parsedGradedVersion,
         grade_time: dataDOMElement.attr('data-grade_time')!,
         grader_id: dataDOMElement.attr('data-grader_id')!,
         verifier_id: dataDOMElement.attr('data-verifier_id')!,
@@ -2906,10 +2907,33 @@ async function openComponentGrading(component_id: number) {
         displayAjaxError(err);
         throw err;
     }
-    window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
-    OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
+    const component = await ajaxGetComponentRubric(getGradeableId(), component_id);
+    let graded_component = await ajaxGetGradedComponent(getGradeableId(), component_id, getAnonId());
 
-    await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id]!, isEditModeEnabled(), true);
+    if (graded_component === undefined) {
+        // create a new empty one to pass down.
+        graded_component = {
+            ...component,
+            comment: '',
+            score: 0.0,
+            custom_mark_selected: false,
+            mark_ids: [],
+            graded_version: getDisplayVersion(),
+            grade_time: '',
+            grader_id: '',
+            verifier_id: '',
+            custom_mark_enabled: CUSTOM_MARK_ID,
+            component_id: component.id,
+        };
+    }
+
+    OLD_MARK_LIST[component_id] = component.marks;
+    COMPONENT_RUBRIC_LIST[component_id] = component;
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+    GRADED_COMPONENTS_LIST[component_id] = graded_component;
+
+    await injectGradingComponent(component, graded_component, isEditModeEnabled(), true);
+
     const page = getComponentPageNumber(component_id);
     if (page) {
         scrollToPage(page);
