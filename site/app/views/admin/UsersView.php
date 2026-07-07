@@ -35,7 +35,6 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
-        $this->core->getOutput()->addInternalModuleJs('sort-table-by-column.js');
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [

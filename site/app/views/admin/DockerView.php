@@ -13,7 +13,6 @@ class DockerView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss('docker_interface.css');
         $this->core->getOutput()->addInternalJs('docker_interface.js');
-        $this->core->getOutput()->addInternalModuleJs('sort-table-by-column.js');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
