@@ -153,7 +153,7 @@
                     {% if column.data_type is defined %}
                         {{ table_sort.sortable_header('details-table', column.title, column.header_key, column.data_type) }}
                     {% else %}
-                        <th style="text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>

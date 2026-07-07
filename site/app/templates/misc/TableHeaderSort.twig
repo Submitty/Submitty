@@ -4,7 +4,7 @@ See sort-table-by-column.ts
 #}
 
 {% macro sortable_header(table_id, title, sort_key, col_data_type) %}
-    <th>
+    <th data-col-title="{{title}}">
         <a href="#"
         onclick="event.preventDefault(); sortTableByColumn('{{ table_id }}', '{{ sort_key }}', '{{ col_data_type }}');"
         class="sortable-header"
