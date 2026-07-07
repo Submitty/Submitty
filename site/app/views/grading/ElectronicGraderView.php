@@ -1005,7 +1005,6 @@ HTML;
 
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
-            "gradeable_id" => $gradeable->getId(),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
