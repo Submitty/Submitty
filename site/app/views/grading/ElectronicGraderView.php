@@ -27,6 +27,7 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
+     * @param SimpleStat[] $testcase_averages
      * @param SimpleStat|null $manual_average
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
@@ -47,6 +48,7 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
+        array $testcase_averages,
         $manual_average,
         $autograded_average,
         $overall_scores,
@@ -362,6 +364,7 @@ class ElectronicGraderView extends AbstractView {
             "autograded_average" => $autograded_average,
             "manual_average" => $manual_average,
             "component_averages" => $component_averages,
+            "testcase_averages" => $testcase_averages,
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
@@ -1002,7 +1005,6 @@ HTML;
 
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
-            "gradeable_id" => $gradeable->getId(),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
