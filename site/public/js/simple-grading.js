@@ -503,8 +503,7 @@ function setupNumericTextCells() {
         );
     });
 
-    $(document).off('mousedown', '#submit-numeric-csv-upload').on('mousedown', '#submit-numeric-csv-upload', () => {
-
+    $(document).off('mousedown', '#numeric-csv-upload-submit').on('mousedown', '#numeric-csv-upload-submit', () => {
         const f = $('#numeric-csv-upload-file').get(0).files[0];
         if (f) {
             const reader = new FileReader();
@@ -529,7 +528,7 @@ function setupNumericTextCells() {
                         const updated_columns = returned_data['data']['updated_columns'] || [];
                         let msg = 'CSV uploaded successfully.';
                         if (updated_columns.length > 0) {
-                            msg += ` Updated: ${updated_columns.join(', ')}.`;
+                            msg += ` Updating: ${updated_columns.join(', ')}.`;
                         }
                         displaySuccessMessage(msg);
                         setTimeout(() => {
