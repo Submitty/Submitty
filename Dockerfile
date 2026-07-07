@@ -39,8 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # =====================================================
-
-# =====================================================
 # Set up container directory structure
 # =====================================================
 
@@ -50,8 +48,6 @@ RUN mkdir -p $HOME/site && chmod 1777 $HOME
 # /test_suite needed for python unit tests
 RUN mkdir -p /test_suite && chmod 1777 /test_suite
 WORKDIR $HOME/site
-
-# =====================================================
 
 # =====================================================
 # Install testing / linting dependencies
@@ -70,5 +66,3 @@ RUN composer install --no-scripts --no-interaction --prefer-dist \
     && npm cache clean --force \
     && rm -rf /root/.composer/cache ~/.npm \
     && chmod -R 777 .
-
-# =====================================================
