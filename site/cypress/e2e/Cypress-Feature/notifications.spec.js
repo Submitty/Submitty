@@ -67,7 +67,7 @@ const verifyBatchNotificationUpdates = (identifier, message, type, action, reloa
     if (!reload) {
         // Perform the initial batch update action
         cy.get(`[data-testid="${identifier}"]`).should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', message).click();
+        cy.get('[data-testid="notification-settings-button-group"]').should('contain', message);
         verifyUpdateMessage();
     }
 
