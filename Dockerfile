@@ -52,6 +52,7 @@ WORKDIR $HOME/site
 # =====================================================
 # Install testing / linting dependencies
 # =====================================================
+
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt $HOME/pip/
 RUN pip3 install --no-cache-dir \
     -r $HOME/pip/dev_requirements.txt \
