@@ -313,4 +313,21 @@ onUnmounted(() => {
 .popup-window {
     height: calc(100vh - 20px);
 }
+.ta-grading-setting-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ta-grading-setting-list > thead > tr {
+  background: var(--standard-hover-light-gray);
+}
+.ta-grading-setting-list > thead > tr > th,
+.ta-grading-setting-list > tbody > tr > td {
+  background: transparent;
+}
+.ta-grading-setting-list > tbody > tr:nth-child(odd) {
+  background: var(--default-white);
+}
+.ta-grading-setting-list > tbody > tr:nth-child(even) {
+  background: var(--standard-hover-light-gray);
+}
 </style>
