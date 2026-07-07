@@ -442,7 +442,6 @@ function setupNumericTextCells() {
         const old_scores = {};
         let total = 0;
 
-        let value = this.value;
         const numbers = /^[0-9]*\.?[0-9]*$/;
 
         if (this.tagName.toLowerCase() === 'input') {
@@ -489,8 +488,6 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-        value = this.value;
-
         submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
@@ -507,6 +504,13 @@ function setupNumericTextCells() {
     });
 
     $(document).off('mousedown', '#submit-numeric-csv-upload').on('mousedown', '#submit-numeric-csv-upload', () => {
+        const confirmation = window.confirm('WARNING! \nPreviously entered data may be overwritten! '
+            + 'This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for '
+            + 'student id and one column for each field. Columns and field types must match.');
+        if (!confirmation) {
+            return;
+        }
+
         const f = $('#numeric-csv-upload-file').get(0).files[0];
         if (f) {
             const reader = new FileReader();
@@ -548,6 +552,7 @@ function setupNumericTextCells() {
                 );
             };
         };
+
     });
 }
 
