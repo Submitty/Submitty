@@ -4,15 +4,14 @@ See sort-table-by-column.ts
 #}
 
 {% macro sortable_header(table_id, title, sort_key, col_data_type) %}
-    <th data-col-title="{{title}}">
-        <a href="#"
-        onclick="event.preventDefault(); sortTableByColumn('{{ table_id }}', '{{ sort_key }}', '{{ col_data_type }}');"
-        class="sortable-header"
-        title="Sort by {{ title }}"
-        aria-label="Sort by {{ title }}"
-        data-sort-key="{{ sort_key }}">
-            {{ title }}
-            <i class="fa fa-sort"></i>
-        </a>
-    </th>
+    {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'SortableColumn',
+            'args': {
+                "tableId": table_id,
+                "title": title,
+                "sortKey": sort_key,
+                "colDataType": col_data_type
+            }
+        } only %}
 {% endmacro %}
