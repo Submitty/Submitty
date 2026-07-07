@@ -267,6 +267,13 @@ function checkForTwoPanelLayoutChange(
     saveTaLayoutDetails();
 }
 
+export function updatePanelOptions() {
+    $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
+    $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
+}
+
+window.setPanelsVisibilities = setPanelsVisibilities;
+
 export function setPanelsVisibilities(
     ele: string,
     forceVisible: boolean | null = null,
@@ -586,9 +593,3 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     // Reload the page so Vue components receive updated layout state from Twig.
     location.reload();
 };
-
-export function updatePanelOptions() {
-    $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
-    $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
-}
-window.setPanelsVisibilities = setPanelsVisibilities;
