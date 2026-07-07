@@ -14,6 +14,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+use app\libraries\response\DownloadResponse;
 use WebSocket;
 
 /**
@@ -206,6 +207,150 @@ class SimpleGraderController extends AbstractController {
         );
     }
 
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods:["GET"])]
+    public function downloadNumericCsv(string $gradeable_id, string $sort = "section_subsection"): ResponseInterface {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return new WebResponse('Error', 'noGradeable', $gradeable_id);
+        }
+
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            $this->core->addErrorMessage('This gradeable is not a numeric text gradeable');
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        //If you can see the page, you can grade the page
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+        if ($gradeable->isGradeByRegistration()) {
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else {
+            $grading_count = count(
+                $this->core->getQueries()->getRotatingSectionsForGradeableAndUser(
+                    $gradeable->getId(),
+                    $this->core->getUser()->getId()
+                )
+            );
+        }
+
+        $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
+        $show_all = $grading_count === 0 && $can_show_all;
+
+        if ($show_all) {
+            $sections = $gradeable->getAllGradingSections();
+        }
+        else {
+            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
+        }
+
+        $students = [];
+        foreach ($sections as $section) {
+            $students = array_merge($students, $section->getUsers());
+        }
+
+        $student_ids = array_map(function (User $user) {
+            return $user->getId();
+        }, $students);
+
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
+        }
+        else {
+            $section_key = "rotating_section";
+        }
+        //Sort the page:
+        if ($sort === "id") {
+            $sort_key = "u.user_id";
+        }
+        elseif ($sort === "first") {
+            $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
+        }
+        elseif ($sort === "last") {
+            $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
+        }
+        else {
+            $sort_key = "u.registration_subsection";
+        }
+
+        $fp = fopen('php://temp', 'r+');
+
+        $numeric_components = [];
+        $text_components = [];
+
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
+            }
+        }
+
+        $header = [
+            "User ID",
+            "Given Name",
+            "Family Name",
+        ];
+
+        foreach ($numeric_components as $component) {
+            $header[] = $component->getTitle() . "(" . $component->getMaxValue() . ")";
+        }
+
+        $header[] = "Total points earned";
+
+        foreach ($text_components as $component) {
+            $header[] = $component->getTitle();
+        }
+
+        fputcsv($fp, $header);
+
+        $rows = $this->core->getQueries()->getGradedGradeables(
+            [$gradeable],
+            $student_ids,
+            null,
+            [$section_key, $sort_key, "u.user_id"]
+        );
+        foreach ($rows as $row) {
+            $user = $row->getSubmitter()->getUser();
+            $csv_row = [
+                $user->getId(),
+                $user->getDisplayedGivenName(),
+                $user->getDisplayedFamilyName(),
+            ];
+
+            $ta_grade = $row->getTaGradedGradeable();
+            $total = 0;
+            foreach ($numeric_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $component_score = $component_grade !== null ? $component_grade->getScore() : 0;
+                $csv_row[] = $component_score;
+                $total += $component_score;
+            }
+
+            $csv_row[] = $total;
+            foreach ($text_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $csv_row[] = $component_grade !== null ? $component_grade->getComment() : "";
+            }
+
+            fputcsv($fp, $csv_row);
+        }
+
+        rewind($fp);
+        $csv = stream_get_contents($fp);
+        fclose($fp);
+
+        return DownloadResponse::getDownloadResponse(
+            $csv,
+            "{$gradeable_id}.csv",
+            "application/csv"
+        );
+    }
     /**
      * @param string $gradeable_id
      *
@@ -348,8 +493,8 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
 
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            return JsonResponse::getFailResponse('This gradeable is not a checkpoint or numeric text gradeable');
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            return JsonResponse::getFailResponse('This gradeable is not a numeric text gradeable');
         }
         $grader = $this->core->getUser();
 
@@ -403,14 +548,23 @@ class SimpleGraderController extends AbstractController {
                         }
                         else {
                             // numeric component
-                            // if the data is empty, we should just input 0. If it is not a number, we should fail.
+                            // if the data is not a number, we should fail.
                             if ($component_data !== '' && !is_numeric($component_data)) {
                                 $temp_array[$value_temp_str] = $component_data;
                                 $temp_array[$status_temp_str] = "ERROR";
                             }
                             else {
+                                // empty data is read as an input of 0
                                 $component_data = floatval($component_data);
-                                if ($component->getUpperClamp() < $component_data) {
+                                if ($component_data === 0.0) {
+                                    // components of value zero should not be saved in the database
+                                    $ta_graded_gradeable->deleteGradedComponent($component);
+                                    $temp_array[$value_temp_str] = $component_data;
+                                    $temp_array[$status_temp_str] = "OK";
+                                }
+                                elseif ($component->getUpperClamp() < $component_data) {
+                                    // components with invalid values should not be saved to the database
+                                    $ta_graded_gradeable->deleteGradedComponent($component);
                                     $temp_array[$value_temp_str] = $component_data;
                                     $temp_array[$status_temp_str] = "ERROR";
                                 }
