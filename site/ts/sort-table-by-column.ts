@@ -1,13 +1,7 @@
 // sortTableByColumn function to be used for all sortable tables
 // See TableHeaderSort.twig
 
-declare global {
-    interface Window {
-        sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes): void;
-    }
-}
-
-enum colDataTypes {
+export enum colDataTypes {
     String = 'string',
     Number = 'number',
     Date = 'date',
@@ -20,7 +14,7 @@ enum colDataTypes {
  * @param col_data_type the datatype of the column we're sorting (defines how rows are compared while sorting)
  * @returns none
  */
-function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes): void {
+export function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes): void {
     const table: HTMLElement = document.querySelector(`#${table_id}`)!;
     if (table === null) {
         return;
@@ -65,22 +59,21 @@ function sortTableByColumn(table_id: string, sort_key: string, col_data_type: co
     applySort(table_id, col_index, new_direction, col_data_type);
     updateSortIcons(table_id, sort_key, new_direction);
 }
-window.sortTableByColumn = sortTableByColumn;
 
 // run when page initializes to restore sort, e.g. after reload
 // $(() => {
-export function restoreSort() {
-    // const table: HTMLElement | null = document.getElementById(table_id);
-    // if (table === null || table.dataset.sortKey === undefined) {
-    //     return;
-    // }
+// export function restoreSort() {
+// const table: HTMLElement | null = document.getElementById(table_id);
+// if (table === null || table.dataset.sortKey === undefined) {
+//     return;
+// }
 //     const savedsort_key = Cookies.get('pending_gradeable_table_key');
 //     const savedDirection = Cookies.get('pending_gradeable_table_direction') || 'ASC';
 //     if (savedSort) {
 //         applySort(savedSort, savedDirection);
 //         updateSortIcons(savedSort, savedDirection);
 //     }
-}
+// }
 
 function applySort(table_id: string, col_index: number, direction: string, col_data_type: colDataTypes) {
     // todo: sort them all as one and hide section headers if not sorted by sections?
