@@ -186,10 +186,14 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
         peer_details[component.id] = {
             graders: [],
             marks_assigned: {},
+            version_conflicts: {},
+            graded_versions: {},
         };
         graded_gradeable.graded_components[component.id].forEach((graded_component) => {
             peer_details[component.id]['graders'].push(graded_component.grader_id);
             peer_details[component.id]['marks_assigned'][graded_component.grader_id] = graded_component.mark_ids;
+            peer_details[component.id]['version_conflicts'][graded_component.grader_id] = graded_component.graded_version !== -1 && graded_component.graded_version !== displayVersion;
+            peer_details[component.id]['graded_versions'][graded_component.grader_id] = graded_component.graded_version;
         });
     });
     // TODO: i don't think this is async

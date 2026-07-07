@@ -40,6 +40,11 @@ Required inputs:
                         {% for grader in peer_details.graders | sort %}
                             <th class="peer-table-header">
                                 {{ grader }}
+                                {% if peer_details.version_conflicts[grader] is same as(true) %}
+                                    <span class="version-warning" data-testid="peer-version-warning">
+                                        Version Conflict: comments from version {{ peer_details.graded_versions[grader] }} may not apply.
+                                    </span>
+                                {% endif %}
                             </th>
                         {% endfor %}
                         <th> Points </th>
