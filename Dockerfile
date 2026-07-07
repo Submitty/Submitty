@@ -9,32 +9,32 @@ RUN apt-get update
 RUN apt-get install -y \
         software-properties-common curl git gnupg2 ca-certificates unzip \
         poppler-utils \
-        libzbar0
-
+        libzbar0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
 # Node 20 manually installed since it's not avb in default Ubuntu 22.04 packages
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP
 # PHP 8.2 manually installed since it's not avb in default Ubuntu 22.04 packages
 RUN add-apt-repository ppa:ondrej/php -y \
     && apt-get update \
     && apt-get install -y \
-        php8.2-cli php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip
+        php8.2-cli php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
         python3 \
         python3-pip \
-        python3-setuptools
+        python3-setuptools \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Clean up package lists
-RUN rm -rf /var/lib/apt/lists/*
 
 # =====================================================
 
@@ -52,8 +52,7 @@ WORKDIR $HOME/site
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt $HOME/pip/
 RUN pip3 install --no-cache-dir \
     -r $HOME/pip/dev_requirements.txt \
-    -r $HOME/pip/system_requirements.txt \
-    coverage
+    -r $HOME/pip/system_requirements.txt
 
 COPY python_submitty_utils $HOME/python_submitty_utils
 RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
