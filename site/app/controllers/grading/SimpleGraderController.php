@@ -298,10 +298,10 @@ class SimpleGraderController extends AbstractController {
         ];
 
         foreach ($numeric_components as $component) {
-            $header[] = $component->getTitle() . "(" . $component->getMaxValue() . ")";
+            $header[] = $component->getTitle();
         }
 
-        $header[] = "Total points earned";
+        $header[] = "Total";
 
         foreach ($text_components as $component) {
             $header[] = $component->getTitle();
