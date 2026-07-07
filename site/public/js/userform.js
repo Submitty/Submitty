@@ -269,6 +269,7 @@ function completeUserFormInformation(user) {
     $('[name="user_preferred_givenname"]').change();
     $('[name="user_pronouns"]', form).val(user['user_pronouns']);
     $('[name="user_pronouns"]').change();
+    $('#user_date_registered').val(user['date_registered'] ? user['date_registered'] : 'N/A');
     $('[name="user_display_pronouns"]', form).val(user['user_display_pronouns']);
     $('[name="user_display_pronouns"]').change();
     $('[name="user_familyname"]', form).val(user['user_familyname']);
