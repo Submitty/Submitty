@@ -1,11 +1,11 @@
 /* global escapeSpecialChars, buildCourseUrl */
-const sortColumns = {
-    user: 0,
-    total_posts: 1,
-    total_threads: 2,
-    total_deleted: 3,
-    total_upducks: 4,
-};
+// const sortColumns = {
+//     user: 0,
+//     total_posts: 1,
+//     total_threads: 2,
+//     total_deleted: 3,
+//     total_upducks: 4,
+// };
 
 function getForumStatsTable() {
     return document.getElementById('forum-stats-table');
