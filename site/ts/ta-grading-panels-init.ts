@@ -10,7 +10,7 @@ import {
     saveResizedColsDimensions,
     initializeHorizontalTwoPanelDrag,
     setPanelsVisibilities,
-    updatePanelHeaderDataAttributes,
+    updatePanelOptions,
     isMobileView,
     changeMobileView,
     getSavedTaLayoutDetails,
@@ -357,7 +357,7 @@ function openAutoGrading(num: string) {
 
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
-    updatePanelHeaderDataAttributes();
+    updatePanelOptions();
 
     // Check initially if its the mobile screen view or not
     changeMobileView();

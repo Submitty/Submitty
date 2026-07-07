@@ -425,7 +425,7 @@ export function resetSinglePanelLayout() {
     if (taLayoutDet.currentOpenPanel) {
         setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
     }
-    updatePanelHeaderDataAttributes();
+    updatePanelOptions();
 }
 
 export function togglePanelLayoutModes(forceVal = false) {
@@ -457,7 +457,7 @@ export function togglePanelLayoutModes(forceVal = false) {
         updatePanelLayoutModes();
     }
     else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
-        updatePanelHeaderDataAttributes();
+        updatePanelOptions();
         twoPanelCont.addClass('active');
         $('.two-panel-item.two-panel-left, .two-panel-drag-bar').addClass(
             'active',
@@ -582,12 +582,12 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     if (!taLayoutDet.isFullLeftColumnMode) {
         $('#grading-panel-student-name').show();
     }
-    updatePanelHeaderDataAttributes();
+    updatePanelOptions();
     // Reload the page so Vue components receive updated layout state from Twig.
     location.reload();
 };
 
-export function updatePanelHeaderDataAttributes() {
+export function updatePanelOptions() {
     $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
     $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
 }
