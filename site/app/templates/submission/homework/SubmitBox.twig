@@ -399,23 +399,19 @@
             // GET FILES OF THE HIGHEST VERSION
             if (assignment_version == highest_version && highest_version > 0) {
                 $("#getprev").click(function(e){
-                    {% if not is_notebook %}
-                        loadPreviousFilesOnDropBoxes();
-                    {% endif %}
+                    loadPreviousFilesOnDropBoxes();
                     e.stopPropagation();
                 });
             }
-            
+
             function loadPreviousFilesOnDropBoxes(){
-                {% if not is_notebook %}
-                    $("#startnew").click();
+                $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
                         readPrevious('{{ file.name }}', {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
-                {% endif %}
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
