@@ -92,6 +92,10 @@
     background: var(--standard-focus-cornflowe-blue);
 }
 
+.peer-progress-bar {
+    background: var(--standard-plum-purple) !important;
+}
+
 @media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {

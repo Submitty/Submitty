@@ -153,6 +153,15 @@
                 <span style="width: {{ max(2, button.getProgress()) }}%"></span>
             </div>
         {% endif %}
+        {% if button.getPeerProgress() != null %}
+            <div class="meter">
+                <span
+                    class="{{ button.getPeerProgressClass() }}"
+                    style="width: {{ max(2, button.getPeerProgress()) }}%"
+                    data-testid="peer-grading-progress-bar"
+                ></span>
+            </div>
+        {% endif %}
     {% endif %}
 {% endmacro %}
 {% include('course/UnregisterForm.twig') %}
