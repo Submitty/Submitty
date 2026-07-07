@@ -531,7 +531,7 @@ function setupNumericTextCells() {
                         const updated_columns = returned_data['data']['updated_columns'] || [];
                         let msg = 'CSV uploaded successfully.';
                         if (updated_columns.length > 0) {
-                            msg += ` Updated: ${updated_columns.join(', ')}.`;
+                            msg += ` Updating: ${updated_columns.join(', ')}.`;
                         }
                         displaySuccessMessage(msg);
                         setTimeout(() => {
