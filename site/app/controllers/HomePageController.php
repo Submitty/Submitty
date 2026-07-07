@@ -296,8 +296,21 @@ class HomePageController extends AbstractController {
             );
         }
 
+        $course_title = trim($_POST['course_title']);
+        // course title can only contain lowercase letters, digits, and the underscore character
+        // also check for "" (if only whitespace is input, it all gets trimmed)
+        if (preg_match('/[^a-z0-9_]/', $course_title) || $course_title === "") {
+            $error = "The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        $course_title = strtolower($course_title);
+
         $semester = trim($_POST['course_semester']);
-        $course_title = trim(strtolower($_POST['course_title']));
         $head_instructor = $_POST['head_instructor'];
 
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
