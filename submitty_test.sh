@@ -207,7 +207,7 @@ case "${1:-}" in
               py-flake8 : run flake8 [option: specific_file.py]
               py-pylint : run pylint [option: specific_file.py]
               py-lint   : py-flake8 & py-pylint [option: specific_file.py]
-              py-unit   : run all python unit tests except migration [option: utils|migration|autograder|daemon]
+              py-unit   : run all python unit tests except migration [option: specific_file.py]
               py-unit-utils      : run just the utils python unit tests
               py-unit-migration  : run just the migration python unit tests
               py-unit-autograder : run just the autograder python unit tests
