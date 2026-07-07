@@ -26,9 +26,9 @@
         All other columns are ignored.
     </p>
     <p>&emsp;</p>
-    <input type="file" id="numeric-csv-upload-file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+    <input type="file" id="numeric-csv-upload-file" name="upload" accept=".xlsx, .csv, .txt" aria-label="Choose File" data-testid="numeric-csv-upload-file">
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="button" id="submit-numeric-csv-upload" value="Submit" />
+    <input class="btn btn-primary" type="button" id="numeric-csv-upload-submit" value="Submit" data-testid="numeric-csv-upload-submit" />
 {% endblock %}

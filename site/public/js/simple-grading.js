@@ -506,7 +506,7 @@ function setupNumericTextCells() {
         );
     });
 
-    $(document).off('mousedown', '#submit-numeric-csv-upload').on('mousedown', '#submit-numeric-csv-upload', () => {
+    $(document).off('mousedown', '#numeric-csv-upload-submit').on('mousedown', '#numeric-csv-upload-submit', () => {
         const f = $('#numeric-csv-upload-file').get(0).files[0];
         if (f) {
             const reader = new FileReader();

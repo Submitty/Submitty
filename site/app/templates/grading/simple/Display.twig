@@ -21,10 +21,9 @@
         <div>
             {% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton', 'class': 'fullscreen-btn-wrapper' } %}
             {% if action == 'numeric' and core.getUser().accessAdmin() %}
-                <a href="javascript:newNumericCsvUploadForm()" class="btn btn-primary">
+                <a href="javascript:newNumericCsvUploadForm()" class="btn btn-primary" data-testid="numeric-csv-upload-button">
                     Upload CSV
                 </a>
-                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt" style="display: none;">
                 <a 
                     class="btn btn-primary"
                     id="csvDownload"
