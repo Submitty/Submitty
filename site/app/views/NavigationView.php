@@ -718,7 +718,6 @@ class NavigationView extends AbstractView {
                 }
                 if ($gradeable->hasPeerComponent()) {
                     $peer_percent = $gradeable->getPeerGradingProgress();
-                    
                     if (!is_nan($peer_percent)) {
                         $array["peer_progress"] = 100 * $peer_percent;
                         $array["peer_progress_class"] = "peer-progress-bar";
