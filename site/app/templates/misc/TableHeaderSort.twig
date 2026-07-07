@@ -9,6 +9,7 @@ See sort-table-by-column.ts
         onclick="event.preventDefault(); sortTableByColumn('{{ table_id }}', '{{ sort_key }}', '{{ col_data_type }}');"
         class="sortable-header"
         title="Sort by {{ title }}"
+        aria-label="Sort by {{ title }}"
         data-sort-key="{{ sort_key }}">
             {{ title }}
             <i class="fa fa-sort"></i>
