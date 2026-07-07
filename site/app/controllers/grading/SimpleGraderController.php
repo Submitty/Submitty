@@ -301,7 +301,7 @@ class SimpleGraderController extends AbstractController {
             $header[] = $component->getTitle() . "(" . $component->getMaxValue() . ")";
         }
 
-        $header[] = "Total points earned";
+        $header[] = "Total";
 
         foreach ($text_components as $component) {
             $header[] = $component->getTitle();
@@ -556,7 +556,6 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse($msg);
         }
 
-        $has_total_col = isset($col_index['Total']);
 
         for ($row_num = 1; $row_num < $arr_length; $row_num++) {
             $row = $data_array[$row_num];
@@ -588,15 +587,6 @@ class SimpleGraderController extends AbstractController {
                 $any_numeric_present_in_row = true;
             }
 
-            if ($has_total_col && $any_numeric_present_in_row) {
-                $idx = $col_index['Total'];
-                $total_val = $row[$idx] ?? '';
-                if ($total_val !== '' && (!is_numeric($total_val) || abs($total - floatval($total_val)) > 0.0000001)) {
-                    $msg = "Row " . ($row_num + 1) . ", Column \"Total\" (column " . ($idx + 1) . ") does not match the sum of included numeric columns. Expected {$total}, found \"{$total_val}\".";
-                    $this->core->addErrorMessage($msg);
-                    return JsonResponse::getFailResponse($msg);
-                }
-            }
         }
 
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
