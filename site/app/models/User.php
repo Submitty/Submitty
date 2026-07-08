@@ -325,7 +325,7 @@ class User extends AbstractModel implements \JsonSerializable {
         // Use registration type data or default to "graded" for students and "staff" for others
         $this->registration_type = $details['registration_type'] ?? ($this->group == 4 ? 'graded' : 'staff');
         //Set the date the user registered/rejoined for the course (self-registration/self-rejoin only)
-        $this->date_registered = isset($details['date_registered']) && $details['date_registered'] !== null
+        $this->date_registered = isset($details['date_registered'])
             ? DateUtils::parseDateTime($details['date_registered'], $this->core->getConfig()->getTimezone())
             : null;
         // Load user's preferred date format. Defaults to 'YMD' if not available
