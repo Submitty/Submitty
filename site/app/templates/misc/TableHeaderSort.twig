@@ -4,14 +4,16 @@ See SortableColumn.vue
 #}
 
 {% macro sortable_header(table_id, title, sort_key, col_data_type) %}
-    {% include 'Vue.twig' with {
-        'type': 'component',
-        'name': 'SortableColumn',
-        'args': {
-            "tableId": table_id,
-            "title": title,
-            "sortKey": sort_key,
-            "colDataType": col_data_type
-        }
-    } only %}
+    {% set id = uniqid() %}
+    <th id="vue-{{ id }}" data-col-title="{{ title }}">
+    </th>
+    <script>
+        window.submitty.render(
+            "#vue-{{ id }}",
+            "component",
+            "SortableColumn",
+            {{ { tableId: table_id, title: title, sortKey: sort_key, colDataType: col_data_type } | json_encode() | raw() }},
+            {}
+        );
+    </script>
 {% endmacro %}
