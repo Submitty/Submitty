@@ -747,16 +747,12 @@ function sendSelectedValue() {
 function runBuild() {
     const url = buildCourseUrl(['reports', 'build_form']);
 
-    // Which sorted summary to generate; defaults to the overall table
-    const sortOrderEl = document.getElementById('sort-order-select');
-    const sortOrder = sortOrderEl ? sortOrderEl.value : 'overall';
-
     sendSelectedValue()
         .then(() => {
             $.ajax({
                 type: 'POST',
                 url: url,
-                data: { csrf_token: csrfToken, sort_order: sortOrder },
+                data: { csrf_token: csrfToken },
                 dataType: 'json',
                 success: function (response) {
                     console.log(response);
