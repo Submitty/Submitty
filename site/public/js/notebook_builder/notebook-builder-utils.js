@@ -1,5 +1,5 @@
 /* global buildCourseUrl, csrfToken, displayErrorMessage */
-/* exported uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
+/* exported uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents, getBadFileSubmissionDirectories */
 
 /**
  * Asynchronous upload of configuration dependency file.
@@ -112,4 +112,23 @@ function getBadMarkdownContents() {
     });
 
     return Array.from(bad_markdown_conents);
+}
+
+/**
+ * Determines if any file submission widget has a blank directory.
+ *
+ * @returns {Array[]} Returns an array containing the directory inputs which were found to be blank.
+*/
+
+function getBadFileSubmissionDirectories() {
+    const bad_directories = new Set();
+    const directory_inputs = document.querySelectorAll('.directory-input');
+
+    directory_inputs.forEach((directory_input) => {
+        if (directory_input.value.trim() === '') {
+            bad_directories.add(directory_input);
+        }
+    });
+
+    return Array.from(bad_directories);
 }
