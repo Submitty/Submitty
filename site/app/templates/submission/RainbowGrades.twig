@@ -16,13 +16,12 @@
         </h1>
         <div id="rainbow-grades-header">
             {% if available_sorts is defined and available_sorts|length > 1 %}
-                <div class="btn-wrapper" id="rainbow-grades-sort-wrapper">
-                    <label for="rainbow-grades-sort-select" id="rainbow-grades-sort-label">Sort order:</label>
+                <div class="btn-wrapper">
                     <select
                         id="rainbow-grades-sort-select"
                         class="btn btn-primary"
                         data-testid="rainbow-grades-sort-select"
-                        title="Choose which sorted version of the gradebook to view"
+                        aria-label="Sort gradebook by"
                         onchange="window.location.href='{{ gradebook_url }}?sort=' + encodeURIComponent(this.value);"
                     >
                         {% for key, info in available_sorts %}

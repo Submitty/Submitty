@@ -16,14 +16,3 @@
 #rainbow-grades-last-update {
     margin-left: auto;
 }
-
-#rainbow-grades-sort-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-#rainbow-grades-sort-label {
-    white-space: nowrap;
-    margin: 0;
-}
