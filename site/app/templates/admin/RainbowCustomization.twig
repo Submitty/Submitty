@@ -97,6 +97,18 @@
         <div id="save_status_container" class="customization_item">
             <div id="status_head">
                 <div id="build_buttons">
+                    {% if sort_order_options is defined %}
+                        <select
+                            id="sort-order-select"
+                            data-testid="sort-order-select"
+                            class="btn btn-default"
+                            aria-label="Summary to generate"
+                        >
+                            {% for value, label in sort_order_options %}
+                                <option value="{{ value }}"{{ value == 'overall' ? ' selected' : '' }}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
                     <button
                     id="btn-build-customization"
                     data-testid="btn-build-customization"
