@@ -1,9 +1,4 @@
 <script setup lang="ts">
-type WindowWithLikeHandlers = Window & {
-    toggleLike?: (postId: number, threadId: number, currentUser: string) => void;
-    showUpduckUsers?: (postId: number) => void;
-};
-
 interface Props {
     postId: number;
     threadId: number;
@@ -15,14 +10,17 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const likeWindow = window as WindowWithLikeHandlers;
+const emit = defineEmits<{
+    'toggle-like': [payload: { postId: number; threadId: number; currentUser: string }];
+    'show-liked-users': [payload: { postId: number }];
+}>();
 
 const handleToggleLike = () => {
-    likeWindow.toggleLike?.(props.postId, props.threadId, props.currentUser);
+    emit('toggle-like', { postId: props.postId, threadId: props.threadId, currentUser: props.currentUser });
 };
 
 const handleShowLikedUsers = () => {
-    likeWindow.showUpduckUsers?.(props.postId);
+    emit('show-liked-users', { postId: props.postId });
 };
 </script>
 

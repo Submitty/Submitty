@@ -87,6 +87,10 @@
                 likeCount: post_up_duck.upduck_count,
                 likedByStaff: post_up_duck.taTrue ? true : false,
                 showLikersIcon: userGroup <= 2,
+            },
+            events: {
+                'toggle-like': '(event) => { toggleLike(event.postId, event.threadId, event.currentUser); }',
+                'show-liked-users': '(event) => { showUpduckUsers(event.postId); }',
             }
         } only %}
         
