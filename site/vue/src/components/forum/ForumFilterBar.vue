@@ -25,7 +25,6 @@ const emit = defineEmits<{
     'update:selectedThreadStatuses': [statuses: number[]];
     'update:unreadChecked': [checked: boolean];
     'filter-change': [state: { categories: number[]; statuses: number[]; unread: boolean }];
-    'clear': [];
     'save-state': [];
 }>();
 
@@ -87,52 +86,6 @@ function toggleUnread(): void {
     emit('save-state');
 }
 
-function clearFilters(): void {
-    selectedCategoryIds.value = [];
-    selectedThreadStatuses.value = [];
-    unreadChecked.value = false;
-    emit('clear');
-    emit('save-state');
-}
-
-// TODO: Remove window property assignments once forum.js is fully migrated to Vue.
-// These are temporary bridges so the legacy jQuery code can read Vue's reactive state.
-const forumWindow = window as unknown as {
-    selectedCategoryIds: typeof selectedCategoryIds;
-    selectedThreadStatuses: typeof selectedThreadStatuses;
-    selectedUnreadChecked: typeof unreadChecked;
-    clearForumFilter: () => boolean;
-    updateClearFilterButton?: () => void;
-    updateThreads?: (loadFirstPage: boolean, successCallback: unknown) => void;
-    saveFilterState?: () => void;
-};
-
-forumWindow.selectedCategoryIds = selectedCategoryIds;
-forumWindow.selectedThreadStatuses = selectedThreadStatuses;
-forumWindow.selectedUnreadChecked = unreadChecked;
-
-function notifyLegacy(): void {
-    forumWindow.updateClearFilterButton?.();
-    forumWindow.updateThreads?.(true, forumWindow.saveFilterState);
-}
-
-watch(selectedCategoryIds, () => {
-    notifyLegacy();
-}, { deep: true });
-
-watch(selectedThreadStatuses, () => {
-    notifyLegacy();
-}, { deep: true });
-
-watch(unreadChecked, () => {
-    notifyLegacy();
-});
-
-forumWindow.clearForumFilter = () => {
-    clearFilters();
-    return false;
-};
-
 function isCategorySelected(categoryId: number): boolean {
     return selectedCategoryIds.value.includes(categoryId);
 }
@@ -185,7 +138,7 @@ function isStatusSelected(statusSelId: number): boolean {
         type="button"
         :data-testid="`thread-category-${category.id}`"
         :title="`Filter by ${category.description}`"
-        @mousedown.prevent="toggleCategory(category.id)"
+        @click.prevent="toggleCategory(category.id)"
       >
         {{ category.description }}
       </button>
@@ -206,7 +159,7 @@ function isStatusSelected(statusSelId: number): boolean {
         type="button"
         data-testid="thread-status-comment"
         title="Filter by comment status"
-        @mousedown.prevent="toggleStatus(0)"
+        @click.prevent="toggleStatus(0)"
       >
         Comment
       </button>
@@ -218,7 +171,7 @@ function isStatusSelected(statusSelId: number): boolean {
         type="button"
         data-testid="thread-status-unresolved"
         title="Filter by unresolved status"
-        @mousedown.prevent="toggleStatus(-1)"
+        @click.prevent="toggleStatus(-1)"
       >
         Unresolved
       </button>
@@ -230,7 +183,7 @@ function isStatusSelected(statusSelId: number): boolean {
         type="button"
         data-testid="thread-status-resolved"
         title="Filter by resolved status"
-        @mousedown.prevent="toggleStatus(1)"
+        @click.prevent="toggleStatus(1)"
       >
         Resolved
       </button>

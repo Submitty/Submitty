@@ -45,7 +45,7 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
@@ -153,6 +153,9 @@
 				initialSelectedCategoryIds: cookie_selected_categories|default([]),
 				initialSelectedThreadStatuses: cookie_selected_thread_status|default([]),
 				initialUnreadChecked: cookie_selected_unread_value|default(false),
+			},
+			events: {
+				'filter-change': '() => { setTimeout(() => { updateClearFilterButton(); updateThreads(true, saveFilterState); }, 0); }',
 			}
 		} only %}
 	{% endif %}
@@ -168,8 +171,8 @@
 
 	function saveFilterState() {
 		const state = {
-			'categories': window.selectedCategoryIds ? [...window.selectedCategoryIds.value] : [],
-			'thread-status': window.selectedThreadStatuses ? [...window.selectedThreadStatuses.value] : [],
+			'categories': readSelectedCategoryIds(),
+			'thread-status': readSelectedStatuses(),
 			'search-content': (document.getElementById('search-content'))?.value ?? '',
 		};
 		history.pushState(state, '');
@@ -177,15 +180,39 @@
 
 	function getFilterState() {
 		return {
-			'categories': window.selectedCategoryIds ? [...window.selectedCategoryIds.value] : [],
-			'thread-status': window.selectedThreadStatuses ? [...window.selectedThreadStatuses.value] : [],
+			'categories': readSelectedCategoryIds(),
+			'thread-status': readSelectedStatuses(),
 			'search-content': (document.getElementById('search-content'))?.value ?? '',
 		};
 	}
 
+	function readSelectedCategoryIds() {
+		const ids = [];
+		document.querySelectorAll('#thread_category .btn[data-cat_id]').forEach((btn) => {
+			if (btn.getAttribute('data-btn-selected') === 'true') {
+				ids.push(parseInt(btn.getAttribute('data-cat_id')));
+			}
+		});
+		return ids;
+	}
+
+	function readSelectedStatuses() {
+		const ids = [];
+		document.querySelectorAll('#thread_status_select .btn[data-sel_id]').forEach((btn) => {
+			if (btn.getAttribute('data-btn-selected') === 'true') {
+				ids.push(parseInt(btn.getAttribute('data-sel_id')));
+			}
+		});
+		return ids;
+	}
+
+	function isUnreadChecked() {
+		return document.getElementById('unread')?.checked ?? false;
+	}
+
 	function checkUnread() {
 		const clearBtn = document.getElementById('clear_filter_button');
-		if (window.selectedUnreadChecked && window.selectedUnreadChecked.value) {
+		if (isUnreadChecked()) {
 			if (clearBtn) {
 				clearBtn.style.visibility = 'visible';
 			}
@@ -196,7 +223,7 @@
 
 	function updateClearFilterButton() {
 		const state = getFilterState();
-		const hasFilters = state.categories.length > 0 || state['thread-status'].length > 0 || state['search-content'] !== '' || (window.selectedUnreadChecked && window.selectedUnreadChecked.value);
+		const hasFilters = state.categories.length > 0 || state['thread-status'].length > 0 || state['search-content'] !== '' || isUnreadChecked();
 		const clearBtn = document.getElementById('clear_filter_button');
 		if (clearBtn) {
 			clearBtn.style.visibility = hasFilters ? 'visible' : 'hidden';

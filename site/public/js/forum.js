@@ -970,13 +970,9 @@ function changeDisplayOptions(option) {
 }
 
 function readCategoryValues() {
-    // Vue owns the single source of truth for filter state
-    if (window.selectedCategoryIds) {
-        return window.selectedCategoryIds.value;
-    }
     const categories_value = [];
     $('#thread_category button').each(function () {
-        if ($(this).data('btn-selected') === 'true') {
+        if ($(this).attr('data-btn-selected') === 'true') {
             categories_value.push($(this).data('cat_id'));
         }
     });
@@ -984,28 +980,20 @@ function readCategoryValues() {
 }
 
 function setCategoryValues(cat_ids) {
-    // If Vue is active, update reactive state (convert strings to numbers)
-    if (window.selectedCategoryIds) {
-        window.selectedCategoryIds.value = cat_ids.map((id) => Number(id));
-    }
     $('#thread_category button').each(function () {
-        if (cat_ids.includes($(this).data('cat_id'))) {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-        else {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        const btnCatId = Number($(this).data('cat_id'));
+        const isActive = $(this).attr('data-btn-selected') === 'true';
+        const shouldBeActive = cat_ids.includes(btnCatId);
+        if (isActive !== shouldBeActive) {
+            this.click();
         }
     });
 }
 
 function readThreadStatusValues() {
-    // Vue owns the single source of truth for filter state
-    if (window.selectedThreadStatuses) {
-        return window.selectedThreadStatuses.value;
-    }
     const thread_status_value = [];
     $('#thread_status_select button').each(function () {
-        if ($(this).data('btn-selected') === 'true') {
+        if ($(this).attr('data-btn-selected') === 'true') {
             thread_status_value.push($(this).data('sel_id'));
         }
     });
@@ -1013,16 +1001,12 @@ function readThreadStatusValues() {
 }
 
 function setThreadStatusValues(sel_ids) {
-    // If Vue is active, update reactive state
-    if (window.selectedThreadStatuses) {
-        window.selectedThreadStatuses.value = sel_ids.map((id) => Number(id));
-    }
     $('#thread_status_select button').each(function () {
-        if (sel_ids.includes($(this).data('sel_id'))) {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-        else {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        const btnSelId = Number($(this).data('sel_id'));
+        const isActive = $(this).attr('data-btn-selected') === 'true';
+        const shouldBeActive = sel_ids.includes(btnSelId);
+        if (isActive !== shouldBeActive) {
+            this.click();
         }
     });
 }
@@ -2283,7 +2267,17 @@ if (!Array.prototype.toggleElement) {
 }
 
 function clearForumFilter() {
-    return window.clearForumFilter?.();
+    // keeping Vue's reactive state in sync with the DOM
+    document.querySelectorAll('#thread_category .btn.filter-active').forEach((btn) => {
+        btn.click();
+    });
+    document.querySelectorAll('#thread_status_select .btn.filter-active').forEach((btn) => {
+        btn.click();
+    });
+    const unreadBtn = document.getElementById('filter_unread_btn');
+    if (unreadBtn?.classList.contains('filter-active')) {
+        unreadBtn.click();
+    }
 }
 
 function updateClearFilterButton() {
@@ -2351,7 +2345,10 @@ function setFilterState(state) {
         $('#search-content').val(state['search-content']);
     }
     updateClearFilterButton();
-    updateThreads(true, null);
+    // Don't call updateThreads here — the filter-change handler (setTimeout(0))
+    if (!('categories' in state) && !('thread-status' in state) && 'search-content' in state) {
+        setTimeout(() => updateThreads(true, null), 0);
+    }
 }
 
 function thread_post_handler() {

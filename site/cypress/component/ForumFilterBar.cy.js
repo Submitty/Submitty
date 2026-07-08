@@ -45,10 +45,10 @@ describe('ForumFilterBar', () => {
             });
 
             cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
-            cy.get('[data-testid="thread-category-1"]').trigger('mousedown');
+            cy.get('[data-testid="thread-category-1"]').click();
             cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
             cy.get('@updateCategoryIds').should('have.been.called');
-            cy.get('[data-testid="thread-category-1"]').trigger('mousedown');
+            cy.get('[data-testid="thread-category-1"]').click();
             cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
         });
     });
@@ -65,17 +65,17 @@ describe('ForumFilterBar', () => {
             });
 
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-inactive');
-            cy.get('[data-testid="thread-status-unresolved"]').trigger('mousedown');
+            cy.get('[data-testid="thread-status-unresolved"]').click();
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-active');
             cy.get('@updateStatuses').should('have.been.called');
-            cy.get('[data-testid="thread-status-unresolved"]').trigger('mousedown');
+            cy.get('[data-testid="thread-status-unresolved"]').click();
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-inactive');
         });
 
         it('supports multiple statuses selected simultaneously', () => {
             cy.mount(ForumFilterBar, { props: { categories } });
-            cy.get('[data-testid="thread-status-comment"]').trigger('mousedown');
-            cy.get('[data-testid="thread-status-resolved"]').trigger('mousedown');
+            cy.get('[data-testid="thread-status-comment"]').click();
+            cy.get('[data-testid="thread-status-resolved"]').click();
             cy.get('[data-testid="thread-status-comment"]').should('have.class', 'filter-active');
             cy.get('[data-testid="thread-status-resolved"]').should('have.class', 'filter-active');
         });
@@ -102,31 +102,27 @@ describe('ForumFilterBar', () => {
     });
 
     describe('clear filters', () => {
-        it('resets all filter state and emits clear event', () => {
-            const onClear = cy.stub().as('clear');
-
+        it('resets all filter state when deactivating all filters via clicking', () => {
             cy.mount(ForumFilterBar, {
                 props: {
                     categories,
-                    onClear,
                 },
             });
 
-            cy.get('[data-testid="thread-category-1"]').trigger('mousedown');
-            cy.get('[data-testid="thread-status-comment"]').trigger('mousedown');
+            // Activate some filters
+            cy.get('[data-testid="thread-category-1"]').click();
+            cy.get('[data-testid="thread-status-comment"]').click();
             cy.get('[data-testid="filter-unread-label"]').click();
 
-            cy.get('@clear').should('not.have.been.called');
-
-            cy.window().then((win) => {
-                win.clearForumFilter();
-            });
+            // Deactivate by clicking active buttons
+            cy.get('[data-testid="thread-category-1"]').click();
+            cy.get('[data-testid="thread-status-comment"]').click();
+            cy.get('[data-testid="filter-unread-label"]').click();
 
             cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
             cy.get('[data-testid="thread-status-comment"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="filter-unread-checkbox"]').should('not.be.checked');
-            cy.get('@clear').should('have.been.called');
         });
     });
 
@@ -164,6 +160,46 @@ describe('ForumFilterBar', () => {
             });
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-active');
             cy.get('[data-testid="filter-unread-checkbox"]').should('be.checked');
+        });
+    });
+
+    describe('composite events', () => {
+        it('emits filter-change with all current state on any toggle', () => {
+            const onFilterChange = cy.stub().as('filterChange');
+
+            cy.mount(ForumFilterBar, {
+                props: {
+                    categories,
+                    'onFilter-change': onFilterChange,
+                },
+            });
+
+            cy.get('[data-testid="thread-category-1"]').click();
+            cy.get('@filterChange').should('have.been.calledWith', {
+                categories: [1],
+                statuses: [],
+                unread: false,
+            });
+        });
+
+        it('emits save-state on every toggle action', () => {
+            const onSaveState = cy.stub().as('saveState');
+
+            cy.mount(ForumFilterBar, {
+                props: {
+                    categories,
+                    'onSave-state': onSaveState,
+                },
+            });
+
+            cy.get('[data-testid="thread-category-1"]').click();
+            cy.get('@saveState').should('have.been.called');
+
+            cy.get('[data-testid="thread-status-comment"]').click();
+            cy.get('@saveState').should('have.been.calledTwice');
+
+            cy.get('[data-testid="filter-unread-label"]').click();
+            cy.get('@saveState').should('have.been.calledThrice');
         });
     });
 
