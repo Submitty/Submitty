@@ -1,4 +1,4 @@
-/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
+/* global Widget, notebook_builder, csrfToken, builder_data, buildCourseUrl, uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents, getBadFileSubmissionDirectories */
 /* exported FormOptionsWidget */
 
 class FormOptionsWidget extends Widget {
@@ -101,7 +101,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets() && this.validateMarkdownWidgets();
+        return this.validateFileNames() && this.validateItemNames() && this.validateImageWidgets() && this.validateMarkdownWidgets() && this.validateFileSubmissionDirectories();
     }
 
     /**
@@ -243,6 +243,26 @@ class FormOptionsWidget extends Widget {
         this.colorFailedInputs([''], '.markdown-textarea');
 
         return bad_markdown_conents.length === 0;
+    }
+
+    /**
+     * Validates that every file submission widget has a non-blank directory.  The directory is required as it
+     * determines where the submitter's uploaded files are stored.  Offending inputs are colored to indicate failure.
+     *
+     * @returns {Boolean} True if all file submission directories are non-blank, false otherwise.
+     */
+    validateFileSubmissionDirectories() {
+        const bad_directories = getBadFileSubmissionDirectories();
+
+        bad_directories.forEach((directory_input) => {
+            directory_input.style.backgroundColor = this.failed_validation_color;
+        });
+
+        if (bad_directories.length !== 0) {
+            this.appendStatusMessage('A file submission directory was found to be blank.  Each file submission cell requires a directory.');
+        }
+
+        return bad_directories.length === 0;
     }
 
     /**
