@@ -1,6 +1,15 @@
 // sortTableByColumn function to be used for all sortable tables
 // See SortableColumn.vue
 
+/**
+ * Enum that stores all possible table column data types by which we'd need to sort.
+ * If a table column requires a sorting procedure that does not fit with any of these
+ * types, then that type should be added to the enum, and the new sorting procedure
+ * should be added to compareFn() in sort-table-by-column.ts.
+ * @property {string} String "standard alphanumeric sorting"
+ * @property {string} Number "numeric sorting, removes MB for file size sorting"
+ * @property {string} Date "date/time sorting, removes @ and EST, uses js Date class"
+ */
 export enum colDataTypes {
     String = 'string',
     Number = 'number',
