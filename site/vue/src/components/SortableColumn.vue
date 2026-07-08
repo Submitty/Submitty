@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { colDataTypes, sortTableByColumn } from '../../../ts/sort-table-by-column';
+import { colDataTypes, sortTableByColumn, restoreSort } from '../../../ts/sort-table-by-column';
+import { onMounted } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     tableId: string;
     title: string;
     sortKey: string;
@@ -9,20 +10,9 @@ defineProps<{
     usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
 }>();
 
-// run when page initializes to restore sort, e.g. after reload
-// $(() => {
-// export function restoreSort() {
-// const table: HTMLElement | null = document.getElementById(tableId);
-// if (table === null || table.dataset.sortKey === undefined) {
-//     return;
-// }
-//     const savedsortKey = Cookies.get('pending_gradeable_table_key');
-//     const savedDirection = Cookies.get('pending_gradeable_table_direction') || 'ASC';
-//     if (savedSort) {
-//         applySort(savedSort, savedDirection);
-//         updateSortIcons(savedSort, savedDirection);
-//     }
-// }
+onMounted(() => {
+    restoreSort(props.tableId);
+});
 </script>
 
 <template>
