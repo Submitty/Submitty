@@ -92,7 +92,7 @@
     background: var(--standard-focus-cornflowe-blue);
 }
 
-.peer-progress-bar {
+span.peer-progress-bar {
     background: var(--standard-plum-purple);
 }
 
