@@ -257,41 +257,43 @@
         {% endif %}
 
         {# File upload boxes #}
-        <div id="upload-boxes">
-            {# Submit boxes #}
-            {% for part in part_names %}
-                {# uploadIndex and input-file + Index required for drag-and-drop.js #}
-                <div tabindex="0"
-                     data-testid="upload-files-{{ loop.index }}"
-                     id="upload{{ loop.index }}"
-                     class="upload-box"
-                     onkeypress="clicked_on_box(event)"
-                     role="text"
-                     aria-label="Press enter to upload your {{ part }} file"
-                >
-                    <h2 class="label" id="label{{ loop.index }}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
-                        {% if part_names|length > 1 %}
-                            Drag your {{ part }} file(s) here or click to open file browser
-                        {% else %}
-                            Drag your file(s) here or click to open file browser
+        {% if not is_notebook %}
+            <div id="upload-boxes">
+                {# Submit boxes #}
+                {% for part in part_names %}
+                    {# uploadIndex and input-file + Index required for drag-and-drop.js #}
+                    <div tabindex="0"
+                         data-testid="upload-files-{{ loop.index }}"
+                         id="upload{{ loop.index }}"
+                         class="upload-box"
+                         onkeypress="clicked_on_box(event)"
+                         role="text"
+                         aria-label="Press enter to upload your {{ part }} file"
+                    >
+                        <h2 class="label" id="label{{ loop.index }}" {% if viewing_inactive_version %} style="color: #666666;" {% endif %}>
+                            {% if part_names|length > 1 %}
+                                Drag your {{ part }} file(s) here or click to open file browser
+                            {% else %}
+                                Drag your file(s) here or click to open file browser
+                            {% endif %}
+                        </h2>
+                        <input data-testid="select-files" type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
+                                {% if viewing_inactive_version %}
+                                    disabled="disabled"
+                                {% endif %}/>
+                        <table class="file-upload-table" data-testid="file-upload-table-{{ loop.index }}" id="file-upload-table-{{ loop.index }}">
+                          <tr style="background:transparent; display:none;">
+                            <th>File Name:</th>
+                            <th>Size:</th>
+                          </tr>
+                        </table>
+                        {% if viewing_inactive_version %}
+                            <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
                         {% endif %}
-                    </h2>
-                    <input data-testid="select-files" type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload"
-                            {% if viewing_inactive_version %}
-                                disabled="disabled"
-                            {% endif %}/>
-                    <table class="file-upload-table" data-testid="file-upload-table-{{ loop.index }}" id="file-upload-table-{{ loop.index }}">
-                      <tr style="background:transparent; display:none;">
-                        <th>File Name:</th>
-                        <th>Size:</th>
-                      </tr>
-                    </table>
-                    {% if viewing_inactive_version %}
-                        <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
         {# Page selector #}
         {% if student_page %}
@@ -330,7 +332,7 @@
             {% endif %}
         {% endif %}
 
-        {% if part_names is not empty %}
+        {% if part_names is not empty and not is_notebook %}
             <button type="button" id="startnew" class="btn btn-primary" data-testid="clear-all-files-button">Clear</button>
 
             {% if display_version == highest_version and display_version > 0 %}
@@ -374,6 +376,7 @@
                 initMaxNoFiles({{ max_file_uploads }});
             });
 
+            {% if not is_notebook %}
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
             if (typeof num_parts === "undefined"){
                 var num_parts = {{ part_names|length }};
@@ -415,6 +418,7 @@
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
+            {% endif %}
 
             // Event listener to check when files are added / removed from the drag-and-drop box
             $(function() {
