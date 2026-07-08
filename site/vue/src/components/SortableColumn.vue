@@ -41,5 +41,8 @@ defineProps<{
   </th>
 </template>
 
-<style>
+<style scoped>
+a.sortable-header {
+  text-decoration: none;
+}
 </style>
