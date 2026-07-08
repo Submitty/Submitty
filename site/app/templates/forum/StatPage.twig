@@ -24,11 +24,11 @@
             </colgroup>
             <thead>
                 <tr>
-                    {{ table_sort.sortable_header('forum-stats-table', 'User', 'user', 'string') }}
-                    {{ table_sort.sortable_header('forum-stats-table', 'Total Posts (not deleted)', 'total_posts', 'number') }}
-                    {{ table_sort.sortable_header('forum-stats-table', 'Total Threads', 'total_threads', 'number') }}
-                    {{ table_sort.sortable_header('forum-stats-table', 'Total Deleted Posts', 'total_deleted', 'number') }}
-                    {{ table_sort.sortable_header('forum-stats-table', 'Total Upducks', 'total_upducks', 'number') }}
+                    {{ table_sort.sortable_header('forum-stats-table', 'User', 'user', 'string', using_row_groups = true) }}
+                    {{ table_sort.sortable_header('forum-stats-table', 'Total Posts (not deleted)', 'total_posts', 'number', using_row_groups = true) }}
+                    {{ table_sort.sortable_header('forum-stats-table', 'Total Threads', 'total_threads', 'number', using_row_groups = true) }}
+                    {{ table_sort.sortable_header('forum-stats-table', 'Total Deleted Posts', 'total_deleted', 'number', using_row_groups = true) }}
+                    {{ table_sort.sortable_header('forum-stats-table', 'Total Upducks', 'total_upducks', 'number', using_row_groups = true) }}
                     <th>Show Posts</th>
                 </tr>
             </thead>

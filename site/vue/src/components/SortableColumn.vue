@@ -6,6 +6,7 @@ defineProps<{
     title: string;
     sortKey: string;
     colDataType: colDataTypes;
+    usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
 }>();
 
 // run when page initializes to restore sort, e.g. after reload
@@ -32,7 +33,7 @@ defineProps<{
     :title="'Sort by ' + title"
     :aria-label="'Sort by ' + title"
     :data-sort-key="sortKey"
-    @click.prevent="sortTableByColumn(tableId, sortKey, colDataType)"
+    @click.prevent="sortTableByColumn(tableId, sortKey, colDataType, usingRowGroups)"
   >
     {{ title }}
     <i class="fa fa-sort" />

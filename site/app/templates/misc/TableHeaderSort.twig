@@ -1,9 +1,8 @@
 {#
-Function for sorting tables by ascending or descending
-See SortableColumn.vue
+Macro for rendering SortableColumn.vue within Twig
 #}
 
-{% macro sortable_header(table_id, title, sort_key, col_data_type) %}
+{% macro sortable_header(table_id, title, sort_key, col_data_type, using_row_groups = false) %}
     {% set id = uniqid() %}
     <th id="vue-{{ id }}" data-col-title="{{ title }}">
     </th>
@@ -12,7 +11,16 @@ See SortableColumn.vue
             "#vue-{{ id }}",
             "component",
             "SortableColumn",
-            {{ { tableId: table_id, title: title, sortKey: sort_key, colDataType: col_data_type } | json_encode() | raw() }},
+            {{ 
+                { 
+                    tableId: table_id, 
+                    title: title, 
+                    sortKey: sort_key, 
+                    colDataType: col_data_type,
+                    usingRowGroups: using_row_groups,
+                } 
+                | json_encode() | raw() 
+            }},
             {}
         );
     </script>
