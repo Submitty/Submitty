@@ -716,7 +716,7 @@ class NavigationView extends AbstractView {
                 if ($gradeable->isTaGrading()) {
                     $array["progress"] = 100 * $progress_bar;
                 }
-                if ($gradeable->hasPeerComponent()) {
+                if ($gradeable->hasPeerComponent() && $this->core->getUser()->accessGrading()) {
                     $peer_percent = $gradeable->getPeerGradingProgress();
                     if (!is_nan($peer_percent)) {
                         $array["peer_progress"] = 100 * $peer_percent;
@@ -778,7 +778,7 @@ class NavigationView extends AbstractView {
                     if (!is_nan($TA_percent)) {
                         $progress = $TA_percent * 100;
                     }
-                    if ($gradeable->hasPeerComponent()) {
+                    if ($gradeable->hasPeerComponent() && $this->core->getUser()->accessGrading()) {
                         $peer_percent = $gradeable->getPeerGradingProgress();
 
                         if (!is_nan($peer_percent)) {
