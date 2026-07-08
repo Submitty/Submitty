@@ -442,7 +442,6 @@ function setupNumericTextCells() {
         const old_scores = {};
         let total = 0;
 
-        let value = this.value;
         const numbers = /^[0-9]*\.?[0-9]*$/;
 
         if (this.tagName.toLowerCase() === 'input') {
@@ -489,8 +488,6 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-        value = this.value;
-
         submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
@@ -506,7 +503,7 @@ function setupNumericTextCells() {
         );
     });
 
-    $('input[class=csvButtonUpload]').change(() => {
+    $('input#csvUpload').change(() => {
         const confirmation = window.confirm('WARNING! \nPreviously entered data may be overwritten! '
             + 'This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for '
             + 'student id and one column for each field. Columns and field types must match.');
@@ -580,6 +577,7 @@ function setupNumericTextCells() {
                             { csrf_token: csrfToken, users: user_ids,
                                 num_numeric: num_numeric, big_file: reader.result },
                             (returned_data) => {
+                                console.log(returned_data);
                                 for (let x = 0; x < returned_data['data'].length; x++) {
                                     const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
                                     if (rowElement.length) {
@@ -602,12 +600,7 @@ function setupNumericTextCells() {
                                                 cellElement.val(returned_data['data'][x][value]);
                                                 y++;
 
-                                                if (Number(cellElement.val()) === 0) {
-                                                    cellElement.css('color', 'var(--standard-light-medium-gray)');
-                                                }
-                                                else {
-                                                    cellElement.css('color', '');
-                                                }
+                                                cellElement.css('color', '');
                                                 total += Number(cellElement.val());
                                             }
                                             else {
