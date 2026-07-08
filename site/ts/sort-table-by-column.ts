@@ -1,5 +1,5 @@
 // sortTableByColumn function to be used for all sortable tables
-// See TableHeaderSort.twig
+// See SortableColumn.vue
 
 export enum colDataTypes {
     String = 'string',
