@@ -162,8 +162,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'legal_family_name' => 'Tester',
             'loaded' => true,
             'manual_registration' => false,
-            'preferred_given_name' => "",
-            'preferred_family_name' => "",
+            'preferred_given_name' => null,
+            'preferred_family_name' => null,
             'numeric_id' => '123456789',
             'preferred_locale' => null,
             'registration_section' => 1,
@@ -217,6 +217,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'enforce_single_session' => false,
             'instructor_courses' => false,
             'date_format' => 'YMD',
+            'date_registered' => null,
         ];
         $this->assertEquals($expected, $actual);
     }
