@@ -7,26 +7,26 @@
 //     total_upducks: 4,
 // };
 
-function getForumStatsTable() {
-    return document.getElementById('forum-stats-table');
-}
+// function getForumStatsTable() {
+//     return document.getElementById('forum-stats-table');
+// }
 
-function getGroupedRows(tbody) {
-    const groups = [];
-    let currentGroup = null;
+// function getGroupedRows(tbody) {
+//     const groups = [];
+//     let currentGroup = null;
 
-    Array.from(tbody.children).forEach((row) => {
-        if (row.classList.contains('user_stat')) {
-            currentGroup = [row];
-            groups.push(currentGroup);
-        }
-        else if (currentGroup !== null) {
-            currentGroup.push(row);
-        }
-    });
+//     Array.from(tbody.children).forEach((row) => {
+//         if (row.classList.contains('user_stat')) {
+//             currentGroup = [row];
+//             groups.push(currentGroup);
+//         }
+//         else if (currentGroup !== null) {
+//             currentGroup.push(row);
+//         }
+//     });
 
-    return groups;
-}
+//     return groups;
+// }
 
 // function sortTableByColumn(sortKey) {
 //     const table = getForumStatsTable();
