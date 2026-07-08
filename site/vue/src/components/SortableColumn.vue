@@ -26,13 +26,13 @@ defineProps<{
 
 <template>
   <!-- See TableHeaderSort.twig -->
-  <th data-col-title="{{ title }}">
+  <th :data-col-title="title">
     <a
       href="#"
       class="sortable-header"
-      title="Sort by {{ title }}"
-      aria-label="Sort by {{ title }}"
-      data-sort-key="{{ sortKey }}"
+      :title="'Sort by ' + title"
+      :aria-label="'Sort by ' + title"
+      :data-sort-key="sortKey"
       @click.prevent="sortTableByColumn(tableId, sortKey, colDataType);"
     >
       {{ title }}
@@ -40,3 +40,6 @@ defineProps<{
     </a>
   </th>
 </template>
+
+<style>
+</style>

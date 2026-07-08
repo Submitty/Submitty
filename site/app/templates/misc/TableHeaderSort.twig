@@ -5,13 +5,13 @@ See SortableColumn.vue
 
 {% macro sortable_header(table_id, title, sort_key, col_data_type) %}
     {% include 'Vue.twig' with {
-            'type': 'component',
-            'name': 'SortableColumn',
-            'args': {
-                "tableId": table_id,
-                "title": title,
-                "sortKey": sort_key,
-                "colDataType": col_data_type
-            }
-        } only %}
+        'type': 'component',
+        'name': 'SortableColumn',
+        'args': {
+            "tableId": table_id,
+            "title": title,
+            "sortKey": sort_key,
+            "colDataType": col_data_type
+        }
+    } only %}
 {% endmacro %}
