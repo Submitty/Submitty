@@ -48,6 +48,7 @@
                 <button title="Show/Hide Grading Rubric (Press G)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grading-rubric-panel-toggle"
                 >
                     <i class="fas fa-edit"></i><span>Rubric</span>
                 </button>
@@ -98,6 +99,7 @@
                 <button title="Show Solution and TA notes"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="solution-ta-notes-panel-toggle"
                 >
                     <i class="fas fa-check"></i><span>Solutions/Notes</span>
                 </button>
@@ -148,6 +150,7 @@
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grade-inquiry-info-panel-toggle"
                 >
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
