@@ -1025,8 +1025,8 @@ SQL;
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
         $this->submitty_db->query(
             "
-INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
-VALUES (?,?,?,?,?,?)",
+            INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
+            VALUES (?,?,?,?,?,?)",
             $params
         );
 
@@ -4798,6 +4798,118 @@ SQL;
           AND g_id=?",
             [$user_id, $g_id]
         );
+    }
+
+    /**
+     * Inserts the preferred default notification settings
+     *
+     * @param string $user_id
+     * @param string $term
+     * @param string $course
+     */
+    public function saveNotificationDefaults(string $user_id, string $term, string $course): void {
+        $this->submitty_db->query(
+            "INSERT INTO notification_default (user_id, term, course)
+             VALUES (?, ?, ?)
+             ON CONFLICT (user_id) DO UPDATE SET
+                term = EXCLUDED.term,
+                course = EXCLUDED.course",
+            [$user_id, $term, $course]
+        );
+    }
+
+    /**
+     * @return array{term: string, course: string}|null
+     */
+    public function getNotificationDefault(string $user_id): ?array {
+        $this->submitty_db->query(
+            "SELECT term, course FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+        $row = $this->submitty_db->row();
+        return empty($row) ? null : $row;
+    }
+
+    public function deleteNotificationDefault(string $user_id): void {
+        $this->submitty_db->query(
+            "DELETE FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getNotificationSettingsForUser(string $user_id): ?array {
+        $this->course_db->query(
+            "SELECT * FROM notification_settings WHERE user_id = ?",
+            [$user_id]
+        );
+        $row = $this->course_db->row();
+        return empty($row) ? null : $row;
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     */
+    public function insertNotificationSettingsForUser(string $user_id, array $source): void {
+        $this->course_db->query(
+            "INSERT INTO notification_settings (
+                user_id, merge_threads, all_new_threads, all_new_posts,
+                all_modifications_forum, reply_in_post_thread, team_invite,
+                team_joined, team_member_submission, self_notification,
+                merge_threads_email, all_new_threads_email, all_new_posts_email,
+                all_modifications_forum_email, reply_in_post_thread_email,
+                team_invite_email, team_joined_email, team_member_submission_email,
+                self_notification_email, self_registration_email,
+                all_released_grades, all_released_grades_email,
+                all_gradeable_releases, all_gradeable_releases_email
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (user_id) DO UPDATE SET
+                merge_threads                  = EXCLUDED.merge_threads,
+                all_new_threads                = EXCLUDED.all_new_threads,
+                all_new_posts                  = EXCLUDED.all_new_posts,
+                all_modifications_forum        = EXCLUDED.all_modifications_forum,
+                reply_in_post_thread           = EXCLUDED.reply_in_post_thread,
+                team_invite                    = EXCLUDED.team_invite,
+                team_joined                    = EXCLUDED.team_joined,
+                team_member_submission         = EXCLUDED.team_member_submission,
+                self_notification              = EXCLUDED.self_notification,
+                merge_threads_email            = EXCLUDED.merge_threads_email,
+                all_new_threads_email          = EXCLUDED.all_new_threads_email,
+                all_new_posts_email            = EXCLUDED.all_new_posts_email,
+                all_modifications_forum_email  = EXCLUDED.all_modifications_forum_email,
+                reply_in_post_thread_email     = EXCLUDED.reply_in_post_thread_email,
+                team_invite_email              = EXCLUDED.team_invite_email,
+                team_joined_email              = EXCLUDED.team_joined_email,
+                team_member_submission_email   = EXCLUDED.team_member_submission_email,
+                self_notification_email        = EXCLUDED.self_notification_email,
+                self_registration_email        = EXCLUDED.self_registration_email,
+                all_released_grades            = EXCLUDED.all_released_grades,
+                all_released_grades_email      = EXCLUDED.all_released_grades_email,
+                all_gradeable_releases         = EXCLUDED.all_gradeable_releases,
+                all_gradeable_releases_email   = EXCLUDED.all_gradeable_releases_email",
+            [
+                $user_id,
+                $source['merge_threads'], $source['all_new_threads'], $source['all_new_posts'],
+                $source['all_modifications_forum'], $source['reply_in_post_thread'], $source['team_invite'],
+                $source['team_joined'], $source['team_member_submission'], $source['self_notification'],
+                $source['merge_threads_email'], $source['all_new_threads_email'], $source['all_new_posts_email'],
+                $source['all_modifications_forum_email'], $source['reply_in_post_thread_email'],
+                $source['team_invite_email'], $source['team_joined_email'], $source['team_member_submission_email'],
+                $source['self_notification_email'], $source['self_registration_email'],
+                $source['all_released_grades'], $source['all_released_grades_email'],
+                $source['all_gradeable_releases'], $source['all_gradeable_releases_email'],
+            ]
+        );
+    }
+
+    public function userHasNotificationDefaults(string $user_id): bool {
+        $this->submitty_db->query(
+            "SELECT 1 FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+        return count($this->submitty_db->row()) > 0;
     }
 
     /**
