@@ -3,10 +3,31 @@
     color: black;
 }
 
+#rainbow-grades-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#rainbow-grades-last-update {
+    margin-left: auto;
+}
+
 #rainbow-grades-header > .btn-wrapper {
     margin: auto;
 }
 
 #rainbow-grades-last-update {
     float: right;
+}
+
+#rainbow-grades-sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#rainbow-grades-sort-label {
+    white-space: nowrap;
+    margin: 0;
 }
