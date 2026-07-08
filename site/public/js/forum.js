@@ -1885,9 +1885,9 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-function showBlockUserForm(userId, displayName, csrfToken) {
+function showBlockUserForm(userId, displayName) {
     $('#block-user-id').val(userId);
-    $('#block-csrf-token').val(csrfToken);
+    $('#block-csrf-token').val(window.csrfToken);
     $('#block-user-display-name').text(displayName);
     $('#block-expiration-date').val('');
 
@@ -1917,8 +1917,7 @@ function submitBlockUser() {
         },
         success: (data) => {
             try {
-                // eslint-disable-next-line no-var
-                var json = JSON.parse(data);
+                let json = JSON.parse(data);
             }
             catch (err) {
                 displayErrorMessage('Error parsing data. Please try again.');
