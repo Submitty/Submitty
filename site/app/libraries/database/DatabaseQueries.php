@@ -285,7 +285,7 @@ class DatabaseQueries {
                     FROM electronic_gradeable_data where user_id = (table Input)
                     ORDER BY submission_time desc
                     LIMIT 1),
-                Forum_View AS 
+                Forum_View AS
                     (SELECT timestamp, user_id
                     FROM viewed_responses where user_id = (table Input)
                     ORDER BY timestamp desc
@@ -740,20 +740,20 @@ SQL;
      */
     public function getUpDucks(): array {
         $this->course_db->query("
-            SELECT 
+            SELECT
                 f.user_id,
-                COUNT(*) AS upducks 
-            FROM 
+                COUNT(*) AS upducks
+            FROM
                 forum_upducks f
-            JOIN 
+            JOIN
                 posts p
-            ON 
+            ON
                 f.post_id = p.id
-            WHERE 
-                p.deleted = FALSE 
-            GROUP BY 
+            WHERE
+                p.deleted = FALSE
+            GROUP BY
                 f.user_id
-            ORDER BY 
+            ORDER BY
                 upducks DESC
         ");
         return $this->course_db->rows();
@@ -776,7 +776,7 @@ SQL;
          */
     public function getUsersWhoLikedPost(int $post_id): array {
         $this->course_db->query("
-            SELECT u.user_id 
+            SELECT u.user_id
             FROM forum_upducks f
             JOIN users u ON f.user_id = u.user_id
             WHERE f.post_id = ?
@@ -1007,7 +1007,7 @@ SQL;
         );
 
         $this->course_db->query(
-            "UPDATE users SET 
+            "UPDATE users SET
                 rotating_section = NULL,
                 registration_type = NULL
             WHERE user_id = ?",
@@ -1092,7 +1092,7 @@ WHERE term=? AND course=? AND user_id=?",
     /**
      * Updates the date_registered timestamp for a user in a course to the current time.
      * Used for self-registration and self-rejoin, NOT for manual adds/edits by an instructor.
-     * 
+     *
      * @param string $user_id
      * @param string $semester
      * @param string $course
@@ -1474,9 +1474,9 @@ WHERE term=? AND course=? AND user_id=?",
     public function generateLateDayCacheForUsers(): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
-        $query = "INSERT INTO late_day_cache 
+        $query = "INSERT INTO late_day_cache
                     (SELECT (cache_row).*
-                         FROM 
+                         FROM
                         (SELECT
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
@@ -1501,8 +1501,8 @@ WHERE term=? AND course=? AND user_id=?",
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
-                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
+                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late,
+                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
@@ -1515,7 +1515,7 @@ WHERE term=? AND course=? AND user_id=?",
         $params[] = $late_day_info->getLateDaysChange();
 
         $query = "INSERT INTO late_day_cache
-                    (user_id, late_day_date, late_days_remaining, late_days_change) 
+                    (user_id, late_day_date, late_days_remaining, late_days_change)
                     VALUES (?, ?, ?, ?)
                     ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
@@ -1868,13 +1868,13 @@ ORDER BY {$orderby}",
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
-            ON 
+            ON
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.user_id=users.user_id
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0
             {$where}
             GROUP BY {$section_key}
@@ -2258,9 +2258,9 @@ ORDER BY merged_data.{$section_key}
 
         $this->course_db->query(
             "
-            SELECT 
+            SELECT
                 $unit.$section_key, COUNT($unit.$id) as verified_components_count
-            FROM 
+            FROM
                 gradeable_data as gd
                 JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
                 JOIN $unit ON (gd.gd_$id = $unit.$id)
@@ -2331,13 +2331,13 @@ ORDER BY merged_data.{$section_key}
             AND egv.active_version>0
             AND egv.g_id=?
             INNER JOIN electronic_gradeable AS eg
-            ON 
+            ON
             eg.g_id=egv.g_id
             AND eg.eg_submission_due_date IS NOT NULL
             INNER JOIN (SELECT DISTINCT ldc.{$user_or_team_id}
             FROM late_day_cache AS ldc
-            WHERE ldc.g_id=? 
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            WHERE ldc.g_id=?
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
@@ -2507,7 +2507,7 @@ ORDER BY merged_data.{$section_key}
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2592,7 +2592,7 @@ ORDER BY gc_order
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2672,7 +2672,7 @@ ORDER BY gc_order
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2794,7 +2794,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params = [$g_id,$g_id, $count];
         }
@@ -4364,14 +4364,14 @@ ORDER BY {$section_key}",
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
-            ON 
+            ON
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.team_id=gradeable_teams.team_id
             AND ldc.submission_days_late>0
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0
             {$where}
             GROUP BY gradeable_teams.team_id, {$section_key}
@@ -6238,8 +6238,8 @@ AND gc_id IN (
                     INNER JOIN gradeable_component_data gcd ON (
                         gd.gd_id = gcd.gd_id
                     )
-                    WHERE 
-                        gi.status = -1 
+                    WHERE
+                        gi.status = -1
                         AND gi.g_id = ?
                 ) AS result
                 GROUP BY result.gcd_grader_id
@@ -6594,8 +6594,8 @@ AND gc_id IN (
                 LEFT JOIN (
                 SELECT
                   g_id AS pgp_g_id,
-                  autograding, 
-                  rubric, 
+                  autograding,
+                  rubric,
                   files,
                   solution_notes,
                   discussion
