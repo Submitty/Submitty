@@ -19,7 +19,7 @@ class ReportView extends AbstractView {
         ]);
     }
 
-    public function showFullGradebook($grade_file, string $grade_summaries_last_run, bool $show_warning = false, ?int $days_since_run = null) {
+    public function showFullGradebook($grade_file, string $grade_summaries_last_run, array $available_sorts = [], string $selected_sort = 'overall', bool $show_warning = false, ?int $days_since_run = null) {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');
 
@@ -31,6 +31,9 @@ class ReportView extends AbstractView {
             'rainbow_grades_csv_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_csv']),
             'show_warning' => $show_warning,
             'days_since_run' => $days_since_run,
+            'available_sorts' => $available_sorts,
+            'selected_sort' => $selected_sort,
+            'gradebook_url' => $this->core->buildCourseUrl(['gradebook']),
         ]);
     }
 }
