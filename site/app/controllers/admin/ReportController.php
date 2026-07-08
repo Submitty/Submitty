@@ -1200,11 +1200,10 @@ class ReportController extends AbstractController {
     /**
      * Generate a custom filename for the downloaded CSV file
      */
-    private function generateCustomFilename(string $sort = 'overall'): string {
+    private function generateCustomFilename(): string {
         $course = $this->core->getConfig()->getCourse();
         $timestamp = DateUtils::getFileNameTimeStamp();
-        $sort_part = ($sort === 'overall') ? '' : "_{$sort}";
-        return "{$course}_rainbow_grades{$sort_part}_{$timestamp}.csv";
+        return "{$course}_rainbow_grades_{$timestamp}.csv";
     }
 
 
@@ -1213,20 +1212,13 @@ class ReportController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile(): ?DownloadResponse {
-        // Which sorted CSV to download; mirrors the gradebook selector and defaults to
-        // the overall CSV. The key is format-validated so it can never escape the
-        // rainbow_grades directory (overall -> output.csv, else output-by-<sort>.csv).
-        $requested = $_GET['sort'] ?? 'overall';
-        $sort = preg_match('/^[a-z0-9_]+$/', $requested) ? $requested : 'overall';
-        $csv_filename = ($sort === 'overall') ? 'output.csv' : 'output-by-' . $sort . '.csv';
-
         // Path to the CSV file for Rainbow Grades
         $csvFilePath = FileUtils::joinPaths(
             '/var/local/submitty/courses',
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
             'rainbow_grades',
-            $csv_filename
+            'output.csv'
         );
 
 
@@ -1234,7 +1226,7 @@ class ReportController extends AbstractController {
         if (file_exists($csvFilePath)) {
             return DownloadResponse::getDownloadResponse(
                 file_get_contents($csvFilePath),
-                $this->generateCustomFilename($sort),
+                $this->generateCustomFilename(),
                 "application/csv"
             );
         }

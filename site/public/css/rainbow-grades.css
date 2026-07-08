@@ -1,18 +1,12 @@
-#rainbow-grades-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 #rainbow-grades > table {
     /* stylelint-disable-next-line color-named */
     color: black;
 }
 
 #rainbow-grades-header > .btn-wrapper {
-    margin: 0;
+    margin: auto;
 }
 
 #rainbow-grades-last-update {
-    margin-left: auto;
+    float: right;
 }
