@@ -19,6 +19,9 @@ class ReportView extends AbstractView {
         ]);
     }
 
+    /**
+     * @param array<string, array{file: string, label: string}> $available_sorts
+     */
     public function showFullGradebook($grade_file, string $grade_summaries_last_run, array $available_sorts = [], string $selected_sort = 'overall', bool $show_warning = false, ?int $days_since_run = null) {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');

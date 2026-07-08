@@ -11,14 +11,12 @@
 
 #rainbow-grades-last-update {
     margin-left: auto;
+    float: right;
+
 }
 
 #rainbow-grades-header > .btn-wrapper {
     margin: auto;
-}
-
-#rainbow-grades-last-update {
-    float: right;
 }
 
 #rainbow-grades-sort-wrapper {
