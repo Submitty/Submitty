@@ -21,24 +21,22 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
         return;
     }
 
-    // const currentSort = Cookies.get('docker_table_key');
-    // const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
-    const currentsort_key: string | undefined = table.dataset.sortKey;
-    const currentDirection: string = table.dataset.sortDirection || 'ASC';
+    // retrieve saved sort key and sort direction values from session storage
+    const prev_sort_key: string | null = sessionStorage.getItem(`${table_id}-sort-key`);
+    const prev_sort_direction: string = sessionStorage.getItem(`${table_id}-sort-direction`) || 'ASC';
 
-    // determine direction; toggle when clicking same key twice
-    let new_direction: string;
-    if (sort_key === currentsort_key) {
-        new_direction = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
+    // determine sort_direction; toggle when clicking same key twice
+    let sort_direction: string;
+    if (sort_key === prev_sort_key) {
+        sort_direction = (prev_sort_direction === 'ASC' ? 'DESC' : 'ASC');
     }
     else {
-        new_direction = 'ASC';
+        sort_direction = 'ASC';
     }
 
-    // Cookies.set('docker_table_key', sort_key, { path: '/admin/docker' });
-    // Cookies.set('docker_table_direction', new_direction, { path: '/admin/docker' });
-    table.dataset.sortKey = sort_key;
-    table.dataset.sortDirection = new_direction;
+    // have the updated sort key and sort direction values to session storage
+    sessionStorage.setItem(`${table_id}-sort-key`, sort_key);
+    sessionStorage.setItem(`${table_id}-sort-direction`, sort_direction);
 
     // get the index of the column we're sorting by (necessary for togglable columns)
     const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
@@ -57,8 +55,13 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
     });
     const col_index: number = header_keys.indexOf(sort_key);
 
-    applySort(table_id, col_index, new_direction, col_data_type, using_row_groups);
-    updateSortIcons(table_id, sort_key, new_direction);
+    // apply the table sorting to the DOM
+    applySort(table_id, col_index, sort_direction, col_data_type, using_row_groups);
+    updateSortIcons(table_id, sort_key, sort_direction);
+}
+
+export function restoreSort() {
+
 }
 
 // run when page initializes to restore sort, e.g. after reload
@@ -69,15 +72,15 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
 //     return;
 // }
 //     const savedsort_key = Cookies.get('pending_gradeable_table_key');
-//     const savedDirection = Cookies.get('pending_gradeable_table_direction') || 'ASC';
+//     const savedsort_direction = Cookies.get('pending_gradeable_table_sort_direction') || 'ASC';
 //     if (savedSort) {
-//         applySort(savedSort, savedDirection);
-//         updateSortIcons(savedSort, savedDirection);
+//         applySort(savedSort, savedsort_direction);
+//         updateSortIcons(savedSort, savedsort_direction);
 //     }
 // }
 
 // Reorder the rows of the table to be sorted according to one row
-function applySort(table_id: string, col_index: number, direction: string, col_data_type: colDataTypes, using_row_groups: boolean = false) {
+function applySort(table_id: string, col_index: number, sort_direction: string, col_data_type: colDataTypes, using_row_groups: boolean = false) {
     // todo: sort them all as one and hide section headers if not sorted by sections?
     const tbodies: HTMLTableSectionElement[] = Array.from(document.querySelectorAll(`#${table_id} tbody`));
     for (const tbody of tbodies) {
@@ -87,7 +90,7 @@ function applySort(table_id: string, col_index: number, direction: string, col_d
             row_groups.sort((group_a, group_b) => {
                 const text_a = group_a[0].children[col_index].textContent.trim();
                 const text_b = group_b[0].children[col_index].textContent.trim();
-                return compareFn(text_a, text_b, direction, col_data_type);
+                return compareFn(text_a, text_b, sort_direction, col_data_type);
             });
             row_groups.forEach((group) => {
                 group.forEach((row) => tbody.appendChild(row));
@@ -100,7 +103,7 @@ function applySort(table_id: string, col_index: number, direction: string, col_d
             rows.sort((row_a, row_b) => {
                 const text_a = row_a.children[col_index].textContent.trim();
                 const text_b = row_b.children[col_index].textContent.trim();
-                return compareFn(text_a, text_b, direction, col_data_type);
+                return compareFn(text_a, text_b, sort_direction, col_data_type);
             });
             rows.forEach((row) => tbody.appendChild(row));
         }
@@ -137,7 +140,7 @@ function getRowGroups(tbody: HTMLTableSectionElement) {
 }
 
 // Comparison function run during row sorting
-function compareFn(text_a: string, text_b: string, direction: string, col_data_type: colDataTypes) {
+function compareFn(text_a: string, text_b: string, sort_direction: string, col_data_type: colDataTypes) {
     let cmp = 0;
     switch (col_data_type) {
         case colDataTypes.Number: {
@@ -164,12 +167,12 @@ function compareFn(text_a: string, text_b: string, direction: string, col_data_t
             break;
         }
     }
-    return direction === 'ASC' ? cmp : -cmp;
+    return sort_direction === 'ASC' ? cmp : -cmp;
 }
 
 // Updates the arrow icons next to each sortable column showing whether
 // that column is being sorted in ascending or descending order
-function updateSortIcons(table_id: string, activeKey: string, direction: string) {
+function updateSortIcons(table_id: string, activeKey: string, sort_direction: string) {
     document.querySelectorAll<HTMLElement>(`#${table_id} a.sortable-header`)
         .forEach((el) => {
             const icon = el.querySelector('i');
@@ -184,7 +187,7 @@ function updateSortIcons(table_id: string, activeKey: string, direction: string)
 
             if (key === activeKey) {
                 icon.classList.remove('fa-sort');
-                icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+                icon.classList.add(sort_direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
             }
         });
 }
