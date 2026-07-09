@@ -1455,6 +1455,11 @@ end of styles used in the admin gradeable page
     background-color: var(--standard-plum-purple); /* purple */
 }
 
+/* peer component has at least one peer grade */
+.grader-peer-half {
+    border: 2px solid var(--standard-mediumorchid);
+}
+
 /* color for a limited access grader */
 .grader-3 {
     background-color: var(--important-post); /* yellow */

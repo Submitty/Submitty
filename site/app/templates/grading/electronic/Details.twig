@@ -17,8 +17,12 @@
                     Component graded by a limited access grader
                 </li>
                 <li>
+                    <i class="grading-example-circle grader-peer-half"></i>
+                    Peer component has at least one peer grade
+                </li>
+                <li>
                     <i class="grading-example-circle grader-4"></i>
-                    Peer component graded by a student
+                    Peer component graded by you
                 </li>
                 <li>
                     <i class="grading-example-circle grader-1"></i>
@@ -432,9 +436,12 @@
                     {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         {% set class_list = class_list | merge(['grader-NULL']) %}
                     {% else %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
+                        {% if info.graded_groups[index] == "peer-null" or info.graded_groups[index] == "peer-no-submission" %}
                             {# Indicates Peer Component #}
                             {% set class_list = class_list | merge(['grader-NULL']) %}
+                        {% elseif info.graded_groups[index] == "peer-half" %}
+                            {# Indicates Peer Component has at least one grade #}
+                            {% set class_list = class_list | merge(['grader-peer-half']) %}
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
                             {% set class_list = class_list | merge(['grader-' ~ info.graded_groups[index]]) %}
@@ -459,6 +466,9 @@
                     {% elseif info.graded_groups[index] == "peer-null" %}
                         {# Indicates Submitted but Ungraded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-half" %}
+                        {# Indicates Peer Component has at least one grade #}
+                        <div title="{{ title }}" class="grading-circle grader-peer-half"></div>
                     {% elseif info.graded_groups[index] == 4 %}
                         {# Indicates Submitted and Graded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-{{ info.graded_groups[index] }}"></div>
