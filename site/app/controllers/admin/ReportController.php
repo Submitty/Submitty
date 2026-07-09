@@ -1151,8 +1151,8 @@ class ReportController extends AbstractController {
     private function getAvailableGradebookSorts(string $rainbow_grades_dir): array {
         $labels = [
             'overall' => 'Overall',
-            'name' => 'By Name',
-            'section' => 'By Section',
+            'name' => 'By Student Name',
+            'section' => 'By Registration Section',
             'lab' => 'By Lab',
             'hw' => 'By Homework',
             'test' => 'By Test',
