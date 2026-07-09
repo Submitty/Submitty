@@ -32,6 +32,4 @@ def down(config, database, semester, course):
     :param course: Name of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE users DROP COLUMN IF EXISTS date_registered
-    """)
+    pass
