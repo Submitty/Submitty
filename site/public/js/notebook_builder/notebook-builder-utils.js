@@ -115,19 +115,22 @@ function getBadMarkdownContents() {
 }
 
 /**
- * Determines if any file submission widget has a blank directory.
+ * Determines if any file submission widget has a blank or duplicated directory.
  *
- * @returns {Array[]} Returns an array containing the directory inputs which were found to be blank.
+ * @returns {Array} Returns an array containing the blank and/or duplicated directory values.
 */
 
 function getBadFileSubmissionDirectories() {
+    const used_directories = new Set();
     const bad_directories = new Set();
-    const directory_inputs = document.querySelectorAll('.directory-input');
 
+    const directory_inputs = document.querySelectorAll('.directory-input');
     directory_inputs.forEach((directory_input) => {
-        if (directory_input.value.trim() === '') {
-            bad_directories.add(directory_input);
+        if (directory_input.value === '' || used_directories.has(directory_input.value)) {
+            bad_directories.add(directory_input.value);
         }
+
+        used_directories.add(directory_input.value);
     });
 
     return Array.from(bad_directories);

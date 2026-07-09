@@ -253,14 +253,16 @@ class FormOptionsWidget extends Widget {
      */
     validateFileSubmissionDirectories() {
         const bad_directories = getBadFileSubmissionDirectories();
-
-        bad_directories.forEach((directory_input) => {
-            directory_input.style.backgroundColor = this.failed_validation_color;
+        bad_directories.forEach((bad_directory) => {
+            if (bad_directory === '') {
+                this.appendStatusMessage('A file submission directory was found to be blank.  Ensure all file submission cells have a directory.');
+            }
+            else {
+                this.appendStatusMessage(`File submission directory '${bad_directory}' was found to be duplicated.  Ensure all file submission cells use a unique directory.`);
+            }
         });
 
-        if (bad_directories.length !== 0) {
-            this.appendStatusMessage('A file submission directory was found to be blank.  Each file submission cell requires a directory.');
-        }
+        this.colorFailedInputs(bad_directories, '.directory-input');
 
         return bad_directories.length === 0;
     }
