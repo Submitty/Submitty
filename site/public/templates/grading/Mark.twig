@@ -14,11 +14,19 @@ Required Input:
             <i class="fas fa-ellipsis-v"></i>
         </span>
     {% endif %}
-    <span class="mark-selector-container">
-        <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters" data-mark_id="{{ mark.id }}">
-            {{ mark.order }}
-        </span>
-    </span>
+    {% include "../misc/Vue.twig" with {
+        "type": "component",
+        "name": "ta_grading/MarkSelector",
+        "args": {
+            "markId": mark.id,
+            "componentId": component.id,
+            "order": mark.order,
+            "isChecked": is_checked ? true : false
+        },
+        "events": {
+            "toggle-mark": "window.onToggleMarkById"
+        }
+    } only %}
     {% if mark.publish %}
     <span class="question-mark-container">
         <a href="https://submitty.org/grader/rubric_grading/rubric_components_and_marks#common-mark-editing" target="_blank" class="explanation-link rubric-question-mark" title="NOTE: This mark will be visible to ALL students, but they will only receive the points (or point deduction) if it is checked.">
