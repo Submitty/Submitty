@@ -154,3 +154,13 @@ $(document).ready(() => {
     $('#add-field').on('input', addFieldOnChange);
     $('#add-field').trigger('input');
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+    const successMessage = sessionStorage.getItem('successMessage');
+    if (successMessage) {
+        displaySuccessMessage(successMessage);
+
+        // Clear the message from sessionStorage so it doesn't show again
+        sessionStorage.removeItem('successMessage');
+    }
+});
