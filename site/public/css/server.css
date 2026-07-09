@@ -340,11 +340,6 @@ tr.info th {
     background-color: var(--alert-border-blue);
 }
 
-td > a.active-sort {
-    text-decoration: underline;
-    font-weight: bold;
-}
-
 .floating-thead,
 .floating-header {
     position: fixed;

@@ -63,11 +63,8 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
         col_data_type: col_data_type,
         using_row_groups: using_row_groups,
     };
-
-    if (prev_sort_data_string !== null) {
-        // save the updated sort data to session storage
-        sessionStorage.setItem(`${table_id}-sorting-data`, JSON.stringify(new_sort_data));
-    }
+    // save the updated sort data to session storage
+    sessionStorage.setItem(`${table_id}-sorting-data`, JSON.stringify(new_sort_data));
 
     applySortToTable(new_sort_data);
 }
@@ -109,7 +106,7 @@ function updateSortingHeader(table_id: string, sort_key: string): number {
         header_link.classList.remove('active-sort');
         const header_key = header_link.dataset.sortKey;
         if (header_key === sort_key) {
-            header_link.classList.add('active-sort'); // TODO: do something with that class? or remove it?
+            header_link.classList.add('active-sort');
         }
         return header_key;
     });

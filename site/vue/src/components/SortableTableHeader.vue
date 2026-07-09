@@ -29,4 +29,9 @@ defineProps<{
 a.sortable-header {
   text-decoration: none;
 }
+
+a.sortable-header.active-sort {
+  /* "double bold" effect to stand out against regular th bold */
+  text-shadow: 0.75px 0;
+}
 </style>
