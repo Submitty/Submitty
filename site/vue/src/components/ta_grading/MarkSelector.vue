@@ -12,7 +12,7 @@ const emit = defineEmits<{
     'toggle-mark': [data: { componentId: number; markId: number }];
 }>();
 
-function handleClick(event: MouseEvent) {
+function handleClick(event: MouseEvent): void {
     event.stopPropagation();
     emit('toggle-mark', { componentId: props.componentId, markId: props.markId });
 }
@@ -22,6 +22,7 @@ function handleClick(event: MouseEvent) {
   <span
     class="mark-selector-container"
     :data-mark_id="markId"
+    data-testid="mark-selector"
     @click="handleClick"
   >
     <span
