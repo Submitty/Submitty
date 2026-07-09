@@ -11,7 +11,7 @@ Macro for rendering SortableTableHeader.vue within Twig
         window.submitty.render(
             "#vue-{{ id }}",
             "component",
-            "SortableTableHeader",
+            "table_sorting/SortableTableHeader",
             {{ 
                 { 
                     tableId: table_id, 
@@ -40,7 +40,7 @@ persist after reload #}
         window.submitty.render(
             "#vue-{{ id }}",
             "component",
-            "TableSortManager",
+            "table_sorting/TableSortManager",
             {{ { tableId: table_id, } | json_encode() | raw() }},
             {}
         );

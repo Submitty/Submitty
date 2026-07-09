@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { restoreSort } from '../ts/sort-table-by-column';
+import { restoreSort } from '../../ts/sort-table-by-column';
 import { onMounted } from 'vue';
 
 const props = defineProps<{
