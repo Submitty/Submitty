@@ -1107,11 +1107,9 @@ class ReportController extends AbstractController {
     public function displayGradebook() {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
 
-        // Discover which sorted gradebook tables were built (output.html plus any output-by-<x>.html).
+        // Find any sort that were already done
         $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
 
-        // Choose which table to show: the requested sort if it was built, otherwise "overall",
-        // otherwise whichever table is first in the preferred order.
         $selected_sort = 'overall';
         $requested = $_GET['sort'] ?? null;
         if (is_string($requested) && isset($available_sorts[$requested])) {
