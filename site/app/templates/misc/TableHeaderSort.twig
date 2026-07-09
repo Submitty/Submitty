@@ -1,5 +1,5 @@
 {#
-Macro for rendering SortableColumn.vue within Twig
+Macro for rendering SortableTableColumn.vue within Twig
 #}
 
 {# using_row_groups is specifically for statPage.twig's forum post collapsible rows #}
@@ -11,7 +11,7 @@ Macro for rendering SortableColumn.vue within Twig
         window.submitty.render(
             "#vue-{{ id }}",
             "component",
-            "SortableColumn",
+            "SortableTableColumn",
             {{ 
                 { 
                     tableId: table_id, 

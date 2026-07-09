@@ -1,5 +1,5 @@
 // sortTableByColumn function to be used for all sortable tables
-// See SortableColumn.vue
+// See SortableTableColumn.vue
 
 /**
  * Enum that stores all possible table column data types by which we'd need to sort.
