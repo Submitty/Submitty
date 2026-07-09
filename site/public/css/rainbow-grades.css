@@ -5,17 +5,20 @@
 
 #rainbow-grades-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
 }
 
-#rainbow-grades-last-update {
-    margin-left: auto;
-    float: right;
+#rainbow-grades-header > .btn-wrapper {
+    margin: 0;
 }
 
-#rainbow-grades-header > .btn-wrapper {
-    margin: auto;
+#rainbow-grades-last-update {
+    flex-basis: 100%;
+    text-align: right;
+    margin: 0;
 }
 
 #rainbow-grades-sort-wrapper {
