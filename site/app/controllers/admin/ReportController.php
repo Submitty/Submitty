@@ -1107,7 +1107,7 @@ class ReportController extends AbstractController {
     public function displayGradebook() {
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
 
-        // Find any sort that were already done
+        //Find any sorts that were already done
         $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
 
         $selected_sort = 'overall';
