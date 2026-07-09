@@ -1872,7 +1872,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 25
+			count: 23
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -9682,22 +9682,10 @@ parameters:
 			path: app/libraries/routers/AccessControl.php
 
 		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has parameter $annot with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			rawMessage: 'Method app\libraries\routers\AnnotatedRouteLoader::configureRoute() has parameter $class with generic class ReflectionClass but does not specify its types: T'
+			rawMessage: 'Method app\libraries\routers\AttributeRouteLoader::configureRoute() has parameter $class with generic class ReflectionClass but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
+			path: app/libraries/routers/AttributeRouteLoader.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'

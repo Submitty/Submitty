@@ -72,14 +72,17 @@ describe('Test cases revolving around grade inquiries', () => {
             });
 
             // need to clear local storage to refresh grader's responsibility page
+            cy.logout();
+            cy.clearCookies();
             cy.clearLocalStorage();
         });
 
         // student view
         cy.login('beahaf');
         cy.visit(['sample', 'gradeable', gradeableId]);
-        cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST');
-        verifyWebSocketStatus();
+        cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST').then(() => {
+            verifyWebSocketStatus();
+        });
     });
     it('should test cases regarding abnormal grade inquiry dates', () => {
         cy.login();

@@ -91,6 +91,7 @@ type MarkConflictInfo = {
     localDeleted: boolean;
 };
 type GradedGradeable = {
+    peer_only_grader: boolean;
     peer_gradeable: boolean;
     user_group: number;
     active_graders: Record<string, string[]>;
@@ -1503,6 +1504,7 @@ function getScoresFromDOM() {
         auto_grading_earned?: number;
         auto_grading_total?: number;
         auto_grading_complete: boolean;
+        peer_only_grader: boolean;
     } = {
         user_group: GRADED_GRADEABLE!.user_group,
         ta_grading_earned: getTaGradingEarned(),
@@ -1510,6 +1512,7 @@ function getScoresFromDOM() {
         peer_grade_earned: getPeerGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false,
+        peer_only_grader: GRADED_GRADEABLE!.peer_only_grader,
     };
 
     // Then check if auto grading scorse exist before adding them

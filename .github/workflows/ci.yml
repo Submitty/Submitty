@@ -30,6 +30,26 @@ concurrency:
 
 
 jobs:
+  verify-migration-freshness:
+    name: Verify Migration Datestamp
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Verify migration datestamp freshness
+        run: python .github/scripts/verify_migration_datestamp.py
+        env:
+          MAX_MIGRATION_AGE_DAYS: 7
+
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-22.04
@@ -782,6 +802,15 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Enable password complexity requirements
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": false/"require_uppercase": true/g' \
+            -e 's/"require_lowercase": false/"require_lowercase": true/g' \
+            -e 's/"require_numbers": false/"require_numbers": true/g' \
+            -e 's/"require_special_chars": false/"require_special_chars": true/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
+
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v7
         with:
@@ -789,6 +818,23 @@ jobs:
           spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+
+      - name: Run change-password tests.
+        uses: cypress-io/github-action@v7
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/change_password.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Disable password complexity requirements
+        run: |
+          sudo sed -i \
+            -e 's/"require_uppercase": true/"require_uppercase": false/g' \
+            -e 's/"require_lowercase": true/"require_lowercase": false/g' \
+            -e 's/"require_numbers": true/"require_numbers": false/g' \
+            -e 's/"require_special_chars": true/"require_special_chars": false/g' \
+            ${SUBMITTY_INSTALL_DIR}/config/submitty.json
 
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json

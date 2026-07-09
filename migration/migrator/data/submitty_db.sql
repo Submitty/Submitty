@@ -444,6 +444,7 @@ CREATE TABLE public.courses (
     owner_name character varying(255) NOT NULL,
     self_registration_type smallint DEFAULT 0,
     default_section_id character varying(255),
+    unarchivable boolean DEFAULT false,
     CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))

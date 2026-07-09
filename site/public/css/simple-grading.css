@@ -9,6 +9,15 @@
     flex-direction: column;
 }
 
+.full-screen-mode {
+    overflow-y: auto;
+}
+
+.fullscreen-btn-wrapper {
+    display: inline-block;
+    vertical-align: bottom;
+}
+
 th {
     background: var(--standard-light-gray);
 }

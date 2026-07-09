@@ -28,7 +28,7 @@
 <div id="grading-panel-header">
     <div class="panel-header-box">
         {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %}
-            <span class="grade-panel" id="autograding_results_btn">
+            <span class="grade-panel" id="autograding_results_btn" data-testid="autograding-results-btn">
                 <button title="Show/Hide Autograding Testcases (Press A)"
                         class="invisible-btn"
                         tabindex="0"
@@ -44,6 +44,7 @@
                 <button title="Show/Hide Grading Rubric (Press G)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grading-rubric-panel-toggle"
                 >
                     <i class="fas fa-edit"></i><span>Rubric</span>
                 </button>
@@ -67,6 +68,7 @@
                 <button title="Show/Hide Student Information (Press S)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="student-info-panel-toggle"
                 >
                     <i class="fas fa-user"></i><span>Student Info</span>
                 </button>
@@ -78,6 +80,7 @@
                 <button title="Show Solution and TA notes"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="solution-ta-notes-panel-toggle"
                 >
                     <i class="fas fa-check"></i><span>Solutions/Notes</span>
                 </button>
@@ -113,6 +116,7 @@
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grade-inquiry-info-panel-toggle"
                 >
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
@@ -143,7 +147,8 @@
 {% endif %}
 
 {% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
+    {% set testId = panelId|replace({'_': '-'}) %}
+    <select class="panel-position-cont" id="{{ panelId }}_select" size="4" data-testid="{{ testId }}-panel-position-select">
         <option class="panel-position-left" value="leftTop">
             Open as top left panel
         </option>

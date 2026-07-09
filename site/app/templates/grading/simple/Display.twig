@@ -19,6 +19,7 @@
         </div>
 
         <div>
+            {% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton', 'class': 'fullscreen-btn-wrapper' } %}
             <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
             <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>

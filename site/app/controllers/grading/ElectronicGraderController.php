@@ -2262,6 +2262,7 @@ class ElectronicGraderController extends AbstractController {
         $response_data_with_peer = $ta_graded_gradeable->toArray();
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
+        $response_data['peer_only_grader'] = $gradeable->hasPeerComponent() && $grader->getGroup() > $gradeable->getMinGradingGroup();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $combined_score = 0;
         foreach ($response_data_with_peer['peer_scores'] as $score) {

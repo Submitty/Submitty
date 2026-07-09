@@ -3792,6 +3792,31 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Deletes a team from the database and removes user associations.
+     * THIS FUNCTION SHOULD ONLY BE USED ON TEAMS WITHOUT SUBMISSIONS
+     *
+     * @param string $team_id
+     * @return void
+     */
+    public function deleteTeam($team_id) {
+        try {
+            $this->course_db->query(
+                "DELETE FROM gradeable_teams WHERE team_id=?",
+                [$team_id]
+            );
+
+            $this->course_db->query(
+                "DELETE FROM teams WHERE team_id=?",
+                [$team_id]
+            );
+        }
+        catch (\Exception $e) {
+            $this->course_db->rollback();
+            throw new \Exception("An error occurred while attempting to delete the team " . $team_id . ".");
+        }
+    }
+
+    /**
      * Set team $team_id's registration/rotating section to $section
      *
      * @param string $team_id
@@ -4975,6 +5000,44 @@ SQL;
     public function getCourseStatus($semester, $course) {
         $this->submitty_db->query("SELECT status FROM courses WHERE term=? AND course=?", [$semester, $course]);
         return $this->submitty_db->row()['status'];
+    }
+
+
+    /**
+     * Fetch all courses-table fields the config page needs in one query.
+     * Returns [] if the course row doesn't exist.
+     *
+     * @return array<string, mixed>
+     */
+    public function getCourseConfigFields(string $term, string $course): array {
+        $this->submitty_db->query(
+            "SELECT self_registration_type, default_section_id, status, unarchivable
+             FROM courses WHERE term=? AND course=?",
+            [$term, $course]
+        );
+        return $this->submitty_db->row(); // [] if no row
+    }
+
+    /**
+     * Set the status of a course (1 = active, 2 = archived)
+     * @param string $term
+     * @param string $course
+     * @param int $status
+     */
+    public function setCourseStatus(string $term, string $course, int $status): void {
+        $this->submitty_db->query("UPDATE courses SET status=? WHERE term=? AND course=?", [$status, $term, $course]);
+    }
+
+    /**
+     * Check if a course is marked as unarchivable
+     * @param string $term
+     * @param string $course
+     * @return bool
+     */
+    public function isCourseUnarchivable(string $term, string $course): bool {
+        $this->submitty_db->query("SELECT unarchivable FROM courses WHERE term=? AND course=?", [$term, $course]);
+        $result = $this->submitty_db->row();
+        return $result !== null && $result['unarchivable'];
     }
 
     public function getPeerAssignment($gradeable_id, $grader) {
@@ -9486,6 +9549,11 @@ SQL;
         return $this->submitty_db->getRowCount() === 1;
     }
 
+    public function termExists(string $semester): bool {
+        $this->submitty_db->query("SELECT COUNT(*) FROM terms WHERE term_id=?", [$semester]);
+        return $this->submitty_db->row()['count'] > 0;
+    }
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
             "SELECT c2.course, c2.term FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
@@ -9932,5 +10000,99 @@ ORDER BY
         );
 
         $this->course_db->commit();
+    }
+
+    private function getAdminConnection(string $dbname): \app\libraries\database\AbstractDatabase {
+        $config = $this->core->getConfig();
+        $factory = new DatabaseFactory($config->getDatabaseDriver());
+        $params = $config->getSubmittyDatabaseParams();
+        $params['dbname'] = $dbname;
+        $db = $factory->getDatabase($params);
+        $db->connect($config->isDebug());
+        return $db;
+    }
+
+    public function createCourseDatabase(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+        $admin_db = $this->getAdminConnection('postgres');
+        try {
+            // CREATE DATABASE cannot run inside a transaction block in Postgres.
+            // If AbstractDatabase::query() wraps calls in an implicit transaction,
+            // this will need a dedicated non-transactional execute path — worth
+            // testing this one call in isolation before wiring up the rest.
+            $admin_db->query("CREATE DATABASE {$dbname}");
+        }
+        finally {
+            $admin_db->disconnect();
+        }
+    }
+
+    public function grantCoursePrivileges(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+
+        $database_json = \app\libraries\FileUtils::readJsonFile(
+            \app\libraries\FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), 'database.json')
+        );
+        $course_user = $database_json['database_course_user'];
+
+        $admin_db = $this->getAdminConnection($dbname);
+        try {
+            $admin_db->query(
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {$course_user}"
+            );
+            $admin_db->query(
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {$course_user}"
+            );
+        }
+        finally {
+            $admin_db->disconnect();
+        }
+    }
+
+    public function insertCourse(string $semester, string $course, string $group_name, string $instructor, int $self_registration_type = 0): void {
+        $this->submitty_db->query(
+            "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type) VALUES (?, ?, ?, ?, ?)",
+            [$semester, $course, $group_name, $instructor, $self_registration_type]
+        );
+    }
+
+    public function deleteCourse(string $semester, string $course): void {
+        $this->submitty_db->query(
+            "DELETE FROM courses WHERE term=? AND course=?",
+            [$semester, $course]
+        );
+    }
+
+    public function runCourseMigrations(string $semester, string $course): bool {
+        $submitty_json = \app\libraries\FileUtils::readJsonFile(
+            \app\libraries\FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), 'submitty.json')
+        );
+        $repo_dir = $submitty_json['submitty_repository'];
+
+        $cmd = sprintf(
+            'python3 %s -e course --course %s %s migrate --initial 2>&1',
+            escapeshellarg($repo_dir . '/migration/run_migrator.py'),
+            escapeshellarg($semester),
+            escapeshellarg($course)
+        );
+        exec($cmd, $output, $return_code);
+        return $return_code === 0;
+    }
+
+    public function insertDefaultForumCategories(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+        $admin_db = $this->getAdminConnection($dbname);
+        try {
+            $categories = ['General Questions', 'Homework Help', 'Quizzes', 'Tests'];
+            foreach ($categories as $rank => $desc) {
+                $admin_db->query(
+                    "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, NULL)",
+                    [$desc, $rank]
+                );
+            }
+        }
+        finally {
+            $admin_db->disconnect();
+        }
     }
 }
