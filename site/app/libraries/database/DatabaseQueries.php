@@ -10016,10 +10016,6 @@ ORDER BY
         $dbname = "submitty_{$semester}_{$course}";
         $admin_db = $this->getAdminConnection('postgres');
         try {
-            // CREATE DATABASE cannot run inside a transaction block in Postgres.
-            // If AbstractDatabase::query() wraps calls in an implicit transaction,
-            // this will need a dedicated non-transactional execute path — worth
-            // testing this one call in isolation before wiring up the rest.
             $admin_db->query("CREATE DATABASE {$dbname}");
         }
         finally {
