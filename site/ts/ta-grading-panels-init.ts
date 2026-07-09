@@ -1,4 +1,5 @@
 import { initializeResizablePanels } from './resizable-panels';
+import { viewFileFullPanel } from './ta-grading';
 import {
     taLayoutDet,
     resetSinglePanelLayout,
@@ -14,6 +15,7 @@ import {
     changeMobileView,
     getSavedTaLayoutDetails,
 } from './ta-grading-panels';
+import { isSubmissionMetaFile } from './utils/file-utils';
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
@@ -313,6 +315,32 @@ function readCookies() {
             }
         });
     }
+
+    // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
+    if (autoscroll === 'on') {
+        // the number of files and folders that are open in the submissions and results browser
+        const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
+        // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)
+        const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions').toArray().filter(
+            (element: HTMLElement) => !isSubmissionMetaFile(element.getAttribute('data-file_name') || ''),
+        );
+        if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
+            const elem = SubmissionFiles[0];
+            const fileName = elem.dataset.file_name!;
+            const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
+            if (elem.classList.contains('image-file')) {
+                // single submitted image file fills up the whole screen
+                viewFileFullPanel(fileName, fileUrl);
+            }
+            else {
+                // text file is opened as a frame, but its parent folder needs to be opened to view it
+                openDiv('sd1');
+                const viewerId = elem.getAttribute('data-viewer_id');
+                openFrame(fileName, fileUrl, viewerId);
+            }
+        }
+    }
+
     for (let x = 0; x < testcases.length; x++) {
         if (testcases[x] !== '[' && testcases[x] !== ']') {
             openAutoGrading(testcases[x]);
