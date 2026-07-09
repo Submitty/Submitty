@@ -19,6 +19,7 @@ declare global {
         onCancelComponent(me: HTMLElement): Promise<void>;
         onCustomMarkChange(me: HTMLElement): Promise<void>;
         onToggleMark(me: HTMLElement): Promise<void>;
+        onToggleMarkById(data: { componentId: number; markId: number }): Promise<void>;
         onToggleCustomMark(me: HTMLElement): Promise<void>;
         onVerifyAll(me: HTMLElement): Promise<void>;
         onVerifyComponent(me: HTMLElement): Promise<void>;
@@ -2193,6 +2194,20 @@ async function onComponentOrderChange() {
 window.onToggleMark = async function (me: HTMLElement) {
     try {
         await toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error toggling mark! ${(err as Error).message}`);
+    }
+};
+
+/**
+ * Called via events bridge from MarkSelector.vue's 'toggle-mark' emit
+ * Receives structured data instead of a DOM element to derive IDs from
+ */
+window.onToggleMarkById = async function (data: { componentId: number; markId: number }) {
+    try {
+        await toggleCommonMark(data.componentId, data.markId);
     }
     catch (err) {
         console.error(err);
