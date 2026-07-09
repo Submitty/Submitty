@@ -1,4 +1,4 @@
-{% import 'misc/TableHeaderSort.twig' as table_sort %}
+{% import 'misc/TableSortComponents.twig' as table_sort %}
 
 <div class="content">
     <header>
@@ -68,22 +68,22 @@
                     <th>#</th>
 
                     {% if active_student_columns[0] %}
-                        {{ table_sort.sortable_header('student-table', 'Registration Section', 'registration_section', 'number') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Registration Section', 'registration_section', 'number') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[1] %}
-                        {{ table_sort.sortable_header('student-table', 'User ID', 'user_id', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'User ID', 'user_id', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[2] %}
-                        {{ table_sort.sortable_header('student-table', 'Given Name', 'first_name', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Given Name', 'first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[3] %}
-                        {{ table_sort.sortable_header('student-table', 'Family Name', 'last_name', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Family Name', 'last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -93,7 +93,7 @@
                     {% endif %}
 
                     {% if active_student_columns[5] %}
-                        {{ table_sort.sortable_header('student-table', 'Rotating Section', 'rotating_section', 'number') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Rotating Section', 'rotating_section', 'number') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -133,12 +133,12 @@
                     {% endif %}
 
                     {% if active_student_columns[13] %}
-                        {{ table_sort.sortable_header('student-table', 'Legal Given Name', 'legal_first_name', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Legal Given Name', 'legal_first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
                     {% if active_student_columns[14] %}
-                        {{ table_sort.sortable_header('student-table', 'Legal Family Name', 'legal_last_name', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Legal Family Name', 'legal_last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
 
@@ -148,7 +148,7 @@
                     {% endif %}
 
                     {% if active_student_columns[16] %}
-                        {{ table_sort.sortable_header('student-table', 'Secondary Email', 'secondary_email', 'string') }}
+                        {{ table_sort.sortable_table_header('student-table', 'Secondary Email', 'secondary_email', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
                 </tr>

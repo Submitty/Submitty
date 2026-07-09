@@ -1,4 +1,4 @@
-{% import 'misc/TableHeaderSort.twig' as table_sort %}
+{% import 'misc/TableSortComponents.twig' as table_sort %}
 
 <div class="content">
     <h1>
@@ -112,9 +112,9 @@
                 <tr>
                     <th style="width:20px">#</th>
                     <th style="width:70px" scope="col">Section</th>
-                    {{ table_sort.sortable_header('data-table', 'User ID', 'user_id', 'string') }}
-                    {{ table_sort.sortable_header('data-table', 'Given Name', 'given_name', 'string') }}
-                    {{ table_sort.sortable_header('data-table', 'Family Name', 'family_name', 'string') }}
+                    {{ table_sort.sortable_table_header('data-table', 'User ID', 'user_id', 'string') }}
+                    {{ table_sort.sortable_table_header('data-table', 'Given Name', 'given_name', 'string') }}
+                    {{ table_sort.sortable_table_header('data-table', 'Family Name', 'family_name', 'string') }}
 
                     {% if action == 'lab' %}
                         {% set colspan = 5 + gradeable.getComponents()|length %}

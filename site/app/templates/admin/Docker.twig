@@ -1,4 +1,4 @@
-{% import "misc/TableHeaderSort.twig" as table_sort %}
+{% import "misc/TableSortComponents.twig" as table_sort %}
 
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
@@ -99,14 +99,14 @@
     <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                {{ table_sort.sortable_header('docker-table', 'Image Name', 'name', 'string') }}
-                {{ table_sort.sortable_header('docker-table', 'Tag', 'tag', 'string') }}
+                {{ table_sort.sortable_table_header('docker-table', 'Image Name', 'name', 'string') }}
+                {{ table_sort.sortable_table_header('docker-table', 'Tag', 'tag', 'string') }}
                 <th>Alias</th>
                 <th>Digest</th>
-                {{ table_sort.sortable_header('docker-table', 'Size', 'size', 'number') }}
-                {{ table_sort.sortable_header('docker-table', 'Created', 'created', 'date') }}
+                {{ table_sort.sortable_table_header('docker-table', 'Size', 'size', 'number') }}
+                {{ table_sort.sortable_table_header('docker-table', 'Created', 'created', 'date') }}
                 <th>Capabilities Containing This Image</th>
-                {{ table_sort.sortable_header('docker-table', 'Owner', 'owner', 'string') }}
+                {{ table_sort.sortable_table_header('docker-table', 'Owner', 'owner', 'string') }}
                 <th>Remove</th>
             </tr>
         </thead>

@@ -1,5 +1,5 @@
 // sortTableByColumn function to be used for all sortable tables
-// See SortableTableColumn.vue
+// See SortableTableHeader.vue
 
 /**
  * Enum that stores all possible table column data types by which we'd need to sort.
@@ -140,6 +140,7 @@ function sortTableRows(table_id: string, col_index: number, sort_direction: stri
             // ignore section break rows during sorting
             const rows: HTMLTableRowElement[] = Array.from(tbody.querySelectorAll(':scope > tr:not(.info)'));
             rows.sort((row_a, row_b) => {
+                // I am not sure why row_a and row_b are possibly being labeled as undefined
                 const text_a = row_a.children[col_index].textContent.trim();
                 const text_b = row_b.children[col_index].textContent.trim();
                 return compareFn(text_a, text_b, sort_direction, col_data_type);

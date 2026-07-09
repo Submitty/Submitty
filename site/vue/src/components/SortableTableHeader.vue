@@ -1,22 +1,17 @@
 <script setup lang="ts">
-import { colDataTypes, sortTableByColumn, restoreSort } from '../../../ts/sort-table-by-column';
-import { onMounted } from 'vue';
+import { colDataTypes, sortTableByColumn } from '../ts/sort-table-by-column';
 
-const props = defineProps<{
+defineProps<{
     tableId: string;
     title: string;
     sortKey: string;
     colDataType: colDataTypes;
     usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
 }>();
-
-onMounted(() => {
-    restoreSort(props.tableId);
-});
 </script>
 
 <template>
-  <!-- See TableHeaderSort.twig -->
+  <!-- See TableSortComponents.twig -->
   <a
     href="#"
     class="sortable-header"
