@@ -33,9 +33,7 @@ exclude=
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
     sbin/untrusted_canary.py,
-    site/cypress/fixtures/copy_of_more_autograding_examples,
-    site/cypress/fixtures/copy_of_sample_files,
-    site/cypress/fixtures/copy_of_tutorial,
+    site/cypress/fixtures,
     site/node_modules,
     tests
 

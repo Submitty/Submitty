@@ -6,34 +6,45 @@ ENV DEBIAN_FRONTEND=noninteractive
 # =====================================================
 
 # Install system utils
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        software-properties-common curl git gnupg2 ca-certificates unzip \
-        poppler-utils \
-        libzbar0 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends software-properties-common \
+    curl \
+    git \
+    gnupg2 \
+    ca-certificates \
+    unzip \
+    poppler-utils \
+    libzbar0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
 # Node 20 manually installed since it's not avb in default Ubuntu 22.04 packages
 RUN apt-get update \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP
 # PHP 8.2 manually installed since it's not avb in default Ubuntu 22.04 packages
-RUN apt-get update \
-    && add-apt-repository ppa:ondrej/php -y \
+RUN add-apt-repository ppa:ondrej/php -y \
     && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        php8.2-cli php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends php8.2-cli \
+    php8.2-xml \
+    php8.2-mbstring \
+    php8.2-curl \
+    php8.2-zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        python3 \
-        python3-pip \
-        python3-setuptools \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 \
+    python3-pip \
+    python3-setuptools \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
