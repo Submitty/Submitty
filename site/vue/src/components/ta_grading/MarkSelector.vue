@@ -25,7 +25,8 @@ function handleClick(event: MouseEvent) {
     @click="handleClick"
   >
     <span
-      :class="['mark-selector', 'col-no-gutters', { 'mark-selected': isChecked }]"
+      class="mark-selector col-no-gutters"
+      :class="[{ 'mark-selected': isChecked }]"
       :data-mark_id="markId"
     >
       {{ order }}

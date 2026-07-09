@@ -2201,10 +2201,9 @@ window.onToggleMark = async function (me: HTMLElement) {
     }
 };
 
-/**
- * Called via events bridge from MarkSelector.vue's 'toggle-mark' emit
- * Receives structured data instead of a DOM element to derive IDs from
- */
+
+// Called via events bridge from MarkSelector.vue's 'toggle-mark' emit
+// Receives structured data instead of a DOM element to derive IDs from
 window.onToggleMarkById = async function (data: { componentId: number; markId: number }) {
     try {
         await toggleCommonMark(data.componentId, data.markId);
