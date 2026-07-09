@@ -1,8 +1,27 @@
 # submitty_test .dockerignore
-*
-!.setup/pip/dev_requirements.txt
-!.setup/pip/system_requirements.txt
-!python_submitty_utils
-!site/**
-!Dockerfile
 .git
+.github
+.env
+
+# editors / os stuff
+.idea
+.vscode
+.vs
+.DS_Store
+*.autosave
+*.orig*
+*~
+
+# caches, etc
+*.o
+*.pyc
+__pycache__/
+*.aux
+*.log
+*.out
+*.synctex.gz
+.coverage
+
+# vendor / node_modules installed inside the image so no need to share
+site/vendor/
+site/node_modules/
