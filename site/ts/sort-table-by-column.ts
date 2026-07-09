@@ -16,6 +16,8 @@ export enum colDataTypes {
     Date = 'date',
 };
 
+// TODO: remove usage of dataset? or use in addition to session storage? I think the latter
+
 // used when reading data from and saving data to SessionStorage
 interface SavedSortData {
     sort_key: string;
@@ -34,9 +36,6 @@ interface SavedSortData {
  */
 export function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes, using_row_groups: boolean = false): void {
     const table: HTMLElement = document.querySelector(`#${table_id}`)!;
-    if (table === null) {
-        return;
-    }
 
     // retrieve the previous sort data from session storage
     let prev_sort_key: string | undefined = undefined;
@@ -95,36 +94,41 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
  * @returns none
  */
 export function restoreSort(table_id: string) {
-    const table: HTMLElement = document.querySelector(`#${table_id}`)!;
-    if (table === null) {
+    const sort_data_string: string | null = sessionStorage.getItem(`${table_id}-sorting-data`);
+    if (sort_data_string === null) {
         return;
     }
+    const sort_data: SavedSortData = JSON.parse(sort_data_string) as SavedSortData;
+    /** currently doesnt work lol */
+    const col_index: number = updateActiveHeader(table_id, sort_data.sort_key);
+    applySort(table_id, col_index, sort_data.sort_direction, sort_data.col_data_type, sort_data.using_row_groups);
+    updateSortIcons(table_id, sort_data.sort_key, sort_data.sort_direction);
+}
 
-    const sort_data_string: string | null = sessionStorage.getItem(`${table_id}-sorting-data`);
-    if (sort_data_string !== null) {
-        const sort_data: SavedSortData = JSON.parse(sort_data_string) as SavedSortData;
+// Return the index of the active sorting header in the table header row
+// side-effect: updates the class of the active header for styling purposes
+// TODO: do something with that class? or remove it?
+function updateActiveHeader(table_id: string, sort_key: string): number {
+    const table: HTMLElement = document.querySelector(`#${table_id}`)!;
 
-        /** TODO: SPLIT INTO ITS OWN HELPER FUNCTION */
-        /** also currently doesnt work lol */
-        const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
-        const header_keys: string[] = table_headers.map((el) => {
-            const header_link: HTMLElement | null = el.querySelector('a.sortable-header');
-            if (header_link === null || header_link.dataset.sortKey === undefined) {
-                return '';
-            }
-            // update styling
-            header_link.classList.remove('active-sort');
-            const header_key = header_link.dataset.sortKey;
-            if (header_key === sort_data.sort_key) {
-                header_link.classList.add('active-sort');
-            }
-            return header_key;
-        });
-        const col_index: number = header_keys.indexOf(sort_data.sort_key);
-
-        applySort(table_id, col_index, sort_data.sort_direction, sort_data.col_data_type, sort_data.using_row_groups);
-        updateSortIcons(table_id, sort_data.sort_key, sort_data.sort_direction);
-    }
+    // get the index of the column we're sorting by (necessary for togglable columns)
+    const table_headers: HTMLElement[] = Array.from(table.querySelectorAll('thead tr th'));
+    const header_keys: string[] = table_headers.map((el) => {
+        const header_link: HTMLElement | null = el.querySelector('a.sortable-header');
+        if (header_link === null || header_link.dataset.sortKey === undefined) {
+            return '';
+        }
+        // update styling for active header
+        header_link.classList.remove('active-sort');
+        const header_key = header_link.dataset.sortKey;
+        if (header_key === sort_key) {
+            header_link.classList.add('active-sort');
+        }
+        return header_key;
+    });
+    // return the active header's index in the table header row
+    const col_index: number = header_keys.indexOf(sort_key);
+    return col_index;
 }
 
 // Reorder the rows of the table to be sorted according to one row
@@ -167,7 +171,7 @@ function applySort(table_id: string, col_index: number, sort_direction: string, 
  * possibly using a Vue emit.
  */
 
-// Returns the row groups in the table as an array of row arrays
+// Return the row groups in the table as an array of row arrays
 function getRowGroups(tbody: HTMLTableSectionElement) {
     const row_groups: HTMLTableRowElement[][] = [];
     let current_row_group: HTMLTableRowElement[] | null = null;
@@ -218,7 +222,7 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
     return sort_direction === 'ASC' ? cmp : -cmp;
 }
 
-// Updates the arrow icons next to each sortable column showing whether
+// Update the arrow icons next to each sortable column showing whether
 // that column is being sorted in ascending or descending order
 function updateSortIcons(table_id: string, activeKey: string, sort_direction: string) {
     document.querySelectorAll<HTMLElement>(`#${table_id} a.sortable-header`)
