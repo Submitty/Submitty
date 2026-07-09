@@ -29,7 +29,7 @@
                 <a 
                     class="btn btn-primary"
                     id="csvDownload"
-                    href="{{ csv_download_url }}?view={{ view_all ? 'all' }}&sort={{ sort }}"
+                    href="{{ csv_download_url }}?view={{ view_all ? 'all' }}"
                 >
                     Download CSV
                 </a>
@@ -162,7 +162,7 @@
                                 {% endif %}
                                 {# Print button #}
                                 {% if action == 'lab' %}
-                                    <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}&sort={{ sort }}">
+                                    <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}">
                                         <i class="fas fa-print">Print</i>
                                     </a>
                                 {% endif %}
