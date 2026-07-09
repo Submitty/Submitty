@@ -1456,8 +1456,21 @@ end of styles used in the admin gradeable page
 }
 
 /* peer component has at least one peer grade */
-.grader-peer-half {
-    border: 2px solid var(--standard-mediumorchid);
+.grader-peer-left-half {
+    background: linear-gradient(
+        to right,
+        var(--standard-mediumorchid) 50%,
+        var(--default-white) 50%
+    );
+}
+
+/* peer component has been graded by current user */
+.grader-peer-right-half {
+    background: linear-gradient(
+        to right,
+        var(--default-white) 50%,
+        var(--standard-mediumorchid) 50%
+    );
 }
 
 /* color for a limited access grader */

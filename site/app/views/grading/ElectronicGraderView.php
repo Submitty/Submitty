@@ -730,12 +730,26 @@ HTML;
 
                 if ($component->isPeerComponent()) {
                     $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+                    $current_user_graded = $graded_component !== null;
+                    $someone_else_graded = false;
 
-                    if ($graded_component !== null) {
+                    if ($container !== null) {
+                        foreach ($container->getGradedComponents() as $other_graded_component) {
+                            if ($other_graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+                                $someone_else_graded = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($current_user_graded && $someone_else_graded) {
                         $info["graded_groups"][] = 4;
                     }
-                    elseif ($container !== null && $container->anyGradedComponents()) {
-                        $info["graded_groups"][] = "peer-half";
+                    elseif ($current_user_graded) {
+                        $info["graded_groups"][] = "peer-right-half";
+                    }
+                    elseif ($someone_else_graded) {
+                        $info["graded_groups"][] = "peer-left-half";
                     }
                     elseif ($ta_graded_gradeable->isComplete($this->core->getUser())) {
                         $info["graded_groups"][] = "peer-null";
