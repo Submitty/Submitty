@@ -15,6 +15,7 @@ defineProps<{
   <a
     href="#"
     class="sortable-header"
+    scope="col"
     :title="'Sort by ' + title"
     :aria-label="'Sort by ' + title"
     :data-sort-key="sortKey"
