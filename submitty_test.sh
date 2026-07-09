@@ -49,53 +49,37 @@ run_php_stan() {
 
 run_php_cs() {
     parse_args "${@:2}"
-    if $FIX; then
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site composer run-script lint:fix -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site composer run-script lint:fix
-        fi
-    else
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site composer run-script lint -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site composer run-script lint
-        fi
-    fi
+    script=lint
+    $FIX && script=lint:fix
 
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site composer run-script "$script" -- "${ARGS[@]}"
+    else
+        run_in_container /home/submitty/site composer run-script "$script"
+    fi
 }
 
 run_js_es() {
     parse_args "${@:2}"
-    if $FIX; then
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site npm run eslint:fix -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site npm run eslint:fix
-        fi
+    script=eslint
+    $FIX && script=eslint:fix
+
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
     else
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site npm run eslint -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site npm run eslint
-        fi
+        run_in_container /home/submitty/site npm run "$script"
     fi
 }
 
 run_css_style() {
     parse_args "${@:2}"
-    if $FIX; then
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site npm run css-stylelint:fix -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site npm run css-stylelint:fix
-        fi
+    script=css-stylelint
+    $FIX && script=css-stylelint:fix
+
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
     else
-        if [ ${#ARGS[@]} -gt 0 ]; then
-            run_in_container /home/submitty/site npm run css-stylelint -- "${ARGS[@]}"
-        else
-            run_in_container /home/submitty/site npm run css-stylelint
-        fi
+        run_in_container /home/submitty/site npm run "$script"
     fi
 }
 
@@ -124,22 +108,22 @@ run_py_pylint() {
 
 run_py_unit_utils() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/python_submitty_utils coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_migration() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/migration coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/migration python3 -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_autograder() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/autograder coverage run -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/autograder python3 -m unittest discover "${ARGS[@]}"
 }
 
 run_py_unit_daemon() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/sbin/submitty_daemon_jobs coverage run -m unittest discover tests -t . "${ARGS[@]}"
+    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . "${ARGS[@]}"
 }
 
 # process input arguments
@@ -188,11 +172,11 @@ case "${1:-}" in
         ;;
     py-unit)
         echo "Running unit test: 'utils'..."
-        run_py_unit_utils "$@"
+        run_py_unit_utils
         echo "Running unit test: 'autograder'..."
-        run_py_unit_autograder "$@"
+        run_py_unit_autograder
         echo "Running unit test: 'daemon'..."
-        run_py_unit_daemon "$@"
+        run_py_unit_daemon
         ;;
     help|*)
         echo "
@@ -207,11 +191,11 @@ case "${1:-}" in
               py-flake8 : run flake8 [option: specific_file.py]
               py-pylint : run pylint [option: specific_file.py]
               py-lint   : py-flake8 & py-pylint [option: specific_file.py]
-              py-unit   : run all python unit tests except migration [option: specific_file.py]
-              py-unit-utils      : run just the utils python unit tests
-              py-unit-migration  : run just the migration python unit tests
-              py-unit-autograder : run just the autograder python unit tests
-              py-unit-daemon     : run just the daemon python unit tests
+              py-unit   : run all python unit tests except migration
+              py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
+              py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
+              py-unit-autograder : run the 'autograder' python unit tests [option: module, class, function ...]
+              py-unit-daemon     : run the 'daemon' python unit tests [option: module, class, function ...]
              "
         ;;
 esac

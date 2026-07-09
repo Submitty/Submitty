@@ -8,8 +8,5 @@ flake8==7.3.0
 # Code Formatter
 black==26.5.1
 
-# Coverage
-coverage==7.15.0
-
 # For cleanup_active_graders.py
 sqlalchemy==2.0.51
