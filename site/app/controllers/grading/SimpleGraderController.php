@@ -5,7 +5,6 @@ namespace app\controllers\grading;
 use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
-use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
@@ -299,10 +298,10 @@ class SimpleGraderController extends AbstractController {
         ];
 
         foreach ($numeric_components as $component) {
-            $header[] = $component->getTitle() . "(" . $component->getMaxValue() . ")";
+            $header[] = $component->getTitle();
         }
 
-        $header[] = "Total points earned";
+        $header[] = "Total";
 
         foreach ($text_components as $component) {
             $header[] = $component->getTitle();
@@ -503,100 +502,164 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("You do not have permission to grade {$gradeable->getTitle()}");
         }
 
-        $num_numeric = intval($_POST['num_numeric']);
-
-        $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
+        $csv_array = preg_split("/\r\n|\n|\r/", trim($_POST['big_file']));
         $arr_length = count($csv_array);
         $return_data = [];
 
         $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
-            $temp_array = explode(',', $csv_array[$i]);
-            $data_array[] = $temp_array;
+            $data_array[] = str_getcsv($csv_array[$i]);
         }
 
-        /** @var GradedGradeable $graded_gradeable */
-        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
-            for ($j = 0; $j < $arr_length; $j++) {
-                $username = $graded_gradeable->getSubmitter()->getId();
-                if ($username !== $data_array[$j][0]) {
-                    continue;
-                }
+        if ($arr_length < 1) {
+            $msg = "CSV file is empty.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
 
-                $temp_array = [];
-                $temp_array['username'] = $username;
-                $index1 = 0;
-                $index2 = 3; //3 is the starting index of the grades in the csv
+        $column_titles = array_map('trim', $data_array[0]);
+        if (!in_array('User ID', $column_titles, true)) {
+            $msg = "CSV must include a header row with a \"User ID\" column.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
 
-                // Get the user grade for this gradeable
-                $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $col_index = array_flip($column_titles);
 
-                //Makes an array with all the values and their status.
-                foreach ($gradeable->getComponents() as $component) {
-                    $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                    $component_grade->setGrader($grader);
-
-                    $value_temp_str = "value_" . $index1;
-                    $status_temp_str = "status_" . $index1;
-                    if (isset($data_array[$j][$index2])) {
-                        $component_data = $data_array[$j][$index2];
-                        // text component
-                        if ($component->isText()) {
-                            $component_grade->setComment($component_data);
-                            $component_grade->setGradeTime($this->core->getDateTimeNow());
-                            $temp_array[$value_temp_str] = $component_data;
-                            $temp_array[$status_temp_str] = "OK";
-                        }
-                        else {
-                            // numeric component
-                            // if the data is not a number, we should fail.
-                            if ($component_data !== '' && !is_numeric($component_data)) {
-                                $temp_array[$value_temp_str] = $component_data;
-                                $temp_array[$status_temp_str] = "ERROR";
-                            }
-                            else {
-                                // empty data is read as an input of 0
-                                $component_data = floatval($component_data);
-                                if ($component_data === 0.0) {
-                                    // components of value zero should not be saved in the database
-                                    $ta_graded_gradeable->deleteGradedComponent($component);
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                                elseif ($component->getUpperClamp() < $component_data) {
-                                    // components with invalid values should not be saved to the database
-                                    $ta_graded_gradeable->deleteGradedComponent($component);
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "ERROR";
-                                }
-                                else {
-                                    $component_grade->setScore($component_data);
-                                    $component_grade->setGradeTime($this->core->getDateTimeNow());
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                            }
-                        }
-                    }
-                    $index1++;
-                    $index2++;
-                    //skips the index of the total points in the csv file
-                    if ($index1 === $num_numeric) {
-                        $index2++;
-                    }
-                }
-
-                // Reset the overall comment because we're overwriting the grade anyway
-                $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-                $return_data[] = $temp_array;
-                $j = $arr_length; //stops the for loop early to not waste resources
+        $numeric_components = [];
+        $text_components = [];
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
             }
         }
 
-        return JsonResponse::getSuccessResponse($return_data);
-    }
+        $present_numeric = [];
+        foreach ($numeric_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_numeric[] = $component;
+            }
+        }
+        $present_text = [];
+        foreach ($text_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_text[] = $component;
+            }
+        }
 
+        if (count($present_numeric) === 0 && count($present_text) === 0) {
+            $msg = "CSV must include at least one recognized question column to update.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
+
+
+        for ($row_num = 1; $row_num < $arr_length; $row_num++) {
+            $row = $data_array[$row_num];
+            if (count($row) === 1 && trim($row[0]) === '') {
+                continue;
+            }
+
+            $user_id = $row[$col_index['User ID']] ?? null;
+            if ($user_id === null || trim($user_id) === '') {
+                $msg = "Row " . ($row_num + 1) . ", Column \"User ID\" is required but was empty.";
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getFailResponse($msg);
+            }
+
+            $total = 0;
+            $any_numeric_present_in_row = false;
+            foreach ($present_numeric as $component) {
+                $idx = $col_index[$component->getTitle()];
+                $val = $row[$idx] ?? '';
+                if ($val === '') {
+                    continue;
+                }
+                if (!is_numeric($val)) {
+                    $msg = "Row " . ($row_num + 1) . ", Column \"" . $component->getTitle() . "\" (column " . ($idx + 1) . ") should be a number. Found \"{$val}\".";
+                    $this->core->addErrorMessage($msg);
+                    return JsonResponse::getFailResponse($msg);
+                }
+                $total += floatval($val);
+                $any_numeric_present_in_row = true;
+            }
+        }
+
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
+            $username = $graded_gradeable->getSubmitter()->getId();
+            $matched_row = null;
+            for ($j = 1; $j < $arr_length; $j++) {
+                if (($data_array[$j][$col_index['User ID']] ?? null) === $username) {
+                    $matched_row = $data_array[$j];
+                    break;
+                }
+            }
+            if ($matched_row === null) {
+                continue;
+            }
+
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+            $temp_array = ['username' => $username];
+            $index1 = 0;
+
+            foreach ($gradeable->getComponents() as $component) {
+                $value_temp_str = "value_" . $index1;
+                $status_temp_str = "status_" . $index1;
+
+                if (!isset($col_index[$component->getTitle()])) {
+                    // If column isn't included in the CSV, leave the grading untouched.
+                    $index1++;
+                    continue;
+                }
+
+                $idx = $col_index[$component->getTitle()];
+                $component_data = $matched_row[$idx] ?? '';
+
+                if ($component_data === '') {
+                    $index1++;
+                    continue;
+                }
+
+                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
+
+                if ($component->isText()) {
+                    $component_grade->setComment($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                else {
+                    $component_data = floatval($component_data);
+                    if ($component->getUpperClamp() < $component_data) {
+                        $msg = "User \"{$username}\", Column \"" . $component->getTitle() . "\" exceeds the maximum value of " . $component->getUpperClamp() . ". Found \"{$component_data}\".";
+                        $this->core->addErrorMessage($msg);
+                        return JsonResponse::getFailResponse($msg);
+                    }
+                    $component_grade->setScore($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                $index1++;
+            }
+
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $return_data[] = $temp_array;
+        }
+
+        $updated_columns = array_merge(
+            array_map(fn($c) => $c->getTitle(), $present_numeric),
+            array_map(fn($c) => $c->getTitle(), $present_text)
+        );
+        return JsonResponse::getSuccessResponse([
+            'updated_students' => $return_data,
+            'updated_columns' => $updated_columns,
+        ]);
+    }
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array<mixed> $msg_array
