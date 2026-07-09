@@ -5,7 +5,7 @@ Macro for rendering SortableTableHeader.vue within Twig
 {# using_row_groups is specifically for statPage.twig's forum post collapsible rows #}
 {% macro sortable_table_header(table_id, title, sort_key, col_data_type, using_row_groups = false) %}
     {% set id = uniqid() %}
-    <th id="vue-{{ id }}" data-col-title="{{ title }}">
+    <th id="vue-{{ id }}" data-col-title="{{ title }}" scope="col">
     </th>
     <script>
         window.submitty.render(
