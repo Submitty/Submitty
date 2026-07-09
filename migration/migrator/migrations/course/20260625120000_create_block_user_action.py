@@ -19,7 +19,7 @@ def up(config, database, semester, course):
     database.execute(
     """
         CREATE TABLE IF NOT EXISTS block_user_action (
-            id SERIAL PRIMARY KEY,
+            id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             user_id character varying(255) NOT NULL,
             action character varying(255) NOT NULL,
             expiration_date timestamp with time zone,

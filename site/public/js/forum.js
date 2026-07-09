@@ -1907,17 +1907,16 @@ function submitBlockUser() {
     const expirationDate = $('#block-expiration-date').val();
 
     const url = buildCourseUrl(['forum', 'users', 'block']);
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {
+    $.post(url, {
             user_id: userId,
             expiration_date: expirationDate,
             csrf_token: csrfToken,
-        },
-        success: (data) => {
+        })
+        .done((data) => {
+            let json;
+
             try {
-                let json = JSON.parse(data);
+                json = JSON.parse(data);
             }
             catch (err) {
                 displayErrorMessage('Error parsing data. Please try again.');
@@ -1930,43 +1929,40 @@ function submitBlockUser() {
             closePopup('block-user-form');
             displaySuccessMessage('User has been blocked from making forum posts.');
             location.reload();
-        },
-        error: () => {
+        })
+        .fail(() => {
             window.alert('Something went wrong while trying to block the user. Please try again.');
-        },
-    });
+        });
 }
 
-function unblockUserFromForum(userId, csrfToken) {
+function unblockUserFromForum(userId) {
     const confirm = window.confirm('Are you sure you would like to unblock this user from making forum posts?');
     if (confirm) {
         const url = buildCourseUrl(['forum', 'users', 'unblock']);
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: {
-                user_id: userId,
-                csrf_token: csrfToken,
-            },
-            success: (data) => {
-                try {
-                    // eslint-disable-next-line no-var
-                    var json = JSON.parse(data);
-                }
-                catch (err) {
-                    displayErrorMessage('Error parsing data. Please try again.');
-                    return;
-                }
-                if (json['status'] === 'fail') {
-                    displayErrorMessage(json['message']);
-                    return;
-                }
-                displaySuccessMessage('User has been unblocked from making forum posts.');
-                location.reload();
-            },
-            error: () => {
-                window.alert('Something went wrong while trying to unblock the user. Please try again.');
-            },
+        $.post(url, {
+            user_id: userId,
+            csrf_token: window.csrfToken,
+        })
+        .done((data) => {
+            let json;
+            try {
+                json = JSON.parse(data);
+            }
+            catch(err) {
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+
+            if (json['status'] === 'fail') {
+                displayErrorMessage(json['message']);
+                return;
+            }
+
+            displaySuccessMessage('User has been unblocked from amking forum posts.');
+            location.reload();
+        })
+        .fail(() => {
+            window.alert('Something went wrong while trying to block the user. Please try again.');
         });
     }
 }
