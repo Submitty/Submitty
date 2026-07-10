@@ -6,7 +6,7 @@ Wrapper file for course creation. Runs the PHP database-creation API
 call and the Python filesystem-provisioning step.
 """
 
-import requests # pylint: disable=import-error
+import requests  # pylint: disable=import-error
 
 from create_course import (
     CONF_DIR,
@@ -57,7 +57,7 @@ def main():
 
     try:
         course_dir = build_course_filesystem(cfg, identity)
-    except (OSError, FileExistsError, KeyError) as e:
+    except (OSError, KeyError) as e:
         die(f"Filesystem provisioning failed after DB creation succeeded: {e}")
 
     print_success(cfg, identity, course_dir)
