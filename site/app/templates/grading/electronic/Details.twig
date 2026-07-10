@@ -13,11 +13,11 @@
                     <i class="grading-example-circle grader-NULL"></i>
                     Ungraded component
                 </li>
-                <li>
-                    <i class="grading-example-circle grader-3"></i>
-                    Component graded by a limited access grader
-                </li>
                 {% if not peer_only_grader %}
+                    <li>
+                        <i class="grading-example-circle grader-3"></i>
+                        Component graded by a limited access grader
+                    </li>
                     <li>
                         <i class="grading-example-circle grader-peer-left-half"></i>
                         Peer component graded by another peer grader
@@ -26,28 +26,32 @@
                         <i class="grading-example-circle grader-peer-right-half"></i>
                         Peer component graded by you
                     </li>
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by another peer grader and you
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-1"></i>
+                        Component graded by a full access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-verified"></i>
+                        Limited access grader verified
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-double"></i>
+                        Component double-graded by a full access grader or instructor
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-active grader-NULL"></i>
+                        Component actively being graded
+                    </li>
                 {% else %}
                     <li>
                         <i class="grading-example-circle grader-4"></i>
                         Peer component graded by you
                     </li>
                 {% endif %}
-                <li>
-                    <i class="grading-example-circle grader-1"></i>
-                    Component graded by a full access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-verified"></i>
-                    Limited access grader verified
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-double"></i>
-                    Component double-graded by a full access grader or instructor
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-active grader-NULL"></i>
-                    Component actively being graded
-                </li>
             </ul>
 
             <div class="row-wrapper">
