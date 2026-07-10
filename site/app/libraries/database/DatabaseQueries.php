@@ -5306,6 +5306,51 @@ AND gc_id IN (
         return intval($row['graded_students']) / $assigned_students;
     }
 
+    public function getAssignedPeerGradingProgress(string $gradeable_id, string $grader_id): float {
+        $this->course_db->query(
+            "SELECT
+                COUNT(DISTINCT pa.user_id) AS assigned_students,
+                COUNT(DISTINCT CASE
+                    WHEN completed.user_id IS NOT NULL THEN pa.user_id
+                END) AS completed_students
+            FROM peer_assign AS pa
+            LEFT JOIN (
+                SELECT
+                    gd.gd_user_id AS user_id,
+                    gcd.gcd_grader_id
+                FROM gradeable_data AS gd
+                INNER JOIN gradeable_component_data AS gcd
+                    ON gcd.gd_id = gd.gd_id
+                INNER JOIN gradeable_component AS gc
+                    ON gc.gc_id = gcd.gc_id
+                    AND gc.g_id = gd.g_id
+                    AND gc.gc_is_peer = TRUE
+                WHERE gd.g_id = ?
+                GROUP BY gd.gd_user_id, gcd.gcd_grader_id
+                HAVING COUNT(DISTINCT gc.gc_id) = (
+                    SELECT COUNT(*)
+                    FROM gradeable_component
+                    WHERE g_id = ?
+                        AND gc_is_peer = TRUE
+                )
+            ) AS completed
+                ON completed.user_id = pa.user_id
+                AND completed.gcd_grader_id = pa.grader_id
+            WHERE pa.g_id = ?
+                AND pa.grader_id = ?",
+            [$gradeable_id, $gradeable_id, $gradeable_id, $grader_id]
+        );
+
+        $row = $this->course_db->row();
+        $assigned_students = intval($row['assigned_students']);
+
+        if ($assigned_students === 0) {
+            return NAN;
+        }
+
+        return intval($row['completed_students']) / $assigned_students;
+    }
+
     public function getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections = []) {
         $where = "";
         $params = [];
