@@ -706,6 +706,8 @@ class ForumThreadView extends AbstractView {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+        // Raw ISO timestamp for Twig date comparisons (avoids locale-formatted string parsing failures)
+        $raw_post_timestamp = DateUtils::dateTimeToString($post->getTimestamp());
 
         if (!$post->getHistory()->isEmpty()) {
             $edit_timestamp = max($post->getHistory()->map(function ($x) {
@@ -857,6 +859,7 @@ class ForumThreadView extends AbstractView {
             "post_user_info" => $post_user_info,
             "post_up_duck" => $post_up_duck,
             "post_date" => $date,
+            "post_date_raw" => $raw_post_timestamp,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
             "visible_username" => $visible_username,
