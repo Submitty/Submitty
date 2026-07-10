@@ -1162,7 +1162,7 @@ class ReportController extends AbstractController {
             'worksheet' => 'By Worksheet',
             'project' => 'By Project',
             'participation' => 'By Participation',
-            'zone' => 'By Zone',
+            'zone' => 'By Exam Seating Zone',
         ];
 
         $found = [];
