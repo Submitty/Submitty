@@ -1908,10 +1908,10 @@ function submitBlockUser() {
 
     const url = buildCourseUrl(['forum', 'users', 'block']);
     $.post(url, {
-            user_id: userId,
-            expiration_date: expirationDate,
-            csrf_token: csrfToken,
-        })
+        user_id: userId,
+        expiration_date: expirationDate,
+        csrf_token: csrfToken,
+    })
         .done((data) => {
             let json;
 
@@ -1943,10 +1943,10 @@ function unblockUserFromForum(userId) {
             user_id: userId,
             csrf_token: window.csrfToken,
         })
-        .done((data) => {
-            let json;
-            try {
-                json = JSON.parse(data);
+            .done((data) => {
+                let json;
+                try {
+                    json = JSON.parse(data);
             }
             catch(err) {
                 displayErrorMessage('Error parsing data. Please try again.');
