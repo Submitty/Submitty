@@ -743,20 +743,14 @@ CREATE TABLE public.block_user_action (
 -- Name: block_user_action_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.block_user_action_id_seq
-    AS integer
+ALTER TABLE public.block_user_action ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.block_user_action_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: block_user_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.block_user_action_id_seq OWNED BY public.block_user_action.id;
+    CACHE 1
+);
 
 
 --
@@ -2271,13 +2265,6 @@ ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.autograding_testcase ALTER COLUMN id SET DEFAULT nextval('public.autograding_testcase_id_seq'::regclass);
-
-
---
--- Name: block_user_action id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.block_user_action ALTER COLUMN id SET DEFAULT nextval('public.block_user_action_id_seq'::regclass);
 
 
 --
