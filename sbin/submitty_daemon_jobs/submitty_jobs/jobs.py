@@ -562,5 +562,5 @@ class GradingClustering(CourseGradeableJob):
         gradeable = self.job_details['gradeable']
         algorithm = self.job_details['algorithm']
 
-        script = os.path.join(INSTALL_DIR, 'sbin', 'run_grading_clustering.py')
-        subprocess.run(['python3', script, semester, course, gradeable, algorithm])
+        script = str(Path(INSTALL_DIR, 'sbin', 'run_grading_clustering.py'))
+        subprocess.run(['python3', script, semester, course, gradeable, algorithm], check=True)

@@ -2,9 +2,10 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import os
+from pathlib import Path
 
 # Add sbin to path to import clustering algorithms
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from clustering_algorithms import dummy_split
 from submitty_jobs.jobs import GradingClustering

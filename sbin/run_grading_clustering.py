@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
 import database_queries
@@ -13,7 +14,7 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", help="The clustering algorithm to run")
+    parser.add_argument("algorithm", choices=["dummy_split"], help="The clustering algorithm to run")
 
     args = parser.parse_args()
 
@@ -24,6 +25,7 @@ def main():
         course_conn = database_queries.setup_course_db(db_name)
     except SQLAlchemyError as e:
         print(f"Error connecting to course database {db_name}: {e}")
+        traceback.print_exc()
         sys.exit(1)
 
     try:
@@ -32,9 +34,6 @@ def main():
 
         if args.algorithm == 'dummy_split':
             cluster_groups = dummy_split.run(submitters)
-        else:
-            print(f"Unknown algorithm: {args.algorithm}")
-            sys.exit(1)
 
         database_queries.bulk_insert_clustering(
             course_conn, args.gradeable_id, args.algorithm, cluster_groups
@@ -43,6 +42,7 @@ def main():
         print(f"Successfully ran {args.algorithm} clustering for {args.gradeable_id}")
     except SQLAlchemyError as e:
         print(f"Database error while generating clusters: {e}")
+        traceback.print_exc()
         sys.exit(1)
     finally:
         course_conn.close()
