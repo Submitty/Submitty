@@ -1090,8 +1090,7 @@ WHERE term=? AND course=? AND user_id=?",
     }
 
     /**
-     * Updates the date_registered timestamp for a user in a course to the current time.
-     * Used for self-registration and self-rejoin, NOT for manual adds/edits by an instructor.
+     * Updates the date_registered timestamp for a user in a course to the current time..
      *
      * @param string $user_id
      */
