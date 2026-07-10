@@ -1947,23 +1947,23 @@ function unblockUserFromForum(userId) {
                 let json;
                 try {
                     json = JSON.parse(data);
-            }
-            catch(err) {
-                displayErrorMessage('Error parsing data. Please try again.');
-                return;
-            }
+                }
+                catch (err) {
+                    displayErrorMessage('Error parsing data. Please try again.');
+                    return;
+                }
 
-            if (json['status'] === 'fail') {
-                displayErrorMessage(json['message']);
-                return;
-            }
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
 
-            displaySuccessMessage('User has been unblocked from amking forum posts.');
-            location.reload();
-        })
-        .fail(() => {
-            window.alert('Something went wrong while trying to block the user. Please try again.');
-        });
+                displaySuccessMessage('User has been unblocked from amking forum posts.');
+                location.reload();
+            })
+            .fail(() => {
+                window.alert('Something went wrong while trying to block the user. Please try again.');
+            });
     }
 }
 

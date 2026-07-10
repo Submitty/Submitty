@@ -676,6 +676,12 @@ class ForumController extends AbstractController {
         $post->setReplyLevel($_POST['reply_level']);
         $GLOBALS['totalAttachments'] = 0;
 
+        $blocked_author_ids = [];
+        if ($this->core->getUser()->accessAdmin()) {
+            $blocked_author_ids = array_flip(
+                $this->core->getQueries()->getUsersBlockedFromForumPosts([$post->getAuthor()->getId()])
+            );
+        }
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
@@ -686,6 +692,7 @@ class ForumController extends AbstractController {
             'tree',
             true,
             $_POST['post_box_id'],
+            $blocked_author_ids,
             true,
             $post->getThread()->isAnnounced()
         );

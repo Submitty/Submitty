@@ -334,13 +334,12 @@ class ForumThreadView extends AbstractView {
         $post_box_id = 2;
         $blocked_author_ids = [];
         if ($user->accessAdmin()) {
-            $author_ids = array_unique(array_map (
+            $author_ids = array_unique(array_map(
                 fn($p) => $p->getAuthor()->getId(),
                 $posts
             ));
             $blocked_author_ids = array_flip(
                 $this->core->getQueries()->getUsersBlockedFromForumPosts($author_ids)
-
             );
         }
         foreach ($posts as $post) {
@@ -721,6 +720,7 @@ class ForumThreadView extends AbstractView {
      * @param string $display_option
      * @param bool $includeReply
      * @param int $post_box_id
+     * @param array<string, int> $blocked_author_ids
      * @param bool $render
      * @return mixed[]|string
      */
@@ -892,7 +892,7 @@ class ForumThreadView extends AbstractView {
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
             "is_author_blocked" => ($user->accessAdmin() && $post->getAuthor()->getId() !== $user->getId())
-                ? isset($blockedAuthorIds[$post->getAuthor()->getId()])
+                ? isset($blocked_author_ids[$post->getAuthor()->getId()])
                 : false,
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),

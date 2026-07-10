@@ -7871,13 +7871,13 @@ AND gc_id IN (
     public function getUsersBlockedFromForumPosts(array $user_ids): array {
         if (count($user_ids) === 0) {
             return [];
-    }
-    $placeholders = implode(',', array_fill(0, count($user_ids), '?'));
-    $this->course_db->query(
+        }
+        $placeholders = implode(',', array_fill(0, count($user_ids), '?'));
+        $this->course_db->query(
             "SELECT user_id FROM block_user_action WHERE user_id IN ($placeholders) AND action = 'no_forum_posts' AND (expiration_date IS NULL OR expiration_date > NOW())",
             $user_ids
-    );
-    return array_column($this->course_db->rows(), 'user_id');
+        );
+        return array_column($this->course_db->rows(), 'user_id');
     }
 
     /**
