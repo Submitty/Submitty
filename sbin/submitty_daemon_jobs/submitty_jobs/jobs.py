@@ -118,19 +118,13 @@ class RunAutoRainbowGrades(CourseJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         source = self.job_details['source']
-        # Optional: which sorted summary to build. If omitted, auto_rainbow_grades.py defaults to the overall table
-        sort_order = self.job_details.get('sort_order')
 
         path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
         debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
 
-        cmd = ['python3', path, semester, course, source]
-        if sort_order:
-            cmd.append(sort_order)
-
         try:
             with open(debug_output, "w") as file:
-                subprocess.call(cmd, stdout=file, stderr=file)
+                subprocess.call(['python3', path, semester, course, source], stdout=file, stderr=file)
         except PermissionError:
             print("error, could not open "+file+" for writing")
 
