@@ -224,43 +224,43 @@ class ReportController extends AbstractController {
      *
      * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
      * suggests the reports were manually generated and copied in.
-     * Result is cached to avoid repeated expensive directory walks on every request.
+     * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
-        // Return cached result if available
         if ($this->rg_manual_generation_cache !== null) {
             return $this->rg_manual_generation_cache;
         }
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
-        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+        $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
 
-        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
+        $latest_pushed_html = $this->getLatestFileTimestamp(
             $summary_html_dir,
             function (string $file_path): bool {
                 return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
             }
         );
 
-        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
+        if ($latest_pushed_html === null || $latest_pushed_html === 0) {
             $this->rg_manual_generation_cache = false;
             return false;
         }
 
-        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
-            $build_dir,
+        $latest_server_build = $this->getLatestFileTimestamp(
+            $server_build_dir,
             function (string $file_path): bool {
-                return str_contains(strtolower(basename($file_path)), 'meta');
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
             }
         );
 
-        if ($latest_build_meta_timestamp === null) {
+        // Summaries exist but no server build produced them -> uploaded manually.
+        if ($latest_server_build === null || $latest_server_build === 0) {
             $this->rg_manual_generation_cache = true;
             return true;
         }
 
-        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $result = ($latest_pushed_html - $latest_server_build) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
         $this->rg_manual_generation_cache = $result;
         return $result;
     }
@@ -1150,7 +1150,7 @@ class ReportController extends AbstractController {
      */
     private function getAvailableGradebookSorts(string $rainbow_grades_dir): array {
         $labels = [
-            'overall' => 'Overall',
+            'overall' => 'By Cumulative Average',
             'name' => 'By Student Name',
             'section' => 'By Registration Section',
             'lab' => 'By Lab',
