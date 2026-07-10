@@ -13,9 +13,18 @@ import grp
 import pwd
 import shutil
 from pathlib import Path
+from dataclasses import dataclass
 
 
 CONF_DIR = Path(__file__).resolve().parent.parent / "config"
+
+
+@dataclass
+class CourseIdentity:
+    semester: str
+    course: str
+    instructor: str
+    ta_group: str
 
 
 def load_json(path: Path):
@@ -139,38 +148,38 @@ def create_directory_tree(course_dir: Path, cfg, instructor: str, ta_group: str)
     php_user = cfg["php_user"]
     daemon_user = cfg["daemon_user"]
 
-    W = 0o2770  # u=rwx,g=rwxs,o=
-    R = 0o2750  # u=rwx,g=rxs,o=
+    WRITABLE_PERM = 0o2770  # u=rwx,g=rwxs,o=
+    READABLE_PERM = 0o2750  # u=rwx,g=rxs,o=
 
-    create_and_set(course_dir, W, instructor, ta_group)
+    create_and_set(course_dir, WRITABLE_PERM, instructor, ta_group)
 
     for sub in ("build", "config", "config/build", "config/form",
                 "bin", "provided_code", "instructor_solution",
                 "test_input", "test_output", "custom_validation_code",
                 "reports", "reports/summary_html"):
-        create_and_set(course_dir / sub, W, instructor, ta_group)
+        create_and_set(course_dir / sub, WRITABLE_PERM, instructor, ta_group)
 
     for sub in ("submissions", "forum_attachments", "annotations",
                 "config_upload", "site"):
-        create_and_set(course_dir / sub, R, php_user, ta_group)
+        create_and_set(course_dir / sub, READABLE_PERM, php_user, ta_group)
 
     for sub in ("submissions_processed",):
-        create_and_set(course_dir / sub, W, daemon_user, ta_group)
+        create_and_set(course_dir / sub, WRITABLE_PERM, daemon_user, ta_group)
 
     for sub in ("results", "generated_output", "results_public", "checkout"):
-        create_and_set(course_dir / sub, R, daemon_user, ta_group)
+        create_and_set(course_dir / sub, READABLE_PERM, daemon_user, ta_group)
 
     for sub in ("uploads", "uploads/bulk_pdf", "uploads/polls",
                 "uploads/student_images", "uploads/student_images/tmp",
                 "uploads/course_materials"):
-        create_and_set(course_dir / sub, R, php_user, ta_group)
+        create_and_set(course_dir / sub, READABLE_PERM, php_user, ta_group)
 
     for sub in ("uploads/split_pdf", "lichen"):
-        create_and_set(course_dir / sub, W, daemon_user, ta_group)
+        create_and_set(course_dir / sub, WRITABLE_PERM, daemon_user, ta_group)
 
     for sub in ("uploads/seating", "rainbow_grades",
                 "reports/all_grades", "reports/seating", "reports/polls"):
-        create_and_set(course_dir / sub, W, php_user, ta_group)
+        create_and_set(course_dir / sub, WRITABLE_PERM, php_user, ta_group)
 
 
 def copy_and_template_files(course_dir: Path, cfg, semester: str, course: str,
@@ -217,6 +226,14 @@ def build_course_filesystem(cfg, semester: str, course: str, instructor: str, ta
     return course_dir
 
 
+def print_success(cfg, identity: CourseIdentity, course_dir: Path):
+    print("\nSUCCESS!\n")
+    print(f"SUCCESS!  new course   {identity.course} {identity.semester}   "
+          f"CREATED HERE:   {course_dir}")
+    print(f"SUCCESS!  course page url  "
+          f"{cfg['submission_url']}/{identity.semester}/{identity.course}")
+
+
 def main():
     check_root()
     cfg = load_config()
@@ -224,13 +241,9 @@ def main():
     validate(args, cfg)
     print("All user/group validation checks passed.")
 
-    course_dir = build_course_filesystem(
-        cfg, args.semester, args.course, args.instructor, args.ta_www_group
-    )
-
-    print("\nSUCCESS!\n")
-    print(f"SUCCESS!  new course   {args.course} {args.semester}   CREATED HERE:   {course_dir}")
-    print(f"SUCCESS!  course page url  {cfg['submission_url']}/{args.semester}/{args.course}")
+    identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
+    course_dir = build_course_filesystem(cfg, identity)
+    print_success(cfg, identity, course_dir)
 
 
 if __name__ == "__main__":

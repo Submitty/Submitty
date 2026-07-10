@@ -6,29 +6,30 @@ Wrapper file for course creation. Runs the PHP database-creation API
 call and the Python filesystem-provisioning step.
 """
 
-import requests
+import requests # pylint: disable=import-error
 
 from create_course import (
     CONF_DIR,
+    CourseIdentity,
     check_root,
     load_config,
     load_json,
     parse_args,
     validate,
     build_course_filesystem,
+    print_success,
     die,
 )
 
 
-def call_php_api(base_url: str, api_key: str, semester: str, course: str,
-                 instructor: str, group_name: str):
+def call_php_api(base_url: str, api_key: str, identity: CourseIdentity):
     resp = requests.post(
         f"{base_url}/api/courses",
         data={
-            "course_semester": semester,
-            "course_title": course,
-            "head_instructor": instructor,
-            "group_name": group_name,
+            "course_semester": identity.semester,
+            "course_title": identity.course,
+            "head_instructor": identity.instructor,
+            "group_name": identity.ta_group,
         },
         headers={"Authorization": f"Bearer {api_key}"},
         timeout=30,
@@ -46,30 +47,20 @@ def main():
     validate(args, cfg)
     print("All user/group validation checks passed.")
 
+    identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
     api_config = load_json(CONF_DIR / "submitty_api.json")
 
     try:
-        call_php_api(
-            base_url=api_config["base_url"],
-            api_key=api_config["api_key"],
-            semester=args.semester,
-            course=args.course,
-            instructor=args.instructor,
-            group_name=args.ta_www_group,
-        )
+        call_php_api(api_config["base_url"], api_config["api_key"], identity)
     except (requests.RequestException, RuntimeError) as e:
         die(f"Course database creation failed: {e}")
 
     try:
-        course_dir = build_course_filesystem(
-            cfg, args.semester, args.course, args.instructor, args.ta_www_group
-        )
-    except Exception as e:
+        course_dir = build_course_filesystem(cfg, identity)
+    except (OSError, FileExistsError, KeyError) as e:
         die(f"Filesystem provisioning failed after DB creation succeeded: {e}")
 
-    print("\nSUCCESS!\n")
-    print(f"SUCCESS!  new course   {args.course} {args.semester}   CREATED HERE:   {course_dir}")
-    print(f"SUCCESS!  course page url  {cfg['submission_url']}/{args.semester}/{args.course}")
+    print_success(cfg, identity, course_dir)
 
 
 if __name__ == "__main__":

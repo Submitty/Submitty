@@ -10274,7 +10274,7 @@ ORDER BY
 
         $this->course_db->commit();
     }
-  
+
     /**
      * Returns all submitters with an active version for a given gradeable.
      *
@@ -10289,7 +10289,7 @@ ORDER BY
         );
         return $this->course_db->rows();
     }
-  
+
     private function getAdminConnection(string $dbname): \app\libraries\database\AbstractDatabase {
         $config = $this->core->getConfig();
         $factory = new DatabaseFactory($config->getDatabaseDriver());
