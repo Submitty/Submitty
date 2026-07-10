@@ -1445,7 +1445,7 @@ end of styles used in the admin gradeable page
     /* yellow       green   */
     background: linear-gradient(
         to right,
-        var(--standard-vibrant-yellow) 50%,
+        var(--important-post) 50%,
         var(--standard-vibrant-green) 50%
     );
 }
