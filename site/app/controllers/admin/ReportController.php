@@ -227,14 +227,13 @@ class ReportController extends AbstractController {
      * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
-        // Return cached result if available
         if ($this->rg_manual_generation_cache !== null) {
             return $this->rg_manual_generation_cache;
         }
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
-        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+        $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
 
         $served_files = glob(FileUtils::joinPaths($summary_html_dir, '*.html'));
         if ($served_files === false || count($served_files) === 0) {
