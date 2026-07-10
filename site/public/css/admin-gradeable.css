@@ -139,7 +139,7 @@ select {
 }
 
 .peer-button {
-    background-color: var(--standard-plum-purple);
+    background-color: var(--standard-mediumorchid);
     /* stylelint-disable-next-line color-named */
     color: white;
 }
