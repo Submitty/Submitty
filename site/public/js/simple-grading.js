@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, closePopup, displaySuccessMessage, showPopup */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -503,143 +503,48 @@ function setupNumericTextCells() {
         );
     });
 
-    $('input#csvUpload').change(() => {
-        const confirmation = window.confirm('WARNING! \nPreviously entered data may be overwritten! '
-            + 'This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for '
-            + 'student id and one column for each field. Columns and field types must match.');
-        if (confirmation) {
-            const f = $('#csvUpload').get(0).files[0];
-            if (f) {
-                const reader = new FileReader();
-                reader.readAsText(f);
-                reader.onload = function () {
-                    // breakOut is used to break out of the function and the errorMessage alerts the user with the error
-                    let breakOut = false;
-                    let errorMessage = '';
+    $(document).off('mousedown', '#numeric-csv-upload-submit').on('mousedown', '#numeric-csv-upload-submit', () => {
+        const f = $('#numeric-csv-upload-file').get(0).files[0];
+        if (f) {
+            const reader = new FileReader();
+            reader.readAsText(f);
+            reader.onload = function () {
+                const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
+                const gradeable_id = $('[data-gradeable]').first().data('gradeable');
+                const num_text = parseInt($('[data-numtext]').first().data('numtext'));
+                const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
 
-                    const lines = (reader.result).trim().split(/\r\n|\n|\r/);
+                const user_ids = [];
+                $('.cell-all').each(function () {
+                    user_ids.push($(this).parent().data('user'));
+                });
 
-                    // constants
-                    const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
-                    const num_text = parseInt($('[data-numtext]').first().data('numtext'));
-                    const gradeable_id = $('[data-gradeable]').first().data('gradeable');
+                submitAJAX(
+                    buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
+                    { csrf_token: csrfToken, users: user_ids, big_file: reader.result },
+                    (returned_data) => {
+                        closePopup('numeric-csv-upload-form');
 
-                    // The csv length should be 3 (user information) + num_numeric + 1 (total if num_numeric exists) + num_text
-                    const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
-
-                    // error checking
-                    for (let row = 0; row < lines.length && !breakOut; row++) {
-                        const tempArray = lines[row].split(',');
-                        // if tempArray is not the same length, break out
-                        if (tempArray.length !== csvLength) {
-                            breakOut = true;
-                            errorMessage = `Row ${row + 1} of the CSV has the incorrect length. The correct length is ${csvLength}.`;
+                        const updated_columns = returned_data['data']['updated_columns'] || [];
+                        let msg = 'CSV uploaded successfully.';
+                        if (updated_columns.length > 0) {
+                            msg += ` Updating: ${updated_columns.join(', ')}.`;
                         }
-
-                        // the index where the numeric and text values start
-                        let dataStart = 3;
-                        let total = 0;
-                        if (!breakOut && num_numeric > 0) {
-                            // num_numeric + 4 because that is the number of numerical elements + total
-                            for (dataStart = 3; dataStart < num_numeric + 3 && !breakOut; dataStart++) {
-                                if (isNaN(Number(tempArray[dataStart]))) {
-                                    breakOut = true;
-                                    errorMessage = `Row ${row + 1} of the CSV's ${dataStart + 1} column should be a number. Found ${tempArray[dataStart]}.`;
-                                }
-                                total += Number(tempArray[dataStart]);
-                            }
-
-                            // if total is not a number
-                            if (isNaN(Number(tempArray[dataStart]))) {
-                                breakOut = true;
-                                errorMessage = `Row ${row + 1} of the CSV's ${dataStart + 1} column should be a number. Found ${tempArray[dataStart]}.`;
-                            }
-
-                            // if totals dont match
-                            const difference = total - Number(tempArray[dataStart]);
-
-                            // precision error
-                            if (difference < 0 || difference > 0.0000001) {
-                                breakOut = true;
-                                errorMessage = `Row ${row + 1} of the CSV does not have the correct total for numeric elements. Expected ${total}, got ${tempArray[dataStart]}.`;
-                            }
-                        }
-                    }
-                    const user_ids = [];
-                    if (!breakOut) {
-                        $('.cell-all').each(function () {
-                            user_ids.push($(this).parent().data('user'));
-                        });
-                    }
-                    if (!breakOut) {
-                        submitAJAX(
-                            buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
-                            { csrf_token: csrfToken, users: user_ids,
-                                num_numeric: num_numeric, big_file: reader.result },
-                            (returned_data) => {
-                                console.log(returned_data);
-                                for (let x = 0; x < returned_data['data'].length; x++) {
-                                    const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
-                                    if (rowElement.length) {
-                                        let total = 0;
-                                        // return_data starts at 0
-                                        for (let col = 0, y = 0; col < csvLength - 3; col++) {
-                                            // if we hit the "total" column, display the total
-                                            if (num_numeric && col === num_numeric) {
-                                                const split_row = rowElement.attr('id').split('-');
-                                                $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
-                                                continue;
-                                            }
-                                            const value = `value_${y}`;
-                                            const status = `status_${y}`;
-
-                                            let cellElement;
-
-                                            if (col < num_numeric) {
-                                                cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col}`);
-                                                cellElement.val(returned_data['data'][x][value]);
-                                                y++;
-
-                                                cellElement.css('color', '');
-                                                total += Number(cellElement.val());
-                                            }
-                                            else {
-                                                // -1 only if we have numeric elements for extra total column
-                                                cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
-                                                cellElement.text(returned_data['data'][x][value]);
-                                                y++;
-                                            }
-
-                                            if (returned_data['data'][x][status] === 'OK') {
-                                                cellElement.css('background-color', 'var(--default-white)');
-                                            }
-                                            // not saved
-                                            else {
-                                                cellElement.css('background-color', 'var(--simple-save-error-red)');
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        alert(`User ${returned_data['data'][x]['username']} does not exist.`);
-                                    }
-                                }
-                            },
-                            () => {
-                                alert('submission error');
-                            },
-                        );
-                    }
-
-                    if (breakOut) {
-                        alert(errorMessage);
-                    }
-                };
-            }
-        }
-        else {
-            let f = $('#csvUpload');
-            f.replaceWith(f = f.clone(true));
-        }
+                        displaySuccessMessage(msg);
+                        setTimeout(() => {
+                            displaySuccessMessage('Refreshing page...');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }, 3000);
+                    },
+                    () => {
+                        closePopup('numeric-csv-upload-form');
+                        window.location.reload();
+                    },
+                );
+            };
+        };
     });
 }
 
@@ -1091,3 +996,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // Remove table-striped to prevent CSS conflicts with JS-set colors
     $('table#data-table').removeClass('table-striped');
 });
+
+function newNumericCsvUploadForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#numeric-csv-upload-form');
+    showPopup('#numeric-csv-upload-form');
+    captureTabInModal('numeric-csv-upload-form');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
