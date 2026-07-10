@@ -221,9 +221,9 @@ class ReportController extends AbstractController {
     /**
      * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
-     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html verbatim,
-     * so every file has an identical twin when the server produced it. A manual generation writes 
-     * reports/summary_html independently, leaving files that diverge from individual_summary_html. 
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
+     * so every file has an identical twin when the server produced it. A manual generation writes
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html.
      * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
