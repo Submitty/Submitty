@@ -93,7 +93,7 @@
 }
 
 span.peer-progress-bar {
-    background: var(--standard-plum-purple);
+    background: var(--standard-mediumorchid);
 }
 
 @media (max-width: 401px) {
