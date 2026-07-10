@@ -1594,6 +1594,17 @@ class Gradeable extends AbstractModel {
         return $this->core->getQueries()->getPeerGradingProgress($this->getId());
     }
 
+    /**
+     * Gets the percent of peer grading this user has completed
+     * @return float The percentage (0 to 1) of peer grading completed by the user
+     */
+    public function getAssignedPeerGradingProgress(User $grader): float {
+        if (!$this->hasPeerComponent()) {
+            return NAN;
+        }
+        return $this->core->getQueries()->getAssignedPeerGradingProgress($this->getId(), $grader->getId());
+    }
+
      /**
       * Gets the percent of grading complete for the provided user for this gradeable
       * @param User $grader
