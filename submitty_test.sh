@@ -3,6 +3,31 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_NAME="submitty_test"
+HELP_MESSAGE="
+    Usage:
+    help      : see usage details
+    phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
+    phpcs     : php CodeSniffer [option: --fix]
+    php-lint  : phpcs & phpstan (with default options only)
+    php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
+    js-lint   : eslint [option: --fix]
+    css-lint  : css-stylelint [option: --fix]
+    py-flake8 : run flake8 [option: specific_file.py]
+    py-pylint : run pylint [option: specific_file.py]
+    py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+    py-unit   : run all python unit tests except migration
+    py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
+    py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
+    py-unit-autograder : run the 'autograder' python unit tests [option: module, class, function ...]
+    py-unit-daemon     : run the 'daemon' python unit tests [option: module, class, function ...]
+"
+
+case "${1:-}" in
+    help|--help|"")
+        echo "$HELP_MESSAGE"
+        exit 0
+        ;;
+esac
 
 # build docker image
 echo "Setting up Docker image '$IMAGE_NAME'..."
@@ -178,24 +203,8 @@ case "${1:-}" in
         echo "Running unit test: 'daemon'..."
         run_py_unit_daemon
         ;;
-    help|*)
-        echo "
-              Usage:
-              help      : see usage details
-              phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
-              phpcs     : php CodeSniffer [option: --fix]
-              php-lint  : phpcs & phpstan (with default options only)
-              php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
-              js-lint   : eslint [option: --fix]
-              css-lint  : css-stylelint [option: --fix]
-              py-flake8 : run flake8 [option: specific_file.py]
-              py-pylint : run pylint [option: specific_file.py]
-              py-lint   : py-flake8 & py-pylint [option: specific_file.py]
-              py-unit   : run all python unit tests except migration
-              py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
-              py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
-              py-unit-autograder : run the 'autograder' python unit tests [option: module, class, function ...]
-              py-unit-daemon     : run the 'daemon' python unit tests [option: module, class, function ...]
-             "
+    *)
+        echo "$HELP_MESSAGE"
+        exit 1
         ;;
 esac
