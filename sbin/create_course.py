@@ -174,7 +174,7 @@ def create_directory_tree(course_dir: Path, cfg, instructor: str, ta_group: str)
 
 
 def copy_and_template_files(course_dir: Path, cfg, semester: str, course: str,
-                             instructor: str, ta_group: str):
+                            instructor: str, ta_group: str):
     install_dir = cfg["submitty_install_dir"]
     php_user = cfg["php_user"]
     database_name = f"submitty_{semester}_{course}"

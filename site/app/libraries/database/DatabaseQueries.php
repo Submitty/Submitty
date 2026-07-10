@@ -10333,4 +10333,5 @@ ORDER BY
         finally {
             $admin_db->disconnect();
         }
+    }
 }

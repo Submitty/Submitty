@@ -6,7 +6,6 @@ Wrapper file for course creation. Runs the PHP database-creation API
 call and the Python filesystem-provisioning step.
 """
 
-import sys
 import requests
 
 from create_course import (
@@ -22,11 +21,7 @@ from create_course import (
 
 
 def call_php_api(base_url: str, api_key: str, semester: str, course: str,
-                  instructor: str, group_name: str):
-    """
-    Calls the PHP course-creation endpoint to do the DB half.
-    Raises on failure.
-    """
+                 instructor: str, group_name: str):
     resp = requests.post(
         f"{base_url}/api/courses",
         data={
