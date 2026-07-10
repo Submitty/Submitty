@@ -64,17 +64,20 @@ WORKDIR $HOME/site
 # Install testing / linting dependencies
 # =====================================================
 
+# Python dependencies
 COPY .setup/pip/dev_requirements.txt .setup/pip/system_requirements.txt $HOME/pip/
 RUN pip3 install --no-cache-dir \
     -r $HOME/pip/dev_requirements.txt \
     -r $HOME/pip/system_requirements.txt
 
-COPY python_submitty_utils $HOME/python_submitty_utils
-RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
-
+# Node & PHP dependencies
 COPY site/composer.json site/composer.lock site/package.json site/package-lock.json ./
 RUN composer install --no-scripts --no-interaction --prefer-dist \
     && npm ci \
     && npm cache clean --force \
     && rm -rf /root/.composer/cache ~/.npm \
     && chmod -R 777 .
+
+# internal python utils
+COPY python_submitty_utils $HOME/python_submitty_utils
+RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
