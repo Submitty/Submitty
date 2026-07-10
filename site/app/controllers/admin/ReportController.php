@@ -35,7 +35,6 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     /**
      * Rainbow grades summaries that can be generated from the GUI. Every value except 'all' is a Makefile
@@ -220,11 +219,12 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
-     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
-     * suggests the reports were manually generated and copied in.
-     * Result is cached to avoid repeated expensive directory walks on every request.
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html verbatim,
+     * so every file has an identical twin when the server produced it. A manual generation writes 
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html. 
+     * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
         // Return cached result if available
@@ -236,76 +236,27 @@ class ReportController extends AbstractController {
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
         $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
 
-        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
-            $summary_html_dir,
-            function (string $file_path): bool {
-                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
-            }
-        );
-
-        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
-            $this->rg_manual_generation_cache = false;
+        $served_files = glob(FileUtils::joinPaths($summary_html_dir, '*.html'));
+        if ($served_files === false || count($served_files) === 0) {
+            $this->rg_manual_generation_cache = false;   // nothing generated at all
             return false;
         }
 
-        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
-            $build_dir,
-            function (string $file_path): bool {
-                return str_contains(strtolower(basename($file_path)), 'meta');
-            }
-        );
-
-        if ($latest_build_meta_timestamp === null) {
-            $this->rg_manual_generation_cache = true;
-            return true;
-        }
-
-        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
-        $this->rg_manual_generation_cache = $result;
-        return $result;
-    }
-
-    /**
-     * Get the most recent file modification timestamp in a directory tree.
-     *
-     * @param string $directory
-     * @param callable(string):bool|null $file_filter
-     * @return int|null Returns null if directory doesn't exist or can't be read, otherwise returns latest mtime or 0 if no matching files found.
-     * Catches and logs permission/read errors to distinguish from missing directories.
-     */
-    private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
-        if (!is_dir($directory)) {
-            return null;
-        }
-
-        $latest_timestamp = 0;  // Use 0 as default for "no files found" instead of null
-        $flags = \FilesystemIterator::SKIP_DOTS;
-
-        try {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, $flags));
-            foreach ($iterator as $file_info) {
-                if (!$file_info->isFile()) {
-                    continue;
-                }
-
-                $file_path = $file_info->getPathname();
-                if ($file_filter !== null && !$file_filter($file_path)) {
-                    continue;
-                }
-
-                $file_mtime = $file_info->getMTime();
-                if ($file_mtime > $latest_timestamp) {
-                    $latest_timestamp = $file_mtime;
-                }
+        $manual = false;
+        foreach ($served_files as $served) {
+            $twin = FileUtils::joinPaths($server_build_dir, basename($served));
+            if (
+                !file_exists($twin)
+                || filesize($served) !== filesize($twin)
+                || md5_file($served) !== md5_file($twin)
+            ) {
+                $manual = true;
+                break;
             }
         }
-        catch (\UnexpectedValueException $e) {
-            // Permission denied or unreadable directory—log the error for debugging
-            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
-            return null;
-        }
 
-        return $latest_timestamp > 0 ? $latest_timestamp : 0;
+        $this->rg_manual_generation_cache = $manual;
+        return $manual;
     }
 
     /**
