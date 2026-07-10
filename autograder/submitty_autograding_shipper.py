@@ -1798,7 +1798,7 @@ AUTOGRADING_WORKERS_SCHEMA = {
             "address": {"type": "string"},
             "username": {"type": "string"},
             "num_autograding_workers": {"type": "integer", "minimum": 1},
-            "display_environment_variable":{"type":"string"},
+            "display_environment_variable": {"type": "string"},
             "enabled": {"type": "boolean"},
             "capabilities": {"type": "array", "items": {"type": "string"}, "minItems": 1},
         },
