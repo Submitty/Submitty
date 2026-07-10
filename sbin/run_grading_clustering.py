@@ -14,7 +14,8 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", choices=["dummy_split"], help="The clustering algorithm to run")
+    parser.add_argument("algorithm", choices=["dummy_split"],
+                        help="The clustering algorithm to run")
 
     args = parser.parse_args()
 
@@ -34,6 +35,8 @@ def main():
 
         if args.algorithm == 'dummy_split':
             cluster_groups = dummy_split.run(submitters)
+        else:
+            raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
         database_queries.bulk_insert_clustering(
             course_conn, args.gradeable_id, args.algorithm, cluster_groups

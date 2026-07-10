@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 # Add sbin to path to import clustering algorithms
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from clustering_algorithms import dummy_split
 from submitty_jobs.jobs import GradingClustering
