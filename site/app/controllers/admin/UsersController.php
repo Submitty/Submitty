@@ -39,6 +39,7 @@ class UsersController extends AbstractController {
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $reg_subsec = $student->getRegistrationSubsection();
             $formatted_tzs[$student->getId()] = $student->getNiceFormatTimeZone() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
@@ -66,21 +67,25 @@ class UsersController extends AbstractController {
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
+                'reg_subsection' => $reg_subsec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
             ]);
         }
 
-        //Get Active student Columns
+        // Get Active student Columns
         $active_student_columns = '';
-        //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
+        // Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
         if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 17) {
             $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
-            //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_student_columns', implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false))), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_student_columns = implode('-', array_merge(array_fill(0, 12, true), array_fill(0, 5, false)));
+            $default_columns = array_merge(array_fill(0, 12, 1), array_fill(0, 5, 0));
+            $cookie_val = implode('-', $default_columns);
+
+            // Expires 10 years from today (functionally indefinite)
+            if (setcookie('active_student_columns', $cookie_val, time() + (10 * 365 * 24 * 60 * 60), '/')) {
+                $active_student_columns = $cookie_val;
             }
         }
 
@@ -244,6 +249,7 @@ class UsersController extends AbstractController {
             'user_email_secondary' => $user->getSecondaryEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
+            'registration_subsection' => $user->getRegistrationSubsection(),
             'course_section_id' => $user->getCourseSectionId(),
             'rotating_section' => $user->getRotatingSection(),
             'user_updated' => $user->isUserUpdated(),
@@ -418,12 +424,24 @@ class UsersController extends AbstractController {
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                if (
+                    $user->getGroup() === User::GROUP_STUDENT
+                    && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                ) {
+                    $this->applyNotificationDefaultsForUser($user->getId());
+                }
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
+                if (
+                    $user->getGroup() === User::GROUP_STUDENT
+                    && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                ) {
+                    $this->applyNotificationDefaultsForUser($user->getId());
+                }
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -647,6 +665,40 @@ class UsersController extends AbstractController {
             'section_id' => $section_id,
             'course_id'  => $course_id,
         ]);
+    }
+
+    // Helper function for appying notifications
+    private function applyNotificationDefaultsForUser(string $user_id): void {
+        $default = $this->core->getQueries()->getNotificationDefault($user_id);
+        if ($default === null) {
+            return;
+        }
+
+        // Source course no longer exists — drop the stale pointer so we don't re-check it
+        if (!$this->core->getQueries()->courseExists($default['term'], $default['course'])) {
+            $this->core->getQueries()->deleteNotificationDefault($user_id);
+            return;
+        }
+
+        $target_term = $this->core->getConfig()->getTerm();
+        $target_course = $this->core->getConfig()->getCourse();
+        if ($default['term'] === $target_term && $default['course'] === $target_course) {
+            return;
+        }
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($default['term'], $default['course']);
+        $this->core->loadCourseDatabase();
+        $source = $this->core->getQueries()->getNotificationSettingsForUser($user_id);
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        if ($source === null) {
+            return;
+        }
+
+        $this->core->getQueries()->insertNotificationSettingsForUser($user_id, $source);
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
@@ -938,7 +990,6 @@ class UsersController extends AbstractController {
             try {
                 switch ($action) {
                     case 'insert':
-                        //User must first exist in Submitty before being enrolled to a course.
                         if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
                             if ($this->core->getAuthentication() instanceof SamlAuthentication) {
@@ -946,6 +997,14 @@ class UsersController extends AbstractController {
                             }
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+
+                        // Apply notification defaults if the user has them set and is a student
+                        if (
+                            $user->getGroup() === User::GROUP_STUDENT
+                            && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                        ) {
+                            $this->applyNotificationDefaultsForUser($user->getId());
+                        }
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);

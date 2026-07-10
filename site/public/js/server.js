@@ -666,54 +666,73 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     const download_info = JSON.parse($('#download_info_json_id').val());
-    let csv_data = 'Given Name,Family Name,User ID,Email,Secondary Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
+
+    // define CSV column headers
+    const columns = [
+        { header: 'Given Name', key: 'given_name' },
+        { header: 'Family Name', key: 'family_name' },
+        { header: 'User ID', key: 'user_id' },
+        { header: 'Email', key: 'email' },
+        { header: 'Secondary Email', key: 'secondary_email' },
+        { header: 'UTC Offset', key: 'utc_offset' },
+        { header: 'Time Zone', key: 'time_zone' },
+        { header: 'Registration Section', key: 'reg_section', quote: true },
+        { header: 'Registration Subsection', key: 'reg_subsection', quote: true },
+        { header: 'Rotation Section', key: 'rot_section' },
+        { header: 'Group', key: 'group' },
+    ];
+
+    // Generate the CSV header row
+    let csv_data = `${columns.map((col) => col.header).join(',')}\n`;
     const required_user_id = [];
+
+    // formats a single user into a CSV row
+    const generateRow = (user) => {
+        return `${columns.map((col) => {
+            let val = user[col.key];
+
+            if (val === undefined || val === null) {
+                val = '';
+            }
+
+            if (col.quote || (typeof val === 'string' && val.includes(','))) {
+                return `"${val}"`;
+            }
+            return val;
+        }).join(',')}\n`;
+    };
+
+    // adds a user to the CSV string only if they haven't been added yet
+    const addUserToCSV = (user) => {
+        if ($.inArray(user.user_id, required_user_id) === -1) {
+            csv_data += generateRow(user);
+            required_user_id.push(user.user_id);
+        }
+    };
 
     $('#download-form input:checkbox').each(function () {
         if ($(this).is(':checked')) {
             const thisVal = $(this).val();
 
-            if (thisVal === 'instructor') {
-                for (let i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                        csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                        required_user_id.push(download_info[i].user_id);
-                    }
+            for (let i = 0; i < download_info.length; ++i) {
+                const user = download_info[i];
+
+                if (thisVal === 'instructor' && user.group === 'Instructor') {
+                    addUserToCSV(user);
                 }
-            }
-            else if (thisVal === 'full_access_grader') {
-                for (let i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                        csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                        required_user_id.push(download_info[i].user_id);
-                    }
+                else if (thisVal === 'full_access_grader' && user.group === 'Full Access Grader (Grad TA)') {
+                    addUserToCSV(user);
                 }
-            }
-            else if (thisVal === 'limited_access_grader') {
-                for (let i = 0; i < download_info.length; ++i) {
-                    if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                        csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                        required_user_id.push(download_info[i].user_id);
-                    }
+                else if (thisVal === 'limited_access_grader' && user.group === 'Limited Access Grader (Mentor)') {
+                    addUserToCSV(user);
                 }
-            }
-            else {
-                for (let i = 0; i < download_info.length; ++i) {
-                    if (code === 'user') {
-                        if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                            required_user_id.push(download_info[i].user_id);
-                        }
+                else if (!['instructor', 'full_access_grader', 'limited_access_grader'].includes(thisVal)) {
+                    // Section/Grader filtering logic
+                    if (code === 'user' && user.reg_section === thisVal) {
+                        addUserToCSV(user);
                     }
-                    else if (code === 'grader') {
-                        if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                            required_user_id.push(download_info[i].user_id);
-                        }
-                        if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += `${[download_info[i].given_name, download_info[i].family_name, download_info[i].user_id, download_info[i].email, download_info[i].secondary_email, download_info[i].utc_offset, download_info[i].time_zone, `"${download_info[i].reg_section}"`, download_info[i].rot_section, download_info[i].group].join(',')}\n`;
-                            required_user_id.push(download_info[i].user_id);
-                        }
+                    else if (code === 'grader' && (user.reg_section === 'All' || $.inArray(thisVal, user.reg_section.split(',')) !== -1)) {
+                        addUserToCSV(user);
                     }
                 }
             }

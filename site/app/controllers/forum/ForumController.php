@@ -895,7 +895,12 @@ class ForumController extends AbstractController {
                 $thread->setDeleted(true);
                 $type = "thread";
             }
-            $metadata = json_encode([]);
+            $metadata = json_encode([
+                'url' => $type === "thread"
+                    ? $this->core->buildCourseUrl(['forum'])
+                    : $this->core->buildCourseUrl(['forum', 'threads', $thread_id]),
+                'thread_id' => $thread_id,
+            ]);
             $subject = "Deleted: " . $post->getContent();
             $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
