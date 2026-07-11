@@ -3632,7 +3632,7 @@ function isVueTotalScoreBoxEnabled(): boolean {
 }
 
 // Mount (or re-mount) a TotalScoreBox Vue app.
-// Creates a fresh mount target inside #total-score-container and renders the score box component. 
+// Creates a fresh mount target inside #total-score-container and renders the score box component.
 // Called after dynamic re-renders where jQuery .html() destroys the initial Vue.twig mount.
 
 async function mountVueTotalScoreBox(): Promise<void> {
@@ -3666,6 +3666,7 @@ async function mountVueTotalScoreBox(): Promise<void> {
         decimalPrecision: getPointPrecision(),
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     await (window as any).submitty.render(
         `#${mountId}`,
         'component',
