@@ -5,21 +5,43 @@
 
 // -----------------------------------------------------------------------------
 // Keyboard shortcut handling
+
+type _Listener = (visible: boolean) => void;
+let _visible = false;
+const _listeners: _Listener[] = [];
+
+export function notifySettingsVisibility(visible: boolean): void {
+    if (_visible === visible) {
+        return;
+    }
+    _visible = visible;
+    _listeners.forEach((fn) => fn(visible));
+}
+
+export function onSettingsVisibilityChange(fn: _Listener): () => void {
+    _listeners.push(fn);
+    fn(_visible);
+    return () => {
+        const idx = _listeners.indexOf(fn);
+        if (idx >= 0) {
+            _listeners.splice(idx, 1);
+        }
+    };
+}
+
+export function isSettingsVisible(): boolean {
+    return _visible;
+}
+
 declare global {
     interface Window {
         showSettings(): void;
-        restoreAllHotkeys(): void;
-        removeAllHotkeys(): void;
-        remapHotkey(i: number): void;
-        remapUnset(i: number): void;
+        hideSettings(): void;
+        registerKeyHandler(parameters: object, fn: (...args: unknown[]) => unknown): void;
     }
 }
 
 const keymap: KeymapEntry<unknown>[] = [];
-const remapping = {
-    active: false,
-    index: 0,
-};
 type KeymapEntry<T> = {
     name: string;
     code: string;
@@ -35,7 +57,7 @@ type SettingsData = {
         name: string;
         storageCode: string;
         options: Record<string, string>;
-        optionsGenerator?: (() => Record<string, string>);
+        optionsGenerator?: ((fullAccess?: boolean) => Record<string, string>);
         default: string;
         currValue?: string;
     }[];
@@ -63,8 +85,8 @@ export const settingsData: SettingsData = [
                 name: 'Prev/Next buttons navigate through',
                 storageCode: 'general-setting-navigate-assigned-students-only',
                 options: {},
-                optionsGenerator: function (): Record<string, string> {
-                    if ($('#ta-grading-settings-list').attr('data-full_access') !== 'true') {
+                optionsGenerator: function (fullAccess?: boolean): Record<string, string> {
+                    if (!fullAccess) {
                         return {};
                     }
                     return {
@@ -93,21 +115,21 @@ export const settingsData: SettingsData = [
     },
 ];
 
-window.onkeyup = function (e) {
-    if (remapping.active) {
-        remapFinish(remapping.index, eventToKeyCode(e));
-        e.preventDefault();
-        return;
+function getKeyCode(name: string): string {
+    const stored = remapGetLS(name);
+    if (stored !== null) {
+        return stored;
     }
-};
+    for (let i = 0; i < keymap.length; i++) {
+        if (keymap[i].name === name) {
+            return keymap[i].originalCode ?? 'Unassigned';
+        }
+    }
+    return 'Unassigned';
+}
 
 window.onkeydown = function (e) {
-    if (remapping.active) {
-        e.preventDefault();
-        return;
-    }
-
-    // Disable hotkeys in the menu so we don't accidentally press anything
+    // Don't fire hotkeys when the settings popup is open
     if (isSettingsVisible()) {
         return;
     }
@@ -120,7 +142,8 @@ window.onkeydown = function (e) {
     const codeName = eventToKeyCode(e);
 
     for (let i = 0; i < keymap.length; i++) {
-        if (keymap[i].code === codeName) {
+        const code = getKeyCode(keymap[i].name);
+        if (code === codeName) {
             keymap[i].fn?.(e, keymap[i].options);
         }
     }
@@ -153,106 +176,21 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
     registerKeyHandler(parameters as KeymapEntry<unknown>, fn as (e: KeyboardEvent, options?: unknown) => void);
 };
 
-function isSettingsVisible() {
-    return $('#settings-popup').is(':visible');
-}
-
 export function showSettings() {
-    generateSettingList();
-    generateHotkeysList();
-    $('#settings-popup').show();
-    captureTabInModal('settings-popup');
+    notifySettingsVisibility(true);
 }
 window.showSettings = showSettings;
 
-window.restoreAllHotkeys = function () {
-    keymap.forEach((hotkey, index) => {
-        updateKeymapAndStorage(index, hotkey.originalCode!);
-    });
-};
+export function hideSettings() {
+    notifySettingsVisibility(false);
+}
+window.hideSettings = hideSettings;
 
-window.removeAllHotkeys = function () {
-    keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unassigned'));
-};
-
-/**
- * Generate list of hotkeys on the ui
- */
-function generateHotkeysList() {
-    const parent = $('#hotkeys-list');
-
-    parent.replaceWith(window.Twig.twig({
-        ref: 'HotkeyList',
-    }).render({
-        keymap: keymap.map((hotkey) => ({
-            ...hotkey,
-            code: hotkey.code || hotkey.originalCode || 'Unassigned',
-        })),
-    }));
+export function getKeymap(): KeymapEntry<unknown>[] {
+    return keymap;
 }
 
-/**
- * Generate list of settings on the ui
- */
-function generateSettingList() {
-    const parent = $('#ta-grading-general-settings');
-    loadTAGradingSettingData();
-
-    parent.replaceWith(window.Twig.twig({
-        ref: 'GeneralSettingList',
-    }).render({
-        settings: settingsData,
-    }));
-}
-
-export function loadTAGradingSettingData() {
-    for (let i = 0; i < settingsData.length; i++) {
-        for (let x = 0; x < settingsData[i].values.length; x++) {
-            const generator = settingsData[i].values[x].optionsGenerator;
-            if (generator) {
-                settingsData[i].values[x].options = generator();
-            }
-            const inquiry = window.Cookies.get('inquiry_status');
-            if (inquiry === 'on') {
-                settingsData[i].values[x].currValue = 'active-inquiry';
-            }
-            else {
-                if (localStorage.getItem(settingsData[i].values[x].storageCode) !== 'default' && localStorage.getItem(settingsData[i].values[x].storageCode) !== 'active-inquiry') {
-                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode)!;
-                }
-                else {
-                    settingsData[i].values[x].currValue = 'default';
-                }
-            }
-            if (settingsData[i].values[x].currValue === null) {
-                localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
-                settingsData[i].values[x].currValue = settingsData[i].values[x].options[settingsData[i].values[x].default];
-            }
-        }
-    }
-}
-
-/**
- * Start rebinding a hotkey
- * @param {int} i Index of hotkey to rebind
- */
-window.remapHotkey = function (i: number) {
-    if (remapping.active) {
-        return;
-    }
-
-    const button = $(`#remap-${i}`);
-    button.text('Enter Key...');
-    remapping.active = true;
-    remapping.index = i;
-
-    $('.remap-disable').attr('disabled', 'disabled');
-    $('#settings-close').attr('disabled', 'disabled');
-    button.attr('disabled', null);
-    button.addClass('btn-success');
-};
-
-function updateKeymapAndStorage(index: number, code: string) {
+export function updateKeymapAndStorage(index: number, code: string): void {
     keymap[index].code = code;
     const keymapObject = keymap.reduce((obj, hotkey) => {
         obj[hotkey.name] = {
@@ -262,38 +200,75 @@ function updateKeymapAndStorage(index: number, code: string) {
         return obj;
     }, {} as Record<string, { code: string; originalCode: string }>);
     localStorage.setItem('keymap', JSON.stringify(keymapObject));
-    generateHotkeysList();
+}
+
+export function loadTAGradingSettingData(fullAccess?: boolean): void {
+    for (let i = 0; i < settingsData.length; i++) {
+        for (let x = 0; x < settingsData[i].values.length; x++) {
+            const generator = settingsData[i].values[x].optionsGenerator;
+            if (generator) {
+                settingsData[i].values[x].options = generator(fullAccess);
+            }
+            const inquiry = window.Cookies?.get('inquiry_status');
+            if (inquiry === 'on') {
+                settingsData[i].values[x].currValue = 'active-inquiry';
+            }
+            else {
+                const stored = localStorage.getItem(settingsData[i].values[x].storageCode);
+                if (stored !== null && stored !== 'default' && stored !== 'active-inquiry') {
+                    settingsData[i].values[x].currValue = stored;
+                }
+                else {
+                    settingsData[i].values[x].currValue = 'default';
+                }
+            }
+            if (settingsData[i].values[x].currValue === null) {
+                const defVal = settingsData[i].values[x].options[settingsData[i].values[x].default];
+                localStorage.setItem(settingsData[i].values[x].storageCode, defVal);
+                settingsData[i].values[x].currValue = defVal;
+            }
+        }
+    }
 }
 
 /**
- * Called when remapping has finished and should save (or discard) a pressed key
- * @param {int} index Index of the hotkey
- * @param {string} code New keycode for the hotkey
+ * Apply a setting change: persist to localStorage and trigger side effects.
+ * Returns the new value string.
  */
-function remapFinish(index: number, code: string) {
-    for (let i = 0; i < keymap.length; i++) {
-        if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
-            const button = $(`#remap-${index}`);
-            button.text('Enter Unique Key...');
-            button.addClass('btn-danger');
-            button.removeClass('btn-success');
-            return;
+export function applySettingChange(storageCode: string, value: string): string {
+    localStorage.setItem(storageCode, value);
+
+    if (storageCode === 'general-setting-navigate-assigned-students-only') {
+        if (value === 'true') {
+            window.Cookies?.set('view', 'assigned', { path: '/' });
+        }
+        else {
+            window.Cookies?.set('view', 'all', { path: '/' });
         }
     }
 
-    updateKeymapAndStorage(index, code);
-    remapping.active = false;
-    $('.remap-disable').attr('disabled', null);
-    $('#settings-close').attr('disabled', null);
+    if (value !== 'active-inquiry') {
+        window.Cookies?.set('inquiry_status', 'off');
+    }
+    else {
+        window.Cookies?.set('inquiry_status', 'on');
+    }
+
+    window.dispatchEvent(new CustomEvent('settings-changed', { detail: { storageCode, value } }));
+    return value;
 }
 
 /**
- * Revert a hotkey to its original code
- * @param {int} i Index of hotkey
+ * Check if a given key code is already bound to another hotkey (by index)
  */
-window.remapUnset = function (index: number) {
-    remapFinish(index, 'Unassigned');
-};
+export function isKeyAlreadyBound(index: number, code: string): boolean {
+    for (let i = 0; i < keymap.length; i++) {
+        if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
+            return true;
+        }
+    }
+    return false;
+}
 
 /**
  * Get the keycode for a hotkey binding from localStorage
@@ -322,7 +297,7 @@ function remapGetLS(mapName: string): string | null {
  * @param {KeyboardEvent} e Event
  * @returns {string} String form of the event
  */
-function eventToKeyCode(e: KeyboardEvent): string {
+export function eventToKeyCode(e: KeyboardEvent): string {
     let codeName = e.code;
 
     // Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
