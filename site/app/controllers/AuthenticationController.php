@@ -209,7 +209,7 @@ class AuthenticationController extends AbstractController {
      *
      * @return MultiResponse
      */
-    #[Route("/api/token", methods: ["GET"])]
+    #[Route("/api/token/validate", methods: ["GET"])]
     public function validateToken() {
         $user = $this->core->getUser();
 
