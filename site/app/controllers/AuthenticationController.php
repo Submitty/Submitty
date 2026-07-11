@@ -201,6 +201,7 @@ class AuthenticationController extends AbstractController {
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
     }
+
     /**
      * Validate whether the supplied API token is still valid.
      *
@@ -224,9 +225,6 @@ class AuthenticationController extends AbstractController {
             ])
         );
     }
-
-
-       
 
     /**
      * Handle stateless authentication for the VCS endpoints.
