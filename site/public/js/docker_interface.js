@@ -112,6 +112,7 @@ function addImage(url) {
             if (json.status === 'success') {
                 $('#add-field').val('');
                 sessionStorage.setItem('successMessage', json.data);
+                sessionStorage.setItem('docker-ui-status-message', 'Update Required');
                 location.reload();
             }
             else {
@@ -136,6 +137,7 @@ function updateImage(url) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 displaySuccessMessage(json.data);
+                sessionStorage.setItem('docker-ui-status-message', 'Changes Pending');
             }
             else {
                 displayErrorMessage(json.message);
