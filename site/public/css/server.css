@@ -1445,14 +1445,32 @@ end of styles used in the admin gradeable page
     /* yellow       green   */
     background: linear-gradient(
         to right,
-        var(--standard-vibrant-yellow) 50%,
+        var(--important-post) 50%,
         var(--standard-vibrant-green) 50%
     );
 }
 
 /* color for student/peer grading */
 .grader-4 {
-    background-color: var(--standard-plum-purple); /* purple */
+    background-color: var(--standard-mediumorchid); /* purple */
+}
+
+/* peer component has at least one peer grade */
+.grader-peer-left-half {
+    background: linear-gradient(
+        to right,
+        var(--standard-mediumorchid) 50%,
+        var(--default-white) 50%
+    );
+}
+
+/* peer component has been graded by current user */
+.grader-peer-right-half {
+    background: linear-gradient(
+        to right,
+        var(--default-white) 50%,
+        var(--standard-mediumorchid) 50%
+    );
 }
 
 /* color for a limited access grader */

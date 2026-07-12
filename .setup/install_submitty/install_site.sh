@@ -376,6 +376,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.mjs ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs
     cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/wasm ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/image_decoders ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/standard_fonts ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/iccs ${VENDOR_FOLDER}/pdfjs
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
