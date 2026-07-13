@@ -49,9 +49,6 @@ window.filter_withdrawn_students = () => {
         withdrawn_simple.show();
         window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
     }
-
-    // Remove table-striped to prevent CSS conflicts with JS-set colors
-    $('table').removeClass('table-striped');
 };
 
 window.changeSections = () => {
