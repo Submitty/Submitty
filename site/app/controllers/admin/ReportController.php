@@ -1072,19 +1072,36 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
-        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
-        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
-        $grade_file = null;
-        if (file_exists($grade_path)) {
-            $grade_file = file_get_contents($grade_path);
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
+
+        $selected_sort = 'overall';
+        $requested = $_GET['sort'] ?? null;
+        if (is_string($requested) && isset($available_sorts[$requested])) {
+            $selected_sort = $requested;
         }
+        elseif (!isset($available_sorts['overall']) && count($available_sorts) > 0) {
+            $selected_sort = array_key_first($available_sorts);
+        }
+
+        $grade_file = null;
+        if (isset($available_sorts[$selected_sort])) {
+            $grade_path = FileUtils::joinPaths($rainbow_grades_dir, $available_sorts[$selected_sort]['file']);
+            if (file_exists($grade_path)) {
+                $grade_file = file_get_contents($grade_path);
+            }
+        }
+
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file,
-                $grade_summaries_last_run
+                $grade_summaries_last_run,
+                $available_sorts,
+                $selected_sort
             )
         );
     }
