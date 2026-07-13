@@ -180,7 +180,9 @@ case "${1:-}" in
         run_py_pylint "$@"
         ;;
     py-lint)
+        echo "Running pylint..."
         run_py_pylint "$@"
+        echo "Running flake8..."
         run_py_flake8 "$@"
         ;;
     py-unit-utils)

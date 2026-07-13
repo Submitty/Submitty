@@ -1,27 +1,24 @@
-# submitty_test .dockerignore
-.git
-.github
-.env
+# ignore everything by default
+**
 
-# editors / os stuff
-.idea
-.vscode
-.vs
-.DS_Store
-*.autosave
-*.orig*
-*~
+# allow parent directories of utils
+!site/
+!.setup/
+!.setup/pip/
+!python_submitty_utils/
 
-# caches, etc
-*.o
-*.pyc
-__pycache__/
-*.aux
-*.log
-*.out
-*.synctex.gz
-.coverage
+# allow the composer / package lock and json
+!site/composer.json
+!site/composer.lock
+!site/package.json
+!site/package-lock.json
 
-# vendor / node_modules installed inside the image so no need to share
-site/vendor/
-site/node_modules/
+!.setup/pip/dev_requirements.txt
+!.setup/pip/system_requirements.txt
+
+# allow python_submitty_utils
+!python_submitty_utils/**
+
+# allow docker related files
+!Dockerfile
+!.dockerignore
