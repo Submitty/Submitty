@@ -45,6 +45,19 @@ tr > td:nth-of-type(5) {
     width: 120px;
 }
 
+tbody {
+    counter-reset: student;
+}
+
+tbody tr:not(.info) {
+    counter-increment: student;
+}
+
+tbody tr:not(.info) > td:nth-child(1)::after {
+    content: counter(student);
+    padding: 0 1em;
+}
+
 .highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
     /* stylelint-disable-next-line declaration-no-important */
     background: var(--standard-focus-cornflower-blue) !important ;
