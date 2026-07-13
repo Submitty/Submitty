@@ -125,11 +125,12 @@
                     'algorithms': algorithms,
                     'currentAlgorithm': current_algorithm,
                     'createClusteringUrl': create_clustering_url,
+                    'checkClusteringStatusUrl': check_clustering_status_url,
                     'csrfToken': core.getCsrfToken(),
                     'canCreateClustering': full_access_grader_permission
                 },
                 'events': {
-                    'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); }',
+                    'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); const banner = document.getElementById("clustering-loading-banner"); if(banner) { banner.style.display = status === "fetching" ? "block" : "none"; } }',
                     'toggle-clustering-mode': 'handleToggleClusteringMode'
                 }
             } %}
@@ -145,6 +146,9 @@
         No clusters have been generated for this assignment. Please select an algorithm from the dropdown to begin.
     </div>
     {% endif %}
+    <div id="clustering-loading-banner" style="display: none;" class="details-warning-box details-warning-highlight">
+        <i class="fas fa-spinner fa-spin"></i> Generating clusters... This may take a few moments.
+    </div>
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}

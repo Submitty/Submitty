@@ -6,6 +6,7 @@ const props = defineProps<{
     algorithms: Record<string, string>;
     currentAlgorithm?: string;
     createClusteringUrl: string;
+    checkClusteringStatusUrl: string;
     csrfToken: string;
     canCreateClustering: boolean;
     gradeableId: string;
@@ -35,15 +36,30 @@ async function onAlgorithmChange(event?: Event) {
                 method: 'POST',
                 body: formData,
             });
-            emit('clustering-status', 'done');
 
             const result = (await response.json()) as { status: string; message?: string };
             if (result.status === 'success') {
-                const urlParams = new URLSearchParams(window.location.search);
-                urlParams.set('cluster_mode', '1');
-                window.location.search = urlParams.toString();
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const statusResponse = await fetch(props.checkClusteringStatusUrl);
+                        const statusResult = await statusResponse.json();
+                        if (statusResult.status === 'success' && statusResult.data.status === 'done') {
+                            clearInterval(pollInterval);
+                            emit('clustering-status', 'done');
+                            const urlParams = new URLSearchParams(window.location.search);
+                            urlParams.set('cluster_mode', '1');
+                            window.location.search = urlParams.toString();
+                        }
+                    } catch (e) {
+                        console.error('Error checking clustering status:', e);
+                        clearInterval(pollInterval);
+                        emit('clustering-status', 'error');
+                        alert('Error checking clustering status.');
+                    }
+                }, 1000);
             }
             else {
+                emit('clustering-status', 'done');
                 alert(result.message || 'Error creating clusters');
                 // Revert selection if it failed
                 selectedAlgorithm.value = props.currentAlgorithm || '';

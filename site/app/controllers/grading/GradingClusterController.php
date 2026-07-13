@@ -56,6 +56,31 @@ class GradingClusterController extends AbstractController {
     }
 
     /**
+     * Checks if the clustering job is currently in progress.
+     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/status", methods: ["GET"])]
+    public function checkClusteringStatus(string $gradeable_id): JsonResponse {
+        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $job_name = "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
+        
+        $clustering_job_file = FileUtils::joinPaths($daemon_job_queue_path, $job_name);
+        $processing_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . $job_name);
+
+        if (file_exists($clustering_job_file) || file_exists($processing_job_file)) {
+            return JsonResponse::getSuccessResponse(['status' => 'processing']);
+        }
+
+        return JsonResponse::getSuccessResponse(['status' => 'done']);
+    }
+
+    /**
      * Fetches all clusters and their members for a given gradeable.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]

@@ -982,6 +982,7 @@ HTML;
             "algorithms" => $algorithms,
             "current_algorithm" => $current_algorithm,
             "create_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'create_clustering']),
+            "check_clustering_status_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'clustering', 'status']),
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
