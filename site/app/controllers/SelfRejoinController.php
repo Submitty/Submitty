@@ -182,8 +182,7 @@ class SelfRejoinController extends AbstractController {
             $user->setRotatingSection($to_join_rotating_section);
         }
 
-        $this->core->getQueries()->updateUser($user, $term, $course);
-        $this->core->getQueries()->updateRegistrationDate($user_id);
+        $this->core->getQueries()->updateUser($user, $term, $course, true);
 
         $this->sendRejoinedStudentEmail($to_join_section);
         return new RedirectResponse($this->core->buildCourseUrl());

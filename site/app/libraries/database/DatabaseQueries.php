@@ -1031,8 +1031,12 @@ SQL;
         );
 
         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
-        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+        $this->course_db->query(
+            "UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=?,
+                date_registered=COALESCE(date_registered, NOW())
+            WHERE user_id=?",
+            $params
+        );
     }
 
     /**
@@ -1040,7 +1044,7 @@ SQL;
      * @param string|null $semester
      * @param string|null $course
      */
-    public function updateUser(User $user, $semester = null, $course = null) {
+    public function updateUser(User $user, $semester = null, $course = null, bool $is_registration_event = false) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getDisplayNameOrder(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
@@ -1082,24 +1086,17 @@ UPDATE courses_users SET user_group=?, registration_section=?, manual_registrati
 WHERE term=? AND course=? AND user_id=?",
                 $params
             );
-
+            $date_registered_sql = $is_registration_event
+            ? ", date_registered=COALESCE(date_registered, NOW())"
+            : "";
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
-            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+            $this->course_db->query(
+                "UPDATE users SET rotating_section=?, registration_subsection=?{$date_registered_sql} WHERE user_id=?",
+                $params
+            );
         }
     }
 
-    /**
-     * Updates the date_registered timestamp for a user in a course to the current time..
-     *
-     * @param string $user_id
-     */
-    public function updateRegistrationDate(string $user_id): void {
-        $this->course_db->query(
-            "UPDATE users SET date_registered=NOW() WHERE user_id=?",
-            [$user_id]
-        );
-    }
     /**
      * @param string    $user_id
      * @param integer   $user_group
