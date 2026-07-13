@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const emit = defineEmits<{
-    (e: 'clustering-status', status: string): void;
-    (e: 'toggle-clustering-mode', payload: { isClusteringMode: boolean; gradeableId: string }): void;
-}>();
-
 const props = defineProps<{
     isClusteringMode: boolean;
     algorithms: Record<string, string>;
@@ -15,6 +10,11 @@ const props = defineProps<{
     csrfToken: string;
     canCreateClustering: boolean;
     gradeableId: string;
+}>();
+
+const emit = defineEmits<{
+    'clustering-status': [status: string];
+    'toggle-clustering-mode': [payload: { isClusteringMode: boolean; gradeableId: string }];
 }>();
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');

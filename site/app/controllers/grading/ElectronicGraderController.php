@@ -2551,7 +2551,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        if (empty($members_to_grade)) {
+        if (count($members_to_grade) === 0) {
             $members_to_grade[] = [
                 'submitter_id' => $submitter_id,
                 'active_version' => $component_version
