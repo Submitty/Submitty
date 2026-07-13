@@ -118,7 +118,7 @@
             <i class="fas fa-ellipsis-v"></i>
         </a>
         <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item key_to_click" tabindex="0" onClick="markPostUnread('{{activeThread.id}}', '{{post_id}}', '{{post_date}}');" title="Mark Post Unread" aria-label="Mark Post Unread">Mark Unread</a>
+            <a class="dropdown-item key_to_click" tabindex="0" onClick="markPostUnread('{{activeThread.id}}', '{{post_id}}', '{{post_date_raw}}');" title="Mark Post Unread" aria-label="Mark Post Unread">Mark Unread</a>
             {% if userGroup <= 3 or post.author.id == current_user %}
                 {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                     {#pass#}
