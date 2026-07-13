@@ -65,10 +65,47 @@ function addFieldOnChange() {
     }
 }
 
-function confirmationDialog(url, id) {
-    if (confirm(`Are you sure you want to remove ${id} image?`)) {
-        removeImage(url, id);
+function confirmationDialog(url, button) {
+    const id = button.dataset.imageId;
+    const aliases = (button.dataset.aliases || '').split(',').filter(Boolean);
+
+    if (aliases.length === 0) {
+        if (confirm(`Are you sure you want to remove ${id} from the configuration?`)) {
+            removeImage(url, id, []);
+        }
+        return;
     }
+
+    const aliasList = aliases.join(', ');
+    if (confirm(`${id} shares an image with these alias(es): ${aliasList}.\n\nRemove ${id} and its alias(es) from the configuration?`)) {
+        removeImage(url, id, aliases);
+    }
+}
+
+function removeImage(url, id, aliases = []) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            image: id,
+            aliases: aliases,
+            csrf_token: csrfToken,
+        },
+        success: (data) => {
+            const json = JSON.parse(data);
+            if (json.status === 'success') {
+                sessionStorage.setItem('successMessage', json.data);
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
 }
 
 function removeImage(url, id) {

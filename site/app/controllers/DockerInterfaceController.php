@@ -227,6 +227,26 @@ class DockerInterfaceController extends AbstractController {
             return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
         }
 
+        $removed = [$image];
+        $skipped = [];
+        $aliases = $_POST['aliases'] ?? [];
+        if (!is_array($aliases)) {
+            $aliases = [];
+        }
+
+        foreach ($aliases as $alias) {
+            if (
+                !is_string($alias)
+                || !preg_match($pattern, $alias)
+                || $this->core->getQueries()->getDockerImageOwner($alias) === false
+                || !$this->core->getQueries()->removeDockerImageOwner($alias, $user)
+            ) {
+                $skipped[] = $alias;
+                continue;
+            }
+            $removed[] = $alias;
+        }
+
         $jsonFilePath = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyDataPath(),
             "config",
@@ -234,9 +254,11 @@ class DockerInterfaceController extends AbstractController {
         );
         $json = FileUtils::readJsonFile($jsonFilePath);
 
-        foreach ($json as $capability_key => $capability) {
-            if (($key = array_search($image, $capability, true)) !== false) {
-                array_splice($json[$capability_key], $key, 1);
+        foreach ($removed as $name) {
+            foreach ($json as $capability_key => $capability) {
+                if (($key = array_search($name, $capability, true)) !== false) {
+                    array_splice($json[$capability_key], $key, 1);
+                }
             }
         }
 
@@ -245,7 +267,11 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
-                                                            Click \'Update dockers and machines\' to apply changes.');
-    }
+        $message = implode(', ', $removed) . " has been removed from the configuration. "
+            . "Click 'Update dockers and machines' to apply changes.";
+        if (count($skipped) > 0) {
+            $message .= ' Could not remove (not listed or managed by another user): ' . implode(', ', array_filter($skipped)) . '.';
+        }
+
+        return JsonResponse::getSuccessResponse($message);
 }
