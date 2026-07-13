@@ -4,6 +4,7 @@ const props = defineProps<{
     componentId: number;
     order: number;
     isChecked: boolean;
+    editMarksEnabled: boolean;
 }>();
 
 // PR #1: routed through events bridge to window.onToggleMarkById.
@@ -14,6 +15,9 @@ const emit = defineEmits<{
 
 function handleClick(event: MouseEvent): void {
     event.stopPropagation();
+    if (props.editMarksEnabled) {
+        return;
+    }
     emit('toggle-mark', { componentId: props.componentId, markId: props.markId });
 }
 </script>

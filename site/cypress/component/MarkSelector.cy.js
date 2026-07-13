@@ -2,7 +2,7 @@ import MarkSelector from '../../vue/src/components/ta_grading/MarkSelector.vue';
 import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
 describe('MarkSelector', () => {
-    const base = { markId: 5, componentId: 1, order: 2 };
+    const base = { markId: 5, componentId: 1, order: 2, editMarksEnabled: false };
 
     it('renders the mark order number', () => {
         cy.mount(MarkSelector, { props: { ...base, isChecked: false } });
@@ -35,6 +35,12 @@ describe('MarkSelector', () => {
         cy.mount(MarkSelector, { props: { ...base, isChecked: false, onToggleMark } });
         cy.get('[data-testid="mark-selector"]').click();
         cy.get('@onToggleMark').should('have.callCount', 1);
+    });
+
+    it('does not emit toggle-mark when editMarksEnabled is true', () => {
+        mountWithEmitSpy(MarkSelector, 'toggleMark', { ...base, editMarksEnabled: true }, 'toggleMark');
+        cy.get('[data-testid="mark-selector"]').click();
+        cy.get('@toggleMark').should('not.have.been.called');
     });
 
     it('handles markId 0 used for custom marks', () => {
