@@ -47,7 +47,6 @@ onMounted(() => {
     tabindex="-1"
     class="popup-form"
     data-testid="mark-stats-popup"
-    style="display: block; outline: none;"
     @keydown.escape="close"
   >
     <div
@@ -62,7 +61,7 @@ onMounted(() => {
         <div class="form-title">
           <h1>Mark Statistics</h1>
           <button
-            data-testid="close-button"
+            data-testid="mark-stats-close-button"
             class="btn btn-default close-button"
             tabindex="-1"
             type="button"
@@ -126,3 +125,10 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.popup-form {
+    display: block;
+    outline: none;
+}
+</style>

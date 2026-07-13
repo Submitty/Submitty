@@ -166,7 +166,7 @@ describe('ReceivedMarkForm', () => {
                     onClose,
                 },
             });
-            cy.get('[data-testid="close-button"]').click({ force: true });
+            cy.get('[data-testid="mark-stats-close-button"]').click({ force: true });
             cy.get('@onClose').should('have.been.calledOnce');
         });
 
