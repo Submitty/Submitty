@@ -2498,6 +2498,11 @@ class ElectronicGraderController extends AbstractController {
             $silent_edit = false;
         }
 
+        $cluster_mode = ($_POST['cluster_mode'] ?? 'false') === 'true';
+        if ($cluster_mode) {
+            $silent_edit = false; // Silent grading will not be allowed
+        }
+
         $logger_params = [
             "course_semester" => $this->core->getConfig()->getTerm(),
             "course_name" => $this->core->getDisplayedCourseName(),
@@ -2509,24 +2514,74 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        // Get / create the TA grade
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-        // Get / create the graded component
-        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+        $members_to_grade = [];
+        if ($cluster_mode) {
+            $config = $this->core->getCourseEntityManager()
+                ->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)
+                ->findWithClustersAndMembers($gradeable_id);
+                
+            if ($config !== null) {
+                $target_cluster = null;
+                foreach ($config->getClusters() as $cluster) {
+                    foreach ($cluster->getMembers() as $member) {
+                        $member_id = $member->getUserId() ?? $member->getTeamId();
+                        if ($member_id === $submitter_id) {
+                            $target_cluster = $cluster;
+                            break 2;
+                        }
+                    }
+                }
+                
+                if ($target_cluster !== null) {
+                    $active_versions = [];
+                    $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+                    foreach ($submitters as $sub) {
+                        $id = $sub['user_id'] ?? $sub['team_id'];
+                        $active_versions[$id] = (int)$sub['active_version'];
+                    }
+                    
+                    $valid_members = $target_cluster->getValidMembers($active_versions);
+                    foreach ($valid_members as $member) {
+                        $members_to_grade[] = [
+                            'submitter_id' => $member->getUserId() ?? $member->getTeamId(),
+                            'active_version' => $member->getActiveVersion()
+                        ];
+                    }
+                }
+            }
+        }
+        
+        if (empty($members_to_grade)) {
+            $members_to_grade[] = [
+                'submitter_id' => $submitter_id,
+                'active_version' => $component_version
+            ];
+        }
 
         try {
-            // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveGradedComponent(
-                $ta_graded_gradeable,
-                $graded_component,
-                $grader,
-                $custom_points,
-                $custom_message,
-                $marks,
-                $component_version,
-                !$silent_edit
-            );
+            foreach ($members_to_grade as $member_info) {
+                $m_submitter_id = $member_info['submitter_id'];
+                $m_component_version = $member_info['active_version'];
+                
+                $m_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $m_submitter_id, false);
+                if ($m_graded_gradeable === false) {
+                    continue;
+                }
+                
+                $m_ta_graded_gradeable = $m_graded_gradeable->getOrCreateTaGradedGradeable();
+                $m_graded_component = $m_ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                
+                $this->saveGradedComponent(
+                    $m_ta_graded_gradeable,
+                    $m_graded_component,
+                    $grader,
+                    $custom_points,
+                    $custom_message,
+                    $marks,
+                    $m_component_version,
+                    !$silent_edit
+                );
+            }
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
