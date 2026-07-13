@@ -69,7 +69,7 @@ class GradingClusterController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         $job_name = "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
-        
+
         $clustering_job_file = FileUtils::joinPaths($daemon_job_queue_path, $job_name);
         $processing_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . $job_name);
 

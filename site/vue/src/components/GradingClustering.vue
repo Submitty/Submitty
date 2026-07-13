@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+const emit = defineEmits<{
+    (e: 'clustering-status', status: string): void;
+    (e: 'toggle-clustering-mode', payload: { isClusteringMode: boolean; gradeableId: string }): void;
+}>();
+
 const props = defineProps<{
     isClusteringMode: boolean;
     algorithms: Record<string, string>;
@@ -13,8 +18,6 @@ const props = defineProps<{
 }>();
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');
-
-const emit = defineEmits(['clustering-status', 'toggle-clustering-mode']);
 
 function toggleClusteringMode() {
     emit('toggle-clustering-mode', {
@@ -42,15 +45,16 @@ async function onAlgorithmChange(event?: Event) {
                 const pollInterval = setInterval(async () => {
                     try {
                         const statusResponse = await fetch(props.checkClusteringStatusUrl);
-                        const statusResult = await statusResponse.json();
-                        if (statusResult.status === 'success' && statusResult.data.status === 'done') {
+                        const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string } };
+                        if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
                             clearInterval(pollInterval);
                             emit('clustering-status', 'done');
                             const urlParams = new URLSearchParams(window.location.search);
                             urlParams.set('cluster_mode', '1');
                             window.location.search = urlParams.toString();
                         }
-                    } catch (e) {
+                    }
+                    catch (e) {
                         console.error('Error checking clustering status:', e);
                         clearInterval(pollInterval);
                         emit('clustering-status', 'error');

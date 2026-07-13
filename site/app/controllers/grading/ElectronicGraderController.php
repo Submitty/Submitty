@@ -2519,7 +2519,7 @@ class ElectronicGraderController extends AbstractController {
             $config = $this->core->getCourseEntityManager()
                 ->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)
                 ->findWithClustersAndMembers($gradeable_id);
-                
+
             if ($config !== null) {
                 $target_cluster = null;
                 foreach ($config->getClusters() as $cluster) {
@@ -2531,15 +2531,15 @@ class ElectronicGraderController extends AbstractController {
                         }
                     }
                 }
-                
+
                 if ($target_cluster !== null) {
                     $active_versions = [];
                     $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
                     foreach ($submitters as $sub) {
                         $id = $sub['user_id'] ?? $sub['team_id'];
-                        $active_versions[$id] = (int)$sub['active_version'];
+                        $active_versions[$id] = (int) $sub['active_version'];
                     }
-                    
+
                     $valid_members = $target_cluster->getValidMembers($active_versions);
                     foreach ($valid_members as $member) {
                         $members_to_grade[] = [
@@ -2550,7 +2550,7 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
         }
-        
+
         if (empty($members_to_grade)) {
             $members_to_grade[] = [
                 'submitter_id' => $submitter_id,
@@ -2562,15 +2562,15 @@ class ElectronicGraderController extends AbstractController {
             foreach ($members_to_grade as $member_info) {
                 $m_submitter_id = $member_info['submitter_id'];
                 $m_component_version = $member_info['active_version'];
-                
+
                 $m_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $m_submitter_id, false);
                 if ($m_graded_gradeable === false) {
                     continue;
                 }
-                
+
                 $m_ta_graded_gradeable = $m_graded_gradeable->getOrCreateTaGradedGradeable();
                 $m_graded_component = $m_ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                
+
                 $this->saveGradedComponent(
                     $m_ta_graded_gradeable,
                     $m_graded_component,
