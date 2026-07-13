@@ -631,6 +631,17 @@ CREATE TABLE public.migrations_system (
 
 
 --
+-- Name: notification_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notification_default (
+    user_id character varying NOT NULL,
+    term character varying NOT NULL,
+    course character varying NOT NULL
+);
+
+
+--
 -- Name: saml_mapped_users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -896,6 +907,14 @@ ALTER TABLE ONLY public.migrations_master
 
 ALTER TABLE ONLY public.migrations_system
     ADD CONSTRAINT migrations_system_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notification_default notification_default_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notification_default
+    ADD CONSTRAINT notification_default_pkey PRIMARY KEY (user_id);
 
 
 --
