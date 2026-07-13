@@ -292,16 +292,9 @@ class DockerInterfaceController extends AbstractController {
         $message = implode(', ', $removed) . " has been removed from the configuration. "
             . "Click 'Update dockers and machines' to apply changes.";
         if (count($skipped) > 0) {
-<<<<<<< Updated upstream
-            $message .= ' Could not remove (not listed or managed by another user): ' . implode(', ', array_filter($skipped)) . '.';
-        }
-
-        return JsonResponse::getSuccessResponse($message);
-=======
             $message .= ' Could not remove (not listed or managed by another user): ' . implode(', ', $skipped) . '.';
         }
 
         return JsonResponse::getSuccessResponse($message);
     }
->>>>>>> Stashed changes
 }
