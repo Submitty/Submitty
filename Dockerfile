@@ -35,6 +35,9 @@ RUN add-apt-repository ppa:ondrej/php -y \
     php8.2-mbstring \
     php8.2-curl \
     php8.2-zip \
+    php8.2-ldap \
+    php8.2-sqlite3 \
+    php8.2-imagick \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
