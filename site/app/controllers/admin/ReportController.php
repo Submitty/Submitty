@@ -37,32 +37,6 @@ class ReportController extends AbstractController {
                                             // wait for the job to complete before timing out and returning failure
     const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
-    /**
-     * Rainbow grades summaries that can be generated from the GUI. Every value except 'all' is a Makefile
-     * target in the RainbowGrades repo, 'all' runs `make tables` to build every sorted summary at once.
-     *
-     * Keep this in sync with the sort-order targets in RainbowGrades/MakefileHelper
-     * and with VALID_SORT_ORDERS in sbin/auto_rainbow_grades.py.
-     */
-    const RAINBOW_GRADES_SORT_ORDERS = [
-        'all' => 'All sorted summaries',
-        'overall' => 'Overall',
-        'name' => 'By Name',
-        'section' => 'By Section',
-        'lab' => 'By Lab',
-        'hw' => 'By Homework',
-        'test' => 'By Test',
-        'quiz' => 'By Quiz',
-        'exam' => 'By Exam',
-        'reading' => 'By Reading',
-        'worksheet' => 'By Worksheet',
-        'project' => 'By Project',
-        'participation' => 'By Participation',
-        'test_exam' => 'By Test & Exam',
-        'zone' => 'By Zone',
-    ];
-
-
     private $all_overrides = [];
     private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
 
@@ -830,7 +804,6 @@ class ReportController extends AbstractController {
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
-                'sort_order_options' => self::RAINBOW_GRADES_SORT_ORDERS,
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
                 'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
                 'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
@@ -886,18 +859,12 @@ class ReportController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     public function executeBuildForm(): JsonResponse {
-        $sort_order = $_POST['sort_order'] ?? 'overall';
-        if (!array_key_exists($sort_order, self::RAINBOW_GRADES_SORT_ORDERS)) {
-            $sort_order = 'overall';
-        }
-
         // Configure json to go into jobs queue
         $job_json = [
             'job' => 'RunAutoRainbowGrades',
             'source' => isset($_POST['source']) ? $_POST['source'] : 'submitty_gui',
             'semester' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
-            'sort_order' => $sort_order,
         ];
 
         // Encode
@@ -1105,38 +1072,19 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
-        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
-
-        //Find any sorts that were already done
-        $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
-
-        $selected_sort = 'overall';
-        $requested = $_GET['sort'] ?? null;
-        if (is_string($requested) && isset($available_sorts[$requested])) {
-            $selected_sort = $requested;
-        }
-        elseif (!isset($available_sorts['overall']) && count($available_sorts) > 0) {
-            $selected_sort = array_key_first($available_sorts);
-        }
-
-        $grade_file = null;
-        if (isset($available_sorts[$selected_sort])) {
-            $grade_path = FileUtils::joinPaths($rainbow_grades_dir, $available_sorts[$selected_sort]['file']);
-            if (file_exists($grade_path)) {
-                $grade_file = file_get_contents($grade_path);
-            }
-        }
-
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+        $grade_file = null;
+        if (file_exists($grade_path)) {
+            $grade_file = file_get_contents($grade_path);
+        }
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file,
-                $grade_summaries_last_run,
-                $available_sorts,
-                $selected_sort
+                $grade_summaries_last_run
             )
         );
     }

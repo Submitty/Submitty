@@ -22,8 +22,8 @@ from pathlib import Path
 import getpass
 
 # Verify correct number of command line arguments
-if len(sys.argv) not in (4, 5):
-    raise Exception('You must pass 3 or 4 command line arguments: semester, course, source, and optionally sort_order')
+if len(sys.argv) != 4:
+    raise Exception('You must pass 3 command line arguments - semester, course, and source')
 
 # Get path to current file directory
 current_dir = os.path.dirname(__file__)
@@ -62,22 +62,6 @@ source = sys.argv[3]
 
 if source not in ["submitty_gui", "submitty_daemon"]:
     raise Exception('ERROR: Source must be either "submitty_gui" or "submitty_daemon"')
-
-# Rainbow grades summaries that may be requested. Every value except 'all' is a Makefile
-# target (each runs ./process_grades.out by_<x>); 'all' runs `make tables` to build every
-# sorted summary. Keep in sync with RainbowGrades/MakefileHelper and with
-# ReportController::RAINBOW_GRADES_SORT_ORDERS.
-VALID_SORT_ORDERS = frozenset({
-    'all', 'overall', 'name', 'section', 'lab', 'hw', 'test', 'quiz',
-    'exam', 'reading', 'worksheet', 'project', 'participation', 'test_exam', 'zone',
-})
-
-# Optional 4th argument: which sorted summary to build. Defaults to 'overall' so the
-# nightly build and any caller that omits it keep the existing (overall-only) behavior.
-sort_order = sys.argv[4] if len(sys.argv) == 5 else 'overall'
-if sort_order not in VALID_SORT_ORDERS:
-    raise Exception('ERROR: Invalid sort_order "{}"'.format(sort_order))
-
 
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
