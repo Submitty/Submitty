@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
-use app\entities\grading_cluster\GradingCluster;
 use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
-use app\entities\grading_cluster\GradingClusterMember;
 use app\libraries\response\JsonResponse;
-use app\libraries\grading_cluster\DummySplitAlgorithm;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
+use app\libraries\FileUtils;
 
 class GradingClusterController extends AbstractController {
     /**
@@ -34,57 +32,24 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid or missing algorithm parameter.");
         }
 
-        $em = $this->core->getCourseEntityManager();
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
-        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
-        if ($submitters === []) {
-            return JsonResponse::getErrorResponse("No active submissions found for this gradeable.");
-        }
+        $clustering_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json");
 
-        $cluster_groups = match ($algorithm) {
-            GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
-        };
+        $clustering_job_data = [
+            "job" => "GradingClustering",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable_id,
+            "algorithm" => $algorithm->value
+        ];
 
-        // Deleting the config cascades and deletes all associated clusters and members
-        $em->getRepository(GradingClusterConfig::class)->deleteByGradeableId($gradeable_id);
-
-        $config = new GradingClusterConfig($gradeable_id, $algorithm);
-        $em->persist($config);
-        $em->flush(); // Save config to get its ID
-
-        $cluster_names = [];
-        foreach ($cluster_groups as $cluster_name => $members) {
-            if ($members !== []) {
-                $cluster_names[] = $cluster_name;
-            }
-        }
-
-        if (!empty($cluster_names)) {
-            $cluster_ids_map = $em->getRepository(GradingClusterConfig::class)
-                ->bulkInsertClusters($config->getId(), $cluster_names);
-
-            $bulkMembersData = [];
-            foreach ($cluster_groups as $cluster_name => $members) {
-                if ($members === []) {
-                    continue;
-                }
-                $cluster_id = $cluster_ids_map[$cluster_name] ?? null;
-                if ($cluster_id === null) {
-                    continue;
-                }
-                foreach ($members as $member) {
-                    $bulkMembersData[] = [
-                        'cluster_id'     => $cluster_id,
-                        'user_id'        => $member['user_id'] ?? null,
-                        'team_id'        => $member['team_id'] ?? null,
-                        'active_version' => (int) $member['active_version']
-                    ];
-                }
-            }
-
-            if (!empty($bulkMembersData)) {
-                $em->getRepository(GradingClusterConfig::class)->bulkInsertMembers($bulkMembersData);
-            }
+        if (
+            (!is_writable($clustering_job_file) && file_exists($clustering_job_file))
+            || file_put_contents($clustering_job_file, json_encode($clustering_job_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return JsonResponse::getErrorResponse("Failed to write clustering job to daemon queue.");
         }
 
         return JsonResponse::getSuccessResponse([]);
