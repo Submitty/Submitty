@@ -296,11 +296,11 @@ class AuthenticationController extends AbstractController {
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repository.";
-            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return JsonResponse::getFailResponse($msg);
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
+        return JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]);
     }
 
     /**
