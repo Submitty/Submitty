@@ -127,6 +127,10 @@
                     'createClusteringUrl': create_clustering_url,
                     'csrfToken': core.getCsrfToken(),
                     'canCreateClustering': full_access_grader_permission
+                },
+                'events': {
+                    'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); }',
+                    'toggle-clustering-mode': 'handleToggleClusteringMode'
                 }
             } %}
         {% endif %}

@@ -50,7 +50,7 @@ $(document).ready(() => {
 
     if (!localStorage.getItem(gradeableMessageStorageKey()) && document.getElementById('gradeable-message-data').dataset.userlevel !== '1') {
         const form = $('#gradeable-message-popup');
-        form.css('display', 'block');
+        form.show();
         form.find('.form-body').scrollTop(0);
     }
 });
@@ -67,7 +67,7 @@ function gradeableMessageAgree() {
     if (!localStorage.getItem(gradeableMessageStorageKey())) {
         localStorage.setItem(gradeableMessageStorageKey(), 'agreed');
         const form = $('#gradeable-message-popup');
-        form.css('display', 'none');
+        form.hide();
     }
     return false;
 }
@@ -78,15 +78,15 @@ function gradeableMessageCancel() {
 
 function showGradeableMessage() {
     const message = $('#gradeable-message-popup');
-    message.css('display', 'block');
-    $('#agree-button').css('display', 'none');
-    $('#cancel-button').css('display', 'none');
-    $('#close-hidden-button').css('display', 'block');
+    message.show();
+    $('#agree-button').hide();
+    $('#cancel-button').hide();
+    $('#close-hidden-button').show();
 }
 
 function hideGradeableMessage() {
     const message = $('#gradeable-message-popup');
-    message.css('display', 'none');
+    message.hide();
 }
 
 let clusteringWarningCallback = null;
@@ -94,7 +94,7 @@ let clusteringWarningCallback = null;
 function showClusteringWarningMessage(callback) {
     clusteringWarningCallback = callback;
     const message = $('#clustering-warning-popup');
-    message.css('display', 'block');
+    message.show();
 }
 
 function clusteringWarningMessageAgree() {
@@ -103,7 +103,7 @@ function clusteringWarningMessageAgree() {
         sessionStorage.setItem(`clusteringWarningAccepted_${dataElement.dataset.gradeable}`, 'true');
     }
     const message = $('#clustering-warning-popup');
-    message.css('display', 'none');
+    message.hide();
     if (clusteringWarningCallback) {
         clusteringWarningCallback();
         clusteringWarningCallback = null;
@@ -112,8 +112,30 @@ function clusteringWarningMessageAgree() {
 
 function clusteringWarningMessageCancel() {
     const message = $('#clustering-warning-popup');
-    message.css('display', 'none');
+    message.hide();
     clusteringWarningCallback = null;
+}
+
+function handleToggleClusteringMode(payload) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (payload.isClusteringMode) {
+        urlParams.delete('cluster_mode');
+        urlParams.delete('algorithm');
+        window.location.search = urlParams.toString();
+    }
+    else {
+        const hasAcceptedWarning = sessionStorage.getItem(`clusteringWarningAccepted_${payload.gradeableId}`) === 'true';
+        if (!hasAcceptedWarning && typeof window.showClusteringWarningMessage === 'function') {
+            window.showClusteringWarningMessage(() => {
+                urlParams.set('cluster_mode', '1');
+                window.location.search = urlParams.toString();
+            });
+        }
+        else {
+            urlParams.set('cluster_mode', '1');
+            window.location.search = urlParams.toString();
+        }
+    }
 }
 
 function getCollapsedSections() {

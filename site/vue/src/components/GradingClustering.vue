@@ -13,34 +13,19 @@ const props = defineProps<{
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');
 
-function toggleClusteringMode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (props.isClusteringMode) {
-        urlParams.delete('cluster_mode');
-        urlParams.delete('algorithm');
-        window.location.search = urlParams.toString();
-    }
-    else {
-        const hasAcceptedWarning = sessionStorage.getItem(`clusteringWarningAccepted_${props.gradeableId}`) === 'true';
-        const win = window as unknown as { showClusteringWarningMessage?: (cb: () => void) => void };
-        if (!hasAcceptedWarning && typeof win.showClusteringWarningMessage === 'function') {
-            win.showClusteringWarningMessage(() => enterClusteringMode(urlParams));
-        }
-        else {
-            enterClusteringMode(urlParams);
-        }
-    }
-}
+const emit = defineEmits(['clustering-status', 'toggle-clustering-mode']);
 
-function enterClusteringMode(urlParams: URLSearchParams) {
-    urlParams.set('cluster_mode', '1');
-    window.location.search = urlParams.toString();
+function toggleClusteringMode() {
+    emit('toggle-clustering-mode', {
+        isClusteringMode: props.isClusteringMode,
+        gradeableId: props.gradeableId,
+    });
 }
 
 async function onAlgorithmChange(event?: Event) {
     const value = event ? (event.target as HTMLSelectElement).value : selectedAlgorithm.value;
     if (props.isClusteringMode && value) {
-        document.body.setAttribute('data-clustering-status', 'fetching');
+        emit('clustering-status', 'fetching');
         const formData = new FormData();
         formData.append('csrf_token', props.csrfToken);
         formData.append('algorithm', value);
@@ -50,7 +35,7 @@ async function onAlgorithmChange(event?: Event) {
                 method: 'POST',
                 body: formData,
             });
-            document.body.setAttribute('data-clustering-status', 'done');
+            emit('clustering-status', 'done');
 
             const result = (await response.json()) as { status: string; message?: string };
             if (result.status === 'success') {
@@ -66,7 +51,7 @@ async function onAlgorithmChange(event?: Event) {
         }
         catch (error) {
             console.error('Error:', error);
-            document.body.setAttribute('data-clustering-status', 'error');
+            emit('clustering-status', 'error');
             alert('Failed to connect to the server.');
         }
     }
@@ -83,8 +68,8 @@ async function onAlgorithmChange(event?: Event) {
   <select
     v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
     v-model="selectedAlgorithm"
-    class="form-control"
-    style="width: auto; margin: 0;"
+    class="form-control clustering-select"
+    data-testid="clustering-algorithm-select"
     @change="onAlgorithmChange"
   >
     <option
@@ -102,3 +87,10 @@ async function onAlgorithmChange(event?: Event) {
     </option>
   </select>
 </template>
+
+<style scoped>
+.clustering-select {
+    width: auto;
+    margin: 0;
+}
+</style>

@@ -7,7 +7,7 @@ describe('Grading Clustering Mode', () => {
 
         // Verify initial state
         cy.get('button').contains('Go to Clustering Mode').should('be.visible');
-        cy.get('select').should('not.exist');
+        cy.get('[data-testid="clustering-algorithm-select"]').should('not.exist');
 
         // Click to enter clustering mode
         cy.get('button').contains('Go to Clustering Mode').click();
@@ -24,13 +24,12 @@ describe('Grading Clustering Mode', () => {
 
         // Verify clustering state
         cy.get('button').contains('Exit Clustering Mode').should('be.visible');
-        cy.get('select').should('be.visible');
-        cy.get('select option').contains('DummySplit').should('be.visible');
+        cy.get('[data-testid="clustering-algorithm-select"]').should('be.visible');
+        cy.get('[data-testid="clustering-algorithm-select"] option').contains('DummySplit').should('be.visible');
 
         // Select the algorithm
-        cy.intercept('POST', '**').as('createClustering');
-        cy.get('select').select('dummy_split');
-        cy.get('select').trigger('change');
+        cy.intercept('POST', '**/create_clustering').as('createClustering');
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
         cy.wait('@createClustering');
 
         // Page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
