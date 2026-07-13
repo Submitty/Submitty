@@ -518,7 +518,7 @@ HTML;
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
      * @param array<string,bool> $grading_details_columns
-     * @param array<string, array<number, array{
+     * @param array<string,array<number,array{
      *      gc_id: number,
      *      gc_title: string,
      *      grader_id: string,

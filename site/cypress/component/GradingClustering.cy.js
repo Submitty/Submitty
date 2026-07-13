@@ -8,6 +8,7 @@ describe('GradingClustering', () => {
         },
         currentAlgorithm: '',
         createClusteringUrl: '/test/clustering',
+        checkClusteringStatusUrl: '/test/clustering_status',
         csrfToken: 'test-token',
         canCreateClustering: true,
         gradeableId: 'test_gradeable',
@@ -73,5 +74,34 @@ describe('GradingClustering', () => {
         cy.get('select').select('dummy_split');
         cy.wait('@createClusteringFail');
         cy.get('@alertStub').should('have.been.calledWith', 'Custom error message');
+    });
+
+    it('emits clustering-status events during successful algorithm change', () => {
+        cy.intercept('POST', '/test/clustering', {
+            statusCode: 200,
+            body: { status: 'success' },
+        }).as('createClusteringSuccess');
+
+        cy.intercept('GET', '/test/clustering_status', {
+            statusCode: 200,
+            body: { status: 'success', data: { status: 'done' } },
+        }).as('checkClusteringStatus');
+
+        const onClusteringStatus = cy.stub().as('clusteringStatusStub');
+
+        cy.mount(GradingClustering, {
+            props: {
+                ...defaultProps,
+                isClusteringMode: true,
+                onClusteringStatus: onClusteringStatus,
+            },
+        });
+
+        cy.get('select').select('dummy_split');
+        cy.wait('@createClusteringSuccess');
+        cy.wait('@checkClusteringStatus');
+
+        cy.get('@clusteringStatusStub').should('have.been.calledWith', 'fetching');
+        cy.get('@clusteringStatusStub').should('have.been.calledWith', 'done');
     });
 });
