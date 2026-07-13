@@ -1,5 +1,5 @@
-/* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
-/* global csrfToken, displayErrorMessage, displaySuccessMessage */
+/* exported collapseSection, openRemoveDialog, submitRemoveImage, removeImage, addImage, updateImage */
+/* global csrfToken, displayErrorMessage, displaySuccessMessage, showPopup, closePopup */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -108,12 +108,59 @@ function removeImage(url, id, aliases = []) {
     });
 }
 
-function removeImage(url, id) {
+let removeDialogUrl = null;
+
+function openRemoveDialog(button, url) {
+    removeDialogUrl = url;
+    const primary = button.dataset.imageId;
+    const aliases = (button.dataset.aliases || '').split(',').filter(Boolean);
+
+    const options = $('#remove-image-options');
+    options.empty();
+
+    const names = [{ name: primary, primary: true }]
+        .concat(aliases.map((a) => ({ name: a, primary: false })));
+
+    names.forEach((entry, i) => {
+        const checkboxId = `remove-image-option-${i}`;
+        const wrapper = $('<div>', { class: 'remove-image-option' });
+        const label = $('<label>', { for: checkboxId });
+        const checkbox = $('<input>', {
+            type: 'checkbox',
+            id: checkboxId,
+            class: 'remove-image-checkbox',
+            value: entry.name,
+        }).prop('checked', entry.primary);
+        label.append(checkbox);
+        label.append(document.createTextNode(` ${entry.name}${entry.primary ? ' (primary)' : ''}`));
+        wrapper.append(label);
+        options.append(wrapper);
+    });
+
+    $('#remove-image-error').text('');
+    showPopup('#remove-image-form');
+}
+
+function submitRemoveImage() {
+    const selected = $('.remove-image-checkbox:checked').map(function () {
+        return $(this).val();
+    }).get();
+
+    if (selected.length === 0) {
+        $('#remove-image-error').text('Select at least one name to remove.');
+        return;
+    }
+
+    closePopup('remove-image-form');
+    removeImage(removeDialogUrl, selected);
+}
+
+function removeImage(url, images) {
     $.ajax({
         url: url,
         type: 'POST',
         data: {
-            image: id,
+            images: images,
             csrf_token: csrfToken,
         },
         success: (data) => {

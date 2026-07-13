@@ -212,19 +212,41 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/admin/remove_image", methods: ["POST"])]
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
-        $image = $_POST['image'] ?? '';
 
-        if (!preg_match($pattern, $image)) {
-            return JsonResponse::getFailResponse('Invalid Docker image name.');
+        // Accept a list of names (primary and/or aliases); fall back to the legacy single-image param.
+        $images = $_POST['images'] ?? null;
+        if (!is_array($images)) {
+            $images = isset($_POST['image']) ? [$_POST['image']] : [];
         }
+        $images = array_values(array_unique(array_filter(
+            $images,
+            fn($i) => is_string($i) && $i !== ''
+        )));
 
-        if ($this->core->getQueries()->getDockerImageOwner($image) === false) {
-            return JsonResponse::getFailResponse('This image is not listed.');
+        if (count($images) === 0) {
+            return JsonResponse::getFailResponse('No image selected for removal.');
         }
 
         $user = $this->core->getUser();
-        if (!$this->core->getQueries()->removeDockerImageOwner($image, $user)) {
-            return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
+        $removed = [];
+        $skipped = [];
+
+        foreach ($images as $image) {
+            if (
+                !preg_match($pattern, $image)
+                || $this->core->getQueries()->getDockerImageOwner($image) === false
+                || !$this->core->getQueries()->removeDockerImageOwner($image, $user)
+            ) {
+                $skipped[] = $image;
+                continue;
+            }
+            $removed[] = $image;
+        }
+
+        if (count($removed) === 0) {
+            return JsonResponse::getFailResponse(
+                'Nothing was removed. The selected image(s) are not listed or are managed by another instructor/superuser.'
+            );
         }
 
         $removed = [$image];
@@ -270,8 +292,16 @@ class DockerInterfaceController extends AbstractController {
         $message = implode(', ', $removed) . " has been removed from the configuration. "
             . "Click 'Update dockers and machines' to apply changes.";
         if (count($skipped) > 0) {
+<<<<<<< Updated upstream
             $message .= ' Could not remove (not listed or managed by another user): ' . implode(', ', array_filter($skipped)) . '.';
         }
 
         return JsonResponse::getSuccessResponse($message);
+=======
+            $message .= ' Could not remove (not listed or managed by another user): ' . implode(', ', $skipped) . '.';
+        }
+
+        return JsonResponse::getSuccessResponse($message);
+    }
+>>>>>>> Stashed changes
 }
