@@ -321,12 +321,18 @@ table tr.table-header {
     border-radius: 4px;
 }
 
-.table-striped > tbody > tr:nth-child(even) {
+/* Table stripe pattern should skip withdrawn students in case they are hidden */
+
+.table-striped > tbody > tr:nth-child(even of :not([data-student$="grade-withdrawn"])) {
     background: var(--standard-hover-light-gray);
 }
 
-.table-striped > tbody > tr:nth-child(odd) {
+.table-striped > tbody > tr:nth-child(odd of :not([data-student$="grade-withdrawn"])) {
     background: var(--default-white);
+}
+
+.table-striped > tbody > tr[data-student$="grade-withdrawn"] {
+    background: var(--standard-light-gray);
 }
 
 .table > thead > tr,
