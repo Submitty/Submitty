@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { restoreSort } from '../../ts/sort-table-by-column';
 import { onMounted } from 'vue';
 
 const props = defineProps<{
     tableId: string;
 }>();
 
+const emit = defineEmits<{
+    'restore-sort': [tableId: string];
+}>();
+
 onMounted(() => {
-    window.addEventListener('DOMContentLoaded', () => {
-        restoreSort(props.tableId);
-    });
+    emit('restore-sort', props.tableId);
 });
 </script>
 
