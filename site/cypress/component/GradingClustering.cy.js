@@ -73,8 +73,7 @@ describe('GradingClustering', () => {
     });
 
     it('emits clustering-error on network failure during creation', () => {
-        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createNetworkError');
-        
+        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createNetworkError');    
         mountWithEmitSpy(GradingClustering, 'clusteringError', {
             ...defaultProps,
             isClusteringMode: true,
@@ -115,7 +114,8 @@ describe('GradingClustering', () => {
             pollCount++;
             if (pollCount === 1) {
                 req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'processing' } } });
-            } else {
+            } 
+            else {
                 req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'done' } } });
             }
         }).as('checkClusteringStatus');
@@ -129,7 +129,6 @@ describe('GradingClustering', () => {
         cy.wait('@createClusteringSuccess');
         cy.wait('@checkClusteringStatus'); // First poll (processing)
         cy.wait('@checkClusteringStatus'); // Second poll (done)
-        
         cy.get('@clusteringDoneStub').should('have.been.called');
     });
 
@@ -143,9 +142,7 @@ describe('GradingClustering', () => {
             statusCode: 200,
             body: { status: 'success', data: { status: 'done' } },
         }).as('checkClusteringStatus');
-
-        // Note: For multiple stubs on the same component mount, we stick to standard cy.mount
-        // instead of mountWithEmitSpy, because mountWithEmitSpy only stubs a single event.
+        
         const onClusteringStatus = cy.stub().as('clusteringStatusStub');
         const onClusteringDone = cy.stub().as('clusteringDoneStub');
 

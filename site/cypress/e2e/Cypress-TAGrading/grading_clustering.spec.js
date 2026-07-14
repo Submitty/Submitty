@@ -18,8 +18,6 @@ describe('Grading Clustering Mode', () => {
 
         // The URL should now have ?cluster_mode=1 and page reloads
         cy.url().should('include', 'cluster_mode=1');
-
-        // Verify clustering state
         cy.get('button').contains('Exit Clustering Mode').should('be.visible');
         cy.get('[data-testid="clustering-algorithm-select"]').should('be.visible');
         cy.get('[data-testid="clustering-algorithm-select"] option').contains('DummySplit').should('be.visible');
@@ -29,7 +27,7 @@ describe('Grading Clustering Mode', () => {
         cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
         cy.wait('@createClustering');
 
-        // Page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
+        // page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
         cy.contains('.details-info-header', 'Cluster A', { timeout: 15000 }).should('exist');
         cy.contains('.details-info-header', 'Cluster B').should('exist');
 
@@ -47,8 +45,6 @@ describe('Grading Clustering Mode', () => {
 
         // assign a score
         cy.get('body').type('{0}');
-        
-        // Save the grade
         cy.get('[data-testid="save-tools-save"]').first().click();
 
         // Verify saving finishes
@@ -59,8 +55,6 @@ describe('Grading Clustering Mode', () => {
         // we should still see clusters
         cy.contains('.details-info-header', 'Cluster A', { timeout: 15000 }).should('exist');
         cy.get('button').contains('Exit Clustering Mode').click();
-
-        // Verify exit
         cy.url().should('not.include', 'cluster_mode=1');
         cy.get('button').contains('Go to Clustering Mode').should('be.visible');
         cy.get('.details-info-header').contains('Cluster A').should('not.exist');
