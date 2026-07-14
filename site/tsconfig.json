@@ -4,8 +4,9 @@
         "./ts/**/*.ts",
         "./tests/**/*.ts",
         "./vue/src/**/*.vue",
-        "./public/js/**/*.js"
-, "vue/src/ts/sort-table-by-column.ts"    ],
+        "./public/js/**/*.js",
+        "vue/src/ts/sort-table-by-column.ts"
+    ],
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
