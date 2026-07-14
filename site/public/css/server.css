@@ -331,6 +331,10 @@ table tr.table-header {
     background: var(--default-white);
 }
 
+tr.highlighted-row td:not(.no-highlight) {
+    background: var(--standard-focus-cornflower-blue);
+}
+
 .table > thead > tr,
 .table > tfoot > tr {
     background: var(--standard-hover-light-gray);
