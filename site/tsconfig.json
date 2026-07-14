@@ -5,7 +5,6 @@
         "./tests/**/*.ts",
         "./vue/src/**/*.vue",
         "./public/js/**/*.js",
-        "vue/src/ts/sort-table-by-column.ts"
     ],
     "compilerOptions": {
         "baseUrl": ".",

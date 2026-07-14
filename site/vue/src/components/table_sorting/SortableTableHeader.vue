@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { colDataTypes } from '../../ts/sort-table-by-column';
+import { colDataTypes } from '../../../../ts/sort-table-by-column';
 
 const props = defineProps<{
     tableId: string;

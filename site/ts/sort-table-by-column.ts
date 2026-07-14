@@ -33,7 +33,7 @@ interface SavedSortData {
  * @param options additional options used for sorting special tables
  * @returns none
  */
-export function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes, using_row_groups: boolean = false): void {
+function sortTableByColumn(table_id: string, sort_key: string, col_data_type: colDataTypes, using_row_groups: boolean = false): void {
     // retrieve the previous sort data from session storage
     let prev_sort_key: string | undefined = undefined;
     let prev_sort_direction: string = 'ASC';
@@ -74,7 +74,7 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
  * @param table_id the id of the table whose sorting data you want to restore
  * @returns none
  */
-export function restoreTableSort(table_id: string) {
+function restoreTableSort(table_id: string) {
     const sort_data_string: string | null = sessionStorage.getItem(`${table_id}-sorting-data`);
     if (sort_data_string === null) {
         return;
