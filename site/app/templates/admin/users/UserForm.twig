@@ -20,7 +20,7 @@
 		</a>
 		<label for="user_id">
             User ID:
-            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off" list="possible_users"/>
+            <input class="readonly" type="text" name="user_id" id="user_id" data-testid="user-id-input" readonly="readonly" placeholder="(Required)" autocomplete="off" list="possible_users"/>
             <datalist id="possible_users"> </datalist>
         </label>
         <label for="user_numeric_id">
@@ -58,7 +58,7 @@
         {% if use_database %}
             <label>
                 Password:
-                <input type="password" name="user_password" placeholder="New Password" />
+                <input type="password" data-testid="password-input" name="user_password" placeholder="New Password" />
             </label>
         {% endif %}
         <label for="registered_section" class="full-width">

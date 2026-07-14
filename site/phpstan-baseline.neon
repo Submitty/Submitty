@@ -593,15 +593,6 @@ parameters:
 
 		-
 			rawMessage: '''
-				Call to deprecated method RedirectOnlyResponse() of class app\libraries\response\MultiResponse:
-				should not be used, just return RedirectResponse directly
-			'''
-			identifier: staticMethod.deprecated
-			count: 1
-			path: app/controllers/NotificationController.php
-
-		-
-			rawMessage: '''
 				Call to deprecated method webOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return WebResponse directly
 			'''
@@ -3438,18 +3429,6 @@ parameters:
 		-
 			rawMessage: 'Method app\controllers\pdf\PDFController::showGraderPDFEmbedded() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/controllers/pdf/PDFController.php
-
-		-
-			rawMessage: 'Only booleans are allowed in a ternary operator condition, mixed given.'
-			identifier: ternary.condNotBoolean
-			count: 2
-			path: app/controllers/pdf/PDFController.php
-
-		-
-			rawMessage: 'Only booleans are allowed in an if condition, mixed given.'
-			identifier: if.condNotBoolean
 			count: 1
 			path: app/controllers/pdf/PDFController.php
 
@@ -6348,7 +6327,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 12
+			count: 14
 			path: app/libraries/database/DatabaseQueries.php
 
 		-

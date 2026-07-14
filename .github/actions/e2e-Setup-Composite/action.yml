@@ -57,7 +57,7 @@ runs:
         sudo systemctl disable php8.1-fpm
       shell: bash
 
-    - uses: shivammathur/setup-php@2.37.0
+    - uses: shivammathur/setup-php@2.37.2
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
