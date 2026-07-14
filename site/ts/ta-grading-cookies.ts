@@ -31,21 +31,20 @@ window.filter_null_section = () => {
 };
 
 window.filter_withdrawn_students = () => {
-    const withdrawn_students = window.Cookies.get('include_withdrawn_students') || 'omit';
+    const withdrawn_students_visibility = window.Cookies.get('include_withdrawn_students') || 'omit';
 
-    // even if this does not exist, we can still hide and show it
-    // This helps as we don't have to determine which page we are on
-    const withdrawn_electronic = $('[data-student="electronic-grade-withdrawn"]');
-    const withdrawn_simple = $('[data-student="simple-grade-withdrawn"]');
+    // includes electronic-grade-withdrawn and simple-grade-withdrawn
+    // for the details and display pages respectively
+    const withdrawn_student_rows = $('[data-student$="grade-withdrawn"]');
 
-    if (withdrawn_students === 'include') {
-        withdrawn_electronic.hide();
-        withdrawn_simple.hide();
+    if (withdrawn_students_visibility === 'include') {
+        withdrawn_student_rows.hide();
+        withdrawn_student_rows.addClass('hidden-withdrawn-student-row');
         window.Cookies.set('include_withdrawn_students', 'omit', cookieArguments);
     }
     else {
-        withdrawn_electronic.show();
-        withdrawn_simple.show();
+        withdrawn_student_rows.show();
+        withdrawn_student_rows.removeClass('hidden-withdrawn-student-row');
         window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
     }
 };
