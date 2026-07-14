@@ -1,4 +1,5 @@
 import GradingClustering from '../../vue/src/components/GradingClustering.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils';
 
 describe('GradingClustering', () => {
     const defaultProps = {
@@ -61,19 +62,75 @@ describe('GradingClustering', () => {
             body: { status: 'fail', message: 'Custom error message' },
         }).as('createClusteringFail');
 
-        cy.mount(GradingClustering, {
-            props: {
-                ...defaultProps,
-                isClusteringMode: true,
-            },
-        });
-
-        const alertStub = cy.stub().as('alertStub');
-        cy.on('window:alert', alertStub);
+        mountWithEmitSpy(GradingClustering, 'clusteringError', {
+            ...defaultProps,
+            isClusteringMode: true,
+        }, 'clusteringErrorStub');
 
         cy.get('select').select('dummy_split');
         cy.wait('@createClusteringFail');
-        cy.get('@alertStub').should('have.been.calledWith', 'Custom error message');
+        cy.get('@clusteringErrorStub').should('have.been.calledWith', 'Custom error message');
+    });
+
+    it('emits clustering-error on network failure during creation', () => {
+        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createNetworkError');
+        
+        mountWithEmitSpy(GradingClustering, 'clusteringError', {
+            ...defaultProps,
+            isClusteringMode: true,
+        }, 'clusteringErrorStub');
+
+        cy.get('select').select('dummy_split');
+        cy.wait('@createNetworkError');
+        cy.get('@clusteringErrorStub').should('have.been.calledWith', 'Failed to connect to the server.');
+    });
+
+    it('emits clustering-error on network failure during status poll', () => {
+        cy.intercept('POST', '/test/clustering', {
+            statusCode: 200,
+            body: { status: 'success' },
+        }).as('createClusteringSuccess');
+
+        cy.intercept('GET', '/test/clustering_status', { forceNetworkError: true }).as('pollNetworkError');
+
+        mountWithEmitSpy(GradingClustering, 'clusteringError', {
+            ...defaultProps,
+            isClusteringMode: true,
+        }, 'clusteringErrorStub');
+
+        cy.get('select').select('dummy_split');
+        cy.wait('@createClusteringSuccess');
+        cy.wait('@pollNetworkError');
+        cy.get('@clusteringErrorStub').should('have.been.calledWith', 'Error checking clustering status.');
+    });
+
+    it('polls multiple times before finishing', () => {
+        cy.intercept('POST', '/test/clustering', {
+            statusCode: 200,
+            body: { status: 'success' },
+        }).as('createClusteringSuccess');
+
+        let pollCount = 0;
+        cy.intercept('GET', '/test/clustering_status', (req) => {
+            pollCount++;
+            if (pollCount === 1) {
+                req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'processing' } } });
+            } else {
+                req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'done' } } });
+            }
+        }).as('checkClusteringStatus');
+
+        mountWithEmitSpy(GradingClustering, 'clusteringDone', {
+            ...defaultProps,
+            isClusteringMode: true,
+        }, 'clusteringDoneStub');
+
+        cy.get('select').select('dummy_split');
+        cy.wait('@createClusteringSuccess');
+        cy.wait('@checkClusteringStatus'); // First poll (processing)
+        cy.wait('@checkClusteringStatus'); // Second poll (done)
+        
+        cy.get('@clusteringDoneStub').should('have.been.called');
     });
 
     it('emits clustering-status events during successful algorithm change', () => {
@@ -87,13 +144,17 @@ describe('GradingClustering', () => {
             body: { status: 'success', data: { status: 'done' } },
         }).as('checkClusteringStatus');
 
+        // Note: For multiple stubs on the same component mount, we stick to standard cy.mount
+        // instead of mountWithEmitSpy, because mountWithEmitSpy only stubs a single event.
         const onClusteringStatus = cy.stub().as('clusteringStatusStub');
+        const onClusteringDone = cy.stub().as('clusteringDoneStub');
 
         cy.mount(GradingClustering, {
             props: {
                 ...defaultProps,
                 isClusteringMode: true,
                 onClusteringStatus: onClusteringStatus,
+                onClusteringDone: onClusteringDone,
             },
         });
 
@@ -103,5 +164,6 @@ describe('GradingClustering', () => {
 
         cy.get('@clusteringStatusStub').should('have.been.calledWith', 'fetching');
         cy.get('@clusteringStatusStub').should('have.been.calledWith', 'done');
+        cy.get('@clusteringDoneStub').should('have.been.called');
     });
 });

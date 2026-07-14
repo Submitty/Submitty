@@ -131,6 +131,8 @@
                 },
                 'events': {
                     'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); const banner = document.getElementById("clustering-loading-banner"); if(banner) { banner.style.display = status === "fetching" ? "block" : "none"; } }',
+                    'clustering-done': '() => { const params = new URLSearchParams(window.location.search); params.set("cluster_mode", "1"); window.location.search = params.toString(); }',
+                    'clustering-error': '(message) => alert(message)',
                     'toggle-clustering-mode': 'handleToggleClusteringMode'
                 }
             } %}

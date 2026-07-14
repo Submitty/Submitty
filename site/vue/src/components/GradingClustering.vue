@@ -15,6 +15,8 @@ const props = defineProps<{
 const emit = defineEmits<{
     'clustering-status': [status: string];
     'toggle-clustering-mode': [payload: { isClusteringMode: boolean; gradeableId: string }];
+    'clustering-done': [];
+    'clustering-error': [message: string];
 }>();
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');
@@ -49,22 +51,20 @@ async function onAlgorithmChange(event?: Event) {
                         if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
                             clearInterval(pollInterval);
                             emit('clustering-status', 'done');
-                            const urlParams = new URLSearchParams(window.location.search);
-                            urlParams.set('cluster_mode', '1');
-                            window.location.search = urlParams.toString();
+                            emit('clustering-done');
                         }
                     }
                     catch (e) {
                         console.error('Error checking clustering status:', e);
                         clearInterval(pollInterval);
                         emit('clustering-status', 'error');
-                        alert('Error checking clustering status.');
+                        emit('clustering-error', 'Error checking clustering status.');
                     }
                 }, 1000);
             }
             else {
                 emit('clustering-status', 'done');
-                alert(result.message || 'Error creating clusters');
+                emit('clustering-error', result.message || 'Error creating clusters');
                 // Revert selection if it failed
                 selectedAlgorithm.value = props.currentAlgorithm || '';
             }
@@ -72,7 +72,7 @@ async function onAlgorithmChange(event?: Event) {
         catch (error) {
             console.error('Error:', error);
             emit('clustering-status', 'error');
-            alert('Failed to connect to the server.');
+            emit('clustering-error', 'Failed to connect to the server.');
         }
     }
 }
@@ -81,6 +81,7 @@ async function onAlgorithmChange(event?: Event) {
 <template>
   <button
     class="btn btn-primary"
+    data-testid="toggle-clustering-mode-btn"
     @click="toggleClusteringMode"
   >
     {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
