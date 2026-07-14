@@ -668,7 +668,6 @@ const fileFullPanelOptions = {
         gradingFileName: '#grading_file_name',
         panel: '#submission_browser',
         innerPanel: '#directory_view',
-        pdfAnnotationBar: '#pdf_annotation_bar',
         saveStatus: '#save_status',
         fileContent: '#file-content',
         fullPanel: 'full_panel',
@@ -682,7 +681,6 @@ const fileFullPanelOptions = {
         gradingFileName: '#notebook_grading_file_name',
         panel: '#notebook_view',
         innerPanel: '#notebook-main-view',
-        pdfAnnotationBar: '#notebook_pdf_annotation_bar', // TODO
         saveStatus: '#notebook_save_status', // TODO
         fileContent: '#notebook-file-content',
         fullPanel: 'notebook_full_panel',
@@ -736,7 +734,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
         const anon_submitter_id = document.getElementById(
             fileFullPanelOptions[panel]['panel'].substring(1),
         )!.dataset.anonSubmitterId;
-        $('#pdf_annotation_bar').show();
         $('#save_status').show();
         return $.ajax({
             type: 'POST',
@@ -759,7 +756,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     else {
         // Check if the file is an image
         const isImage = isImageFile(name);
-        $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
 
         if (isImage) {
             // For images, use server-side annotation system
@@ -839,9 +835,6 @@ window.collapseFile = function (rawPanel: string = 'submission') {
 
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
-        if ($('#pdf_annotation_bar').is(':visible')) {
-            $('#pdf_annotation_bar').hide();
-        }
     }
     $(fileFullPanelOptions[panel]['innerPanel']).show();
     const offset1 = $(fileFullPanelOptions[panel]['innerPanel']).css('left');
