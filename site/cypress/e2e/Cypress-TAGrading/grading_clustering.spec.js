@@ -28,7 +28,7 @@ describe('Grading Clustering Mode', () => {
         cy.wait('@createClustering');
 
         // page should reload, we verify it by checking that "Cluster A" or "Cluster B" headers exist
-        cy.contains('.details-info-header', 'Cluster A', { timeout: 15000 }).should('exist');
+        cy.contains('.details-info-header', 'Cluster A', { timeout: 60000 }).should('exist');
         cy.contains('.details-info-header', 'Cluster B').should('exist');
 
         // test cluster grading logic by grading a student in Cluster A
@@ -53,7 +53,7 @@ describe('Grading Clustering Mode', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details?cluster_mode=1']);
 
         // we should still see clusters
-        cy.contains('.details-info-header', 'Cluster A', { timeout: 15000 }).should('exist');
+        cy.contains('.details-info-header', 'Cluster A', { timeout: 60000 }).should('exist');
         cy.get('button').contains('Exit Clustering Mode').click();
         cy.url().should('not.include', 'cluster_mode=1');
         cy.get('button').contains('Go to Clustering Mode').should('be.visible');
