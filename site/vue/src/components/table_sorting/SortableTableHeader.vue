@@ -1,13 +1,26 @@
 <script setup lang="ts">
-import { colDataTypes, sortTableByColumn } from '../../ts/sort-table-by-column';
+import { colDataTypes } from '../../ts/sort-table-by-column';
 
-defineProps<{
+const props = defineProps<{
     tableId: string;
     title: string;
     sortKey: string;
     colDataType: colDataTypes;
     usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
 }>();
+
+const emit = defineEmits<{
+    'sort-click': [payload: { tableId: string; sortKey: string; colDataType: colDataTypes; usingRowGroups: boolean }];
+}>();
+
+function handleClick() {
+    emit('sort-click', {
+        tableId: props.tableId,
+        sortKey: props.sortKey,
+        colDataType: props.colDataType,
+        usingRowGroups: props.usingRowGroups,
+    });
+}
 </script>
 
 <template>
@@ -18,7 +31,7 @@ defineProps<{
     :title="'Sort by ' + title"
     :aria-label="'Sort by ' + title"
     :data-sort-key="sortKey"
-    @click.prevent="sortTableByColumn(tableId, sortKey, colDataType, usingRowGroups)"
+    @click.prevent="handleClick"
   >
     {{ title }}
     <i class="fa fa-sort" />

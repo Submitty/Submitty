@@ -724,23 +724,39 @@ HTML;
             //List of graded components
             $info["graded_groups"] = [];
             foreach ($gradeable->getComponents() as $component) {
-                $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
+                $ta_graded_gradeable = $row->getOrCreateTaGradedGradeable();
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
-                    $info["graded_groups"][] = 4;
-                }
-                elseif (($component->isPeerComponent() && $graded_component !== null)) {
-                    //peer submitted and graded
-                    $info["graded_groups"][] = 4;
-                }
-                elseif (($component->isPeerComponent() && $graded_component === null)) {
-                    //peer submitted but not graded
-                    $info["graded_groups"][] = "peer-null";
-                }
-                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
-                    //peer not submitted
-                    $info["graded_groups"][] = "peer-no-submission";
+                if ($component->isPeerComponent()) {
+                    $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+                    $current_user_graded = $graded_component !== null;
+                    $someone_else_graded = false;
+
+                    if ($container !== null) {
+                        foreach ($container->getGradedComponents() as $other_graded_component) {
+                            if ($other_graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+                                $someone_else_graded = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($current_user_graded && $someone_else_graded) {
+                        $info["graded_groups"][] = 4;
+                    }
+                    elseif ($current_user_graded) {
+                        $info["graded_groups"][] = "peer-right-half";
+                    }
+                    elseif ($someone_else_graded) {
+                        $info["graded_groups"][] = "peer-left-half";
+                    }
+                    elseif ($ta_graded_gradeable->isComplete($this->core->getUser())) {
+                        $info["graded_groups"][] = "peer-null";
+                    }
+                    else {
+                        $info["graded_groups"][] = "peer-no-submission";
+                    }
                 }
                 elseif ($graded_component === null) {
                     //non-peer not graded
@@ -1274,6 +1290,12 @@ HTML;
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
+        // Add MarkerJS libraries globally for image annotation
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
+        // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
+
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
@@ -1285,6 +1307,7 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
+        $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);

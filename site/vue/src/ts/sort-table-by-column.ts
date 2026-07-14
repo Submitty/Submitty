@@ -205,6 +205,10 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
     return sort_direction === 'ASC' ? cmp : -cmp;
 }
 
+// Expose on window so Twig event handlers can call these functions
+(window as unknown as Record<string, unknown>).sortTableByColumn = sortTableByColumn;
+(window as unknown as Record<string, unknown>).restoreSort = restoreSort;
+
 // Update the arrow icons next to each sortable column showing whether
 // that column is being sorted in ascending or descending order
 function updateSortIcons(table_id: string, activeKey: string, sort_direction: string) {

@@ -22,7 +22,9 @@ Macro for rendering SortableTableHeader.vue within Twig
                 } 
                 | json_encode() | raw() 
             }},
-            {}
+            {
+                'sort-click': '(payload) => { window.sortTableByColumn(payload.tableId, payload.sortKey, payload.colDataType, payload.usingRowGroups); }'
+            }
         );
     </script>
 {% endmacro %}
@@ -42,7 +44,9 @@ persist after reload #}
             "component",
             "table_sorting/TableSortManager",
             {{ { tableId: table_id, } | json_encode() | raw() }},
-            {}
+            {
+                'restore-sort': '(tableId) => { window.restoreSort(tableId); }'
+            }
         );
     </script>
 {% endmacro %}
