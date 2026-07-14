@@ -323,14 +323,14 @@ table tr.table-header {
 
 /* Table stripe pattern should skip withdrawn students in case they are hidden */
 
-.table-striped 
-    > tbody 
+.table-striped
+    > tbody
     > tr:nth-child(even of :not(.hidden-withdrawn-student-row)) {
     background: var(--standard-hover-light-gray);
 }
 
-.table-striped 
-    > tbody 
+.table-striped
+    > tbody
     > tr:nth-child(odd of :not(.hidden-withdrawn-student-row)) {
     background: var(--default-white);
 }
