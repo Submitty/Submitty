@@ -990,6 +990,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         autoResize();
     }
+
+    window.updateSimpleGradingRowNumbersAndColors();
+
+    // Remove table-striped to prevent CSS conflicts with JS-set colors
+    $('table#data-table').removeClass('table-striped');
 });
 
 function newNumericCsvUploadForm() {

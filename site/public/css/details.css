@@ -2,8 +2,6 @@
     padding: 20px 10px;
 }
 
-/* Details Table Styling */
-
 #details-table tbody.details-info-header {
     font-size: 15px;
 }
@@ -15,19 +13,6 @@
 /* stylelint-disable-next-line no-descending-specificity */
 #details-table tbody.details-content td {
     text-align: center;
-}
-
-tbody {
-    counter-reset: student;
-}
-
-tbody tr:not(.info) {
-    counter-increment: student;
-}
-
-tbody tr:not(.info) > td:nth-child(1)::after {
-    content: counter(student);
-    padding: 0 1em;
 }
 
 .expand-icon,
