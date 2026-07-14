@@ -722,7 +722,8 @@ if [ "${IS_WORKER}" == 0 ]; then
         systemctl restart apache2
         echo "done"
         echo -n "restarting nginx..."
-        systemctl restart nginx
+        echo -n "SKIPPING NGINX NOW"
+#        systemctl restart nginx
         echo "done"
     fi
 fi

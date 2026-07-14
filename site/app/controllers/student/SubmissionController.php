@@ -819,12 +819,16 @@ class SubmissionController extends AbstractController {
                 ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
+                if ($output === false) {
+                  $message = "CGI failed: error=".curl_error($ch)." errno=".curl_errno($ch);
+                  return $this->core->getOutput()->renderJsonFail($message);
+		}
                 curl_close($ch);
                 $response = json_decode($output);
 
                 if (!$response->success) {
                     if (!isset($response->error_message)) {
-                        return $this->core->getOutput()->renderJsonFail("Unknown error occurred.");
+                        return $this->core->getOutput()->renderJsonFail("Bulk Upload: Unknown error occurred.");
                     }
                     return $this->core->getOutput()->renderJsonFail($response->error_message);
                 }
