@@ -214,16 +214,12 @@ class AuthenticationController extends AbstractController {
         $user = $this->core->getUser();
 
         if ($user === null) {
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getFailResponse("Invalid or expired token.")
-            );
+            return JsonResponse::getFailResponse("Invalid or expired token.");
         }
 
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse([
-                'user_id' => $user->getId(),
-            ])
-        );
+        return JsonResponse::getSuccessResponse([
+            'user_id' => $user->getId(),
+        ]);
     }
 
     /**
@@ -296,11 +292,18 @@ class AuthenticationController extends AbstractController {
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repository.";
-            return JsonResponse::getFailResponse($msg);
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse($msg)
+            );
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        return JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]);
+        return MultiResponse::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse([
+                'message' => $msg,
+                'authenticated' => true,
+            ])
+        );
     }
 
     /**
