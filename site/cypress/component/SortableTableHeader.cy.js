@@ -44,7 +44,8 @@ describe('SortableTableHeader', () => {
 
         it('emits sort-click on every click', () => {
             mountWithEmitSpy(SortableTableHeader, 'sort-click', defaultProps, 'sortClickHandler');
-            cy.get('a.sortable-header').click().click();
+            cy.get('a.sortable-header').click();
+            cy.get('a.sortable-header').click();
             cy.get('@sortClickHandler').should('have.callCount', 2);
         });
     });
