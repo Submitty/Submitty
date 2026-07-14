@@ -949,10 +949,10 @@ class ForumController extends AbstractController {
 
         $expiration_date = null;
         if ($expiration_date_str !== '') {
-            $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone())->format('Y-m-d H:i:sO');
+            $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone());
         }
 
-        $this->core->getQueries()->addBlockAction($user_id, 'no_forum_posts', $expiration_date, $current_user_id);
+        $this->core->getQueries()->addBlockedUser($user_id, 'no_forum_posts', $expiration_date, $current_user_id);
         return $this->core->getOutput()->renderJsonSuccess("User has been blocked from making forum posts.");
     }
 
@@ -968,11 +968,11 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("User ID is required.");
         }
 
-        $active_blocks = $this->core->getQueries()->getActiveBlockActions($user_id);
+        $active_blocks = $this->core->getQueries()->getActiveBlockedUsers($user_id);
         $block_id = null;
         foreach ($active_blocks as $block) {
-            if ($block['action'] === 'no_forum_posts') {
-                $block_id = $block['id'];
+            if ($block->getAction() === 'no_forum_posts') {
+                $block_id = $block->getId();
                 break;
             }
         }
@@ -981,7 +981,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("User is not currently blocked from forum posts.");
         }
 
-        $this->core->getQueries()->deleteBlockAction($block_id);
+        $this->core->getQueries()->deleteBlockedUser($block_id);
         return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
     }
 
@@ -990,18 +990,19 @@ class ForumController extends AbstractController {
         if (!$this->core->getUser()->accessAdmin()) {
             return JsonResponse::getFailResponse("You do not have permission to view this.");
         }
-        $active_blocks = $this->core->getQueries()->getActiveBlockActions();
+        $active_blocks = $this->core->getQueries()->getActiveBlockedUsers();
         $blocked_users = [];
         foreach ($active_blocks as $block) {
-            if ($block['action'] !== 'no_forum_posts') {
+            if ($block->getAction() !== 'no_forum_posts') {
                 continue;
             }
-            $user = $this->core->getQueries()->getUserById($block['user_id']);
-            $display_name = $user !== null ? $user->getDisplayFullName() : $block['user_id'];
+            $user = $this->core->getQueries()->getUserById($block->getUserId());
+            $display_name = $user !== null ? $user->getDisplayFullName() : $block->getUserId();
+            $expiration_date = $block->getExpirationDate();
             $blocked_users[] = [
-                'user_id' => $block['user_id'],
+                'user_id' => $block->getUserId(),
                 'display_name' => $display_name,
-                'expiration_date' => $block['expiration_date'],
+                'expiration_date' => $expiration_date !== null ? $expiration_date->format('Y-m-d H:i:sO') : null,
             ];
         }
         return JsonResponse::getSuccessResponse(['users' => $blocked_users]);

@@ -30,6 +30,8 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\LateDayInfo;
+use app\entities\forum\ForumBlockedUser;
+use DateTime;
 
 /**
  * DatabaseQueries
@@ -8130,63 +8132,83 @@ AND gc_id IN (
     }
 
     public function isUserBlockedFromForumPosts(string $user_id): bool {
-        $this->course_db->query(
-            "SELECT 1 FROM block_user_action WHERE user_id = ? AND action = 'no_forum_posts' AND (expiration_date IS NULL OR expiration_date > NOW())",
-            [$user_id]
-        );
-        return count($this->course_db->rows()) > 0;
+        $block = $this->core->getCourseEntityManager()
+            ->getRepository(ForumBlockedUser::class)
+            ->findOneBy(['user_id' => $user_id, 'action' => 'no_forum_posts']);
+        return $block !== null && $block->isActive();
     }
 
     /**
-     * @param string[] $user_ids
-     * @return string[] the subset of $user_ids currently blocked from forum posts
+     * @return ForumBlockedUser[]
      */
-    public function getUsersBlockedFromForumPosts(array $user_ids): array {
-        if (count($user_ids) === 0) {
-            return [];
-        }
-        $placeholders = implode(',', array_fill(0, count($user_ids), '?'));
-        $this->course_db->query(
-            "SELECT user_id FROM block_user_action WHERE user_id IN ($placeholders) AND action = 'no_forum_posts' AND (expiration_date IS NULL OR expiration_date > NOW())",
-            $user_ids
-        );
-        return array_column($this->course_db->rows(), 'user_id');
-    }
+    public function getActiveBlockedUsers(?string $user_id = null): array {
+        $em = $this->core->getCourseEntityManager();
+        $qb = $em->createQueryBuilder();
+        $qb->select('b')
+            ->from(ForumBlockedUser::class, 'b')
+            ->where('b.expiration_date IS NULL OR b.expiration_date > :now')
+            ->setParameter('now', new DateTime())
+            ->orderBy('b.created_at', 'DESC');
 
-    /**
-     * @return mixed[]
-     */
-    public function getActiveBlockActions(?string $user_id = null): array {
         if ($user_id !== null) {
-            $this->course_db->query(
-                "SELECT * FROM block_user_action WHERE user_id = ? AND (expiration_date IS NULL OR expiration_date > NOW()) ORDER BY created_at DESC",
-                [$user_id]
-            );
+            $qb->andWhere('b.user_id = :user_id')
+                ->setParameter('user_id', $user_id);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function addBlockedUser(string $user_id, string $action, ?DateTime $expiration_date, string $created_by): void {
+        $em = $this->core->getCourseEntityManager();
+        $repo = $em->getRepository(ForumBlockedUser::class);
+        $existing = $repo->findOneBy(['user_id' => $user_id, 'action' => $action]);
+
+        if ($existing !== null) {
+            $existing->setExpirationDate($expiration_date);
         }
         else {
-            $this->course_db->query(
-                "SELECT * FROM block_user_action WHERE (expiration_date IS NULL OR expiration_date > NOW()) ORDER BY created_at DESC"
-            );
+            $block = new ForumBlockedUser($user_id, $action, $expiration_date, $created_by);
+            $em->persist($block);
         }
-        return $this->course_db->rows();
+
+        $em->flush();
     }
 
-    public function addBlockAction(string $user_id, string $action, ?string $expiration_date, string $created_by): void {
-        $this->course_db->query(
-            "INSERT INTO block_user_action (user_id, action, expiration_date, created_by) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, action) DO UPDATE SET expiration_date = EXCLUDED.expiration_date, created_by = EXCLUDED.created_by, created_at = CURRENT_TIMESTAMP",
-            [$user_id, $action, $expiration_date, $created_by]
-        );
+    public function updateBlockedUser(int $id, ?DateTime $expiration_date): void {
+        $em = $this->core->getCourseEntityManager();
+        $block = $em->getRepository(ForumBlockedUser::class)->find($id);
+        if ($block !== null) {
+            $block->setExpirationDate($expiration_date);
+            $em->flush();
+        }
     }
 
-    public function updateBlockAction(int $id, ?string $expiration_date): void {
-        $this->course_db->query(
-            "UPDATE block_user_action SET expiration_date = ? WHERE id = ?",
-            [$expiration_date, $id]
-        );
+    public function deleteBlockedUser(int $id): void {
+        $em = $this->core->getCourseEntityManager();
+        $block = $em->getRepository(ForumBlockedUser::class)->find($id);
+        if ($block !== null) {
+            $em->remove($block);
+            $em->flush();
+        }
     }
+    /**
+     * @param string[] $author_ids
+     * @return string[] the subset of $author_ids who are blocked from forum posts
+     */
+    public function getUsersBlockedFromForumPosts(array $author_ids): array {
+        if (empty($author_ids)) {
+            return [];
+        }
 
-    public function deleteBlockAction(int $id): void {
-        $this->course_db->query("DELETE FROM block_user_action WHERE id = ?", [$id]);
+        $blocked = $this->core->getCourseEntityManager()
+            ->getRepository(ForumBlockedUser::class)
+            ->findBy(['user_id' => $author_ids, 'action' => 'no_forum_posts']);
+
+        $now = new DateTime();
+        return array_values(array_map(
+            fn($b) => $b->getUserId(),
+            array_filter($blocked, fn($b) => $b->getExpirationDate() === null || $b->getExpirationDate() > $now)
+        ));
     }
 
     /**

@@ -18,7 +18,7 @@ def up(config, database, semester, course):
 
     database.execute(
     """
-        CREATE TABLE IF NOT EXISTS block_user_action (
+        CREATE TABLE IF NOT EXISTS forum_blocked_user (
             id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             user_id character varying(255) NOT NULL,
             action character varying(255) NOT NULL,
@@ -33,7 +33,7 @@ def up(config, database, semester, course):
                 REFERENCES users(user_id)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
-            CONSTRAINT block_user_action_action_check
+            CONSTRAINT forum_blocked_user_action_check
                 CHECK (action IN ('no_forum_posts')),
             UNIQUE (user_id, action)
         );

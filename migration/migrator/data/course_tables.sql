@@ -1112,6 +1112,35 @@ ALTER SEQUENCE public.forum_attachments_id_seq OWNED BY public.forum_attachments
 
 
 --
+-- Name: forum_blocked_user; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_blocked_user (
+    id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    action character varying(255) NOT NULL,
+    expiration_date timestamp with time zone,
+    created_by character varying(255) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT forum_blocked_user_action_check CHECK (((action)::text = 'no_forum_posts'::text))
+);
+
+
+--
+-- Name: forum_blocked_user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.forum_blocked_user ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.forum_blocked_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: forum_posts_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2236,6 +2265,7 @@ CREATE TABLE public.users (
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
     previous_rotating_section integer,
+    date_registered timestamp without time zone,
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
@@ -2606,6 +2636,22 @@ ALTER TABLE ONLY public.electronic_gradeable
 
 ALTER TABLE ONLY public.forum_attachments
     ADD CONSTRAINT forum_attachments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_user_id_action_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_user_id_action_key UNIQUE (user_id, action);
 
 
 --
@@ -3467,6 +3513,22 @@ ALTER TABLE ONLY public.course_materials_access
 
 ALTER TABLE ONLY public.gradeable_allowed_minutes_override
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
