@@ -10,25 +10,6 @@
     font-size: 19px;
 }
 
-#pdf_annotation_icons {
-    position: relative;
-    display: block;
-    width: fit-content;
-}
-
-#pdf_annotation_icons .btn {
-    margin: 0 5px 0 5px;
-} 
-
-#pdf_annotation_bar {
-    display: none;
-    position: relative;
-    left: 1%;
-    z-index: 41;
-    box-sizing: content-box;
-    margin-bottom: 6px;
-}
-
 .toolbar-action[value^='color'] {
     display: inline-block;
     width: 20px;
