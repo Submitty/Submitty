@@ -156,31 +156,6 @@ function submitRemoveImage() {
     removeImage(removeDialogUrl, selected);
 }
 
-function removeImage(url, images) {
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {
-            images: images,
-            csrf_token: csrfToken,
-        },
-        success: (data) => {
-            const json = JSON.parse(data);
-            if (json.status === 'success') {
-                sessionStorage.setItem('successMessage', json.data);
-                location.reload();
-            }
-            else {
-                displayErrorMessage(json.message);
-            }
-        },
-        error: (err) => {
-            console.error(err);
-            window.alert('Something went wrong. Please try again.');
-        },
-    });
-}
-
 function addImage(url) {
     const capability = $('#capability-form').val();
     const image = $('#add-field').val();
