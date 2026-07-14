@@ -82,6 +82,5 @@ RUN composer install --no-scripts --no-interaction --prefer-dist \
     && chmod -R 777 .
 
 # install requirements for python_submitty_utils
-COPY python_submitty_utils/requirements.txt python_submitty_utils/setup.py $HOME/python_submitty_utils/
+COPY python_submitty_utils/requirements.txt $HOME/python_submitty_utils/
 RUN pip3 install --no-cache-dir -r $HOME/python_submitty_utils/requirements.txt
-RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
