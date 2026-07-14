@@ -126,11 +126,11 @@ function openRemoveDialog(button, url) {
         const wrapper = $('<div>', { class: 'remove-image-option' });
         const label = $('<label>', { for: checkboxId });
         const checkbox = $('<input>', {
-            type: 'checkbox',
-            id: checkboxId,
-            class: 'remove-image-checkbox',
+            'type': 'checkbox',
+            'id': checkboxId,
+            'class': 'remove-image-checkbox',
             'data-testid': 'remove-image-checkbox',
-            value: entry.name,
+            'value': entry.name,
         }).prop('checked', entry.primary);
         label.append(checkbox);
         label.append(document.createTextNode(` ${entry.name}${entry.primary ? ' (primary)' : ''}`));
