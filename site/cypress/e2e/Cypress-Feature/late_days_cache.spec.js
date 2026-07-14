@@ -77,15 +77,15 @@ all_user_ids.push('moscie');
 // Submission is 1 days late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Bad (too many late days used this term)
 // Or After given 2 extentions => Bad (too many late days used this term)
-all_late_users['barteh'] = 3;
-all_user_ids.push('barteh');
-// Submission is 3 days late and 0 late days => Bad (too many late days used this term)
-// After given 2 late days => Bad (too many late days used on this assignment) because only 1 late day is allowed
-// Or After given 2 extentions => Good
 all_late_users['ziemeb'] = 2;
 all_user_ids.push('ziemeb');
 // Submission is 2 day late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Late (valid submission)
+// Or After given 2 extentions => Good
+all_late_users['barteh'] = 3;
+all_user_ids.push('barteh');
+// Submission is 3 days late and 0 late days => Bad (too many late days used this term)
+// After given 2 late days => Bad (too many late days used on this assignment) because only 1 late day is allowed
 // Or After given 2 extentions => Good
 
 describe('Test cases involving late day cache updates', () => {
