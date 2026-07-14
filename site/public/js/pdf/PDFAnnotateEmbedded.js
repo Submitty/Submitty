@@ -278,40 +278,6 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                 const height = doc.internal.pageSize.getHeight();
                 doc.addImage(imgData, 'JPEG', 0, 0, width, height);
                 renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                // TODO: Get the saving and loading from annotated_pdfs working
-                /* console.log("CHECK2");
-                    var fd = new FormData();
-                    var pdfToSave = btoa(doc.output());
-                    let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
-                    let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
-                    fd.append('annotation_layer', JSON.stringify(annotation_layer));
-                    fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
-                    fd.append('csrf_token', csrfToken);
-                    fd.append('pdf', pdfToSave);
-                    let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotated_pdfs']);
-                    //localStorage.setItem('pdf-rotate', rotateVal);
-                    //render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        data: fd,
-                        processData: false,
-                        contentType: false,
-                        success: function(data){
-                            console.log("CHECK4");
-                            //let response = JSON.parse(data);
-                            console.log("CHECK3");
-                            var anchor=document.createElement('a');
-                            anchor.setAttribute('href', encodeURIComponent(file_path));
-                            anchor.setAttribute('download', file_path);
-                            document.body.appendChild(anchor);
-                            anchor.click();
-                            anchor.parentNode.removeChild(anchor);
-                        },
-                        error: function(){
-                            alert("Something went wrong, please contact a administrator.");
-                        }
-                    }); */
             });
         });
     }
@@ -322,7 +288,6 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
-        updateAnnotations();
         let currentTool;
         let NUM_PAGES = 0;
 
@@ -485,21 +450,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
         // ignore the identifier error
     }
     repairPDF();
-    updateAnnotations();
 }
-
-// TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
-// the code below will remove the annotation info from local storage when a new window pops up
-// unload event should not be avoided as well: https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event
-/**
-$(window).on('unload', () => {
-    for (let i = 0; i < localStorage.length; i++) {
-        if (localStorage.key(i).includes('annotations')) {
-            localStorage.removeItem(localStorage.key(i));
-        }
-    }
-});
-**/
 
 function loadAllAnnotations(annotations, file_name) {
     for (const grader in annotations) {
@@ -546,36 +497,6 @@ function toggleOtherAnnotations(hide_others) {
         }
     }
     render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-}
-
-function updateAnnotations() {
-    const elements = document.querySelectorAll('path, g');
-
-    elements.forEach((element) => {
-        let transform = element.getAttribute('transform');
-        let hasTranslate = false;
-
-        if (transform) {
-            const updatedTransform = transform.replace(/translate\(\s*(-?[\d.]+)?\s*,\s*(-?[\d.]+)?\s*\)/, (match, x, y) => {
-                hasTranslate = true;
-
-                x = x !== undefined ? parseFloat(x) : 0;
-                y = y !== undefined ? parseFloat(y) : 0;
-
-                return `translate(${x}, ${y})`;
-            });
-
-            transform = updatedTransform;
-        }
-
-        // Add translate(0, 0) if there's no translate transformation
-        if (!hasTranslate) {
-            transform = transform ? `${transform.trim()} translate(0, 0)` : 'translate(0, 0)';
-        }
-
-        // Update the transform attribute of the element, removing unnecessary spaces
-        element.setAttribute('transform', transform.replace(/\s+/g, ' '));
-    });
 }
 
 function repairPDF() {
