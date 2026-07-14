@@ -26,7 +26,7 @@ class DateTimeFormat extends AbstractModel {
         'MDY' => [
             'gradeable' => 'm/d/Y @ h:i A T',
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
-            'forum' => 'Y/n/j g:i A',
+            'forum' => 'n/j/Y g:i A',
             'notification' => 'n/j g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
@@ -36,7 +36,7 @@ class DateTimeFormat extends AbstractModel {
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',
             'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
-            'forum' => 'Y/j/n g:i A',
+            'forum' => 'j/n/Y g:i A',
             'notification' => 'j/n g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
