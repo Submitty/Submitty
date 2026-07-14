@@ -1,57 +1,3 @@
-.tool-selected {
-    box-shadow: 0 0 3px 3px var(--standard-medium-dark-lime-green);
-    background-color: var(--standard-medium-dark-lime-green);
-}
-
-.toolbar-action:not(button),
-.toolbar-item {
-    text-align: center;
-    margin-left: 6px;
-    font-size: 19px;
-}
-
-.toolbar-action[value^='color'] {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--text-black);
-    vertical-align: middle;
-    margin-top: -5px;
-}
-
-.selection-menu {
-    display: none;
-    position: absolute;
-    border: 1px solid var(--standard-medium-dark-lime-green);
-    background: var(--standard-light-seafoam);
-    top: auto;
-}
-
-#text_size_selector {
-    padding: initial;
-    font-size: initial;
-    border: initial;
-    height: initial;
-    background-size: initial;
-}
-
-#color-selector-container {
-    display: inline;
-}
-
-#color-selector-grid {
-    display: grid;
-    grid-template-columns: auto auto auto auto auto;
-}
-
-#color_selector_menu {
-    left: 295px;
-}
-
-#size_selector_menu {
-    left: 327px;
-}
-
 .color {
     display: inline-block;
     width: 20px;
@@ -61,51 +7,9 @@
     margin: 2px;
 }
 
-#custom-color {
-    width: revert;
-    padding: 0px;
-}
-
-.color:hover,
-#custom-color:hover {
-    cursor: pointer;
-}
-
 #content-wrapper {
     position: relative;
 }
-
-#zoom-custom {
-    width: 55px;
-}
-
-.input-suffix {
-    display: inline-block;
-    position: relative;
-}
-
-.input-suffix:after {
-    position: absolute;
-    top: 11px;
-    right: 0.5em;
-    transition: all 0.05s ease-in-out;
-}
-
-.input-suffix:hover::after,
-.input-suffix:focus-within::after {
-  right: 1.5em;
-}
-
-.suffix-percent::after {
-    content: '%';
-} 
-
-@supports (-moz-appearance:none) {
-    .input-suffix::after {
-      right: 1.5em;
-    }
-}
-
 
 #grading-pdf-repair {
     display: flex;
@@ -120,10 +24,6 @@
 
 #grading-pdf-repair-btn {
     margin-left: 8px;
-}
-
-#pdf-buttons {
-    display: inline-block;
 }
 
 /* Notebook panel */
