@@ -45,7 +45,7 @@ persist after reload #}
             "table_sorting/TableSortManager",
             {{ { tableId: table_id, } | json_encode() | raw() }},
             {
-                'restore-sort': '(tableId) => { window.restoreSort(tableId); }'
+                'restore-table-sort': '(tableId) => { window.restoreTableSort(tableId); }'
             }
         );
     </script>

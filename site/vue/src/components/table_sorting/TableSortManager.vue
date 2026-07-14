@@ -6,11 +6,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'restore-sort': [tableId: string];
+    'restore-table-sort': [tableId: string];
 }>();
 
 onMounted(() => {
-    emit('restore-sort', props.tableId);
+    emit('restore-table-sort', props.tableId);
 });
 </script>
 

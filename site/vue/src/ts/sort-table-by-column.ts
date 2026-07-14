@@ -74,7 +74,7 @@ export function sortTableByColumn(table_id: string, sort_key: string, col_data_t
  * @param table_id the id of the table whose sorting data you want to restore
  * @returns none
  */
-export function restoreSort(table_id: string) {
+export function restoreTableSort(table_id: string) {
     const sort_data_string: string | null = sessionStorage.getItem(`${table_id}-sorting-data`);
     if (sort_data_string === null) {
         return;
@@ -207,7 +207,7 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
 
 // Expose on window so Twig event handlers can call these functions
 (window as unknown as Record<string, unknown>).sortTableByColumn = sortTableByColumn;
-(window as unknown as Record<string, unknown>).restoreSort = restoreSort;
+(window as unknown as Record<string, unknown>).restoreTableSort = restoreTableSort;
 
 // Update the arrow icons next to each sortable column showing whether
 // that column is being sorted in ascending or descending order

@@ -11,24 +11,24 @@ describe('TableSortManager', () => {
     });
 
     describe('emit on mount', () => {
-        it('emits restore-sort with the tableId on mount', () => {
-            mountWithEmitSpy(TableSortManager, 'restore-sort', { tableId: 'docker-table' }, 'restoreSortHandler');
-            cy.get('@restoreSortHandler').should('have.been.calledWith', 'docker-table');
+        it('emits restore-table-sort with the tableId on mount', () => {
+            mountWithEmitSpy(TableSortManager, 'restore-table-sort', { tableId: 'docker-table' }, 'restoreTableSortHandler');
+            cy.get('@restoreTableSortHandler').should('have.been.calledWith', 'docker-table');
         });
 
-        it('emits restore-sort exactly once per mount', () => {
-            mountWithEmitSpy(TableSortManager, 'restore-sort', { tableId: 'docker-table' }, 'restoreSortHandler');
-            cy.get('@restoreSortHandler').should('have.callCount', 1);
+        it('emits restore-table-sort exactly once per mount', () => {
+            mountWithEmitSpy(TableSortManager, 'restore-table-sort', { tableId: 'docker-table' }, 'restoreTableSortHandler');
+            cy.get('@restoreTableSortHandler').should('have.callCount', 1);
         });
 
-        it('emits restore-sort with different table ID values', () => {
-            mountWithEmitSpy(TableSortManager, 'restore-sort', { tableId: 'student-table' }, 'restoreSortHandler');
-            cy.get('@restoreSortHandler').should('have.been.calledWith', 'student-table');
+        it('emits restore-table-sort with different table ID values', () => {
+            mountWithEmitSpy(TableSortManager, 'restore-table-sort', { tableId: 'student-table' }, 'restoreTableSortHandler');
+            cy.get('@restoreTableSortHandler').should('have.been.calledWith', 'student-table');
         });
 
-        it('emits restore-sort with an empty tableId', () => {
-            mountWithEmitSpy(TableSortManager, 'restore-sort', { tableId: '' }, 'restoreSortHandler');
-            cy.get('@restoreSortHandler').should('have.been.calledWith', '');
+        it('emits restore-table-sort with an empty tableId', () => {
+            mountWithEmitSpy(TableSortManager, 'restore-table-sort', { tableId: '' }, 'restoreTableSortHandler');
+            cy.get('@restoreTableSortHandler').should('have.been.calledWith', '');
         });
     });
 });
