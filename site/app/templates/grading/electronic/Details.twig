@@ -9,35 +9,51 @@
     <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
+            {% set peer_only_grader = gradeable.hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), gradeable.getMinGradingGroup()) %}
             <ul id="details-legend">
                 <li>
                     <i class="grading-example-circle grader-NULL"></i>
                     Ungraded component
                 </li>
-                <li>
-                    <i class="grading-example-circle grader-3"></i>
-                    Component graded by a limited access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-4"></i>
-                    Peer component graded by a student
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-1"></i>
-                    Component graded by a full access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-verified"></i>
-                    Limited access grader verified
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-double"></i>
-                    Component double-graded by a full access grader or instructor
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-active grader-NULL"></i>
-                    Component actively being graded
-                </li>
+                {% if not peer_only_grader %}
+                    <li>
+                        <i class="grading-example-circle grader-3"></i>
+                        Component graded by a limited access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-peer-left-half"></i>
+                        Peer component graded by another peer grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-peer-right-half"></i>
+                        Peer component graded by you
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by another peer grader and you
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-1"></i>
+                        Component graded by a full access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-verified"></i>
+                        Limited access grader verified
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-double"></i>
+                        Component double-graded by a full access grader or instructor
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-active grader-NULL"></i>
+                        Component actively being graded
+                    </li>
+                {% else %}
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by you
+                    </li>
+                {% endif %}
             </ul>
 
             <div class="row-wrapper">
@@ -407,7 +423,7 @@
     <td class="td-graded-questions" style="text-align: center">
         <span>
             {# check if current user is a peer only grader #}
-            {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
+            {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
             {% if core.getUser().accessGrading() and not peer_only_grader %}
@@ -423,9 +439,15 @@
                     {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         {% set class_list = class_list | merge(['grader-NULL']) %}
                     {% else %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
+                        {% if info.graded_groups[index] == "peer-null" or info.graded_groups[index] == "peer-no-submission" %}
                             {# Indicates Peer Component #}
                             {% set class_list = class_list | merge(['grader-NULL']) %}
+                        {% elseif info.graded_groups[index] == "peer-left-half" %}
+                            {# Indicates Peer Component graded by someone other than yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-left-half']) %}
+                        {% elseif info.graded_groups[index] == "peer-right-half" %}
+                            {# Indicates Peer Component graded only by yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-right-half']) %}
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
                             {% set class_list = class_list | merge(['grader-' ~ info.graded_groups[index]]) %}
@@ -450,8 +472,17 @@
                     {% elseif info.graded_groups[index] == "peer-null" %}
                         {# Indicates Submitted but Ungraded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-left-half" %}
+                        {# Indicates Component graded by someone else but not current user #}
+                        {% if peer_only_grader %}
+                            <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                        {% else %}
+                            <div title="{{ title }}" class="grading-circle grader-peer-left-half"></div>
+                        {% endif %}
+                    {% elseif info.graded_groups[index] == "peer-right-half" %}
+                        {# Indicates Component graded only by current user #}
+                        <div title="{{ title }}" class="grading-circle grader-peer-right-half"></div>
                     {% elseif info.graded_groups[index] == 4 %}
-                        {# Indicates Submitted and Graded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-{{ info.graded_groups[index] }}"></div>
                     {% endif %}
                 {% endif %}
