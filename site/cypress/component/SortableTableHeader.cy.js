@@ -31,8 +31,8 @@ describe('SortableTableHeader', () => {
     });
 
     describe('click behavior', () => {
-        it('emits sort-click with correct payload on click', () => {
-            mountWithEmitSpy(SortableTableHeader, 'sort-click', defaultProps, 'sortClickHandler');
+        it('emits sort-table-column-click with correct payload on click', () => {
+            mountWithEmitSpy(SortableTableHeader, 'sort-table-column-click', defaultProps, 'sortClickHandler');
             cy.get('a.sortable-header').click();
             cy.get('@sortClickHandler').should('have.been.calledWith', {
                 tableId: 'docker-table',
@@ -42,8 +42,8 @@ describe('SortableTableHeader', () => {
             });
         });
 
-        it('emits sort-click on every click', () => {
-            mountWithEmitSpy(SortableTableHeader, 'sort-click', defaultProps, 'sortClickHandler');
+        it('emits sort-table-column-click on every click', () => {
+            mountWithEmitSpy(SortableTableHeader, 'sort-table-column-click', defaultProps, 'sortClickHandler');
             cy.get('a.sortable-header').click();
             cy.get('a.sortable-header').click();
             cy.get('@sortClickHandler').should('have.callCount', 2);
@@ -52,7 +52,7 @@ describe('SortableTableHeader', () => {
 
     describe('prop variants', () => {
         it('passes usingRowGroups: true in the emit payload', () => {
-            mountWithEmitSpy(SortableTableHeader, 'sort-click', {
+            mountWithEmitSpy(SortableTableHeader, 'sort-table-column-click', {
                 ...defaultProps,
                 sortKey: 'total_posts',
                 usingRowGroups: true,
@@ -69,7 +69,7 @@ describe('SortableTableHeader', () => {
         it('passes each colDataType variant in the emit payload', () => {
             const colDataTypeCases = ['string', 'number', 'date'];
             colDataTypeCases.forEach((dataType) => {
-                mountWithEmitSpy(SortableTableHeader, 'sort-click', {
+                mountWithEmitSpy(SortableTableHeader, 'sort-table-column-click', {
                     ...defaultProps,
                     sortKey: `col_${dataType}`,
                     colDataType: dataType,

@@ -10,11 +10,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'sort-click': [payload: { tableId: string; sortKey: string; colDataType: colDataTypes; usingRowGroups: boolean }];
+    'sort-table-column-click': [payload: { tableId: string; sortKey: string; colDataType: colDataTypes; usingRowGroups: boolean }];
 }>();
 
 function handleClick() {
-    emit('sort-click', {
+    emit('sort-table-column-click', {
         tableId: props.tableId,
         sortKey: props.sortKey,
         colDataType: props.colDataType,

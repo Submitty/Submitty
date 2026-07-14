@@ -23,7 +23,7 @@ Macro for rendering SortableTableHeader.vue within Twig
                 | json_encode() | raw() 
             }},
             {
-                'sort-click': '(payload) => { window.sortTableByColumn(payload.tableId, payload.sortKey, payload.colDataType, payload.usingRowGroups); }'
+                'sort-table-column-click': '(payload) => { window.sortTableByColumn(payload.tableId, payload.sortKey, payload.colDataType, payload.usingRowGroups); }'
             }
         );
     </script>
