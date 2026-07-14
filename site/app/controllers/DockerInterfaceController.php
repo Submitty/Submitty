@@ -213,7 +213,6 @@ class DockerInterfaceController extends AbstractController {
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
 
-        // Accept a list of names (primary and/or aliases); fall back to the legacy single-image param.
         $images = $_POST['images'] ?? null;
         if (!is_array($images)) {
             $images = isset($_POST['image']) ? [$_POST['image']] : [];
@@ -227,18 +226,48 @@ class DockerInterfaceController extends AbstractController {
             return JsonResponse::getFailResponse('No image selected for removal.');
         }
 
+        $jsonFilePath = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyDataPath(),
+            "config",
+            "autograding_containers.json"
+        );
+        $json = FileUtils::readJsonFile($jsonFilePath);
+
+        // Names actually present in the config (independent of ownership).
+        $in_config = [];
+        foreach ($json as $capability) {
+            foreach ($capability as $name) {
+                $in_config[$name] = true;
+            }
+        }
+
         $user = $this->core->getUser();
         $removed = [];
         $skipped = [];
 
         foreach ($images as $image) {
-            if (
-                !preg_match($pattern, $image)
-                || $this->core->getQueries()->getDockerImageOwner($image) === false
-                || !$this->core->getQueries()->removeDockerImageOwner($image, $user)
-            ) {
+            if (!preg_match($pattern, $image)) {
                 $skipped[] = $image;
                 continue;
+            }
+
+            $owner = $this->core->getQueries()->getDockerImageOwner($image); // string|false
+
+            // Nothing to act on: no owner row and not in the config.
+            if ($owner === false && !isset($in_config[$image])) {
+                $skipped[] = $image;
+                continue;
+            }
+
+            // Protect images managed by another instructor from non-superusers.
+            if ($owner !== false && $owner !== '' && !$user->isSuperUser() && $owner !== $user->getId()) {
+                $skipped[] = $image;
+                continue;
+            }
+
+            // Drop the ownership row if one exists; a missing row is fine.
+            if ($owner !== false) {
+                $this->core->getQueries()->removeDockerImageOwner($image, $user);
             }
             $removed[] = $image;
         }
@@ -249,33 +278,6 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        $removed = [$image];
-        $skipped = [];
-        $aliases = $_POST['aliases'] ?? [];
-        if (!is_array($aliases)) {
-            $aliases = [];
-        }
-
-        foreach ($aliases as $alias) {
-            if (
-                !is_string($alias)
-                || !preg_match($pattern, $alias)
-                || $this->core->getQueries()->getDockerImageOwner($alias) === false
-                || !$this->core->getQueries()->removeDockerImageOwner($alias, $user)
-            ) {
-                $skipped[] = $alias;
-                continue;
-            }
-            $removed[] = $alias;
-        }
-
-        $jsonFilePath = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyDataPath(),
-            "config",
-            "autograding_containers.json"
-        );
-        $json = FileUtils::readJsonFile($jsonFilePath);
-
         foreach ($removed as $name) {
             foreach ($json as $capability_key => $capability) {
                 if (($key = array_search($name, $capability, true)) !== false) {
@@ -284,10 +286,7 @@ class DockerInterfaceController extends AbstractController {
             }
         }
 
-        FileUtils::writeJsonFile(
-            $jsonFilePath,
-            $json,
-        );
+        FileUtils::writeJsonFile($jsonFilePath, $json);
 
         $message = implode(', ', $removed) . " has been removed from the configuration. "
             . "Click 'Update dockers and machines' to apply changes.";
