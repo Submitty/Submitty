@@ -81,6 +81,7 @@ RUN composer install --no-scripts --no-interaction --prefer-dist \
     && rm -rf /root/.composer/cache ~/.npm \
     && chmod -R 777 .
 
-# install internal python utils
-COPY python_submitty_utils $HOME/python_submitty_utils
+# install requirements for python_submitty_utils
+COPY python_submitty_utils/requirements.txt python_submitty_utils/setup.py $HOME/python_submitty_utils/
+RUN pip3 install --no-cache-dir -r $HOME/python_submitty_utils/requirements.txt
 RUN pip3 install --no-cache-dir -e $HOME/python_submitty_utils
