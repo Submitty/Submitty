@@ -73,7 +73,7 @@ describe('GradingClustering', () => {
     });
 
     it('emits clustering-error on network failure during creation', () => {
-        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createNetworkError');    
+        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createNetworkError');
         mountWithEmitSpy(GradingClustering, 'clusteringError', {
             ...defaultProps,
             isClusteringMode: true,
@@ -114,7 +114,7 @@ describe('GradingClustering', () => {
             pollCount++;
             if (pollCount === 1) {
                 req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'processing' } } });
-            } 
+            }
             else {
                 req.reply({ statusCode: 200, body: { status: 'success', data: { status: 'done' } } });
             }
@@ -142,7 +142,7 @@ describe('GradingClustering', () => {
             statusCode: 200,
             body: { status: 'success', data: { status: 'done' } },
         }).as('checkClusteringStatus');
-        
+
         const onClusteringStatus = cy.stub().as('clusteringStatusStub');
         const onClusteringDone = cy.stub().as('clusteringDoneStub');
 
