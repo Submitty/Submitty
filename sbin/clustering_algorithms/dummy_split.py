@@ -6,6 +6,10 @@ from .clustering_algorithm import ClusteringAlgorithm
 
 
 class DummySplit(ClusteringAlgorithm):
+    """
+    Dummy split algorithm that splits submitters alphabetically into two clusters.
+    """
+
     def run(self, submitters):
         cluster_a = []
         cluster_b = []
