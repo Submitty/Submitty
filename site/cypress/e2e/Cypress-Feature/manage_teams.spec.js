@@ -105,37 +105,36 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         });
     });
 
-    // These last few tests are miscellaneous / don't belong in the instructor context
-    it('Should test student access to their new teams', () => {
-        [STUDENT_1, STUDENT_2].forEach((user) => {
-            cy.login(user);
-            cy.visit(['sample', 'gradeable', 'open_team_homework', 'team']);
-            cy.get('[data-testid="your-team-header"]').should('exist');
+    context('Student team access', () => {
+        it('Should test student access to their new teams created in this test', () => {
+            [STUDENT_1, STUDENT_2, 'efferm'].forEach((user) => {
+                cy.login(user);
+                cy.visit(['sample', 'gradeable', 'open_team_homework', 'team']);
+                cy.get('[data-testid="your-team-header"]').should('exist');
+            });
         });
     });
 
-    it('Should successfully test the deletion of teams', () => {
-        // The after all does this but the it is here for clarity
+    context('Instructor team management, test delete teams', () => {
+        it('Should successfully test the deletion of teams', () => {
+            cy.login('instructor');
+            cy.visit(['sample', 'gradeable', 'open_team_homework', 'team']);
+            cy.on('window:confirm', () => true);
+
+            cy.get('#delete_all_teams').click();
+
+            cy.get('[data-testid="popup-message"]')
+                .invoke('text')
+                .should('equal', 'Successfully deleted 15 teams. Skipped 30 teams with submissions. Skipped 0 teams with instructor-level users.');
+
+            cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
+                .should('have.text', 'There are currently 30 existing teams for this gradeable. There are currently 16 students not yet on a team and 85 students on existing teams for this gradeable.');
+        });
     });
 
     after(() => {
-        // Clean up the testing state
+        // Clean up remaining testing state
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'open_team_homework', 'team']);
-        cy.on('window:confirm', () => true);
-
-        // Delete the teams we created:
-        // As the testing data is at the time of writing this test,
-        // every existing team for this gradeable had a submission so they will happen to be skipped.
-        // Therefore only the new teams made in this test are deleted.
-        cy.get('#delete_all_teams').click();
-        cy.get('[data-testid="popup-message"]')
-            .invoke('text')
-            .should('equal', 'Successfully deleted 15 teams. Skipped 30 teams with submissions. Skipped 0 teams with instructor-level users.');
-
-        // The Twig template has a setTimeout of 1500ms before reloading the page
-        cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
-            .should('have.text', 'There are currently 30 existing teams for this gradeable. There are currently 16 students not yet on a team and 85 students on existing teams for this gradeable.');
 
         // Reset the registration subsections on the Manage Students page
         cy.visit(['sample', 'users']);
