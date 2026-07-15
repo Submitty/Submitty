@@ -93,7 +93,7 @@ class PDFController extends AbstractController {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path);
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $anon_path, null, $annotation_jsons, true, 1, true);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, 1, true);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img")]
@@ -129,105 +129,6 @@ class PDFController extends AbstractController {
             'user_id' => $id
         ]);
     }
-
-    // #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")]
-    // public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id = ""): void {
-    //     $filename = html_entity_decode($filename);
-    //     $anon_path = urldecode($anon_path);
-    //     $id = $this->core->getUser()->getId();
-
-    //     if ($student_id !== "") {
-    //         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT && $student_id !== $id) {
-    //             $this->core->getOutput()->renderJsonFail('You do not have permission to access this file');
-    //             return;
-    //         }
-    //         $id = $student_id;
-    //     }
-
-    //     $real_path = $this->getPath($anon_path, $id, true);
-    //     if (!file_exists($real_path)) {
-    //         $this->core->getOutput()->renderJsonFail('The PDF file could not be found');
-    //         return;
-    //     }
-
-    //     $gradeable = $this->tryGetGradeable($gradeable_id);
-    //     if ($gradeable === false) {
-    //         $this->core->getOutput()->renderJsonFail('Could not get gradeable');
-    //         return;
-    //     }
-    //     if ($gradeable->isTeamAssignment()) {
-    //         if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
-    //             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
-    //         }
-    //     }
-    //     $submitter = $this->core->getQueries()->getSubmitterById($id);
-    //     $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
-    //     $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-    //     $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-
-    //     $latest_timestamp = filemtime($real_path);
-    //     $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path, $latest_timestamp);
-
-    //     $rerender_annotated_pdf = !(file_exists($annotation_path) && $latest_timestamp <= filemtime($annotation_path));
-
-    //     $pdf_array[] = 'PDF';
-    //     $this->core->getOutput()->renderOutput($pdf_array, 'downloadPDFEmbedded', $gradeable_id, $id, $filename, $real_path, $annotation_jsons, $rerender_annotated_pdf, true, 1, true);
-    // }
-
-    // #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/{target_dir}", methods: ["POST"])]
-    // public function savePDFAnnotation(string $gradeable_id, string $target_dir): JsonResponse {
-    //     //Save the annotation layer to a folder.
-    //     $annotation_info = $_POST['GENERAL_INFORMATION'];
-    //     $grader_id = $this->core->getUser()->getId();
-    //     $course_path = $this->core->getConfig()->getCoursePath();
-    //     $user_id = $annotation_info['user_id'];
-
-    //     $gradeable = $this->tryGetGradeable($gradeable_id);
-    //     if ($gradeable === false) {
-    //         return JsonResponse::getErrorResponse('Could not get gradeable');
-    //     }
-
-    //     $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
-    //     if ($graded_gradeable === false) {
-    //         return JsonResponse::getErrorResponse('Could not get graded gradeable');
-    //     }
-
-    //     // Leaving the target_dir parameter gives us flexibility in the future, but it is currently only allowed to
-    //     // ever have one value ("annotations").  There is commented-out code in PDFInitToolbar.js which makes use of
-    //     // different directories, which may want to be re-enabled in the future.
-    //     if ($target_dir !== 'annotations') {
-    //         return JsonResponse::getErrorResponse("Invalid target directory $target_dir");
-    //     }
-
-    //     if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-    //         return JsonResponse::getErrorResponse('You do not have permission to grade this student');
-    //     }
-
-    //     $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
-    //     $annotation_gradeable_path = FileUtils::joinPaths($course_path, $target_dir, $gradeable_id);
-    //     if (!is_dir($annotation_gradeable_path) && !FileUtils::createDir($annotation_gradeable_path)) {
-    //         return JsonResponse::getErrorResponse('Creating annotation gradeable folder failed');
-    //     }
-    //     $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $user_id);
-    //     if (!is_dir($annotation_user_path) && !FileUtils::createDir($annotation_user_path)) {
-    //         return JsonResponse::getErrorResponse('Creating annotation user folder failed');
-    //     }
-    //     $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
-    //     if (!is_dir($annotation_version_path) && !FileUtils::createDir($annotation_version_path)) {
-    //         return JsonResponse::getErrorResponse('Creating annotation version folder failed');
-    //     }
-
-    //     $annotation_body = [
-    //         'file_path' => $annotation_info['file_path'],
-    //         'grader_id' => $grader_id,
-    //         'annotations' => isset($_POST['annotation_layer']) ? json_decode($_POST['annotation_layer'], true) : []
-    //     ];
-
-    //     $annotation_json = json_encode($annotation_body);
-    //     file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($annotation_info["file_path"])) . "_" . $grader_id . '.json', $annotation_json);
-    //     return JsonResponse::getSuccessResponse('Annotation saved successfully!');
-    // }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods: ["POST"])]
     public function showGraderPDFEmbedded(string $gradeable_id) {
@@ -276,7 +177,7 @@ class PDFController extends AbstractController {
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $anon_path, $anon_path, $annotation_jsons, false, $page_num, false, $is_peer_grader);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $page_num, false);
     }
 
     #[Route(path: "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/img", methods: ["POST"])]
