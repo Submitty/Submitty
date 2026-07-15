@@ -14257,12 +14257,6 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			rawMessage: 'Method app\views\PDFView::downloadPDFEmbedded() has parameter $annotation_jsons with no value type specified in iterable type array.'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/views/PDFView.php
-
-		-
 			rawMessage: 'Method app\views\PDFView::showPDFEmbedded() has parameter $annotation_jsons with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1

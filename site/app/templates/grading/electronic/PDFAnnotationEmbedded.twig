@@ -10,15 +10,6 @@
     </div>
 </div>
 
-<!-- Provide template of download / view all button to copy over to toolbar since this page is the only one that gets the necessary info -->
-<template id="permission-annotations-btn-template">
-    {% if can_download is defined and can_download %}
-        <button id="download-annotations-btn" class='btn btn-default' aria-label="Download the file" data-testid="download-annotations-btn">
-            Download <i class="fas fa-download" title="Download the file"></i>
-        </button>
-    {% endif %}
-</template>
-
 <script>
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
 </script>
