@@ -31,6 +31,7 @@ function handleClick() {
     :title="'Sort by ' + title"
     :aria-label="'Sort by ' + title"
     :data-sort-key="sortKey"
+    data-testid="sortable-header-link"
     @click.prevent="handleClick"
   >
     {{ title }}
