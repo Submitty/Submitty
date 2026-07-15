@@ -86,13 +86,6 @@ class PDFController extends AbstractController {
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
-        $submitter = $this->core->getQueries()->getSubmitterById($id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path);
-
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, 1, true);
     }
 
@@ -132,7 +125,6 @@ class PDFController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods: ["POST"])]
     public function showGraderPDFEmbedded(string $gradeable_id) {
-        // This is the embedded pdf annotator that we built.
         // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
@@ -142,7 +134,6 @@ class PDFController extends AbstractController {
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
         $real_path = $is_anon ? "" : $file_path;
-        $anon_path = $is_anon ? $file_path : "";
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
@@ -150,9 +141,6 @@ class PDFController extends AbstractController {
             if (!file_exists($real_path)) {
                 return JsonResponse::getErrorResponse('The PDF file could not be found');
             }
-        }
-        else {
-            $anon_path = $this->getPath($file_path, $gradeable_id, false);
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -168,15 +156,6 @@ class PDFController extends AbstractController {
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             return JsonResponse::getErrorResponse('You do not have permission to grade this student');
         }
-
-        // We've already verified that we can grade this assignment.  We just check to see if this a peer grader
-        // to determine if we should show a button to download the PDF.
-        $is_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->hasPeerComponent();
-
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
-
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $page_num, false);
     }
 
@@ -226,7 +205,6 @@ class PDFController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img/{target_dir}", methods: ["POST"])]
     public function saveImageAnnotation(string $gradeable_id, string $target_dir): JsonResponse {
-        // Save image annotations similar to PDF annotations
         $grader_id = $this->core->getUser()->getId();
         $course_path = $this->core->getConfig()->getCoursePath();
         $user_id = $_POST['user_id'] ?? null;
