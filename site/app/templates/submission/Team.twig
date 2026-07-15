@@ -231,10 +231,7 @@
         </header>
 
         {% set message_class = students_on_teams_count == 0 ? 'red-message' : 'message' %}
-        <p class="{{ message_class }}"> 
-            There are currently <b>{{ team_count }} existing teams</b> for this gradeable. 
-            There are currently <b>{{ students_not_on_teams_count }}</b> students not yet on a team and <b>{{ students_on_teams_count }}</b> students on existing teams for this gradeable.
-        </p>
+        <p class="{{ message_class }}" data-testid="manage-teams-message">There are currently <b>{{ team_count }} existing teams</b> for this gradeable. There are currently <b>{{ students_not_on_teams_count }}</b> students not yet on a team and <b>{{ students_on_teams_count }}</b> students on existing teams for this gradeable.</p>
         <br>
         <div class="team-management-links">
             <p>
