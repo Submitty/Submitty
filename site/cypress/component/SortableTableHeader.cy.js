@@ -67,8 +67,7 @@ describe('SortableTableHeader', () => {
         });
 
         it('passes each colDataType variant in the emit payload', () => {
-            const colDataTypeCases = ['string', 'number', 'date'];
-            colDataTypeCases.forEach((dataType) => {
+            ['string', 'number', 'date'].forEach((dataType) => {
                 mountWithEmitSpy(SortableTableHeader, 'sort-table-column-click', {
                     ...defaultProps,
                     sortKey: `col_${dataType}`,
