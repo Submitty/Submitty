@@ -35,6 +35,7 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
+    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
     private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
@@ -273,9 +274,13 @@ class ReportController extends AbstractController {
                 }
             }
         }
+        catch (\UnexpectedValueException $e) {
+            // Permission denied or unreadable directory—log the error for debugging
+            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
+            return null;
+        }
 
-        $this->rg_manual_generation_cache = $manual;
-        return $manual;
+        return $latest_timestamp > 0 ? $latest_timestamp : 0;
     }
 
     /**

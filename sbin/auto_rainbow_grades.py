@@ -13,6 +13,7 @@ usage: python3 auto_rainbow_grades.py <semester> <course> <source>
 # Imports
 import sys
 import os
+import glob
 import subprocess
 import shutil
 import pwd
@@ -193,9 +194,26 @@ else:
 print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
-# Run make tables
-print('Compiling rainbow grades', flush=True)
-cmd_output = os.popen('make tables').read()
+# Sorted summaries to build. Each is a Makefile target that runs
+# ./process_grades.out by_<x>. process_grades.out skips any sort order the course
+# has no gradeables for, so inapplicable tables are simply not produced.
+SORT_ORDERS = ['overall', 'section', 'hw', 'lab', 'test', 'exam']
+
+# Remove stale tables so a sort order that no longer applies doesn't linger.
+print('Removing previous rainbow grades tables', flush=True)
+for stale in glob.glob('output.html') + glob.glob('output.csv') \
+        + glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
+    os.remove(stale)
+
+# Run make once per sorted summary
+for order in SORT_ORDERS:
+    print('Compiling rainbow grades ({})'.format(order), flush=True)
+    result = subprocess.run(
+        ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    print(result.stdout, flush=True)
+    if result.returncode != 0:
+        raise Exception('Failure building rainbow grades table: {}'.format(order))
 
 # Run make push_test
 print('Exporting to summary_html', flush=True)
