@@ -7,7 +7,7 @@ from pathlib import Path
 # Add sbin to path to import clustering algorithms
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from clustering_algorithms import dummy_split
+from clustering_algorithms.dummy_split import DummySplit
 from submitty_jobs.jobs import GradingClustering
 
 class TestGradingClustering(unittest.TestCase):
@@ -17,7 +17,8 @@ class TestGradingClustering(unittest.TestCase):
             {'user_id': 'student2', 'team_id': None, 'active_version': 2},
             {'user_id': None, 'team_id': 'team1', 'active_version': 3}
         ]
-        clusters = dummy_split.run(submitters)
+        algo = DummySplit()
+        clusters = algo.run(submitters)
         
         self.assertEqual(len(clusters), 2)
         self.assertEqual(len(clusters['Cluster A (A-M)']), 0)
