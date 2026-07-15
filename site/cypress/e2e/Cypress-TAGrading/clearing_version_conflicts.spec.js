@@ -52,7 +52,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.login('instructor');
 
         cy.log('Button should exist if there is a version conflict');
-        cy.visit(['sample', 'gradeable', 'grading_team_homework', 'grading', 'grade?who_id=fIS8zNJi2DWpWMg&sort=id&direction=ASC']);
+        cy.visit(['sample', 'gradeable', 'grading_team_homework', 'grading', 'grade?who_id=eyaIcqtZ8q9kRLu&sort=id&direction=ASC']);
         cy.get('[data-testid="grading-rubric-btn"]').click();
         cy.get('[data-testid="change-graded-version"]').should('exist');
         cy.get('[data-testid="version-warning"]').should('exist');
@@ -76,7 +76,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
                 url: buildUrl(['sample', 'gradeable', 'grading_team_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
                 form: true,
                 body: {
-                    anon_id: 'fIS8zNJi2DWpWMg',
+                    anon_id: 'eyaIcqtZ8q9kRLu',
                     graded_version: 3,
                     component_ids: [92, 93, 94, 95],
                     csrf_token: win.csrfToken,
