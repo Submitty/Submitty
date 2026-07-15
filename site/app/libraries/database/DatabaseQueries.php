@@ -9772,7 +9772,7 @@ WHERE current_state IN
                 return '';
             }
             // Use simplified expression for empty keymap
-            if (empty($key_map)) {
+            if ($key_map === []) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
             return 'ORDER BY ' . implode(
