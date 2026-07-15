@@ -393,6 +393,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # twig.js
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
+    # jspdf
+    mkdir ${VENDOR_FOLDER}/jspdf
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
     # highlight.js
     mkdir ${VENDOR_FOLDER}/highlight.js
     cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/

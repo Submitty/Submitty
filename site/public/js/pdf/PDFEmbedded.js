@@ -1,4 +1,4 @@
-/* global pdfjsLib, csrfToken */
+/* global pdfjsLib, csrfToken, jspdf */
 /* exported render */
 
 window.RENDER_OPTIONS = {
