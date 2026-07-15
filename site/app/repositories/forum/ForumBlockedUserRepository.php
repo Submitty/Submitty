@@ -9,6 +9,9 @@ use app\entities\forum\ForumBlockedUser;
 use DateTime;
 use Doctrine\ORM\EntityRepository;
 
+/**
+ * @extends EntityRepository<ForumBlockedUser>
+ */
 class ForumBlockedUserRepository extends EntityRepository {
     public function isUserBlockedFromForumPosts(string $user_id): bool {
         $block = $this->findOneBy(['user_id' => $user_id, 'action' => ForumBlockAction::NoForumPosts]);
@@ -77,9 +80,14 @@ class ForumBlockedUserRepository extends EntityRepository {
         $blocked = $this->findBy(['user_id' => $author_ids, 'action' => ForumBlockAction::NoForumPosts]);
 
         $now = new DateTime();
-        return array_values(array_map(
-            fn($b) => $b->getUserId(),
-            array_filter($blocked, fn($b) => $b->getExpirationDate() === null || $b->getExpirationDate() > $now)
-        ));
+        $blocked_user_ids = [];
+
+        foreach ($blocked as $block) {
+            if ($block->getExpirationDate() === null || $block->getExpirationDate() > $now) {
+                $blocked_user_ids[] = $block->getUserId();
+            }
+        }
+
+        return $blocked_user_ids;
     }
 }
