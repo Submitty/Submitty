@@ -44,33 +44,6 @@ def create_gradeable_submission(src: str, dst: str) -> None:
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
 
-
-def create_pdf_annotations(file_name: str, file_path: str, src: str, dst: str, grader_id) -> None:
-    """
-    Specifically designed helper function that copies a annotation from the
-    source to the destination.
-
-    The source annotation need to be modified to reflect:
-        the file that the annotations belongs to
-        the grader that is responsible for the annotation
-
-    :param file_name: encoded file name
-    :param file_path: anonymous file path
-    :param src: path of the file or directory we want to use for this annotation
-    :param dst: path to the folder where we should copy the annotation to
-    :param grader_id: grader of the annotation
-    """
-    with open(src, 'r') as open_file:
-        annotation_json = json.load(open_file)
-        annotation_json['file_path'] = file_path
-        annotation_json['grader_id'] = grader_id
-        for annotation in annotation_json['annotations']:
-            annotation['userId'] = grader_id
-
-    with open(os.path.join(dst, file_name), 'w') as f:
-        json.dump(annotation_json, f, indent=2)
-
-
 def create_group(group) -> None:
     """
     Creates the group on the system, adding some base users to the group as well that are necessary
