@@ -35,7 +35,6 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
     private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
@@ -194,10 +193,11 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
-     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
-     * suggests the reports were manually generated and copied in.
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
+     * so every file has an identical twin when the server produced it. A manual generation writes
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html.
      * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
@@ -273,13 +273,9 @@ class ReportController extends AbstractController {
                 }
             }
         }
-        catch (\UnexpectedValueException $e) {
-            // Permission denied or unreadable directory—log the error for debugging
-            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
-            return null;
-        }
 
-        return $latest_timestamp > 0 ? $latest_timestamp : 0;
+        $this->rg_manual_generation_cache = $manual;
+        return $manual;
     }
 
     /**
@@ -486,6 +482,9 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['date_registered'] = $user->getDateRegistered() !== null
+            ? $user->getDateRegistered()->format(\DateTime::ATOM)
+            : null;
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
