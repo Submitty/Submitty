@@ -6,7 +6,7 @@ import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
 import database_queries
-from clustering_algorithms import dummy_split
+from clustering_algorithms.dummy_split import DummySplit
 
 
 def main():
@@ -34,7 +34,8 @@ def main():
         submitters = database_queries.get_active_submitters(course_conn, args.gradeable_id)
 
         if args.algorithm == 'dummy_split':
-            cluster_groups = dummy_split.run(submitters)
+            algo = DummySplit()
+            cluster_groups = algo.run(submitters)
         else:
             raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
