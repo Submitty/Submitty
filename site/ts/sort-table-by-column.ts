@@ -75,6 +75,10 @@ function sortTableByColumn(table_id: string, sort_key: string, col_data_type: co
  * @returns none
  */
 function restoreTableSort(table_id: string) {
+    if (!document.querySelector(`#${table_id}`)) {
+        requestAnimationFrame(() => restoreTableSort(table_id));
+        return;
+    }
     const sort_data_string: string | null = sessionStorage.getItem(`${table_id}-sorting-data`);
     if (sort_data_string === null) {
         return;
