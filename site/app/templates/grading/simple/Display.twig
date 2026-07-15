@@ -260,7 +260,7 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade cell-checkpoint {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
+                class="cell-grade cell-checkpoint no-highlight {{ component_grade ? (component_grade.getScore() == 1.0 ? "simple-full-credit" : (component_grade.getScore() == 0.5 ? "simple-half-credit" : "")) : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
@@ -281,7 +281,7 @@
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
-        <td class="option-small-input">
+        <td class="option-small-input no-highlight">
             <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-comment-{{ section_id }}-{{ index }}-{{loop.index0 }}"
                   contenteditable
@@ -308,7 +308,7 @@
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             {% set component_score = component_grade ? component_grade.getScore() : 0 %}
             {% set total = total + component_score %}
-            <td class="option-small-input">
+            <td class="option-small-input no-highlight">
                 <input
                     class="option-small-box cell-grade" tabindex="0"
                     style="text-align: center; width: 80px; {{ component_score == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
@@ -336,7 +336,7 @@
             </td>
         {% endfor %}
 
-        <td class="option-small-output">
+        <td class="option-small-output no-highlight">
             <div class="option-small-box cell-total" style="text-align: center" id="total-{{ section_id }}-{{ index }}" data-total="true">{{ total }}</div>
         </td>
     {% endif %}
@@ -345,7 +345,7 @@
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
-        <td class="option-small-input">
+        <td class="option-small-input no-highlight">
             <textarea class="option-small-box cell-grade cell-text-entry"
                   tabindex="0" id="cell-{{ section_id }}-{{ index }}-{{ text_start + loop.index0 }}"
                   contenteditable
