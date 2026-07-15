@@ -46,7 +46,7 @@ for i in "${array[@]}"; do
 done
 
 # COURSE_BUILDERS & DAEMON_USER need access to these scripts
-array=( build_homework_function.sh make_assignments_txt_file.py make_generated_output.py config_syntax_check.py json_schemas json_schemas/complete_config_schema.json set_allowed_mins.py comment_count.py )
+array=( build_homework_function.sh make_assignments_txt_file.py make_generated_output.py config_syntax_check.py json_schemas json_schemas/complete_config_schema.json set_allowed_mins.py comment_count.py insert_build_data.py )
 for i in "${array[@]}"; do
     chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
@@ -109,7 +109,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/docker_cleanup.sh
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things in sbin
-array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py send_email.py cleanup_old_email.py send_notification.py generate_grade_summaries.py submitty_daemon_jobs)
+array=( auto_rainbow_grades.py auto_rainbow_scheduler.py build_config_upload.py send_email.py cleanup_old_email.py cleanup_active_graders.py send_notification.py generate_grade_summaries.py submitty_daemon_jobs)
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}

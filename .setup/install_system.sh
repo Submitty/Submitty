@@ -234,7 +234,11 @@ DB_COURSE_PASSWORD=submitty_dbuser
 # DISTRO SETUP
 #################
 
-source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+if [ ${WORKER} == 1 ]; then
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh worker
+else
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+fi
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
@@ -759,9 +763,7 @@ fi
 # (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
 # operational at that time.)
 if [ ${WORKER} == 0 ]; then
-
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
-
 fi
 
 popd > /dev/null

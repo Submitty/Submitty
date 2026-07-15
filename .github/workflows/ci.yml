@@ -36,12 +36,12 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.9'
 
@@ -54,7 +54,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
@@ -68,7 +68,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -93,7 +93,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -118,7 +118,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -146,7 +146,7 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -160,6 +160,15 @@ jobs:
       - run: npm ci
       - name: Run cypress component tests
         run: npx cypress run --component --browser chrome
+        env:
+          VITE_COVERAGE: "true"
+      - name: Upload Cypress Component Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: site/coverage/lcov.info
+          flags: vue
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
@@ -178,8 +187,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.1
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@2.37.2
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -205,8 +214,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.1
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@2.37.2
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -241,8 +250,8 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v6
-      - uses: shivammathur/setup-php@2.37.1
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@2.37.2
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -274,7 +283,7 @@ jobs:
     name: Python Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -296,7 +305,7 @@ jobs:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -381,7 +390,7 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: install yamllint
         run: sudo apt-get install -y yamllint
       - name: Run yamllint
@@ -392,7 +401,7 @@ jobs:
     name: Shell Lint
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: install ShellCheck
         run: sudo apt-get install -y shellcheck
       - name: Run ShellCheck
@@ -405,13 +414,13 @@ jobs:
 
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: main
           path: MAIN
 
       - name: Checkout PR branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: PR
 
@@ -488,7 +497,7 @@ jobs:
           sudo rm /etc/postgresql/14 -rf
 
       - name: Checkout Current Branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: branch/GIT_CHECKOUT/Submitty
           fetch-depth: 0
@@ -499,7 +508,7 @@ jobs:
                        -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
 
       - name: Checkout main Branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.MBASE || 'main' }}
           path: main/GIT_CHECKOUT/Submitty
@@ -745,9 +754,8 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Run setup script
-        uses: ./.github/actions/e2e-Setup-Composite
+        uses: actions/checkout@v7
+      - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v5
@@ -956,7 +964,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # If the matrix is currently on Development or Tutorial,
       # we should use the respective courses
@@ -1053,7 +1061,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: ./.github/actions/e2e-Setup-Composite
       - name: Run integration tests
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
@@ -1062,7 +1070,7 @@ jobs:
     name: Ansible Install
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup SSH
         shell: bash
         run: |

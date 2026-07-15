@@ -236,33 +236,36 @@ export function changeStudentArrowTooltips(data: string) {
     }
 }
 
-window.updateCookies = function () {
+window.updateCookies = function (clear_open_files: boolean = false) {
     window.Cookies.set('silent_edit_enabled', String(isSilentEditModeEnabled()), {
         path: '/',
     });
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
-    let files: string[] = [];
-    $('#file-container')
-        .children()
-        .each(function () {
-            $(this)
-                .children('div[id^=div_viewer_]')
-                .each(function () {
-                    files = files.concat(
-                        findAllOpenedFiles(
-                            $(this),
-                            '',
-                            $(this)[0].dataset.file_name!,
-                            [],
-                            true,
-                        ),
-                    );
-                });
-        });
+    let open_files_array: string[] = [];
+    if (!clear_open_files) {
+        // keep open files persistent across cookie updates
+        const prev_open_files = window.Cookies.get('open_files') || '[]';
+        const prev_open_files_array = JSON.parse(prev_open_files) as string[];
+        open_files_array = open_files_array.concat(prev_open_files_array);
+        // search for and add open files to our array, then remove closed files
+        $('#file-container')
+            .children()
+            .each(function () {
+                $(this)
+                    .children('div[id^=div_viewer_]')
+                    .each(function () {
+                        open_files_array = open_files_array.concat(findAllOpenFiles($(this)));
+                        const closed_files_array: string[] = findAllClosedFiles($(this));
+                        open_files_array = open_files_array.filter((item) => !closed_files_array.includes(item));
+                    });
+            });
+    }
+    // remove duplicates from the auto-open list
+    open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
-    window.Cookies.set('files', JSON.stringify(files), { path: '/' });
+    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -311,8 +314,8 @@ function openDiv(num: string) {
 }
 window.openDiv = openDiv;
 
-// finds all the open files and folder and stores them in stored_paths
-function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
+// finds all the open files and folders and stores them in stored_paths
+function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string = '', path: string = elem[0].dataset.file_name!, stored_paths: string[] = [], first: boolean = true) {
     if (first === true) {
         current_path += path;
         if ($(elem)[0].classList.contains('open')) {
@@ -350,17 +353,65 @@ function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, pat
                         stored_paths.push(
                             `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
                         );
-                        stored_paths = findAllOpenedFiles(
+                        stored_paths = findAllOpenFiles(
                             $(this),
                             current_path,
-                            $(this)[0].dataset.file_name!,
+                            $(this)[0].dataset.file_name,
                             stored_paths,
                             false,
                         );
                     }
                 });
         });
+    return stored_paths;
+}
 
+// finds all the closed files and folders and stores them in stored_paths
+function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = '', path: string = elem[0].dataset.file_name!, stored_paths: string[] = [], first: boolean = true) {
+    if (first === true) {
+        current_path += path;
+        if (!$(elem)[0].classList.contains('open')) {
+            stored_paths.push(path);
+        }
+    }
+    else {
+        current_path += `#$SPLIT#$${path}`;
+    }
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=file_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('shown')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                    }
+                });
+        });
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=div_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('open')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                    }
+                    stored_paths = findAllClosedFiles(
+                        $(this),
+                        current_path,
+                        $(this)[0].dataset.file_name,
+                        stored_paths,
+                        false,
+                    );
+                });
+        });
     return stored_paths;
 }
 
@@ -671,6 +722,12 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
+
+    // Clean up any open annotation editor when loading a new file
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     const extension = name.split('.').pop();
     if (fileFullPanelOptions[panel]['pdf'] && extension === 'pdf') {
         const gradeable_id = document.getElementById(
@@ -693,38 +750,77 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
+                // Clear previous PDF content before appending new content
+                $('#file-content').empty();
                 $('#file-content').append(data);
             },
         });
     }
     else {
+        // Check if the file is an image
+        const isImage = isImageFile(name);
         $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
-        $(fileFullPanelOptions[panel]['saveStatus']).hide();
-        $(fileFullPanelOptions[panel]['fileContent']).append(
-            `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            name,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            path,
-        );
-        openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
-        $(
-            `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
-        ).css('max-height', '1200px');
-        // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
+
+        if (isImage) {
+            // For images, use server-side annotation system
+            const gradeable_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.gradeableId;
+            const anon_submitter_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.anonSubmitterId;
+            $(fileFullPanelOptions[panel]['saveStatus']).show();
+
+            return $.ajax({
+                type: 'POST',
+                url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'img']),
+                data: {
+                    user_id: anon_submitter_id,
+                    filename: name,
+                    file_path: path,
+                    is_anon: true,
+                    csrf_token: window.csrfToken,
+                },
+                success: function (data: string) {
+                    // Clean up annotation editor and reset manager before loading new content
+                    if (typeof window.cleanupAnnotationEditor === 'function') {
+                        window.cleanupAnnotationEditor();
+                    }
+
+                    // Clear previous image content before appending new content
+                    $(fileFullPanelOptions[panel]['fileContent']).empty();
+                    $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                },
+            });
+        }
+        else {
+            $(fileFullPanelOptions[panel]['saveStatus']).hide();
+            // For other file types, use the original iframe approach
+            $(fileFullPanelOptions[panel]['fileContent']).append(
+                `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                name,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                path,
+            );
+            openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
+            $(
+                `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
+            ).css('max-height', '1200px');
+        }
     }
 }
 window.loadPDF = loadPDF;
@@ -733,6 +829,14 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    // Also remove image annotation containers
+    $(`${fileFullPanelOptions[panel]['fileContent']}`).empty();
+
+    // Clean up any open annotation editor when collapsing files
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
         if ($('#pdf_annotation_bar').is(':visible')) {
@@ -894,6 +998,13 @@ window.deleteAttachment = function (target: string, file_name: string) {
     }
 };
 
+// Utility function to check if a file extension is an image
+function isImageFile(filename: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'tif'];
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return extension ? imageExtensions.includes(extension) : false;
+}
+
 function checkOpenComponentMark(index: number) {
     const component_id = getFirstOpenComponentId();
     if (component_id !== NO_COMPONENT_ID) {
@@ -918,7 +1029,7 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 }
 
 $(() => {
-// Navigate to the prev / next student buttons
+    // Navigate to the prev / next student buttons
     registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
         gotoPrevStudent();
     });
