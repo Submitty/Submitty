@@ -10,7 +10,7 @@ const emit = defineEmits<{
 }>();
 
 onMounted(() => {
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
         emit('restore-table-sort', props.tableId);
     });
 });
