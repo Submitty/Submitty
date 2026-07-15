@@ -1,5 +1,3 @@
-
-import json
 import os
 import random
 import shutil
@@ -43,6 +41,7 @@ def create_gradeable_submission(src: str, dst: str) -> None:
 
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
+
 
 def create_group(group) -> None:
     """
