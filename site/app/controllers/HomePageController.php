@@ -533,27 +533,40 @@ class HomePageController extends AbstractController {
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
-        else {
-            $term = new Term(
-                $term_id,
-                $term_name,
-                new \DateTime($start_date),
-                new \DateTime($end_date),
-            );
-            $em->persist($term);
-            $em->flush();
-            $this->core->addSuccessMessage("Term added successfully.");
+
+        $start_date_obj = new \DateTime($start_date);
+        $end_date_obj = new \DateTime($end_date);
+        $term_length_days = $start_date_obj->diff($end_date_obj)->days;
+
+        if ($term_length_days > 360) {
+            $error = "Term length cannot exceed 360 days (this term spans $term_length_days days).";
+            $this->core->addErrorMessage($error);
             return new MultiResponse(
-                JsonResponse::getSuccessResponse([
-                    "term_id" => $term_id,
-                    "term_name" => $term_name,
-                    "start_date" => $start_date,
-                    "end_date" => $end_date
-                ]),
+                JsonResponse::getFailResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
+
+        $term = new Term(
+            $term_id,
+            $term_name,
+            new \DateTime($start_date),
+            new \DateTime($end_date),
+        );
+        $em->persist($term);
+        $em->flush();
+        $this->core->addSuccessMessage("Term added successfully.");
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                "term_id" => $term_id,
+                "term_name" => $term_name,
+                "start_date" => $start_date,
+                "end_date" => $end_date
+            ]),
+            null,
+            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+        );
     }
 
     /**

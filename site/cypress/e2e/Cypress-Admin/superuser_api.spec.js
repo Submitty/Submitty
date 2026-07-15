@@ -79,4 +79,25 @@ describe('Tests cases revolving around term creation', () => {
             });
         });
     });
+
+    it('Should show error when term length exceeds 360 days', () => {
+        getApiKey('superuser', 'superuser').then((key) => {
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/terms`,
+                body: {
+                    term_id: `long_term${timestamp}`,
+                    term_name: 'Too Long Term',
+                    start_date: '2022-01-01',
+                    end_date: '2023-06-01',
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.status).to.eql('fail');
+                expect(response.body.message).to.match(/^Term length cannot exceed 360 days \(this term spans \d+ days\)\.$/);
+            });
+        });
+    });
 });
