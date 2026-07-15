@@ -2490,7 +2490,6 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
-            // eslint-disable-next-line no-restricted-syntax
             $('#thread-content').text(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');
