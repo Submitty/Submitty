@@ -30,8 +30,6 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\LateDayInfo;
-use app\entities\forum\ForumBlockedUser;
-use DateTime;
 
 /**
  * DatabaseQueries
@@ -8129,86 +8127,6 @@ AND gc_id IN (
         $current_date = new \DateTime();
         $lock_date_time = new \DateTime($lock_date);
         return $lock_date_time < $current_date;
-    }
-
-    public function isUserBlockedFromForumPosts(string $user_id): bool {
-        $block = $this->core->getCourseEntityManager()
-            ->getRepository(ForumBlockedUser::class)
-            ->findOneBy(['user_id' => $user_id, 'action' => 'no_forum_posts']);
-        return $block !== null && $block->isActive();
-    }
-
-    /**
-     * @return ForumBlockedUser[]
-     */
-    public function getActiveBlockedUsers(?string $user_id = null): array {
-        $em = $this->core->getCourseEntityManager();
-        $qb = $em->createQueryBuilder();
-        $qb->select('b')
-            ->from(ForumBlockedUser::class, 'b')
-            ->where('b.expiration_date IS NULL OR b.expiration_date > :now')
-            ->setParameter('now', new DateTime())
-            ->orderBy('b.created_at', 'DESC');
-
-        if ($user_id !== null) {
-            $qb->andWhere('b.user_id = :user_id')
-                ->setParameter('user_id', $user_id);
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function addBlockedUser(string $user_id, string $action, ?DateTime $expiration_date, string $created_by): void {
-        $em = $this->core->getCourseEntityManager();
-        $repo = $em->getRepository(ForumBlockedUser::class);
-        $existing = $repo->findOneBy(['user_id' => $user_id, 'action' => $action]);
-
-        if ($existing !== null) {
-            $existing->setExpirationDate($expiration_date);
-        }
-        else {
-            $block = new ForumBlockedUser($user_id, $action, $expiration_date, $created_by);
-            $em->persist($block);
-        }
-
-        $em->flush();
-    }
-
-    public function updateBlockedUser(int $id, ?DateTime $expiration_date): void {
-        $em = $this->core->getCourseEntityManager();
-        $block = $em->getRepository(ForumBlockedUser::class)->find($id);
-        if ($block !== null) {
-            $block->setExpirationDate($expiration_date);
-            $em->flush();
-        }
-    }
-
-    public function deleteBlockedUser(int $id): void {
-        $em = $this->core->getCourseEntityManager();
-        $block = $em->getRepository(ForumBlockedUser::class)->find($id);
-        if ($block !== null) {
-            $em->remove($block);
-            $em->flush();
-        }
-    }
-    /**
-     * @param string[] $author_ids
-     * @return string[] the subset of $author_ids who are blocked from forum posts
-     */
-    public function getUsersBlockedFromForumPosts(array $author_ids): array {
-        if (empty($author_ids)) {
-            return [];
-        }
-
-        $blocked = $this->core->getCourseEntityManager()
-            ->getRepository(ForumBlockedUser::class)
-            ->findBy(['user_id' => $author_ids, 'action' => 'no_forum_posts']);
-
-        $now = new DateTime();
-        return array_values(array_map(
-            fn($b) => $b->getUserId(),
-            array_filter($blocked, fn($b) => $b->getExpirationDate() === null || $b->getExpirationDate() > $now)
-        ));
     }
 
     /**

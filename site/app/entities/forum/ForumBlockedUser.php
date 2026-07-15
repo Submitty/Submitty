@@ -5,8 +5,9 @@ namespace app\entities\forum;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use app\repositories\forum\ForumBlockedUserRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ForumBlockedUserRepository::class)]
 #[ORM\Table(name: "forum_blocked_user")]
 class ForumBlockedUser {
     #[ORM\Id]
@@ -17,8 +18,8 @@ class ForumBlockedUser {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $action;
+    #[ORM\Column(type: Types::STRING, enumType: ForumBlockAction::class)]
+    protected ForumBlockAction $action;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $expiration_date;
@@ -29,7 +30,7 @@ class ForumBlockedUser {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $created_at;
 
-    public function __construct(string $user_id, string $action, ?DateTime $expiration_date, string $created_by) {
+    public function __construct(string $user_id, ForumBlockAction $action, ?DateTime $expiration_date, string $created_by) {
         $this->user_id = $user_id;
         $this->action = $action;
         $this->expiration_date = $expiration_date;
@@ -45,7 +46,7 @@ class ForumBlockedUser {
         return $this->user_id;
     }
 
-    public function getAction(): string {
+    public function getAction(): ForumBlockAction {
         return $this->action;
     }
 

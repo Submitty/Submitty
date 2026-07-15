@@ -9,6 +9,7 @@ use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\entities\forum\Thread;
 use app\entities\forum\Post;
+use app\entities\forum\ForumBlockedUser;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -339,7 +340,10 @@ class ForumThreadView extends AbstractView {
                 $posts
             ));
             $blocked_author_ids = array_flip(
-                $this->core->getQueries()->getUsersBlockedFromForumPosts($author_ids)
+                $this->core
+                    ->getCourseEntityManager()
+                    ->getRepository(ForumBlockedUser::class)
+                    ->getUsersBlockedFromForumPosts($author_ids)
             );
         }
         foreach ($posts as $post) {

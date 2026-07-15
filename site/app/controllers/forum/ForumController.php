@@ -21,6 +21,8 @@ use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
 use DateTime;
+use app\entities\forum\ForumBlockAction;
+use app\entities\forum\ForumBlockedUser;
 
 /**
  * Class ForumHomeController
@@ -353,7 +355,7 @@ class ForumController extends AbstractController {
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
 
-        if (!$this->core->getUser()->accessAdmin() && $this->core->getQueries()->isUserBlockedFromForumPosts($current_user_id)) {
+        if (!$this->core->getUser()->accessAdmin() && $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->isUserBlockedFromForumPosts($current_user_id)) {
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
             return $this->core->getOutput()->renderJsonFail("You are currently blocked from making forum posts.", $result);
         }
@@ -534,7 +536,7 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
-        elseif (!$this->core->getUser()->accessAdmin() && $this->core->getQueries()->isUserBlockedFromForumPosts($current_user_id)) {
+        elseif (!$this->core->getUser()->accessAdmin() && $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->isUserBlockedFromForumPosts($current_user_id)) {
             $this->core->addErrorMessage("You are currently blocked from making forum posts.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         }
@@ -679,7 +681,7 @@ class ForumController extends AbstractController {
         $blocked_author_ids = [];
         if ($this->core->getUser()->accessAdmin()) {
             $blocked_author_ids = array_flip(
-                $this->core->getQueries()->getUsersBlockedFromForumPosts([$post->getAuthor()->getId()])
+                $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->getUsersBlockedFromForumPosts([$post->getAuthor()->getId()])
             );
         }
         $result = $this->core->getOutput()->renderTemplate(
@@ -952,7 +954,7 @@ class ForumController extends AbstractController {
             $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone());
         }
 
-        $this->core->getQueries()->addBlockedUser($user_id, 'no_forum_posts', $expiration_date, $current_user_id);
+        $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->addBlockedUser($user_id, ForumBlockAction::NoForumPosts, $expiration_date, $current_user_id);
         return $this->core->getOutput()->renderJsonSuccess("User has been blocked from making forum posts.");
     }
 
@@ -968,10 +970,10 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("User ID is required.");
         }
 
-        $active_blocks = $this->core->getQueries()->getActiveBlockedUsers($user_id);
+        $active_blocks = $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->getActiveBlockedUsers($user_id);
         $block_id = null;
         foreach ($active_blocks as $block) {
-            if ($block->getAction() === 'no_forum_posts') {
+            if ($block->getAction() === ForumBlockAction::NoForumPosts) {
                 $block_id = $block->getId();
                 break;
             }
@@ -981,7 +983,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("User is not currently blocked from forum posts.");
         }
 
-        $this->core->getQueries()->deleteBlockedUser($block_id);
+        $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->deleteBlockedUser($block_id);
         return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
     }
 
@@ -990,10 +992,12 @@ class ForumController extends AbstractController {
         if (!$this->core->getUser()->accessAdmin()) {
             return JsonResponse::getFailResponse("You do not have permission to view this.");
         }
-        $active_blocks = $this->core->getQueries()->getActiveBlockedUsers();
+        $active_blocks = $this->core->getCourseEntityManager()
+            ->getRepository(ForumBlockedUser::class)
+            ->getActiveBlockedUsers();
         $blocked_users = [];
         foreach ($active_blocks as $block) {
-            if ($block->getAction() !== 'no_forum_posts') {
+            if ($block->getAction() !== ForumBlockAction::NoForumPosts) {
                 continue;
             }
             $user = $this->core->getQueries()->getUserById($block->getUserId());
