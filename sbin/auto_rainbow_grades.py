@@ -194,12 +194,12 @@ else:
 print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
-# Sorted summaries to build. Each is a Makefile target that runs
-# ./process_grades.out by_<x>. process_grades.out skips any sort order the course
-# has no gradeables for, so inapplicable tables are simply not produced.
+# Sorted summaries to build, each is a Makefile target that runs
+# ./process_grades.out by_<x>, process_grades.out skips any sort order the course
+# has no gradeables for, so inapplicable tables are simply not produced
 SORT_ORDERS = ['overall', 'section', 'hw', 'lab', 'test', 'exam']
 
-# Remove stale tables so a sort order that no longer applies doesn't linger.
+# Remove stale tables so a sort order that no longer applies doesn't linger
 print('Removing previous rainbow grades tables', flush=True)
 for stale in glob.glob('output.html') + glob.glob('output.csv') \
         + glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
@@ -211,8 +211,8 @@ for order in SORT_ORDERS:
     result = subprocess.run(
         ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
     )
-    print(result.stdout, flush=True)
     if result.returncode != 0:
+        print(result.stdout, flush=True)
         raise Exception('Failure building rainbow grades table: {}'.format(order))
 
 # Run make push_test
