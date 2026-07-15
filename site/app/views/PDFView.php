@@ -31,7 +31,7 @@ class PDFView extends AbstractView {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
-        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
             'user_id' => $user_id,
             'grader_id' => $this->core->getUser()->getId(),
