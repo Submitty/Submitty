@@ -91,6 +91,9 @@ if not args.worker:
     shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
     os.chmod(SECRETS_PHP_JSON, 0o440)
 
+
+shutil.chown(CONFIG_DATA_DIR, 'root', COURSE_BUILDERS_GROUP)
+os.chmod(CONFIG_DATA_DIR, 0o755)
 os.chmod(SUBMITTY_JSON, 0o444)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 os.chmod(PRESERVE_LIST_JSON, 0o444)

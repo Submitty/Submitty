@@ -13,7 +13,11 @@ parser.add_argument('--install-dir', default='/usr/local/submitty',
 
 args = parser.parse_args()
 
+SUBMITTY_DATA_DIR = '/var/local/submitty'
+
 CONFIG_INSTALL_DIR = os.path.join(args.install_dir, 'config')
+
+CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
 
 SETUP_REPOSITORY_DIR = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup')
 
@@ -26,6 +30,8 @@ SETUP_INSTALL_DIR = os.path.join(args.install_dir, '.setup')
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 os.makedirs(SETUP_REPOSITORY_DIR, exist_ok=True)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
+os.makedirs(CONFIG_DATA_DIR, exist_ok=True)
+
 PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
 # Rescue preserve list
 preserve_list = OrderedDict()
