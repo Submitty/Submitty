@@ -45,9 +45,17 @@ tr > td:nth-of-type(5) {
     width: 120px;
 }
 
-.highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
-    /* stylelint-disable-next-line declaration-no-important */
-    background: var(--standard-focus-cornflower-blue) !important ;
+tbody {
+    counter-reset: student;
+}
+
+tbody > tr:not(.info) {
+    counter-increment: student;
+}
+
+tbody > tr:not(.info) > td:nth-child(1)::after {
+    content: counter(student);
+    padding: 0 1em;
 }
 
 #data-table td:focus,
@@ -81,6 +89,8 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+/* Key Styles */
+
 .simple-key-full-credit,
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
@@ -106,7 +116,13 @@ input[type="number"]::-webkit-outer-spin-button {
     text-align: center;
 }
 
-/* styling for fields that aren't icons */
+.simple-icon {
+    transform: scaleX(3);
+    width: 20px;
+}
+
+/* Checkpoint Cell Styles */
+
 .simple-full-credit:not(i) {
     background-color: var(--simple-full-credit-dark-blue);
 }
@@ -117,11 +133,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .simple-save-error:not(i) {
     background-color: var(--simple-save-error-red);
-}
-
-.simple-icon {
-    transform: scaleX(3);
-    width: 20px;
 }
 
 #details-legend li {

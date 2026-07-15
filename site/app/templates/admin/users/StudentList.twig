@@ -161,7 +161,7 @@
                     {% for student in students %}
                         {% set class = "" %}
                         {% if student.accessGrading() %}
-                            {% set class = "access-grading" %}
+                            {% set class = "highlighted-row" %}
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
