@@ -48,6 +48,46 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.get('[data-testid="version-warning"]').should('exist');
     });
 
+    it('Clear conflict button should work on team gradeables', () => {
+        cy.login('instructor');
+
+        cy.log('Button should exist if there is a version conflict');
+        cy.visit(['sample', 'gradeable', 'grading_team_homework', 'grading', 'grade?who_id=fIS8zNJi2DWpWMg&sort=id&direction=ASC']);
+        cy.get('[data-testid="grading-rubric-btn"]').click();
+        cy.get('[data-testid="change-graded-version"]').should('exist');
+        cy.get('[data-testid="version-warning"]').should('exist');
+
+        cy.log('Clicking the button should resolve the version conflict');
+
+        // wait until page is fully loaded
+        cy.get('[data-testid="component-list"]').children().should('have.length.least', 1);
+
+        cy.get('[data-testid="version-warning"]').should('exist');
+
+        cy.get('[data-testid="change-graded-version"]').click();
+        cy.get('[data-testid="change-graded-version"]', { timeout: 10000 }).should('not.be.visible');
+
+        cy.get('[data-testid="version-warning"]').should('not.exist');
+
+        // reset state
+        cy.window().then(async (win) => {
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'gradeable', 'grading_team_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
+                form: true,
+                body: {
+                    anon_id: 'fIS8zNJi2DWpWMg',
+                    graded_version: 3,
+                    component_ids: [92, 93, 94, 95],
+                    csrf_token: win.csrfToken,
+                },
+            });
+        });
+
+        cy.reload();
+        cy.get('[data-testid="version-warning"]').should('exist');
+    });
+
     it('Clicking "save" on a component with a version conflict should resolve the conflict for that component', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=JjnNjvAks6GQg1h&sort=id&direction=ASC&gradeable_version=1']);
