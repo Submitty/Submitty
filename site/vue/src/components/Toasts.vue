@@ -130,6 +130,17 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
   margin: 0;
   /* stylelint-disable-next-line declaration-no-important */
   padding: 8px 14px !important;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.inner-message > span {
+  min-width: 0;
+}
+
+.inner-message > a {
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 span > i {

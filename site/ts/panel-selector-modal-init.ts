@@ -1,7 +1,4 @@
 $(() => {
-    // Draggable Popup box
-    $('#panels-selector-modal').draggable();
-
     // Single Panel mode
     const singlePanelCanvas: HTMLCanvasElement | null = document.querySelector('#layout-option-1 #single-panel');
     const singlePanelCanvasCTX = singlePanelCanvas?.getContext('2d');
