@@ -268,7 +268,7 @@ function renderPage(pageNumber, renderOptions) {
         const transform = scalePage(pageNumber, viewport, canvasContext);
 
         // Render the page
-        return pdfPage.renderPDF({ canvasContext, viewport, transform }).promise.then(() => {
+        return pdfPage.render({ canvasContext, viewport, transform }).promise.then(() => {
             // Indicate that the page was loaded
             page.setAttribute('data-loaded', 'true');
 
@@ -474,7 +474,7 @@ function roundToDivide(x, div) {
 //                 viewport: viewport,
 //             };
 
-//             page.renderPDF(renderContext).promise.then(() => {
+//             page.render(renderContext).promise.then(() => {
 //                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
 //                 const width = doc.internal.pageSize.getWidth();
 //                 const height = doc.internal.pageSize.getHeight();
