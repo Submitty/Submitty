@@ -192,99 +192,99 @@ function buildCourseUrl(parts = []) {
 //     download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
 // }
 
-// eslint-disable-next-line default-param-last
-function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
-    window.GENERAL_INFORMATION = {
-        grader_id: grader_id,
-        user_id: user_id,
-        gradeable_id: gradeable_id,
-        file_name: file_name,
-        file_path: file_path,
-    };
-    // TODO: Replace this with rerender_pdf, only rerender if rerender_pdf is set to true
-    // eslint-disable-next-line no-constant-condition
-    if (true) {
-        window.RENDER_OPTIONS.documentId = file_name;
-        // TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
-        window.RENDER_OPTIONS.userId = grader_id;
-        if (url === '') {
-            url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
-        }
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                user_id: user_id,
-                filename: file_name,
-                file_path: file_path,
-                csrf_token: csrfToken,
-            },
-            success: (data) => {
-                let pdfData;
-                try {
-                    pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
-                }
-                catch (err) {
-                    console.log(err);
-                    console.log(data);
-                    alert('Something went wrong, please try again later.');
-                }
-                const pdfJsBaseUrl = `${window.location.origin}/vendor/pdfjs/`;
-                pdfjsLib.getDocument({
-                    data: pdfData,
-                    cMapUrl: `${pdfJsBaseUrl}cmaps/`,
-                    cMapPacked: true,
-                    wasmUrl: `${pdfJsBaseUrl}wasm/`,
-                    iccUrl: `${pdfJsBaseUrl}iccs/`,
-                    standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
-                }).promise.then((pdf) => {
-                    const doc = new jspdf.jsPDF('p', 'mm');
-                    renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
-                });
-            },
-        });
-    }
-    else {
-        const anchor = document.createElement('a');
-        anchor.setAttribute('href', 'file_path');
-        anchor.setAttribute('download', file_path);
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.parentNode.removeChild(anchor);
-    }
-}
-function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
-    const scale = 3; // Define the scale factor here
-    if (num < targetNum) {
-        if (num !== 1) {
-            doc.addPage();
-        }
-        pdf.getPage(num).then((page) => {
-            const viewport = page.getViewport({ scale: scale });
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+// // eslint-disable-next-line default-param-last
+// function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
+//     window.GENERAL_INFORMATION = {
+//         grader_id: grader_id,
+//         user_id: user_id,
+//         gradeable_id: gradeable_id,
+//         file_name: file_name,
+//         file_path: file_path,
+//     };
+//     // TODO: Replace this with rerender_pdf, only rerender if rerender_pdf is set to true
+//     // eslint-disable-next-line no-constant-condition
+//     if (true) {
+//         window.RENDER_OPTIONS.documentId = file_name;
+//         // TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
+//         window.RENDER_OPTIONS.userId = grader_id;
+//         if (url === '') {
+//             url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
+//         }
+//         $.ajax({
+//             type: 'POST',
+//             url: url,
+//             data: {
+//                 user_id: user_id,
+//                 filename: file_name,
+//                 file_path: file_path,
+//                 csrf_token: csrfToken,
+//             },
+//             success: (data) => {
+//                 let pdfData;
+//                 try {
+//                     pdfData = JSON.parse(data)['data'];
+//                     pdfData = atob(pdfData);
+//                 }
+//                 catch (err) {
+//                     console.log(err);
+//                     console.log(data);
+//                     alert('Something went wrong, please try again later.');
+//                 }
+//                 const pdfJsBaseUrl = `${window.location.origin}/vendor/pdfjs/`;
+//                 pdfjsLib.getDocument({
+//                     data: pdfData,
+//                     cMapUrl: `${pdfJsBaseUrl}cmaps/`,
+//                     cMapPacked: true,
+//                     wasmUrl: `${pdfJsBaseUrl}wasm/`,
+//                     iccUrl: `${pdfJsBaseUrl}iccs/`,
+//                     standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
+//                 }).promise.then((pdf) => {
+//                     const doc = new jspdf.jsPDF('p', 'mm');
+//                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
+//                 });
+//             },
+//         });
+//     }
+//     else {
+//         const anchor = document.createElement('a');
+//         anchor.setAttribute('href', 'file_path');
+//         anchor.setAttribute('download', file_path);
+//         document.body.appendChild(anchor);
+//         anchor.click();
+//         anchor.parentNode.removeChild(anchor);
+//     }
+// }
+// function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
+//     const scale = 3; // Define the scale factor here
+//     if (num < targetNum) {
+//         if (num !== 1) {
+//             doc.addPage();
+//         }
+//         pdf.getPage(num).then((page) => {
+//             const viewport = page.getViewport({ scale: scale });
+//             const canvas = document.createElement('canvas');
+//             const ctx = canvas.getContext('2d');
+//             canvas.height = viewport.height;
+//             canvas.width = viewport.width;
 
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-            };
+//             const renderContext = {
+//                 canvasContext: ctx,
+//                 viewport: viewport,
+//             };
 
-            page.render(renderContext).promise.then(() => {
-                const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                const width = doc.internal.pageSize.getWidth();
-                const height = doc.internal.pageSize.getHeight();
-                doc.addImage(imgData, 'JPEG', 0, 0, width, height);
-                renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-            });
-        });
-    }
-    else {
-        doc.save(file_name);
-    }
-}
+//             page.render(renderContext).promise.then(() => {
+//                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
+//                 const width = doc.internal.pageSize.getWidth();
+//                 const height = doc.internal.pageSize.getHeight();
+//                 doc.addImage(imgData, 'JPEG', 0, 0, width, height);
+//                 renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
+//             });
+//         });
+//     }
+//     else {
+//         doc.save(file_name);
+//     }
+// }
 
 function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
