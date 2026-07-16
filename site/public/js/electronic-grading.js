@@ -16,7 +16,4 @@ window.addEventListener('DOMContentLoaded', () => {
             withdrawnFilterElements.hide();
         }
     }
-    window.updateElectronicGradingRowNumbersAndColors();
-    // Remove table-striped to prevent CSS conflicts with JS-set colors
-    $('table').removeClass('table-striped');
 });

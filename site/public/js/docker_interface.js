@@ -128,7 +128,7 @@ function addImage(url) {
 function updateImage(url) {
     $.ajax({
         url: url,
-        type: 'GET',
+        type: 'POST',
         data: {
             csrf_token: csrfToken,
         },
