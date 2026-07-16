@@ -1,24 +1,8 @@
 <div class="content">
     <script>
-        /**
-         * Escape any characters that may cause problems for JSON.parse()
-         * Double quotes are not included here as they were already escaped in PHP
-         */
-        const escape = str => {
-            return str
-                .replace(/[\\]/g, '\\\\')
-                .replace(/[\/]/g, '\\/')
-                .replace(/[\b]/g, '\\b')
-                .replace(/[\f]/g, '\\f')
-                .replace(/[\n]/g, '\\n')
-                .replace(/[\r]/g, '\\r')
-                .replace(/[\t]/g, '\\t');
-        };
-
-        let config_string = "{{ config_string|raw }}";
-        config_string = escape(config_string);
+        let config = null;
         try {
-            config = JSON.parse(config_string);
+            config = JSON.parse('{{ config_string|escape('js') }}');
         }
         catch (err) {
             console.error(err);
@@ -26,10 +10,10 @@
         }
 
         window.builder_data = {
-            g_id: '{{ gradeable.getId() }}',
+            g_id: '{{ gradeable.getId()|escape('js') }}',
             config: config,
-            images: JSON.parse('{{ images|raw }}'),
-            codemirror_langauges: JSON.parse('{{ codemirror_languages|raw }}')
+            images: JSON.parse('{{ images|escape('js') }}'),
+            codemirror_languages: JSON.parse('{{ codemirror_languages|escape('js') }}')
         };
 
         // Attach notebook_builder object to the window
