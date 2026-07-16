@@ -13,13 +13,13 @@ class PDFView extends AbstractView {
         string $user_id,
         ?string $file_name,
         ?string $file_path,
-        ?string $anon_path,
-        ?string $download_path,
-        array $annotation_jsons,
-        bool $is_student,
+        // ?string $anon_path,
+        // ?string $download_path,
+        // array $annotation_jsons,
+        // bool $is_student,
         ?int $page_num,
         bool $jquery = false,
-        bool $is_peer_grader = false
+        // bool $is_peer_grader = false
     ): void {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
