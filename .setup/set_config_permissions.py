@@ -38,6 +38,8 @@ SUBMITTY_DIRECTORY_JSON = os.path.join(SUBMITTY_DIRECTORY_DIR, 'submitty.json')
 
 os.makedirs(SUBMITTY_DIRECTORY_DIR, exist_ok=True)
 
+SUBMITTY_DATA_DIR = '/var/local/submitty'
+CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
