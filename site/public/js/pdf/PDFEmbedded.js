@@ -1,4 +1,4 @@
-/* global pdfjsLib, csrfToken, jspdf */
+/* global pdfjsLib, csrfToken */
 
 /*
     renderPDF() is used in PDFEmbedded.js,
@@ -441,7 +441,6 @@ function roundToDivide(x, div) {
 //                     iccUrl: `${pdfJsBaseUrl}iccs/`,
 //                     standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
 //                 }).promise.then((pdf) => {
-//                     const doc = new jspdf.jsPDF('p', 'mm');
 //                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
 //                 });
 //             },
