@@ -108,8 +108,6 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
-        $config_string = Utils::escapeDoubleQuotes($config_string);
-
         $this->loadDependencies();
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
