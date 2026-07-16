@@ -47,11 +47,17 @@ async function onAlgorithmChange(event?: Event) {
                 const pollInterval = setInterval(async () => {
                     try {
                         const statusResponse = await fetch(props.checkClusteringStatusUrl);
-                        const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string } };
+                        const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string }; message?: string };
                         if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
                             clearInterval(pollInterval);
                             emit('clustering-status', 'done');
                             emit('clustering-done');
+                        }
+                        else if (statusResult.status === 'fail' || (statusResult.data && statusResult.data.status === 'error')) {
+                            clearInterval(pollInterval);
+                            emit('clustering-status', 'error');
+                            emit('clustering-error', statusResult.message || 'Clustering process failed.');
+                            selectedAlgorithm.value = props.currentAlgorithm || '';
                         }
                     }
                     catch (e) {
