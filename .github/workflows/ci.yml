@@ -73,7 +73,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -98,7 +98,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -123,7 +123,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -151,7 +151,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -195,7 +195,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -222,7 +222,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -260,7 +260,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -288,7 +288,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -310,7 +310,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -732,7 +732,7 @@ jobs:
       - uses: ./.github/actions/e2e-Setup-Composite
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -957,7 +957,7 @@ jobs:
 
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -1072,7 +1072,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
