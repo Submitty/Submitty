@@ -73,12 +73,12 @@ describe('tests navigation buttons for each level of access', () => {
             [null, null, white, blue],
         );
         checkButtons('grades_released_homework_autota',
-            [null, 'VIEW GRADE', 'REGRADE', null],
-            [null, green, white, null],
-        );
-        checkButtons('grades_released_homework',
             [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
             [null, red, white, null],
+        );
+        checkButtons('grades_released_homework',
+            [null, 'VIEW GRADE', 'REGRADE', null],
+            [null, green, white, null],
         );
         checkButtons('grades_released_lab',
             [null, null, 'REGRADE', null],
@@ -120,8 +120,8 @@ describe('tests navigation buttons for each level of access', () => {
             [null, null, white, null],
         );
         checkButtons('grades_released_homework_autota',
-            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
-            [null, red, white, null],
+            [null, 'VIEW GRADE', 'REGRADE', null],
+            [null, green, white, null],
         );
         checkButtons('grades_released_homework',
             [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
@@ -149,7 +149,7 @@ describe('tests navigation buttons for each level of access', () => {
         );
         checkButtons('closed_homework',
             [null, 'LATE SUBMIT', null, null],
-            [null, red, white, null],
+            [null, red, null, null],
         );
         checkButtons('closed_team_homework',
             ['VIEW TEAM', 'LATE SUBMIT', null, null],
@@ -161,8 +161,8 @@ describe('tests navigation buttons for each level of access', () => {
         );
         checkButtons('grading_lab', null, null);
         checkButtons('grades_released_homework_autota',
-            [null, 'OVERDUE SUBMISSION', null, null],
-            [null, red, null, null],
+            [null, 'VIEW GRADE', null, null],
+            [null, green, null, null],
         );
         checkButtons('grades_released_homework',
             [null, 'OVERDUE SUBMISSION', null, null],
