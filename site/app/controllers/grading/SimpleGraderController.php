@@ -200,7 +200,7 @@ class SimpleGraderController extends AbstractController {
             $rows,
             $student_full,
             $graders,
-            $section_key,
+            // $section_key,
             $show_all_sections_button,
             $sort,
             $anon_ids

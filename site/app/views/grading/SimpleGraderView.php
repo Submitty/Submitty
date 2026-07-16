@@ -13,12 +13,15 @@ class SimpleGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables
+     * @param string $student_full
      * @param array $graders
     //  * @param string $section_type
      * @param bool $show_all_sections_button
+     * @param string $sort
+     * @param array $anon_ids
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, /*$student_full,*/ $graders, /*$section_type,*/ $show_all_sections_button, $sort, $anon_ids) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, /*$section_type,*/ $show_all_sections_button, $sort, $anon_ids) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -87,7 +90,7 @@ class SimpleGraderView extends AbstractView {
             // "section_type" => $section_type,
             "show_all_sections_button" => $show_all_sections_button,
             "view_all" => $view_all,
-            // "student_full" => $student_full,
+            "student_full" => $student_full,
             "components_numeric" => $components_numeric,
             "components_text" => $components_text,
             "sort" => $sort,
