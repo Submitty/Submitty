@@ -174,23 +174,23 @@ function buildCourseUrl(parts = []) {
 
 // For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 // as a parameter.
-function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
-    // set the values for default view through submission page
-    window.RENDER_OPTIONS.scale = 1;
-    window.RENDER_OPTIONS.rotate = 0;
-    window.RENDER_OPTIONS.studentPopup = true;
-    render(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url);
-}
+// function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
+//     // set the values for default view through submission page
+//     window.RENDER_OPTIONS.scale = 1;
+//     window.RENDER_OPTIONS.rotate = 0;
+//     window.RENDER_OPTIONS.studentPopup = true;
+//     render(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url);
+// }
 
 // For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 // as a parameter.
-function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, rerender_pdf) {
-    // set the values for default view through submission page
-    window.RENDER_OPTIONS.scale = 1;
-    window.RENDER_OPTIONS.rotate = 0;
-    window.RENDER_OPTIONS.studentPopup = true;
-    download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
-}
+// function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, rerender_pdf) {
+//     // set the values for default view through submission page
+//     window.RENDER_OPTIONS.scale = 1;
+//     window.RENDER_OPTIONS.rotate = 0;
+//     window.RENDER_OPTIONS.studentPopup = true;
+//     download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
+// }
 
 // eslint-disable-next-line default-param-last
 function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
