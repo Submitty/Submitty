@@ -41,6 +41,12 @@
     dest: /usr/local/submitty/config/
     mode: "0644"
 
+- name: Copy pre-configured configuration files  # By default, the same as running generate_configs.py
+  ansible.builtin.copy:
+    src: "{{ submitty_install_config_location }}/var_configs"
+    dest: /var/local/submitty/config/
+    mode: "0644"
+
 - name: Stat preserved_list.json file
   ansible.builtin.stat:
     path: /usr/local/submitty/config/preserve_file_list.json

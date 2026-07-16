@@ -1019,6 +1019,10 @@ jobs:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
+      - name: Validate image
+        if: failure()
+        run: curl --show-error --fail --include http://localhost:1511
+
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
