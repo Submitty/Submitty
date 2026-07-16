@@ -2563,7 +2563,12 @@ class ElectronicGraderController extends AbstractController {
                 $m_submitter_id = $member_info['submitter_id'];
                 $m_component_version = $member_info['active_version'];
 
-                $m_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $m_submitter_id, false);
+                if ($m_submitter_id === $submitter_id) {
+                    $m_graded_gradeable = $graded_gradeable;
+                } 
+                else {
+                    $m_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $m_submitter_id, false);
+                }
                 if ($m_graded_gradeable === false) {
                     continue;
                 }
