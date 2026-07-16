@@ -159,7 +159,7 @@ function renderPage(pageNumber, renderOptions) {
         const transform = scalePage(pageNumber, viewport, canvasContext);
 
         // Render the page
-        return pdfPage.render({ canvasContext, viewport, transform }).promise.then(() => {
+        return pdfPage.renderPDF({ canvasContext, viewport, transform }).promise.then(() => {
             // Indicate that the page was loaded
             page.setAttribute('data-loaded', 'true');
 
@@ -179,7 +179,7 @@ function buildCourseUrl(parts = []) {
 //     window.RENDER_OPTIONS.scale = 1;
 //     window.RENDER_OPTIONS.rotate = 0;
 //     window.RENDER_OPTIONS.studentPopup = true;
-//     render(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url);
+//     renderPDF(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url);
 // }
 
 // For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
@@ -272,7 +272,7 @@ function buildCourseUrl(parts = []) {
 //                 viewport: viewport,
 //             };
 
-//             page.render(renderContext).promise.then(() => {
+//             page.renderPDF(renderContext).promise.then(() => {
 //                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
 //                 const width = doc.internal.pageSize.getWidth();
 //                 const height = doc.internal.pageSize.getHeight();
@@ -286,7 +286,7 @@ function buildCourseUrl(parts = []) {
 //     }
 // }
 
-function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
+function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
         let currentTool;
         let NUM_PAGES = 0;
