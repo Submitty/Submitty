@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -d "/usr/local/submitty/GIT_CHECKOUT/Submitty" ]; then
     SUBMITTY_ROOT="/usr/local/submitty/GIT_CHECKOUT/Submitty"
 else
-    SUBMITTY_ROOT="/Submitty"
+    SUBMITTY_ROOT="$SCRIPT_DIR/.."
 fi
 
 IMAGE_NAME="submitty_test"
