@@ -1204,6 +1204,10 @@ class SubmissionController extends AbstractController {
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
+        if (!$this->core->getAccess()->canI("path.write", ["path" => $uploaded_file, "dir" => "split_pdf"])) {
+            return $this->uploadResult("Invalid path", false);
+        }
+
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
         }
