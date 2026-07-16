@@ -7985,11 +7985,11 @@ AND gc_id IN (
             FROM gradeable_data AS gd
             WHERE (
                 gd.g_id = ?
-                AND gd.gd_user_id = ?
+                AND (gd.gd_user_id = ? OR gd.gd_team_id = ?)
                 AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
                 AND gd.gd_id = gcd.gd_id
             )',
-            array_merge([$version, $gradeable_id, $submitter_id], $component_ids)
+            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids)
         );
     }
 
