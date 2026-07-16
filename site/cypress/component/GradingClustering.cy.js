@@ -26,10 +26,9 @@ describe('GradingClustering', () => {
         cy.get('[data-testid="toggle-clustering-mode-btn"]').click();
         cy.get('@toggleClusteringStub').should('have.been.calledWith', {
             isClusteringMode: false,
-            gradeableId: 'test_gradeable'
+            gradeableId: 'test_gradeable',
         });
     });
-
 
     it('renders "Exit Clustering Mode" and dropdown when in clustering mode', () => {
         cy.mount(GradingClustering, {
@@ -85,9 +84,9 @@ describe('GradingClustering', () => {
                 isClusteringMode: true,
             },
         });
-        
+
         cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
-        
+
         cy.wait('@createClustering').then((interception) => {
             expect(interception.request.body).to.include('name="csrf_token"');
             expect(interception.request.body).to.include(defaultProps.csrfToken);
@@ -112,18 +111,18 @@ describe('GradingClustering', () => {
                 currentAlgorithm: 'other_algo',
                 algorithms: {
                     ...defaultProps.algorithms,
-                    other_algo: 'Other Algo'
+                    other_algo: 'Other Algo',
                 },
                 onClusteringStatus: onClusteringStatus,
                 onClusteringError: onClusteringError,
-            }
+            },
         });
 
         cy.get('[data-testid="clustering-algorithm-select"]').should('have.value', 'other_algo');
 
         cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
         cy.wait('@createClusteringFail');
-        
+
         cy.get('@clusteringErrorStub').should('have.been.calledWith', 'Custom error message');
         cy.get('@clusteringStatusStub').should('have.been.calledWith', 'done');
         cy.get('[data-testid="clustering-algorithm-select"]').should('have.value', 'other_algo');
@@ -209,7 +208,7 @@ describe('GradingClustering', () => {
                 currentAlgorithm: 'other_algo',
                 algorithms: {
                     ...defaultProps.algorithms,
-                    other_algo: 'Other Algo'
+                    other_algo: 'Other Algo',
                 },
                 onClusteringError: onClusteringError,
             },

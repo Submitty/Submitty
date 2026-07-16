@@ -21,6 +21,5 @@ describe('Grading Clustering Mode', () => {
         cy.get('button').contains('Exit Clustering Mode').should('be.visible');
         cy.get('[data-testid="clustering-algorithm-select"]').should('be.visible');
         cy.get('[data-testid="clustering-algorithm-select"] option').contains('DummySplit').should('be.visible');
-
     });
 });
