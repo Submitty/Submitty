@@ -49,6 +49,7 @@ run_in_container() {
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
     docker run --rm $terminal_flag -u "$(id -u):$(id -g)" -e HOME=/tmp \
+        --cap-drop=DAC_OVERRIDE \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
