@@ -114,22 +114,22 @@ class SimpleGraderView extends AbstractView {
         return $return;
     }
 
-    /**
-     * @param Gradeable $gradeable
-     * @param string $section
-     * @param User[] $students
-     * @return string
-     */
-    public function displayPrintLab(Gradeable $gradeable, string $section, $students) {
-        //Get the names of all of the checkpoints
-        $checkpoints = array_map(function (Component $component) {
-            return $component->getTitle();
-        }, $gradeable->getComponents());
-        return $this->core->getOutput()->renderTwigTemplate("grading/simple/PrintLab.twig", [
-            "gradeable" => $gradeable,
-            "section" => $section,
-            "checkpoints" => $checkpoints,
-            "students" => $students
-        ]);
-    }
+    // /**
+    //  * @param Gradeable $gradeable
+    //  * @param string $section
+    //  * @param User[] $students
+    //  * @return string
+    //  */
+    // public function displayPrintLab(Gradeable $gradeable, string $section, $students) {
+    //     //Get the names of all of the checkpoints
+    //     $checkpoints = array_map(function (Component $component) {
+    //         return $component->getTitle();
+    //     }, $gradeable->getComponents());
+    //     return $this->core->getOutput()->renderTwigTemplate("grading/simple/PrintLab.twig", [
+    //         "gradeable" => $gradeable,
+    //         "section" => $section,
+    //         "checkpoints" => $checkpoints,
+    //         "students" => $students
+    //     ]);
+    // }
 }
