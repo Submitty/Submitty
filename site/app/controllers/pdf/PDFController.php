@@ -93,7 +93,7 @@ class PDFController extends AbstractController {
         //$annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         //$annotation_jsons = $this->loadAnnotationJsons($annotation_path, $anon_path);
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path,/* $anon_path, null, $annotation_jsons, true,*/ 1, true);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, /*$anon_path, null, $annotation_jsons, true,*/ 1, true);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img")]
@@ -275,7 +275,7 @@ class PDFController extends AbstractController {
         //$annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         //$annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
 
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path,/*$anon_path, $anon_path, $annotation_jsons, false,*/ $page_num, false, /*$is_peer_grader*/);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, /*$anon_path, $anon_path, $annotation_jsons, false,*/ $page_num, false, /*$is_peer_grader*/);
     }
 
     #[Route(path: "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/img", methods: ["POST"])]
