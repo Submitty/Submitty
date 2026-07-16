@@ -22,6 +22,9 @@ CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
 SETUP_REPOSITORY_DIR = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup')
 
 CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, 'data/configs')
+
+VAR_CONFIG_REPOSITORY = os.path.join(CONFIG_REPOSITORY, "var_configs")
+
 if args.worker:
     CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, 'data/configs/worker')
 
@@ -48,22 +51,20 @@ with open(PRESERVE_LIST_JSON, 'w') as json_file:
     json.dump(preserve_list, json_file, indent=2)
 
 # Copy all files from .setup/data/configs to the install config directory
-for item in os.listdir(CONFIG_REPOSITORY):
-    source_path = os.path.join(CONFIG_REPOSITORY, item)
-    destination_path = os.path.join(CONFIG_INSTALL_DIR, item)
-    # Only copy files, if the file does not exist at the destination
-    if os.path.isfile(source_path) and not os.path.exists(destination_path):
-        try:
-            shutil.copy(source_path, destination_path)
-        except PermissionError:
-            print(f"Permission denied for '{item}'")
-        except (shutil.Error, OSError) as e:
-            print(f"An error occurred while copying '{item}': {e}")
+CONFIGS = {
+    CONFIG_REPOSITORY: CONFIG_INSTALL_DIR,
+    VAR_CONFIG_REPOSITORY: CONFIG_DATA_DIR
+}
 
-# Copy items that need to be in /var/local instead of /usr/local
-try:
-    shutil.copy(os.path.join(CONFIG_REPOSITORY, 'var_configs/autograding_containers.json'), CONFIG_DATA_DIR)
-except PermissionError:
-    print("Permission denied for autograding_containers.json")
-except (shutil.Error, OSError) as e:
-    print(f"An error occurred while copying 'autograding_containers.json': {e}")
+for source, dest in CONFIGS.items():
+    for item in os.listdir(source):
+        source_path = os.path.join(source, item)
+        destination_path = os.path.join(dest, item)
+        # Only copy files, if the file does not exist at the destination
+        if os.path.isfile(source_path) and not os.path.exists(destination_path):
+            try:
+                shutil.copy(source_path, destination_path)
+            except PermissionError:
+                print(f"Permission denied for '{item}'")
+            except (shutil.Error, OSError) as e:
+                print(f"An error occurred while copying '{item}': {e}")
