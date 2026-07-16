@@ -48,9 +48,10 @@ SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
-CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
+
+CONTAINERS_JSON = os.path.join(CONFIG_DATA_DIR, 'autograding_containers.json')
 
 PHP_USER = 'submitty_php'
 PHP_GROUP = 'submitty_php'
@@ -60,6 +61,7 @@ DAEMON_GROUP = 'submitty_daemon'
 DAEMONPHP_GROUP = 'submitty_daemonphp'
 DAEMONPHPCGI_GROUP = 'submitty_daemonphpcgi'
 DAEMONCGI_GROUP = 'submitty_daemoncgi'
+COURSE_BUILDERS_GROUP = 'submitty_course_builders'
 
 FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
@@ -111,7 +113,7 @@ config['first_untrusted_gid'] = FIRST_UNTRUSTED_GID
 config['daemon_uid'] = DAEMON_UID
 config['daemon_gid'] = DAEMON_GID
 config['daemon_user'] = DAEMON_USER
-config['course_builders_group'] = 'submitty_course_builders'
+config['course_builders_group'] = COURSE_BUILDERS_GROUP
 config['supervisor_user'] = 'submitty'
 if not args.worker:
     PHP_UID, PHP_GID = get_ids(PHP_USER)

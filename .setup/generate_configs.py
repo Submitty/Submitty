@@ -64,7 +64,6 @@ for item in os.listdir(CONFIG_REPOSITORY):
 try:
     shutil.copy(os.path.join(CONFIG_REPOSITORY, 'var_configs/autograding_containers.json'), CONFIG_DATA_DIR)
 except PermissionError:
-    print(f"Permission denied for autograding_containers.json")
+    print("Permission denied for autograding_containers.json")
 except (shutil.Error, OSError) as e:
     print(f"An error occurred while copying 'autograding_containers.json': {e}")
-
