@@ -244,6 +244,7 @@ class UsersController extends AbstractController {
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
             'user_pronouns' => $user->getPronouns(),
+            'date_registered' => $user->getDateRegistered() !== null ? $user->getDateRegistered()->format(\DateTime::ATOM) : null,
             'user_display_pronouns' => $user->getDisplayPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
