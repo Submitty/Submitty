@@ -2565,7 +2565,7 @@ class ElectronicGraderController extends AbstractController {
 
                 if ($m_submitter_id === $submitter_id) {
                     $m_graded_gradeable = $graded_gradeable;
-                } 
+                }
                 else {
                     $m_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $m_submitter_id, false);
                 }
