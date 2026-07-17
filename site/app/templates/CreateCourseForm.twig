@@ -18,7 +18,7 @@
             <div class="option-input col-md-6">
                 <select name="course_semester" id="course_semester" class="auto_save" onchange="onTermChange()">
                     {% for term in terms %}
-                        <option value="{{ term.getId() }}" data-start="{{ term.getStartDate() | date('Y/m/d') }}" data-end="{{ term.getEndDate() | date('Y/m/d') }}">
+                        <option value="{{ term.getId() }}" data-start="{{ term.getStartDate()|date('Y/m/d') }}" data-end="{{ term.getEndDate()|date('Y/m/d') }}">
                             {{ term.getName() }}
                         </option>
                     {% endfor %}
