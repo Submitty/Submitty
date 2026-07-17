@@ -21,6 +21,9 @@ if [[ ! -d $VENV_PATH ]]; then
     python3 -m venv "$VENV_PATH"
 fi
 
+# can't follow dynamic paths, so it will fail to find this file
+# see https://www.shellcheck.net/wiki/SC1091, under Exceptions
+# shellcheck source=/dev/null
 source "${VENV_PATH}/bin/activate"
 
 pip3 install -r "${SUBMITTY_REPOSITORY}"/.setup/pip/system_requirements.txt
