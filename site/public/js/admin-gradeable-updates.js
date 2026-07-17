@@ -391,33 +391,22 @@ $(document).ready(() => {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if ($('input[name="all_grade"]:checked').val() === 'All Grade All') {
-                if (confirm('Each student grades every other student! Continue?')) {
-                    const data = { csrf_token: csrfToken };
-                    data[this.name] = $(this).val();
-                    setRandomGraders($('#g_id').val(), data, (response_data) => {
-                        // Clear errors by setting new values
-                        for (const key in response_data) {
-                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
-                                clearError(key, response_data[key]);
-                            }
-                        }
-                        // Clear errors by just removing red background
-                        for (const key in data) {
-                            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                                clearError(key);
-                            }
-                        }
-                        updateErrorMessage();
-                    }, updateGradeableErrorCallback, true);
-                    return;
-                }
+            const clear_peer_matrix = this.id === 'clear_peer_matrix';
+            const all_grade_all = !clear_peer_matrix
+                && $('input[name="all_grade"]:checked').val() === 'All Grade All';
+
+            let confirmation_message = 'This will update peer matrix. Are you sure?';
+            if (clear_peer_matrix) {
+                confirmation_message = 'This will clear peer matrix. Are you sure?';
             }
-            if (confirm('This will update peer matrix. Are you sure?')) {
+            else if (all_grade_all) {
+                confirmation_message = 'Each student grades every other student! Continue?';
+            }
+            if (confirm(confirmation_message)) {
                 const data = { csrf_token: csrfToken };
                 data[this.name] = $(this).val();
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
-                // Clear errors by setting new values
+                    // Clear errors by setting new values
                     for (const key in response_data) {
                         if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
@@ -430,7 +419,7 @@ $(document).ready(() => {
                         }
                     }
                     updateErrorMessage();
-                }, updateGradeableErrorCallback, false);
+                }, updateGradeableErrorCallback, all_grade_all, clear_peer_matrix);
             }
             else {
                 return false;
@@ -511,6 +500,19 @@ function checkWarningBanners() {
         }
         else {
             $('#grading-open-after-grading-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        if ($('#has_release_date_yes').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+            // hide/show element when manual grading due date is after the grade release date
+            if (grades_release_date < manual_grading_due_date) {
+                $('#grading-due-after-grades-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#grading-due-after-grades-released-dates-warning').hide();
+            }
         }
     }
 
@@ -662,21 +664,17 @@ function ajaxCheckBuildStatus() {
         },
     });
 }
-function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all) {
-    let number_to_grade = 1;
-    if (all_grade_all === true) {
+function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all, clear_peer_matrix) {
+    let number_to_grade;
+
+    if (clear_peer_matrix) {
+        number_to_grade = 0;
+    }
+    else if (all_grade_all === true) {
         number_to_grade = 10000;
     }
     else {
         number_to_grade = $('#number_to_peer_grade').val();
-    }
-
-    if (number_to_grade <= 0) {
-        number_to_grade = 0;
-        if (!confirm('This will clear Peer Matrix. Continue?')) {
-            $('#peer_loader').addClass('hide');
-            return false;
-        }
     }
 
     gradeable_id = $('#g_id').val();

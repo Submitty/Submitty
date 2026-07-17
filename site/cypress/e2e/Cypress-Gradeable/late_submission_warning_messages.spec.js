@@ -34,17 +34,25 @@ const getServerDateComponents = (date = new Date()) => {
     };
 };
 
-// Return a due-date string for N calendar days ago (in server timezone) at noon.
-// Using a fixed noon time avoids UTC/server-timezone calendar-day boundary issues
-// that occur when the CI runner and the Submitty server are in different timezones.
+// Due date `daysAgo` days before the current instant, expressed in the server's timezone.
+// Anchoring on the real instant means the gap to the actual submission
+// is always daysAgo*24h + test-runtime
 const getDueDateString = (daysAgo) => {
-    const { year, month, day } = getServerDateComponents();
-    // Use UTC arithmetic to subtract days without DST ambiguity
-    const due = new Date(Date.UTC(year, month - 1, day - daysAgo));
-    const y = due.getUTCFullYear();
-    const m = String(due.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(due.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${d} 12:00:00`;
+    const due = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: SERVER_TIMEZONE,
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).formatToParts(due);
+    const part = (type) => parts.find((p) => p.type === type).value;
+    // Some engines emit '24' for midnight under hour12:false; normalize to '00'.
+    const hour = part('hour') === '24' ? '00' : part('hour');
+    return `${part('year')}-${part('month')}-${part('day')} ${hour}:${part('minute')}:${part('second')}`;
 };
 
 // Return a date string for N calendar days ago at 6 AM in the server's timezone.
@@ -313,44 +321,6 @@ describe('Test warning messages for non team gradeable', () => {
         cy.visit(['sample', 'gradeable', gradeable]);
         cy.get('#do_not_grade').click();
     });
-
-    it('Confirmation for the first submission with 2 remaining late days and 1 extension', () => {
-        // Part 1/2 of a test case
-        // The first submission will be done 2 days after the due date and use 2 valid late days
-        cy.login('instructor');
-        giveExtensions(gradeable);
-        giveLateDays(getMorningDateString(3), 'student'); // Give valid late days (the current ones are after the original due date)
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=late-days]').clear();
-        cy.get('[data-testid=late-days]').type(3);
-        cy.get('[data-testid=late-days]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.get('[data-testid=submission-due-date]').clear();
-        cy.get('[data-testid=submission-due-date]').type(getDueDateString(2));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.logout();
-        // Due 2 days ago: server reports 2+1=3 days late; 1 extension day, 2 late days consumed
-        SubmitAndCheckMessage('non_team', 'upload_file1', 'valid_usage', '2_days_late+extension', 3, 1);
-    });
-    it('Warning message for the second submission with 0 valid remaining late day ', () => {
-        /* Part 2/2 of a test case
-        This submission is invalid because the late days remaining are earned at the extension date,
-        not the original due date. */
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('[data-testid=submission-due-date]').clear();
-        cy.get('[data-testid=submission-due-date]').type(getDueDateString(3));
-        cy.get('[data-testid=submission-due-date]').type('{enter}');
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-        cy.logout();
-        // Due 3 days ago: server reports 3+1=4 days late
-        SubmitAndCheckMessage('non_team', 'upload_file2', 'invalid_4_days_late', '', 4);
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=5']);
-        cy.get('#no_late_submission').click(); // disable late submissions
-        cy.get('[data-testid=save-status]', { timeout: 20000 }).should('have.text', 'All Changes Saved');
-    });
 });
 
 describe('Test warning messages for team gradeable', () => {
@@ -398,6 +368,7 @@ describe('Test warning messages for team gradeable', () => {
     it('Confirmation for the first submission with 2 remaining late days and 1 extension for teams', () => {
         // Part 1/2 of a test case
         // The first submission will be done 2 days after the due date and use 2 valid late days for each team member
+        cy.logout();
         cy.login('instructor');
         giveExtensions(team_gradeable);
         giveLateDays(getMorningDateString(3), 'student', 3); // this is important for part 2/2

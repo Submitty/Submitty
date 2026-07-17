@@ -74,6 +74,9 @@ class Access {
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
 
+    /** Allow access to annotated files if the user owns the file (for view_annotated_file parameter) */
+    const ALLOW_ANNOTATED_FILE_OWNER    = 1 << 19;
+
     /** If the current set of flags requires the "gradeable" (type Gradeable) argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "component" (type GradeableComponent) argument */
@@ -165,7 +168,7 @@ class Access {
         $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE | self::ALLOW_LIMITED_ACCESS_GRADER;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
-        $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
 
 
         $this->permissions["grading.simple"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER;
@@ -198,7 +201,7 @@ class Access {
         $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::ALLOW_ANNOTATED_FILE_OWNER;
         $this->permissions["path.read.attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW;
         $this->permissions["path.read.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         $this->permissions["path.read.submission_versions"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
@@ -456,6 +459,9 @@ class Access {
         $graded_gradeable = null;
         /** @var Gradeable|null $gradeable */
         $gradeable = null;
+
+        $peer_only_staff_grader = false;
+
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
             if (array_key_exists("graded_gradeable", $args)) {
                 $graded_gradeable = $args["graded_gradeable"];
@@ -472,17 +478,18 @@ class Access {
             // we can't just immediately return false.
             $grading_checks = true;
 
+            $peer_only_staff_grader = $gradeable !== null && $gradeable->hasPeerComponent() && $user !== null && $user->accessGrading() && !$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup());
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
                     if (
-                        //Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
-                        //Students are allowed to see this if its a peer graded assignment
                         !(($group === User::GROUP_STUDENT && $gradeable->hasPeerComponent()) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        &&
+                        !($peer_only_staff_grader
+                            && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
-                        //Otherwise, you're not allowed
                         $grading_checks = false;
                     }
                 }
@@ -494,7 +501,7 @@ class Access {
                 }
             }
 
-            if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+            if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER && !$peer_only_staff_grader) {
                 //Check their grading section
                 if (array_key_exists("section", $args)) {
                     if (!$this->isSectionInGradingSections($gradeable, $args["section"], $user)) {
@@ -536,6 +543,16 @@ class Access {
             // grade another (eg students cannot edit others' files during peer grading)
             if ($grading_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = false;
+            }
+
+            // Allow access to annotated files if the user owns the file and view_annotated_file is true
+            if (!$grading_checks && self::checkBits($checks, self::ALLOW_ANNOTATED_FILE_OWNER)) {
+                $view_annotated_file = filter_var($args['view_annotated_file'] ?? false, FILTER_VALIDATE_BOOL);
+                $dir = $args['dir'] ?? '';
+                $path = $args['path'] ?? '';
+                if ($view_annotated_file && $dir === 'submissions_processed' && strpos($path, $user->getId()) !== false) {
+                    $grading_checks = true;
+                }
             }
 
             if (!$grading_checks) {
@@ -583,8 +600,11 @@ class Access {
                 return false;
             }
 
-            if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
-                //Make sure a component allows students to access it via peer grading
+            if (
+                self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT)
+                && ($group === User::GROUP_STUDENT || $peer_only_staff_grader)
+            ) {
+                // Make sure peer graders can only access peer components
                 if (!$component->isPeerComponent()) {
                     return false;
                 }

@@ -29,7 +29,7 @@
 
 
 
-    <div id="manage-categories-view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
+    <div id="manage-categories-view" data-testid="manage-categories-view" style="margin: 0 auto; max-width: 750px; padding-bottom: 20px">
         <h3 style="margin-bottom:10px;"> Manage Categories </h3>
         <div>
 
@@ -38,7 +38,7 @@
                 <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
 
                 
-                <input class="date_picker flatpickr-input active" placeholder=" mm / dd / yyyy " name="visible_date" id="category_visible_date" type="text">
+                <input class="date_picker flatpickr-input active" placeholder="YYYY-MM-DD" name="visible_date" id="category_visible_date" type="text">
                 <script>
 
                     flatpickr('.date_picker', {
@@ -85,13 +85,13 @@
                     <div style="float: right;width: auto;">
                         <span class="categorylistitemdate-desc">
                             <span class="categorylistitem-desc-text" style="overflow-wrap: break-word;"> {{ category.visibleDate }}</span>
-                            <i class="fas fa-edit category-button edit-category-date-button"></i>
+                            <i class="fas fa-edit category-button edit-category-date-button" data-testid="edit-category-date-button"></i>
                         </span>
 
 
                         <span class="categorylistitemdate-editdesc" style="display: none;">
-                                <input type="text" aria-label="New Date for Category" placeholder=" {{ category.visibleDate }} " class="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
-                                <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check category-button save-date-button"></i></a>
+                                <input type="text" aria-label="New Date for Category" placeholder="YYYY-MM-DD" class="edit-category-date-input date_picker flatpickr-input" data-testid="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
+                                <a class="post_button" title="Save Changes" aria-label="Save Changes" data-testid="save-category-date-button"><i class="fas fa-check category-button save-date-button"></i></a>
                                 <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-date-button"></i></a>
                         </span>
 
@@ -147,9 +147,25 @@
         $(".edit-category-date-button").click(function() {
             const item = getItem(this);
             const category_visible_date = item.data('visible_date');
-            item.find(".categorylistitemdate-editdesc input").val(category_visible_date);
+            const date_input = item.find(".categorylistitemdate-editdesc input");
+            date_input.val(category_visible_date);
             item.find(".categorylistitemdate-desc").hide();
             item.find(".categorylistitemdate-editdesc").show();
+
+            const date_input_element = date_input.get(0);
+            if (date_input_element && !date_input_element._flatpickr) {
+                flatpickr(date_input_element, {
+                    allowInput: true,
+                    dateFormat: "Y-m-d",
+                    onReady: (a, b, fp) => {
+                        fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                    }
+                });
+            }
+
+            if (date_input_element && date_input_element._flatpickr) {
+                date_input_element._flatpickr.open();
+            }
 
         });
         $(".cancel-desc-button").click(function() {

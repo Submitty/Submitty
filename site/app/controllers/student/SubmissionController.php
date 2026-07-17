@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradeableList;
 use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
@@ -1203,6 +1204,10 @@ class SubmissionController extends AbstractController {
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
+        if (!$this->core->getAccess()->canI("path.write", ["path" => $uploaded_file, "dir" => "split_pdf"])) {
+            return $this->uploadResult("Invalid path", false);
+        }
+
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
         }
@@ -1396,11 +1401,9 @@ class SubmissionController extends AbstractController {
      */
     #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
     public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
-        $user_id = $_GET['user_id'] ?? '';
-        // Instructors can get values for other users, otherwise require the $_GET user id to be the same as the
-        // API authenticated user.
-        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
-            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        $user_id = $this->core->getUser()->getId();
+        if ($this->core->getUser()->getGroup() === \app\models\User::GROUP_INSTRUCTOR) {
+            $user_id = $_GET['user_id'] ?? $user_id;
         }
 
         try {
@@ -1429,6 +1432,16 @@ class SubmissionController extends AbstractController {
                 $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
                     $testcase_config = $testcase->getTestcase();
                     if ($testcase->canView()) {
+                        $autochecks = [];
+                        foreach ($testcase->getAutochecks() as $autocheck) {
+                            $autochecks[] = [
+                                'description' => $autocheck->getDescription(),
+                                'messages' => $autocheck->getMessages(),
+                                'diff_viewer' => $autocheck->getDiffViewer(),
+                                'expected' => $autocheck->getDiffViewer()->getDisplayExpected(),
+                                'actual' => $autocheck->getDiffViewer()->getDisplayActual()
+                            ];
+                        }
                         return [
                             'name' => $testcase_config->getName(),
                             'details' => $testcase_config->getDetails(),
@@ -1436,7 +1449,8 @@ class SubmissionController extends AbstractController {
                             'points_available' => $testcase_config->getPoints(),
                             'has_extra_results' => $testcase->hasAutochecks(),
                             'points_received' => $testcase->getPoints(),
-                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : '',
+                            'autochecks' => $autochecks,
                         ];
                     }
                     else {
@@ -1779,6 +1793,7 @@ class SubmissionController extends AbstractController {
                     for ($i = 1; $i <= $num_parts; $i++) {
                         if (isset($uploaded_files[$i])) {
                             $current_files_set = array_flip($uploaded_files[$i]["name"]);
+                            $current_files_base_set = array_map(fn($name) => pathinfo($name, PATHINFO_FILENAME), $uploaded_files[$i]["name"]);
                             $previous_files_src[$i] = [];
                             $previous_files_dst[$i] = [];
                             $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
@@ -1787,7 +1802,8 @@ class SubmissionController extends AbstractController {
                             foreach ($filenames as $filename) {
                                 $file_base_name = basename($filename);
                                 $previous_files_src[$i][$j] = $file_base_name;
-                                if (!$clobber && isset($current_files_set[$file_base_name])) {
+                                $old_file_base = pathinfo($file_base_name, PATHINFO_FILENAME);
+                                if (!$clobber && (isset($current_files_set[$file_base_name]) || in_array($old_file_base, $current_files_base_set, true))) {
                                     $parts = explode(".", $file_base_name);
                                     $parts[0] .= "_version_" . $highest_version;
                                     $file_base_name = implode(".", $parts);
@@ -2589,5 +2605,16 @@ class SubmissionController extends AbstractController {
         return new RedirectResponse(
             $this->core->buildCourseUrl(['gradeable', $gradeable_id])
         );
+    }
+    #[Route("/api/{term}/{course}/gradeables", methods: ['GET'])]
+    public function viewUsersGradeableList(string $term, string $course): JsonResponse {
+        if (!$this->core->getQueries()->courseExists($term, $course)) {
+            return JsonResponse::getFailResponse("Course $course for term $term does not exist");
+        }
+        $user = $this->core->getUser();
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+        $gradeables = new GradeableList($this->core, $user);
+        return JsonResponse::getSuccessResponse($gradeables->toJson());
     }
 }

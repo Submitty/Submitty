@@ -1,112 +1,9 @@
 /* global escapeSpecialChars, buildCourseUrl */
-const sortColumns = {
-    user: 0,
-    total_posts: 1,
-    total_threads: 2,
-    total_deleted: 3,
-    total_upducks: 4,
-};
-
-function getForumStatsTable() {
-    return document.getElementById('forum_stats_table');
-}
-
-function getGroupedRows(tbody) {
-    const groups = [];
-    let currentGroup = null;
-
-    Array.from(tbody.children).forEach((row) => {
-        if (row.classList.contains('user_stat')) {
-            currentGroup = [row];
-            groups.push(currentGroup);
-        }
-        else if (currentGroup !== null) {
-            currentGroup.push(row);
-        }
-    });
-
-    return groups;
-}
-
-function sortTableByColumn(sortKey) {
-    const table = getForumStatsTable();
-    if (table === null || sortColumns[sortKey] === undefined) {
-        return;
-    }
-
-    const currentSort = table.dataset.sortKey;
-    const currentDirection = table.dataset.sortDirection || 'ASC';
-
-    let newDirection;
-    if (currentSort === sortKey) {
-        newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
-    }
-    else {
-        newDirection = sortKey === 'user' ? 'ASC' : 'DESC';
-    }
-
-    table.dataset.sortKey = sortKey;
-    table.dataset.sortDirection = newDirection;
-
-    applySort(sortKey, newDirection);
-    updateSortIcons(sortKey, newDirection);
-}
-
-window.sortTableByColumn = sortTableByColumn;
-
-function applySort(sortKey, direction) {
-    const table = getForumStatsTable();
-    if (table === null) {
-        return;
-    }
-
-    const tbody = table.querySelector('tbody');
-    const groups = getGroupedRows(tbody);
-    const colIndex = sortColumns[sortKey];
-
-    groups.sort((groupA, groupB) => {
-        const aText = groupA[0].children[colIndex].textContent.trim();
-        const bText = groupB[0].children[colIndex].textContent.trim();
-        let cmp = 0;
-
-        if (sortKey === 'user') {
-            cmp = aText.localeCompare(bText);
-        }
-        else {
-            cmp = Number(aText) - Number(bText);
-        }
-
-        return direction === 'ASC' ? cmp : -cmp;
-    });
-
-    groups.forEach((group) => {
-        group.forEach((row) => tbody.appendChild(row));
-    });
-}
-
-function updateSortIcons(activeKey = null, direction = 'ASC') {
-    document.querySelectorAll('#forum_stats_table .sortable-header').forEach((link) => {
-        const icon = link.querySelector('i');
-        const key = link.dataset.sortKey;
-
-        if (icon === null || key === undefined) {
-            return;
-        }
-
-        icon.classList.remove('fa-sort-up', 'fa-sort-down');
-        icon.classList.add('fa-sort');
-
-        if (key === activeKey) {
-            icon.classList.remove('fa-sort');
-            icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
-        }
-    });
-}
 
 $(document).ready(() => {
-    const forumStatsTable = $('#forum_stats_table');
+    const forumStatsTable = $('#forum-stats-table');
 
-    updateSortIcons();
+    // updateSortIcons();
 
     forumStatsTable.on('click', 'button[data-action]', function (event) {
         event.preventDefault();
@@ -139,6 +36,13 @@ $(document).ready(() => {
             }
             button.text('Collapse');
             button.data('action', 'collapse');
+            $('td').click(() => {
+                if (button.data('type') === 'post' || button.data('type') === 'thread') {
+                    const id = button.data('thread_id');
+                    const url = buildCourseUrl(['forum', 'threads', id]);
+                    window.open(url, '_blank');
+                }
+            });
         }
         else {
             for (let i = 0; i < ids.length; i++) {
@@ -152,9 +56,9 @@ $(document).ready(() => {
         }
     });
 
-    forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', function () {
-        const id = $(this).data('thread_id');
+    forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', (event) => {
+        const id = $(event.currentTarget).data('thread_id');
         const url = buildCourseUrl(['forum', 'threads', id]);
-        window.open(url);
+        window.open(url, '_blank');
     });
 });

@@ -37,6 +37,7 @@ class ReportController extends AbstractController {
                                             // wait for the job to complete before timing out and returning failure
 
     private $all_overrides = [];
+    private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
 
     #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
@@ -189,6 +190,46 @@ class ReportController extends AbstractController {
 
         //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
+    }
+
+    /**
+     * Determine whether the served Rainbow Grades HTML was generated manually or not.
+     *
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
+     * so every file has an identical twin when the server produced it. A manual generation writes
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html.
+     * Result is cached.
+     */
+    private function isRainbowGradesLikelyManuallyGenerated(): bool {
+        if ($this->rg_manual_generation_cache !== null) {
+            return $this->rg_manual_generation_cache;
+        }
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
+        $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
+
+        $served_files = glob(FileUtils::joinPaths($summary_html_dir, '*.html'));
+        if ($served_files === false || count($served_files) === 0) {
+            $this->rg_manual_generation_cache = false;   // nothing generated at all
+            return false;
+        }
+
+        $manual = false;
+        foreach ($served_files as $served) {
+            $twin = FileUtils::joinPaths($server_build_dir, basename($served));
+            if (
+                !file_exists($twin)
+                || filesize($served) !== filesize($twin)
+                || md5_file($served) !== md5_file($twin)
+            ) {
+                $manual = true;
+                break;
+            }
+        }
+
+        $this->rg_manual_generation_cache = $manual;
+        return $manual;
     }
 
     /**
@@ -395,6 +436,9 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['date_registered'] = $user->getDateRegistered() !== null
+            ? $user->getDateRegistered()->format(\DateTime::ATOM)
+            : null;
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
@@ -697,6 +741,7 @@ class ReportController extends AbstractController {
             $grade_summaries_last_run = $this->getGradeSummariesLastRun();
             $show_warning = false;
             $days_since_run = null;
+            $rainbow_grades_generated_manually = $this->isRainbowGradesLikelyManuallyGenerated();
 
             if ($grade_summaries_last_run !== 'Never') {
                 // Make string parsable
@@ -742,6 +787,7 @@ class ReportController extends AbstractController {
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
+                'normalization_warnings' => $customization->getNormalizationWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
@@ -754,6 +800,8 @@ class ReportController extends AbstractController {
                 'is_nightly_enabled' => $is_nightly_enabled,
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
+                'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
+                'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
 

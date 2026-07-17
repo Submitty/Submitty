@@ -144,7 +144,7 @@ describe('Test sidebars', () => {
             cy.login(user);
             cy.visit(['sample']);
             extendedBaseSidebar();
-            cy.get('body').should('have.css', 'background-image').and('include', 'http://www.cs.rpi.edu/~cutler/classes/visualization/S18/images/vinca_minor_mirrored.jpg');
+            cy.get('body').should('have.css', 'background-image').and('include', 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png');
             cy.get('#submitty-body').should('have.css', 'background-color', 'rgba(240, 240, 240, 0.85)');
         });
 

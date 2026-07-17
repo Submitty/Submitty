@@ -105,8 +105,13 @@ class Output {
 
     public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
-        $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+
+        // cache must be in a directory that is not hardened by php fpm 'ProtectSystem=full' property
+        $cache_path = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'cache', 'twig');
+
         $debug = $full_load && $this->core->getConfig()?->isDebug();
+        // set this to false to force caching even on development machine
+        //$debug = false;
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
