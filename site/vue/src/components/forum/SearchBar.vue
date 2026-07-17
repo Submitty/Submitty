@@ -47,11 +47,14 @@ function handleKeydown(e: KeyboardEvent) {
         placeholder="Search here..."
         aria-label="Forum Search Input Box"
         data-ays-ignore="true"
+        style="height: 100%; width: 100%; padding-right: 2rem;"
         @keydown="handleKeydown"
         @change="query = query.trim()"
       />
       <button
-        v-show="query.length > 0"
+        v-if="query.length > 0"
+        id="search-clear"
+        style="display: block;"
         type="button"
         title="Clear search"
         aria-label="Clear search"
