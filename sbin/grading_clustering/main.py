@@ -31,7 +31,9 @@ def main():
 
     try:
         # Fetch submitters
-        submitters = clustering_database_queries.get_active_submitters(course_conn, args.gradeable_id)
+        submitters = clustering_database_queries.get_active_submitters(
+            course_conn, args.gradeable_id
+        )
 
         if args.algorithm == 'dummy_split':
             algo = DummySplit()

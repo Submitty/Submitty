@@ -13,7 +13,7 @@ try:
     DB_HOST = DATABASE_CONFIG['database_host']
     DB_USER = DATABASE_CONFIG['database_user']
     DB_PASSWORD = DATABASE_CONFIG['database_password']
-except Exception as config_fail_error:
+except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
     print(f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed {config_fail_error}")
     sys.exit(1)
 
@@ -87,7 +87,11 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
         cluster_values.append(f"(:config_id, :name_{i})")
         cluster_params[f"name_{i}"] = name
 
-    cluster_insert_sql = "INSERT INTO ta_grading_clusters (config_id, cluster_name) VALUES " + ", ".join(cluster_values) + " RETURNING id, cluster_name"
+    cluster_insert_sql = (
+        "INSERT INTO ta_grading_clusters (config_id, cluster_name) VALUES "
+        + ", ".join(cluster_values)
+        + " RETURNING id, cluster_name"
+    )
     cluster_query = text(cluster_insert_sql)
     result = conn.execute(cluster_query, cluster_params)
 
@@ -114,7 +118,10 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
             m_idx += 1
 
     if member_values:
-        member_insert_sql = "INSERT INTO ta_grading_clusters_members (cluster_id, user_id, team_id, active_version) VALUES " + ", ".join(member_values)
+        member_insert_sql = (
+            "INSERT INTO ta_grading_clusters_members "
+            "(cluster_id, user_id, team_id, active_version) VALUES "
+        ) + ", ".join(member_values)
         member_query = text(member_insert_sql)
         conn.execute(member_query, member_params)
 
