@@ -21,7 +21,7 @@ if [[ ! -d $VENV_PATH ]]; then
     python3 -m venv "$VENV_PATH"
 fi
 
-source "$VENV_PATH/bin/activate"
+source "${VENV_PATH}/bin/activate"
 
 pip3 install -r "${SUBMITTY_REPOSITORY}"/.setup/pip/system_requirements.txt
 
