@@ -31,7 +31,6 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cyAssertRegistration(STUDENT_2, 'NULL');
         cyAssertRegistration(STUDENT_3, 'NULL');
 
-
         // Set up subsections
         cy.get(`[data-testid="edit-student-${STUDENT_1}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
