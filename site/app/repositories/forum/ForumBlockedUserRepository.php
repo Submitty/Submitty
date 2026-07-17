@@ -23,7 +23,7 @@ class ForumBlockedUserRepository extends EntityRepository {
      */
     public function getActiveBlockedUsers(?string $user_id = null): array {
         $qb = $this->createQueryBuilder('b');
-        $qb->where('b.expiration_date IS NULL OR b.expiration_date > :now')
+        $qb->where('(b.expiration_date IS NULL OR b.expiration_date > :now)')
             ->setParameter('now', new DateTime())
             ->orderBy('b.created_at', 'DESC');
 
