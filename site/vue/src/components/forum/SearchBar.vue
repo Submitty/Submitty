@@ -39,30 +39,34 @@ function handleKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div data-testid="search-bar-vue">
-    <div class="search-input-wrapper">
-      <input
-        v-model="query"
-        type="text"
-        placeholder="Search here..."
-        aria-label="Forum Search Input Box"
-        data-ays-ignore="true"
-        style="height: 100%; width: 100%; padding-right: 2rem;"
-        @keydown="handleKeydown"
-        @change="query = query.trim()"
+  <div
+    class="search-input-wrapper"
+    data-testid="search-bar-vue"
+  >
+    <input
+      v-model="query"
+      type="text"
+      placeholder="Search here..."
+      aria-label="Forum Search Input Box"
+      data-ays-ignore="true"
+      style="height: 100%; width: 100%; padding-right: 2rem;"
+      @keydown="handleKeydown"
+      @change="query = query.trim()"
+    />
+    <button
+      v-if="query.length > 0"
+      id="search-clear"
+      style="display: block;"
+      type="button"
+      title="Clear search"
+      aria-label="Clear search"
+      data-ays-ignore="true"
+      @click="clearSearch"
+    >
+      <i
+        class="fa-solid fa-circle-xmark"
+        aria-hidden="true"
       />
-      <button
-        v-if="query.length > 0"
-        id="search-clear"
-        style="display: block;"
-        type="button"
-        title="Clear search"
-        aria-label="Clear search"
-        data-ays-ignore="true"
-        @click="clearSearch"
-      >
-        <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-      </button>
-    </div>
+    </button>
   </div>
 </template>
