@@ -539,7 +539,7 @@ HTML;
         // header_key => unique key of the table header
         $columns = [];
         $columns[] = ["title" => "#", "header_key" => "index"];
-        $columns[] = ["title" => "Section", "header_key" => "section", "data_type" => "string"];
+        $columns[] = ["title" => "Section", "header_key" => "section"];
 
         $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
             $gradeable->getLimitedAccessBlind() === 2);
