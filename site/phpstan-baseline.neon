@@ -304,24 +304,9 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
-			rawMessage: '''
-				Call to deprecated method RedirectOnlyResponse() of class app\libraries\response\MultiResponse:
-				should not be used, just return RedirectResponse directly
-			'''
-			identifier: staticMethod.deprecated
-			count: 1
-			path: app/controllers/HomePageController.php
-
-		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 3
-			path: app/controllers/HomePageController.php
-
-		-
-			rawMessage: 'Dynamic call to static method app\libraries\response\MultiResponse::RedirectOnlyResponse().'
-			identifier: staticMethod.dynamicCall
-			count: 1
 			path: app/controllers/HomePageController.php
 
 		-
@@ -15243,12 +15228,6 @@ parameters:
 		-
 			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $graders with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/views/grading/SimpleGraderView.php
-
-		-
-			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $sort with no type specified.'
-			identifier: missingType.parameter
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
 
