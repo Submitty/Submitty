@@ -24,7 +24,7 @@
 					'type': 'component',
 					'name': 'forum/SearchBar',
 					'args': { 'csrfToken': csrf_token, 'searchQuery': '' },
-					'style': 'flex: 1 1 auto; min-width: 30px; display: flex;',
+					'class': 'search-bar-wrapper',
 					'events': {
 						'search': '() => { updateClearFilterButton(); updateThreads(true, saveFilterState); }'
 					}
