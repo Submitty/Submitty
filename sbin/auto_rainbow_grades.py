@@ -21,6 +21,13 @@ import datetime
 from pathlib import Path
 import getpass
 
+
+# Print an error message without a traceback and exit non-zero.
+def error_exit(message):
+    print(f'ERROR: {message}', file=sys.stderr, flush=True)
+    sys.exit(1)
+
+
 # Verify correct number of command line arguments
 if len(sys.argv) != 4:
     raise Exception('You must pass 3 command line arguments - semester, course, and source')
@@ -149,7 +156,8 @@ os.chdir(rg_course_path)
 creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
-    raise Exception('Unable to locate the submitty_admin.json credentials file at {}, please contact your sysadmin.'.format(creds_file))
+    error_exit(f'Unable to locate the submitty_admin.json credentials file at '
+               f'{creds_file}, cannot read the auth token')
 
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
@@ -160,11 +168,11 @@ if 'token' not in creds or not creds['token']:
 
     # Distinguish a missing key from a present-but-empty token in the output
     if 'token' not in creds:
-        print('No token key found in submitty_admin.json, attempting to continue '
-              'with previously generated grade summaries. Please contact your sysadmin.', flush=True)
+        print('No token field found in submitty_admin.json, attempting to continue '
+              'with previously generated grade summaries', flush=True)
     else:
         print('The auth token in submitty_admin.json is empty, attempting to continue '
-              'with previously generated grade summaries. Please contact your sysadmin.', flush=True)
+              'with previously generated grade summaries', flush=True)
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
@@ -172,15 +180,15 @@ if 'token' not in creds or not creds['token']:
     file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
 
     if file_count == 0:
-        raise Exception('Failure - No usable auth token in submitty_admin.json and the '
-                        'grade summaries directory is empty ({})'.format(reports_path))
+        error_exit(f'Failure: No usable auth token in submitty_admin.json and the '
+                   f'grade summaries directory is empty ({reports_path})')
 
 # Take this path if we DID get an auth token
 else:
 
     # Construct cmd string
     cmd = [
-        '{}/sbin/generate_grade_summaries.py'.format(install_dir),
+        f'{install_dir}/sbin/generate_grade_summaries.py',
         semester,
         course,
         source
@@ -193,10 +201,9 @@ else:
 
     # Check return code of generate_grade_summaries.py execution
     if cmd_return_code != 0:
-        raise Exception('Failure generating grade summaries, the auth token in '
-                        'submitty_admin.json may be invalid or expired '
-                        '(generate_grade_summaries.py exited with code {})'
-                        .format(cmd_return_code))
+        error_exit(f'Failure generating grade summaries, the auth token in '
+                   f'submitty_admin.json may be invalid or expired '
+                   f'(generate_grade_summaries.py exited with code {cmd_return_code})')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade summaries', flush=True)
