@@ -140,10 +140,17 @@
     </div>
 </div>
 {% if error_message != "" %}
-    {% include "grading/electronic/ErrorMessage.twig" with {
-            "color" : error_color,
-            "message" : error_message
-    } only %}
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'StatusBanner',
+        'args': {
+            'message': error_message,
+            'color': error_color
+        },
+        'events': {
+            'color-change': '(event) => { document.body.style.background = event; }'
+        }
+    } %}
 {% endif %}
 
 {% macro renderPanelPositionSelector(panelId) %}

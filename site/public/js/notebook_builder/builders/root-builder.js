@@ -9,7 +9,7 @@ class RootBuilder extends AbstractBuilder {
     constructor(attachment_div) {
         super(attachment_div);
 
-        const all_options = this.selector_options.concat(['Item']);
+        const all_options = this.selector_options.concat(['File Submission', 'Item']);
         this.main_selector = new SelectorWidget(all_options, 'Add New Notebook Cell');
 
         this.itempool_selector = new SelectorWidget(['Itempool Item'], 'Add New Itempool Item');

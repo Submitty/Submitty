@@ -27,6 +27,7 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
+     * @param SimpleStat[] $testcase_averages
      * @param SimpleStat|null $manual_average
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
@@ -47,6 +48,7 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
+        array $testcase_averages,
         $manual_average,
         $autograded_average,
         $overall_scores,
@@ -362,6 +364,7 @@ class ElectronicGraderView extends AbstractView {
             "autograded_average" => $autograded_average,
             "manual_average" => $manual_average,
             "component_averages" => $component_averages,
+            "testcase_averages" => $testcase_averages,
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
@@ -721,23 +724,39 @@ HTML;
             //List of graded components
             $info["graded_groups"] = [];
             foreach ($gradeable->getComponents() as $component) {
-                $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
+                $ta_graded_gradeable = $row->getOrCreateTaGradedGradeable();
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
-                    $info["graded_groups"][] = 4;
-                }
-                elseif (($component->isPeerComponent() && $graded_component !== null)) {
-                    //peer submitted and graded
-                    $info["graded_groups"][] = 4;
-                }
-                elseif (($component->isPeerComponent() && $graded_component === null)) {
-                    //peer submitted but not graded
-                    $info["graded_groups"][] = "peer-null";
-                }
-                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
-                    //peer not submitted
-                    $info["graded_groups"][] = "peer-no-submission";
+                if ($component->isPeerComponent()) {
+                    $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+                    $current_user_graded = $graded_component !== null;
+                    $someone_else_graded = false;
+
+                    if ($container !== null) {
+                        foreach ($container->getGradedComponents() as $other_graded_component) {
+                            if ($other_graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+                                $someone_else_graded = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($current_user_graded && $someone_else_graded) {
+                        $info["graded_groups"][] = 4;
+                    }
+                    elseif ($current_user_graded) {
+                        $info["graded_groups"][] = "peer-right-half";
+                    }
+                    elseif ($someone_else_graded) {
+                        $info["graded_groups"][] = "peer-left-half";
+                    }
+                    elseif ($ta_graded_gradeable->isComplete($this->core->getUser())) {
+                        $info["graded_groups"][] = "peer-null";
+                    }
+                    else {
+                        $info["graded_groups"][] = "peer-no-submission";
+                    }
                 }
                 elseif ($graded_component === null) {
                     //non-peer not graded
@@ -1002,7 +1021,6 @@ HTML;
 
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
-            "gradeable_id" => $gradeable->getId(),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
@@ -1122,15 +1140,9 @@ HTML;
             ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $gradeable->isBulkUpload()) {
-            $pattern1 = "upload.pdf";
-            $pattern2 = "/\.upload_page_\d+/";
-            $pattern3 = "/\.upload_version_\d+_page\d+/";
-            $pattern4 = ".submit.timestamp";
-            $pattern5 = ".bulk_upload_data.json";
-
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if ($pattern1 !== $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 !== $key && $pattern5 !== $key) {
+                if (!FileUtils::isSubmissionMetaFile($key) && $key !== 'upload.pdf') {
                     $pattern_match_flag = true;
                 }
             }
@@ -1278,6 +1290,12 @@ HTML;
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
+        // Add MarkerJS libraries globally for image annotation
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
+        // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
+
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
@@ -1289,6 +1307,7 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
+        $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
