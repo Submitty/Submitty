@@ -5,8 +5,8 @@ import argparse
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
-import database_queries
-from clustering_algorithms.dummy_split import DummySplit
+import clustering_database_queries
+from algorithms.dummy_split import DummySplit
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
     db_name = f"submitty_{args.semester}_{args.course}"
 
     try:
-        course_conn = database_queries.setup_course_db(db_name)
+        course_conn = clustering_database_queries.setup_course_db(db_name)
     except SQLAlchemyError as e:
         print(f"Error connecting to course database {db_name}: {e}")
         traceback.print_exc()
@@ -31,7 +31,7 @@ def main():
 
     try:
         # Fetch submitters
-        submitters = database_queries.get_active_submitters(course_conn, args.gradeable_id)
+        submitters = clustering_database_queries.get_active_submitters(course_conn, args.gradeable_id)
 
         if args.algorithm == 'dummy_split':
             algo = DummySplit()
@@ -39,7 +39,7 @@ def main():
         else:
             raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
-        database_queries.bulk_insert_clustering(
+        clustering_database_queries.bulk_insert_clustering(
             course_conn, args.gradeable_id, args.algorithm, cluster_groups
         )
 

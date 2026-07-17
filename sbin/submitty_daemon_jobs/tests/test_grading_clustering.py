@@ -7,7 +7,7 @@ from pathlib import Path
 # Add sbin to path to import clustering algorithms
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from clustering_algorithms.dummy_split import DummySplit
+from grading_clustering.algorithms.dummy_split import DummySplit
 from submitty_jobs.jobs import GradingClustering
 
 class TestGradingClustering(unittest.TestCase):
@@ -39,7 +39,8 @@ class TestGradingClustering(unittest.TestCase):
         mock_subprocess.assert_called_once()
         args, kwargs = mock_subprocess.call_args
         self.assertEqual(args[0][0], 'python3')
-        self.assertIn('run_grading_clustering.py', args[0][1])
+        self.assertIn('main.py', args[0][1])
+        self.assertIn('grading_clustering', args[0][1])
         self.assertEqual(args[0][2:], ['s23', 'csci1100', 'hw1', 'dummy_split'])
 
 if __name__ == '__main__':
