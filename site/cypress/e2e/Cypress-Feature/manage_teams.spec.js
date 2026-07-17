@@ -5,12 +5,32 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
     const STUDENT_3 = 'windlj';
     const GRADEABLE = 'grading_homework_team_pdf';
 
+    function cyAssertRegistration(user, section, subsection = '') {
+        if (subsection !== '') {
+            cy.get(`#user-${user} .td-registration-section`)
+                .invoke('text')
+                .invoke('replace', /\s+/g, '') // strips whitespace characters
+                .should('equal', `${section}-${subsection}`);
+        }
+        else {
+            cy.get(`#user-${user} .td-registration-section`)
+                .invoke('text')
+                .invoke('replace', /\s+/g, '') // strips whitespace characters
+                .should('equal', section);
+        }
+    }
+
     before(() => {
         // Log in to set up the initial state
         cy.login('instructor');
 
         // Navigate to Manage Students page
         cy.visit(['sample', 'users']);
+
+        cyAssertRegistration(STUDENT_1, 'NULL');
+        cyAssertRegistration(STUDENT_2, 'NULL');
+        cyAssertRegistration(STUDENT_3, 'NULL');
+
 
         // Set up subsections
         cy.get(`[data-testid="edit-student-${STUDENT_1}-button"]`).click();
@@ -19,11 +39,15 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cy.get('#registration_subsection').type('cypress');
         cy.get('#user-form-submit').click();
 
+        cyAssertRegistration(STUDENT_1, '1', 'cypress');
+
         cy.get(`[data-testid="edit-student-${STUDENT_2}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('#registration_subsection').clear();
         cy.get('#registration_subsection').type('cypress');
         cy.get('#user-form-submit').click();
+
+        cyAssertRegistration(STUDENT_2, '1', 'cypress');
 
         // STUDENT_3 only gets a section (no subsection)
         // they are to be used for testing the creation of single-student teams
@@ -31,11 +55,7 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('#user-form-submit').click();
 
-        // Re-visit the Manage Students page to ensure the changes applied
-        cy.visit(['sample', 'users']);
-        cy.get(`#user-${STUDENT_1} .td-registration-section`).should('contain', '1');
-        cy.get(`#user-${STUDENT_2} .td-registration-section`).should('contain', '1');
-        cy.get(`#user-${STUDENT_3} .td-registration-section`).should('contain', '1');
+        cyAssertRegistration(STUDENT_3, '1');
     });
 
     context('Test Instructor team management', () => {
@@ -154,13 +174,19 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cy.get('#registration_subsection').clear();
         cy.get('#user-form-submit').click();
 
+        cyAssertRegistration(STUDENT_1, 'NULL');
+
         cy.get(`[data-testid="edit-student-${STUDENT_2}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('null');
         cy.get('#registration_subsection').clear();
         cy.get('#user-form-submit').click();
 
+        cyAssertRegistration(STUDENT_2, 'NULL');
+
         cy.get(`[data-testid="edit-student-${STUDENT_3}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('null');
         cy.get('#user-form-submit').click();
+
+        cyAssertRegistration(STUDENT_3, 'NULL');
     });
 });
