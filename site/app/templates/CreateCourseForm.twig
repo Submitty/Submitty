@@ -16,9 +16,9 @@
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <select name="course_semester" id="course_semester" class="auto_save">
+                <select name="course_semester" id="course_semester" class="auto_save" onchange="onTermChange()">
                     {% for term in terms %}
-                        <option value="{{ term.getId() }}">
+                        <option value="{{ term.getId() }}" data-start="{{ term.getStartDate() | date('Y-m-d') }}" data-end="{{ term.getEndDate() | date('Y-m-d') }}">
                             {{ term.getName() }}
                         </option>
                     {% endfor %}
@@ -26,6 +26,7 @@
                 {% if is_superuser %}
                     <button class="btn btn-secondary" type="button" style="margin-left:10px;" onclick="addNewTerm()">Other</button>
                 {% endif %}
+                <span class="information-type" id="term_dates" style="display: block; margin-top: 5px;"></span>
             </div>
         </div>
 
@@ -118,6 +119,19 @@
         $("#term-id").focus();
     }
 
+    function onTermChange() {
+        let select = document.getElementById("course_semester");
+        let selected = select.options[select.selectedIndex];
+        let display = document.getElementById("term-dates");
+        if (!selected) {
+            display.textContent = "";
+            return;
+        }
+        let start = selected.getAttribute("data-start");
+        let end = selected.getAttribute("data-end");
+        display.textContent = (start && end) ? `Term dates: ${start} /u2013 ${end}` : '';
+    }
+
     function onHeadInstructorChange() {
         let headInstructor = $('#head_instructor').val();
         $.ajax({
@@ -163,5 +177,6 @@
     $(document).ready(function() {
         onHeadInstructorChange();
         $('[name="head_instructor"]').change(onHeadInstructorChange);
+        onTermChange();
     });
 </script>
