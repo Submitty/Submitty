@@ -18,7 +18,7 @@
             <div class="option-input col-md-6">
                 <select name="course_semester" id="course_semester" class="auto_save" onchange="onTermChange()">
                     {% for term in terms %}
-                        <option value="{{ term.getId() }}" data-start="{{ term.getStartDate() | date('Y-m-d') }}" data-end="{{ term.getEndDate() | date('Y-m-d') }}">
+                        <option value="{{ term.getId() }}" data-start="{{ term.getStartDate() | date('Y/m/d') }}" data-end="{{ term.getEndDate() | date('Y/m/d') }}">
                             {{ term.getName() }}
                         </option>
                     {% endfor %}
@@ -122,14 +122,14 @@
     function onTermChange() {
         let select = document.getElementById("course_semester");
         let selected = select.options[select.selectedIndex];
-        let display = document.getElementById("term-dates");
+        let display = document.getElementById("term_dates");
         if (!selected) {
             display.textContent = "";
             return;
         }
         let start = selected.getAttribute("data-start");
         let end = selected.getAttribute("data-end");
-        display.textContent = (start && end) ? `Term dates: ${start} /u2013 ${end}` : '';
+        display.textContent = (start && end) ? `Term dates: ${start} \u2013 ${end}` : '';
     }
 
     function onHeadInstructorChange() {
