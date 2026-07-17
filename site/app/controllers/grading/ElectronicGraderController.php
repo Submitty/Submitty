@@ -3909,6 +3909,127 @@ class ElectronicGraderController extends AbstractController {
     }
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/save_peer_component", methods: ["POST"])]
+    public function ajaxSavePeerComponent($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        $peer_id = $_POST['peer_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $mark_ids = $_POST['mark_ids'] ?? [];
+        if ($submitter_id === '' || $peer_id === '' || $component_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing required peer component data');
+            return;
+        }
+        if (!is_array($mark_ids)) {
+            $mark_ids = [$mark_ids];
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch gradeable');
+            return;
+        }
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch component');
+            return;
+        }
+        if (!$component->isPeerComponent()) {
+            $this->core->getOutput()->renderJsonFail('This component is not a peer component');
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
+            return;
+        }
+        $peer = $this->core->getQueries()->getUserById($peer_id);
+        if ($peer === null) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch peer grader');
+            return;
+        }
+        $valid_mark_ids = [];
+        foreach ($component->getMarks() as $mark) {
+            $valid_mark_ids[] = $mark->getId();
+        }
+        $mark_ids = array_map('intval', $mark_ids);
+        foreach ($mark_ids as $mark_id) {
+            if (!in_array($mark_id, $valid_mark_ids, true)) {
+                $this->core->getOutput()->renderJsonFail('Invalid mark for this component');
+                return;
+            }
+        }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer);
+        if ($graded_component === null) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch peer graded component');
+            return;
+        }
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        try {
+            $this->saveGradedComponent(
+                $ta_graded_gradeable,
+                $graded_component,
+                $peer,
+                $graded_component->getScore(),
+                $graded_component->getComment(),
+                $mark_ids,
+                $active_version,
+                false
+            );
+            $this->core->getOutput()->renderJsonSuccess('Peer component saved successfully');
+        }
+        catch (\InvalidArgumentException $exception) {
+            $this->core->getOutput()->renderJsonFail($exception->getMessage());
+        }
+        catch (\Exception $exception) {
+            $this->core->getOutput()->renderJsonError($exception->getMessage());
+        }
+    }
+
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/resolve_peer_version_conflicts", methods: ["POST"])]
+    public function ajaxResolvePeerVersionConflicts($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        $peer_id = $_POST['peer_id'] ?? '';
+        if ($submitter_id === '' || $peer_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing required peer grading data');
+            return;
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+        $peer = $this->core->getQueries()->getUserById($peer_id);
+        if ($peer === null) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch peer grader');
+            return;
+        }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        foreach ($gradeable->getPeerComponents() as $component) {
+            $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer);
+            if ($graded_component === null) {
+                continue;
+            }
+            if ($graded_component->getGradedVersion() !== $active_version) {
+                $graded_component->setGradedVersion($active_version);
+            }
+        }
+        $ta_graded_gradeable->resetUserViewedDate();
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+        $this->core->getOutput()->renderJsonSuccess(
+            'Peer version conflicts resolved successfully'
+        );
+    }
+
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods: ["POST"])]
     public function ajaxClearPeerMarks($gradeable_id) {
         $submitter_id = $_POST['submitter_id'] ?? '';

@@ -25,6 +25,9 @@ declare global {
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
         clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
+        resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
@@ -443,6 +446,71 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
         },
         error: function () {
             console.log('Failed to delete');
+        },
+    });
+};
+
+window.savePeerComponent = function (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string) {
+    const mark_ids = $(
+        `.peer-edit-mark[data-component-id="${component_id}"][data-peer-id="${peer_id}"]:checked`,
+    ).map(function () {
+        return $(this).val();
+    }).get();
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'save_peer_component',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+            component_id,
+            mark_ids,
+        },
+        type: 'POST',
+        success: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Saved');
+            $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+            setTimeout(() => {
+                save_status.text('');
+            }, 2000);
+        },
+        error: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Save failed');
+        },
+    });
+};
+
+window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'resolve_peer_version_conflicts',
+    ]);
+
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            $(`.peer-edit-version-warning[data-peer-id="${peer_id}"]`).remove();
+            $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+        },
+        error: function () {
+            console.log('Failed to resolve peer version conflicts');
         },
     });
 };

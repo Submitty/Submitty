@@ -1798,58 +1798,85 @@ HTML;
             ]);
     }
 
+
     /**
-     * Render the Grade Inquiry panel
+     * Render the peer component editing panel
+     *
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
     public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable) {
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
         if ($gradeable->isTeamAssignment()) {
-            foreach ($this->core->getQueries()->getTeamById($submitter)->getMemberUserIds() as $student_id) {
-                $peers_to_list = array_merge($peers_to_list, $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $student_id));
+            $team = $this->core->getQueries()->getTeamById($submitter);
+            foreach ($team->getMemberUserIds() as $student_id) {
+                $peers_to_list = array_merge(
+                    $peers_to_list,
+                    $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $student_id)
+                );
             }
         }
-        $components = $gradeable->getComponents();
+        $peers_to_list = array_values(array_unique($peers_to_list));
         $components_details_array = [];
-        $peer_details = [];
         $component_scores = [];
-        $peer_details["graders"] = [];
         $marks = [];
-        foreach ($components as $component) {
-            if ($component->isPeerComponent()) {
-                foreach ($peers_to_list as $peer) {
-                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById([$peer])[$peer]);
-                    if ($graded_component !== null) {
-                        $peer_details["graders"][$component->getId()][] = $peer;
-                        $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
-                        $component_scores[$component->getId()][$peer] = $graded_component->getTotalScore();
-                    }
-                }
-                $component_details["title"] = $component->getTitle();
-                $component_details["marks"] = [];
-                $component_details["max"] = $component->getMaxValue();
-                $component_details["id"] = strval($component->getId());
-                foreach ($component->getMarks() as $mark) {
-                    $component_details["marks"][] = $mark->getId();
-                    $marks[$mark->getId()]["title"] = $mark->getTitle();
-                    $marks[$mark->getId()]["points"] = $mark->getPoints();
-                }
-                $components_details_array[] = $component_details;
+        $peer_details = [
+            "graders" => [],
+            "marks_assigned" => [],
+            "graded_versions" => [],
+            "version_conflicts" => []
+        ];
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($gradeable->getComponents() as $component) {
+            if (!$component->isPeerComponent()) {
+                continue;
             }
+            $component_id = $component->getId();
+            foreach ($peers_to_list as $peer) {
+                $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer_user);
+                if ($graded_component === null) {
+                    continue;
+                }
+                $graded_version = $graded_component->getGradedVersion();
+                $peer_details["graders"][$component_id][] = $peer;
+                $peer_details["marks_assigned"][$component_id][$peer] = $graded_component->getMarkIds();
+                $peer_details["graded_versions"][$component_id][$peer] = $graded_version;
+                $peer_details["version_conflicts"][$component_id][$peer] = $graded_version !== $active_version;
+               $component_scores[$component_id][$peer] = $graded_component->getTotalScore() ?? 0;
+            }
+            $component_details = [
+                "title" => $component->getTitle(),
+                "marks" => [],
+                "max" => $component->getMaxValue(),
+                "id" => strval($component_id),
+                "extra_credit" => $component->isExtraCredit()
+            ];
+            foreach ($component->getMarks() as $mark) {
+                $mark_id = $mark->getId();
+                $component_details["marks"][] = $mark_id;
+                $marks[$mark_id]["title"] = $mark->getTitle();
+                $marks[$mark_id]["points"] = $mark->getPoints();
+            }
+            $components_details_array[] = $component_details;
         }
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
-            "gradeable_id" => $gradeable->getId(),
-            "peers" => $peers_to_list,
-            "submitter_id" => $submitter,
-            "peer_details" => $peer_details,
-            "components" => $components_details_array,
-            "csrf_token" => $this->core->getCsrfToken(),
-            "component_scores" => $component_scores,
-            "marks" => $marks
-        ]);
+        return $this->core->getOutput()->renderTwigTemplate(
+            "grading/electronic/EditPeerComponentsForm.twig",
+            [
+                "gradeable_id" => $gradeable->getId(),
+                "peers" => $peers_to_list,
+                "submitter_id" => $submitter,
+                "peer_details" => $peer_details,
+                "components" => $components_details_array,
+                "csrf_token" => $this->core->getCsrfToken(),
+                "component_scores" => $component_scores,
+                "marks" => $marks,
+                "active_version" => $active_version
+            ]
+        );
     }
 
     /**

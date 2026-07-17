@@ -38,18 +38,8 @@ Required inputs:
         {% for grader in peer_details.graders | sort %}
             {% if peer_details.version_conflicts[grader] %}
                 {% if not conflictPresent %}
-                    <div
-                        class="version-warning peer-version-warning"
-                        data-testid="peer-version-warning"
-                    >
+                    <div class="version-warning peer-version-warning" data-testid="peer-version-warning">
                         Version Conflict(s) Present
-                        <a
-                            class="fa-question-circle"
-                            href="https://submitty.org/grader/resolving_version_conflict"
-                            target="_blank"
-                            aria-label="Learn more about resolving version conflicts"
-                        >
-                        </a>
                     </div>
                     {% set conflictPresent = true %}
                 {% endif %}

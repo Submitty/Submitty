@@ -1073,6 +1073,30 @@ tr.is_publish {
     color: inherit;
 }
 
+.peer-edit-marks-list {
+    clear: both;
+}
+
+.peer-edit-version-warning {
+    color: var(--error-alert-dark-red);
+    font-weight: bold;
+    clear: both;
+}
+
+.peer-edit-components {
+    margin-top: 15px;
+}
+
+.peer-edit-component:not(:last-child) {
+    margin-bottom: 15px;
+}
+
+.peer-component-save-status {
+    margin-left: 5px;
+    color: var(--standard-dark-green);
+    font-weight: bold;
+}
+
 .gradeable .graded-by {
     font-style: italic;
     padding-right: 10px;
