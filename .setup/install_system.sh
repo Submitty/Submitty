@@ -664,9 +664,6 @@ fi
 
 /bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
 
-# shellcheck can't follow dynamic paths, so it will fail to find this file
-# see https://www.shellcheck.net/wiki/SC1091, under Exceptions
-# shellcheck source=/dev/null
 source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
 
 # Create and setup database for non-workers
