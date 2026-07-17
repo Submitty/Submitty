@@ -7,35 +7,51 @@
     <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
+            {% set peer_only_grader = gradeable.hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), gradeable.getMinGradingGroup()) %}
             <ul id="details-legend">
                 <li>
                     <i class="grading-example-circle grader-NULL"></i>
                     Ungraded component
                 </li>
-                <li>
-                    <i class="grading-example-circle grader-3"></i>
-                    Component graded by a limited access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-4"></i>
-                    Peer component graded by a student
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-1"></i>
-                    Component graded by a full access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-verified"></i>
-                    Limited access grader verified
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-double"></i>
-                    Component double-graded by a full access grader or instructor
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-active grader-NULL"></i>
-                    Component actively being graded
-                </li>
+                {% if not peer_only_grader %}
+                    <li>
+                        <i class="grading-example-circle grader-3"></i>
+                        Component graded by a limited access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-peer-left-half"></i>
+                        Peer component graded by another peer grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-peer-right-half"></i>
+                        Peer component graded by you
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by another peer grader and you
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-1"></i>
+                        Component graded by a full access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-verified"></i>
+                        Limited access grader verified
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-double"></i>
+                        Component double-graded by a full access grader or instructor
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-active grader-NULL"></i>
+                        Component actively being graded
+                    </li>
+                {% else %}
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by you
+                    </li>
+                {% endif %}
             </ul>
 
             <div class="row-wrapper">
@@ -259,9 +275,11 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, override_data, anon_ids, max_team_name_length, active_graders) %}
-    <tr class="grade-table" data-testid="grade-table"
+    <tr data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
-            style='background: #7bd0f7;'
+            class="grade-table highlighted-row"
+        {% else %}
+            class="grade-table"
         {% endif %}
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn" %}
             data-student="electronic-grade-withdrawn"
@@ -286,7 +304,7 @@
                 {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
                 {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
-            {% elseif column.function == "grading_blind" %}
+            {% elseif column.function == "grading_peer" %}
                 {{ _self.render_column_grading_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ _self.render_column_index(context, section, graded_gradeable, index, info, column) }}
@@ -415,9 +433,11 @@
 {% macro render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) %}
     <td class="td-graded-questions" style="text-align: center">
         <span>
+            {# check if current user is a peer only grader #}
+            {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
-            {% if core.getUser().accessGrading() %}
+            {% if core.getUser().accessGrading() and not peer_only_grader %}
                     {% set user_id = graded_gradeable.getSubmitter().getId() %}
                     {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
                     {% set component_graders = user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] is defined ? user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] : {} %}
@@ -430,9 +450,15 @@
                     {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         {% set class_list = class_list | merge(['grader-NULL']) %}
                     {% else %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
+                        {% if info.graded_groups[index] == "peer-null" or info.graded_groups[index] == "peer-no-submission" %}
                             {# Indicates Peer Component #}
                             {% set class_list = class_list | merge(['grader-NULL']) %}
+                        {% elseif info.graded_groups[index] == "peer-left-half" %}
+                            {# Indicates Peer Component graded by someone other than yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-left-half']) %}
+                        {% elseif info.graded_groups[index] == "peer-right-half" %}
+                            {# Indicates Peer Component graded only by yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-right-half']) %}
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
                             {% set class_list = class_list | merge(['grader-' ~ info.graded_groups[index]]) %}
@@ -441,34 +467,37 @@
                     <div title="{{ title }}" class="{{ class_list | join(' ') }}"></div>
             {% endif %}
             {# Peer View for Stoplights #}
-            {% if core.getUser().getGroup() == 4 %}
-                    {# If no submission has been made, non peer should not be visible to peer grader #}
-                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Ungraded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-
-                            circle grader-NULL }}"></i>
+            {% if core.getUser().getGroup() == 4 or peer_only_grader %}
+                {% set component = graded_gradeable.getGradeable().getComponents()[index] %}
+                {% set title = component.getTitle() %}
+                {# If no submission has been made, non peer should not be visible to peer grader #}
+                {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
+                    {% if info.graded_groups[index] == "peer-null" %}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% endif %}
+                {% else %}
+                    {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
+                    {% if info.graded_groups[index] == "peer-no-submission" %}
+                        {# Indicates Not Submitted Peer Component #}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-null" %}
+                        {# Indicates Submitted but Ungraded Peer Component #}
+                        <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-left-half" %}
+                        {# Indicates Component graded by someone else but not current user #}
+                        {% if peer_only_grader %}
+                            <div title="{{ title }}" class="grading-circle grader-NULL"></div>
                         {% else %}
-                            {# Indicates Non-Peer Component (Hidden)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
+                            <div title="{{ title }}" class="grading-circle grader-peer-left-half"></div>
                         {% endif %}
-                    {% else %}
-                        {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
-                        {%  if info.graded_groups[index] == "peer-no-submission" %}
-                            {# Indicates Not Submitted Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Submitted but Ungraded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] == 4 %}
-                            {# Indicates Submitted and Graded Peer Component #}
-                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
-                        {% else %}
-                            {# Indicates Non-Peer Component (Hidden)#}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
-                        {% endif %}
+                    {% elseif info.graded_groups[index] == "peer-right-half" %}
+                        {# Indicates Component graded only by current user #}
+                        <div title="{{ title }}" class="grading-circle grader-peer-right-half"></div>
+                    {% elseif info.graded_groups[index] == 4 %}
+                        <div title="{{ title }}" class="grading-circle grader-{{ info.graded_groups[index] }}"></div>
                     {% endif %}
                 {% endif %}
+            {% endif %}
             {%- endfor -%}
         </span>
     </td>
@@ -477,7 +506,7 @@
 {# Grading Button #}
 {% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
     {% set badge_count = 0 %}
-
+    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
     {% if graded_gradeable.getSubmitter().getId() in overrides %}
         {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
         {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
@@ -497,13 +526,19 @@
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
 
-    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
+                {% set btn_class = "btn-primary" %}
+            {% elseif peer_only_grader and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% elseif peer_only_grader %}
+                {% set contents = "Grade" %}
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}
@@ -539,6 +574,7 @@
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
 {% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
+    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
     {% if  graded_gradeable.getSubmitter().getId() in overrides %}
         {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
         {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
@@ -553,12 +589,18 @@
     {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
-    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
+                {% set btn_class = "btn-primary" %}
+            {% elseif peer_only_grader and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% elseif peer_only_grader %}
+                {% set contents = "Grade" %}
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}

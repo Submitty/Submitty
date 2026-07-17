@@ -139,6 +139,13 @@ $(document).ready(() => {
             }
             button.text('Collapse');
             button.data('action', 'collapse');
+            $('td').click(() => {
+                if (button.data('type') === 'post' || button.data('type') === 'thread') {
+                    const id = button.data('thread_id');
+                    const url = buildCourseUrl(['forum', 'threads', id]);
+                    window.open(url, '_blank');
+                }
+            });
         }
         else {
             for (let i = 0; i < ids.length; i++) {
@@ -152,9 +159,9 @@ $(document).ready(() => {
         }
     });
 
-    forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', function () {
-        const id = $(this).data('thread_id');
+    forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', (event) => {
+        const id = $(event.currentTarget).data('thread_id');
         const url = buildCourseUrl(['forum', 'threads', id]);
-        window.open(url);
+        window.open(url, '_blank');
     });
 });

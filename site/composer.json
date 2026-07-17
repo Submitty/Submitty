@@ -29,12 +29,12 @@
     "league/commonmark": "2.8.2",
     "maennchen/zipstream-php": "3.1.1",
     "onelogin/php-saml": "4.3.1",
-    "php-ds/php-ds": "1.7.0",
+    "php-ds/php-ds": "2.0.1",
     "ramsey/uuid": "4.9.2",
     "symfony/cache": "6.4.7",
     "symfony/config": "6.4.4",
     "symfony/http-foundation": "6.4.14",
-    "symfony/routing": "6.1.11",
+    "symfony/routing": "6.4.13",
     "textalk/websocket": "1.6.3",
     "twig/markdown-extra": "^3.24",
     "twig/twig": "3.24.0"
@@ -42,7 +42,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "1.2.0",
     "php-mock/php-mock-phpunit": "2.15.0",
-    "phpstan/phpstan": "2.1.46",
+    "phpstan/phpstan": "2.1.54",
     "phpstan/phpstan-deprecation-rules": "2.0.4",
     "phpstan/phpstan-doctrine": "2.0.21",
     "phpstan/phpstan-strict-rules": "2.0.10",

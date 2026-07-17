@@ -56,7 +56,7 @@ class ForumController extends AbstractController {
     }
 
     private function searchQuery(): string {
-        return $_COOKIE["search_query"] ?? "";
+        return $_POST["search_query"] ?? "";
     }
 
     private function getSavedCategoryIds($currentCourse, $category_ids) {
@@ -584,11 +584,33 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
-                $parent_preview = $this->previewText($parent_post_content, 100);
-                $subject = "New Reply: " . $thread_title;
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
-                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
-                $this->core->getNotificationFactory()->onNewPost($event);
+                $is_reply_announcement = isset($_POST['replyAnnouncement'])
+                    && $_POST['replyAnnouncement'] === 'replyAnnouncement'
+                    && $this->core->getUser()->accessFullGrading();
+
+                if ($is_reply_announcement) {
+                    $repo = $this->core->getCourseEntityManager()->getRepository(\app\entities\forum\Thread::class);
+                    $thread = $repo->findOneBy(['id' => intval($thread_id)]);
+
+                    if ($thread && $thread->isPinned()) {
+                        $subject = "Update to Pinned Thread: " . $thread_title;
+                        $content = "An Instructor or Teaching Assistant posted an important update in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nUpdate:\n\n" . $post_content;
+                        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                        $this->core->getNotificationFactory()->onNewAnnouncement($event);
+
+                        $this->core->getQueries()->setAnnounced($thread_id);
+                    }
+                    else {
+                        $is_reply_announcement = false;
+                    }
+                }
+                else {
+                    $parent_preview = $this->previewText($parent_post_content, 100);
+                    $subject = "New Reply: " . $thread_title;
+                    $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n Post:\n" . $parent_preview . "\n\nNew Reply:\n\n" . $post_content;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                    $this->core->getNotificationFactory()->onNewPost($event);
+                }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
                 $result['post_id'] = $post_id;
@@ -770,14 +792,16 @@ class ForumController extends AbstractController {
         $type = "";
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
+        $edited_post_preview = $this->previewText($post->getContent());
+        $edited_post_subject_preview = $this->previewText($post->getContent(), 100);
         if ($did_edit_thread) {
             $subject = "Thread Edited: " . $thread->getTitle();
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . $post->getContent();
-            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $subject = "Post Edited: " . $edited_post_subject_preview;
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
@@ -854,7 +878,12 @@ class ForumController extends AbstractController {
                 $thread->setDeleted(true);
                 $type = "thread";
             }
-            $metadata = json_encode([]);
+            $metadata = json_encode([
+                'url' => $type === "thread"
+                    ? $this->core->buildCourseUrl(['forum'])
+                    : $this->core->buildCourseUrl(['forum', 'threads', $thread_id]),
+                'thread_id' => $thread_id,
+            ]);
             $subject = "Deleted: " . $post->getContent();
             $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];

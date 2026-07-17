@@ -107,8 +107,9 @@ window.onkeydown = function (e) {
         return;
     }
 
-    // Disable hotkeys in the menu so we don't accidentally press anything
-    if (isSettingsVisible()) {
+    // Disable hotkeys while in the menu or the annotation editor
+    // so we don't accidentally press anything
+    if (isSettingsVisible() || isAnnotationEditorVisible()) {
         return;
     }
 
@@ -155,6 +156,10 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
 
 function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
+}
+
+function isAnnotationEditorVisible() {
+    return $('#global-annotation-editor-wrapper').is(':visible');
 }
 
 export function showSettings() {

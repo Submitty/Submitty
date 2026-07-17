@@ -104,9 +104,28 @@
     }
   }
 
-  function unhideId(element, id) {
-    element.parentElement.append("<" + id + ">");
-    element.remove();
+  function toggleUserId(element) {
+    const parent = element.parentElement;
+    const nameSpan = parent.querySelector('.full-name');
+    const idSpan = parent.querySelector('.user-id');
+    const icon = element.querySelector('i');
+
+    if (idSpan.style.display === 'none') {
+      nameSpan.style.display = 'none';
+      idSpan.style.display = 'inline';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+      element.setAttribute('aria-label', 'Hide user id');
+      element.setAttribute('title', 'Hide user id');
+    }
+    else {
+      nameSpan.style.display = 'inline';
+      idSpan.style.display = 'none';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+      element.setAttribute('aria-label', 'Show user id');
+      element.setAttribute('title', 'Show user id');
+    }
   }
 
   function updateTimerInterval() {

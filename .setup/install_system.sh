@@ -225,7 +225,11 @@ DB_COURSE_PASSWORD=submitty_dbuser
 # DISTRO SETUP
 #################
 
-source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+if [ ${WORKER} == 1 ]; then
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh worker
+else
+    source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+fi
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
@@ -351,6 +355,25 @@ echo "$gitconfig_content" > "$gitconfig_path"
 sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
+
+#################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
+
+popd > /dev/null
 
 #################################################################
 # APACHE SETUP
@@ -780,9 +803,7 @@ fi
 # (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
 # operational at that time.)
 if [ ${WORKER} == 0 ]; then
-
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
-
 fi
 
 popd > /dev/null
