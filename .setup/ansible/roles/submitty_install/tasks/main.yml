@@ -43,7 +43,7 @@
 
 - name: Copy pre-configured configuration files  # By default, the same as running generate_configs.py
   ansible.builtin.copy:
-    src: "{{ submitty_install_config_location }}/var_configs"
+    src: "{{ submitty_install_config_location }}/var_configs/"
     dest: /var/local/submitty/config/
     mode: "0644"
 
