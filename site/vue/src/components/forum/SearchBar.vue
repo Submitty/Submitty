@@ -13,8 +13,6 @@ const emit = defineEmits<{
 
 const query = ref(props.searchQuery ?? '');
 
-// Transitional: keep hidden #search-content synced for jQuery consumers
-// (modifyThreadList reads it, Search/Filter buttons submit via updateThreads)
 watch(query, (val) => {
     $('#search-content').val(val);
 }, { immediate: true });
