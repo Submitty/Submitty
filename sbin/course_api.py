@@ -48,17 +48,17 @@ def main():
     print("All user/group validation checks passed.")
 
     identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
-    api_config = load_json(CONF_DIR / "submitty_api.json")
-
-    try:
-        call_php_api(api_config["base_url"], api_config["api_key"], identity)
-    except (requests.RequestException, RuntimeError) as e:
-        die(f"Course database creation failed: {e}")
 
     try:
         course_dir = build_course_filesystem(cfg, identity)
     except (OSError, KeyError) as e:
         die(f"Filesystem provisioning failed after DB creation succeeded: {e}")
+
+    api_config = load_json(CONF_DIR / "submitty_api.json")
+    try:
+        call_php_api(api_config["base_url"], api_config["api_key"], identity)
+    except (requests.RequestException, RuntimeError) as e:
+        die(f"Course database creation failed: {e}")
 
     print_success(cfg, identity, course_dir)
 
