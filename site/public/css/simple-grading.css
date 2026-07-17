@@ -18,40 +18,31 @@
     vertical-align: bottom;
 }
 
-th {
-    background: var(--standard-light-gray);
+/* Data Table Header Width Styles */
+
+tr > th:nth-of-type(1),
+tr > td:nth-of-type(1) {
+    width: 20px;
 }
 
-tr > th:first-child,
-tr > td:first-child {
-    position: sticky;
-    left: 0;
-    border-left: 1px solid var(--standard-medium-gray);
+tr > th:nth-of-type(2),
+tr > td:nth-of-type(2) {
+    width: 70px;
 }
 
-tr > th:nth-child(2),
-tr > td:nth-child(2) {
-    position: sticky;
-    left: 1.25rem;
+tr > th:nth-of-type(3),
+tr > td:nth-of-type(3) {
+    width: 90px;
 }
 
-tr > th:nth-child(3),
-tr > td:nth-child(3) {
-    position: sticky;
-    left: 5.25rem;
+tr > th:nth-of-type(4),
+tr > td:nth-of-type(4) {
+    width: 110px;
 }
 
-tr > th:nth-child(4),
-tr > td:nth-child(4) {
-    position: sticky;
-    left: 10.75rem;
-}
-
-tr > th:nth-child(5),
-tr > td:nth-child(5) {
-    position: sticky;
-    left: 16.75rem;
-    border-right: 1px solid var(--standard-medium-gray);
+tr > th:nth-of-type(5),
+tr > td:nth-of-type(5) {
+    width: 120px;
 }
 
 tbody {
