@@ -47,6 +47,7 @@ function handleKeydown(e: KeyboardEvent) {
       placeholder="Search here..."
       aria-label="Forum Search Input Box"
       data-ays-ignore="true"
+      data-testid="search-content-input"
       @keydown="handleKeydown"
       @change="query = query.trim()"
     />
