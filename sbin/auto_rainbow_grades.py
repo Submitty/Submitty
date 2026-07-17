@@ -22,10 +22,17 @@ from pathlib import Path
 import getpass
 
 
-# Print an error message without a traceback and exit non-zero.
+# Print an error message without a traceback and exit non-zero,
+# done without a traceback as the traceback includes raw code
+# and jumbled output
 def error_exit(message):
     print(f'ERROR: {message}', file=sys.stderr, flush=True)
     sys.exit(1)
+
+
+# Print an a non fatal warning that should be surfaced to the UI
+def warn(message):
+    print(f'WARNING: {message}', flush=True)
 
 
 # Verify correct number of command line arguments
@@ -168,11 +175,11 @@ if 'token' not in creds or not creds['token']:
 
     # Distinguish a missing key from a present-but-empty token in the output
     if 'token' not in creds:
-        print('No token field found in submitty_admin.json, attempting to continue '
-              'with previously generated grade summaries', flush=True)
+        warn('No token field found in submitty_admin.json, attempting to continue '
+              'with previously generated grade summaries')
     else:
-        print('The auth token in submitty_admin.json is empty, attempting to continue '
-              'with previously generated grade summaries', flush=True)
+        warn('The auth token in submitty_admin.json is empty, attempting to continue '
+              'with previously generated grade summaries')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries

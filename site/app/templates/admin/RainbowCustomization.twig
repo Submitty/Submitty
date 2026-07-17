@@ -4,7 +4,14 @@
     </div>
     <div id="rg_web_ui">
         <h1>Rainbow Grades Configuration</h1>
-
+        <div id="rg-build-notices">
+            {% for notice in rainbow_build_notices %}
+                <h2 class="rg-build-notice rg-build-notice-{{ notice.level }}"
+                    data-testid="rg-build-notice-{{ notice.level }}">
+                    {{ notice.level == 'error' ? 'Error:' : 'Warning:' }} {{ notice.message }}
+                </h2>
+            {% endfor %}
+        </div>
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
                 <p><strong>Notice:</strong> Rainbow Grades tools are running in limited functionality mode.  This means that grades summaries must be

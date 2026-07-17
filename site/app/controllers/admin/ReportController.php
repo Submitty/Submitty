@@ -192,6 +192,14 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_build_notices", methods: ["POST"])]
+    public function rainbowGradesBuildNotices(): JsonResponse {
+        return JsonResponse::getSuccessResponse([
+            'notices' => $this->getRainbowGradesBuildNotices(),
+        ]);
+    }
+
     /**
      * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
@@ -801,6 +809,7 @@ class ReportController extends AbstractController {
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
                 'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
+                'rainbow_build_notices' => $this->getRainbowGradesBuildNotices(),
                 'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
@@ -1010,6 +1019,7 @@ class ReportController extends AbstractController {
         $debug_contents = file_get_contents($debug_output_path);
         $debug_contents = trim($debug_contents);
         $was_successful = str_ends_with($debug_contents, 'Done');
+        $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
 
         if ($max_wait_time && $failure_detected === false && $was_successful) {
             return JsonResponse::getSuccessResponse($debug_contents);
@@ -1184,5 +1194,25 @@ class ReportController extends AbstractController {
             ];
         }
         return $gradeables;
+    }
+
+    /** @return array<int, array{level: string, message: string}> */
+    private function getRainbowGradesBuildNotices(): array {
+        $debug_output_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            'auto_debug_output.txt'
+        );
+        if (!file_exists($debug_output_path)) {
+            return [];
+        }
+
+        $notices = [];
+        foreach (explode("\n", (string) file_get_contents($debug_output_path)) as $line) {
+            if (preg_match('/^(ERROR|WARNING): (.+)$/', trim($line), $matches) === 1) {
+                $notices[] = ['level' => strtolower($matches[1]), 'message' => $matches[2]];
+            }
+        }
+        return $notices;
     }
 }

@@ -787,10 +787,13 @@ function checkBuildStatus() {
             if (response.status === 'success') {
                 $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data);
+                refreshManualGenerationBanner();
+                refreshBuildNotices();
             }
             else if (response.status === 'fail') {
                 $('#save_status').text('A failure occurred generating rainbow grades');
                 showLogButton(response.message);
+                refreshBuildNotices();
             }
             else {
                 $('#save_status').text('Internal Server Error');
@@ -799,6 +802,37 @@ function checkBuildStatus() {
         },
         error: function (xhr, status, error) {
             console.error(`Failed to parse response from server: ${xhr.responseText}`);
+        },
+    });
+}
+
+function renderBuildNotices(notices) {
+    const container = $('#rg-build-notices');
+    container.empty();
+
+    (notices || []).forEach((notice) => {
+        $('<h4></h4>')
+            .addClass(`rg-build-notice rg-build-notice-${notice.level}`)
+            .attr('data-testid', `rg-build-notice-${notice.level}`)
+            .text(`${notice.level === 'error' ? 'Error:' : 'Warning:'} ${notice.message}`)
+            .appendTo(container);
+    });
+}
+
+function refreshBuildNotices() {
+    $.ajax({
+        type: 'POST',
+        url: buildCourseUrl(['reports', 'rainbow_grades_build_notices']),
+        data: { csrf_token: csrfToken },
+        dataType: 'json',
+        success: function (response) {
+            if (response.status !== 'success') {
+                return;
+            }
+            renderBuildNotices(response.data.notices);
+        },
+        error: function (xhr) {
+            console.error(`Failed to refresh build notices: ${xhr.responseText}`);
         },
     });
 }
