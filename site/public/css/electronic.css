@@ -1060,6 +1060,19 @@ tr.is_publish {
     font-size: medium;
 }
 
+.gradeable .peer-version-warning {
+    margin: 5px 15px;
+}
+
+.gradeable .peer-version-conflict {
+    color: var(--error-alert-dark-red);
+}
+
+.gradeable .peer-version-conflict .indicator,
+.gradeable .peer-version-conflict .indicator i {
+    color: inherit;
+}
+
 .gradeable .graded-by {
     font-style: italic;
     padding-right: 10px;

@@ -3,7 +3,12 @@
 Required inputs:
     component: {id, title, ta_comment, student_comment, page, max_value}
     graded_component: {graders, marksassigned}
-    peer_details: {graders, marks_assigned}
+    peer_details: {
+        graders,
+        marks_assigned,
+        graded_versions,
+        version_conflicts
+    }
 
     show_verify_grader = can_verify and grader_id is defined and grader_id != your_user_id
     {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }}
@@ -29,6 +34,27 @@ Required inputs:
 {% block mark_list_footer %}
     {# Component is closed, so show just the received marks #}
     {% if not show_mark_list %}
+        {% set conflictPresent = false %}
+        {% for grader in peer_details.graders | sort %}
+            {% if peer_details.version_conflicts[grader] %}
+                {% if not conflictPresent %}
+                    <div
+                        class="version-warning peer-version-warning"
+                        data-testid="peer-version-warning"
+                    >
+                        Version Conflict(s) Present
+                        <a
+                            class="fa-question-circle"
+                            href="https://submitty.org/grader/resolving_version_conflict"
+                            target="_blank"
+                            aria-label="Learn more about resolving version conflicts"
+                        >
+                        </a>
+                    </div>
+                    {% set conflictPresent = true %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
         <div class="container">
             <div class="row divider"></div>
         </div>
@@ -38,9 +64,7 @@ Required inputs:
                 <thead>
                     <tr> 
                         {% for grader in peer_details.graders | sort %}
-                            <th class="peer-table-header">
-                                {{ grader }}
-                            </th>
+                            <th class="peer-table-header{% if peer_details.version_conflicts[grader] %} peer-version-conflict{% endif %}" data-testid="peer-grader-header" data-grader-id="{{ grader }}"> {{ grader }} </th>
                         {% endfor %}
                         <th> Points </th>
                         <th class="peer-table-title-data"> Title  </th>
@@ -50,7 +74,7 @@ Required inputs:
                     {% for mark in component.marks %}
                         <tr>
                         {% for grader in peer_details.graders | sort %}
-                            <td class="peer-table-data">
+                            <td class="peer-table-data{% if peer_details.version_conflicts[grader] %} peer-version-conflict{% endif %}" data-testid="peer-grader-mark" data-grader-id="{{ grader }}">
                                 {% if mark.id in peer_details.marks_assigned[grader] %}
                                     <div class="col-no-gutters indicator">
                                         <i class="far fa-check-square fa-1g"></i>
