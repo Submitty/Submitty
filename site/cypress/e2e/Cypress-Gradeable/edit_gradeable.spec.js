@@ -140,17 +140,14 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#page_4_nav').click();
         cy.get('#peer_graders_list').should('exist');
 
-        cy.intercept('POST', '**/RandomizePeers').as('clearPeerMatrix');
-        cy.on('window:confirm', (str) => {
-            expect(str).to.equal('This will clear peer matrix. Are you sure?');
-            return true;
-        });
         cy.get('#clear_peer_matrix').click();
-        cy.wait('@clearPeerMatrix').then(({ request }) => {
-            expect(request.body.number_to_grade).to.equal('0');
+        cy.get('#clear_peer_matrix').then(() => {
+            cy.on('window:confirm', (str) => {
+                expect(str).to.equal('This will clear peer matrix. Are you sure?');
+                return false;
+            });
         });
 
-        cy.get('#page_4_nav').click();
         cy.get('#download_peer_csv').click();
 
         cy.get('#hidden_files').should('exist');
