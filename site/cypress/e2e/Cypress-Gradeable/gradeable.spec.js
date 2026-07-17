@@ -23,8 +23,12 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             cy.get('[fname = "file1.txt"]').should('not.exist');
             cy.get('#upload1').selectFile([testfile1, testfile2], { action: 'drag-drop' });
 
+            // Dismiss successful upload message
+            cy.get('.alert-success').should('be.visible');
+            cy.get('.alert-success > a').click();
+            cy.get('.alert-success').should('not.exist');
+
             cy.waitPageChange(() => {
-                cy.get('.alert-success > a').click(); // Dismiss successful upload message
                 cy.get('#submit').click();
             });
 
