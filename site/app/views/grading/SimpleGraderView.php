@@ -18,7 +18,7 @@ class SimpleGraderView extends AbstractView {
      * @param bool $show_all_sections_button
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $sort, $anon_ids) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $anon_ids) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -90,7 +90,6 @@ class SimpleGraderView extends AbstractView {
             "student_full" => $student_full,
             "components_numeric" => $components_numeric,
             "components_text" => $components_text,
-            "sort" => $sort,
             "sections" => $sections,
             "component_ids" => $component_ids,
             "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
