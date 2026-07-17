@@ -1046,6 +1046,14 @@ tr.is_publish {
     cursor: default;
 }
 
+.gradeable .component .peer-component-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    font-size: 20px;
+}
+
 .gradeable .peer-border {
     border: 3px solid var(--standard-mediumorchid);
 }
