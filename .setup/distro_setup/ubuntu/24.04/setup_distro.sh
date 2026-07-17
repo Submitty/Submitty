@@ -119,6 +119,9 @@ apt-get install git -y
 if [ "${DEV_VM}" == 1 ]; then
     CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+    # can't follow dynamic paths, so it will fail to find this file
+    # see https://www.shellcheck.net/wiki/SC1091, under Exceptions
+    # shellcheck source=/dev/null
     source "$CUR_DIR/../../../vagrant/setup_ldap.sh"
 fi
 
