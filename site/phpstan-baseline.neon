@@ -15247,12 +15247,6 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
-			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $sort with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/grading/SimpleGraderView.php
-
-		-
 			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $student_full with no type specified.'
 			identifier: missingType.parameter
 			count: 1
