@@ -142,7 +142,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#clear_peer_matrix').click();
         cy.get('#clear_peer_matrix').then(() => {
-            cy.on('window:confirm', () => false);
+            cy.on('window:confirm', (str) => {
+                expect(str).to.equal('This will clear peer matrix. Are you sure?');
+                return false;
+            });
         });
 
         cy.get('#download_peer_csv').click();

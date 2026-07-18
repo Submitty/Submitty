@@ -8,7 +8,6 @@ declare global {
         changeSections: () => void;
         changeInquiry: () => void;
         changeSortOrder: () => void;
-        sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
         changeAnon: () => void;
     }
 }
@@ -72,12 +71,6 @@ window.changeInquiry = () => {
 window.changeSortOrder = () => {
     const sort = window.Cookies.get('sort');
     window.Cookies.set('sort', sort === 'random' ? 'id' : 'random', cookieArguments);
-    location.reload();
-};
-
-window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
-    window.Cookies.set('sort', sort_type, cookieArguments);
-    window.Cookies.set('direction', direction, cookieArguments);
     location.reload();
 };
 
