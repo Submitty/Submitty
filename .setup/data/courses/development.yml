@@ -716,6 +716,20 @@ gradeables:
             gcm_points: -5
     eg_max_random_submissions: 0
 
+ - gradeable_config: scheme_hello_world
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    eg_max_random_submissions: 0
+
   - gradeable_config: docker_choice_of_language
     components:
       - gc_lower_clamp: 0
