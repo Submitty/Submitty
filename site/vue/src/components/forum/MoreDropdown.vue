@@ -5,6 +5,7 @@ interface MoreDropdownItem {
     title: string;
     link?: string;
     optionalClass?: string;
+    dividerBefore?: boolean;
 }
 
 const props = defineProps<{
@@ -13,6 +14,7 @@ const props = defineProps<{
     showMerged: boolean;
     showDeleted: boolean;
     threadExists: boolean;
+    isFullThreadsPage: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -81,23 +83,30 @@ function handleOptionClick(option: string) {
         More
       </button>
       <div class="dropdown-menu dropdown-menu-right">
-        <a
+        <template
           v-for="item in items"
-          :id="item.id"
           :key="item.id"
-          :data-testid="item.id"
-          class="dropdown-item"
-          :class="item.optionalClass ?? ''"
-          :title="item.title"
-          href="#"
-          @click.prevent="handleItemClick(item)"
         >
-          {{ item.displayText }}
-        </a>
-        <template v-if="items.length > 0 && threadExists">
+          <div
+            v-if="item.dividerBefore"
+            class="dropdown-divider"
+          />
+          <a
+            :id="item.id"
+            :data-testid="item.id"
+            class="dropdown-item"
+            :class="item.optionalClass ?? ''"
+            :title="item.title"
+            href="#"
+            @click.prevent="handleItemClick(item)"
+          >
+            {{ item.displayText }}
+          </a>
+        </template>
+        <template v-if="items.length > 0 && threadExists && !isFullThreadsPage">
           <div class="dropdown-divider" />
         </template>
-        <template v-if="threadExists">
+        <template v-if="threadExists && !isFullThreadsPage">
           <a
             v-for="opt in displayOptions"
             :id="opt.id"
@@ -120,10 +129,3 @@ function handleOptionClick(option: string) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.dropdown-item.active {
-    font-weight: bold;
-    background-color: #e8e8e8;
-}
-</style>
