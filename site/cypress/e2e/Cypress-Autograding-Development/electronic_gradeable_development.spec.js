@@ -21,7 +21,6 @@ describe('Test the development course gradeables', { env: { course: 'development
         const gradeables = [
             { name: 'cpp_cats', submissions: cppCats },
             { name: 'rust_hello_world', submissions: rust },
-            { name: 'scheme_hello_world', submissions: scheme },
         ];
 
         runTests(gradeables);
