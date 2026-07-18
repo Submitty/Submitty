@@ -79,14 +79,16 @@
 					'id': 'edit-categories',
 					'displayText': 'Edit Categories',
 					'title': 'Edit Forum Categories',
-					'link': manage_categories_url
+					'link': manage_categories_url,
+					'dividerBefore': true
 				}]) %}
 			{% endif %}
 			{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 				{% set moreItems = moreItems|merge([{
 					'id': 'toggle-attachments',
 					'displayText': 'Toggle Attachments',
-					'title': 'Click to toggle all post attachments'
+					'title': 'Click to toggle all post attachments',
+					'dividerBefore': true
 				}]) %}
 			{% endif %}
 			{% include "Vue.twig" with {
@@ -97,7 +99,8 @@
 					'currentDisplayOption': display_option is defined ? display_option : '',
 					'showMerged': show_merged_thread is defined and show_merged_thread,
 					'showDeleted': show_deleted is defined and show_deleted,
-					'threadExists': thread_exists is defined and thread_exists
+					'threadExists': thread_exists is defined and thread_exists,
+					'isFullThreadsPage': is_full_threads_page is defined and is_full_threads_page
 				},
 				'class': 'more-dropdown',
 				'events': {
