@@ -3658,12 +3658,11 @@ function addItempoolOptions(componentId: number) {
 }
 
 $(() => {
-    // Accessibility: Trigger click for key_to_click elements on Enter or Space
-    $(document).on('keydown', '.key_to_click', (e) => {
+    // Accessibility: Trigger click for rubric-interactive-element on Enter or Space
+    $(document).on('keydown', '.rubric-interactive-element', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             $(e.currentTarget).trigger('click');
         }
     });
 });
-
