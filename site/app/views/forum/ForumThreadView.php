@@ -288,6 +288,8 @@ class ForumThreadView extends AbstractView {
             $button_params["more_data"] = $more_data;
             $button_params["forum_bar_buttons_left"] = $other_buttons;
         }
+        $button_params["show_merged_thread"] = $show_merged_thread;
+        $button_params["show_deleted"] = $show_deleted;
         return $button_params;
     }
 
