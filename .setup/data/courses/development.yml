@@ -716,7 +716,7 @@ gradeables:
             gcm_points: -5
     eg_max_random_submissions: 0
 
- - gradeable_config: scheme_hello_world
+  - gradeable_config: scheme_hello_world
     components:
       - gc_lower_clamp: 0
         gc_default: 5
