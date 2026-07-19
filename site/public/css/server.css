@@ -321,12 +321,22 @@ table tr.table-header {
     border-radius: 4px;
 }
 
-.table-striped > tbody > tr:nth-child(even) {
+/* Table stripe pattern should skip withdrawn students in case they are hidden */
+
+.table-striped
+    > tbody
+    > tr:nth-child(even of :not(.hidden-withdrawn-student-row)) {
     background: var(--standard-hover-light-gray);
 }
 
-.table-striped > tbody > tr:nth-child(odd) {
+.table-striped
+    > tbody
+    > tr:nth-child(odd of :not(.hidden-withdrawn-student-row)) {
     background: var(--default-white);
+}
+
+tr.highlighted-row td:not(.no-highlight) {
+    background: var(--standard-focus-cornflower-blue);
 }
 
 .table > thead > tr,
@@ -338,11 +348,6 @@ tr.info,
 tr.info td,
 tr.info th {
     background-color: var(--alert-border-blue);
-}
-
-td > a.active-sort {
-    text-decoration: underline;
-    font-weight: bold;
 }
 
 .floating-thead,
