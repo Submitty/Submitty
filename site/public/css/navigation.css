@@ -92,6 +92,10 @@
     background: var(--standard-focus-cornflowe-blue);
 }
 
+span.peer-progress-bar {
+    background: var(--standard-mediumorchid);
+}
+
 @media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {
