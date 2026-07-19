@@ -35,33 +35,6 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
-
-    /**
-     * Rainbow grades summaries that can be generated from the GUI. Every value except 'all' is a Makefile
-     * target in the RainbowGrades repo, 'all' runs `make tables` to build every sorted summary at once.
-     *
-     * Keep this in sync with the sort-order targets in RainbowGrades/MakefileHelper
-     * and with VALID_SORT_ORDERS in sbin/auto_rainbow_grades.py.
-     */
-    const RAINBOW_GRADES_SORT_ORDERS = [
-        'all' => 'All sorted summaries',
-        'overall' => 'Overall',
-        'name' => 'By Name',
-        'section' => 'By Section',
-        'lab' => 'By Lab',
-        'hw' => 'By Homework',
-        'test' => 'By Test',
-        'quiz' => 'By Quiz',
-        'exam' => 'By Exam',
-        'reading' => 'By Reading',
-        'worksheet' => 'By Worksheet',
-        'project' => 'By Project',
-        'participation' => 'By Participation',
-        'test_exam' => 'By Test & Exam',
-        'zone' => 'By Zone',
-    ];
-
 
     private $all_overrides = [];
     private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
@@ -220,92 +193,43 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
-     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
-     * suggests the reports were manually generated and copied in.
-     * Result is cached to avoid repeated expensive directory walks on every request.
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
+     * so every file has an identical twin when the server produced it. A manual generation writes
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html.
+     * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
-        // Return cached result if available
         if ($this->rg_manual_generation_cache !== null) {
             return $this->rg_manual_generation_cache;
         }
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
-        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+        $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
 
-        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
-            $summary_html_dir,
-            function (string $file_path): bool {
-                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
-            }
-        );
-
-        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
-            $this->rg_manual_generation_cache = false;
+        $served_files = glob(FileUtils::joinPaths($summary_html_dir, '*.html'));
+        if ($served_files === false || count($served_files) === 0) {
+            $this->rg_manual_generation_cache = false;   // nothing generated at all
             return false;
         }
 
-        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
-            $build_dir,
-            function (string $file_path): bool {
-                return str_contains(strtolower(basename($file_path)), 'meta');
-            }
-        );
-
-        if ($latest_build_meta_timestamp === null) {
-            $this->rg_manual_generation_cache = true;
-            return true;
-        }
-
-        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
-        $this->rg_manual_generation_cache = $result;
-        return $result;
-    }
-
-    /**
-     * Get the most recent file modification timestamp in a directory tree.
-     *
-     * @param string $directory
-     * @param callable(string):bool|null $file_filter
-     * @return int|null Returns null if directory doesn't exist or can't be read, otherwise returns latest mtime or 0 if no matching files found.
-     * Catches and logs permission/read errors to distinguish from missing directories.
-     */
-    private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
-        if (!is_dir($directory)) {
-            return null;
-        }
-
-        $latest_timestamp = 0;  // Use 0 as default for "no files found" instead of null
-        $flags = \FilesystemIterator::SKIP_DOTS;
-
-        try {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, $flags));
-            foreach ($iterator as $file_info) {
-                if (!$file_info->isFile()) {
-                    continue;
-                }
-
-                $file_path = $file_info->getPathname();
-                if ($file_filter !== null && !$file_filter($file_path)) {
-                    continue;
-                }
-
-                $file_mtime = $file_info->getMTime();
-                if ($file_mtime > $latest_timestamp) {
-                    $latest_timestamp = $file_mtime;
-                }
+        $manual = false;
+        foreach ($served_files as $served) {
+            $twin = FileUtils::joinPaths($server_build_dir, basename($served));
+            if (
+                !file_exists($twin)
+                || filesize($served) !== filesize($twin)
+                || md5_file($served) !== md5_file($twin)
+            ) {
+                $manual = true;
+                break;
             }
         }
-        catch (\UnexpectedValueException $e) {
-            // Permission denied or unreadable directory—log the error for debugging
-            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
-            return null;
-        }
 
-        return $latest_timestamp > 0 ? $latest_timestamp : 0;
+        $this->rg_manual_generation_cache = $manual;
+        return $manual;
     }
 
     /**
@@ -512,6 +436,9 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['date_registered'] = $user->getDateRegistered() !== null
+            ? $user->getDateRegistered()->format(\DateTime::ATOM)
+            : null;
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
@@ -830,7 +757,6 @@ class ReportController extends AbstractController {
 
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
-                'sort_order_options' => self::RAINBOW_GRADES_SORT_ORDERS,
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
                 'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
                 'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
@@ -886,18 +812,12 @@ class ReportController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     public function executeBuildForm(): JsonResponse {
-        $sort_order = $_POST['sort_order'] ?? 'overall';
-        if (!array_key_exists($sort_order, self::RAINBOW_GRADES_SORT_ORDERS)) {
-            $sort_order = 'overall';
-        }
-
         // Configure json to go into jobs queue
         $job_json = [
             'job' => 'RunAutoRainbowGrades',
             'source' => isset($_POST['source']) ? $_POST['source'] : 'submitty_gui',
             'semester' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
-            'sort_order' => $sort_order,
         ];
 
         // Encode
@@ -1105,97 +1025,22 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
-        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
-
-        //Find any sorts that were already done
-        $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
-
-        $selected_sort = 'overall';
-        $requested = $_GET['sort'] ?? null;
-        if (is_string($requested) && isset($available_sorts[$requested])) {
-            $selected_sort = $requested;
-        }
-        elseif (!isset($available_sorts['overall']) && count($available_sorts) > 0) {
-            $selected_sort = array_key_first($available_sorts);
-        }
-
-        $grade_file = null;
-        if (isset($available_sorts[$selected_sort])) {
-            $grade_path = FileUtils::joinPaths($rainbow_grades_dir, $available_sorts[$selected_sort]['file']);
-            if (file_exists($grade_path)) {
-                $grade_file = file_get_contents($grade_path);
-            }
-        }
-
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+        $grade_file = null;
+        if (file_exists($grade_path)) {
+            $grade_file = file_get_contents($grade_path);
+        }
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file,
-                $grade_summaries_last_run,
-                $available_sorts,
-                $selected_sort
+                $grade_summaries_last_run
             )
         );
     }
-
-    /**
-     * Discover which rainbow grades tables have been built in the given directory and
-     * return them as an ordered map of sort-key => ['file' => <filename>, 'label' => <label>].
-     * Recognizes output.html (overall) and output-by-<x>.html (e.g. output-by-section.html).
-     *
-     * @return array<string, array{file: string, label: string}>
-     */
-    private function getAvailableGradebookSorts(string $rainbow_grades_dir): array {
-        $labels = [
-            'overall' => 'Overall',
-            'name' => 'By Name',
-            'section' => 'By Section',
-            'lab' => 'By Lab',
-            'hw' => 'By Homework',
-            'test' => 'By Test',
-            'quiz' => 'By Quiz',
-            'exam' => 'By Exam',
-            'reading' => 'By Reading',
-            'worksheet' => 'By Worksheet',
-            'project' => 'By Project',
-            'participation' => 'By Participation',
-            'zone' => 'By Zone',
-        ];
-
-        $found = [];
-        foreach (glob(FileUtils::joinPaths($rainbow_grades_dir, 'output*.html')) as $path) {
-            $name = basename($path);
-            if ($name === 'output.html') {
-                $key = 'overall';
-            }
-            elseif (preg_match('/^output-by-([a-z0-9_]+)\.html$/', $name, $m)) {
-                $key = $m[1];
-            }
-            else {
-                continue;
-            }
-            $found[$key] = [
-                'file' => $name,
-                'label' => $labels[$key] ?? ('By ' . ucwords(str_replace('_', ' ', $key))),
-            ];
-        }
-
-        $ordered = [];
-        foreach (array_keys($labels) as $key) {
-            if (isset($found[$key])) {
-                $ordered[$key] = $found[$key];
-                unset($found[$key]);
-            }
-        }
-        foreach ($found as $key => $info) {
-            $ordered[$key] = $info;
-        }
-        return $ordered;
-    }
-
 
     /**
      * Generate a custom filename for the downloaded CSV file
