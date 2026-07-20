@@ -7970,18 +7970,24 @@ AND gc_id IN (
      *
      * @param int[] $component_ids
      */
-    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
+    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, string $grader_id, int $version, array $component_ids): void {
         $this->course_db->query(
             'UPDATE gradeable_component_data AS gcd
             SET gcd_graded_version = ?
-            FROM gradeable_data AS gd
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
             WHERE (
                 gd.g_id = ?
                 AND gd.gd_user_id = ?
                 AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
                 AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND (
+                    gc.gc_is_peer = FALSE
+                    OR gcd.gcd_grader_id = ?
+                )
             )',
-            array_merge([$version, $gradeable_id, $submitter_id], $component_ids)
+            array_merge([$version, $gradeable_id, $submitter_id], $component_ids, [$grader_id])
         );
     }
 

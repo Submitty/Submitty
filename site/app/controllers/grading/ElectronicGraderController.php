@@ -2718,7 +2718,7 @@ class ElectronicGraderController extends AbstractController {
         Logger::logTAGrading($logger_params);
 
         try {
-            $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $graded_version, $component_ids);
+            $this->core->getQueries()->changeGradedVersionOfComponents($gradeable_id, $submitter_id, $this->core->getUser()->getId(), $graded_version, $component_ids);
             return JsonResponse::getSuccessResponse();
         }
         catch (\InvalidArgumentException $e) {
