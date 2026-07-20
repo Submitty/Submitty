@@ -153,4 +153,65 @@ describe('GradingClustering', () => {
             expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Polling failed']);
         });
     });
+
+    it('emits error if initial POST has a network error', () => {
+        cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createClustering');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+
+        cy.get('@wrapper').should((wrapper) => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Failed to connect to the server.']);
+        });
+    });
+
+    it('emits error if polling status has a network error', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
+        cy.intercept('GET', '/test/clustering_status', { forceNetworkError: true }).as('checkClusteringStatus');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        cy.wait('@checkClusteringStatus');
+
+        cy.get('@wrapper').should((wrapper) => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Error checking clustering status.']);
+        });
+    });
+
+    it('emits error if polling status returns data.status error', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
+        cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'error' }, message: 'Server algorithm failed' } }).as('checkClusteringStatus');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        cy.wait('@checkClusteringStatus');
+
+        cy.get('@wrapper').should((wrapper) => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Server algorithm failed']);
+        });
+    });
 });
