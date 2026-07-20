@@ -18,6 +18,24 @@
     padding-left: 1rem;
 }
 
+.full-screen-mode .content {
+    margin: 0;
+    padding: 0;
+}
+
+.fullscreen-btn-wrapper {
+    float: right;
+    margin-right: 0.5rem;
+}
+
+.full-screen-mode .chatroom-container {
+    height: 100vh;
+}
+
+body:has(.full-screen-mode) {
+    overflow: hidden;
+}
+
 .leave-room {
     float: right;
     margin-right: 1rem;

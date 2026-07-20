@@ -74,7 +74,7 @@ fi
 
 # set the permissions of the top level directory
 chown  "root:${COURSE_BUILDERS_GROUP:?}"  "${SUBMITTY_INSTALL_DIR}"
-chmod  751                              "${SUBMITTY_INSTALL_DIR:?}"
+chmod  751                                "${SUBMITTY_INSTALL_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -173,11 +173,13 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
 
     # php & daemon needs to be able to read workers & containers config
+    chown  "root:${COURSE_BUILDERS_GROUP:?}"                  "${SUBMITTY_DATA_DIR:?}/config/"
+    chmod  755                                                "${SUBMITTY_DATA_DIR:?}/config/"
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
-    chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
+    chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_DATA_DIR:?}/config/autograding_containers.json"
     # instructors need read access to these files to build gradeables from the command line
     chmod  644                                                "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
-    chmod  644                                                "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
+    chmod  644                                                "${SUBMITTY_DATA_DIR:?}/config/autograding_containers.json"
 fi
 
 # Set permissions of all files in the logs directories

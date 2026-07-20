@@ -737,11 +737,7 @@ class Gradeable extends AbstractModel {
         $outside_folder = $path_array[count($path_array) - 2];
         $file_name = $path_array[count($path_array) - 1];
         //Automatically remove these special files
-        if (
-            $file_name === ".submit.timestamp"
-            || $file_name === ".submit.notebook"
-            || $file_name === ".user_assignment_access.json"
-        ) {
+        if (FileUtils::isSubmissionMetaFile($file_name)) {
             return false;
         }
 
@@ -1585,6 +1581,28 @@ class Gradeable extends AbstractModel {
         return array_filter($this->components, function (Component $component) {
             return $component->isPeerComponent();
         });
+    }
+
+    /**
+     * Gets the percent of students who have received a peer grade for this gradeable
+     * @return float The percentage (0 to 1) of peer grading received or NAN if none required
+     */
+    public function getPeerGradingProgress(): float {
+        if (!$this->hasPeerComponent()) {
+            return NAN;
+        }
+        return $this->core->getQueries()->getPeerGradingProgress($this->getId());
+    }
+
+    /**
+     * Gets the percent of peer grading this user has completed
+     * @return float The percentage (0 to 1) of peer grading completed by the user
+     */
+    public function getAssignedPeerGradingProgress(User $grader): float {
+        if (!$this->hasPeerComponent()) {
+            return NAN;
+        }
+        return $this->core->getQueries()->getAssignedPeerGradingProgress($this->getId(), $grader->getId());
     }
 
      /**
