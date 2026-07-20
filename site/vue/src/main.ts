@@ -11,12 +11,9 @@ const exports = {
         args: Record<string, unknown> = {},
         events: Record<string, string> = {},
     ) {
-        const mountKey = typeof target === 'string'
-            ? target
-            : (target as HTMLElement).id
-                ? `#${(target as HTMLElement).id}`
-                : `el-${Math.random().toString()}`;
+        const mountKey = typeof target === 'string' ? target : `el-${target.id ?? 'unknown'}`;
 
+        // Unmount any existing app mounted on the same target to prevent leaks
         if (mountedApps.has(mountKey)) {
             mountedApps.get(mountKey)!.unmount();
             mountedApps.delete(mountKey);
