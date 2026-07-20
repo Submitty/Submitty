@@ -1702,19 +1702,26 @@ HTML;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
         $current_user = $this->core->getUser();
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->isPeerComponent()) {
-                $graded_component = $ta_graded_gradeable->getGradedComponent($component, $current_user);
-                if ($graded_component !== null && $graded_component->getGradedVersion() !== $active_version) {
-                    $show_clear_conflicts = true;
-                    break;
+        if ($ta_graded_gradeable !== null) {
+            foreach ($gradeable->getComponents() as $component) {
+                if ($component->isPeerComponent()) {
+                    $graded_component = $ta_graded_gradeable->getGradedComponent($component, $current_user);
+                    if ($graded_component !== null && $graded_component->getGradedVersion() !== $active_version) {
+                        $show_clear_conflicts = true;
+                        break;
+                    }
                 }
-            }
-            elseif (!$is_peer_grader) {
-                $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
-                if ($graded_component_container !== null && $graded_component_container->hasVersionConflict()) {
-                    $show_clear_conflicts = true;
-                    break;
+                elseif (!$is_peer_grader) {
+                    $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
+                    if ($graded_component_container === null) {
+                        continue;
+                    }
+                    foreach ($graded_component_container->getGradedComponents() as $graded_component) {
+                        if ($graded_component->getGradedVersion() !== $active_version) {
+                            $show_clear_conflicts = true;
+                            break 2;
+                        }
+                    }
                 }
             }
         }
