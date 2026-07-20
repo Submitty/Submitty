@@ -499,6 +499,10 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
 };
 
 window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -526,10 +530,7 @@ window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_i
 };
 
 window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string) {
-    const confirmation = confirm(
-        'Are you sure you want to clear all version conflicts '
-        + 'for all peer graders on all peer components?',
-    );
+    const confirmation = confirm('Are you sure you want to update the version for all components for all graders without separately inspecting each component?');
     if (!confirmation) {
         return;
     }
