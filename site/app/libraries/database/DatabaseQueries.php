@@ -7995,7 +7995,7 @@ AND gc_id IN (
                     OR gcd.gcd_grader_id = ?
                 )
             )',
-            array_merge([$version, $gradeable_id, $submitter_id], $component_ids, [$grader_id])
+            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids, [$grader_id])
         );
     }
     /**
