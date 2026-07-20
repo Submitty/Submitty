@@ -63,10 +63,10 @@ describe('GradingClustering', () => {
         cy.mount(GradingClustering, { props: defaultProps });
         cy.get('[data-testid="create-clusters-btn"]').click();
         cy.get('.popup-form').should('be.visible');
-        
+
         // Button should be disabled initially (empty selection)
         cy.get('button').contains('Submit').should('be.disabled');
-        
+
         // Select an algorithm
         cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
         cy.get('button').contains('Submit').should('not.be.disabled');
@@ -75,7 +75,7 @@ describe('GradingClustering', () => {
     it('sends correct FormData payload when Submit is clicked', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'done' } } }).as('checkClusteringStatus');
-        
+
         cy.mount(GradingClustering, { props: defaultProps });
 
         cy.get('[data-testid="create-clusters-btn"]').click();

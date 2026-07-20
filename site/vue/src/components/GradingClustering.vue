@@ -96,9 +96,19 @@ async function submitClustering() {
   </button>
 
   <Teleport to="body">
-    <div v-if="showModal" class="popup-form" style="display: block;">
-      <div class="popup-box" @click.self="toggleModal">
-        <div class="popup-window" style="width: 400px; margin: auto;">
+    <div
+      v-if="showModal"
+      class="popup-form"
+      style="display: block;"
+    >
+      <div
+        class="popup-box"
+        @click.self="toggleModal"
+      >
+        <div
+          class="popup-window"
+          style="width: 400px; margin: auto;"
+        >
           <div class="form-title">
             <h1>Create Clusters</h1>
             <button
@@ -111,24 +121,52 @@ async function submitClustering() {
             </button>
           </div>
           <div class="form-body">
-            <p style="margin-bottom: 15px;">Select an algorithm to generate clusters for this gradeable.</p>
+            <p style="margin-bottom: 15px;">
+              Select an algorithm to generate clusters for this gradeable.
+            </p>
             <select
-                v-if="Object.keys(algorithms).length > 0"
-                v-model="selectedAlgorithm"
-                class="form-control clustering-select"
-                data-testid="clustering-algorithm-select"
+              v-if="Object.keys(algorithms).length > 0"
+              v-model="selectedAlgorithm"
+              class="form-control clustering-select"
+              data-testid="clustering-algorithm-select"
             >
-                <option value="" disabled>Select an algorithm...</option>
-                <option v-for="(name, id) in algorithms" :key="id" :value="id">{{ name }}</option>
+              <option
+                value=""
+                disabled
+              >
+                Select an algorithm...
+              </option>
+              <option
+                v-for="(name, id) in algorithms"
+                :key="id"
+                :value="id"
+              >
+                {{ name }}
+              </option>
             </select>
             <div v-else>
-                No clustering algorithms available.
+              No clustering algorithms available.
             </div>
-            
+
             <div class="form-buttons">
-              <div class="form-button-container" style="justify-content: flex-end; display: flex; gap: 10px;">
-                <a class="btn btn-default close-button key_to_click" tabindex="0" @click="toggleModal">Cancel</a>
-                <button class="btn btn-primary" @click="submitClustering" :disabled="!selectedAlgorithm">Submit</button>
+              <div
+                class="form-button-container"
+                style="justify-content: flex-end; display: flex; gap: 10px;"
+              >
+                <a
+                  class="btn btn-default close-button key_to_click"
+                  tabindex="0"
+                  @click="toggleModal"
+                >
+                  Cancel
+                </a>
+                <button
+                  class="btn btn-primary"
+                  :disabled="!selectedAlgorithm"
+                  @click="submitClustering"
+                >
+                  Submit
+                </button>
               </div>
             </div>
           </div>

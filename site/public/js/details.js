@@ -89,7 +89,6 @@ function hideGradeableMessage() {
     message.hide();
 }
 
-
 function getCollapsedSections() {
     return JSON.parse(Cookies.get('collapsed_sections') || '[]');
 }

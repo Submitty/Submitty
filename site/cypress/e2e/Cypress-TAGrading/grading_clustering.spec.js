@@ -12,7 +12,7 @@ describe('Grading Clustering Mode', () => {
         cy.get('[data-testid="group-by-clusters-checkbox"]').check();
         cy.getCookie('group_by_clusters').should('have.property', 'value', 'true');
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('be.checked');
-        
+
         // Modal popup opens on click
         cy.get('button').contains('Create Clusters').click();
         cy.get('.popup-window').should('be.visible');
@@ -23,7 +23,7 @@ describe('Grading Clustering Mode', () => {
         // Close modal
         cy.get('.form-title .close-button:visible').click();
         cy.get('.popup-window:visible').should('not.exist');
-        
+
         // Uncheck the group by clusters view
         cy.get('[data-testid="group-by-clusters-checkbox"]').uncheck();
         cy.getCookie('group_by_clusters').should('have.property', 'value', 'false');
