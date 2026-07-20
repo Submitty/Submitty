@@ -1861,9 +1861,8 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
     });
 }
 
-/**
- * Closes the mark stats popup by re-rendering the component with show: false
- */
+// Closes the mark stats popup by re-rendering the component with show: false
+
 window.closeMarkStatsPopup = function () {
     const el = document.querySelector('.js-received-mark-form');
     if (el) {
