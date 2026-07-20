@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import Popup from '../Popup.vue';
 
 interface PeerComponent {
     id: string;
@@ -27,6 +28,7 @@ const props = defineProps<{
     componentScores: Record<string, Record<string, number>>;
     peerDetails: PeerDetails;
     marks: Record<string, MarkInfo>;
+    visible?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -38,23 +40,8 @@ const emit = defineEmits<{
     }];
 }>();
 
-const safePeers = ref<string[]>([]);
-const safeComponents = ref<PeerComponent[]>([]);
-const safeComponentScores = ref<Record<string, Record<string, number>>>({});
-const safePeerDetails = ref<PeerDetails>({ graders: {}, marks_assigned: {} });
-const safeMarks = ref<Record<string, MarkInfo>>({});
-const selectedPeer = ref('');
-
-function initProps() {
-    safePeers.value = props.peers ?? [];
-    safeComponents.value = props.components ?? [];
-    safeComponentScores.value = props.componentScores ?? {};
-    safePeerDetails.value = props.peerDetails ?? { graders: {}, marks_assigned: {} };
-    safeMarks.value = props.marks ?? {};
-    selectedPeer.value = safePeers.value[0] ?? '';
-}
-
-initProps();
+const visible = ref(props.visible);
+const selectedPeer = ref(props.peers[0] ?? '');
 
 function clearMarks() {
     emit('clear-marks', {
@@ -90,11 +77,11 @@ function badgeText(earned: number, max: number): string {
 }
 
 function isMarkAssigned(componentId: string, peer: string, markId: number): boolean {
-    return safePeerDetails.value?.marks_assigned?.[componentId]?.[peer]?.includes(markId) ?? false;
+    return props.peerDetails?.marks_assigned?.[componentId]?.[peer]?.includes(markId) ?? false;
 }
 
 function scoreForComponent(componentId: string, peer: string): number | undefined {
-    return safeComponentScores.value?.[componentId]?.[peer];
+    return props.componentScores?.[componentId]?.[peer];
 }
 
 function hasScore(componentId: string, peer: string): boolean {
@@ -103,7 +90,12 @@ function hasScore(componentId: string, peer: string): boolean {
 </script>
 
 <template>
-  <div>
+  <Popup
+    title="Edit Peer Components Form"
+    :visible="visible"
+    @toggle="visible = !visible"
+  >
+    <template #trigger />
     <span data-testid="warning-text">
       Select the student whose marks you want to clear
       <br>WARNING this will remove all of the peer grading done by this student:
@@ -116,7 +108,7 @@ function hasScore(componentId: string, peer: string): boolean {
       data-testid="edit-peer-select"
     >
       <option
-        v-for="peer in safePeers"
+        v-for="peer in peers"
         :key="peer"
         :value="peer"
       >
@@ -124,7 +116,7 @@ function hasScore(componentId: string, peer: string): boolean {
       </option>
     </select>
     <div
-      v-for="peer in safePeers"
+      v-for="peer in peers"
       v-show="selectedPeer === peer"
       :key="peer"
       class="edit-peer-components-block"
@@ -139,7 +131,7 @@ function hasScore(componentId: string, peer: string): boolean {
       </button>
       <br>
       <div
-        v-for="component in safeComponents"
+        v-for="component in components"
         :key="component.id"
         :data-testid="'component-block-' + component.id"
       >
@@ -191,18 +183,17 @@ function hasScore(componentId: string, peer: string): boolean {
               />
             </div>
             <div class="col-no-gutters point-value">
-              <span data-testid="mark-points">{{ safeMarks[String(markId)]?.points }}</span>
+              <span data-testid="mark-points">{{ marks[String(markId)]?.points }}</span>
             </div>
             <div class="col">
               <span
                 style="white-space: pre-wrap;"
                 data-testid="mark-title"
-              >{{ safeMarks[String(markId)]?.title }}</span>
+              >{{ marks[String(markId)]?.title }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <br>
-  </div>
+  </Popup>
 </template>
