@@ -13,11 +13,6 @@ describe('Test the development course gradeables', { env: { course: 'development
             { submissionFiles: { 1: ['extraLinesAtEnd.zip'] }, expected: [2, 3, 2, 2, 2, 2, 0], full: [2, 3, 4, 4, 4, 4, 4] },
         ];
 
-        const scheme = [
-            { submissionFiles: { 1: ['main.rkt'] }, expected: [5], full: [5] },
-            { submissionFiles: { 1: ['goodbye.rkt'] }, expected: [0], full: [5] },
-        ];
-
         const gradeables = [
             { name: 'cpp_cats', submissions: cppCats },
             { name: 'rust_hello_world', submissions: rust },
