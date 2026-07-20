@@ -178,8 +178,8 @@ function build_homework {
         return 1
     fi
 
-    # if this script is run by root, then run the set allowed minutes script
-    if [[ "$UID" -eq "0" ]] ; then
+    # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
+    if [[ "$UID" -eq 0 || "$(whoami)" == "submitty_daemon" ]]; then
         # Add allowed minutes in database from config if exists
         python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
         set_minutes="$?"
