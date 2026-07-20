@@ -35,7 +35,7 @@
     cmd: |
       if [ $UID -ne 0 ]; then
         exec sudo $0 "$@"
-        bash -p ./.setup/install_system.sh
+        bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
         exit $?
       fi
 
