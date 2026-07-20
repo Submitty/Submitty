@@ -4028,6 +4028,30 @@ class ElectronicGraderController extends AbstractController {
             'Peer version conflicts resolved successfully'
         );
     }
+    
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_all_peer_version_conflicts", methods: ["POST"])]
+    public function ajaxClearAllPeerVersionConflicts($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        if ($submitter_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing submitter ID');
+            return;
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $this->core->getQueries()->changeGradedVersionOfAllPeerComponents($gradeable_id, $submitter_id, $active_version);
+        $graded_gradeable->getOrCreateTaGradedGradeable()->resetUserViewedDate();
+        $this->core->getOutput()->renderJsonSuccess(
+            'All peer version conflicts resolved successfully'
+        );
+    }
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods: ["POST"])]

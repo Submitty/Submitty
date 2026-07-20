@@ -1784,10 +1784,29 @@ HTML;
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
 
+        $has_peer_version_conflict = false;
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($gradeable->getPeerComponents() as $component) {
+            $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if ($graded_component_container === null) {
+                continue;
+            }
+            foreach ($graded_component_container->getGradedComponents() as $graded_component) {
+                if ($graded_component->getGradedVersion() !== $active_version) {
+                    $has_peer_version_conflict = true;
+                    break 2;
+                }
+            }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
+                "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
                 "anon_id" => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
+                "csrf_token" => $this->core->getCsrfToken(),
+                "has_peer_version_conflict" => $has_peer_version_conflict,
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,

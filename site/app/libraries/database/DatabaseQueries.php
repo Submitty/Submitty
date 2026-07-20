@@ -7990,6 +7990,27 @@ AND gc_id IN (
             array_merge([$version, $gradeable_id, $submitter_id], $component_ids, [$grader_id])
         );
     }
+    /**
+     * Changes the graded version of a gradeable for all peer components for all peer graders
+     *
+     */
+    public function changeGradedVersionOfAllPeerComponents(string $gradeable_id, string $submitter_id, int $version): void {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND gc.g_id = gd.g_id
+                AND gc.gc_is_peer = TRUE
+            )',
+            [$version, $gradeable_id, $submitter_id]
+        );
+    }
 
     /**
      * Gets if the provided submitter has a submission for a particular gradeable

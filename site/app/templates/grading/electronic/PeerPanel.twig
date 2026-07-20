@@ -7,6 +7,11 @@
                         <i class="fas fa-pencil-alt" aria-hidden="true"></i>
                         Edit Peer Components
                     </button>
+                    {% if has_peer_version_conflict %}
+                        <button type="button" class="btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
+                            Clear All Peer Version Conflicts
+                        </button>
+                    {% endif %}
                 </span>
                 <div class="inner-container" id="peer-grading-box">
                     {% if has_active_version %}

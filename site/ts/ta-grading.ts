@@ -28,6 +28,7 @@ declare global {
         clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
         reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
@@ -520,6 +521,36 @@ window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_i
         },
         error: function () {
             console.log('Failed to resolve peer version conflicts');
+        },
+    });
+};
+
+window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string) {
+    const confirmation = confirm(
+        'Are you sure you want to clear all version conflicts '
+        + 'for all peer graders on all peer components?',
+    );
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'clear_all_peer_version_conflicts',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            void window.reloadPeerRubric(gradeable_id, anon_id);
+        },
+        error: function () {
+            console.log('Failed to clear all peer version conflicts');
         },
     });
 };
