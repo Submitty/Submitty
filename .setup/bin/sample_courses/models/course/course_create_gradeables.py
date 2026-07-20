@@ -11,7 +11,6 @@ import random
 import shutil
 import subprocess
 import os.path
-import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
@@ -28,6 +27,15 @@ from sample_courses.utils.create_or_generate import (
     create_gradeable_submission,
     create_pdf_annotations
     )
+
+def set_seeded_random_state(*parts):
+    """
+    Set the random state to a seeded value based on the provided parts.
+    """
+    saved_state = random.getstate()
+    seeded_rng = random.Random("|".join(str(part) for part in parts))
+    random.setstate(seeded_rng.getstate())
+    return saved_state
 
 
 class Course_create_gradeables:
@@ -54,7 +62,13 @@ class Course_create_gradeables:
 
     def add_gradeables(self) -> None:
         anon_ids = {}
+        # pre gradeable creation random state
+        initial_state = random.getstate()
         for gradeable in self.gradeables:
+
+            # set the random state to a seeded value based on the gradeable id and course code and return the previous state to be restored later
+            gradeable_state = set_seeded_random_state(gradeable.id, self.code, "gradeables")
+
             #create gradeable specific anonymous ids for users
             prev_state = random.getstate()
             for user in self.users:
@@ -409,6 +423,10 @@ class Course_create_gradeables:
                                 )
                             )
                         self.conn.commit()
+            # restore the random state to the previous state before the last iteration
+            random.setstate(gradeable_state)
+        # restore the random state to the previous state before the gradeable loop
+        random.setstate(initial_state)
 
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':
