@@ -89,4 +89,68 @@ describe('GradingClustering', () => {
             expect(interception.request.body).to.include('dummy_split');
         });
     });
+
+    it('emits events and polls correctly on success', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
+        cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'done' } } }).as('checkClusteringStatus');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        cy.wait('@checkClusteringStatus');
+        
+        cy.get('@wrapper').should(wrapper => {
+            expect(wrapper.emitted('clustering-status')).to.exist;
+            expect(wrapper.emitted('clustering-status')).to.have.length(2);
+            expect(wrapper.emitted('clustering-status')[0]).to.deep.equal(['fetching']);
+            expect(wrapper.emitted('clustering-status')[1]).to.deep.equal(['done']);
+            expect(wrapper.emitted('clustering-done')).to.have.length(1);
+        });
+    });
+
+    it('emits error if initial POST fails', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'fail', message: 'Creation failed' } }).as('createClustering');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        
+        cy.get('@wrapper').should(wrapper => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Creation failed']);
+        });
+    });
+
+    it('emits error if polling status fails', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
+        cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'fail', message: 'Polling failed' } }).as('checkClusteringStatus');
+
+        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        cy.wait('@checkClusteringStatus');
+        
+        cy.get('@wrapper').should(wrapper => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Polling failed']);
+        });
+    });
 });
