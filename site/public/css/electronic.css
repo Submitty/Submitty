@@ -1073,6 +1073,28 @@ tr.is_publish {
     color: inherit;
 }
 
+.gradeable .peer-version-conflict {
+    color: var(--error-alert-dark-red);
+    border-left: 2px solid var(--error-alert-dark-red);
+    border-right: 2px solid var(--error-alert-dark-red);
+}
+
+.gradeable .peer-version-conflict-top {
+    border-top: 2px solid var(--error-alert-dark-red);
+}
+
+.gradeable .peer-version-conflict-bottom {
+    border-bottom: 2px solid var(--error-alert-dark-red);
+}
+
+.gradeable .peer-version-conflict i {
+    color: inherit;
+}
+
+.gradeable #peer-grading-table {
+    border-collapse: collapse;
+}
+
 .peer-edit-marks-list {
     clear: both;
 }

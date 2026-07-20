@@ -52,30 +52,33 @@ Required inputs:
             {# Header row with the name of each grader #}
             <table id="peer-grading-table" class="mobile-table">
                 <thead>
-                    <tr> 
+                    <tr>
                         {% for grader in peer_details.graders | sort %}
-                            <th class="peer-table-header{% if peer_details.version_conflicts[grader] %} peer-version-conflict{% endif %}" data-testid="peer-grader-header" data-grader-id="{{ grader }}"> {{ grader }} </th>
+                            <th class="peer-table-header{% if peer_details.version_conflicts[grader] %} peer-version-conflict peer-version-conflict-top{% endif %}" data-testid="peer-grader-header" data-grader-id="{{grader}}">
+                                {{grader}}
+                            </th>
                         {% endfor %}
                         <th> Points </th>
-                        <th class="peer-table-title-data"> Title  </th>
+                        <th class="peer-table-title-data"> Title </th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% set last_mark = component.marks|last %}
                     {% for mark in component.marks %}
                         <tr>
-                        {% for grader in peer_details.graders | sort %}
-                            <td class="peer-table-data{% if peer_details.version_conflicts[grader] %} peer-version-conflict{% endif %}" data-testid="peer-grader-mark" data-grader-id="{{ grader }}">
-                                {% if mark.id in peer_details.marks_assigned[grader] %}
-                                    <div class="col-no-gutters indicator">
-                                        <i class="far fa-check-square fa-1g"></i>
-                                    </div>
-                                {% else %}
-                                    <div class="col-no-gutters indicator">
-                                        <i class="far fa-square fa-1g"></i>
-                                    </div>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
+                            {% for grader in peer_details.graders | sort %}
+                                <td class="peer-table-data{% if peer_details.version_conflicts[grader] %} peer-version-conflict{% if mark.id == last_mark.id %} peer-version-conflict-bottom{% endif %}{% endif %}" data-testid="peer-grader-mark" data-grader-id="{{grader}}">
+                                    {% if mark.id in peer_details.marks_assigned[grader] %}
+                                        <div class="col-no-gutters indicator">
+                                            <i class="far fa-check-square fa-1g"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="col-no-gutters indicator">
+                                            <i class="far fa-square fa-1g"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
                             <td class="peer-table-data">
                                 <div class="col-no-gutters point-value">
                                     <span>{{ mark.points }}</span>
