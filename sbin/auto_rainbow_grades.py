@@ -22,9 +22,7 @@ from pathlib import Path
 import getpass
 
 
-# Print an error message without a traceback and exit non-zero,
-# done without a traceback as the traceback includes raw code
-# and jumbled output
+# Print an error message without a traceback and exit non-zero.
 def error_exit(message):
     print(f'ERROR: {message}', file=sys.stderr, flush=True)
     sys.exit(1)
