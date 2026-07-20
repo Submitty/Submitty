@@ -173,11 +173,11 @@ if 'token' not in creds or not creds['token']:
 
     # Distinguish a missing key from a present-but-empty token in the output
     if 'token' not in creds:
-        warn('No token field found in submitty_admin.json, attempting to continue '
-              'with previously generated grade summaries')
+        warn('No token field found in submitty_admin.json, attempting to '
+             'continue with previously generated grade summaries')
     else:
-        warn('The auth token in submitty_admin.json is empty, attempting to continue '
-              'with previously generated grade summaries')
+        warn('The auth token in submitty_admin.json is empty, attempting to '
+             'continue with previously generated grade summaries')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
