@@ -1,3 +1,5 @@
+{% import 'misc/TableSortComponents.twig' as table_sort %}
+
 <div class="content">
     <header>
         <h1>Manage Students</h1>
@@ -52,7 +54,7 @@
             } %}
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
-            <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
+            <a href="javascript:newStudentForm()" class="btn btn-primary" data-testid="new-student-form-btn">New Student</a>
         </div>
     </header>
 
@@ -64,72 +66,89 @@
             <thead>
                 <tr>
                     <th>#</th>
+
                     {% if active_student_columns[0] %}
                         <th>Registration Section</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[1] %}
-                        <th style="text-align:left;">User ID</th>
+                        {{ table_sort.sortable_table_header('student-table', 'User ID', 'user_id', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[2] %}
-                        <th style="text-align:left;">Given Name</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Given Name', 'first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[3] %}
-                        <th style="text-align:left;">Family Name</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Family Name', 'last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[4] %}
-                        <th style="text-align:left;">Pronouns</th>
+                        <th>Pronouns</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[5] %}
-                        <th>Rotating Section</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Rotating Section', 'rotating_section', 'number') }}
                         {% set count = count + 1 %}
                     {% endif %}
-                    {% if active_student_columns[6] %}
+
+                   {% if active_student_columns[6] %}
                         <th>UTC Offset / Time Zone</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[7] %}
                         <th>View Grades</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[8] %}
                         <th>Late Days</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[9] %}
                         <th>Registration Type</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[10] %}
                         <th>Edit Student</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[11] %}
                         <th>Delete Student</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[12] %}
                         <th>User Numeric ID</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[13] %}
-                        <th>Legal Given Name</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Legal Given Name', 'legal_first_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[14] %}
-                        <th>Legal Family Name</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Legal Family Name', 'legal_last_name', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[15] %}
                         <th>Email</th>
                         {% set count = count + 1 %}
                     {% endif %}
+
                     {% if active_student_columns[16] %}
-                        <th>Secondary Email</th>
+                        {{ table_sort.sortable_table_header('student-table', 'Secondary Email', 'secondary_email', 'string') }}
                         {% set count = count + 1 %}
                     {% endif %}
                 </tr>
@@ -142,7 +161,7 @@
                     {% for student in students %}
                         {% set class = "" %}
                         {% if student.accessGrading() %}
-                            {% set class = "access-grading" %}
+                            {% set class = "highlighted-row" %}
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
@@ -229,6 +248,7 @@
         <p id="no-one-found" class="warning">No students found</p>
     {% endif %}
 </div>
+
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}

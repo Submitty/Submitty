@@ -1,0 +1,102 @@
+{# Autograding Testcase Average Graph with display toggles #}
+
+<div id="testcase-averages" class="page-content">
+    <div class="testcase-averages-toggles" style="margin: 10px 0;">
+        <label id="tc-show-hidden-row" style="margin-right: 18px;">
+            <input type="checkbox" id="tc-show-hidden" checked> Show hidden testcases
+        </label>
+        <label id="tc-show-extra-credit-row" style="margin-right: 18px;">
+            <input type="checkbox" id="tc-show-extra-credit" checked> Show extra credit testcases
+        </label>
+        <label id="tc-show-submission-limit-row">
+            <input type="checkbox" id="tc-show-submission-limit"> Show submission limit testcase
+        </label>
+    </div>
+
+    <div id="Graph6"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+    <script>
+        (function () {
+            var allTestcases = [
+                {% for tc in testcase_averages %}
+                {
+                    title: '{{ tc.title|escape("js") }}',
+                    avg: {{ tc.avg_score }},
+                    max: {{ tc.max }},
+                    hidden: {{ tc.hidden ? 'true' : 'false' }},
+                    extraCredit: {{ tc.extra_credit ? 'true' : 'false' }},
+                    submissionLimit: {{ tc.submission_limit ? 'true' : 'false' }}
+                },
+                {% endfor %}
+            ];
+
+            var checkboxes = {
+                hidden: document.getElementById('tc-show-hidden'),
+                extraCredit: document.getElementById('tc-show-extra-credit'),
+                submissionLimit: document.getElementById('tc-show-submission-limit')
+            };
+
+            // Hide a toggle entirely when no testcase falls into that category
+            function hideRowIfEmpty(rowId, predicate) {
+                if (!allTestcases.some(predicate)) {
+                    var row = document.getElementById(rowId);
+                    if (row) {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+            hideRowIfEmpty('tc-show-hidden-row', function (tc) { return tc.hidden && !tc.submissionLimit; });
+            hideRowIfEmpty('tc-show-extra-credit-row', function (tc) { return tc.extraCredit && !tc.submissionLimit; });
+            hideRowIfEmpty('tc-show-submission-limit-row', function (tc) { return tc.submissionLimit; });
+
+            function buildPlot() {
+                var filtered = allTestcases.filter(function (tc) {
+                    if (tc.submissionLimit) {
+                        return checkboxes.submissionLimit.checked;
+                    }
+                    if (tc.hidden && !checkboxes.hidden.checked) {
+                        return false;
+                    }
+                    if (tc.extraCredit && !checkboxes.extraCredit.checked) {
+                        return false;
+                    }
+                    return true;
+                });
+
+                var x = filtered.map(function (tc) { return tc.title; });
+                var avg = filtered.map(function (tc) { return tc.avg; });
+                var max = filtered.map(function (tc) { return tc.max; });
+
+                var traceFull = {
+                    x: x, y: max, name: 'Full Scores', type: 'bar',
+                    text: max, textposition: 'auto', hoverinfo: 'none',
+                    marker: { color: 'rgb(246,251,252)', opacity: 1.0, line: { color: 'rbg(170,170,170)', width: 1.5 } }
+                };
+                var traceAvg = {
+                    x: x, y: avg, name: 'Average Scores', type: 'bar',
+                    text: avg, textposition: 'auto', hoverinfo: 'none',
+                    marker: { color: 'rgb(48,99,152)', opacity: 1.0, line: { color: 'rbg(170,170,170)', width: 1.5 } }
+                };
+                var layout = {
+                    title: { text: 'Autograding Testcase Averages' },
+                    barmode: 'overlay',
+                    xaxis: { title: { text: 'Testcases' } },
+                    yaxis: { title: { text: 'Scores' } },
+                    font: { family: '"Source Sans Pro", sans-serif' }
+                };
+
+                Plotly.newPlot('Graph6', [traceFull, traceAvg], layout, { displayModeBar: false, displaylogo: false });
+            }
+
+            Object.keys(checkboxes).forEach(function (key) {
+                checkboxes[key].addEventListener('change', buildPlot);
+            });
+
+            buildPlot();
+        })();
+    </script>
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
