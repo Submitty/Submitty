@@ -214,7 +214,8 @@ def main():
     elif args.command == "up":
         handle_up(args, config, worker_env)
     else:
-        cmd = subprocess.run(["vagrant", *args.command], env=worker_env, check=False)
+        cmd = subprocess.run(["vagrant", args.command, *args.remainder],
+                             env=worker_env, check=False)
         sys.exit(cmd.returncode)
 
 

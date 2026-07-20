@@ -7,11 +7,17 @@ const incorrect_verification_code = '99999999';
 const valid_verification_code = '00000000';
 
 function inputData(email = valid_email, user_id = valid_user_id, password = valid_password, confirm_password = valid_password) {
+    cy.get('[data-testid="email"]').clear();
     cy.get('[data-testid="email"]').type(email);
+    cy.get('[data-testid="user-id"]').clear();
     cy.get('[data-testid="user-id"]').type(user_id);
+    cy.get('[data-testid="given-name"]').clear();
     cy.get('[data-testid="given-name"]').type(valid_given_name);
+    cy.get('[data-testid="family-name"]').clear();
     cy.get('[data-testid="family-name"]').type(valid_family_name);
+    cy.get('[data-testid="password"]').clear();
     cy.get('[data-testid="password"]').type(password);
+    cy.get('[data-testid="confirm-password"]').clear();
     cy.get('[data-testid="confirm-password"]').type(confirm_password);
 }
 
@@ -41,6 +47,12 @@ describe('Self account creation tests', () => {
         inputData('test.email.bad@bad.com', 'new_user_id');
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'This email is not accepted.');
+        cy.get('[data-testid="email"]').should('have.value', 'test.email.bad@bad.com');
+        cy.get('[data-testid="user-id"]').should('have.value', 'new_user_id');
+        cy.get('[data-testid="given-name"]').should('have.value', valid_given_name);
+        cy.get('[data-testid="family-name"]').should('have.value', valid_family_name);
+        cy.get('[data-testid="password"]').should('have.value', '');
+        cy.get('[data-testid="confirm-password"]').should('have.value', '');
         cy.get('[data-testid="remove-message-popup"').click(); // unremoved popups eventually clog the screen
         // Id too short
         inputData(undefined, 'short');

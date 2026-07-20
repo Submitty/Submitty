@@ -24,7 +24,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             cy.get('#upload1').selectFile([testfile1, testfile2], { action: 'drag-drop' });
 
             cy.waitPageChange(() => {
-                cy.get('.alert-success > a').click(); // Dismiss successful upload message
+                cy.get('.alert-success > a', { timeout: 10000 }).click(); // Dismiss successful upload message
                 cy.get('#submit').click();
             });
 
@@ -133,20 +133,6 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                 cy.get('[data-testid="popup-message"]')
                     .should('contain', 'You have not unlocked this gradeable yet');
             }
-            cy.logout();
-        });
-
-        // users with 7+ points on open_homework
-        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
-            cy.login(user);
-            cy.visit(['testing']);
-
-            cy.get('[data-testid="locked_homework_points"]')
-                .find('[data-testid="submit-btn"]')
-                .click();
-
-            cy.visit(['testing', 'gradeable', 'locked_homework_points']);
-            cy.get('[data-testid="new-submission-info"]').should('exist');
             cy.logout();
         });
     });

@@ -1,3 +1,12 @@
+<div class="content" data-testid="default-course-banner" style="background-color: var(--standard-lightskyblue); margin-bottom: 12px; {{ is_default_course ? '' : 'display: none;' }}">
+    This course is currently set as the default for your future courses.
+</div>
+{% if not is_default_course and default_course is not null %}
+    <div class="content" data-testid="other-default-course-banner" style="background-color: var(--standard-lightskyblue); margin-bottom: 12px;">
+        Your current default for future courses is ({{ default_course.term }}) {{ default_course.course }}.
+    </div>
+{% endif %}
+
 <div class="content">
   <style>
       input[type="checkbox"]:disabled {
@@ -6,9 +15,9 @@
       .sync-top-right {
         display: flex;
         align-items: center;
-          float: right;
-          text-align: right;
-          margin-right: 5px;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-bottom: 8px;
       }
       .sync-bottom-row {
           margin-top: 30px;
@@ -42,6 +51,16 @@
           border: 0;
           border-top: 1px solid var(--standard-light-gray);
       }
+      .sync-default-row {
+        margin-top: 16px;
+        display: flex;
+      }
+      .sync-default-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+      }
       .button-row {
           display: flex;
           flex-wrap: wrap;
@@ -52,6 +71,11 @@
       }
       .button-group {
           margin-top: 8px;
+          margin-bottom: 20px;
+          clear: both;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
       }
       .sync-help-text {
           font-size: 13px;
@@ -179,9 +203,13 @@
                         <span class="option-alt">Alert me when a thread is merged</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox">
+                    <input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}">
+                </div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Merged Thread" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox">
+                        <input type="checkbox" aria-label="Email Merged Thread" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads_email'] ? 'true' : 'false' }}">
+                    </div>
                 {% endif %}
             </div>
 
@@ -467,7 +495,29 @@
             $('#form_notification_settings').trigger("change");
         }
 
-
+        function saveNotificationDefaults() {
+            $.ajax({
+                type: "POST",
+                url: "{{ save_defaults_url }}",
+                data: { csrf_token: "{{ csrf_token }}" },
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if (json['status'] === 'fail') {
+                            displayErrorMessage(json['message']);
+                        } else {
+                            displaySuccessMessage(json['data']);
+                            location.reload();
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error saving defaults. Please try again.');
+                    }
+                },
+                error: function() {
+                    displayErrorMessage('Failed to save notification defaults.');
+                }
+            });
+        }
 
         function setNotification(button) {
             const popup = $(button).closest('#sync-notification-popup');
@@ -497,6 +547,39 @@
         }
         function clearAllSyncCourses() {
             $('.sync-course-checkbox').prop('checked', false);
+        }
+        function toggleDefaultCourse(checkbox) {
+            var url = checkbox.checked
+                ? "{{ save_defaults_url }}"
+                : "{{ clear_defaults_url }}";
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { csrf_token: "{{ csrf_token }}" },
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if (json['status'] === 'fail') {
+                            displayErrorMessage(json['message']);
+                            checkbox.checked = !checkbox.checked;
+                        } else {
+                            displaySuccessMessage(json['data']);
+                            $('[data-testid="default-course-banner"]').toggle(checkbox.checked);
+                            if (checkbox.checked) {
+                                $('[data-testid="other-default-course-banner"]').hide();
+                            }
+                        }
+                    } catch(err) {
+                        displayErrorMessage('Error updating default. Please try again.');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                },
+                error: function() {
+                    displayErrorMessage('Failed to update notification default.');
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
         }
         function toggleSyncRow(row) {
             const checkbox = row.querySelector('.sync-course-checkbox');
@@ -538,4 +621,4 @@
         });
     </script>
 </div>
-{% include 'SyncSettingsPopup.twig' with { courses: courses } %}
+{% include 'SyncSettingsPopup.twig' with { courses: courses, is_default_course: is_default_course } %}

@@ -213,4 +213,127 @@
     </div>
 {% endif %}
 
+{% if is_instructor %}
+    <div class="content">
+        <header>
+            <h1>Manage Teams</h1>   
+            <div class="btn-wrapper">
+                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="createTeamsFromSubsections()">
+                   Create Teams from Registration Subsections
+                </button>
+                <button class="btn btn-primary" id="create_single_student_teams" onclick="createSingleStudentTeams()">
+                   Create Single-Student Teams
+                </button>
+                <button class="btn btn-danger" id="delete_all_teams" onclick="deleteTeams()">
+                   Delete All Teams
+                </button>
+            </div>
+        </header>
+
+        {% set message_class = students_on_teams_count == 0 ? 'red-message' : 'message' %}
+        <p class="{{ message_class }}"> 
+            There are currently <b>{{ team_count }} existing teams</b> for this gradeable. 
+            There are currently <b>{{ students_not_on_teams_count }}</b> students not yet on a team and <b>{{ students_on_teams_count }}</b> students on existing teams for this gradeable.
+        </p>
+        <br>
+        <div class="team-management-links">
+            <p>
+                Go to <b> Grade Details </b> to see the list of students and teams for this gradeable:
+                <a href="{{ grading_overview_url }}">Grade Details</a>
+            </p>
+            <p>
+                Go to <b> Manage Students </b> to see the list of students and their sections and subsections for this course:
+                <a href="{{ manage_students_url }}">Manage Students</a>
+            </p>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    function createSingleStudentTeams() {
+
+        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_single_student_teams']);
+        const message = "Are you sure you want to generate single-student teams?\n\n" +
+                        "{{ students_not_on_teams_count }} students currently without a team will be placed on their own individual teams.\n" +
+                        "{{ students_on_teams_count }} students on existing teams will be skipped.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    if (response.data && response.data.trim() !== "") {
+                        displayMessage(response.data);
+                    }
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+    function createTeamsFromSubsections() {
+
+        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'create_teams_from_subsections']);
+        const message = "Are you sure you want to generate teams from registration subsections?\n\n" +
+                        "Up to {{ students_not_on_teams_count }} students currently without a team will be put on teams based on registration subsection.\n" +
+                        "{{ students_on_teams_count }} students on existing teams will be skipped.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    if (response.data && response.data.trim() !== "") {
+                        displayMessage(response.data);
+                    }
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+    function deleteTeams() {
+        const url = buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'team', 'delete_all_teams']);
+        const message = "WARNING: Are you sure you want to all teams for this gradeable?\n\n" +
+                        "Teams that have already made a submission will be SKIPPED and preserved.\n" +
+                        "Teams where an instructor user is a member will be SKIPPED and preserved.\n" +
+                        "Teams without any submissions will be PERMANENTLY DELETED.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    if (response.data && response.data.trim() !== "") {
+                        displayMessage(response.data);
+                    }
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+</script>
+
 {% include 'submission/EditTeamName.twig' %}
