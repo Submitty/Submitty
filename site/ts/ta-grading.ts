@@ -442,11 +442,7 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, pe
 };
 
 window.newEditPeerComponentsForm = function () {
-    const el = document.getElementById('edit-peer-components-form');
-    if (!el) {
-        return;
-    }
-    void window.submitty.render(el, 'component', 'ta_grading/EditPeerComponentsForm', {
+    void window.submitty.render('#edit-peer-components-form', 'component', 'ta_grading/EditPeerComponentsForm', {
         ...window.editPeerComponentsFormArgs,
         visible: true,
     }, window.editPeerComponentsFormEvents);
