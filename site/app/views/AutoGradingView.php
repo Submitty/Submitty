@@ -429,21 +429,21 @@ class AutoGradingView extends AbstractView {
             ];
         }, $ta_graded_components);
 
-        $uploaded_pdfs = [];
-        foreach ($uploaded_files['submissions'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
-                $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
-                $uploaded_pdfs[] = $file;
-            }
-        }
-        foreach ($uploaded_files['checkout'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
-                $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
-                $uploaded_pdfs[] = $file;
-            }
-        }
+        // $uploaded_pdfs = [];
+        // foreach ($uploaded_files['submissions'] as $file) {
+        //     if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+        //         $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
+        //         $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
+        //         $uploaded_pdfs[] = $file;
+        //     }
+        // }
+        // foreach ($uploaded_files['checkout'] as $file) {
+        //     if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+        //         $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
+        //         $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
+        //         $uploaded_pdfs[] = $file;
+        //     }
+        // }
         $id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
@@ -715,35 +715,35 @@ class AutoGradingView extends AbstractView {
 
         $id = $this->core->getUser()->getId();
 
-        $uploaded_pdfs = [];
-        foreach ($uploaded_files['submissions'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $graders = [];
-                $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
-                if (is_dir($annotation_path)) {
-                    $first_file = scandir($annotation_path)[2];
-                    $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-                    if (is_file($annotation_path)) {
-                        $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                        foreach ($dir_iter as $fileinfo) {
-                            if (!$fileinfo->isDot()) {
-                                $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                                $pdf_info = explode('_', $no_extension);
-                                $grader_id = $pdf_info[count($pdf_info) - 1];
-                                $graders[] = $grader_id;
-                            }
-                        }
-                    }
-                }
-                $file['graders'] = $graders;
-                $uploaded_pdfs[] = $file;
-            }
-        }
-        foreach ($uploaded_files['checkout'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $uploaded_pdfs[] = $file;
-            }
-        }
+        // $uploaded_pdfs = [];
+        // foreach ($uploaded_files['submissions'] as $file) {
+        //     if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+        //         $graders = [];
+        //         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        //         if (is_dir($annotation_path)) {
+        //             $first_file = scandir($annotation_path)[2];
+        //             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+        //             if (is_file($annotation_path)) {
+        //                 $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+        //                 foreach ($dir_iter as $fileinfo) {
+        //                     if (!$fileinfo->isDot()) {
+        //                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+        //                         $pdf_info = explode('_', $no_extension);
+        //                         $grader_id = $pdf_info[count($pdf_info) - 1];
+        //                         $graders[] = $grader_id;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         $file['graders'] = $graders;
+        //         $uploaded_pdfs[] = $file;
+        //     }
+        // }
+        // foreach ($uploaded_files['checkout'] as $file) {
+        //     if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+        //         $uploaded_pdfs[] = $file;
+        //     }
+        // }
 
         $files = null;
         $display_version = 0;
