@@ -464,7 +464,6 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-
         $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
@@ -478,30 +477,30 @@ class AutoGradingView extends AbstractView {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
 
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
-        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
-        $annotated_pdf_paths = [];
-        $annotated_file_names = [];
-        $annotation_paths = [];
-        if (is_dir($annotation_path)) {
-            $dir_iter = new \FilesystemIterator($annotation_path);
-            foreach ($dir_iter as $file_info) {
-                $pdf_id = explode("_", $file_info->getFilename())[0];
-                if (file_get_contents($file_info->getPathname()) !== "") {
-                    $annotated_file_names[] = $pdf_id;
-                    $pdf_id = $pdf_id . '.pdf';
-                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-                        $target_file = scandir($annotation_path)[2];
-                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
-                    }
-                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
-                        $target_file = scandir($pdfs_path)[2];
-                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
-                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
-                    }
-                }
-            }
-        }
+        // $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        // $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        // $annotated_pdf_paths = [];
+        // $annotated_file_names = [];
+        // $annotation_paths = [];
+        // if (is_dir($annotation_path)) {
+        //     $dir_iter = new \FilesystemIterator($annotation_path);
+        //     foreach ($dir_iter as $file_info) {
+        //         $pdf_id = explode("_", $file_info->getFilename())[0];
+        //         if (file_get_contents($file_info->getPathname()) !== "") {
+        //             $annotated_file_names[] = $pdf_id;
+        //             $pdf_id = $pdf_id . '.pdf';
+        //             if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+        //                 $target_file = scandir($annotation_path)[2];
+        //                 $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+        //             }
+        //             if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+        //                 $target_file = scandir($pdfs_path)[2];
+        //                 $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+        //                 $annotated_pdf_paths[$pdf_id] = $pdf_path;
+        //             }
+        //         }
+        //     }
+        // }
         // Check for image annotation files
         $img_annotation_paths = [];
         foreach ($uploaded_imgs as $image_file) {
@@ -576,16 +575,16 @@ class AutoGradingView extends AbstractView {
             'grade_inquiry_available' => $grade_inquiry_available,
             'grade_inquiry_message' => $this->core->getConfig()->getGradeInquiryMessage(),
             'num_decimals' => $num_decimals,
-            'uploaded_pdfs' => $uploaded_pdfs,
+            // 'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
             'display_version' => $display_version,
-            'display_original_pdf' => $this->core->buildCourseUrl(['display_file']),
-            'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
-            'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
-            "annotated_file_names" =>  $annotated_file_names,
-            "annotation_paths" => $annotation_paths,
-            "annotated_pdf_paths" => $annotated_pdf_paths,
+            // 'display_original_pdf' => $this->core->buildCourseUrl(['display_file']),
+            // 'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            // 'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
+            // "annotated_file_names" =>  $annotated_file_names,
+            // "annotation_paths" => $annotation_paths,
+            // "annotated_pdf_paths" => $annotated_pdf_paths,
             "uploaded_imgs" => $uploaded_imgs,
             "img_annotation_paths" => $img_annotation_paths,
             "grader_info" => $grader_info
