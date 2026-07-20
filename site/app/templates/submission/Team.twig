@@ -216,15 +216,15 @@
 {% if is_instructor %}
     <div class="content">
         <header>
-            <h1>Manage Teams</h1>   
+            <h1 data-testid="manage-teams-header">Manage Teams</h1>
             <div class="btn-wrapper">
-                <button class="btn btn-primary" id="create_teams_from_registration_subsections" onclick="createTeamsFromSubsections()">
+                <button class="btn btn-primary" id="create-teams-from-registration-subsections" data-testid="create-teams-from-registration-subsections" onclick="createTeamsFromSubsections()">
                    Create Teams from Registration Subsections
                 </button>
-                <button class="btn btn-primary" id="create_single_student_teams" onclick="createSingleStudentTeams()">
+                <button class="btn btn-primary" id="create-single-student-teams" data-testid="create-single-student-teams" onclick="createSingleStudentTeams()">
                    Create Single-Student Teams
                 </button>
-                <button class="btn btn-danger" id="delete_all_teams" onclick="deleteTeams()">
+                <button class="btn btn-danger" id="delete-all-teams" data-testid="delete-all-teams" onclick="deleteTeams()">
                    Delete All Teams
                 </button>
             </div>
@@ -233,14 +233,14 @@
         {% set message_class = students_on_teams_count == 0 ? 'red-message' : 'message' %}
         <p class="{{ message_class }}" data-testid="manage-teams-message">There are currently <b>{{ team_count }} existing teams</b> for this gradeable. There are currently <b>{{ students_not_on_teams_count }}</b> students not yet on a team and <b>{{ students_on_teams_count }}</b> students on existing teams for this gradeable.</p>
         <br>
-        <div class="team-management-links">
+        <div class="team-management-links" data-testid="team-management-links">
             <p>
                 Go to <b> Grade Details </b> to see the list of students and teams for this gradeable:
-                <a href="{{ grading_overview_url }}">Grade Details</a>
+                <a data-testid="grade-details-link" href="{{ grading_overview_url }}">Grade Details</a>
             </p>
             <p>
                 Go to <b> Manage Students </b> to see the list of students and their sections and subsections for this course:
-                <a href="{{ manage_students_url }}">Manage Students</a>
+                <a data-testid="manage-students-link" href="{{ manage_students_url }}">Manage Students</a>
             </p>
         </div>
     </div>
