@@ -93,7 +93,8 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
+            {# {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }} #}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
@@ -222,7 +223,8 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
+{# {%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%} #}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -267,7 +269,7 @@ function switch_feedback_modes() {
                     </div>
                 {% endif %}
 
-            {% for file in uploaded_pdfs %}
+            {# {% for file in uploaded_pdfs %}
                 {% if file.encoded_name is defined and file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
@@ -279,7 +281,7 @@ function switch_feedback_modes() {
                     </p>
                 {% endif %}
 
-            {% endfor %}
+            {% endfor %} #}
             </br>
             <b>Peer Feedback:</b>
             <div>
