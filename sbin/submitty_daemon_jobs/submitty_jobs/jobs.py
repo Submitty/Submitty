@@ -545,3 +545,16 @@ class DocxToPDF(AbstractJob):
             log.close()
             log_msg = f"[Last ran on: {today.isoformat()}]\n"
             logger.write_to_log(log_file, log_msg)
+
+
+class GradingClustering(CourseGradeableJob):
+    required_keys = CourseGradeableJob.required_keys + ['algorithm']
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+        algorithm = self.job_details['algorithm']
+
+        script = str(Path(INSTALL_DIR, 'sbin', 'grading_clustering', 'main.py'))
+        subprocess.run(['python3', script, semester, course, gradeable, algorithm], check=True)
