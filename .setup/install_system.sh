@@ -658,7 +658,7 @@ if [ ${WORKER} == 1 ]; then
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
         echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
