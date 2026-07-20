@@ -1698,7 +1698,26 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
-        $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
+        $show_clear_conflicts = false;
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+        $current_user = $this->core->getUser();
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isPeerComponent()) {
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component, $current_user);
+                if ($graded_component !== null && $graded_component->getGradedVersion() !== $active_version) {
+                    $show_clear_conflicts = true;
+                    break;
+                }
+            }
+            elseif (!$is_peer_grader) {
+                $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
+                if ($graded_component_container !== null && $graded_component_container->hasVersionConflict()) {
+                    $show_clear_conflicts = true;
+                    break;
+                }
+            }
+        }
 
         $is_withdrawn_student = !$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn";
 
