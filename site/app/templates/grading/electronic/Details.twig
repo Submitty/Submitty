@@ -80,6 +80,11 @@
                     <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
+                {% if full_access_grader_permission %}
+                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
+                    <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_clustering_mode %}checked{% endif %}>
+                </label>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -123,7 +128,6 @@
                 'style': 'display: contents;',
                 'args': {
                     'gradeableId': gradeable.getId(),
-                    'isClusteringMode': is_clustering_mode,
                     'algorithms': algorithms,
                     'currentAlgorithm': current_algorithm,
                     'createClusteringUrl': create_clustering_url,
@@ -133,9 +137,8 @@
                 },
                 'events': {
                     'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); const banner = document.getElementById("clustering-loading-banner"); if(banner) { banner.style.display = status === "fetching" ? "block" : "none"; } }',
-                    'clustering-done': '() => { const params = new URLSearchParams(window.location.search); params.set("cluster_mode", "1"); window.location.search = params.toString(); }',
-                    'clustering-error': '(message) => alert(message)',
-                    'toggle-clustering-mode': 'handleToggleClusteringMode'
+                    'clustering-done': '() => { window.location.reload(); }',
+                    'clustering-error': '(message) => alert(message)'
                 }
             } %}
         {% endif %}
@@ -147,7 +150,7 @@
     {% endif %}
     {% if is_clustering_mode and current_algorithm is null %}
     <div class="details-warning-box details-warning-highlight">
-        No clusters have been generated for this assignment. Please select an algorithm from the dropdown to begin.
+        No clusters have been generated for this assignment. Please click 'Create Clusters' to begin.
     </div>
     {% endif %}
     <div id="clustering-loading-banner" style="display: none;" class="details-warning-box details-warning-highlight">
@@ -589,7 +592,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}{% if context.is_clustering_mode and section.title != 'Unclustered' %}&cluster_mode=1{% endif %}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -651,7 +654,7 @@
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}{% if context.is_clustering_mode and section.title != 'Unclustered' %}&cluster_mode=1{% endif %}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -912,8 +915,6 @@
         }
     }
 </script>
-
-{% include 'grading/electronic/ClusteringWarningMessage.twig' %}
 {% include 'grading/electronic/GradeableMessage.twig' with {
     "course": course,
     "semester": semester,

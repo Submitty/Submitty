@@ -1028,7 +1028,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")]
-    public function showDetails(string $gradeable_id, ?string $cluster_mode = null) {
+    public function showDetails(string $gradeable_id) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -1199,7 +1199,7 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $is_clustering_mode = $cluster_mode === '1';
+        $is_clustering_mode = ($_COOKIE['group_by_clusters'] ?? '') === 'true';
         $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findWithClustersAndMembers($gradeable->getId());
         $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
 

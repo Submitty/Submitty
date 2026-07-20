@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 
 const props = defineProps<{
-    isClusteringMode: boolean;
     algorithms: Record<string, string>;
     currentAlgorithm?: string;
     createClusteringUrl: string;
@@ -14,110 +13,133 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'clustering-status': [status: string];
-    'toggle-clustering-mode': [payload: { isClusteringMode: boolean; gradeableId: string }];
     'clustering-done': [];
     'clustering-error': [message: string];
 }>();
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');
+const showModal = ref(false);
 
-function toggleClusteringMode() {
-    emit('toggle-clustering-mode', {
-        isClusteringMode: props.isClusteringMode,
-        gradeableId: props.gradeableId,
-    });
+function toggleModal() {
+    showModal.value = !showModal.value;
+    if (!showModal.value) {
+        selectedAlgorithm.value = props.currentAlgorithm || '';
+    }
 }
 
-async function onAlgorithmChange(event?: Event) {
-    const value = event ? (event.target as HTMLSelectElement).value : selectedAlgorithm.value;
-    if (props.isClusteringMode && value) {
-        emit('clustering-status', 'fetching');
-        const formData = new FormData();
-        formData.append('csrf_token', props.csrfToken);
-        formData.append('algorithm', value);
+async function submitClustering() {
+    if (!selectedAlgorithm.value) {
+        return;
+    }
+    
+    showModal.value = false;
+    emit('clustering-status', 'fetching');
+    const formData = new FormData();
+    formData.append('csrf_token', props.csrfToken);
+    formData.append('algorithm', selectedAlgorithm.value);
 
-        try {
-            const response = await fetch(props.createClusteringUrl, {
-                method: 'POST',
-                body: formData,
-            });
+    try {
+        const response = await fetch(props.createClusteringUrl, {
+            method: 'POST',
+            body: formData,
+        });
 
-            const result = (await response.json()) as { status: string; message?: string };
-            if (result.status === 'success') {
-                const pollInterval = setInterval(async () => {
-                    try {
-                        const statusResponse = await fetch(props.checkClusteringStatusUrl);
-                        const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string }; message?: string };
-                        if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
-                            clearInterval(pollInterval);
-                            emit('clustering-status', 'done');
-                            emit('clustering-done');
-                        }
-                        else if (statusResult.status === 'fail' || (statusResult.data && statusResult.data.status === 'error')) {
-                            clearInterval(pollInterval);
-                            emit('clustering-status', 'error');
-                            emit('clustering-error', statusResult.message || 'Clustering process failed.');
-                            selectedAlgorithm.value = props.currentAlgorithm || '';
-                        }
+        const result = (await response.json()) as { status: string; message?: string };
+        if (result.status === 'success') {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const statusResponse = await fetch(props.checkClusteringStatusUrl);
+                    const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string }; message?: string };
+                    if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
+                        clearInterval(pollInterval);
+                        emit('clustering-status', 'done');
+                        emit('clustering-done');
                     }
-                    catch (e) {
-                        console.error('Error checking clustering status:', e);
+                    else if (statusResult.status === 'fail' || (statusResult.data && statusResult.data.status === 'error')) {
                         clearInterval(pollInterval);
                         emit('clustering-status', 'error');
-                        emit('clustering-error', 'Error checking clustering status.');
+                        emit('clustering-error', statusResult.message || 'Clustering process failed.');
+                        selectedAlgorithm.value = props.currentAlgorithm || '';
                     }
-                }, 1000);
-            }
-            else {
-                emit('clustering-status', 'done');
-                emit('clustering-error', result.message || 'Error creating clusters');
-                // Revert selection if it failed
-                selectedAlgorithm.value = props.currentAlgorithm || '';
-            }
+                }
+                catch (e) {
+                    console.error('Error checking clustering status:', e);
+                    clearInterval(pollInterval);
+                    emit('clustering-status', 'error');
+                    emit('clustering-error', 'Error checking clustering status.');
+                }
+            }, 1000);
         }
-        catch (error) {
-            console.error('Error:', error);
-            emit('clustering-status', 'error');
-            emit('clustering-error', 'Failed to connect to the server.');
+        else {
+            emit('clustering-status', 'done');
+            emit('clustering-error', result.message || 'Error creating clusters');
+            selectedAlgorithm.value = props.currentAlgorithm || '';
         }
+    }
+    catch (error) {
+        console.error('Error:', error);
+        emit('clustering-status', 'error');
+        emit('clustering-error', 'Failed to connect to the server.');
     }
 }
 </script>
 
 <template>
   <button
+    v-if="canCreateClustering"
     class="btn btn-primary"
-    data-testid="toggle-clustering-mode-btn"
-    @click="toggleClusteringMode"
+    data-testid="create-clusters-btn"
+    style="margin-left: auto;"
+    @click="toggleModal"
   >
-    {{ isClusteringMode ? 'Exit Clustering Mode' : 'Go to Clustering Mode' }}
+    Create Clusters
   </button>
-  <select
-    v-if="isClusteringMode && Object.keys(algorithms).length > 0 && canCreateClustering"
-    v-model="selectedAlgorithm"
-    class="form-control clustering-select"
-    data-testid="clustering-algorithm-select"
-    @change="onAlgorithmChange"
-  >
-    <option
-      value=""
-      disabled
-    >
-      Select an algorithm...
-    </option>
-    <option
-      v-for="(name, id) in algorithms"
-      :key="id"
-      :value="id"
-    >
-      {{ name }}
-    </option>
-  </select>
+
+  <Teleport to="body">
+    <div v-if="showModal" class="popup-form" style="display: block;">
+      <div class="popup-box" @click.self="toggleModal">
+        <div class="popup-window" style="width: 400px; margin: auto;">
+          <div class="form-title">
+            <h1>Create Clusters</h1>
+            <button
+              data-testid="close-button"
+              class="btn btn-default close-button"
+              type="button"
+              @click="toggleModal"
+            >
+              Close
+            </button>
+          </div>
+          <div class="form-body">
+            <p style="margin-bottom: 15px;">Select an algorithm to generate clusters for this gradeable.</p>
+            <select
+                v-if="Object.keys(algorithms).length > 0"
+                v-model="selectedAlgorithm"
+                class="form-control clustering-select"
+                data-testid="clustering-algorithm-select"
+            >
+                <option value="" disabled>Select an algorithm...</option>
+                <option v-for="(name, id) in algorithms" :key="id" :value="id">{{ name }}</option>
+            </select>
+            <div v-else>
+                No clustering algorithms available.
+            </div>
+            
+            <div class="form-buttons">
+              <div class="form-button-container" style="justify-content: flex-end; display: flex; gap: 10px;">
+                <a class="btn btn-default close-button key_to_click" tabindex="0" @click="toggleModal">Cancel</a>
+                <button class="btn btn-primary" @click="submitClustering" :disabled="!selectedAlgorithm">Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
 .clustering-select {
-    width: auto;
-    margin: 0;
+    width: 100%;
 }
 </style>

@@ -432,7 +432,7 @@ async function ajaxGetGradedComponent(gradeable_id: string | undefined, componen
  * @throws {Error} Throws except when the response returns status 'success'
  * @return {Object}
  */
-async function ajaxSaveGradedComponent(gradeable_id: string | undefined, component_id: number, anon_id: string | undefined, graded_version: number, custom_points: number, custom_message: string, silent_edit: boolean, mark_ids: number[], cluster_mode: boolean) {
+async function ajaxSaveGradedComponent(gradeable_id: string | undefined, component_id: number, anon_id: string | undefined, graded_version: number, custom_points: number, custom_message: string, silent_edit: boolean, mark_ids: number[]) {
     let response: Record<string, string | undefined> | null;
     try {
         response = await $.ajax({
@@ -449,7 +449,6 @@ async function ajaxSaveGradedComponent(gradeable_id: string | undefined, compone
                 custom_message: custom_message,
                 silent_edit: silent_edit,
                 mark_ids: mark_ids,
-                cluster_mode: cluster_mode,
             },
         }) as Record<string, string | undefined>;
     }
@@ -3470,17 +3469,13 @@ async function saveGradedComponent(component_id: number) {
         //  however, because the server filters out non-existent mark ids
         gradedComponent.mark_ids.push(data.mark_id);
     }));
-    const urlParams = new URLSearchParams(window.location.search);
-    const clusterMode = urlParams.get('cluster_mode') === '1';
-
     await ajaxSaveGradedComponent(
         gradeable_id, component_id, getAnonId(),
         gradedComponent.graded_version,
         gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
         gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
         isSilentEditModeEnabled(),
-        gradedComponent.mark_ids,
-        clusterMode);
+        gradedComponent.mark_ids);
 }
 
 /**

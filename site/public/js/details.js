@@ -89,54 +89,6 @@ function hideGradeableMessage() {
     message.hide();
 }
 
-let clusteringWarningCallback = null;
-
-function showClusteringWarningMessage(callback) {
-    clusteringWarningCallback = callback;
-    const message = $('#clustering-warning-popup');
-    message.show();
-}
-
-function clusteringWarningMessageAgree() {
-    const dataElement = document.getElementById('gradeable-message-data');
-    if (dataElement && dataElement.dataset.gradeable) {
-        sessionStorage.setItem(`clusteringWarningAccepted_${dataElement.dataset.gradeable}`, 'true');
-    }
-    const message = $('#clustering-warning-popup');
-    message.hide();
-    if (clusteringWarningCallback) {
-        clusteringWarningCallback();
-        clusteringWarningCallback = null;
-    }
-}
-
-function clusteringWarningMessageCancel() {
-    const message = $('#clustering-warning-popup');
-    message.hide();
-    clusteringWarningCallback = null;
-}
-
-function handleToggleClusteringMode(payload) {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (payload.isClusteringMode) {
-        urlParams.delete('cluster_mode');
-        urlParams.delete('algorithm');
-        window.location.search = urlParams.toString();
-    }
-    else {
-        const hasAcceptedWarning = sessionStorage.getItem(`clusteringWarningAccepted_${payload.gradeableId}`) === 'true';
-        if (!hasAcceptedWarning && typeof window.showClusteringWarningMessage === 'function') {
-            window.showClusteringWarningMessage(() => {
-                urlParams.set('cluster_mode', '1');
-                window.location.search = urlParams.toString();
-            });
-        }
-        else {
-            urlParams.set('cluster_mode', '1');
-            window.location.search = urlParams.toString();
-        }
-    }
-}
 
 function getCollapsedSections() {
     return JSON.parse(Cookies.get('collapsed_sections') || '[]');
@@ -239,13 +191,24 @@ window.addEventListener('DOMContentLoaded', () => {
         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
     }
-    // Randomize Order - all graders have permission
     const randomFilterBox = document.getElementById('toggle-random-order');
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');
+
+    const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
+    if (groupByClustersBox) {
+        const groupByClustersStatus = Cookies.get('group_by_clusters');
+        groupByClustersBox.checked = (groupByClustersStatus === 'true');
+    }
 
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
         withdrawnFilterElements.show();
     }
 });
+
+function changeGroupByClusters() {
+    const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
+    Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
+    window.location.reload();
+}
