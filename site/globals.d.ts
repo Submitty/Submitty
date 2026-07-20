@@ -17,5 +17,8 @@ declare global {
         luxon: typeof luxon;
         markerjs3: typeof markerjs3;
         markerjsUI: typeof markerjsUI;
+        submitty: {
+            render: (target: string | Element, type: 'component' | 'page', name: string, args?: Record<string, unknown>, events?: Record<string, string>) => Promise<void>;
+        };
     }
 }
