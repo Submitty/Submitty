@@ -806,17 +806,27 @@ function checkBuildStatus() {
     });
 }
 
-function renderBuildNotices(notices) {
+function renderBuildNotices(notice) {
     const container = $('#rg-build-notices');
     container.empty();
 
-    (notices || []).forEach((notice) => {
-        $('<h4></h4>')
-            .addClass(`rg-build-notice rg-build-notice-${notice.level}`)
-            .attr('data-testid', `rg-build-notice-${notice.level}`)
-            .text(`${notice.level === 'error' ? 'Error:' : 'Warning:'} ${notice.message}`)
-            .appendTo(container);
+    if (!notice) {
+        return;
+    }
+
+    const banner = $('<div></div>')
+        .addClass(`content rg-build-notice rg-build-notice-${notice.level}`)
+        .attr('data-testid', 'rg-build-notice');
+    const heading = $('<h4></h4>');
+
+    notice.messages.forEach((message, index) => {
+        if (index > 0) {
+            heading.append($('<br>'));
+        }
+        heading.append(document.createTextNode(message));
     });
+
+    container.append(banner.append(heading));
 }
 
 function refreshBuildNotices() {
@@ -829,7 +839,7 @@ function refreshBuildNotices() {
             if (response.status !== 'success') {
                 return;
             }
-            renderBuildNotices(response.data.notices);
+            renderBuildNotices(response.data.notice);
         },
         error: function (xhr) {
             console.error(`Failed to refresh build notices: ${xhr.responseText}`);

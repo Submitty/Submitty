@@ -809,7 +809,7 @@ class ReportController extends AbstractController {
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
                 'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
-                'rainbow_build_notices' => $this->getRainbowGradesBuildNotices(),
+                'rainbow_build_notice' => $this->getRainbowGradesBuildNotice(),
                 'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
@@ -1196,7 +1196,11 @@ class ReportController extends AbstractController {
         return $gradeables;
     }
 
-    /** @return array<int, array{level: string, message: string}> */
+    /**
+     * Parse ERROR:/WARNING: lines out of the latest rainbow grades build log.
+     *
+     * @return array<int, array{level: string, message: string}>
+     */
     private function getRainbowGradesBuildNotices(): array {
         $debug_output_path = FileUtils::joinPaths(
             $this->core->getConfig()->getCoursePath(),
@@ -1214,5 +1218,27 @@ class ReportController extends AbstractController {
             }
         }
         return $notices;
+    }
+
+    /**
+     * Collapse the build notices into a single banner, with error overriding warning.
+     *
+     * @return array{level: string, messages: string[]}|null
+     */
+    private function getRainbowGradesBuildNotice(): ?array {
+        $notices = $this->getRainbowGradesBuildNotices();
+        if (count($notices) === 0) {
+            return null;
+        }
+
+        $level = 'warning';
+        foreach ($notices as $notice) {
+            if ($notice['level'] === 'error') {
+                $level = 'error';
+                break;
+            }
+        }
+
+        return ['level' => $level, 'messages' => array_column($notices, 'message')];
     }
 }
