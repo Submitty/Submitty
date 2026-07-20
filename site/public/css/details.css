@@ -4,6 +4,10 @@
 
 /* Details Table Styling */
 
+#details-table th {
+    text-align: center;
+}
+
 #details-table tbody.details-info-header {
     font-size: 15px;
 }

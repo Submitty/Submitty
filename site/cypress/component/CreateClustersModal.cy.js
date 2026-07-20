@@ -1,7 +1,7 @@
-import GradingClustering from '../../vue/src/components/GradingClustering.vue';
+import CreateClustersModal from '../../vue/src/components/CreateClustersModal.vue';
 import { mountWithEmitSpy } from '../support/component_test_utils';
 
-describe('GradingClustering', () => {
+describe('CreateClustersModal', () => {
     const defaultProps = {
         algorithms: {
             dummy_split: 'DummySplit',
@@ -15,13 +15,13 @@ describe('GradingClustering', () => {
     };
 
     it('renders "Create Clusters" button if user can create clustering', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
+        cy.mount(CreateClustersModal, { props: defaultProps });
         cy.get('[data-testid="create-clusters-btn"]').should('contain', 'Create Clusters');
         cy.get('.popup-form').should('not.exist');
     });
 
     it('does not render "Create Clusters" button if user cannot create clustering', () => {
-        cy.mount(GradingClustering, {
+        cy.mount(CreateClustersModal, {
             props: {
                 ...defaultProps,
                 canCreateClustering: false,
@@ -31,7 +31,7 @@ describe('GradingClustering', () => {
     });
 
     it('opens modal on button click', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
+        cy.mount(CreateClustersModal, { props: defaultProps });
         cy.get('[data-testid="create-clusters-btn"]').click();
         cy.get('.popup-form').should('be.visible');
         cy.get('.form-title').should('contain', 'Create Clusters');
@@ -39,7 +39,7 @@ describe('GradingClustering', () => {
     });
 
     it('closes modal on cancel click', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
+        cy.mount(CreateClustersModal, { props: defaultProps });
         cy.get('[data-testid="create-clusters-btn"]').click();
         cy.get('.popup-form').should('be.visible');
         cy.get('.close-button').first().click();
@@ -47,7 +47,7 @@ describe('GradingClustering', () => {
     });
 
     it('does not render dropdown if no algorithms are available', () => {
-        cy.mount(GradingClustering, {
+        cy.mount(CreateClustersModal, {
             props: {
                 ...defaultProps,
                 algorithms: {},
@@ -60,7 +60,7 @@ describe('GradingClustering', () => {
     });
 
     it('Submit button is disabled until algorithm is selected', () => {
-        cy.mount(GradingClustering, { props: defaultProps });
+        cy.mount(CreateClustersModal, { props: defaultProps });
         cy.get('[data-testid="create-clusters-btn"]').click();
         cy.get('.popup-form').should('be.visible');
 
@@ -76,7 +76,7 @@ describe('GradingClustering', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'done' } } }).as('checkClusteringStatus');
 
-        cy.mount(GradingClustering, { props: defaultProps });
+        cy.mount(CreateClustersModal, { props: defaultProps });
 
         cy.get('[data-testid="create-clusters-btn"]').click();
         cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
@@ -94,7 +94,7 @@ describe('GradingClustering', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'done' } } }).as('checkClusteringStatus');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 
@@ -117,7 +117,7 @@ describe('GradingClustering', () => {
     it('emits error if initial POST fails', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'fail', message: 'Creation failed' } }).as('createClustering');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 
@@ -137,7 +137,7 @@ describe('GradingClustering', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'fail', message: 'Polling failed' } }).as('checkClusteringStatus');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 
@@ -157,7 +157,7 @@ describe('GradingClustering', () => {
     it('emits error if initial POST has a network error', () => {
         cy.intercept('POST', '/test/clustering', { forceNetworkError: true }).as('createClustering');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 
@@ -177,7 +177,7 @@ describe('GradingClustering', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { forceNetworkError: true }).as('checkClusteringStatus');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 
@@ -198,7 +198,7 @@ describe('GradingClustering', () => {
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'error' }, message: 'Server algorithm failed' } }).as('checkClusteringStatus');
 
-        cy.mount(GradingClustering, { props: defaultProps }).then(({ wrapper }) => {
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
             cy.wrap(wrapper).as('wrapper');
         });
 

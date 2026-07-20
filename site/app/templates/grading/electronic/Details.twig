@@ -124,7 +124,7 @@
         {% if full_access_grader_permission %}
             {% include 'Vue.twig' with {
                 'type': 'component',
-                'name': 'GradingClustering',
+                'name': 'CreateClustersModal',
                 'style': 'display: contents;',
                 'args': {
                     'gradeableId': gradeable.getId(),
@@ -338,7 +338,9 @@
             {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "section" %}
-                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column, null) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.header_key == "team_id" %}
@@ -390,7 +392,9 @@
             {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, null, index, null, column) }}
             {% elseif column.header_key == "section" %}
-                {{ _self.render_column_section(context, section, null, index, null, column) }}
+                {{ _self.render_column_section(context, section, null, index, null, column, user) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, null, index, null, column) }}
             {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.header_key == "team_id" %}
@@ -670,7 +674,23 @@
 {% endmacro %}
 
 {# Section Number #}
-{% macro render_column_section(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_section(context, section, graded_gradeable, index, info, column, teamless_user) %}
+    <td>
+        {% if context.is_clustering_mode %}
+            {% set user = graded_gradeable ? graded_gradeable.getSubmitter().getUser() : teamless_user %}
+            {% if context.gradeable.isGradeByRegistration() %}
+                {{ user.getRegistrationSection() ?? "NULL" }}
+            {% else %}
+                {{ user.getRotatingSection() ?? "NULL" }}
+            {% endif %}
+        {% else %}
+            {{ section.title }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Cluster #}
+{% macro render_column_cluster(context, section, graded_gradeable, index, info, column) %}
     <td>{{ section.title }}</td>
 {% endmacro %}
 

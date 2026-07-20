@@ -71,7 +71,7 @@ async function submitClustering() {
             }, 1000);
         }
         else {
-            emit('clustering-status', 'done');
+            emit('clustering-status', 'error');
             emit('clustering-error', result.message || 'Error creating clusters');
             selectedAlgorithm.value = props.currentAlgorithm || '';
         }
