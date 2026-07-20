@@ -25,7 +25,7 @@ declare global {
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
         peerComponentMarksChanged (peer_id: string, component_id: string): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
@@ -429,8 +429,11 @@ window.peerComponentMarksChanged = function (peer_id: string, component_id: stri
     $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
 };
 
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmed = confirm(`Are you sure you want to delete all grading from ${peer_id}?`);
+    if (!confirmed) {
+        return;
+    }
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -450,7 +453,7 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
             window.location.reload();
         },
         error: function () {
-            console.log('Failed to delete');
+            console.log('Failed to delete peer marks');
         },
     });
 };
