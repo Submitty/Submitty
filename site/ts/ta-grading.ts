@@ -25,6 +25,8 @@ declare global {
         openAll (click_class: string, class_modifier: string): void;
         clearPeerMarks: (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) => void;
         newEditPeerComponentsForm(): void;
+        editPeerComponentsFormArgs?: Record<string, unknown>;
+        editPeerComponentsFormEvents?: Record<string, string>;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
@@ -440,10 +442,14 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, pe
 };
 
 window.newEditPeerComponentsForm = function () {
-    $('.popup-form').css('display', 'none');
-    const form = $('#edit-peer-components-form');
-    form.css('display', 'block');
-    captureTabInModal('edit-peer-components-form');
+    const el = document.getElementById('edit-peer-components-form');
+    if (!el) {
+        return;
+    }
+    void window.submitty.render(el, 'component', 'ta_grading/EditPeerComponentsForm', {
+        ...window.editPeerComponentsFormArgs,
+        visible: true,
+    }, window.editPeerComponentsFormEvents);
 };
 
 function rotateImage(url: string | undefined, rotateBy: string) {

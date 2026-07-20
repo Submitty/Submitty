@@ -1,22 +1,8 @@
-{% extends 'generic/Popup.twig' %}
-{% block popup_id %}edit-peer-components-form{% endblock %}
-{% block title %}Edit Peer Components Form{% endblock %}
-{% block body %}
-    {% include 'Vue.twig' with {
-        'type': 'component',
-        'name': 'ta_grading/EditPeerComponentsForm',
-        'args': {
-            'peers': peers,
-            'submitterId': submitter_id,
-            'gradeableId': gradeable_id,
-            'csrfToken': csrf_token,
-            'components': components,
-            'componentScores': component_scores,
-            'peerDetails': peer_details,
-            'marks': marks,
-        },
-        'events': {
-            'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, detail.csrfToken); }',
-        }
-    } %}
-{% endblock %}
+<div id="edit-peer-components-form"></div>
+<script>
+    window.editPeerComponentsFormArgs = {{ { peers: peers, submitterId: submitter_id, gradeableId: gradeable_id, csrfToken: csrf_token, components: components, componentScores: component_scores, peerDetails: peer_details, marks: marks } | json_encode() | raw() }};
+    window.editPeerComponentsFormEvents = {
+        'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, detail.csrfToken); }',
+    };
+    void window.submitty.render('#edit-peer-components-form', 'component', 'ta_grading/EditPeerComponentsForm', window.editPeerComponentsFormArgs, window.editPeerComponentsFormEvents);
+</script>
