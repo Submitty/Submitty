@@ -50,7 +50,7 @@ $(document).ready(() => {
 
     if (!localStorage.getItem(gradeableMessageStorageKey()) && document.getElementById('gradeable-message-data').dataset.userlevel !== '1') {
         const form = $('#gradeable-message-popup');
-        form.show();
+        form.css('display', 'block');
         form.find('.form-body').scrollTop(0);
     }
 });
@@ -67,7 +67,7 @@ function gradeableMessageAgree() {
     if (!localStorage.getItem(gradeableMessageStorageKey())) {
         localStorage.setItem(gradeableMessageStorageKey(), 'agreed');
         const form = $('#gradeable-message-popup');
-        form.hide();
+        form.css('display', 'none');
     }
     return false;
 }
@@ -78,15 +78,15 @@ function gradeableMessageCancel() {
 
 function showGradeableMessage() {
     const message = $('#gradeable-message-popup');
-    message.show();
-    $('#agree-button').hide();
-    $('#cancel-button').hide();
-    $('#close-hidden-button').show();
+    message.css('display', 'block');
+    $('#agree-button').css('display', 'none');
+    $('#cancel-button').css('display', 'none');
+    $('#close-hidden-button').css('display', 'block');
 }
 
 function hideGradeableMessage() {
     const message = $('#gradeable-message-popup');
-    message.hide();
+    message.css('display', 'none');
 }
 
 function getCollapsedSections() {
@@ -190,6 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
     }
+    // Randomize Order - all graders have permission
     const randomFilterBox = document.getElementById('toggle-random-order');
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');

@@ -31,7 +31,7 @@ async function submitClustering() {
     if (!selectedAlgorithm.value) {
         return;
     }
-    
+
     showModal.value = false;
     emit('clustering-status', 'fetching');
     const formData = new FormData();
