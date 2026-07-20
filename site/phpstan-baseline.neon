@@ -13765,18 +13765,6 @@ parameters:
 			path: app/views/AuthenticationView.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 2
-			path: app/views/AutoGradingView.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/views/AutoGradingView.php
-
-		-
 			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 4
