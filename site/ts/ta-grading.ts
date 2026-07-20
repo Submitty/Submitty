@@ -426,7 +426,7 @@ window.changeCurrentPeer = function () {
     $(`#edit-peer-components-form-${peer}`).show();
 };
 
-window.peerComponentMarksChanged = function (peer_id: string, component_id: string,) {
+window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
     $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
 };
 
