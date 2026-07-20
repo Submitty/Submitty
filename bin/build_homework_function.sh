@@ -310,6 +310,9 @@ function build_homework {
         "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
     fi
 
+    # insert the gradeable data into the db
+    "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
+
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
     popd > /dev/null
 }

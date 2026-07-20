@@ -21,6 +21,7 @@
         <label for="new-section-id">Section ID:&emsp;</label>
         <input
             id="new-section-id"
+            data-testid="new-section-id"
             name="section_id"
             type="text"
             pattern="[A-Za-z0-9_\-]+"
@@ -34,6 +35,7 @@
         <label for="new-course-id-num">Course ID:&emsp;</label>
         <input
             id="new-course-id-num"
+            data-testid="new-course-id-num"
             name="course_id"
             type="text"
             pattern="\d{5}"
@@ -51,5 +53,5 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Add Section" />
+    <input class="btn btn-primary" type="submit" data-testid="add-section-submit" value="Add Section" />
 {% endblock %}

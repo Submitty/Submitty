@@ -20,7 +20,7 @@
 		</a>
 		<label for="user_id">
             User ID:
-            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off" list="possible_users"/>
+            <input class="readonly" type="text" name="user_id" id="user_id" data-testid="user-id-input" readonly="readonly" placeholder="(Required)" autocomplete="off" list="possible_users"/>
             <datalist id="possible_users"> </datalist>
         </label>
         <label for="user_numeric_id">
@@ -51,14 +51,14 @@
             Secondary Email:
             <input type="text" name="user_email_secondary" id="user_email_secondary" placeholder="(Optional)" />
         </label>
-        <label for="user_pronouns"> 
+        <label for="user_pronouns">
             Pronouns:
             <input class="readonly" type="text" name="user_pronouns" readonly="readonly" id="user_pronouns" placeholder="(Optional)"/>
         </label>
         {% if use_database %}
             <label>
                 Password:
-                <input type="password" name="user_password" placeholder="New Password" />
+                <input type="password" data-testid="password-input" name="user_password" placeholder="New Password" />
             </label>
         {% endif %}
         <label for="registered_section" class="full-width">
@@ -106,6 +106,10 @@
                 <option value="audit">audit</option>
                 <option value="withdrawn">withdrawn</option>
             </select>
+        </label>
+        <label for="user_date_registered" class="full-width">
+            Registration date:
+            <input class="readonly" type="text" id="user_date_registered" readonly="readonly" value="N/A">
         </label>
         <fieldset id="user-form-assigned-sections" class="full-width" hidden>
             <legend style="font-weight:bold;font-size:16pt">Assigned Registration Sections for Grading</legend>

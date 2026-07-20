@@ -1,3 +1,5 @@
+import { getCurrentSemester } from '/cypress/support/utils.js';
+
 describe('TA Grading Panel Switcher', () => {
     const panels = [
         {
@@ -110,7 +112,7 @@ describe('TA Grading Panel Switcher', () => {
         it(`Should show correct panel options for ${layout.name}`, () => {
             cy.login('ta');
 
-            cy.visit('/courses/s26/sample/gradeable/no_due_date_no_release/grading/grade?who_id=FI9yKu3j9DrXWt5&sort=id&direction=ASC');
+            cy.visit(`/courses/${getCurrentSemester()}/sample/gradeable/no_due_date_no_release/grading/grade?who_id=UVSFkMDuolWBQtO&sort=id&direction=ASC`);
 
             cy.log(`Testing layout: ${layout.name}`);
 

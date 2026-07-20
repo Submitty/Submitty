@@ -325,7 +325,7 @@ class NavigationView extends AbstractView {
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup() && $date_limitation;
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $date_limitation && $gradeable->hasPeerComponent() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
+        $im_a_peer_grader = $date_limitation && $gradeable->hasPeerComponent() && (($this->core->getUser()->getGroup() === User::GROUP_STUDENT && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()))) || $this->core->getUser()->accessGrading());
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
@@ -667,6 +667,7 @@ class NavigationView extends AbstractView {
         $date_text = null;
         $date_time = null;
         $progress = null;
+        $peer_progress = null;
 
         //Button types that override any other buttons
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -714,6 +715,13 @@ class NavigationView extends AbstractView {
                 ];
                 if ($gradeable->isTaGrading()) {
                     $array["progress"] = 100 * $progress_bar;
+                }
+                if ($gradeable->hasPeerComponent() && $this->core->getUser()->accessGrading()) {
+                    $peer_percent = $gradeable->getPeerGradingProgress();
+                    if (!is_nan($peer_percent)) {
+                        $array["peer_progress"] = 100 * $peer_percent;
+                        $array["peer_progress_class"] = "peer-progress-bar";
+                    }
                 }
                 return new Button($this->core, $array);
             }
@@ -770,6 +778,20 @@ class NavigationView extends AbstractView {
                     if (!is_nan($TA_percent)) {
                         $progress = $TA_percent * 100;
                     }
+                    if ($gradeable->hasPeerComponent()) {
+                        if ($this->core->getUser()->accessGrading()) {
+                            $peer_percent = $gradeable->getPeerGradingProgress();
+                            if (!is_nan($peer_percent)) {
+                                $peer_progress = $peer_percent * 100;
+                            }
+                        }
+                        else {
+                            $peer_percent = $gradeable->getAssignedPeerGradingProgress($this->core->getUser());
+                            if (!is_nan($peer_percent)) {
+                                $peer_progress = $peer_percent * 100;
+                            }
+                        }
+                    }
                 }
                 else {
                     $title = "VIEW SUBMISSIONS";
@@ -799,6 +821,8 @@ class NavigationView extends AbstractView {
             "date" => $date_time,
             "href" => $href,
             "progress" => $progress,
+            "peer_progress" => $peer_progress,
+            "peer_progress_class" => "peer-progress-bar",
             "class" => "btn btn-nav btn-nav-grade {$class}",
             "name" => "grade-btn"
         ]);

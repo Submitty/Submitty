@@ -5,7 +5,6 @@ namespace app\controllers\grading;
 use app\libraries\GradeableType;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
-use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
@@ -14,6 +13,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+use app\libraries\response\DownloadResponse;
 use WebSocket;
 
 /**
@@ -22,81 +22,6 @@ use WebSocket;
  */
 #[AccessControl(permission: "grading.simple")]
 class SimpleGraderController extends AbstractController {
-    /**
-     * @param string $gradeable_id
-     * @param int|string|null $section
-     * @param string|null $section_type
-     * @param string $sort
-     *
-     * @return ResponseInterface
-     */
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods:["GET"])]
-    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
-        //convert from id --> u.user_id etc for use by the database.
-        if ($sort === "id") {
-            $sort_by = "u.user_id";
-        }
-        elseif ($sort === "first") {
-            $sort_by = "coalesce(u.user_preferred_givenname, u.user_givenname)";
-        }
-        else {
-            $sort_by = "coalesce(u.user_preferred_familyname, u.user_familyname)";
-        }
-
-        //Figure out what section we are supposed to print
-        if (is_null($section)) {
-            $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        }
-        catch (\InvalidArgumentException $e) {
-            return new WebResponse('Error', 'noGradeable', $gradeable_id);
-        }
-
-        // Make sure this gradeable is an electronic file gradeable
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            $this->core->addErrorMessage('This gradeable is not a checkpoint or numeric text gradeable');
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
-            $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        //Figure out if we are getting users by rotating or registration section.
-        if (is_null($section_type)) {
-            return new WebResponse('Error', 'genericError', ['Got null section type']);
-        }
-
-        //Grab the students in section, sectiontype.
-        if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections([$section], $sort_by);
-        }
-        elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections([$section], $sort_by);
-        }
-        else {
-            $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        //Turn off header/footer so that we are using simple html.
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        //display the lab to be printed (in SimpleGraderView's displayPrintLab function)
-        return new WebResponse(
-            ['grading', 'SimpleGrader'],
-            'displayPrintLab',
-            $gradeable,
-            $section,
-            $students
-        );
-    }
-
     /**
      * @param string $gradeable_id
      * @param null|string $view
@@ -200,13 +125,155 @@ class SimpleGraderController extends AbstractController {
             $rows,
             $student_full,
             $graders,
-            $section_key,
             $show_all_sections_button,
-            $sort,
             $anon_ids
         );
     }
 
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods:["GET"])]
+    public function downloadNumericCsv(string $gradeable_id, string $sort = "section_subsection"): ResponseInterface {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return new WebResponse('Error', 'noGradeable', $gradeable_id);
+        }
+
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            $this->core->addErrorMessage('This gradeable is not a numeric text gradeable');
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+
+        //If you can see the page, you can grade the page
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+        if ($gradeable->isGradeByRegistration()) {
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        }
+        else {
+            $grading_count = count(
+                $this->core->getQueries()->getRotatingSectionsForGradeableAndUser(
+                    $gradeable->getId(),
+                    $this->core->getUser()->getId()
+                )
+            );
+        }
+
+        $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
+        $show_all = $grading_count === 0 && $can_show_all;
+
+        if ($show_all) {
+            $sections = $gradeable->getAllGradingSections();
+        }
+        else {
+            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
+        }
+
+        $students = [];
+        foreach ($sections as $section) {
+            $students = array_merge($students, $section->getUsers());
+        }
+
+        $student_ids = array_map(function (User $user) {
+            return $user->getId();
+        }, $students);
+
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
+        }
+        else {
+            $section_key = "rotating_section";
+        }
+        //Sort the page:
+        if ($sort === "id") {
+            $sort_key = "u.user_id";
+        }
+        elseif ($sort === "first") {
+            $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
+        }
+        elseif ($sort === "last") {
+            $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
+        }
+        else {
+            $sort_key = "u.registration_subsection";
+        }
+
+        $fp = fopen('php://temp', 'r+');
+
+        $numeric_components = [];
+        $text_components = [];
+
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
+            }
+        }
+
+        $header = [
+            "User ID",
+            "Given Name",
+            "Family Name",
+        ];
+
+        foreach ($numeric_components as $component) {
+            $header[] = $component->getTitle();
+        }
+
+        $header[] = "Total";
+
+        foreach ($text_components as $component) {
+            $header[] = $component->getTitle();
+        }
+
+        fputcsv($fp, $header);
+
+        $rows = $this->core->getQueries()->getGradedGradeables(
+            [$gradeable],
+            $student_ids,
+            null,
+            [$section_key, $sort_key, "u.user_id"]
+        );
+        foreach ($rows as $row) {
+            $user = $row->getSubmitter()->getUser();
+            $csv_row = [
+                $user->getId(),
+                $user->getDisplayedGivenName(),
+                $user->getDisplayedFamilyName(),
+            ];
+
+            $ta_grade = $row->getTaGradedGradeable();
+            $total = 0;
+            foreach ($numeric_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $component_score = $component_grade !== null ? $component_grade->getScore() : 0;
+                $csv_row[] = $component_score;
+                $total += $component_score;
+            }
+
+            $csv_row[] = $total;
+            foreach ($text_components as $component) {
+                $component_grade = $ta_grade !== null ? $ta_grade->getGradedComponent($component) : null;
+                $csv_row[] = $component_grade !== null ? $component_grade->getComment() : "";
+            }
+
+            fputcsv($fp, $csv_row);
+        }
+
+        rewind($fp);
+        $csv = stream_get_contents($fp);
+        fclose($fp);
+
+        return DownloadResponse::getDownloadResponse(
+            $csv,
+            "{$gradeable_id}.csv",
+            "application/csv"
+        );
+    }
     /**
      * @param string $gradeable_id
      *
@@ -349,8 +416,8 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("Invalid gradeable ID");
         }
 
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            return JsonResponse::getFailResponse('This gradeable is not a checkpoint or numeric text gradeable');
+        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT) {
+            return JsonResponse::getFailResponse('This gradeable is not a numeric text gradeable');
         }
         $grader = $this->core->getUser();
 
@@ -358,91 +425,164 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("You do not have permission to grade {$gradeable->getTitle()}");
         }
 
-        $num_numeric = intval($_POST['num_numeric']);
-
-        $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
+        $csv_array = preg_split("/\r\n|\n|\r/", trim($_POST['big_file']));
         $arr_length = count($csv_array);
         $return_data = [];
 
         $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
-            $temp_array = explode(',', $csv_array[$i]);
-            $data_array[] = $temp_array;
+            $data_array[] = str_getcsv($csv_array[$i]);
         }
 
-        /** @var GradedGradeable $graded_gradeable */
-        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
-            for ($j = 0; $j < $arr_length; $j++) {
-                $username = $graded_gradeable->getSubmitter()->getId();
-                if ($username !== $data_array[$j][0]) {
-                    continue;
-                }
+        if ($arr_length < 1) {
+            $msg = "CSV file is empty.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
 
-                $temp_array = [];
-                $temp_array['username'] = $username;
-                $index1 = 0;
-                $index2 = 3; //3 is the starting index of the grades in the csv
+        $column_titles = array_map('trim', $data_array[0]);
+        if (!in_array('User ID', $column_titles, true)) {
+            $msg = "CSV must include a header row with a \"User ID\" column.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
 
-                // Get the user grade for this gradeable
-                $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $col_index = array_flip($column_titles);
 
-                //Makes an array with all the values and their status.
-                foreach ($gradeable->getComponents() as $component) {
-                    $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-                    $component_grade->setGrader($grader);
-
-                    $value_temp_str = "value_" . $index1;
-                    $status_temp_str = "status_" . $index1;
-                    if (isset($data_array[$j][$index2])) {
-                        $component_data = $data_array[$j][$index2];
-                        // text component
-                        if ($component->isText()) {
-                            $component_grade->setComment($component_data);
-                            $component_grade->setGradeTime($this->core->getDateTimeNow());
-                            $temp_array[$value_temp_str] = $component_data;
-                            $temp_array[$status_temp_str] = "OK";
-                        }
-                        else {
-                            // numeric component
-                            // if the data is empty, we should just input 0. If it is not a number, we should fail.
-                            if ($component_data !== '' && !is_numeric($component_data)) {
-                                $temp_array[$value_temp_str] = $component_data;
-                                $temp_array[$status_temp_str] = "ERROR";
-                            }
-                            else {
-                                $component_data = floatval($component_data);
-                                if ($component->getUpperClamp() < $component_data) {
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "ERROR";
-                                }
-                                else {
-                                    $component_grade->setScore($component_data);
-                                    $component_grade->setGradeTime($this->core->getDateTimeNow());
-                                    $temp_array[$value_temp_str] = $component_data;
-                                    $temp_array[$status_temp_str] = "OK";
-                                }
-                            }
-                        }
-                    }
-                    $index1++;
-                    $index2++;
-                    //skips the index of the total points in the csv file
-                    if ($index1 === $num_numeric) {
-                        $index2++;
-                    }
-                }
-
-                // Reset the overall comment because we're overwriting the grade anyway
-                $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-                $return_data[] = $temp_array;
-                $j = $arr_length; //stops the for loop early to not waste resources
+        $numeric_components = [];
+        $text_components = [];
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $text_components[] = $component;
+            }
+            else {
+                $numeric_components[] = $component;
             }
         }
 
-        return JsonResponse::getSuccessResponse($return_data);
-    }
+        $present_numeric = [];
+        foreach ($numeric_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_numeric[] = $component;
+            }
+        }
+        $present_text = [];
+        foreach ($text_components as $component) {
+            if (isset($col_index[$component->getTitle()])) {
+                $present_text[] = $component;
+            }
+        }
 
+        if (count($present_numeric) === 0 && count($present_text) === 0) {
+            $msg = "CSV must include at least one recognized question column to update.";
+            $this->core->addErrorMessage($msg);
+            return JsonResponse::getFailResponse($msg);
+        }
+
+
+        for ($row_num = 1; $row_num < $arr_length; $row_num++) {
+            $row = $data_array[$row_num];
+            if (count($row) === 1 && trim($row[0]) === '') {
+                continue;
+            }
+
+            $user_id = $row[$col_index['User ID']] ?? null;
+            if ($user_id === null || trim($user_id) === '') {
+                $msg = "Row " . ($row_num + 1) . ", Column \"User ID\" is required but was empty.";
+                $this->core->addErrorMessage($msg);
+                return JsonResponse::getFailResponse($msg);
+            }
+
+            $total = 0;
+            $any_numeric_present_in_row = false;
+            foreach ($present_numeric as $component) {
+                $idx = $col_index[$component->getTitle()];
+                $val = $row[$idx] ?? '';
+                if ($val === '') {
+                    continue;
+                }
+                if (!is_numeric($val)) {
+                    $msg = "Row " . ($row_num + 1) . ", Column \"" . $component->getTitle() . "\" (column " . ($idx + 1) . ") should be a number. Found \"{$val}\".";
+                    $this->core->addErrorMessage($msg);
+                    return JsonResponse::getFailResponse($msg);
+                }
+                $total += floatval($val);
+                $any_numeric_present_in_row = true;
+            }
+        }
+
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
+            $username = $graded_gradeable->getSubmitter()->getId();
+            $matched_row = null;
+            for ($j = 1; $j < $arr_length; $j++) {
+                if (($data_array[$j][$col_index['User ID']] ?? null) === $username) {
+                    $matched_row = $data_array[$j];
+                    break;
+                }
+            }
+            if ($matched_row === null) {
+                continue;
+            }
+
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+            $temp_array = ['username' => $username];
+            $index1 = 0;
+
+            foreach ($gradeable->getComponents() as $component) {
+                $value_temp_str = "value_" . $index1;
+                $status_temp_str = "status_" . $index1;
+
+                if (!isset($col_index[$component->getTitle()])) {
+                    // If column isn't included in the CSV, leave the grading untouched.
+                    $index1++;
+                    continue;
+                }
+
+                $idx = $col_index[$component->getTitle()];
+                $component_data = $matched_row[$idx] ?? '';
+
+                if ($component_data === '') {
+                    $index1++;
+                    continue;
+                }
+
+                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
+
+                if ($component->isText()) {
+                    $component_grade->setComment($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                else {
+                    $component_data = floatval($component_data);
+                    if ($component->getUpperClamp() < $component_data) {
+                        $msg = "User \"{$username}\", Column \"" . $component->getTitle() . "\" exceeds the maximum value of " . $component->getUpperClamp() . ". Found \"{$component_data}\".";
+                        $this->core->addErrorMessage($msg);
+                        return JsonResponse::getFailResponse($msg);
+                    }
+                    $component_grade->setScore($component_data);
+                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                    $temp_array[$value_temp_str] = $component_data;
+                    $temp_array[$status_temp_str] = "OK";
+                }
+                $index1++;
+            }
+
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $return_data[] = $temp_array;
+        }
+
+        $updated_columns = array_merge(
+            array_map(fn($c) => $c->getTitle(), $present_numeric),
+            array_map(fn($c) => $c->getTitle(), $present_text)
+        );
+        return JsonResponse::getSuccessResponse([
+            'updated_students' => $return_data,
+            'updated_columns' => $updated_columns,
+        ]);
+    }
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array<mixed> $msg_array

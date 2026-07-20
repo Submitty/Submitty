@@ -108,7 +108,7 @@ const switchUser = (account) => {
     cy.logout();
     cy.login(account);
     cy.visit(['sample', 'office_hours_queue']);
-    verifyWebSocketStatus();
+    verifyWebSocketStatus(50000);
 };
 
 const studentJoinQueue = (queueName, queueCode) => {

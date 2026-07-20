@@ -112,6 +112,7 @@ gradeables:
     eg_depends_on: open_homework
     eg_depends_on_points: 0
     g_title: Locked Homework (depends on Open Homework)
+
   - g_id: locked_homework_points
     components:
       - gc_lower_clamp: 0
