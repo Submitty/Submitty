@@ -142,7 +142,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#clear_peer_matrix').click();
         cy.get('#clear_peer_matrix').then(() => {
-            cy.on('window:confirm', () => false);
+            cy.on('window:confirm', (str) => {
+                expect(str).to.equal('This will clear peer matrix. Are you sure?');
+                return false;
+            });
         });
 
         cy.get('#download_peer_csv').click();
@@ -189,7 +192,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#yes_student_download').click();
         cy.get('#yes_student_submit').click();
 
-        logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
+        logoutLogin('adamsg', ['sample', 'gradeable', 'open_peer_homework']);
         cy.get('#upload1').should('exist');
         cy.get('#submission-version-select').should('exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('not.exist');
