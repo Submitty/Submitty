@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\entities\grading_cluster\GradingCluster;
 use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
+use app\entities\grading_cluster\GradingClusterMember;
 use app\libraries\response\JsonResponse;
+use app\libraries\grading_cluster\DummySplitAlgorithm;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
-use app\libraries\FileUtils;
 
 class GradingClusterController extends AbstractController {
     /**
@@ -32,25 +34,35 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid or missing algorithm parameter.");
         }
 
-        $semester = $this->core->getConfig()->getTerm();
-        $course = $this->core->getConfig()->getCourse();
+        $em = $this->core->getCourseEntityManager();
 
-        $clustering_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json");
-
-        $clustering_job_data = [
-            "job" => "GradingClustering",
-            "semester" => $semester,
-            "course" => $course,
-            "gradeable" => $gradeable_id,
-            "algorithm" => $algorithm->value
-        ];
-
-        if (
-            (!is_writable($clustering_job_file) && file_exists($clustering_job_file))
-            || file_put_contents($clustering_job_file, json_encode($clustering_job_data, JSON_PRETTY_PRINT)) === false
-        ) {
-            return JsonResponse::getErrorResponse("Failed to write clustering job to daemon queue.");
+        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+        if ($submitters === []) {
+            return JsonResponse::getErrorResponse("No active submissions found for this gradeable.");
         }
+
+        $cluster_groups = match ($algorithm) {
+            GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
+        };
+
+        // Deleting the config cascades and deletes all associated clusters and members
+        $em->getRepository(GradingClusterConfig::class)->deleteByGradeableId($gradeable_id);
+
+        $config = new GradingClusterConfig($gradeable_id, $algorithm);
+        $em->persist($config);
+
+        foreach ($cluster_groups as $cluster_name => $members) {
+            if ($members === []) {
+                continue;
+            }
+
+            $cluster = new GradingCluster($config, $cluster_name);
+            foreach ($members as $member) {
+                new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null, (int) $member['active_version']);
+            }
+            $em->persist($cluster);
+        }
+        $em->flush();
 
         return JsonResponse::getSuccessResponse([]);
     }
@@ -67,7 +79,7 @@ class GradingClusterController extends AbstractController {
 
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
-            ->findWithClustersAndMembers($gradeable_id);
+            ->findOneBy(['gradeable_id' => $gradeable_id]);
 
         if ($config === null) {
             return JsonResponse::getSuccessResponse([
@@ -86,13 +98,16 @@ class GradingClusterController extends AbstractController {
         $result = [];
         foreach ($config->getClusters() as $cluster) {
             $valid_members = [];
-            foreach ($cluster->getValidMembers($active_versions) as $m) {
-                $valid_members[] = [
-                    'id'      => $m->getId(),
-                    'user_id' => $m->getUserId(),
-                    'team_id' => $m->getTeamId(),
-                    'active_version' => $m->getActiveVersion(),
-                ];
+            foreach ($cluster->getMembers() as $m) {
+                $member_id = $m->getUserId() ?? $m->getTeamId();
+                if (isset($active_versions[$member_id]) && $active_versions[$member_id] === $m->getActiveVersion()) {
+                    $valid_members[] = [
+                        'id'      => $m->getId(),
+                        'user_id' => $m->getUserId(),
+                        'team_id' => $m->getTeamId(),
+                        'active_version' => $m->getActiveVersion(),
+                    ];
+                }
             }
 
             $result[] = [

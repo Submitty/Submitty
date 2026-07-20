@@ -19,19 +19,4 @@ class GradingClusterConfigRepository extends EntityRepository {
             ->setParameter('gradeable_id', $gradeable_id)
             ->execute();
     }
-
-    /**
-     * Fetches a GradingClusterConfig along with all of its clusters and their members in a single query.
-     */
-    public function findWithClustersAndMembers(string $gradeable_id): ?\app\entities\grading_cluster\GradingClusterConfig {
-        return $this->getEntityManager()->createQuery('
-            SELECT c, cl, m
-            FROM \app\entities\grading_cluster\GradingClusterConfig c
-            LEFT JOIN c.clusters cl
-            LEFT JOIN cl.members m
-            WHERE c.gradeable_id = :gradeable_id
-        ')
-        ->setParameter('gradeable_id', $gradeable_id)
-        ->getOneOrNullResult();
-    }
 }
