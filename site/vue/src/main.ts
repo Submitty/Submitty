@@ -11,7 +11,7 @@ const exports = {
         args: Record<string, unknown> = {},
         events: Record<string, string> = {},
     ) {
-        const mountKey = typeof target === 'string' ? target.replace(/^#/, '') : target.id ?? target.className ?? 'unknown';
+        const mountKey = typeof target === 'string' ? target.replace(/^#/, '') : target.id ?? 'unknown';
 
         // Unmount any existing app mounted on the same target to prevent leaks
         if (mountedApps.has(mountKey)) {

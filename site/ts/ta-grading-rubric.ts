@@ -48,6 +48,7 @@ declare global {
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
+        closeMarkStatsPopup: () => void;
     }
 }
 
@@ -1856,9 +1857,25 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
         stats: stats,
         studentLinks: studentLinks,
     }, {
-        close: '() => { const el = document.querySelector(".js-received-mark-form"); if (el) { window.submitty.render(el, "component", "ta_grading/ReceivedMarkForm", { show: false, componentTitle: "", markTitle: "", stats: null, studentLinks: [] }); } }',
+        close: 'closeMarkStatsPopup',
     });
 }
+
+/**
+ * Closes the mark stats popup by re-rendering the component with show: false
+ */
+window.closeMarkStatsPopup = function () {
+    const el = document.querySelector('.js-received-mark-form');
+    if (el) {
+        void window.submitty.render(el, 'component', 'ta_grading/ReceivedMarkForm', {
+            show: false,
+            componentTitle: '',
+            markTitle: '',
+            stats: null,
+            studentLinks: [],
+        });
+    }
+};
 
 /**
  * Gets if there are any loaded unverified components

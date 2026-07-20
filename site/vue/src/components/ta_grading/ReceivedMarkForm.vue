@@ -32,10 +32,14 @@ const emit = defineEmits<{
 
 <template>
   <Popup
+    v-if="show"
     :visible="show"
     title="Mark Statistics"
     @toggle="emit('close')"
   >
+    <template #trigger>
+      <span class="hidden-trigger" />
+    </template>
     <div class="form-body">
       <h3>
         <span data-testid="question-title">{{ componentTitle }}</span>:
@@ -76,3 +80,9 @@ const emit = defineEmits<{
     </div>
   </Popup>
 </template>
+
+<style scoped>
+.hidden-trigger {
+    display: none;
+}
+</style>
