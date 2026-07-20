@@ -33,7 +33,11 @@
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
-      sudo bash -p ./.setup/install_system.sh
+      if [ $UID -ne 0 ]; then
+        exec sudo $0 "$@"
+        bash -p ./.setup/install_system.sh
+        exit $?
+      fi
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
