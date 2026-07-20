@@ -180,6 +180,15 @@ button > i.fas:hover {
     box-shadow: var(--default-box-shadow);
 }
 
+.gradeable .peer-version-conflict .indicator,
+.gradeable .peer-version-conflict .indicator i {
+    color: inherit;
+}
+
+.gradeable .peer-version-conflict i {
+    color: inherit;
+}
+
 #prev-student-navlink i,
 #next-student-navlink i {
     padding: 3px 14px;
@@ -1074,17 +1083,12 @@ tr.is_publish {
 
 .gradeable .peer-version-conflict {
     color: var(--error-alert-dark-red);
-}
-
-.gradeable .peer-version-conflict .indicator,
-.gradeable .peer-version-conflict .indicator i {
-    color: inherit;
+    border-left: 2px solid var(--error-alert-dark-red);
+    border-right: 2px solid var(--error-alert-dark-red);
 }
 
 .gradeable .peer-version-conflict {
     color: var(--error-alert-dark-red);
-    border-left: 2px solid var(--error-alert-dark-red);
-    border-right: 2px solid var(--error-alert-dark-red);
 }
 
 .gradeable .peer-version-conflict-top {
@@ -1093,10 +1097,6 @@ tr.is_publish {
 
 .gradeable .peer-version-conflict-bottom {
     border-bottom: 2px solid var(--error-alert-dark-red);
-}
-
-.gradeable .peer-version-conflict i {
-    color: inherit;
 }
 
 .gradeable #peer-grading-table {
