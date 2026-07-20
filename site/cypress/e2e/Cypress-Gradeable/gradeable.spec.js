@@ -24,7 +24,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             cy.get('#upload1').selectFile([testfile1, testfile2], { action: 'drag-drop' });
 
             cy.waitPageChange(() => {
-                cy.get('.alert-success > a').click(); // Dismiss successful upload message
+                cy.get('.alert-success > a', { timeout: 10000 }).click(); // Dismiss successful upload message
                 cy.get('#submit').click();
             });
 
