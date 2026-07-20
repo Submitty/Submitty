@@ -1891,12 +1891,17 @@ HTML;
         $components_details_array = [];
         $component_scores = [];
         $marks = [];
+        $peer_names = [];
         $peer_details = [
             "graders" => [],
             "marks_assigned" => [],
             "graded_versions" => [],
             "version_conflicts" => []
         ];
+        foreach ($peers_to_list as $peer) {
+            $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
+            $peer_names[$peer] = $peer_user->getDisplayedGivenName() . ' ' . $peer_user->getDisplayedFamilyName() . ' (' . $peer . ')';
+        }
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->isPeerComponent()) {
@@ -1914,7 +1919,7 @@ HTML;
                 $peer_details["marks_assigned"][$component_id][$peer] = $graded_component->getMarkIds();
                 $peer_details["graded_versions"][$component_id][$peer] = $graded_version;
                 $peer_details["version_conflicts"][$component_id][$peer] = $graded_version !== $active_version;
-               $component_scores[$component_id][$peer] = $graded_component->getTotalScore() ?? 0;
+                $component_scores[$component_id][$peer] = $graded_component->getTotalScore() ?? 0;
             }
             $component_details = [
                 "title" => $component->getTitle(),
@@ -1936,6 +1941,7 @@ HTML;
             [
                 "gradeable_id" => $gradeable->getId(),
                 "peers" => $peers_to_list,
+                "peer_names" => $peer_names,
                 "submitter_id" => $submitter,
                 "peer_details" => $peer_details,
                 "components" => $components_details_array,

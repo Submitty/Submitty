@@ -5,12 +5,11 @@
 {% block body %}
 	<span>
 		Select the peer grader whose grades you want to edit.
-		</br> WARNING: Delete All Grading will remove all peer grading done by this student.
 	</span>
 	<div id="peer-edit-active-version" data-active-version="{{active_version}}" hidden></div>
 	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
 		{% for peer in peers %}
-			<option value = "{{peer}}">{{peer}}</option>
+			<option value = "{{peer}}">{{peer_names[peer]}}</option>
 		{% endfor %}
 	</select>
 	{% set first_peer = true %}
@@ -30,7 +29,7 @@
 					{% set peer_has_version_conflict = true %}
 				{% endif %}
 			{% endfor %}
-	    	<button type="button" class="btn btn-danger" onclick="clearPeerMarks( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Delete All Grading For {{peer}}</button>
+	    	<button type="button" class="btn btn-danger" onclick="clearPeerMarks( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Delete All Grading by Peer Grader {{peer}} for Student {{submitter_id}}'s Submission</button>
             {% if peer_has_version_conflict %}
 	    		<button type="button" class="btn clear-peer-version-conflicts" data-peer-id="{{peer}}" onclick="resolvePeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Clear Version Conflicts</button>
 	    	{% endif %}
