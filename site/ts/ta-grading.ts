@@ -24,6 +24,7 @@ declare global {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
+        peerComponentMarksChanged (peer_id: string, component_id: string): void;
         clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
         savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
@@ -424,6 +425,10 @@ window.changeCurrentPeer = function () {
     $(`#edit-peer-components-form-${peer}`).show();
 };
 
+window.peerComponentMarksChanged = function (peer_id: string, component_id: string,) {
+    $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
+};
+
 window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
     const peer_id = $('#edit-peer-select').val();
     const url = buildCourseUrl([
@@ -475,6 +480,7 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
         success: function () {
             const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
             save_status.text('Saved');
+            $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
             void window.reloadPeerRubric(gradeable_id, getAnonId());
             setTimeout(() => {

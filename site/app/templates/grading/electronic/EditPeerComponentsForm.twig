@@ -62,7 +62,7 @@
                             {% for mark in component.marks %}
                                 <div class="row">
                                     <div class="col-no-gutters indicator">
-                                        <input type="checkbox" class="peer-edit-mark" data-component-id="{{component.id}}" data-peer-id="{{peer}}" value="{{mark}}"
+                                        <input type="checkbox" class="peer-edit-mark" data-component-id="{{component.id}}" data-peer-id="{{peer}}" value="{{mark}}" onchange="peerComponentMarksChanged('{{peer}}', '{{component.id}}')"
                                             {% if peer_details.marks_assigned is defined and
                                                 peer_details.marks_assigned[component.id][peer] is defined and
                                                 mark in peer_details.marks_assigned[component.id][peer] %}
@@ -79,7 +79,7 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn" onclick="savePeerComponent('{{submitter_id}}','{{gradeable_id}}','{{peer}}','{{component.id}}','{{csrf_token}}')">
+                        <button type="button" class="btn peer-save-component" data-component-id="{{component.id}}" data-peer-id="{{peer}}" onclick="savePeerComponent( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{component.id}}', '{{csrf_token}}')">
                             Save Component
                         </button>
                         <span class="peer-component-save-status" data-component-id="{{component.id}}" data-peer-id="{{peer}}">
