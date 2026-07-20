@@ -4028,7 +4028,7 @@ class ElectronicGraderController extends AbstractController {
             'Peer version conflicts resolved successfully'
         );
     }
-    
+
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_all_peer_version_conflicts", methods: ["POST"])]
     public function ajaxClearAllPeerVersionConflicts($gradeable_id) {
