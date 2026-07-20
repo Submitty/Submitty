@@ -104,8 +104,8 @@ describe('GradingClustering', () => {
 
         cy.wait('@createClustering');
         cy.wait('@checkClusteringStatus');
-        
-        cy.get('@wrapper').should(wrapper => {
+
+        cy.get('@wrapper').should((wrapper) => {
             expect(wrapper.emitted('clustering-status')).to.exist;
             expect(wrapper.emitted('clustering-status')).to.have.length(2);
             expect(wrapper.emitted('clustering-status')[0]).to.deep.equal(['fetching']);
@@ -126,8 +126,8 @@ describe('GradingClustering', () => {
         cy.get('button').contains('Submit').click();
 
         cy.wait('@createClustering');
-        
-        cy.get('@wrapper').should(wrapper => {
+
+        cy.get('@wrapper').should((wrapper) => {
             expect(wrapper.emitted('clustering-error')).to.exist;
             expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Creation failed']);
         });
@@ -147,8 +147,8 @@ describe('GradingClustering', () => {
 
         cy.wait('@createClustering');
         cy.wait('@checkClusteringStatus');
-        
-        cy.get('@wrapper').should(wrapper => {
+
+        cy.get('@wrapper').should((wrapper) => {
             expect(wrapper.emitted('clustering-error')).to.exist;
             expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Polling failed']);
         });
