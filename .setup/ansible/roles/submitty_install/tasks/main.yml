@@ -33,7 +33,7 @@
   ansible.builtin.shell:
     executable: "/bin/bash"
     cmd: |
-      bash -p ./.setup/install_system.sh
+      sudo bash -p ./.setup/install_system.sh
 
   args:
     chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
