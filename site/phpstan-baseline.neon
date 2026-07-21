@@ -3412,6 +3412,12 @@ parameters:
 			path: app/controllers/image_submission_files/PDFController.php
 
 		-
+			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
+			identifier: empty.notAllowed
+			count: 1
+			path: app/controllers/image_submission_files/ImageController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
