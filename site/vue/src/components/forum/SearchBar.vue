@@ -38,6 +38,7 @@ function handleKeydown(e: KeyboardEvent) {
   >
     <input
       v-model="query"
+      class="search-bar-input"
       type="text"
       placeholder="Search here..."
       aria-label="Forum Search Input Box"
@@ -64,7 +65,7 @@ function handleKeydown(e: KeyboardEvent) {
 </template>
 
 <style scoped>
-input {
+.search-bar-input {
     height: 100%;
     width: 100%;
     padding-right: 2rem;
