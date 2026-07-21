@@ -816,8 +816,8 @@ function renderBuildNotices(notice) {
         .attr('id', 'rainbow-build-notice')
         .attr('data-testid', 'rainbow-build-notice');
     notice.messages.forEach((message) => {
-    banner.append($('<p></p>').text(message));
-    container.append(banner);
+        banner.append($('<p></p>').text(message));
+        container.append(banner);
     });
 }
 
