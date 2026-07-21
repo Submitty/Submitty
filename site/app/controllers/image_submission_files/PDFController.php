@@ -1,6 +1,6 @@
 <?php
 
-namespace app\controllers\pdf;
+namespace app\controllers\image_submission_files;
 
 use app\libraries\Core;
 use app\controllers\AbstractController;
