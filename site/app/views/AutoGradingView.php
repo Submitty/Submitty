@@ -504,7 +504,7 @@ class AutoGradingView extends AbstractView {
         // Check for image annotation files
         $img_annotation_paths = [];
         foreach ($uploaded_imgs as $image_file) {
-            // Following PDFController pattern - use MD5 of anon_path for matching
+            // Following ImageController pattern - use MD5 of anon_path for matching
             $image_path_md5 = md5($image_file['path']);
 
             if (is_dir($img_annotation_dir)) {
