@@ -34,12 +34,12 @@ fi
 #################
 
 # PATHS
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
-RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
-LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_DATA_DIR=/var/local/submitty
+export CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+export RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
+export LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
+export SUBMITTY_INSTALL_DIR=/usr/local/submitty
+export SUBMITTY_DATA_DIR=/var/local/submitty
 
 
 # USERS / GROUPS
@@ -409,7 +409,7 @@ if [ ${WORKER} == 0 ]; then
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/Require host __your_domain__/Require host localhost/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require local/g" /etc/apache2/sites-available/submitty.conf
         sed -i -e "s/\*:80/*:${SUBMISSION_PORT}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
@@ -597,6 +597,10 @@ if [ ! -d "${clangsrc}" ]; then
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
 
+bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
+
+source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -662,10 +666,6 @@ if [ ${WORKER} == 1 ]; then
     fi
 fi
 
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
-
-source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
-
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
@@ -688,6 +688,17 @@ if [ ${WORKER} == 0 ]; then
     else
         echo "Submitty master database already exists"
     fi
+fi
+
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
+    chown -R root:root /etc/systemd/system/nullsmtpd.service
+    chmod 444 /etc/systemd/system/nullsmtpd.service
+    systemctl restart nullsmtpd
+    # also, set it to automatically start on boot
+    systemctl enable nullsmtpd
 fi
 
 echo Beginning Install Submitty Script
@@ -741,17 +752,6 @@ if [ ${WORKER} == 0 ]; then
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
-fi
-
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
-    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
-    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
-    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
-    chown -R root:root /etc/systemd/system/nullsmtpd.service
-    chmod 444 /etc/systemd/system/nullsmtpd.service
-    systemctl restart nullsmtpd
-    # also, set it to automatically start on boot
-    systemctl enable nullsmtpd
 fi
 
 
