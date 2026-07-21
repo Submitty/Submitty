@@ -1908,7 +1908,6 @@ HTML;
                 continue;
             }
             $component_id = $component->getId();
-            $component_details = [];
             foreach ($peers_to_list as $peer) {
                 $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
                 $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer_user);
