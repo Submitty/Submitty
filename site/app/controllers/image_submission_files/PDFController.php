@@ -14,10 +14,10 @@ class PDFController extends AbstractController {
 
     // also update in ImageController.php
     /**
-     * - If $real is false, given the real file path and the gradeable id,
-     * returns the anonymous file path to the submitted file, which contains the student's anonymous id.
-     * - If $real is true, given the anonymous path and the student's id,
-     * returns the real file path to the submitted file.
+     * If $real is false, given the real file path and the gradeable id,
+     * returns the anonymous file path to the submitted file, which contains 
+     * the student's anonymous id. If $real is true, given the anonymous path 
+     * and the student's id, returns the real file path to the submitted file.
      * @param string $file_path the path to the submission file
      * @param string $id 
      * - if $real is false, the gradeable id of the submitted file we're getting the path of
