@@ -1,4 +1,5 @@
 import UpduckButton from '@/components/forum/UpduckButton.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils';
 
 const baseProps = {
     postId: 123,
@@ -12,7 +13,7 @@ const baseProps = {
 
 describe('UpduckButton', () => {
     it('renders correct image for liked and unliked states', () => {
-        cy.mount(UpduckButton, { props: { ...baseProps, userLiked: false, postId: 123 } });
+        cy.mount(UpduckButton, { props: baseProps });
         cy.get('[data-testid="upduck-container"]').within(() => {
             cy.get('img')
                 .should('have.attr', 'src')
@@ -30,7 +31,7 @@ describe('UpduckButton', () => {
     });
 
     it('renders like count including zero and large numbers', () => {
-        cy.mount(UpduckButton, { props: { ...baseProps, likeCount: 0, postId: 5 } });
+        cy.mount(UpduckButton, { props: { ...baseProps, postId: 5 } });
         cy.get('[data-testid="like-count"]').should('have.text', '0');
 
         cy.mount(UpduckButton, { props: { ...baseProps, likeCount: 99999, postId: 6 } });
@@ -41,26 +42,20 @@ describe('UpduckButton', () => {
         cy.mount(UpduckButton, { props: { ...baseProps, likedByStaff: true, postId: 7 } });
         cy.get('[data-testid="instructor-like"]').should('be.visible');
 
-        cy.mount(UpduckButton, { props: { ...baseProps, likedByStaff: false, postId: 8 } });
+        cy.mount(UpduckButton, { props: { ...baseProps, postId: 8 } });
         cy.get('[data-testid="instructor-like"]').should('not.be.visible');
     });
 
     it('shows likers icon when showLikersIcon is true and clicking it emits show-liked-users', () => {
-        const onShowLikedUsers = cy.stub().as('onShowLikedUsers');
-
-        cy.mount(UpduckButton, { props: { ...baseProps, showLikersIcon: true, postId: 99, onShowLikedUsers } });
+        mountWithEmitSpy(UpduckButton, 'show-liked-users', { ...baseProps, showLikersIcon: true, postId: 99 });
         cy.get('[data-testid="show-upduck-list"]').should('exist').click({ force: true });
-
-        cy.get('@onShowLikedUsers').should('have.been.calledOnceWith', { postId: 99 });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', { postId: 99 });
     });
 
     it('emits toggle-like when like button is clicked', () => {
-        const onToggleLike = cy.stub().as('onToggleLike');
-
-        cy.mount(UpduckButton, { props: { ...baseProps, postId: 11, threadId: 22, currentUser: 'user2', onToggleLike } });
+        mountWithEmitSpy(UpduckButton, 'toggle-like', { ...baseProps, postId: 11, threadId: 22, currentUser: 'user2' });
         cy.get('[data-testid="upduck-button"]').click();
-
-        cy.get('@onToggleLike').should('have.been.calledOnceWith', { postId: 11, threadId: 22, currentUser: 'user2' });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', { postId: 11, threadId: 22, currentUser: 'user2' });
     });
 
     it('does not throw when no event handlers are provided', () => {
@@ -71,21 +66,17 @@ describe('UpduckButton', () => {
     });
 
     it('keyboard activation (Enter) emits toggle-like', () => {
-        const onToggleLike = cy.stub().as('onToggleLike');
-
-        cy.mount(UpduckButton, { props: { ...baseProps, postId: 201, threadId: 202, currentUser: 'user2', onToggleLike } });
+        mountWithEmitSpy(UpduckButton, 'toggle-like', { ...baseProps, postId: 201, threadId: 202, currentUser: 'user2' });
         cy.get('[data-testid="upduck-button"]').focus();
         cy.get('[data-testid="upduck-button"]').type('{enter}');
-        cy.get('@onToggleLike').should('have.been.calledOnceWith', { postId: 201, threadId: 202, currentUser: 'user2' });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', { postId: 201, threadId: 202, currentUser: 'user2' });
     });
 
     it('multiple clicks emit toggle-like multiple times', () => {
-        const onToggleLike = cy.stub().as('onToggleLike');
-
-        cy.mount(UpduckButton, { props: { ...baseProps, postId: 301, threadId: 302, currentUser: 'user2', onToggleLike } });
+        mountWithEmitSpy(UpduckButton, 'toggle-like', { ...baseProps, postId: 301, threadId: 302, currentUser: 'user2' });
         cy.get('[data-testid="upduck-button"]').click();
         cy.get('[data-testid="upduck-button"]').click();
-        cy.get('@onToggleLike').should('have.been.calledTwice');
+        cy.get('@eventHandler').should('have.been.calledTwice');
     });
 
     it('id attributes include postId for both icon and counter', () => {
@@ -102,13 +93,11 @@ describe('UpduckButton', () => {
 
     describe('edge cases', () => {
         it('handles postId = 0 without breaking ids', () => {
-            const onToggleLike = cy.stub().as('onToggleLike');
-
-            cy.mount(UpduckButton, { props: { ...baseProps, postId: 0, likeCount: 0, onToggleLike } });
+            mountWithEmitSpy(UpduckButton, 'toggle-like', { ...baseProps, postId: 0 });
             cy.get('#likeIcon_0').should('exist');
             cy.get('#likeCounter_0').should('have.text', '0');
             cy.get('[data-testid="upduck-button"]').click();
-            cy.get('@onToggleLike').should('have.been.calledOnceWith', { postId: 0, threadId: baseProps.threadId, currentUser: baseProps.currentUser });
+            cy.get('@eventHandler').should('have.been.calledOnceWith', { postId: 0, threadId: baseProps.threadId, currentUser: baseProps.currentUser });
         });
 
         it('handles negative likeCount gracefully (renders as-is)', () => {

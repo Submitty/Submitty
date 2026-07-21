@@ -50,10 +50,10 @@ const handleShowLikedUsers = () => {
       class="like-counter"
     >{{ props.likeCount }}</span>
     <span
+      v-show="props.likedByStaff"
       :id="`likedByInstructor_${props.postId}`"
       data-testid="instructor-like"
       class="liked-by-instructor"
-      :style="props.likedByStaff ? '' : 'display: none;'"
     >
       liked by teaching staff
     </span>
