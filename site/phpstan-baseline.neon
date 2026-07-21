@@ -3349,43 +3349,43 @@ parameters:
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
 			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
 			rawMessage: 'Loose comparison via "==" between string|false and string is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ImagesController::ajaxUploadImagesFiles() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\UserImagesController::ajaxUploadImagesFiles() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
-			rawMessage: 'Method app\controllers\grading\ImagesController::viewImagesPage() has no return type specified.'
+			rawMessage: 'Method app\controllers\grading\UserImagesController::viewImagesPage() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
 			rawMessage: 'Only booleans are allowed in an if condition, app\models\DisplayImage|null given.'
 			identifier: if.condNotBoolean
 			count: 1
-			path: app/controllers/grading/ImagesController.php
+			path: app/controllers/grading/UserImagesController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
