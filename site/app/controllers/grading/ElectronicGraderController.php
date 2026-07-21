@@ -3910,7 +3910,7 @@ class ElectronicGraderController extends AbstractController {
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/save_peer_component", methods: ["POST"])]
-    public function ajaxSavePeerComponent($gradeable_id) {
+    public function ajaxSavePeerComponent($gradeable_id): void {
         $submitter_id = $_POST['submitter_id'] ?? '';
         $peer_id = $_POST['peer_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
@@ -3987,7 +3987,7 @@ class ElectronicGraderController extends AbstractController {
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/resolve_peer_version_conflicts", methods: ["POST"])]
-    public function ajaxResolvePeerVersionConflicts($gradeable_id) {
+    public function ajaxResolvePeerVersionConflicts($gradeable_id): void {
         $submitter_id = $_POST['submitter_id'] ?? '';
         $peer_id = $_POST['peer_id'] ?? '';
         if ($submitter_id === '' || $peer_id === '') {
@@ -4031,7 +4031,7 @@ class ElectronicGraderController extends AbstractController {
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_all_peer_version_conflicts", methods: ["POST"])]
-    public function ajaxClearAllPeerVersionConflicts($gradeable_id) {
+    public function ajaxClearAllPeerVersionConflicts($gradeable_id): void {
         $submitter_id = $_POST['submitter_id'] ?? '';
         if ($submitter_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing submitter ID');

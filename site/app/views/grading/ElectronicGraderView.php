@@ -1908,6 +1908,7 @@ HTML;
                 continue;
             }
             $component_id = $component->getId();
+            $component_details = [];
             foreach ($peers_to_list as $peer) {
                 $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
                 $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer_user);
@@ -1921,13 +1922,11 @@ HTML;
                 $peer_details["version_conflicts"][$component_id][$peer] = $graded_version !== $active_version;
                 $component_scores[$component_id][$peer] = $graded_component->getTotalScore() ?? 0;
             }
-            $component_details = [
-                "title" => $component->getTitle(),
-                "marks" => [],
-                "max" => $component->getMaxValue(),
-                "id" => strval($component_id),
-                "extra_credit" => $component->isExtraCredit()
-            ];
+            $component_details["title"] = $component->getTitle();
+            $component_details["marks"] = [];
+            $component_details["max"] = $component->getMaxValue();
+            $component_details["id"] = strval($component_id);
+            $component_details["extra_credit"] = $component->isExtraCredit();
             foreach ($component->getMarks() as $mark) {
                 $mark_id = $mark->getId();
                 $component_details["marks"][] = $mark_id;
