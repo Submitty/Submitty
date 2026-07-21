@@ -162,7 +162,7 @@ creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
     error_exit(f'Unable to locate the submitty_admin.json credentials file at '
-               f'{creds_file}, cannot read the auth token')
+               f'{creds_file}, please contact your sysadmin.')
 
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
