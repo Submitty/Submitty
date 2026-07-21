@@ -20,18 +20,20 @@
                         <i class="grading-example-circle grader-3"></i>
                         Component graded by a limited access grader
                     </li>
-                    <li>
-                        <i class="grading-example-circle grader-peer-left-half"></i>
-                        Peer component graded by another peer grader
-                    </li>
-                    <li>
-                        <i class="grading-example-circle grader-peer-right-half"></i>
-                        Peer component graded by you
-                    </li>
-                    <li>
-                        <i class="grading-example-circle grader-4"></i>
-                        Peer component graded by another peer grader and you
-                    </li>
+                    {% if gradeable.hasPeerComponent() %}
+                        <li>
+                            <i class="grading-example-circle grader-peer-left-half"></i>
+                            Peer component graded by another peer grader
+                        </li>
+                        <li>
+                            <i class="grading-example-circle grader-peer-right-half"></i>
+                            Peer component graded by you
+                        </li>
+                        <li>
+                            <i class="grading-example-circle grader-4"></i>
+                            Peer component graded by another peer grader and you
+                        </li>
+                    {% endif %}
                     <li>
                         <i class="grading-example-circle grader-1"></i>
                         Component graded by a full access grader
