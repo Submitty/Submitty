@@ -67,6 +67,7 @@ use app\libraries\FileUtils;
  * @method array getUserIdRequirements()
  * @method array<string, mixed> getPasswordRequirements()
  * @method string getSecretSession()
+ * @method string getSecretSeedKey()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
@@ -340,6 +341,9 @@ class Config extends AbstractModel {
     /** @prop
      * @var string */
     protected $secret_session;
+    /** @prop
+     * @var string */
+    protected $secret_seed_key;
     /** @prop-read
      * @var string|null */
     protected $verified_submitty_admin_user = null;
@@ -562,7 +566,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
         }
 
-        foreach (['session'] as $key) {
+        foreach (['session', 'seed_key'] as $key) {
             $var = "secret_{$key}";
             $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
             if (empty($secrets_json[$key])) {

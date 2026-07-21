@@ -751,6 +751,7 @@ if not args.worker:
     config = OrderedDict()
     characters = string.ascii_letters + string.digits
     config['session'] = ''.join(secrets.choice(characters) for _ in range(64))
+    config['seed_key'] = ''.join(secrets.choice(characters) for _ in range(64))
     with open(SECRETS_PHP_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
     shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
