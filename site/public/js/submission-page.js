@@ -33,7 +33,7 @@ function initializeTimer(gradeableID, is_timed) {
 function syncWithServer(criticalSync) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['gradeable', gradeable_id, 'time_remaining_data']);
-    $.ajax({
+    return $.ajax({
         url,
         type: 'GET',
         processData: false,
@@ -102,20 +102,20 @@ function syncWithServer(criticalSync) {
         }
     }
 }
-function checkDeadline() {
+async function checkDeadline() {
     if (Math.abs(Date.now() - lastTime) > 5000) {
         // we need to sync back up
-        syncWithServer(true);
+        await syncWithServer(true);
     }
     if (ticks_till_update <= 0) {
-        syncWithServer(false);
+        await syncWithServer(false);
     }
     else {
         curTime += (Date.now() - lastTime);
         const time = Math.abs(Math.floor((curTime - deadline) / 1000));
         const days = Math.floor(time / (3600 * 24));
         if (document.getElementById('gradeable-time-remaining-text') !== null) {
-            if (curTime > deadline) {
+            if (curTime > deadline && deadline !== 0) {
                 return 1 + days;
             }
         }
