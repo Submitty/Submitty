@@ -58,7 +58,6 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
     });
 
     it('Should test Instructor creation, Student access, and deletion of teams', () => {
-
         // ==========================================
         // Test Instructor creation of teams
         // ==========================================
