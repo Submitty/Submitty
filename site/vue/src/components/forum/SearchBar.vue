@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import $ from 'jquery';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     csrfToken: string;
@@ -12,10 +11,6 @@ const emit = defineEmits<{
 }>();
 
 const query = ref(props.searchQuery ?? '');
-
-watch(query, (val) => {
-    $('#search-content').val(val);
-}, { immediate: true });
 
 function submitSearch() {
     const trimmed = query.value.trim();

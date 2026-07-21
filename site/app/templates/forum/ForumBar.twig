@@ -26,7 +26,7 @@
 					'args': { 'csrfToken': csrf_token, 'searchQuery': '' },
 					'class': 'search-bar-wrapper',
 					'events': {
-						'search': '() => { updateClearFilterButton(); updateThreads(true, saveFilterState); }'
+						'search': '(query) => { $("#search-content").val(query); updateClearFilterButton(); updateThreads(true, saveFilterState); }'
 					}
 				} %}
 				<div class="search-actions">

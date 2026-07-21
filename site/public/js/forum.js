@@ -2270,6 +2270,11 @@ function clearForumFilter() {
         $('#filter_unread_btn').click();
     }
     $('#search-content').val('');
+    const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
@@ -2345,6 +2350,11 @@ function setFilterState(state) {
     }
     if ('search-content' in state) {
         $('#search-content').val(state['search-content']);
+        const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
+        if (searchInput) {
+            searchInput.value = state['search-content'];
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
     }
     updateClearFilterButton();
     updateThreads(true, null);
