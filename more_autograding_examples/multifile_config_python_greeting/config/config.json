@@ -7,12 +7,12 @@
 
     // Submitty preprocesses config.json, so comments and #include are supported.
     "autograding": {
-        #include "includes/autograding_paths.jsoninc"
+        #include "includes/autograding_paths.txt"
     },
 
     "testcases": [
-        #include "includes/visible_greeting_test.jsoninc"
+        #include "includes/visible_greeting_test.txt"
         ,
-        #include "includes/hidden_greeting_test.jsoninc"
+        #include "includes/hidden_greeting_test.txt"
     ]
 }
