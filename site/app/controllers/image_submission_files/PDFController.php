@@ -12,11 +12,20 @@ class PDFController extends AbstractController {
         parent::__construct($core);
     }
 
+    // also update in ImageController.php
     /**
-     * returns the path contains the anonymous id given the gradeable id if $real is false
-     * returns the path for the submitted file given the user id if $real is true
+     * - If $real is false, given the real file path and the gradeable id,
+     * returns the anonymous file path to the submitted file, which contains the student's anonymous id.
+     * - If $real is true, given the anonymous path and the student's id,
+     * returns the real file path to the submitted file.
+     * @param string $file_path the path to the submission file
+     * @param string $id 
+     * - if $real is false, the gradeable id of the submitted file we're getting the path of
+     * - if $real is true, the user id of the user whose submitted file we are finding the path of
+     * @param bool $real whether the output string should be the real or anonymous file path
+     * @return string
      */
-    public function getPath(string $file_path, string $id, bool $real): string {
+    public function getSubmittedFilePath(string $file_path, string $id, bool $real): string {
         $path = "";
         $file_path_parts = explode("/", $file_path);
 
@@ -175,7 +184,7 @@ class PDFController extends AbstractController {
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-            $real_path = $this->getPath($file_path, $id, true);
+            $real_path = $this->getSubmittedFilePath($file_path, $id, true);
             if (!file_exists($real_path)) {
                 return JsonResponse::getErrorResponse('The PDF file could not be found');
             }

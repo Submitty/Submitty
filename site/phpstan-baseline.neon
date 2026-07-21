@@ -3403,13 +3403,13 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
-			path: app/controllers/pdf/PDFController.php
+			path: app/controllers/image_submission_files/PDFController.php
 
 		-
-			rawMessage: 'Method app\controllers\pdf\PDFController::showGraderPDFEmbedded() has no return type specified.'
+			rawMessage: 'Method app\controllers\image_submission_files\PDFController::showGraderPDFEmbedded() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/controllers/pdf/PDFController.php
+			path: app/controllers/image_submission_files/PDFController.php
 
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'

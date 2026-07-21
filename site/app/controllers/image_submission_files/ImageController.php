@@ -14,6 +14,45 @@ class ImageController extends AbstractController {
         parent::__construct($core);
     }
 
+    // also update in PDFController.php
+    /**
+     * - If $real is false, given the real file path and the gradeable id,
+     * returns the anonymous file path to the submitted file, which contains the student's anonymous id.
+     * - If $real is true, given the anonymous path and the student's id,
+     * returns the real file path to the submitted file.
+     * @param string $file_path the path to the submission file
+     * @param string $id 
+     * - if $real is false, the gradeable id of the submitted file we're getting the path of
+     * - if $real is true, the user id of the user whose submitted file we are finding the path of
+     * @param bool $real whether the output string should be the real or anonymous file path
+     * @return string
+     */
+    public function getSubmittedFilePath(string $file_path, string $id, bool $real): string {
+        $path = "";
+        $file_path_parts = explode("/", $file_path);
+
+        if ($real && str_contains($file_path, "..")) {
+            return "INVALID FILE PATH";
+        }
+
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index === 9) {
+                if ($real) {
+                    $path .= "/" . $id;
+                }
+                else {
+                    $user_id = $file_path_parts[$index];
+                    $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $id);
+                    $path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
+                }
+            }
+            else {
+                $path = $path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $path;
+    }
+
     /**
      * Load annotation JSON data for a given file path from the annotation directory
      * @param string $annotation_dir The directory containing annotation files
@@ -45,36 +84,6 @@ class ImageController extends AbstractController {
         }
 
         return $annotation_jsons;
-    }
-
-    /**
-     * returns the path contains the anonymous id given the gradeable id if $real is false
-     * returns the path for the submitted file given the user id if $real is true
-     */
-    public function getPath(string $file_path, string $id, bool $real): string {
-        $path = "";
-        $file_path_parts = explode("/", $file_path);
-
-        if ($real && str_contains($file_path, "..")) {
-            return "INVALID FILE PATH";
-        }
-
-        for ($index = 1; $index < count($file_path_parts); $index++) {
-            if ($index === 9) {
-                if ($real) {
-                    $path .= "/" . $id;
-                }
-                else {
-                    $user_id = $file_path_parts[$index];
-                    $anon_ids = $this->core->getQueries()->getSubmitterIdFromAnonId($user_id, $id);
-                    $path .= "/" . (empty($anon_ids) ? $user_id : $anon_ids[$user_id]);
-                }
-            }
-            else {
-                $path = $path . "/" . $file_path_parts[$index];
-            }
-        }
-        return $path;
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img")]
@@ -121,7 +130,7 @@ class ImageController extends AbstractController {
         $file_path = urldecode($_POST['file_path']);
 
         $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-        $real_path = $this->getPath($file_path, $id, true);
+        $real_path = $this->getSubmittedFilePath($file_path, $id, true);
         if (!file_exists($real_path)) {
             $this->core->getOutput()->renderJsonFail('The image file could not be found');
             return;
