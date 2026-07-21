@@ -33,7 +33,7 @@ describe('Test cases revolving around grade inquiries', () => {
         setGradeInquiriesForGradeable(gradeableId, gradeInquiryDeadlineDate);
         cy.get('[data-testid="grade-inquiry-dates-warning"]').should('not.be.visible');
         cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
-        cy.get('[data-testid="grade-button"]').eq(2).click();
+        cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
         cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
         cy.get('[data-testid="component-tab-36"]').click();
@@ -81,7 +81,7 @@ describe('Test cases revolving around grade inquiries', () => {
         });
 
         // student view
-        cy.login('beahaf');
+        cy.login('bitdiddle');
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST').then(() => {
             verifyWebSocketStatus();
@@ -96,14 +96,14 @@ describe('Test cases revolving around grade inquiries', () => {
         // TA / Instructor view
         cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
         cy.get('[data-testid="view-sections"]').click();
-        cy.get('[data-testid="grade-button"]').eq(2).click();
+        cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grade-inquiry-info-btn"]').click();
         cy.get('[data-testid="invalid-grade-inquiry"]').should('exist');
         cy.get('[data-testid="invalid-grade-inquiry"]').should('have.text', 'Grade inquiries will not start. Contact the instructor if this is unexpected.');
         cy.get('[data-testid="component-tab-36"]').should('not.exist');
 
         // student view
-        cy.login('beahaf');
+        cy.login('bitdiddle');
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('[data-testid="grade-inquiry-container"]').should('contain', 'There will be no grade inquiries. Contact the instructor if this is a mistake.');
     });
