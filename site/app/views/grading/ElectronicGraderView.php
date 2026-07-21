@@ -1288,7 +1288,6 @@ HTML;
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
-        // $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFEmbedded.js'));
 
         // Add MarkerJS libraries globally for image annotation
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
@@ -1594,7 +1593,6 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
-        // $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFEmbedded.js'), 'js');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
