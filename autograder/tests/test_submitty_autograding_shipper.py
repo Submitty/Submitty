@@ -1,9 +1,11 @@
 import os
 import json
 import shutil
+import tempfile
 import unittest
 import contextlib
 import copy
+from unittest.mock import MagicMock
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -344,3 +346,105 @@ class TestAutogradingShipper(unittest.TestCase):
             file for file in os.listdir(paths['checkout']) if file.startswith('failed')
         ]
         self.assertTrue(len(failed_files) == 0)
+
+
+class TestLoadAutogradingWorkersJson(unittest.TestCase):
+    """Tests for load_autograding_workers_json schema validation."""
+
+    VALID_WORKERS = {
+        "primary": {
+            "address": "localhost",
+            "username": "",
+            "num_autograding_workers": 5,
+            "enabled": True,
+            "capabilities": ["default"],
+        }
+    }
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        config_dir = os.path.join(self.temp_dir, 'config')
+        os.makedirs(config_dir)
+        self.workers_json_path = os.path.join(config_dir, 'autograding_workers.json')
+
+        self.mock_config = MagicMock()
+        self.mock_config.submitty = {'submitty_install_dir': self.temp_dir}
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def _write_workers(self, workers):
+        with open(self.workers_json_path, 'w') as f:
+            json.dump(workers, f)
+
+    def test_valid_config_loads_successfully(self):
+        """A correctly formed autograding_workers.json should load without error."""
+        self._write_workers(self.VALID_WORKERS)
+        result = shipper.load_autograding_workers_json(self.mock_config)
+        self.assertEqual(result, self.VALID_WORKERS)
+
+    def test_missing_num_autograding_workers_raises(self):
+        """Missing num_autograding_workers should raise SystemExit with a clear message."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        del workers['primary']['num_autograding_workers']
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit) as ctx:
+            shipper.load_autograding_workers_json(self.mock_config)
+        self.assertIn('num_autograding_workers', str(ctx.exception))
+
+    def test_missing_enabled_raises(self):
+        """Missing enabled field should raise SystemExit with a clear message."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        del workers['primary']['enabled']
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit) as ctx:
+            shipper.load_autograding_workers_json(self.mock_config)
+        self.assertIn('enabled', str(ctx.exception))
+
+    def test_wrong_type_for_num_workers_raises(self):
+        """num_autograding_workers as a string should raise SystemExit."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        workers['primary']['num_autograding_workers'] = "five"
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit) as ctx:
+            shipper.load_autograding_workers_json(self.mock_config)
+        self.assertIn('num_autograding_workers', str(ctx.exception))
+
+    def test_num_workers_below_minimum_raises(self):
+        """num_autograding_workers of 0 should raise SystemExit."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        workers['primary']['num_autograding_workers'] = 0
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit):
+            shipper.load_autograding_workers_json(self.mock_config)
+
+    def test_empty_capabilities_raises(self):
+        """An empty capabilities list should raise SystemExit."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        workers['primary']['capabilities'] = []
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit):
+            shipper.load_autograding_workers_json(self.mock_config)
+
+    def test_unknown_key_raises(self):
+        """An unrecognised key (e.g. a typo) should raise SystemExit."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        workers['primary']['capabilites'] = ["default"]  # common typo
+        self._write_workers(workers)
+        with self.assertRaises(SystemExit) as ctx:
+            shipper.load_autograding_workers_json(self.mock_config)
+        self.assertIn('capabilites', str(ctx.exception))
+
+    def test_multiple_workers_valid(self):
+        """Multiple valid worker entries should load successfully."""
+        workers = copy.deepcopy(self.VALID_WORKERS)
+        workers['worker2'] = {
+            "address": "192.168.1.50",
+            "username": "submitty",
+            "num_autograding_workers": 10,
+            "enabled": False,
+            "capabilities": ["default", "python"],
+        }
+        self._write_workers(workers)
+        result = shipper.load_autograding_workers_json(self.mock_config)
+        self.assertEqual(result, workers)

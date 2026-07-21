@@ -37,7 +37,17 @@ class ThreadRepository extends EntityRepository {
      * @param int[] $status
      * @return Thread[]
      */
-    public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int &$block_number, bool $scroll_down = true): array {
+    public function getAllThreads(
+        array $category_ids,
+        string $search_query,
+        array $status,
+        bool $get_deleted,
+        bool $get_merged_threads,
+        bool $filter_unread,
+        string $user_id,
+        int &$block_number,
+        bool $scroll_down = true
+    ): array {
         if ($block_number < 0) {
             return [];
         }
@@ -93,11 +103,17 @@ class ThreadRepository extends EntityRepository {
             });
         }
 
+        if (strlen($search_query) > 0) {
+            $result = array_filter($result, function ($x) use ($search_query) {
+                return $x->isSearchMatch($search_query);
+            });
+        }
+
         // if we filtered out all threads in this block, and the block was not empty,
         // recursively fetch the next block until we find a non-empty block or run out of blocks.
         if (count($result) === 0 && count($block) !== 0) {
             $block_number += $scroll_down ? 1 : -1;
-            $result = $this->getAllThreads($category_ids, $status, $get_deleted, $get_merged_threads, $filter_unread, $user_id, $block_number);
+            $result = $this->getAllThreads($category_ids, $search_query, $status, $get_deleted, $get_merged_threads, $filter_unread, $user_id, $block_number);
         }
         return $result;
     }

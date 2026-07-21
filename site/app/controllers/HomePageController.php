@@ -2,13 +2,16 @@
 
 namespace app\controllers;
 
+use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
+use app\entities\Term;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 use app\controllers\SelfRejoinController;
 
@@ -19,13 +22,20 @@ use app\controllers\SelfRejoinController;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+    /** @var array<Course> */
+    private array $courses = [];
+
     /**
      * HomePageController constructor.
      *
-     * @param Core $core
+     * @param Core $core Core Submitty application object
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $user = $this->core->getUser();
+        if ($user !== null) {
+            $this->courses = $this->core->getQueries()->getCourseForUserId($user->getId());
+        }
     }
 
     /**
@@ -45,16 +55,18 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $unarchived_courses = $this->courses;
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
         $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
         $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
-            foreach (['archived_courses', 'unarchived_courses'] as $var) {
-                $$var = array_filter($$var, function (Course $course) use ($user_id) {
-                    return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
-                });
-            }
+            $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
+
+            $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id) {
+                return $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getTerm());
+            });
         }
 
         $self_rejoin_tester = new SelfRejoinController($this->core);
@@ -104,6 +116,133 @@ class HomePageController extends AbstractController {
         );
     }
 
+    #[Route("/home/go_to_course_notifications", methods: ["POST"])]
+    public function goToCourseNotifications(): void {
+        $courses = $this->courses;
+        $course_title = $_POST['course'];
+        foreach ($courses as $course) {
+            if ($course->getTitle() === $course_title) {
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
+                $this->core->loadCourseDatabase();
+                $url = $this->core->buildCourseUrl(['notifications']);
+                $this->core->redirect($url);
+                return;
+            }
+        }
+        $this->core->addErrorMessage("Course not found.");
+        $this->core->redirect($this->core->buildUrl(['home']));
+    }
+
+    #[Route("/home/mark_seen", methods: ["POST"])]
+    public function markNotificationAsSeen(): void {
+        $courses = $this->courses;
+        $user_id = $this->core->getUser()->getId();
+        $original_config = clone $this->core->getConfig();
+        $course_title = $_POST['course'];
+        $notification_id = $_POST['notification_id'];
+        foreach ($courses as $course) {
+            if ($course->getTitle() === $course_title) {
+                $term = $course->getTerm();
+                $this->core->loadCourseConfig($term, $course_title);
+                $this->core->loadCourseDatabase();
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $notification_id);
+                break;
+            }
+        }
+        $this->core->setConfig($original_config);
+    }
+
+    /**
+     * Returns recent all recent notifications for a user,
+     * and the total count of their unseen notifications.
+     * @param int $unseen_count
+     * @return array<Notification>
+     */
+    private function getHomeNotificationData(int &$unseen_count = 0): array {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $course_name = $course->getTitle();
+            $this->core->loadCourseConfig($term, $course_name);
+            $this->core->loadCourseDatabase();
+            $course_db = $this->core->getCourseDB();
+            $course_display_name = $course->getDisplayName();
+            $results = array_merge($results, $this->core->getQueries()->getRecentUserNotifications($user_id, $term, $course_name, $course_db, $course_display_name));
+            $unseen_count += (int) $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+        }
+
+        usort($results, fn($a, $b) => $a->getElapsedTime() <=> $b->getElapsedTime());
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        $unseen_count = $unseen_count;
+        return $results;
+    }
+
+    /**
+     * Returns the counts of unseen notifications in each of the user's courses
+     * @return JsonResponse
+     */
+    #[Route("/home/get_unseen_counts", methods: ["GET"])]
+    public function getUnseenNotificationCounts(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->courses;
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term = $course->getTerm();
+            $title = $course->getTitle();
+            $this->core->loadCourseConfig($term, $title);
+            $this->core->loadCourseDatabase();
+            $count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
+            $results[] = [
+                "term" => $term,
+                "title" => $title,
+                "name" => $course->getDisplayName(),
+                "count" => $count,
+            ];
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse($results);
+    }
+
+    /**
+     * Mark notifications from 1 or multiple courses as seen
+     * @return JsonResponse
+     */
+    #[Route("/home/mark_all_seen", methods: ["POST"])]
+    public function markSeen(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $_POST['courses'] ?? [];
+
+        if (!is_array($courses)) {
+            $courses = [];
+        }
+        $original_config = clone $this->core->getConfig();
+
+        foreach ($courses as $course) {
+            $term   = $course["term"];
+            $course = $course["course"];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
+            $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+        }
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        return JsonResponse::getSuccessResponse("Marked seen");
+    }
+
     /**
      * Display the HomePageView to the student.
      *
@@ -112,7 +251,8 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-
+        $unseen_count = 0;
+        $notifications = $this->getHomeNotificationData($unseen_count);
         return new MultiResponse(
             null,
             new WebResponse(
@@ -122,7 +262,9 @@ class HomePageController extends AbstractController {
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
-                $courses["data"]["self_registration_courses"]
+                $courses["data"]["self_registration_courses"],
+                $notifications,
+                $unseen_count
             )
         );
     }
@@ -154,8 +296,21 @@ class HomePageController extends AbstractController {
             );
         }
 
+        $course_title = trim($_POST['course_title']);
+        // course title can only contain lowercase letters, digits, and the underscore character
+        // also check for "" (if only whitespace is input, it all gets trimmed)
+        if (preg_match('/[^a-z0-9_]/', $course_title) || $course_title === "") {
+            $error = "The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        $course_title = strtolower($course_title);
+
         $semester = trim($_POST['course_semester']);
-        $course_title = trim(strtolower($_POST['course_title']));
         $head_instructor = $_POST['head_instructor'];
 
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
@@ -249,7 +404,8 @@ class HomePageController extends AbstractController {
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new MultiResponse(
@@ -273,6 +429,10 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
+        $terms = $this->core->getSubmittyEntityManager()
+            ->getRepository(Term::class)
+            ->findBy([], ['name' => 'DESC']);
+
         return new MultiResponse(
             null,
             new WebResponse(
@@ -280,7 +440,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllTerms(),
+                $terms,
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -324,6 +484,7 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     #[Route("/term/new", methods: ["POST"])]
+    #[Route("/api/terms", methods: ["POST"])]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -331,28 +492,81 @@ class HomePageController extends AbstractController {
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
-        $response = new MultiResponse();
-        if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
-            $term_id = $_POST['term_id'];
-            $term_name = $_POST['term_name'];
-            $start_date = $_POST['start_date'];
-            $end_date = $_POST['end_date'];
 
-            $terms = $this->core->getQueries()->getAllTerms();
-            if (in_array($term_id, $terms)) {
-                $this->core->addErrorMessage("Term id already exists.");
-            }
-            elseif ($end_date < $start_date) {
-                $this->core->addErrorMessage("End date should be after Start date.");
-            }
-            else {
-                $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
-                $this->core->addSuccessMessage("Term added successfully.");
-            }
-            $url = $this->core->buildUrl(['home', 'courses', 'new']);
-            $response = $response->RedirectOnlyResponse(new RedirectResponse($url));
+        if (
+            !isset($_POST['term_id'])
+            || !isset($_POST['term_name'])
+            || !isset($_POST['start_date'])
+            || !isset($_POST['end_date'])
+        ) {
+            $error = "Term ID, term name, start date, or end date not set.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
         }
-        return $response;
+
+        $term_id = $_POST['term_id'];
+        $term_name = $_POST['term_name'];
+        $start_date = $_POST['start_date'];
+        $end_date = $_POST['end_date'];
+        $em = $this->core->getSubmittyEntityManager();
+        $term = $em->find(Term::class, $term_id);
+
+        if ($term !== null) {
+            $error = "Term with that ID already exists.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        elseif ($end_date < $start_date) {
+            $error = "End date should be after Start date.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        $start_date_obj = new \DateTime($start_date);
+        $end_date_obj = new \DateTime($end_date);
+        $term_length_days = $start_date_obj->diff($end_date_obj)->days;
+
+        if ($term_length_days > 360) {
+            $error = "Term length cannot exceed 360 days (this term spans $term_length_days days).";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        $term = new Term(
+            $term_id,
+            $term_name,
+            new \DateTime($start_date),
+            new \DateTime($end_date),
+        );
+        $em->persist($term);
+        $em->flush();
+        $this->core->addSuccessMessage("Term added successfully.");
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                "term_id" => $term_id,
+                "term_name" => $term_name,
+                "start_date" => $start_date,
+                "end_date" => $end_date
+            ]),
+            null,
+            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+        );
     }
 
     /**

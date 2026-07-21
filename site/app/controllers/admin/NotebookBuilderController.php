@@ -23,7 +23,8 @@ class NotebookBuilderController extends AbstractController {
         parent::__construct($core);
 
         $this->expected_owner = $this->core->getConfig()->getPhpUser();
-        $this->expected_group = $this->core->getConfig()->getCourse() . '_tas_www';
+        // the expected group should be the group who owns the course config file
+        $this->expected_group = posix_getgrgid(filegroup($this->core->getConfig()->getCourseJsonPath()))['name'];
     }
 
     /**
@@ -47,8 +48,9 @@ class NotebookBuilderController extends AbstractController {
             $autograding_config_controller = new AutogradingConfigController($this->core);
             $config_dir = $autograding_config_controller->createConfigDirectory();
 
+            $user = $this->core->getUser()->getId();
             // Verify new directory was created
-            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, $this->expected_owner, $this->expected_group);
+            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, $user, $this->expected_owner, $this->expected_group);
             if ($permission_failures) {
                 foreach ($permission_failures as $failure) {
                     $this->core->addErrorMessage($failure);
@@ -63,7 +65,7 @@ class NotebookBuilderController extends AbstractController {
             file_put_contents($json_path, '{"notebook": [], "testcases": []}');
 
             // Verify default json was created
-            $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
+            $permission_failures = FileUtils::checkForPermissionErrors($json_path, $user, $this->expected_owner, $this->expected_group);
             if ($permission_failures) {
                 foreach ($permission_failures as $failure) {
                     $this->core->addErrorMessage($failure);
@@ -106,8 +108,6 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
-        $config_string = Utils::escapeDoubleQuotes($config_string);
-
         $this->loadDependencies();
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
@@ -133,7 +133,7 @@ class NotebookBuilderController extends AbstractController {
         $this->updateGroupPermission($json_path);
 
         // Check for permission failures
-        $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
+        $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->core->getUser()->getId(), $this->expected_owner, $this->expected_group);
         if ($permission_failures) {
             return JsonResponse::getErrorResponse('An error occurred saving the modified config.json.', $permission_failures);
         }
@@ -176,6 +176,7 @@ class NotebookBuilderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/multiple-choice-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/short-answer-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/image-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/file-submission-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/itempool-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widgets/item-widget.js');
 
@@ -196,8 +197,9 @@ class NotebookBuilderController extends AbstractController {
         $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
         FileUtils::createDir($directory_path);
 
+        $user = $this->core->getUser()->getId();
         // Check for permission failures on subdirectory which will hold uploaded file
-        $permission_failures = FileUtils::checkForPermissionErrors($directory_path, $this->expected_owner, $this->expected_group);
+        $permission_failures = FileUtils::checkForPermissionErrors($directory_path, $user, $this->expected_owner, $this->expected_group);
         if ($permission_failures) {
             return JsonResponse::getErrorResponse('Failure creating sub-directory.', $permission_failures);
         }
@@ -208,7 +210,7 @@ class NotebookBuilderController extends AbstractController {
         $this->updateGroupPermission($full_path);
 
         // Check for permission failures on uploaded file
-        $permission_failures = FileUtils::checkForPermissionErrors($full_path, $this->expected_owner, $this->expected_group);
+        $permission_failures = FileUtils::checkForPermissionErrors($full_path, $user, $this->expected_owner, $this->expected_group);
         if ($permission_failures) {
             return JsonResponse::getErrorResponse('Failure uploading file.', $permission_failures);
         }
@@ -295,7 +297,7 @@ class NotebookBuilderController extends AbstractController {
 
         FileUtils::getDirContents($autograding_dir, $files);
         foreach ($files as $file) {
-            $errors = array_merge($errors, FileUtils::checkForPermissionErrors($file, $this->expected_owner, $this->expected_group));
+            $errors = array_merge($errors, FileUtils::checkForPermissionErrors($file, $this->core->getUser()->getId(), $this->expected_owner, $this->expected_group));
         }
 
         return $errors;

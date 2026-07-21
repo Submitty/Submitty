@@ -1,4 +1,5 @@
 import { initializeResizablePanels } from './resizable-panels';
+import { viewFileFullPanel } from './ta-grading';
 import {
     taLayoutDet,
     resetSinglePanelLayout,
@@ -14,6 +15,7 @@ import {
     changeMobileView,
     getSavedTaLayoutDetails,
 } from './ta-grading-panels';
+import { isSubmissionMetaFile } from './utils/file-utils';
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
@@ -132,7 +134,7 @@ function initializeTaLayout() {
     }
     else if (taLayoutDet.numOfPanelsEnabled) {
         togglePanelLayoutModes(true);
-        if (taLayoutDet.isFullLeftColumnMode && $('#silent-edit-id').length !== 0) {
+        if (taLayoutDet.isFullLeftColumnMode) {
             toggleFullLeftColumnMode(true);
         }
         // initialize the layout\
@@ -240,32 +242,28 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-    const opened_mark = window.Cookies.get('opened_mark') || '';
-    const scroll_pixel = parseFloat(window.Cookies.get('scroll_pixel') || '');
+    const open_files = window.Cookies.get('open_files') || '';
 
+    /*
+        FIX ME! testcases cookie is currently never set, so opened test
+        cases never persist. To fix, set this cookie in ta-grading.ts as
+        an array of the numbers at the end of the testcases' ids (i.e. `#testcase_${num}` )
+    */
     const testcases = window.Cookies.get('testcases') || '';
-
-    const files = window.Cookies.get('files') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
-    window.addEventListener('load', () => {
-        $(`#title-${opened_mark}`).trigger('click');
-        if (scroll_pixel > 0) {
-            const gradingRubric = document.getElementById(
-                'grading-rubric',
-            ) as HTMLElement;
-            gradingRubric.scrollTop = scroll_pixel;
-        }
-    });
-
     if (autoscroll === 'on') {
         ($('#autoscroll_id')[0] as HTMLInputElement).checked = true;
-        const files_array = JSON.parse(files) as string[];
-        files_array.forEach((element: string) => {
+        const open_files_array = JSON.parse(open_files) as string[];
+        open_files_array.forEach((element: string) => {
             const file_path = element.split('#$SPLIT#$');
             let current = $('#file-container');
+            // flags whether this path is invalid for this submission
+            // (might be valid for other submissions)
+            let invalid_path: boolean;
             for (let x = 0; x < file_path.length; x++) {
+                invalid_path = true;
                 current.children().each(function () {
                     if (x === file_path.length - 1) {
                         $(this)
@@ -303,14 +301,46 @@ function readCookies() {
                                     $(this)[0].dataset.file_name === file_path[x]
                                 ) {
                                     current = $(this);
+                                    invalid_path = false;
                                     return false;
                                 }
                             });
                     }
                 });
+                // the path does not correlate with this submission's
+                // file structure, so let's stop following it
+                if (invalid_path) {
+                    break;
+                }
             }
         });
     }
+
+    // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
+    if (autoscroll === 'on') {
+        // the number of files and folders that are open in the submissions and results browser
+        const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
+        // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)
+        const SubmissionFiles = $('#div_viewer_sd1 .openable-element-submissions').toArray().filter(
+            (element: HTMLElement) => !isSubmissionMetaFile(element.getAttribute('data-file_name') || ''),
+        );
+        if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
+            const elem = SubmissionFiles[0];
+            const fileName = elem.dataset.file_name!;
+            const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
+            if (elem.classList.contains('image-file')) {
+                // single submitted image file fills up the whole screen
+                viewFileFullPanel(fileName, fileUrl);
+            }
+            else {
+                // text file is opened as a frame, but its parent folder needs to be opened to view it
+                openDiv('sd1');
+                const viewerId = elem.getAttribute('data-viewer_id');
+                openFrame(fileName, fileUrl, viewerId);
+            }
+        }
+    }
+
     for (let x = 0; x < testcases.length; x++) {
         if (testcases[x] !== '[' && testcases[x] !== ']') {
             openAutoGrading(testcases[x]);
@@ -333,6 +363,7 @@ $(() => {
     changeMobileView();
     initializeTaLayout();
 
+    // switch between standard and mobile layout on resize
     window.addEventListener('resize', () => {
         const wasMobileView = isMobileView;
         changeMobileView();
@@ -342,10 +373,8 @@ $(() => {
         }
     });
 
+    // resize/hide the student's name in the top-left corner on resize
     window.addEventListener('resize', () => {
-        if ($('#silent-edit-id').length === 0) {
-            return;
-        }
         const name_div = $('#grading-panel-student-name');
         const panel_div = $('.panels-container');
         // have to calculate the height since the item is positioned absolutely
@@ -359,9 +388,12 @@ $(() => {
         const overlap_margin = 15;
         const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
         if (overlapping || taLayoutDet.isFullLeftColumnMode) {
-            $('#grading-panel-student-name').hide();
+            name_div.hide();
         }
     });
+
+    // manually trigger resize at init so layout matches window dimensions at first page open
+    window.dispatchEvent(new Event('resize'));
 
     // Grading panel toggle buttons
     $('.grade-panel button').click(function () {
@@ -411,7 +443,9 @@ $(() => {
     // Check for the panels status initially
     adjustGradingPanelHeader();
     const resizeObserver = new ResizeObserver(() => {
-        adjustGradingPanelHeader();
+        requestAnimationFrame(() => {
+            adjustGradingPanelHeader();
+        });
     });
     // calling it for the first time i.e initializing
     adjustGradingPanelHeader();

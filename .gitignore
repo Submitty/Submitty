@@ -16,6 +16,7 @@ __pycache__/
 *.out
 *.synctex.gz
 .coverage
+.nyc_output/
 coverage.xml
 
 
@@ -36,6 +37,7 @@ coverage.xml
 /site/incremental_build/
 /site/cypress/fixtures/copy_of_more_autograding_examples
 /site/cypress/fixtures/copy_of_sample_files
+/site/cypress/fixtures/copy_of_tutorial
 
 db_update.php
 .setup/data/random_users.txt

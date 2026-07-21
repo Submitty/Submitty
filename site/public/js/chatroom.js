@@ -1,4 +1,42 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient */
+/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient, Twig, displaySuccessMessage */
+
+/**
+ * Asynchronously load the chatroom row template
+ * @return {Promise}
+ */
+function loadChatroomTemplate(chatroomId) {
+    return new Promise((resolve, reject) => {
+        Twig.twig({
+            id: 'ChatroomRow',
+            href: '/templates/chat/ChatroomRow.twig', // This loads from public
+            allowInlineIncludes: true,
+            async: true,
+            error: function () {
+                reject();
+            },
+            load: function () {
+                resolve();
+            },
+        });
+    });
+}
+
+function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon, allowReadOnlyAfterEnd, isAdmin, isActive, base_url) {
+    const isReadOnly = !isActive && allowReadOnlyAfterEnd;
+
+    return Twig.twig({ ref: 'ChatroomRow' }).render({
+        id: chatroomId,
+        description: description,
+        title: title,
+        hostName: hostName,
+        isAllowAnon: isAllowAnon,
+        isReadOnly: allowReadOnlyAfterEnd,
+        isAdmin: isAdmin,
+        isActive: isActive,
+        baseUrl: base_url,
+        csrf_token: csrfToken,
+    });
+}
 
 function fetchMessages(chatroomId) {
     $.ajax({
@@ -94,40 +132,34 @@ function appendMessage(displayName, role, ts, content, msgID) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.message_id);
 }
 
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
                 break;
             case 'chat_close':
-                window.alert('Chatroom has been closed by the instructor.');
-                window.location.href = buildCourseUrl(['chat']);
-                break;
-            default:
-                console.error(msg);
-        }
-    };
-    window.socketClient.open(`chatroom_${chatroomId}`);
-}
+                if (msg.allow_read_only_after_end) {
+                    const messageInput = document.querySelector('.message-input');
+                    const sendButton = document.querySelector('.send-message-btn');
 
-function initChatroomListSocketClient() {
-    window.chatroomListSocketClient = new WebSocketClient();
-    window.chatroomListSocketClient.onmessage = (msg) => {
-        console.log('Received message from chatroom socket:', msg.type, msg);
-        switch (msg.type) {
-            case 'chat_open':
-                handleChatOpen(msg);
+                    messageInput.disabled = true;
+                    messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+                    sendButton.disabled = true;
+                }
+                else {
+                    window.alert('Chatroom has been closed by the instructor.');
+                    window.location.href = buildCourseUrl(['chat']);
+                }
                 break;
-            case 'chat_close': {
-                const row = document.getElementById(`chatroom-row-${msg.id}`);
-                if (row) {
-                    row.remove();
+            case 'message_delete': {
+                const msgElement = document.getElementById(msg.message_id);
+                if (msgElement) {
+                    msgElement.remove();
                 }
                 break;
             }
@@ -135,7 +167,30 @@ function initChatroomListSocketClient() {
                 console.error(msg);
         }
     };
-    window.chatroomListSocketClient.open('chatrooms');
+    window.socketClient.open('chatrooms', {
+        chatroom_id: chatroomId,
+    });
+}
+
+function initChatroomListSocketClient(user_admin, base_url) {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        const isActive = msg.type === 'chat_open';
+
+        switch (msg.type) {
+            case 'chat_open':
+            case 'chat_close':
+            case 'chat_create':
+                handleChatStateChange(msg, user_admin, isActive, base_url);
+                break;
+            case 'chat_delete':
+                removeChatroomRow(msg.chatroom_id);
+                break;
+            default:
+                console.error('Unknown message type:', msg);
+        }
+    };
+    window.socketClient.open('chatrooms');
 }
 
 function newChatroomForm() {
@@ -144,13 +199,14 @@ function newChatroomForm() {
     document.getElementById('chatroom-allow-anon').checked = true;
 }
 
-function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) {
+function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon, readOnly) {
     const form = $('#edit-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
     document.getElementById('chatroom-title-input').value = title;
     document.getElementById('chatroom-description-input').value = description;
     document.getElementById('chatroom-anon-allow').checked = allow_anon;
+    document.getElementById('edit-chatroom-read-only-allow').checked = readOnly;
 }
 
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
@@ -190,7 +246,7 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     }
 }
 
-function toggle_chatroom(chatroomId, active) {
+function toggleChatroom(chatroomId, active) {
     const form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
     if (!active || confirm('This will close the chatroom. Are you sure?')) {
         form.submit();
@@ -207,67 +263,63 @@ function showJoinMessage(message) {
     }, 3000);
 }
 
-function handleChatOpen(msg) {
+function handleChatStateChange(msg, user_admin, isActive, base_url) {
     const tableBody = document.querySelector('#chatrooms-table tbody');
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`chatroom-row-${msg.id}`)) {
-        return;
+
+    removeChatroomRow(msg.chatroom_id);
+    const rowHtml = renderChatroomRow(msg.chatroom_id, msg.description, msg.title, msg.host_name, msg.allow_anon, msg.allow_read_only_after_end, user_admin, isActive, base_url);
+    // This should be safe because the Twig template escapes all passed variables.
+    // eslint-disable-next-line no-unsanitized/method
+    tableBody.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function removeChatroomRow(chatroomId) {
+    const row = document.getElementById(`${chatroomId}`);
+    if (row) {
+        row.remove();
     }
-    const tr = document.createElement('tr');
-    tr.id = `chatroom-row-${msg.id}`;
+}
 
-    const tdTitle = document.createElement('td');
-    const spanTitle = document.createElement('span');
-    spanTitle.className = 'display-short';
-    spanTitle.title = msg.title;
-    spanTitle.textContent = msg.title.length > 30 ? `${msg.title.slice(0, 30)}...` : msg.title;
-    tdTitle.appendChild(spanTitle);
-    tr.appendChild(tdTitle);
-
-    const tdHostName = document.createElement('td');
-    tdHostName.textContent = msg.host_name;
-    tr.appendChild(tdHostName);
-
-    const tdDescription = document.createElement('td');
-    const spanDescription = document.createElement('span');
-    spanDescription.className = 'display-short';
-    spanDescription.title = msg.description;
-    spanDescription.textContent = msg.description.length > 45 ? `${msg.description.slice(0, 45)}...` : msg.description;
-    tdDescription.appendChild(spanDescription);
-    tr.appendChild(tdDescription);
-
-    const tdLinks = document.createElement('td');
-    const joinLink = document.createElement('a');
-    joinLink.href = `${msg.base_url}/${msg.id}`;
-    joinLink.className = 'btn btn-primary';
-    joinLink.textContent = 'Join';
-    tdLinks.appendChild(joinLink);
-
-    if (msg.allow_anon) {
-        tdLinks.appendChild(document.createTextNode(' '));
-        const iTag = document.createElement('i');
-        iTag.textContent = 'or';
-        tdLinks.appendChild(iTag);
-        tdLinks.appendChild(document.createTextNode(' '));
-
-        const anonJoinLink = document.createElement('a');
-        anonJoinLink.href = `${msg.base_url}/${msg.id}/anonymous`;
-        anonJoinLink.className = 'btn btn-default';
-        anonJoinLink.textContent = 'Join As Anon.';
-        tdLinks.appendChild(anonJoinLink);
+function clearChatroom(chatroomId, chatroomTitle) {
+    if (confirm('This will clear all messages in the chatroom. Are you sure?')) {
+        $.ajax({
+            url: buildCourseUrl(['chat', chatroomId, 'clear']),
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken,
+            },
+            success: function (response) {
+                try {
+                    const msg = JSON.parse(response);
+                    if (msg.status !== 'success') {
+                        console.error(msg);
+                        displayErrorMessage(msg.message || 'Something went wrong. Please try again.');
+                    }
+                    else {
+                        displaySuccessMessage(`Cleared ${chatroomTitle} sucessfully`);
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                    window.alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            },
+        });
     }
-    tr.appendChild(tdLinks);
-
-    tableBody.appendChild(tr);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
+        const { chatroomId, userId, displayName, user_admin, isAnonymous, read_only } = pageData;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
 
@@ -278,29 +330,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
-        messageInput.addEventListener('keypress', (event) => {
-            if (event.keyCode === 13 && !event.shiftKey) {
+        if (!read_only) {
+            messageInput.addEventListener('keypress', (event) => {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    event.preventDefault();
+                    sendButton.click();
+                }
+            });
+        }
+        if (!read_only) {
+            sendButton.addEventListener('click', (event) => {
                 event.preventDefault();
-                sendButton.click();
-            }
-        });
+                const messageContent = messageInput.value.trim();
+                if (messageContent === '') {
+                    alert('Please enter a message.');
+                    return;
+                }
 
-        sendButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            const messageContent = messageInput.value.trim();
-            if (messageContent === '') {
-                alert('Please enter a message.');
-                return;
-            }
+                const role = user_admin ? 'instructor' : 'student';
+                sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
 
-            const role = user_admin ? 'instructor' : 'student';
-            sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
-
-            messageInput.value = '';
-        });
+                messageInput.value = '';
+            });
+        }
+        if (read_only) {
+            messageInput.disabled = true;
+            messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
+            sendButton.disabled = true;
+        }
     }
     const chatroomsTable = document.getElementById('chatrooms-table');
-    if (chatroomsTable) {
-        initChatroomListSocketClient();
+    const allChatroomData = document.getElementById('all-chatroom-data');
+    if (chatroomsTable && allChatroomData) {
+        loadChatroomTemplate();
+        const pageData = JSON.parse(allChatroomData.textContent);
+        const { user_admin, base_url } = pageData;
+        initChatroomListSocketClient(user_admin, base_url);
     }
 });

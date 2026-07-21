@@ -144,7 +144,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param double $max_size
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true) {
+    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true, bool $has_unseen_gradeable_notification = false) {
         $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($student_view) {
             $submission_open_date->sub(new \DateInterval('PT1H'));
@@ -199,7 +199,9 @@ class SubmissionControllerTester extends BaseUnitTest {
             'depends_on_points' => null,
             'allow_custom_marks' => true,
             'any_manual_grades' => false,
-            'notifications_sent' => 0
+            'score_notifications_sent' => 0,
+            'release_notifications_sent' => false,
+            'has_unseen_gradeable_notification' => $has_unseen_gradeable_notification
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
@@ -353,6 +355,51 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $zip->addFile($file_path, substr($file_path, strlen($root_dir) + 1));
             }
         }
+    }
+
+    /**
+     * Visiting a gradeable page with an unseen gradeable notification should mark the
+     * tied notification as seen.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testShowHomeworkPageMarksNotificationAsSeenWhenUnseen(): void {
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: true);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $database_queries->expects($this->once())
+            ->method('markNotificationAsSeenByGradeableId')
+            ->with($this->equalTo('testUser'), $this->equalTo('test'));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $controller->showHomeworkPage('test');
+    }
+
+    /**
+     * Visiting a gradeable page without any unseen gradeable notifications should not
+     * mark any notifications as seen.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testShowHomeworkPageSkipsMarkSeenWhenNoUnseenNotification(): void {
+        $gradeable = $this->createMockGradeable(has_unseen_gradeable_notification: false);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable, 0);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $database_queries->expects($this->never())
+            ->method('markNotificationAsSeenByGradeableId');
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $controller->showHomeworkPage('test');
     }
 
     /**
@@ -819,6 +866,63 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'test1.txt'], $files);
+    }
+
+    /**
+     * Test that a previous file without an extension is correctly detected as conflicting
+     * with a new file that has the same base name but with an extension.
+     * Fixes issue #10047.
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testSecondVersionPreviousOverlapNoExtension() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
+        $this->addUploadFile('answers', 'old_file');
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
+        $this->assertFalse($return['status'] == 'fail');
+        $this->assertTrue($return['status'] == 'success');
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = [];
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        sort($files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'answers'], $files);
+
+        $this->addUploadFile('answers.pdf', 'new_file');
+        $_POST['previous_files'] = json_encode([['answers']]);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test', 'true', 'false');
+
+        $this->assertFalse($return['status'] == 'fail');
+        $this->assertTrue($return['status'] == 'success');
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = [];
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+            if ($file->getFilename() === 'answers.pdf') {
+                $this->assertStringEqualsFile($file->getPathname(), 'new_file');
+            }
+        }
+        sort($files);
+        $this->assertEquals(['.submit.timestamp', '.user_assignment_access.json', 'answers.pdf', 'answers_version_1'], $files);
     }
 
     /**

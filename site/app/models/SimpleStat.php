@@ -56,6 +56,7 @@ class SimpleStat extends AbstractModel {
         if (isset($details['gc_id'])) {
             $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
             $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
+            $include_withdrawn_students = ($_COOKIE['include_withdrawn_students'] ?? 'omit') === 'include';
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];
@@ -65,7 +66,7 @@ class SimpleStat extends AbstractModel {
             $this->is_peer_component = $details['gc_is_peer'];
             $this->count = $details['count'];
             $this->active_grade_inquiry_count = $details['active_grade_inquiry_count'];
-            $this->grader_info = $this->core->getQueries()->getAverageGraderScores($details['g_id'], $details['gc_id'], $details['section_key'], $details['team'], $bad_submissions_cookie, $null_section_cookie);
+            $this->grader_info = $this->core->getQueries()->getAverageGraderScores($details['g_id'], $details['gc_id'], $details['section_key'], $details['team'], $bad_submissions_cookie, $null_section_cookie, $include_withdrawn_students);
         }
         else {
             $this->component = false;

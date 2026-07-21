@@ -3,26 +3,68 @@
         <p class='green-message'>{{ incentive_message }}</p>
     </div>
 {% endif %}
-
+{% set downloadable_file_count = 0 %}
+{% for file in files %}
+    {#
+        For notebook gradeables, files in the root directory are system-generated
+        notebook metadata files and should not be counted as downloadable student
+        submissions. Student notebook files are stored within part directories,
+        so we only count files whose relative path contains at least one '/'.
+    #}
+    {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% elseif not is_notebook %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% endif %}
+{% endfor %}
+{% for file in processed_files %}
+    {% if is_notebook and (file.relative_name|split('/'))|length > 1 %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% elseif not is_notebook %}
+        {% set downloadable_file_count = downloadable_file_count + 1 %}
+    {% endif %}
+{% endfor %}
 {# Submitted files #}
 {% if student_download or is_vcs or core.getUser().accessGrading() %}
-    <h4>Submitted Files</h4>
+    {% if downloadable_file_count > 0 %}
+        <div class="submitted-files-header">
+            <h4>Submitted Files</h4>
+            <button
+                id="submission-files-toggle"
+                class="btn btn-default"
+                onclick="toggleSubmittedFiles()"
+                type="button"
+            >
+                <i 
+                    id="submission-files-toggle-icon"
+                    class="fas {% if downloadable_file_count > 10 %}fa-chevron-down{% else %}fa-chevron-up{% endif %}"
+                ></i>
+                <span id="submission-files-toggle-text">
+                    {% if downloadable_file_count > 10 %}
+                        Show All Files
+                    {% else %}
+                        Hide All Files
+                    {% endif %}
+                </span>
+            </button>
+        </div>
+    {% endif %}
     <div class="row">
-        <div class="box col-md-6" id="submitted-files">
+        {% if downloadable_file_count > 0 %}
+            <div class="box col-md-6{% if downloadable_file_count > 10 %} submitted-files-collapsed{% endif %}" id="submitted-files">
             {% for file in files %}
-                {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
                 {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                     <div class="flex-row">
                         <span>
-                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}KB)
                         </span>
                         {# view and download icons if student is permitted to access files #}
                         {% if student_download %}
                             <div>
                                 {% set extension = file.relative_name|split('.')|last|lower %}
                                 {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
-                                    <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
-                                        <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
+                                    <button class = 'btn btn-default' onclick='openSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab"> View
+                                        <i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></button>
                                 {% endif %}
                                 <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
                                     <i class="fas fa-download" title="Download the file"></i></button>
@@ -38,17 +80,17 @@
                     {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
                         <div class="flex-row">
                             <span>
-                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}KB)
                             </span>
                             {# view and download icons if student is permitted to access files #}
                             {% if student_download %}
                                 <div>
                                     {% set extension = file.relative_name|split('.')|last|lower %}
                                     {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
-                                        <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
-                                            <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
+                                        <button class = 'btn btn-default' onclick='openSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab"> View
+                                            <i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></button>
                                     {% endif %}
-                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions_processed")' aria-label="Download {{file.relative_name}}"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 </div>
                             {% endif %}
@@ -56,20 +98,27 @@
                     {% endif %}
                 {% endfor %}
             {% endif %}
-            {% if student_download and (files|length + processed_files|length) > 1 %}
+            {% if student_download and downloadable_file_count > 1 %}
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
-                     <button class = 'btn btn-primary' 
+                     <button class = 'btn btn-primary'
                         onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ submitter_id }}", "{{ display_version }}", "submission")'
                         tabindex="0"
                         aria-label="Download"
                         > Download all files
-                        <i class="fas fa-download" title="Download zip of all files"></i></button> 
+                        <i class="fas fa-download" title="Download zip of all files"></i></button>
                 </div>
             {% endif %}
         </div>
-        <div class="box col-md-6 submission-details">
+        {% endif %}
+        {% if downloadable_file_count > 10 %}
+            <div class="box col-md-12 submission-details" id="submission-details">
+        {% elseif downloadable_file_count > 0 %}
+            <div class="box col-md-6 submission-details" id="submission-details">
+        {% else %}
+            <div class="box col-md-12 submission-details" id="submission-details">
+        {% endif %}
             {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
                 <span class="flex-row">
                     <span>First access timestamp:</span>

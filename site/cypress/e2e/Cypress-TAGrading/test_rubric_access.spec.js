@@ -14,7 +14,7 @@ describe('Rubric Access Test', () => {
         cy.get('[data-testid="popup-window"]').should('exist');
         cy.get('#agree-button').click();
         cy.get('[data-testid="view-sections"]').click();
-        cy.get('[data-testid="grade-button"]').eq(12).click();
+        cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grading-rubric-btn"]').click();
         const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
         cy.get('#attachment-upload').selectFile(filePath);

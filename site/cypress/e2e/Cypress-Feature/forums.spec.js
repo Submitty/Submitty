@@ -1,4 +1,4 @@
-import { buildUrl, getApiKey, verifyWebSocketFunctionality } from '../../support/utils';
+import { buildUrl, getApiKey, verifyWebSocketFunctionality, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
@@ -131,6 +131,7 @@ describe('Forum Thread Lock Date Functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        verifyWebSocketStatus();
     });
 
     it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
@@ -219,7 +220,7 @@ const submitCreateThreadRequest = (title, content) => {
         'markdown_status': 0,
         'lock_thread_date': '',
         'thread_post_content': content,
-        'cat[]': '2', // "Question" category
+        'cat[]': '2', // "Homework Help" category
         'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
         'thread_status': -1,
     };
@@ -344,6 +345,7 @@ describe('Should test WebSocket functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        verifyWebSocketStatus();
         removeThread(title5);
     });
 
@@ -356,7 +358,7 @@ describe('Should test WebSocket functionality', () => {
             cy.get('@thread').within(() => {
                 cy.get('[data-testid="thread-list-item"]').should('contain', title5);
                 cy.get('.thread-content').should('contain', content4);
-                cy.get('.label_forum').should('contain', 'Question');
+                cy.get('.label_forum').should('contain', 'Homework Help');
             });
 
             // Verify the server response data matches the DOM components
@@ -576,5 +578,28 @@ describe('Should test WebSocket functionality', () => {
         cy.get('@instructorUnlike').then(() => {
             removeThread(title5);
         });
+    });
+});
+
+describe('Should test Search functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+    });
+    it('Should find posts containing \'Homework 1\'', () => {
+        cy.get('[data-testid="search-content-input"]').type('Homework 1');
+        cy.get('[data-testid="search-submit"]').click();
+        cy.get('#thread_list').contains('Homework 1 not running');
+        cy.get('#thread_list').contains('Homework 1 print clarification');
+        cy.get('#thread_list').contains('Homework 1 has been posted on the course website.');
+        cy.get('#thread_list').contains('Python Tutorials').should('not.exist');
+        cy.get('#thread_list').contains('Course syllabus').should('not.exist');
+
+        cy.go('back');
+        cy.get('#thread_list').contains('Homework 1 not running');
+        cy.get('#thread_list').contains('Homework 1 print clarification');
+        cy.get('#thread_list').contains('Homework 1 has been posted on the course website.');
+        cy.get('#thread_list').contains('Python Tutorials');
+        cy.get('#thread_list').contains('Course syllabus');
     });
 });

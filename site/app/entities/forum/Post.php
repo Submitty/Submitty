@@ -200,6 +200,10 @@ class Post {
         })->toArray());
     }
 
+    public function isSearchMatch(string $search_query): bool {
+        return str_contains(strtolower($this->content), strtolower($search_query));
+    }
+
     /**
      * Saves a version as a PostHistory entity
      * @param \app\entities\UserEntity $edit_author

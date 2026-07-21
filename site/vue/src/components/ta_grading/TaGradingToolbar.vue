@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
@@ -65,6 +64,7 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     button-id="two-panel-mode-btn"
     title="Toggle the two panel mode"
     optional-spanid="two-panel-mode-btn"
+    optional-test-id="panel-selector-toggle"
   />
 
   <NavigationButton

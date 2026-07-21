@@ -1,31 +1,14 @@
-/* global sortTable, escapeSpecialChars, buildCourseUrl */
+/* global escapeSpecialChars, buildCourseUrl */
+
 $(document).ready(() => {
-    $('th').click(function () {
-        let table_id = 0;
-        switch ($(this).attr('id')) {
-            case 'user_sort':
-                table_id = 0;
-                break;
-            case 'total_posts_sort':
-                table_id = 1;
-                break;
-            case 'total_threads_sort':
-                table_id = 2;
-                break;
-            case 'total_deleted_sort':
-                table_id = 3;
-                break;
-            default:
-                table_id = 0;
-        }
-        if ($(this).html().indexOf(' ↓') > -1) {
-            sortTable(table_id, true);
-        }
-        else {
-            sortTable(table_id, false);
-        }
-    });
-    $('button').click(function () {
+    const forumStatsTable = $('#forum-stats-table');
+
+    // updateSortIcons();
+
+    forumStatsTable.on('click', 'button[data-action]', function (event) {
+        event.preventDefault();
+
+        const button = $(this);
         const action = $(this).data('action');
         const posts = $(this).data('posts');
         const ids = $(this).data('id');
@@ -33,31 +16,49 @@ $(document).ready(() => {
         const thread_ids = $(this).data('thread_id');
         const thread_titles = $(this).data('thread_titles');
         if (action === 'expand') {
+            let currentRow = button.closest('tr');
             for (let i = 0; i < posts.length; i++) {
                 let post_string = posts[i];
                 post_string = escapeSpecialChars(post_string);
                 let thread_title = thread_titles[i];
                 thread_title = escapeSpecialChars(thread_title);
-                $(this).parent().parent().parent().append(`<tr id="${ids[i]}"><td></td><td>${timestamps[i]}</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td></tr> `);
+                const expandedRow = $(`
+                    <tr id="${ids[i]}" class="forum-stats-detail-row">
+                        <td></td>
+                        <td>${timestamps[i]}</td>
+                        <td style="cursor:pointer;" data-type="thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td>
+                        <td colspan="2" style="cursor:pointer; text-align:left;" data-type="post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td>
+                        <td></td>
+                    </tr>
+                `);
+                currentRow.after(expandedRow);
+                currentRow = expandedRow;
             }
-            $(this).text('Collapse');
-            $(this).data('action', 'collapse');
-            $('td').click(function () {
-                if ($(this).data('type') === 'post' || $(this).data('type') === 'thread') {
-                    const id = $(this).data('thread_id');
+            button.text('Collapse');
+            button.data('action', 'collapse');
+            $('td').click(() => {
+                if (button.data('type') === 'post' || button.data('type') === 'thread') {
+                    const id = button.data('thread_id');
                     const url = buildCourseUrl(['forum', 'threads', id]);
-                    window.open(url);
+                    window.open(url, '_blank');
                 }
             });
         }
         else {
             for (let i = 0; i < ids.length; i++) {
                 const item = document.getElementById(ids[i]);
-                item.remove();
+                if (item !== null) {
+                    item.remove();
+                }
             }
-            $(this).text('Expand');
-            $(this).data('action', 'expand');
+            button.text('Expand');
+            button.data('action', 'expand');
         }
-        return false;
+    });
+
+    forumStatsTable.on('click', 'td[data-type="post"], td[data-type="thread"]', (event) => {
+        const id = $(event.currentTarget).data('thread_id');
+        const url = buildCourseUrl(['forum', 'threads', id]);
+        window.open(url, '_blank');
     });
 });

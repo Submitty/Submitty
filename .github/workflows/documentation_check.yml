@@ -7,6 +7,9 @@ on:
     # * new commits are added (to ensure failing title blocks merging)
     types: [opened, reopened, edited, synchronize]
 
+permissions:
+  contents: read
+
 jobs:
   title-check:
     name: Title Check

@@ -1,3 +1,4 @@
+/* global initializeResizablePanels, CodeMirror, buildCourseUrl */
 // MODEL + CONTROLLERS /////////////////////////////////////////////////////////
 /**
  * On document.ready, JS in PlagiarismResult.twig will call this function
@@ -7,11 +8,9 @@
  * @param {array} user_1_list
  */
 function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_list) {
-    // eslint-disable-next-line no-undef
     initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
 
     // initialize editors
-    // eslint-disable-next-line no-undef
     const editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
         readOnly: true,
@@ -19,7 +18,6 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
         lineWrapping: true,
         autoRefresh: true,
     });
-    // eslint-disable-next-line no-undef
     const editor2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
         lineNumbers: true,
         readOnly: true,
@@ -237,7 +235,6 @@ function user2DropdownChanged(state) {
 }
 
 function loadUser1VersionDropdownList(state) {
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist'])}?user_id_1=${state.user_1_selected.user_id}`;
     requestAjaxData(url, (data) => {
         state.user_1_version_dropdown_list = data;
@@ -255,7 +252,6 @@ function loadUser1VersionDropdownList(state) {
 
 function loadUser2DropdownList(state) {
     // acquire ajax data for user 2 dropdown and send to the refresher
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'match'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}`;
     requestAjaxData(url, (data) => {
         state.user_2_dropdown_list = data;
@@ -280,7 +276,6 @@ function loadConcatenatedFileForEditor(state, editor) {
     // to the selected user + version in panel number #editor
     let url = '';
     if (editor === 1) {
-        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
     }
     else { // editor 2
@@ -289,7 +284,6 @@ function loadConcatenatedFileForEditor(state, editor) {
             state.editor2.refresh();
             return;
         }
-        // eslint-disable-next-line no-undef
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_2_selected.user_id}&version=${state.user_2_selected.version}&source_gradeable=${state.user_2_selected.source_gradeable}`;
     }
     requestAjaxData(url, (data) => {
@@ -327,7 +321,6 @@ function loadColorInfo(state) {
         return;
     }
 
-    // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'colorinfo'])}?user_id_1=${state.user_1_selected.user_id}&version_user_1=${state.user_1_selected.version}&user_id_2=${state.user_2_selected.user_id}&version_user_2=${state.user_2_selected.version}&source_gradeable_user_2=${state.user_2_selected.source_gradeable}`;
     requestAjaxData(url, (data) => {
         state.color_info = data;

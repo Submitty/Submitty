@@ -115,3 +115,7 @@ th {
 #times-helped-cell {
     background-color: var(--standard-vibrant-green);
 }
+
+.name-change-label {
+    margin-top: 12px;
+}

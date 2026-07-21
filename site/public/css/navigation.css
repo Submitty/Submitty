@@ -87,8 +87,13 @@
 }
 
 .seating-chart-table {
+    /* stylelint-disable-next-line color-named */
     border: 2px solid black;
     background: var(--standard-focus-cornflowe-blue);
+}
+
+span.peer-progress-bar {
+    background: var(--standard-mediumorchid);
 }
 
 @media (max-width: 401px) {
@@ -114,6 +119,7 @@
 
     .course-section-heading:hover {
         background: var(--standard-medium-blue);
+        /* stylelint-disable-next-line color-named */
         color: white;
         transform: translate(0, -5px);
     }
@@ -124,6 +130,7 @@
 
     .panel-head-active {
         background: var(--submitty-logo-blue);
+        /* stylelint-disable-next-line color-named */
         color: white;
     }
 

@@ -46,30 +46,41 @@ def schema_validation(test):
         traceback.print_exc()
         raise
 
-@testcase
-def solution(test):
-    cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
-                     os.path.join(test.testcase_path, "data")])
-    test.run_run()
-    test.run_validator()
-
-    test.diff("grade.txt", "grade.txt_solution", "-b")
-    test.json_diff("results.json", "results.json_solution")
-
-
-
-@testcase
-def buggy(test):
-    cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy.py"),
-                     os.path.join(test.testcase_path, "data")])
-    test.run_run()
-    test.run_validator()
-
-    test.diff("grade.txt", "grade.txt_buggy", "-b")
-    test.json_diff("results.json", "results.json_buggy")
-
-
+####################################################################################
+##
+## FIXME - With issue  https://github.com/Submitty/Submitty/issues/11784  and
+##    PR  https://github.com/Submitty/Tutorial/pull/56
+##    our static analysis count program deprecated support for counting
+##    loop depth.  When/if we restore this feature functionality, we can
+##    restore these tests.
+##
+####################################################################################
+#
+# @testcase
+# def solution(test):
+#     cleanup(test)
+#     subprocess.call(["cp",
+#                      os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
+#                      os.path.join(test.testcase_path, "data")])
+#     test.run_run()
+#     test.run_validator()
+# 
+#     test.diff("grade.txt", "grade.txt_solution", "-b")
+#     test.json_diff("results.json", "results.json_solution")
+# 
+# 
+# 
+# @testcase
+# def buggy(test):
+#     cleanup(test)
+#     subprocess.call(["cp",
+#                      os.path.join(SAMPLE_SUBMISSIONS, "buggy.py"),
+#                      os.path.join(test.testcase_path, "data")])
+#     test.run_run()
+#     test.run_validator()
+# 
+#     test.diff("grade.txt", "grade.txt_buggy", "-b")
+#     test.json_diff("results.json", "results.json_buggy")
+# 
+# 
+####################################################################################

@@ -149,7 +149,7 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
             $values['has_due_date'] = $dates['has_due_date'] ?? true;
-            $values['has_release_date'] = $dates['has_released_date'] ?? true;
+            $values['has_release_date'] = $dates['has_release_date'] ?? true;
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
@@ -324,7 +324,7 @@ class AdminGradeableController extends AbstractController {
                         break;
                 }
                 if ($gradeable->isUsingSubdirectory()) {
-                    $vcs_values['subdirectory'] = $gradeable->getVcsSubdirectory();
+                    $vcs_values['vcs_subdirectory'] = $gradeable->getVcsSubdirectory();
                 }
                 $return_json['vcs'] = $vcs_values;
             }
@@ -385,8 +385,9 @@ class AdminGradeableController extends AbstractController {
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
-            'notifications_sent' => 0,
-            'notifications_pending' => 0
+            'score_notifications_sent' => 0,
+            'score_notifications_pending' => 0,
+            'release_notifications_sent' => false
         ]);
     }
 
@@ -543,6 +544,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
+            $this->core->getOutput()->addInternalJs('gradeable-config-utils.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
@@ -613,8 +615,9 @@ class AdminGradeableController extends AbstractController {
             'is_bulk_upload' => $gradeable->isBulkUpload(),
             'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'config_files' => $config_files,
-            'notifications_sent' => $gradeable->getNotificationsSent(),
-            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
+            'score_notifications_sent' => $gradeable->getScoreNotificationsSent(),
+            'score_notifications_pending' => $this->core->getQueries()->getPendingGradeableScoreNotifications($gradeable->getId()),
+            'release_notifications_sent' => $gradeable->getReleaseNotificationsSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1404,7 +1407,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getConfig()->getTerm(),
                 $this->core->getConfig()->getCourse(),
                 $repo_name,
-                $subdir
+                $subdir,
+                $this->core->getConfig()->getSubmittyPath()
             );
         }
 
@@ -1480,7 +1484,7 @@ class AdminGradeableController extends AbstractController {
             'precision',
             'grader_assignment_method',
             'depends_on_points',
-            'notifications_sent'
+            'score_notifications_sent'
         ];
 
         $array_properties = [
@@ -1591,8 +1595,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
             }
 
-            if ($prop === 'notifications_sent' && $post_val === "0" && $gradeable->getNotificationsSent() > 0) {
-                $this->core->getQueries()->resetGradeableNotifications($gradeable);
+            if ($prop === 'score_notifications_sent' && $post_val === "0" && $gradeable->getScoreNotificationsSent() > 0) {
+                $this->core->getQueries()->resetGradeableScoreNotifications($gradeable);
             }
 
             if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets, true)) {
@@ -1712,8 +1716,7 @@ class AdminGradeableController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "BuildConfig",
@@ -1731,9 +1734,8 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory) {
-        // FIXME:  should use a variable instead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+    public static function enqueueGenerateRepos(string $semester, string $course, string $g_id, string $subdirectory, string $submittyPath) {
+        $config_build_file = FileUtils::joinPaths($submittyPath, "daemon_job_queue", "generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json");
 
         $config_build_data = [
             "job" => "RunGenerateRepos",
@@ -1817,23 +1819,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($status);
     }
 
-    /**
-     * Shifts all dates in the array up to and including $date_prop to be no later than $time
-     * @param array $dates
-     * @param string $date_prop
-     * @param \DateTime $time
-     */
-    private function shiftDates(array &$dates, string $date_prop, \DateTime $time) {
-        foreach (Gradeable::date_validated_properties as $d) {
-            if ($dates[$d] > $time) {
-                $dates[$d] = $time;
-            }
-            if ($date_prop === $d) {
-                break;
-            }
-        }
-    }
-
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")]
     public function openquickLink($gradeable_id, $action) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -1845,7 +1830,7 @@ class AdminGradeableController extends AbstractController {
         if ($action === "release_grades_now") {
             if ($gradeable->hasReleaseDate()) {
                 if ($dates['grade_released_date'] > $now) {
-                    $this->shiftDates($dates, 'grade_released_date', $now);
+                    $dates['grade_released_date'] = $now;
                     $message .= "Released grades for ";
                     $success = true;
                 }
@@ -1861,7 +1846,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
-                $this->shiftDates($dates, 'ta_view_start_date', $now);
+                $dates['ta_view_start_date'] = $now;
                 $message .= "Opened TA access to ";
                 $success = true;
             }
@@ -1872,7 +1857,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
-                $this->shiftDates($dates, 'grade_start_date', $now);
+                $dates['grade_start_date'] = $now;
                 $message .= "Opened grading for ";
                 $success = true;
             }
@@ -1883,7 +1868,7 @@ class AdminGradeableController extends AbstractController {
         }
         elseif ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
-                $this->shiftDates($dates, 'submission_open_date', $now);
+                $dates['submission_open_date'] = $now;
                 $message .= "Opened student access to ";
                 $success = true;
             }
@@ -1895,7 +1880,7 @@ class AdminGradeableController extends AbstractController {
         elseif ($action === "close_submissions") {
             if ($gradeable->hasDueDate()) {
                 if ($dates['submission_due_date'] > $now) {
-                    $this->shiftDates($dates, 'submission_due_date', $now);
+                    $dates['submission_due_date'] = $now;
                     $message .= "Closed assignment ";
                     $success = true;
                 }

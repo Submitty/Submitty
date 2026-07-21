@@ -201,6 +201,13 @@ class Thread {
         });
     }
 
+    public function isSearchMatch(string $search_query): bool {
+        return str_contains(strtolower($this->title), strtolower($search_query)) ||
+               array_any($this->posts->toArray(), function ($x) use ($search_query) {
+                return $x->isSearchMatch($search_query);
+               });
+    }
+
     public function isFavorite(string $user_id): bool {
         return $this->favorers->map(function ($x) {
             return $x->getUserId();

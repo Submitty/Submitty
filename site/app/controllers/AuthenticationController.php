@@ -59,6 +59,7 @@ class AuthenticationController extends AbstractController {
         }
 
         Utils::setCookie('submitty_session', '', time() - 3600);
+        Utils::setCookie('submitty_websocket_token', '', time() - 3600);
         // Remove all history for checkpoint gradeables
         foreach (array_keys($_COOKIE) as $cookie) {
             if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
@@ -351,12 +352,16 @@ EMAIL;
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
+        $form_values = $_SESSION['create_account_form_values'] ?? [];
+        unset($_SESSION['create_account_form_values']);
         return new WebResponse(
             'Authentication',
             'signupForm',
             [
                 'accepted_emails' => $this->core->getConfig()->getAcceptedEmails(),
-                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements()
+                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements(),
+                'password_requirements' => $this->core->getConfig()->getPasswordRequirements(),
+                'form_values' => $form_values
             ]
         );
     }
@@ -459,32 +464,33 @@ EMAIL;
         $confirm_password = $_POST['confirm_password'];
         $given_name = $_POST['given_name'];
         $family_name = $_POST['family_name'];
+        $form_values = [
+            'email' => $email,
+            'user_id' => $user_id,
+            'given_name' => $given_name,
+            'family_name' => $family_name
+        ];
         $user_exists = $this->core-> getQueries()->getUserIdEmailExists($email, $user_id);
         $unverified_users = UnverifiedUserController::getUnverifiedUsers($this->core, $email, $user_id);
 
         if ($user_exists || count($unverified_users) !== 0) {
-            $this->core->addErrorMessage('User ID or email is already attached with an account.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            return $this->redirectToSignupForm('User ID or email is already attached with an account.', $form_values);
         }
 
         if ($password !== $confirm_password) {
-            $this->core->addErrorMessage('Passwords did not match.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            return $this->redirectToSignupForm('Passwords did not match.', $form_values);
         }
 
-        if (!Utils::isValidPassword($password)) {
-            $this->core->addErrorMessage('Password does not meet the requirements.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+        if (!Utils::isValidPassword($password, $this->core->getConfig()->getPasswordRequirements())) {
+            return $this->redirectToSignupForm('Password does not meet the requirements.', $form_values);
         }
 
         if (!Utils::isAcceptedEmail($this->core->getConfig()->getAcceptedEmails(), $email)) {
-            $this->core->addErrorMessage('This email is not accepted.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            return $this->redirectToSignupForm('This email is not accepted.', $form_values);
         }
 
         if (!Utils::isAcceptedUserId($this->core->getConfig()->getUserIdRequirements(), $user_id, $given_name, $family_name, $email)) {
-            $this->core->addErrorMessage('This user id does not meet the requirements.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            return $this->redirectToSignupForm('This user id does not meet the requirements.', $form_values);
         }
         $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
 
@@ -507,8 +513,16 @@ EMAIL;
         }
         catch (\Exception $e) {
             Logger::error($e);
-            $this->core->addErrorMessage($e->getMessage() . ' Failed to create the account.');
-            return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+            return $this->redirectToSignupForm($e->getMessage() . ' Failed to create the account.', $form_values);
         }
+    }
+
+    /**
+     * @param array{email: string, user_id: string, given_name: string, family_name: string} $form_values
+     */
+    private function redirectToSignupForm(string $message, array $form_values): RedirectResponse {
+        $this->core->addErrorMessage($message);
+        $_SESSION['create_account_form_values'] = $form_values;
+        return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
     }
 }

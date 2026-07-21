@@ -1,4 +1,4 @@
-/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
+/* global MultipleChoiceWidget, MarkdownWidget, ShortAnswerWidget, ImageWidget, FileSubmissionWidget, ItempoolWidget, ItemWidget, getBadItemNames, displayErrorMessage */
 /* exported AbstractBuilder */
 
 class AbstractBuilder {
@@ -28,6 +28,9 @@ class AbstractBuilder {
                         break;
                     case 'Image':
                         this.widgetAdd(new ImageWidget());
+                        break;
+                    case 'File Submission':
+                        this.widgetAdd(new FileSubmissionWidget());
                         break;
                     case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
@@ -89,6 +92,9 @@ class AbstractBuilder {
                         break;
                     case 'image':
                         widget = new ImageWidget();
+                        break;
+                    case 'file_submission':
+                        widget = new FileSubmissionWidget();
                         break;
                     case 'item':
                         widget = new ItemWidget();

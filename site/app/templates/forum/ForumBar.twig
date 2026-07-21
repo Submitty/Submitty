@@ -16,12 +16,17 @@
 	<div class="toolbar">
 		<div class="toolbar-left">
 			{% if thread_exists %}
-			<form id="search_block" method="post" action="{{ search_url }}">
+			<form id="forum-search-form" action="javascript:void(0);" data-ays-ignore="true">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search-content" id="search-content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<div class="search-input-wrapper">
+					<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" data-ays-ignore="true" />
+					<button type="button" title="Clear search" id="search-clear" aria-label="Clear search" data-ays-ignore="true">
+						<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+					</button>
+				</div>
 				<div class="search-actions">
-					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
+					<button type="button" name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
 						Search
 					</button>
 
@@ -40,12 +45,13 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					<a id="clear_filter_button" class="text-decoration-none key_to_click clear-filter-button" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
 		</div>
 		<div class="toolbar-right">
+			{% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton' } %}
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">
 				<div class="btn-group">
@@ -66,7 +72,7 @@
 						{% endfor %}
 						{% if core.getUser().accessGrading() %}
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" >Edit Categories</a>
+							<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" data-testid="edit-categories-link">Edit Categories</a>
 						{% endif %}
 						{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 							<div class="dropdown-divider"></div>
@@ -158,6 +164,8 @@
 
 	$( document ).ready(function() {
 		loadFilterHandlers();
+		updateThreads(true, null);
+		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
@@ -179,11 +187,7 @@
 		$('#unread').prop("checked", {{cookie_selected_unread_value}});
 
 		unread_marked = checkUnread();
-
-		if(filters_applied.length > 0 || unread_marked ){
-			$('#forum_filter_bar').css('display', 'inline-block');
-			$('#clear_filter_button').css('visibility', 'visible');
-		}
+		updateClearFilterButton();
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
 			$("#{{display_option }}_label").addClass('active');

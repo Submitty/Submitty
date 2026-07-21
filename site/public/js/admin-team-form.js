@@ -248,6 +248,13 @@ function getTeamFormMultipleInvitesWarningString() {
             </div>`;
 }
 
+function initTeamMemberAutocomplete(member_element, student_full, form = $('#admin-team-form')) {
+    member_element.autocomplete({
+        source: student_full,
+    });
+    member_element.autocomplete('option', 'appendTo', form);
+}
+
 function removeTeamMemberInput(i) {
     const removed_member_element = $(`#user_id_${i}`);
     // remove the Remove button associated with this member;
@@ -258,9 +265,7 @@ function removeTeamMemberInput(i) {
 
     // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    removed_member_element.autocomplete({
-        source: student_full,
-    });
+    initTeamMemberAutocomplete(removed_member_element, student_full);
 }
 
 function approveTeamMemberInput(i) {
@@ -282,9 +287,7 @@ function approveTeamMemberInput(i) {
 
     // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    new_member_element.autocomplete({
-        source: student_full,
-    });
+    initTeamMemberAutocomplete(new_member_element, student_full);
 }
 
 function addTeamMemberInput(old, i) {
@@ -309,9 +312,7 @@ function addTeamMemberInput(old, i) {
 
     // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
-    $(`#user_id_${i}`).autocomplete({
-        source: student_full,
-    });
+    initTeamMemberAutocomplete($(`#user_id_${i}`), student_full);
 }
 
 function importTeamForm() {

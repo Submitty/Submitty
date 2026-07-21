@@ -3,6 +3,7 @@
 --
 
 
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -443,6 +444,7 @@ CREATE TABLE public.courses (
     owner_name character varying(255) NOT NULL,
     self_registration_type smallint DEFAULT 0,
     default_section_id character varying(255),
+    unarchivable boolean DEFAULT false,
     CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
@@ -629,6 +631,17 @@ CREATE TABLE public.migrations_system (
 
 
 --
+-- Name: notification_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notification_default (
+    user_id character varying NOT NULL,
+    term character varying NOT NULL,
+    course character varying NOT NULL
+);
+
+
+--
 -- Name: saml_mapped_users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -733,6 +746,7 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
+    date_format character varying(3) DEFAULT 'YMD'::character varying,
     CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
     CONSTRAINT user_preferred_givenname_not_empty CHECK (((user_preferred_givenname)::text <> ''::text)),
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
@@ -893,6 +907,14 @@ ALTER TABLE ONLY public.migrations_master
 
 ALTER TABLE ONLY public.migrations_system
     ADD CONSTRAINT migrations_system_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notification_default notification_default_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notification_default
+    ADD CONSTRAINT notification_default_pkey PRIMARY KEY (user_id);
 
 
 --
@@ -1112,4 +1134,5 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 --
 -- PostgreSQL database dump complete
 --
+
 

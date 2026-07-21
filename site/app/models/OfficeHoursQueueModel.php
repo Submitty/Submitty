@@ -107,13 +107,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getName() {
-        if (!isset($this->last_queue_details)) {
-            $this->last_queue_details = $this->core->getQueries()->getLastQueueDetails();
-        }
-        if (!array_key_exists('name', $this->last_queue_details)) {
-            return $this->core->getUser()->getDisplayedGivenName() . " " . $this->core->getUser()->getDisplayedFamilyName();
-        }
-        return $this->last_queue_details['name'];
+        // Always use abbreviated name (displayed given + first initial of family name)
+        return $this->core->getUser()->getDisplayedGivenName() . " " . substr($this->core->getUser()->getDisplayedFamilyName(), 0, 1) . ".";
     }
 
     public function getContactInfo() {

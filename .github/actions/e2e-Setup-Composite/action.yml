@@ -20,7 +20,7 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 8.1
+  PHP_VER: 8.2
   NODE_VERSION: 16
   PYTHON_VERSION: "3.10"
 
@@ -35,22 +35,29 @@ runs:
         rm -rf "$AGENT_TOOLSDIRECTORY"
         sudo apt-get clean
       shell: bash
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         path: SUBMITTY_CPY/
     - name: Copy Repo
       run: |
-        # have to copy first, absolute paths not supported by actions/checkout@v4
+        # have to copy first, absolute paths not supported by actions/checkout@v7
           sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
           echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
       shell: bash
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.35.2
+
+    - name: Disable php8.1-fpm before setup
+      run: |
+        sudo systemctl stop php8.1-fpm
+        sudo systemctl disable php8.1-fpm
+      shell: bash
+
+    - uses: shivammathur/setup-php@2.37.2
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -61,7 +68,7 @@ runs:
       shell: bash
 
     - name: Cache pip
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -92,7 +99,7 @@ runs:
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       shell: bash
     - name: Install composer Cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
@@ -182,6 +189,8 @@ runs:
 
     - name: Set up apache
       run: |
+        sudo add-apt-repository ppa:ondrej/php
+        sudo apt update
         sudo apt-get install apache2
         sudo apt-get install apache2-suexec-custom
         sudo apt-get install libapache2-mod-authnz-external

@@ -245,7 +245,9 @@ $(document).ready(() => {
             event.returnValue = 1;
         }
     };
-    loadTemplates().then(() => updateRedactionsDisplay());
+    if (is_electronic) {
+        loadTemplates().then(() => updateRedactionsDisplay());
+    }
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
@@ -298,7 +300,12 @@ $(document).ready(() => {
             saveGraders();
             return;
         }
-        if ($(this).prop('id') === 'all_access' || $(this).prop('id') === 'minimum_grading_group') {
+        if ($(this).prop('id') === 'minimum_grading_group_autograding' || $(this).prop('id') === 'minimum_grading_group') {
+            $('#minimum_grading_group').val($(this).val());
+            $('#minimum_grading_group_autograding').val($(this).val());
+            saveGraders();
+        }
+        if ($(this).prop('id') === 'all_access') {
             saveGraders();
         }
         // Don't save if it we're ignoring it
@@ -317,7 +324,7 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
-        const notifications_sent = Number(document.querySelector('#container-rubric').dataset.notifications_sent);
+        const score_notifications_sent = Number(document.querySelector('#container-rubric').dataset.score_notifications_sent);
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -326,7 +333,7 @@ $(document).ready(() => {
                 $(val).val('0');
             }
             // Ask for confirmation if the release is delegated to the future and notifications have been sent already
-            if (notifications_sent > 0 && val.name === 'grade_released_date') {
+            if (score_notifications_sent > 0 && val.name === 'grade_released_date') {
                 const updating = new Date($(val).val());
                 const original = new Date($(val).attr('data-original'));
 
@@ -337,7 +344,7 @@ $(document).ready(() => {
                         + 'students when the new grades release date is reached?',
                     );
 
-                    data['notifications_sent'] = resend ? 0 : notifications_sent;
+                    data['score_notifications_sent'] = resend ? 0 : score_notifications_sent;
                 }
             }
             data[val.name] = $(val).val();
@@ -369,9 +376,9 @@ $(document).ready(() => {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
-                    if (key === 'grade_released_date' && data['notifications_sent'] === 0) {
+                    if (key === 'grade_released_date' && data['score_notifications_sent'] === 0) {
                         document.getElementById('gradeable-notifications-message').remove();
-                        document.querySelector('#container-rubric').dataset.notifications_sent = '0';
+                        document.querySelector('#container-rubric').dataset.score_notifications_sent = '0';
                     }
                 }
                 updateErrorMessage();
@@ -384,33 +391,22 @@ $(document).ready(() => {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if ($('input[name="all_grade"]:checked').val() === 'All Grade All') {
-                if (confirm('Each student grades every other student! Continue?')) {
-                    const data = { csrf_token: csrfToken };
-                    data[this.name] = $(this).val();
-                    setRandomGraders($('#g_id').val(), data, (response_data) => {
-                        // Clear errors by setting new values
-                        for (const key in response_data) {
-                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
-                                clearError(key, response_data[key]);
-                            }
-                        }
-                        // Clear errors by just removing red background
-                        for (const key in data) {
-                            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                                clearError(key);
-                            }
-                        }
-                        updateErrorMessage();
-                    }, updateGradeableErrorCallback, true);
-                    return;
-                }
+            const clear_peer_matrix = this.id === 'clear_peer_matrix';
+            const all_grade_all = !clear_peer_matrix
+                && $('input[name="all_grade"]:checked').val() === 'All Grade All';
+
+            let confirmation_message = 'This will update peer matrix. Are you sure?';
+            if (clear_peer_matrix) {
+                confirmation_message = 'This will clear peer matrix. Are you sure?';
             }
-            if (confirm('This will update peer matrix. Are you sure?')) {
+            else if (all_grade_all) {
+                confirmation_message = 'Each student grades every other student! Continue?';
+            }
+            if (confirm(confirmation_message)) {
                 const data = { csrf_token: csrfToken };
                 data[this.name] = $(this).val();
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
-                // Clear errors by setting new values
+                    // Clear errors by setting new values
                     for (const key in response_data) {
                         if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
@@ -423,7 +419,7 @@ $(document).ready(() => {
                         }
                     }
                     updateErrorMessage();
-                }, updateGradeableErrorCallback, false);
+                }, updateGradeableErrorCallback, all_grade_all, clear_peer_matrix);
             }
             else {
                 return false;
@@ -433,6 +429,93 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
+
+    const ta_beta_testing_start_date = $('#date_ta_view').val();
+    const submission_open_date = $('#date_submit').val();
+    const submission_due_date = $('#date_due').val();
+    const manual_grading_start_date = $('#date_grade').val();
+    const manual_grading_due_date = $('#date_grade_due').val();
+    const grades_release_date = $('#date_released').val();
+
+    if ($('#radio_electronic_file').is(':checked')) {
+        // hide/show element when ta beta testing date is after the submission open date
+        if (ta_beta_testing_start_date > submission_open_date) {
+            $('#ta-beta-testing-after-students-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-students-dates-warning').hide();
+        }
+    }
+    else {
+        // hide/show element when ta beta testing date is after the grade start date
+        if (ta_beta_testing_start_date > manual_grading_start_date) {
+            $('#ta-beta-testing-after-grading-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#ta-beta-testing-after-grading-dates-warning').hide();
+        }
+    }
+
+    if ($('#has_due_date_yes').is(':checked')) {
+        // hide/show element when open submission date is after the submission due date
+        if (submission_open_date > submission_due_date) {
+            $('#open-submission-after-submission-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#open-submission-after-submission-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#radio_electronic_file').is(':checked') && $('#has_due_date_yes').is(':checked')) {
+        if ($('#yes_ta_grade').is(':checked')) {
+            // hide/show element when submission due date is after the manual grading start date
+            if (submission_due_date > manual_grading_start_date) {
+                $('#submission-due-after-grading-open-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-open-dates-warning').hide();
+            }
+        }
+        else if ($('#has_release_date_yes').is(':checked')) {
+            // hide/show element when submission due date is after the grades release
+            if (submission_due_date > grades_release_date) {
+                $('#submission-due-after-grading-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#submission-due-after-grading-released-dates-warning').hide();
+            }
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        // hide/show element when manual grading open date is after the manual grading due date
+        if (manual_grading_due_date < manual_grading_start_date) {
+            $('#grading-open-after-grading-due-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#grading-open-after-grading-due-dates-warning').hide();
+        }
+    }
+
+    if ($('#yes_ta_grade').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+        if ($('#has_release_date_yes').is(':checked') || $('#radio_electronic_file').is(':not(:checked)')) {
+            // hide/show element when manual grading due date is after the grade release date
+            if (grades_release_date < manual_grading_due_date) {
+                $('#grading-due-after-grades-released-dates-warning').show();
+                $('#gradeable-dates-warnings-banner').show();
+            }
+            else {
+                $('#grading-due-after-grades-released-dates-warning').hide();
+            }
+        }
+    }
+
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
@@ -581,21 +664,17 @@ function ajaxCheckBuildStatus() {
         },
     });
 }
-function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all) {
-    let number_to_grade = 1;
-    if (all_grade_all === true) {
+function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all, clear_peer_matrix) {
+    let number_to_grade;
+
+    if (clear_peer_matrix) {
+        number_to_grade = 0;
+    }
+    else if (all_grade_all === true) {
         number_to_grade = 10000;
     }
     else {
         number_to_grade = $('#number_to_peer_grade').val();
-    }
-
-    if (number_to_grade <= 0) {
-        number_to_grade = 0;
-        if (!confirm('This will clear Peer Matrix. Continue?')) {
-            $('#peer_loader').addClass('hide');
-            return false;
-        }
     }
 
     gradeable_id = $('#g_id').val();
@@ -1036,7 +1115,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // When the text editor opens, the user shouldn't have to manually scroll to see the contents
 function scrollToBottom() {
-    window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 820, left: 0, behavior: 'smooth' });
 }
 
 function updateGradeableEditor(g_id, file_path) {
@@ -1049,6 +1128,25 @@ function updateGradeableEditor(g_id, file_path) {
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
     }
+    else {
+        document.querySelectorAll('.key_to_click').forEach((link) => {
+            link.classList.remove('selected');
+        });
+        cancelGradeableConfigEdit();
+    }
+}
+
+function isBinaryPath(path) {
+    const binaryExtensions = [
+        'png', 'jpg', 'jpeg', 'gif',
+        'bmp', 'bin', 'exe', 'dll',
+        'pdf', 'zip', 'tar', 'gz',
+        '7z', 'rar', 'iso',
+        'class', 'o', 'so',
+    ];
+
+    const ext = path.split('.').pop().toLowerCase();
+    return binaryExtensions.includes(ext);
 }
 
 // When you load the editor
@@ -1090,10 +1188,9 @@ function loadGradeableEditor(g_id, file_path) {
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
                 loadCodeMirror();
-                scrollToBottom();
             }
             catch {
-                displayErrorMessage('Error parsing data. Please try again');
+                displayErrorMessage('Error parsing data. File type not supported in the editor.');
             }
         },
     });
@@ -1123,6 +1220,24 @@ document.addEventListener('DOMContentLoaded', () => {
     updateEditorButtonStyle();
 });
 
+function toggleFolder(id) {
+    const div = document.getElementById(id);
+    const icon = document.getElementById(`${id}-icon`);
+    if (!div) {
+        return;
+    }
+    if (div.style.display === 'none') {
+        div.style.display = 'block';
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+    }
+    else {
+        div.style.display = 'none';
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
+    }
+}
+
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
     const editorButton = document.getElementById('open-config-editor');
@@ -1144,6 +1259,9 @@ function cancelGradeableConfigEdit() {
     isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
 
     closeCodeMirrorInstance();
 }
@@ -1333,6 +1451,8 @@ function loadCodeMirror() {
         },
     );
     updateEditorIcons();
+    codeMirrorInstance.refresh();
+    codeMirrorInstance.focus();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
@@ -1396,4 +1516,13 @@ function updateEditorIcons() {
     const tabLength = localStorage.getItem('setTabLength') || '2';
     tabLengthIcon.classList.remove('fa-2', 'fa-4');
     tabLengthIcon.classList.add(`fa-${tabLength}`);
+}
+
+function markLastClicked(el) {
+    // Remove highlight from all
+    document.querySelectorAll('.key_to_click').forEach((link) => {
+        link.classList.remove('selected');
+    });
+    // Highlight the clicked one
+    el.classList.add('selected');
 }

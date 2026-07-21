@@ -14,11 +14,10 @@ import platform
 import threading
 
 
-CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
-SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
-AUTOGRADING_WORKERS_PATH = path.join(CONFIG_PATH, 'autograding_workers.json')
-AUTOGRADING_CONTAINERS_PATH = path.join(CONFIG_PATH, 'autograding_containers.json')
-with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+INSTALL_CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
+SUBMITTY_CONFIG_PATH = path.join(INSTALL_CONFIG_PATH, 'submitty.json')
+
+with open(os.path.join(INSTALL_CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
@@ -26,6 +25,12 @@ with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
     SUBMITTY_CONFIG = json.load(open_file)
 SUBMITTY_INSTALL_DIR = SUBMITTY_CONFIG['submitty_install_dir']
 SUBMITTY_REPOSITORY_DIR = SUBMITTY_CONFIG['submitty_repository']
+
+SUBMITTY_DATA_DIR = SUBMITTY_CONFIG['submitty_data_dir']
+DATA_CONFIG_PATH = path.join(SUBMITTY_DATA_DIR,'config')
+
+AUTOGRADING_WORKERS_PATH = path.join(INSTALL_CONFIG_PATH, 'autograding_workers.json')
+AUTOGRADING_CONTAINERS_PATH = path.join(DATA_CONFIG_PATH, 'autograding_containers.json')
 
 SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
 

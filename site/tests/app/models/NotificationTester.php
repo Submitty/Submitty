@@ -174,6 +174,11 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(false, $notification->hasEmptyMetadata());
     }
 
+    public function testCreateNotificationGradeableIdNullByDefault(): void {
+        $notification = Notification::createNotification($this->core, $this->notify_details['normal']);
+        $this->assertNull($notification->getGradeableId());
+    }
+
     public function testGetNotifyTime(): void {
         $notification = Notification::createViewOnlyNotification($this->core, $this->notify_details['view_only']);
         $this->assertEquals("Less than a minute ago", $notification->getNotifyTime());

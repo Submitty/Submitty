@@ -39,7 +39,7 @@
 
                 <button class="btn btn-default" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)" data-testid="download-zip-file">Download Zip File</button>
 
-                <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
+                <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies(true);" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
             <br />
             {# Files #}
@@ -85,17 +85,25 @@
 
 {% macro display_file(dir, path, id, indent, title, blind_grader) %}
     {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
+    {% set is_image = dir matches '/\\.(jpg|jpeg|png|gif|bmp|webp|tiff|tif)$/i' %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
-                <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                {{ dir }}</a> &nbsp;
-            <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            {% if is_image %}
+                {# For image files: Clicking filename opens in full panel #}
+                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click image-file' file-url="{{ path|url_encode }}" data-file_name="{{ dir }}" onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}");' data-viewer_id="{{ id }}">
+                    <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                    {{ dir }}</a> &nbsp;
+            {% else %}
+                {# For non-image files: Keep original behavior #}
+                <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" data-file_name="{{ dir }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+                    <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                    {{ dir }}</a> &nbsp;
+            {% endif %}
+            <a id = 'open_file_{{ dir|url_encode }}' onclick='openSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Open the file in a new tab" class="key_to_click" tabindex="0"><i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></a>
             <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
-    <i class="fas fa-download" title="Download the file"></i>
-</a>
-
+                <i class="fas fa-download" title="Download the file"></i>
+            </a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>

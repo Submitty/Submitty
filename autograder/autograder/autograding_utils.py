@@ -123,7 +123,7 @@ class Logger:
 def just_write_grade_history(json_file, assignment_deadline, submission_time, seconds_late,
                              first_access_time, access_duration, queue_time, batch_regrade, grading_began,
                              wait_time, grading_finished, grade_time, autograde_total,
-                             revision):
+                             revision, regrade_by):
 
     #####################################
     # LOAD THE PREVIOUS HISTORY
@@ -160,6 +160,8 @@ def just_write_grade_history(json_file, assignment_deadline, submission_time, se
             blob["autograde_max_possible"] = int(autograde_array[5])
     if revision:
         blob["revision"] = revision
+    if regrade_by:
+        blob["regrade_by"] = regrade_by
 
     #####################################
     #  ADD IT TO THE HISTORY
@@ -574,7 +576,8 @@ def archive_autograding_results(
                                  grading_finished_longstring,
                                  int(gradingtime),
                                  grade_result,
-                                 queue_obj.get("revision", None))
+                                 queue_obj.get("revision", None),
+                                 queue_obj.get("regrade_by", None))
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
             f.write("FINISHED GRADING!\n")

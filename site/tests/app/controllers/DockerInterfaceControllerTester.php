@@ -12,29 +12,33 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
     private $core;
     /** Tmp area for file operations */
     private string $tmp_dir;
+    private string $tmp_dir2;
 
     public function setUp(): void {
         $user_details = ['access_faculty' => true];
         $this->core = $this->createMockCore([], $user_details);
 
         $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $this->tmp_dir2 = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         //create dummy log areas
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "config"), true);
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "docker"), true);
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo"), true);
 
-        FileUtils::writeFile(
-            FileUtils::joinPaths($this->tmp_dir, "config", "autograding_containers.json"),
-            DockerUITester::getAutogradingContainersJson()
-        );
+        FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir2, "config"), true);
+
         FileUtils::writeFile(
             FileUtils::joinPaths($this->tmp_dir, "config", "autograding_workers.json"),
             DockerUITester::getAutogradingWorkersJson()
         );
+        FileUtils::writeFile(
+            FileUtils::joinPaths($this->tmp_dir2, "config", "autograding_containers.json"),
+            DockerUITester::getAutogradingContainersJson()
+        );
 
         /** Set dummy paths to tmp dir, ok to use same path since everything will be in dirs inside of there */
-        $this->core->getConfig()->method('getSubmittyPath')->willReturn($this->tmp_dir);
         $this->core->getConfig()->method('getSubmittyInstallPath')->willReturn($this->tmp_dir);
+        $this->core->getConfig()->method('getSubmittyDataPath')->willReturn($this->tmp_dir2);
     }
 
     /** tearDown runs after each unit test in this file */
@@ -45,13 +49,14 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
     }
 
     public function testShowDockerInterface() {
+        $this->core->getUser()->method('getInstructorCourses')->willReturn([0 => ['term' => 's26', 'course' => 'test']]);
         $mock_data = [];
 
         $docker = new DockerInterfaceController($this->core);
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
-        $mock_data['autograding_containers'] = json_decode(DockerUITester::getAutogradingContainersJson(), true);
         $mock_data['autograding_workers'] = json_decode(DockerUITester::getAutogradingWorkersJson(), true);
+        $mock_data['autograding_containers'] = json_decode(DockerUITester::getAutogradingContainersJson(), true);
         $mock_data['image_owners'] = [];
 
         $this->assertTrue($api['status'] === "success");

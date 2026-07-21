@@ -9,53 +9,53 @@
     flex-direction: column;
 }
 
-th {
-    background: var(--standard-light-gray);
+.full-screen-mode {
+    overflow-y: auto;
 }
 
-tr > th:first-child,
-tr > td:first-child {
-    position: sticky;
-    left: 0;
-    border-left: 1px solid var(--standard-medium-gray);
+.fullscreen-btn-wrapper {
+    display: inline-block;
+    vertical-align: bottom;
 }
 
-tr > th:nth-child(2),
-tr > td:nth-child(2) {
-    position: sticky;
-    left: 1.25rem;
+/* Data Table Header Width Styles */
+
+tr > th:nth-of-type(1),
+tr > td:nth-of-type(1) {
+    width: 20px;
 }
 
-tr > th:nth-child(3),
-tr > td:nth-child(3) {
-    position: sticky;
-    left: 5.25rem;
+tr > th:nth-of-type(2),
+tr > td:nth-of-type(2) {
+    width: 70px;
 }
 
-tr > th:nth-child(4),
-tr > td:nth-child(4) {
-    position: sticky;
-    left: 10.75rem;
+tr > th:nth-of-type(3),
+tr > td:nth-of-type(3) {
+    width: 90px;
 }
 
-tr > th:nth-child(5),
-tr > td:nth-child(5) {
-    position: sticky;
-    left: 16.75rem;
-    border-right: 1px solid var(--standard-medium-gray);
+tr > th:nth-of-type(4),
+tr > td:nth-of-type(4) {
+    width: 110px;
 }
 
-.highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
-    /* stylelint-disable-next-line declaration-no-important */
-    background: var(--standard-focus-cornflower-blue) !important ;
+tr > th:nth-of-type(5),
+tr > td:nth-of-type(5) {
+    width: 120px;
 }
 
-tr:nth-child(odd) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--default-white);
+tbody {
+    counter-reset: student;
 }
 
-tr:nth-child(even) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--standard-light-gray);
+tbody > tr:not(.info) {
+    counter-increment: student;
+}
+
+tbody > tr:not(.info) > td:nth-child(1)::after {
+    content: counter(student);
+    padding: 0 1em;
 }
 
 #data-table td:focus,
@@ -89,19 +89,40 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+/* Key Styles */
+
+.simple-key-full-credit,
 .simple-full-credit {
-    background-color: var(--simple-full-credit-dark-blue);
+    color: var(--simple-full-credit-dark-blue);
 }
 
+.simple-key-half-credit,
 .simple-half-credit {
-    background-color: var(--simple-half-credit-light-blue);
+    color: var(--simple-half-credit-light-blue);
 }
 
+.simple-key-save-error,
 .simple-save-error {
     color: var(--simple-save-error-red);
 }
 
-/* styling for fields that aren't icons */
+.simple-key-no-credit,
+.simple-key-full-credit,
+.simple-key-half-credit,
+.simple-key-save-error {
+    min-width: 3.5rem;
+    margin-right: 1.25rem;
+    display: inline-block;
+    text-align: center;
+}
+
+.simple-icon {
+    transform: scaleX(3);
+    width: 20px;
+}
+
+/* Checkpoint Cell Styles */
+
 .simple-full-credit:not(i) {
     background-color: var(--simple-full-credit-dark-blue);
 }
@@ -114,13 +135,26 @@ input[type="number"]::-webkit-outer-spin-button {
     background-color: var(--simple-save-error-red);
 }
 
-.simple-icon {
-    transform: scaleX(3);
-    width: 20px;
-    margin-left: 20px;
+#details-legend li {
+    font-size: 0.9em;
 }
 
-#details-legend li {
-    margin-right: 6px;
-    font-size: 0.9em;
+.cell-grade {
+    border-left: 1px solid var(--standard-medium-gray);
+}
+
+.cell-text-entry {
+    overflow-y: scroll;
+    resize: vertical;
+    min-height: 30px;
+    cursor: text;
+}
+
+.cell-checkpoint {
+    cursor: pointer;
+}
+
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
 }

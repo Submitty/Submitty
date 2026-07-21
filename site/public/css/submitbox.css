@@ -51,7 +51,7 @@
 }
 
 #gradeable-submission-cont #submit {
-    /* stylelint-disable-next-line declaration-no-important */
+    /* stylelint-disable-next-line declaration-no-important, color-named */
     color: white !important;
 }
 
@@ -62,6 +62,26 @@
 #submitted-files .flex-row > span:first-child {
     min-width: 0;
     word-break: break-all;
+}
+
+.submitted-files-collapsed {
+    display: none;
+}
+
+.submitted-files-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+#submission-files-toggle {
+    padding: 3px 8px;
+    line-height: 1;
+}
+
+.submitted-files-header h4 {
+    margin: 0;
 }
 
 #version-cont {
@@ -91,6 +111,24 @@
 
 .disable-submit:hover {
     background-color: var(--good-green);
+}
+
+.submission-warning {
+    font-weight: bold;
+    color: var(--btn-text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--standard-vibrant-orange);
+}
+
+.submission-error {
+    font-weight: bold;
+    color: var(--btn-text-black);
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: var(--danger-red);
 }
 
 #gradeable-info h1 {
@@ -199,4 +237,16 @@
     #submission-version-select {
         width: 100%;
     }
+}
+
+/* Image file clickable styles for annotator */
+.image-file {
+    /* stylelint-disable-next-line color-no-hex */
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.image-file:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }

@@ -1,10 +1,11 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filterWithdrawnUpdate */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
+    updateToggleButtonText();
     const collapsedSections = Cookies.get('collapsed_sections');
     collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
@@ -30,14 +31,14 @@ $(document).ready(() => {
         }
     });
 
-    // Creating and adding style for the pseudo selector in the details-table
+    // Adds labels to values in mobile view using pseudo selector :before
     const style = document.createElement('style');
     let content = '';
     // loop over the head row of `details-table`
     $('#details-table thead tr th').each(function (idx) {
         if (idx) {
-            // the content to be added is inside this data attr
-            content = $(this).data('col-title');
+            // add each header's text as a label for that column's values in the student's submission
+            content = $(this).data('col-title') ?? '';
             style.innerHTML += `
               #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
                   content: "${escapeSpecialChars(content)}";
@@ -88,6 +89,22 @@ function hideGradeableMessage() {
     message.css('display', 'none');
 }
 
+function getCollapsedSections() {
+    return JSON.parse(Cookies.get('collapsed_sections') || '[]');
+}
+
+function updateToggleButtonText() {
+    const collapsed = getCollapsedSections();
+    const button = $('#toggle-all-sections-btn');
+
+    if (collapsed.length === 0) {
+        button.text('Collapse All Sections');
+    }
+    else {
+        button.text('Expand All Sections');
+    }
+}
+
 function updateCollapsedSections() {
     Cookies.set('collapsed_sections', JSON.stringify([...collapseItems]), { path: $('#details-table').attr('data-details-base-path') });
 }
@@ -99,6 +116,7 @@ function expandAllSections() {
     });
     collapseItems.clear();
     updateCollapsedSections();
+    updateToggleButtonText();
 }
 
 function collapseAllSections() {
@@ -109,6 +127,18 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
+    updateToggleButtonText();
+}
+
+function toggleAllSections() {
+    const collapsed = getCollapsedSections();
+
+    if (collapsed.length === 0) {
+        collapseAllSections();
+    }
+    else {
+        expandAllSections();
+    }
 }
 
 function inquiryUpdate() {
@@ -141,10 +171,11 @@ window.addEventListener('DOMContentLoaded', () => {
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
         // Withdrawn Students
-        const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+
         if (!is_team_assignment) { // Toggle not available on team assignments
-            if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {
+            if (withdrawnFilterStatus === 'omit') {
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
             }

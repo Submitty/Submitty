@@ -3,8 +3,7 @@
 <div id="queue_status">
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <label for="name_box">Your Name:</label>
-    <input type="text" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+    <input type="hidden" id="name_box" name="name" value="{{viewer.getName()}}">
     <br>
     <div class="form-group">
       <label for="queue_code">Queue Name:
@@ -24,9 +23,13 @@
       <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
       <br>
     </div>
-    <button id="join_queue_btn" type="submit" class="btn btn-primary" data-testid="join-queue-btn">Join</button>
+    <button id="join_queue_btn" type="submit" class="btn btn-primary" data-testid="join-queue-btn">Join as {{viewer.getName()}}</button>
   </form>
+    <p class="name-change-label">
+        Want to change your name? <a id="profile_link">Set your preferred name in your profile</a>.
+    </p>
     <script>
+        document.getElementById('profile_link').href = buildUrl(['user_profile']);
         $('#queue_code').change(function(){
             document.getElementById('add_to_queue').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/add';
 
@@ -123,7 +126,7 @@
       {% if open_queues|length > 1  or my_queue != viewer.getCurrentQueueCode() %}
       <form method="post" action="{{ base_url }}/{{ viewer.getCurrentQueueCode() | url_encode }}/switch">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" id="name_box" name="name" maxlength="20" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+          <input type="hidden" id="name_box" name="name" value="{{viewer.getName()}}">
           <input type="hidden" name="time_in" value="{{ viewer.getCurrentQueueTimeIn() }}">
           <div class="form-group">
               <br>

@@ -11,7 +11,6 @@ import random
 import shutil
 import subprocess
 import os.path
-import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
@@ -28,6 +27,15 @@ from sample_courses.utils.create_or_generate import (
     create_gradeable_submission,
     create_pdf_annotations
     )
+
+def set_seeded_random_state(*parts):
+    """
+    Set the random state to a seeded value based on the provided parts.
+    """
+    saved_state = random.getstate()
+    seeded_rng = random.Random("|".join(str(part) for part in parts))
+    random.setstate(seeded_rng.getstate())
+    return saved_state
 
 
 class Course_create_gradeables:
@@ -54,7 +62,13 @@ class Course_create_gradeables:
 
     def add_gradeables(self) -> None:
         anon_ids = {}
+        # pre gradeable creation random state
+        initial_state = random.getstate()
         for gradeable in self.gradeables:
+
+            # set the random state to a seeded value based on the gradeable id and course code and return the previous state to be restored later
+            gradeable_state = set_seeded_random_state(gradeable.id, self.code, "gradeables")
+
             #create gradeable specific anonymous ids for users
             prev_state = random.getstate()
             for user in self.users:
@@ -70,7 +84,7 @@ class Course_create_gradeables:
                         anon_id=anon_id
                     )
                 )
-                self.conn.commit()
+            self.conn.commit()
             random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
@@ -202,7 +216,6 @@ class Course_create_gradeables:
                                         g_id=gradeable.id, user_id=None, team_id=team_id,
                                         g_version=version, submission_time=current_time_string
                                     ))
-                                    self.conn.commit()
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version).values(
@@ -210,7 +223,6 @@ class Course_create_gradeables:
                                                 active_version=active_version, g_notification_sent=g_notification_sent
                                             )
                                         )
-                                        self.conn.commit()
                                     json_history["team_history"] = json_team_history[team_id]
                                 else:
                                     self.conn.execute(
@@ -218,14 +230,13 @@ class Course_create_gradeables:
                                                 g_id=gradeable.id, user_id=user.id, g_version=version, submission_time=current_time_string
                                             )
                                     )
-                                    self.conn.commit()
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version).values(
                                                 g_id=gradeable.id, user_id=user.id, active_version=active_version, g_notification_sent=g_notification_sent
                                             )
                                         )
-                                        self.conn.commit()
+                                self.conn.commit()
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
@@ -350,7 +361,6 @@ class Course_create_gradeables:
                                 if skip_grading > 0.3 and random.random() > 0.01:
                                     ins = insert(self.gradeable_data_overall_comment).values(**overall_comment_values)
                                     res = self.conn.execute(ins)
-                                    self.conn.commit()
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         # This is used to simulate unfinished grading.
@@ -369,7 +379,6 @@ class Course_create_gradeables:
                                             gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit
                                         )
                                     )
-                                    self.conn.commit()
                                     first = True
                                     first_set = False
                                     for mark in component.marks:
@@ -383,6 +392,7 @@ class Course_create_gradeables:
                                             if(first):
                                                 first_set = True
                                         first = False
+                                self.conn.commit()
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
                         os.system(f"chown -R submitty_php:{self.code}_tas_www {submission_path}")
@@ -393,7 +403,6 @@ class Course_create_gradeables:
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                         res = self.conn.execute(insert(self.gradeable_data).values({"g_id": gradeable.id, "gd_user_id": user.id }))
-                        self.conn.commit()
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
@@ -412,7 +421,11 @@ class Course_create_gradeables:
                                     gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1
                                 )
                             )
-                            self.conn.commit()
+                        self.conn.commit()
+            # restore the random state to the previous state before the last iteration
+            random.setstate(gradeable_state)
+        # restore the random state to the previous state before the gradeable loop
+        random.setstate(initial_state)
 
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':

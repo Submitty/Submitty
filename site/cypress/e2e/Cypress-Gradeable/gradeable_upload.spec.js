@@ -1,26 +1,25 @@
 import { getCurrentSemester } from '../../support/utils';
 import { getApiKey } from '../../support/utils';
 import { gradeable_json, rubric, bad_rubric } from '../../support/api_testing_json';
+const testfile1 = 'cypress/fixtures/json_ui.json';
+
 describe('Tests cases revolving around gradeable access and submission', () => {
-    it('Should upload file, submit, view gradeable', () => {
-        // // API
-        getApiKey('instructor', 'instructor').then((key) => {
-            cy.request({
-                method: 'POST',
-                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
-                body: gradeable_json,
-                headers: {
-                    Authorization: key,
-                },
-            }).then((response) => {
-                expect(response.body.status).to.eql('success');
-            });
+    before(() => {
+        cy.login();
+        cy.visit(['sample']);
+        cy.get('body').then(($body) => {
+            // Reset the state on BEFORE actions, so reruns are possible.
+            if ($body.find('[data-testid="api_testing"] [title="Delete Gradeable"]').length > 0) {
+                cy.get('[data-testid="api_testing"] [title="Delete Gradeable"]').click();
+                cy.get('[data-testid="confirm-delete-gradeable').click();
+            }
+            if ($body.find('[data-testid="hw-1"] [title="Delete Gradeable"]').length > 0) {
+                cy.get('[data-testid="hw-1"] [title="Delete Gradeable"]').click();
+                cy.get('[data-testid="confirm-delete-gradeable').click();
+            }
         });
-
-        cy.login('instructor');
-
-        const testfile1 = 'cypress/fixtures/json_ui.json';
-
+    });
+    it('Should upload file, submit, view gradeable', () => {
         cy.visit(['sample', 'gradeable']);
 
         // Makes sure the clear button is not disabled by adding a file
@@ -36,6 +35,23 @@ describe('Tests cases revolving around gradeable access and submission', () => {
         cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
         cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
+        cy.get('[data-testid="has_release_date_no"]').should('not.be.checked');
+        cy.get('[data-testid="has_release_date_yes"]').should('be.checked');
+
+        getApiKey('instructor', 'instructor').then((key) => {
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: gradeable_json,
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.status).to.eql('success');
+            });
+        });
+
+        cy.login('instructor');
 
         cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
         cy.get('body').should('contain.text', 'Edit Gradeable');
@@ -51,6 +67,20 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
             expect(test_json.rubric).to.eql(rubric);
+            expect(test_json.dates.has_release_date).to.eql(false);
+            // Add testing for remaining date values in downloaded gradeable JSON
+            expect(test_json.dates.ta_view_start_date).to.eql('1970-01-01 23:59:59');
+            expect(test_json.dates.grade_start_date).to.eql('9997-12-31 23:59:59');
+            expect(test_json.dates.grade_due_date).to.eql('9998-12-31 23:59:59');
+            expect(test_json.dates.grade_released_date).to.eql('9998-12-31 23:59:59');
+            expect(test_json.dates.team_lock_date).to.eql('9996-12-31 23:59:59');
+            expect(test_json.dates.submission_open_date).to.eql('1971-01-01 23:59:59');
+            expect(test_json.dates.submission_due_date).to.eql('9996-12-31 23:59:59');
+            expect(test_json.dates.grade_inquiry_start_date).to.eql('9999-01-01 23:59:59');
+            expect(test_json.dates.grade_inquiry_due_date).to.eql('9999-01-06 23:59:59');
+            expect(test_json.dates.has_due_date).to.eql(false);
+            expect(test_json.dates.late_submission_allowed).to.eql(true);
+            expect(test_json.dates.late_days).to.eql(1);
         });
     });
 

@@ -1,5 +1,5 @@
 {# make sure edits are made in both site/public/templates/misc/Vue.twig and site/app/templates/Vue.twig #}
-{% set id = random() %}
+{% set id = uniqid() %}
 <div
     id="vue-{{ id }}"
     class="{{ class is defined ? class }}"
@@ -11,6 +11,7 @@
         "#vue-{{ id }}",
         "{{ type }}",
         "{{ name }}",
-        {{ args | default({}) | json_encode() | raw() }}
+        {{ args | default({}) | json_encode() | raw() }},
+        {{ events | default({}) | json_encode() | raw() }}
     );
 </script>

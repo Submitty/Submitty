@@ -24,7 +24,9 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
-        if (is_null($user) || !$user->accessFaculty()) {
+        $is_instructor = count($user->getInstructorCourses()) > 0;
+        $is_faculty = $user->accessFaculty();
+        if (is_null($user) || (!$is_instructor && !$is_faculty)) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
@@ -34,7 +36,7 @@ class DockerInterfaceController extends AbstractController {
         $json = [];
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
-                $this->core->getConfig()->getSubmittyInstallPath(),
+                $this->core->getConfig()->getSubmittyDataPath(),
                 "config",
                 "autograding_containers.json"
             )
@@ -73,6 +75,7 @@ class DockerInterfaceController extends AbstractController {
                 ['admin', 'Docker'],
                 'displayDockerPage',
                 new DockerUI($this->core, $json),
+                $is_faculty
             )
         );
     }
@@ -131,7 +134,7 @@ class DockerInterfaceController extends AbstractController {
         if ($found) {
             $json = FileUtils::readJsonFile(
                 FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyInstallPath(),
+                    $this->core->getConfig()->getSubmittyDataPath(),
                     "config",
                     "autograding_containers.json"
                 )
@@ -150,7 +153,7 @@ class DockerInterfaceController extends AbstractController {
             }
             FileUtils::writeJsonFile(
                 FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyInstallPath(),
+                    $this->core->getConfig()->getSubmittyDataPath(),
                     "config",
                     "autograding_containers.json"
                 ),
@@ -165,7 +168,7 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    #[Route("/admin/update_docker", methods: ["GET"])]
+    #[Route("/admin/update_docker", methods: ["POST"])]
     public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -225,7 +228,7 @@ class DockerInterfaceController extends AbstractController {
         }
 
         $jsonFilePath = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
+            $this->core->getConfig()->getSubmittyDataPath(),
             "config",
             "autograding_containers.json"
         );

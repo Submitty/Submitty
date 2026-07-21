@@ -18,6 +18,7 @@ from pathlib import Path
 import time
 import datetime
 import pause
+import getpass
 
 from submitty_utils import dateutils
 
@@ -57,6 +58,7 @@ def is_active_version(directory):
 # For the specified interval, walks over the log file and creates
 # queue files for these submissions.
 def replay(starttime,endtime):
+    sudo_user = os.getenv("SUDO_USER") or getpass.getuser()
     replay_starttime=datetime.datetime.now()
     print (replay_starttime,"replay start: ",starttime)
 
@@ -115,7 +117,8 @@ def replay(starttime,endtime):
                     "required_capabilities": "default",
                     "queue_time": queue_time,
                     "regrade": True,
-                    "max_possible_grading_time" : -1 }
+                    "max_possible_grading_time" : -1,
+                    "regrade_by": sudo_user }
             file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
@@ -129,6 +132,8 @@ def main():
     data_dir = os.path.join(SUBMITTY_DATA_DIR, "courses")
     data_dirs = data_dir.split(os.sep)
     grade_queue = []
+    # try to find who ran the command
+    sudo_user = os.getenv("SUDO_USER") or getpass.getuser()
     if not args.times is None:
         starttime = dateutils.read_submitty_date(args.times[0])
         endtime = dateutils.read_submitty_date(args.times[1])
@@ -208,15 +213,25 @@ def main():
                     raise SystemExit("ERROR: path reconstruction failed")
                 # add them to the queue
 
-                # FIXME: This will be incorrect if the username includes an underscore
-                if '_' not in my_who:
-                    my_user = my_who
-                    my_team = ""
-                    my_is_team = False
-                else:
+                # Determine if this submission belongs to a team or an individual user.
+                # We check user_assignment_settings.json — team directories contain a
+                # "team_history" key written by TeamController.php when the team is created.
+                # Individual user directories never contain this key.
+                # If the file is missing, default to treating the submitter as a user (safer fallback).
+                settings_file = os.path.join(data_dir, my_semester, my_course,
+                                             "submissions", my_gradeable, my_who,
+                                             "user_assignment_settings.json")
+                my_is_team = False
+                if os.path.isfile(settings_file):
+                    with open(settings_file, 'r') as sf:
+                        my_is_team = "team_history" in json.load(sf)
+
+                if my_is_team:
                     my_user = ""
                     my_team = my_who
-                    my_is_team = True
+                else:
+                    my_user = my_who
+                    my_team = ""
 
                 # Note: If the initial checkout failed, or if
                 # autograding failed to create a results subdirectory
@@ -244,7 +259,8 @@ def main():
                        "required_capabilities" : required_capabilities,
                        "queue_time":queue_time,
                        "regrade":True,
-                       "max_possible_grading_time" : max_grading_time}
+                       "max_possible_grading_time" : max_grading_time,
+                       "regrade_by": sudo_user }
 
                 if is_vcs_checkout:
                     obj['revision'] = revision

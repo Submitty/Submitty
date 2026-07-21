@@ -2,15 +2,20 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    {% include "misc/Markdown.twig" with {
-        "content" : gradeable_message,
-        "class" : "content gradeable_message"
+    {% include 'Vue.twig' with {
+        type: "component",
+        name: "Markdown",
+        args: {
+            content: gradeable_message
+        },
+        class: "content gradeable_message",
     } only %}
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden-message'>
+    <div class='content overridden-message' data-testid='overridden-grades-student-banner'>
         <p>NOTE: The numeric score for this assignment has been overridden by your instructor.</p>
+        <p>Your overridden score for this assignment is {{ overridden_grade }}.</p>
         {% if rainbow_grades_active %} <p>Your numeric score for the assignment will be visible in <a href={{ rainbow_grades_url }}>Rainbow Grades.</a></p> {% endif %}
         <p>Please see your instructor if you have questions about your grade for this assignment.</p>
     </div>
@@ -64,6 +69,21 @@
         </h4>
     {% endif %}
 
+    {% if penalty_free_submissions <= 5 %}
+        <div class="submission-warning">
+        {% if penalty_free_submissions == 1 %}
+            <p>Warning: You have 1 penalty free submission remaining.</p>
+        {% elseif penalty_free_submissions > 0 %}
+            <p>Warning: You have {{ penalty_free_submissions }} penalty free submissions remaining.</p>
+        {% else %}
+            <p>Warning: You have 0 penalty free submissions remaining.</p>
+        {% endif %}
+        </div>
+    {% endif %}
+
+    <div id="error-banner-count" class="submission-error" style="display: none;"> </div>
+    <div id="error-banner-size" class="submission-error" style="display: none;"> </div>
+
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
@@ -86,6 +106,13 @@
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
+                    <label for="radio-placeholder">
+                        <input type='radio' id="radio-placeholder" name="submission-type">
+                         No File Rubric Grading
+                        <a aria-label "No File Rubric Grading Help" href = "https://submitty.org/instructor/no_file_rubric_grading" target="_blank">
+                            <i title="No File Rubric Grading Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
                 {% endif %}
@@ -148,20 +175,20 @@
         {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED')
             or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SUBMITTY_HOSTED_URL') %}
             {% if vcs_repo_exists %}
-                <h3>To access your Repository:</h3>
-                <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+                <h3 data-testid="vcs-repository-info">To access your Repository:</h3>
                 <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
-                {# Below will get uncommented once SAML is active #}
-                {# <p>You will need to use an Authentication Token.</p> #}
+                <br><br>
+                <span><em>Log in using </em> '<code>{{user_id}}</code>'<em> as your username and either your password,
+                if allowed by your school, or a VCS / GIT Authentication Token in place of your password. </em></span>
                 <br><br>
                 {% if git_auth_token_required %}
-                    <span>Note: Your school requires that you use Authentication Tokens.</span><br>
+                    <span><em>Note: Your school requires that you use Authentication Tokens.</em></span><br><br>
                 {% endif %}
                 <a href="{{ git_auth_token_url }}" class="btn btn-primary">Create and Manage Authentication Tokens</a>
                 <br><br>
             {% else %}
-                <h3>Your repository does not exist.</h3>
-                <p>Please click the button below and refresh the page in a minute.</p><br>
+                <h3 data-testid="vcs-repository-error">Your repository does not exist.</h3>
+                <p>Contact your instructor or sysadmin for assistance in creating your repository for this assignment.</p><br>
                 <form method="POST" action="{{ vcs_generate_repo_url }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <button type="submit" class="btn btn-primary">Generate Repository</button>
@@ -187,25 +214,29 @@
         {% endif %}
 
         {% if vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
-            <h3>To access your Repository:</h3>
+            <h3 data-testid="vcs-repository-info">To access your Repository:</h3>
             <span><em>Note: Please push all changes before grading.</em></span><br />
             <samp> git clone {{ vcs_partial_path }} SPECIFY_TARGET_DIRECTORY  </samp>
             <br><br>
         {% endif %}
-        
-        {% if vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1) %}
+
+        {% if (vcs_repo_exists and (vcs_host_type == 0 or vcs_host_type == 1)) or vcs_host_type == constant('app\\models\\gradeable\\GradeableUtils::VCS_TYPE_SELF_HOSTED') %}
             <h3>Grade your repository:</h3>
             {% if using_subdirectory %}
             <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
             {% endif %}
             <div class="upload-message">
-                {% include "misc/Markdown.twig" with {
-                    "content" : upload_message
+                {% include 'Vue.twig' with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        content: upload_message,
+                    }
                 } only %}
             </div>
             <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
         {% endif %}
-    
+
     {% else %}
         {% if is_notebook %}
             {% include 'notebook/Notebook.twig' with {
@@ -257,8 +288,6 @@
                     </table>
                     {% if viewing_inactive_version %}
                         <h3 style="color: #666666;">Switch to most recent version to upload files</h3>
-                    {% else %}
-                        <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -276,16 +305,21 @@
             </form>
         {% endif %}
         {# /Page selector #}
-        
+
         {% if can_student_submit %}
             <div class="upload-message">
-                {% include "misc/Markdown.twig" with {
-                    "content" : upload_message
+                {% include 'Vue.twig' with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        content: upload_message
+                    }
                 } only %}
             </div>
             <button type="button" id="submit" data-testid="submit-gradeable" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
+
             {% if is_notebook %}
             <button class = "btn btn-default" id = "printing" onclick="window.print()">Print Quiz as PDF</button>
             {% endif %}
@@ -358,28 +392,115 @@
                 for (var i = 1; i <= num_parts; i++){
                     deleteFiles(i);
                 }
+                $('#error-banner').text('').hide();
                 e.stopPropagation();
             });
 
             // GET FILES OF THE HIGHEST VERSION
             if (assignment_version == highest_version && highest_version > 0) {
                 $("#getprev").click(function(e){
-                    loadPreviousFilesOnDropBoxes();
+                    {% if not is_notebook %}
+                        loadPreviousFilesOnDropBoxes();
+                    {% endif %}
                     e.stopPropagation();
                 });
             }
 
             function loadPreviousFilesOnDropBoxes(){
-                $("#startnew").click();
+                {% if not is_notebook %}
+                    $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
                         readPrevious('{{ file.name }}', {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
+                {% endif %}
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
+
+            // Event listener to check when files are added / removed from the drag-and-drop box
+            $(function() {
+                const uploadBoxes = document.getElementById('upload-boxes');
+                if (uploadBoxes) {
+                    previousSubmissionFileCount = $('.file-label').length; // track # of files from prior submission
+                    const observer = new MutationObserver(function(mutations) {
+                        // Whenever a file is added or removed, recalculate totals and warnings
+                        checkDroppedFiles();
+                    });
+
+                    // Observe modifications to the drag-and-drop box
+                    observer.observe(uploadBoxes, { childList: true, subtree: true });
+                }
+            });
+
+            // Handle Submission Size / File Count Warnings:
+            function checkDroppedFiles() {
+                let totalFiles = 0;
+                let totalSize = 0;
+                // Loop through files to total count and size
+                if (typeof file_array !== 'undefined' && Array.isArray(file_array)) {
+                    for (let i = 0; i < file_array.length; i++) {
+                        let files = file_array[i];
+
+                        if (files && Array.isArray(files)) {
+                            totalFiles += files.length;
+
+                            for (let j = 0; j < files.length; j++) {
+                                let file = files[j];
+
+                                if (file && typeof file.size === 'number') {
+                                    totalSize += file.size;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const maxFileCount = {{ max_file_uploads }};
+                const maxFileSize = {{ max_submission_size }};
+
+                const no_new_files = totalFiles === 0;
+                const totalFilesIncludingPrevious = $('.file-label').length;
+                const previousFilesCount = totalFilesIncludingPrevious - totalFiles;
+
+                const invalid_count = totalFiles > maxFileCount;
+                const invalid_size = totalSize > maxFileSize;
+
+                const $errorBannerCount = $('#error-banner-count');
+                const $errorBannerSize = $('#error-banner-size');
+
+                setButtonStatus();
+                if ((previousFilesCount === previousSubmissionFileCount) && no_new_files) {
+                    $(".submit-gradeable").prop('disabled', true);
+                }
+
+                if (invalid_count || invalid_size) {
+                    $(".submit-gradeable").prop('disabled', true);
+                }
+
+                if (invalid_count) {
+                    $errorBannerCount
+                        .text('Maximum allowed number of files to be uploaded is {{ max_file_uploads }}. For submissions with more than {{ max_file_uploads }}, please use a .zip file.')
+                        .show();
+                }
+                else {
+                    $errorBannerCount.text('').hide();
+                }
+
+                if (invalid_size) {
+                    $errorBannerSize
+                            .text('Selected files are too large. Total upload size exceeds the allowed limit of {{ max_submission_size / 1000 }} KB.')
+                            .show();
+                }
+                else {
+                    $errorBannerSize.text('').hide();
+                }
+            }
+
+            window.checkDroppedFiles = checkDroppedFiles;
+
             //TODO: move the logic on loading submission mode into a module
 
         </script>
@@ -556,7 +677,36 @@
             e.stopPropagation();
         });
     });
+
+    window.blankSubmitAll = function(){
+        const is_team_assignment = {{ is_team_assignment ? 'true' : 'false' }};
+        const url = is_team_assignment ?
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions_for_teams']) :
+        buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'generate_blank_submissions']);
+
+        const message = is_team_assignment ?
+        "This will create a placeholder submission for ALL TEAMS on this gradeable." :
+        "This will create a placeholder submission for ALL STUDENTS on this gradeable.";
+
+        const csrf_token = "{{ csrf_token }}";
+        if(confirm(message)){
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    csrf_token
+                },
+                success: function(data){
+                    const response = JSON.parse(data);
+                    displayMessage(response.data);
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(){
+                    displayMessage("An error occurred.");
+                }
+            });
+        }
+    }
+
     initializeTimer('{{ gradeable_id }}', {{ is_timed }});
 </script>
-
-

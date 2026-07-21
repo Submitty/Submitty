@@ -26,7 +26,7 @@ class DateTimeFormat extends AbstractModel {
         'MDY' => [
             'gradeable' => 'm/d/Y @ h:i A T',
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
-            'forum' => 'Y/n/j g:i A',
+            'forum' => 'n/j/Y g:i A',
             'notification' => 'n/j g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
@@ -36,7 +36,7 @@ class DateTimeFormat extends AbstractModel {
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',
             'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
-            'forum' => 'Y/j/n g:i A',
+            'forum' => 'j/n/Y g:i A',
             'notification' => 'j/n g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
@@ -68,11 +68,24 @@ class DateTimeFormat extends AbstractModel {
     public function __construct(Core $core, string $specifier) {
         parent::__construct($core);
 
-        if (in_array($specifier, self::SPECIFIERS)) {
+        if (in_array($specifier, self::SPECIFIERS, true)) {
             $this->specifier = $specifier;
         }
         else {
             throw new BadArgumentException('Illegal $specifier passed to DateTimeFormat constructor.');
+        }
+    }
+
+    /**
+     * Set $this->specifier
+     * @param string $specifier A valid specifier from self::SPECIFIERS
+     */
+    public function setSpecifier(string $specifier): void {
+        if (in_array($specifier, self::SPECIFIERS, true)) {
+            $this->specifier = $specifier;
+        }
+        else {
+            throw new BadArgumentException('Illegal $specifier passed to setSpecifier.');
         }
     }
 
@@ -85,7 +98,7 @@ class DateTimeFormat extends AbstractModel {
      * @return string
      */
     public function getFormat(string $key) {
-        if (!in_array($key, self::DATE_FORMATS_KEYS)) {
+        if (!in_array($key, self::DATE_FORMATS_KEYS, true)) {
             throw new BadArgumentException('The $key must be a member DateTimeFormat::DATE_FORMAT_KEYS');
         }
 

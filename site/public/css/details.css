@@ -2,6 +2,8 @@
     padding: 20px 10px;
 }
 
+/* Details Table Styling */
+
 #details-table tbody.details-info-header {
     font-size: 15px;
 }
@@ -13,6 +15,19 @@
 /* stylelint-disable-next-line no-descending-specificity */
 #details-table tbody.details-content td {
     text-align: center;
+}
+
+tbody {
+    counter-reset: student;
+}
+
+tbody tr:not(.info) {
+    counter-increment: student;
+}
+
+tbody tr:not(.info) > td:nth-child(1)::after {
+    content: counter(student);
+    padding: 0 1em;
 }
 
 .expand-icon,
@@ -38,6 +53,12 @@
     flex-wrap: wrap;
     width: 100%;
     justify-content: space-between;
+}
+
+.student-info-btns-container {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 6px;
 }
 
 .details-action-box {
@@ -67,14 +88,10 @@
 
 #details-legend {
     width: 100%;
-    padding: 6px 6px 6px 0;
+    padding: 6px;
     justify-self: flex-end;
     border: 1px solid var(--standard-medium-gray);
     border-radius: 4px;
-}
-
-#details-legend li i {
-    margin-right: 6px;
 }
 
 .row-wrapper {
@@ -121,7 +138,7 @@
         padding: 0;
         margin: -1px;
         overflow: hidden;
-        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
         border: 0;
     }
 

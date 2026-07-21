@@ -18,6 +18,24 @@
     padding-left: 1rem;
 }
 
+.full-screen-mode .content {
+    margin: 0;
+    padding: 0;
+}
+
+.fullscreen-btn-wrapper {
+    float: right;
+    margin-right: 0.5rem;
+}
+
+.full-screen-mode .chatroom-container {
+    height: 100vh;
+}
+
+body:has(.full-screen-mode) {
+    overflow: hidden;
+}
+
 .leave-room {
     float: right;
     margin-right: 1rem;
@@ -110,4 +128,23 @@
     text-align: center;
     transition: opacity 1s;
     z-index: 1000;
+}
+
+.chatroom-name-cell {
+    text-align: left;
+}
+
+.chatroom-status-cell {
+    text-align: left;
+    white-space: nowrap;
+}
+
+#chatrooms-table th,
+#chatrooms-table td {
+    text-align: left;
+    padding-left: 12px;
+}
+
+.readonly-badge {
+    margin-left: -4px;
 }

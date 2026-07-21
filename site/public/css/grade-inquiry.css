@@ -1,6 +1,7 @@
 .component-tabs {
     margin-top: 10px;
     display: flex;
+    /* stylelint-disable-next-line color-named */
     border-bottom: 1px solid grey;
     width: 100%;
 }
@@ -14,6 +15,7 @@ a.component-tab {
 }
 
 a.component-tab:hover {
+    /* stylelint-disable-next-line color-named */
     border: 1px solid gray;
     border-bottom: none;
 }
@@ -33,11 +35,13 @@ a.component-tab.btn-selected {
 
 .component-tab-icon.fa-exclamation {
     background-color: var(--error-alert-dark-red);
+    /* stylelint-disable-next-line color-named */
     color: white;
 }
 
 .component-tab-icon.fa-check {
     background-color: var(--standard-dark-green);
+    /* stylelint-disable-next-line color-named */
     color: white;
 }
 

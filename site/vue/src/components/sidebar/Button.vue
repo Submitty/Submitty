@@ -85,5 +85,6 @@ function getButtonId(button: Button): string | undefined {
 .flex-line {
     display: flex;
     align-items: center;
+    gap: 12px;
 }
 </style>

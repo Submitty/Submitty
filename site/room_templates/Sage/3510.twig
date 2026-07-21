@@ -222,8 +222,12 @@
 
     function render_row(row) {
       render_section_row("left", row);
-      render_section_row("middle", row);
-      render_section_row("right", row);
+      if (row != 1) {
+        render_section_row("middle", row);
+      }
+      if (row != 11 && row != 12) {
+        render_section_row("right", row);
+      }
     }
 
     function render_section(section) {

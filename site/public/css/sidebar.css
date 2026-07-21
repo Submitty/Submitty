@@ -64,6 +64,7 @@ aside {
     }
 
     aside a .icon-title:active {
+        /* stylelint-disable-next-line color-no-hex */
         color: #790000;
     }
 

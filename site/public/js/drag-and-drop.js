@@ -87,14 +87,6 @@ function draghandle(e) {
 
 // ADD FILES FOR NEW SUBMISSION
 // ========================================================================================
-// check if adding a file is valid (not exceeding the limit)
-function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
-        alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
-        return false;
-    }
-    return true;
-}
 
 // initialize maximum no of files with that of the php_ini value
 function initMaxNoFiles(max_no_of_files) {
@@ -105,12 +97,10 @@ function initMaxNoFiles(max_no_of_files) {
 function drop(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    for (let i = 0; i < filestream.length; i++) {
+        addFileWithCheck(filestream[i], part); // check for folders
+        total_files_added++;
     }
 }
 
@@ -118,12 +108,10 @@ function drop(e) {
 function dropWithMultipleZips(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part, false); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    for (let i = 0; i < filestream.length; i++) {
+        addFileWithCheck(filestream[i], part, false); // check for folders
+        total_files_added++;
     }
 }
 
@@ -154,11 +142,9 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        for (let i = 0; i < filestream.length; i++) {
-            addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
-            total_files_added++;
-        }
+    for (let i = 0; i < filestream.length; i++) {
+        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+        total_files_added++;
     }
     $(`#input-file${part}`).val('');
 }
@@ -465,7 +451,7 @@ function handle_input_keypress(inactive_version) {
 // BULK UPLOAD
 // ========================================================================================
 function openFile(url_full) {
-    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank');
 }
 
 // HANDLE SUBMISSION
@@ -1375,23 +1361,22 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('link_url', link_url);
     }
 
-    if (file_path !== null && file_path !== '') {
+    if (file_path !== null) {
         if (file_path.startsWith('/')) {
             alert('The file path cannot start with the root directory “/”, use a relative path.');
             return;
         }
-        const file_name = file_path.split('/').pop();
-        if (link_url !== null) {
-            const lastSlashIndex = file_path.lastIndexOf('/');
-            const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
-            file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
-        }
-        if (!window.isValidFilePath(file_path)) {
+        // For editing, file_path is the directory path, not the full file path
+        // Validate that it doesn't contain invalid characters for directories
+        if (file_path.includes('..')) {
+            alert('Directory path cannot contain ".."');
             return;
         }
-        if (window.isValidFileName(file_name)) {
-            formData.append('file_path', file_path);
+        // Add placeholder to give form of a file path for validation (only for non-empty paths)
+        if (file_path !== '' && !window.isValidFilePath(`${file_path}/placeholder`)) {
+            return;
         }
+        formData.append('file_path', file_path);
     }
 
     if (title !== null && window.isValidFileName(title)) {
@@ -1403,6 +1388,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
     else {
         if (title !== null) {
+            alert('Invalid filename');
             return;
         }
     }

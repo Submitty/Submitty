@@ -40,8 +40,15 @@ require 'json'
 ON_CI = !ENV.fetch('CI', '').empty?
 
 # VM resource configuration
-VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
-VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
+if ARGV[0] == 'workers'
+ # if this is a worker machine, do not allocate as much memory. (scaling concerns)
+ VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
+ VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
+else
+ VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '4096').to_i
+ VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '4').to_i
+end
+
 
 def gen_script(machine_name, worker: false, base: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
@@ -97,7 +104,7 @@ def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
   group = 'vagrant'
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
 
-  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax IntroQuantumComputing LichenTestData DockerImages DockerImagesRPI)
+  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades SubmittyCLI Tutorial CrashCourseCPPSyntax IntroQuantumComputing LichenTestData DockerImages DockerImagesRPI)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)

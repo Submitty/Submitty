@@ -65,6 +65,7 @@ use app\libraries\FileUtils;
  * @method array getCourseJson()
  * @method array getAcceptedEmails()
  * @method array getUserIdRequirements()
+ * @method array<string, mixed> getPasswordRequirements()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
@@ -81,13 +82,14 @@ use app\libraries\FileUtils;
  * @method string getSeekMessageInstructions()
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
+ * @method string getSubmittyDataPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
- * @method DateTimeFormat getDateTimeFormat()
  * @method string getSystemMessage()
  * @method string getLatestTag()
  * @method string getLatestCommit()
  * @method int getCourseMaterialFileUploadLimitMb()
+ * @method int getMaxCourseMaterialStorageMb()
  */
 
 class Config extends AbstractModel {
@@ -121,6 +123,10 @@ class Config extends AbstractModel {
     /** @prop
      * @var array<mixed> */
     protected $user_id_requirements = [];
+
+    /** @prop
+     * @var array<mixed> */
+    protected $password_requirements = [];
 
     /** @prop
      * @var array<string> */
@@ -171,8 +177,16 @@ class Config extends AbstractModel {
     /**
      * Maximum file upload size for course materials (in MB)
      * @prop
+     * @var int
      */
     protected int $course_material_file_upload_limit_mb;
+
+    /**
+     * Maximum total storage for course materials (in MB)
+     * @prop
+     * @var int
+     */
+    protected int $max_course_material_storage_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
@@ -348,6 +362,9 @@ class Config extends AbstractModel {
      * @var string */
     protected $submitty_install_path;
     /** @prop
+     * @var string */
+    protected $submitty_data_path;
+    /** @prop
      * @var bool */
     protected $duck_banner_enabled;
     /** @prop
@@ -362,10 +379,6 @@ class Config extends AbstractModel {
     protected $feature_flags = [];
 
     /** @prop
-     * @var DateTimeFormat */
-    protected $date_time_format;
-
-    /** @prop
      * @var string */
     protected $php_user;
 
@@ -378,14 +391,28 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
-        // It is configured as a property of the Config class
-        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
-        $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
-
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
         }
+    }
+
+    /**
+     * Get the DateTimeFormat object, updated with the current user's preferred format.
+     * Implements per-user date/time formatting as described in Issue#11751.
+     * If no user is logged in, defaults to 'YMD' (ISO 8601 standard).
+     * getDateFormat() returns the user's preferred format specifier (MDY, DMY, or YMD)
+     * which was loaded from the database when the user logged in.
+     *
+     * @return DateTimeFormat
+     */
+    public function getDateTimeFormat(): DateTimeFormat {
+        $specifier = 'YMD';
+
+        if ($this->core->getUser() !== null && $this->core->getUser()->isLoaded()) {
+            $specifier = $this->core->getUser()->getDateFormat();
+        }
+
+        return new DateTimeFormat($this->core, $specifier);
     }
 
     public function loadMasterConfigs($config_path) {
@@ -455,6 +482,8 @@ class Config extends AbstractModel {
             $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
         }
 
+        $this->password_requirements = $submitty_json['password_requirements'];
+
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
@@ -504,10 +533,13 @@ class Config extends AbstractModel {
 
         // Default to 100 MB if not set
         $this->course_material_file_upload_limit_mb = (int) ($submitty_json['course_material_file_upload_limit_mb'] ?? 100);
+        $this->max_course_material_storage_mb = (int) ($submitty_json['max_course_material_storage_mb'] ?? 1000);
+
 
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+        $this->submitty_data_path = $submitty_json['submitty_data_dir'];
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 

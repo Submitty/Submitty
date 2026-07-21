@@ -63,6 +63,11 @@ def anon_log(in_filename,out_filename,offset):
                     result =tokens[6]
                     
                     things=which.split('/')
+                    if len(things) == 4 and things[2] == "generated_output":
+                        outfile.write('{0}|{1}|{2}|{3}| {4:76}|{5}|{6}\n'
+                                      .format(timestamp,job_id,batch,untrusted,which,waitgrade,result))
+                        continue
+
                     if len(things) != 6:
                         # discard unparsable things (only errors)
                         continue

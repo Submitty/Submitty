@@ -125,7 +125,6 @@ const handleDeletion = async (id: number) => {
 }
 .td-wrap-element {
   white-space: pre-wrap;
-  word-break: break-word;
   overflow-wrap: break-word;
 }
 .query-container {

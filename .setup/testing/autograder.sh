@@ -47,18 +47,6 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/src
 cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 
 # --------------------------------------
-echo "Getting DrMemory..."
-mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
-pushd /tmp
-DRMEM_TAG=release_2.0.1
-DRMEM_VER=2.0.1-2
-wget_retry wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
-ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
-rm DrMemory-Linux-${DRMEM_VER}.tar.gz
-popd
-
-# --------------------------------------
 pushd /tmp
 
 echo "Getting TCLAPP"

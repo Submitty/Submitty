@@ -98,17 +98,28 @@ class Utils {
 
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
+     *
+     * @param array{min_length: int, max_length: int, require_uppercase: bool, require_lowercase: bool, require_numbers: bool, require_special_chars: bool} $requirements The password requirements taken from the config file
      */
-    public static function isValidPassword(string $password): bool {
-        $upperCase = preg_match('/[A-Z]/', $password);
-        $lowerCase = preg_match('/[a-z]/', $password);
-        $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
-        $numericVal = preg_match('/[0-9]/', $password);
-        return $upperCase >= 1 &&
-            $lowerCase >= 1 &&
-            $specialChar >= 1 &&
-            $numericVal >= 1 &&
-            strlen($password) >= 12;
+    public static function isValidPassword(string $password, array $requirements): bool {
+        $len = strlen($password);
+        $has_uppercase = false;
+        $has_lowercase = false;
+        $has_numbers = false;
+        $has_special = false;
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $password[$i];
+            $has_uppercase = $has_uppercase || ($ch >= 'A' && $ch <= 'Z');
+            $has_lowercase = $has_lowercase || ($ch >= 'a' && $ch <= 'z');
+            $has_numbers = $has_numbers || ($ch >= '0' && $ch <= '9');
+            $has_special = $has_special || !($ch >= 'A' && $ch <= 'Z') && !($ch >= 'a' && $ch <= 'z') && !($ch >= '0' && $ch <= '9');
+        }
+        $valid_length = ($len >= $requirements['min_length']) && ($len <= $requirements['max_length']);
+        $valid_uppercase = !$requirements['require_uppercase'] || $has_uppercase;
+        $valid_lowercase = !$requirements['require_lowercase'] || $has_lowercase;
+        $valid_numbers = !$requirements['require_numbers'] || $has_numbers;
+        $valid_special = !$requirements['require_special_chars'] || $has_special;
+        return $valid_length && $valid_uppercase && $valid_lowercase && $valid_numbers && $valid_special;
     }
 
     /**
@@ -217,16 +228,39 @@ class Utils {
     public static function checkUploadedImageFile($id) {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
-                if (file_exists($file_name)) {
-                    $mime_type = mime_content_type($file_name);
-                    if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
-                        return false;
-                    }
+                if (file_exists($file_name) && !self::isValidUploadedImage($file_name)) {
+                    return false;
                 }
             }
             return true;
         }
         return false;
+    }
+
+    public static function checkUploadedImageOrPdfFile(string $id): bool {
+        if (isset($_FILES[$id])) {
+            foreach ($_FILES[$id]['tmp_name'] as $file_name) {
+                if (file_exists($file_name) && !self::isValidUploadedImageOrPdf($file_name)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static function isValidUploadedImage(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && str_starts_with($mime_type, 'image/') && getimagesize($file_name) !== false;
+    }
+
+    public static function isValidUploadedPdf(string $file_name): bool {
+        $mime_type = mime_content_type($file_name);
+        return is_string($mime_type) && $mime_type === 'application/pdf';
+    }
+
+    public static function isValidUploadedImageOrPdf(string $file_name): bool {
+        return self::isValidUploadedImage($file_name) || self::isValidUploadedPdf($file_name);
     }
 
     /**
@@ -422,5 +456,49 @@ class Utils {
         }
         // Default to returning false
         return false;
+    }
+
+    /**
+     * Builds a full page identifier based on page type and parameters for a WebSocket page.
+     *
+     * @param array<string, string> $params Parameters array containing page, term, course, and other optional parameters
+     * @return string|null Full WebSocket page identifier or null if the inputs are invalid
+     */
+    public static function buildWebSocketPageIdentifier(array $params = []): ?string {
+        if (!isset($params['page'], $params['term'], $params['course'])) {
+            return null;
+        }
+
+        $page = $params['page'];
+        $prefix = $params['term'] . '-' . $params['course'] . '-';
+
+        switch ($page) {
+            case 'discussion_forum':
+            case 'office_hours_queue':
+                return $prefix . $page;
+            case 'chatrooms':
+                if (!isset($params['all_chatrooms']) && isset($params['chatroom_id'])) {
+                    return $prefix . $page . '-' . $params['chatroom_id'];
+                }
+                return $prefix . $page;
+            case 'polls':
+                if (!isset($params['poll_id']) || !isset($params['instructor'])) {
+                    return null;
+                }
+                $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                return $prefix . $page . '-' . $params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+            case 'grade_inquiry':
+                if (!isset($params['gradeable_id']) || !isset($params['submitter_id'])) {
+                    return null;
+                }
+                return $prefix . $page . '-' . $params['gradeable_id'] . '_' . $params['submitter_id'];
+            case 'grading':
+                if (!isset($params['gradeable_id'])) {
+                    return null;
+                }
+                return $prefix . $page . '-' . $params['gradeable_id'];
+            default:
+                return null;
+        }
     }
 }

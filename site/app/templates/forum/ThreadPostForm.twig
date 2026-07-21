@@ -87,13 +87,12 @@
             "args": {
                 "markdownAreaId" : "reply_box_" ~ post_box_id,
                 "toggleButtonId" : "markdown_toggle_" ~ post_box_id,
+                "markdownStatusId" : "markdown_input_" ~ post_box_id,
                 "markdownAreaName" : "thread_post_content",
                 "markdownAreaValue" : "",
                 "class" : "post_content_reply thread_post_content",
                 "placeholder" : post_content_placeholder,
                 "previewDivId" : "preview_box_" ~ post_box_id,
-                "renderHeader" : render_markdown is defined and render_markdown ? render_markdown : false,
-                "showToggle" : true,
                 "markdownHeaderId" : "markdown_header_" ~ post_box_id,
                 "minHeight" : min_height,
                 "required" :  false,
@@ -129,7 +128,7 @@
                  when date is above then current date then output is less than zero.
                  and when date is below then current date the output is greater then zero #}
                 {% if category.visibleDate is null or category.diff >= 0 %}
-                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.description }}
+                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="overflow-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.description }}
                     <input type="checkbox" name="cat[]" value="{{ category.id }}" data-testid="{{ category.id }}" aria-label="Category {{ category.description }}">
                 </div>
                 {% endif %}
@@ -151,9 +150,9 @@
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image/PDF</label>
                 </div>
-                <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <input type="file" accept="image/*,.pdf" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}" data-testid="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
             </div>
@@ -192,6 +191,11 @@
             <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
+        {% endif %}
+        {% if show_reply_announcement is defined and show_reply_announcement and core.getUser().accessFullGrading() %}
+            {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
+            <input type="checkbox" id="replyAnnouncement_{{ post_box_id }}" name="replyAnnouncement" value="replyAnnouncement" data-ays-ignore="true" onchange="checkReplyAnnouncement(this);"/>
+            <label class="inline-block" for="replyAnnouncement_{{ post_box_id }}">{{ announcement_text }} (pinned thread reply)</label>
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
             <div id="pin-expiration-date">
@@ -297,5 +301,15 @@
 
             addFile(image, part);
         }
+    }
+    if (typeof window.checkReplyAnnouncement === 'undefined') {
+        window.checkReplyAnnouncement = function(element) {
+            if (element.checked) {
+                var confirmed = confirm("This will send an email/notification to ALL students in the course. Only use this for important corrections or updates to the pinned thread. Continue?");
+                if (!confirmed) {
+                    element.checked = false;
+                }
+            }
+        };
     }
 </script>

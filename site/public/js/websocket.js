@@ -35,28 +35,33 @@ class WebSocketClient {
         my_url.port = window.websocketPort;
         my_url.pathname = 'ws';
         this.url = my_url.href;
-        this.serverError = false;
+        this.serverError = null;
     }
 
-    open(page) {
+    open(page, args = {}) {
         console.log(`WebSocket: connecting to ${this.url}`);
-        this.client = new WebSocket(this.url);
+        const [term, course] = document.body.dataset.courseUrl.split('/').slice(4);
+        const urlWithParams = new URL(this.url);
+        urlWithParams.searchParams.append('page', page);
+        urlWithParams.searchParams.append('course', course);
+        urlWithParams.searchParams.append('term', term);
+
+        for (const key in args) {
+            urlWithParams.searchParams.append(key, args[key]);
+        }
+        this.client = new WebSocket(urlWithParams.href);
         this.client.onopen = () => {
             console.log('WebSocket: connected');
             $('#socket-server-system-message').hide();
             if (this.onopen) {
                 this.onopen();
             }
-            const term_course_arr = document.body.dataset.courseUrl.split('/');
-            const course = term_course_arr.pop();
-            const term = term_course_arr.pop();
-            this.client.send(JSON.stringify({ type: 'new_connection', page: `${term}-${course}-${page}` }));
         };
 
         this.client.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (Object.keys(data).includes('error') && data['error'] === 'Server error') {
-                this.serverError = true;
+            if (Object.keys(data).includes('error')) {
+                this.serverError = data['error'];
                 return;
             }
             this.number++;
@@ -77,6 +82,7 @@ class WebSocketClient {
                     console.log('WebSocket: Closed');
                     if (this.serverError) {
                         sys_message.show();
+                        console.error(`WebSocket Server Error: ${this.serverError}`);
                     }
                     break;
                 default:

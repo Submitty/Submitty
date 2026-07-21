@@ -1,4 +1,11 @@
 <div class="warning-banner content" id="gradeable-dates-warnings-banner" data-testid="gradeable-dates-warnings-banner" hidden>
+    <p class="dates-warning" id="ta-beta-testing-after-students-dates-warning" data-testid="ta-beta-testing-after-students-dates-warning" hidden>Warning: TA Beta Testing starts after submission open date. TAs will not be able to test the assignment before it is released to students.</p>
+    <p class="dates-warning" id="ta-beta-testing-after-grading-dates-warning" data-testid="ta-beta-testing-after-grading-dates-warning" hidden>Warning: TA Beta Testing starts after manual grading starts. TAs will not be able to test the assignment before grading begins.</p>
+    <p class="dates-warning" id="open-submission-after-submission-due-dates-warning" data-testid="open-submission-after-submission-due-dates-warning" hidden>Warning: Gradeable submissions are open after the assignment is due. Students will not be able to submit the assignment on time.</p>
+    <p class="dates-warning" id="submission-due-after-grading-open-dates-warning" data-testid="submission-due-after-grading-open-dates-warning" hidden>Warning: Gradeable due date is after the manual grading start date. TAs will be allowed to grade the assignment before it is due for students.</p>
+    <p class="dates-warning" id="submission-due-after-grading-released-dates-warning" data-testid="submission-due-after-grading-released-dates-warning" hidden>Warning: Gradeable due date is after the date that grades are released. Students grades will be released or show as missing before the assignment is due.</p>
+    <p class="dates-warning" id="grading-open-after-grading-due-dates-warning" data-testid="grading-open-after-grading-due-dates-warning" hidden>Warning: Grades are due before grading is open. TAs will not be able to grade the assignment on time.</p>
+    <p class="dates-warning" id="grading-due-after-grades-released-dates-warning" data-testid="grading-due-after-grades-released-dates-warning" hidden>Warning: Grades are released before grading is due. Grading may not be finished before students are able to view their grade.</p>
     <p class="dates-warning" id="grade-inquiry-dates-warning" data-testid="grade-inquiry-dates-warning" hidden>Warning: Grade Inquiry ends before it starts. Students will not be able to make Grade Inquires.</p>
     <p class="dates-warning" id="no-grade-inquiry-warning" data-testid="no-grade-inquiry-warning" hidden>Warning: Grade Inquiry ends before the assignment is released. Students will not be able to make Grade Inquires.</p>
 </div>
@@ -55,8 +62,8 @@
         <div {% if not electronic %}hidden{% endif %} id="release_toggle_container">
             <fieldset>
                 <legend>Will this assignment have a grades released date? (Not having a release date will let students see their grade immediately)</legend>
-                <input id="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
-                <input id="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
+                <input id="has_release_date_yes" data-testid="has_release_date_yes" class="date-radio" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
+                <input id="has_release_date_no" data-testid="has_release_date_no" class="date-radio" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
             </fieldset>
         </div>
 
@@ -77,9 +84,9 @@
             {% if electronic and gradeable.isStudentView() and release_date <= "now"|date(date_format, timezone_string) %}
                 <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
                     Note: Grades released notifications are sent and emailed at the start of every hour for students with complete TA/Manual grades.
-                    <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> notifications have been sent{{ notifications_pending <= 0 ? '.' : ',' }}
-                    {% if notifications_pending > 0 %}
-                    and <span id="notification-pending">{{ notifications_pending }}</span> are awaiting to be sent at the top of the hour.
+                    <span id="notification-total">{{ gradeable.getScoreNotificationsSent() }}</span> notifications have been sent{{ score_notifications_pending <= 0 ? '.' : ',' }}
+                    {% if score_notifications_pending > 0 %}
+                    and <span id="notification-pending">{{ score_notifications_pending }}</span> are awaiting to be sent at the top of the hour.
                     {% endif %}
                 </p>
             {% endif %}

@@ -450,7 +450,9 @@ class RegenerateBulkImages(AbstractJob):
             generate_pdf_images.Redaction(**r)
             for r in self.job_details.get("redactions", [])
         ]
-        regenerate_bulk_images.main(folder, redactions)
+        # Support configurable parallel workers (default to None for auto-detection)
+        max_workers = self.job_details.get("max_workers", None)
+        regenerate_bulk_images.main(folder, redactions, max_workers)
 
     def cleanup_job(self):
         pass
@@ -543,3 +545,16 @@ class DocxToPDF(AbstractJob):
             log.close()
             log_msg = f"[Last ran on: {today.isoformat()}]\n"
             logger.write_to_log(log_file, log_msg)
+
+
+class GradingClustering(CourseGradeableJob):
+    required_keys = CourseGradeableJob.required_keys + ['algorithm']
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+        algorithm = self.job_details['algorithm']
+
+        script = str(Path(INSTALL_DIR, 'sbin', 'grading_clustering', 'main.py'))
+        subprocess.run(['python3', script, semester, course, gradeable, algorithm], check=True)
