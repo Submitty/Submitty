@@ -597,7 +597,7 @@ if [ ! -d "${clangsrc}" ]; then
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
 
-bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
 
 source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
 
