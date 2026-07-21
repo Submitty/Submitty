@@ -1,18 +1,18 @@
-<div id="rg-build-notices">
-    {% if rainbow_build_notice is not null %}
-        <div class="system-message rg-build-notice-{{ rainbow_build_notice.level }}"
-        id="rainbow-build-notice" data-testid="rainbow-build-notice">
-            {% for message in rainbow_build_notice.messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
 <div class="content">
     <div id="rg_web_ui_loading">
         <p>Loading...</p>
     </div>
     <div id="rg_web_ui">
+        <div id="rg-build-notices">
+            {% if rainbow_build_notice is not null %}
+                <div class="rg-build-notice rg-build-notice-{{ rainbow_build_notice.level }}"
+                     id="rainbow-build-notice" data-testid="rainbow-build-notice">
+                    {% for message in rainbow_build_notice.messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
         <h1>Rainbow Grades Configuration</h1>
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">

@@ -783,11 +783,9 @@ function checkBuildStatus() {
         data: { csrf_token: csrfToken },
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             if (response.status === 'success') {
                 $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data);
-                refreshManualGenerationBanner();
                 refreshBuildNotices();
             }
             else if (response.status === 'fail') {
@@ -797,7 +795,6 @@ function checkBuildStatus() {
             }
             else {
                 $('#save_status').text('Internal Server Error');
-                console.log(response);
             }
         },
         error: function (xhr, status, error) {
@@ -815,15 +812,13 @@ function renderBuildNotices(notice) {
     }
 
     const banner = $('<div></div>')
-        .addClass(`system-message rg-build-notice-${notice.level}`)
+        .addClass(`rg-build-notice rg-build-notice-${notice.level}`)
         .attr('id', 'rainbow-build-notice')
         .attr('data-testid', 'rainbow-build-notice');
-
     notice.messages.forEach((message) => {
-        banner.append($('<p></p>').text(message));
-    });
-
+    banner.append($('<p></p>').text(message));
     container.append(banner);
+    });
 }
 
 function refreshBuildNotices() {

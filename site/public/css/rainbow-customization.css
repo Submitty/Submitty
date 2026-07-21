@@ -405,13 +405,6 @@ div:has(.override)
     color: var(--warning-brown);
 }
 
-#rainbow-build-notice {
-    flex-grow: 1;
-    margin: 10px;
-    width: auto;
-    box-sizing: border-box;
-}
-
 .rg-small-text {
     font-size: 0.85em;
 }
@@ -440,11 +433,20 @@ div:has(.override)
     color: var(--standard-gray-black);
 }
 
+.rg-build-notice {
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    border-radius: 3px;
+    text-align: center;
+    font-weight: bold;
+}
+.rg-build-notice p {
+    margin: 0;
+}
 .rg-build-notice-error {
     background: var(--standard-light-red);
     color: var(--standard-black);
 }
-
 .rg-build-notice-warning {
     background: var(--standard-light-yellow-brown);
     color: var(--standard-black);
