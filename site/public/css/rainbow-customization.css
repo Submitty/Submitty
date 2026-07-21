@@ -405,6 +405,13 @@ div:has(.override)
     color: var(--warning-brown);
 }
 
+#rainbow-build-notice {
+    flex-grow: 1;
+    margin: 10px;
+    width: auto;
+    box-sizing: border-box;
+}
+
 .rg-small-text {
     font-size: 0.85em;
 }
@@ -431,4 +438,14 @@ div:has(.override)
 
 [data-theme="dark"] .manual-generation-warning a {
     color: var(--standard-gray-black);
+}
+
+.rg-build-notice-error {
+    background: var(--standard-light-red);
+    color: var(--standard-black);
+}
+
+.rg-build-notice-warning {
+    background: var(--standard-light-yellow-brown);
+    color: var(--standard-black);
 }

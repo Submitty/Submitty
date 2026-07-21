@@ -196,7 +196,7 @@ class ReportController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_build_notices", methods: ["POST"])]
     public function rainbowGradesBuildNotices(): JsonResponse {
         return JsonResponse::getSuccessResponse([
-            'notices' => $this->getRainbowGradesBuildNotices(),
+            'notice' => $this->getRainbowGradesBuildNotice(),
         ]);
     }
 

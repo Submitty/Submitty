@@ -1,11 +1,10 @@
 <div id="rg-build-notices">
     {% if rainbow_build_notice is not null %}
-        <div class="rg-build-notice rg-build-notice-{{ rainbow_build_notice.level }}" data-testid="rg-build-notice">
-            <h4>
-                {% for message in rainbow_build_notice.messages %}
-                    {{ message }}{% if not loop.last %}<br>{% endif %}
-                {% endfor %}
-            </h4>
+        <div class="system-message rg-build-notice-{{ rainbow_build_notice.level }}"
+        id="rainbow-build-notice" data-testid="rainbow-build-notice">
+            {% for message in rainbow_build_notice.messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
         </div>
     {% endif %}
 </div>

@@ -815,18 +815,15 @@ function renderBuildNotices(notice) {
     }
 
     const banner = $('<div></div>')
-        .addClass(`content rg-build-notice rg-build-notice-${notice.level}`)
-        .attr('data-testid', 'rg-build-notice');
-    const heading = $('<h4></h4>');
+        .addClass(`system-message rg-build-notice-${notice.level}`)
+        .attr('id', 'rainbow-build-notice')
+        .attr('data-testid', 'rainbow-build-notice');
 
-    notice.messages.forEach((message, index) => {
-        if (index > 0) {
-            heading.append($('<br>'));
-        }
-        heading.append(document.createTextNode(message));
+    notice.messages.forEach((message) => {
+        banner.append($('<p></p>').text(message));
     });
 
-    container.append(banner.append(heading));
+    container.append(banner);
 }
 
 function refreshBuildNotices() {

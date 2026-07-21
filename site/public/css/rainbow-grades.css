@@ -10,11 +10,3 @@
 #rainbow-grades-last-update {
     float: right;
 }
-
-.rg-build-notice-error {
-    background-color: var(--standard-light-red);
-}
-
-.rg-build-notice-warning {
-    background-color: var(--standard-light-yellow-brown);
-}
