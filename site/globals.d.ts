@@ -5,6 +5,11 @@ import * as markerjsUI from '@markerjs/markerjs-ui';
 export { };
 
 declare global {
+    interface Element {
+        reRender?: (newArgs: Record<string, unknown>) => Promise<void>;
+        unmount?: () => void;
+    }
+
     interface Window {
         csrfToken: string;
         $: JQueryStatic;

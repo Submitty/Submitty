@@ -62,6 +62,19 @@ const exports = {
 
         mountedApps.set(mountKey, app);
         app.mount(target);
+
+        // Attach reRender + unmount so the element can be updated or destroyed without repeating type/name/events.
+        const el = typeof target === 'string' ? document.querySelector(target) : target;
+        if (el) {
+            (el as unknown as { reRender: (newArgs: Record<string, unknown>) => Promise<void> }).reRender =
+                (newArgs: Record<string, unknown>) => this.render(target, type, name, newArgs, events);
+            (el as unknown as { unmount: () => void }).unmount = () => {
+                if (mountedApps.has(mountKey)) {
+                    mountedApps.get(mountKey)!.unmount();
+                    mountedApps.delete(mountKey);
+                }
+            };
+        }
     },
 };
 

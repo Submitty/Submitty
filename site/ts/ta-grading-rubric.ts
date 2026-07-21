@@ -1,5 +1,6 @@
 import { viewFileFullPanel } from './ta-grading';
 import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
+import { updateVueComponent, unmountVueComponent } from './utils/vue';
 
 declare global {
     interface Window {
@@ -1850,30 +1851,19 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
 
     const studentLinks = computeStudentLinks(stats);
 
-    void window.submitty.render(el, 'component', 'ta_grading/ReceivedMarkForm', {
+    updateVueComponent(el, {
         show: true,
         componentTitle: component_title,
         markTitle: mark_title,
         stats: stats,
         studentLinks: studentLinks,
-    }, {
-        close: 'closeMarkStatsPopup',
     });
 }
 
-// Closes the mark stats popup by re-rendering the component with show: false
+// Closes the mark stats popup by fully unmounting the Vue app.
 
 window.closeMarkStatsPopup = function () {
-    const el = document.querySelector('.js-received-mark-form');
-    if (el) {
-        void window.submitty.render(el, 'component', 'ta_grading/ReceivedMarkForm', {
-            show: false,
-            componentTitle: '',
-            markTitle: '',
-            stats: null,
-            studentLinks: [],
-        });
-    }
+    unmountVueComponent('.js-received-mark-form');
 };
 
 /**
