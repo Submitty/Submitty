@@ -57,109 +57,100 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cyAssertRegistration(STUDENT_3, '1');
     });
 
-    context('Test Instructor team management', () => {
-        // Login the instructor and navigate to the teams page before each test in this context
-        beforeEach(() => {
-            cy.login('instructor');
+    it('Should test Instructor creation, Student access, and deletion of teams', () => {
+
+        // ==========================================
+        // Test Instructor creation of teams
+        // ==========================================
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
+
+        // Verify the inline team count messaging
+        cy.get('[data-testid="manage-teams-header"]').contains('Manage Teams').should('be.visible');
+
+        cy.get('[data-testid="manage-teams-message"]')
+            .contains('existing teams for this gradeable') // only check the first part of the message
+            .invoke('text')
+            .should('equal', 'There are currently 36 existing teams for this gradeable. There are currently 3 students not yet on a team and 101 students on existing teams for this gradeable.');
+
+        // Tests the links to Grade Details and Manage Students
+        cy.get('[data-testid="team-management-links"]').within(() => {
+            cy.get('[data-testid="grade-details-link"]').click();
+        });
+        cy.url().should('include', '/grading');
+
+        cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
+
+        cy.get('[data-testid="team-management-links"]').within(() => {
+            cy.get('[data-testid="manage-students-link"]').click();
+        });
+        cy.url().should('include', '/users');
+
+        cy.visit(['sample', 'gradeable', GRADEABLE, 'team']); // Go back to teams page
+
+        // Verify the buttons for management of teams exist
+        cy.get('[data-testid="create-teams-from-registration-subsections"]')
+            .should('be.visible')
+            .and('contain', 'Create Teams from Registration Subsections');
+
+        cy.get('[data-testid="create-single-student-teams"]')
+            .should('be.visible')
+            .and('contain', 'Create Single-Student Teams');
+
+        cy.get('[data-testid="delete-all-teams"]')
+            .should('be.visible')
+            .and('contain', 'Delete All Teams');
+
+        // Test the creation of teams from Registration Subsections
+        cy.on('window:confirm', () => true); // Automatically accept the browswer confirmation popup
+        cy.get('[data-testid="create-teams-from-registration-subsections"]').click();
+
+        cy.get('[data-testid="popup-message"]')
+            .invoke('text')
+            .should('equal', 'Successfully created 1 teams from registration subsections.');
+
+        // The Twig template has a setTimeout of 1500ms before reloading the page
+        cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
+            .should('have.text', 'There are currently 37 existing teams for this gradeable. There are currently 1 students not yet on a team and 103 students on existing teams for this gradeable.');
+
+        // Test the creation of single-student teams
+        cy.get('[data-testid="create-single-student-teams"]').click();
+
+        cy.get('[data-testid="popup-message"]')
+            .invoke('text')
+            .should('equal', 'Successfully created 1 single-student teams.');
+
+        // The Twig template has a setTimeout of 1500ms before reloading the page
+        cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
+            .should('have.text', 'There are currently 38 existing teams for this gradeable. There are currently 0 students not yet on a team and 104 students on existing teams for this gradeable.');
+
+        cy.logout('instructor');
+        // ==========================================
+        // Test student team access
+        // ==========================================
+        [STUDENT_1, STUDENT_2, STUDENT_3].forEach((user) => {
+            cy.login(user);
             cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
+            cy.get('[data-testid="your-team-header"]').should('exist');
         });
 
-        it('Should verify the inline team count messaging', () => {
-            cy.get('[data-testid="manage-teams-header"]').contains('Manage Teams').should('be.visible');
+        cy.logout(STUDENT_3);
 
-            cy.get('[data-testid="manage-teams-message"]')
-                .contains('existing teams for this gradeable') // only check the first part of the message
-                .invoke('text')
-                .should('equal', 'There are currently 36 existing teams for this gradeable. There are currently 3 students not yet on a team and 101 students on existing teams for this gradeable.');
-        });
+        // ==========================================
+        // Test instructor deletion of teams
+        // ==========================================
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
+        cy.on('window:confirm', () => true);
 
-        it('Should have working links to Grade Details and Manage Students', () => {
-            cy.get('[data-testid="team-management-links"]').within(() => {
-                cy.get('[data-testid="grade-details-link"]').click();
-            });
-            cy.url().should('include', '/grading');
+        cy.get('[data-testid="delete-all-teams"]').click();
 
-            // Go back
-            cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
+        cy.get('[data-testid="popup-message"]')
+            .invoke('text')
+            .should('equal', 'Successfully deleted 2 teams. Skipped 36 teams with submissions. Skipped 0 teams with instructor-level users.');
 
-            cy.get('[data-testid="team-management-links"]').within(() => {
-                cy.get('[data-testid="manage-students-link"]').click();
-            });
-            cy.url().should('include', '/users');
-        });
-
-        it('Should verify the instructor management buttons for teams exist', () => {
-            cy.get('[data-testid="create-teams-from-registration-subsections"]')
-                .should('be.visible')
-                .and('contain', 'Create Teams from Registration Subsections');
-
-            cy.get('[data-testid="create-single-student-teams"]')
-                .should('be.visible')
-                .and('contain', 'Create Single-Student Teams');
-
-            cy.get('[data-testid="delete-all-teams"]')
-                .should('be.visible')
-                .and('contain', 'Delete All Teams');
-        });
-
-        it('Should successfully create teams from Registration Subsections', () => {
-            // Automatically accept the browser confirmation popup
-            cy.on('window:confirm', () => true);
-
-            // Click the button
-            cy.get('[data-testid="create-teams-from-registration-subsections"]').click();
-
-            cy.get('[data-testid="popup-message"]')
-                .invoke('text')
-                .should('equal', 'Successfully created 1 teams from registration subsections.');
-
-            // The Twig template has a setTimeout of 1500ms before reloading the page
-            cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
-                .should('have.text', 'There are currently 37 existing teams for this gradeable. There are currently 1 students not yet on a team and 103 students on existing teams for this gradeable.');
-        });
-
-        it('Should successfully create single-student teams', () => {
-            // Automatically accept the browser confirmation popup
-            cy.on('window:confirm', () => true);
-
-            // Click the button
-            cy.get('[data-testid="create-single-student-teams"]').click();
-
-            cy.get('[data-testid="popup-message"]')
-                .invoke('text')
-                .should('equal', 'Successfully created 1 single-student teams.');
-
-            // The Twig template has a setTimeout of 1500ms before reloading the page
-            cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
-                .should('have.text', 'There are currently 38 existing teams for this gradeable. There are currently 0 students not yet on a team and 104 students on existing teams for this gradeable.');
-        });
-    });
-
-    context('Test Student team access', () => {
-        it('Should test student access to their new teams created in this test', () => {
-            [STUDENT_1, STUDENT_2, STUDENT_3].forEach((user) => {
-                cy.login(user);
-                cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
-                cy.get('[data-testid="your-team-header"]').should('exist');
-            });
-        });
-    });
-
-    context('Test Instructor team management, delete teams', () => {
-        it('Should successfully test the deletion of teams', () => {
-            cy.login('instructor');
-            cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
-            cy.on('window:confirm', () => true);
-
-            cy.get('[data-testid="delete-all-teams"]').click();
-
-            cy.get('[data-testid="popup-message"]')
-                .invoke('text')
-                .should('equal', 'Successfully deleted 2 teams. Skipped 36 teams with submissions. Skipped 0 teams with instructor-level users.');
-
-            cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
-                .should('have.text', 'There are currently 36 existing teams for this gradeable. There are currently 3 students not yet on a team and 101 students on existing teams for this gradeable.');
-        });
+        cy.get('[data-testid="manage-teams-message"]', { timeout: 5000 })
+            .should('have.text', 'There are currently 36 existing teams for this gradeable. There are currently 3 students not yet on a team and 101 students on existing teams for this gradeable.');
     });
 
     after(() => {
