@@ -2279,6 +2279,15 @@ function loadFilterHandlers() {
     updateClearFilterButton();
 }
 
+function searchForum() {
+    const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
+    if (searchInput) {
+        $('#search-content').val(searchInput.value.trim());
+    }
+    updateClearFilterButton();
+    updateThreads(true, saveFilterState);
+}
+
 function getFilterState() {
     return {
         'categories': readCategoryValues(),
