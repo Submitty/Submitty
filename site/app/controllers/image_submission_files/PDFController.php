@@ -51,18 +51,6 @@ class PDFController extends AbstractController {
         return $path;
     }
 
-    // #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")]
-    // public function showStudentPDF(string $gradeable_id, string $filename, string $path): void {
-    //     $filename = html_entity_decode($filename);
-    //     $id = $this->core->getUser()->getId();
-    //     $gradeable = $this->tryGetGradeable($gradeable_id);
-    //     if ($gradeable->isTeamAssignment()) {
-    //         $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
-    //     }
-
-    //     $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, 1, true);
-    // }
-
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods: ["POST"])]
     public function showGraderPDFEmbedded(string $gradeable_id) {
         // User can be a team
