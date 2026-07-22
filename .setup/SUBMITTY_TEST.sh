@@ -6,8 +6,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # SUBMITTY_ROOT is set based on if this is being used inside the vm or locally
 if [ -d "/usr/local/submitty/GIT_CHECKOUT/Submitty" ]; then
     SUBMITTY_ROOT="/usr/local/submitty/GIT_CHECKOUT/Submitty"
+    SCRIPT_UID="$(id -u vagrant)"
+    SCRIPT_GID="$(id -g vagrant)"
 else
     SUBMITTY_ROOT="$SCRIPT_DIR/.."
+    SCRIPT_UID="$(id -u)"
+    SCRIPT_GID="$(id -g)"
 fi
 
 IMAGE_NAME="submitty_test"
@@ -48,8 +52,7 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
-    docker run --rm $terminal_flag -u "$(id -u):$(id -g)" -e HOME=/tmp \
-        --cap-drop=DAC_OVERRIDE \
+    docker run --rm $terminal_flag -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
