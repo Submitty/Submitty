@@ -176,6 +176,22 @@ class GradingOrder extends AbstractModel {
                     }
                 };
                 break;
+            case "peer":
+                $keyFn = function (Submitter $a) {
+                    if ($a->isTeam()) {
+                        return strtolower(
+                            ($a->getTeam()->getTeamName() ?? '') . ' ' . $a->getId()
+                        );
+                    }
+                    return strtolower(
+                        $a->getUser()->getDisplayedFamilyName()
+                        . ' '
+                        . $a->getUser()->getDisplayedGivenName()
+                        . ' '
+                        . $a->getId()
+                    );
+                };
+                break;
             case "random":
                 $keyFn = function (Submitter $a) {
                     //So it's (pseudo) randomly ordered, and will be different for each gradeable

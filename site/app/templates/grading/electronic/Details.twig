@@ -64,9 +64,11 @@
                     <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
                 </label>
                 {% endif %}
-                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
-                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
-                </label>
+                {% if not is_student %}
+                    <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper"> Randomize Order
+                        <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
+                    </label>
+                {% endif %}
                 {% if toggle_anon_button %}
                 <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
                     <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>

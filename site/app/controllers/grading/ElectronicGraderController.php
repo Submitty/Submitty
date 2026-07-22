@@ -1047,7 +1047,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
-        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() === User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -1074,8 +1074,14 @@ class ElectronicGraderController extends AbstractController {
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
 
-        $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
-        $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
+        $sort = $_COOKIE['sort'] ?? 'id';
+        $direction = $_COOKIE['direction'] ?? 'ASC';
+        if ($peer) {
+            $sort = $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
+                ? 'random'
+                : 'peer';
+            $direction = 'ASC';
+        }
 
 
         //Get grading_details Columns
