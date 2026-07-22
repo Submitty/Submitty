@@ -223,7 +223,7 @@ for stale in glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
 
 
 def build_table(order):
-    print('Compiling rainbow grades ({})'.format(order), flush=True)
+    print('Compiling rainbow grades table by {}'.format(order), flush=True)
     result = subprocess.run(
         ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
     )
