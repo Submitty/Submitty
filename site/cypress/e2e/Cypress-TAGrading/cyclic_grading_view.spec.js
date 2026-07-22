@@ -7,7 +7,7 @@ describe('Cyclic grading View Test', () => {
             if (user === 'ta') {
                 cy.get('[data-testid="popup-window"]').should('exist');
                 cy.get('[data-testid="close-button"]').should('exist');
-                cy.get('[data-testid="close-hidden-button"]').should('exist');
+                cy.get('[data-testid="agree-popup-btn"]').should('exist');
                 cy.get('[data-testid="agree-popup-btn"]').click();
             }
             cy.get('[data-testid="view-sections"]').click();
