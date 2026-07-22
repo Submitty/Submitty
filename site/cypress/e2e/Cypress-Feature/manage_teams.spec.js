@@ -5,6 +5,12 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
     const STUDENT_3 = 'windlj';
     const GRADEABLE = 'grading_homework_team_pdf';
 
+    /* Note, grading_homework_team_pdf was chosen because every preexisting
+     * team has made a submission. This is necessarybecause the deleteTeams function
+     * skips teams that have made a submission, and we do not want to delete any teams
+     * that may be used for testing later.
+     */
+
     function cyAssertRegistration(user, section, subsection = '') {
         if (subsection !== '') {
             cy.get(`[data-testid="user-row-${user}"] [data-testid="registration-section"]`)
@@ -27,10 +33,6 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         // Navigate to Manage Students page
         cy.visit(['sample', 'users']);
 
-        cyAssertRegistration(STUDENT_1, 'NULL');
-        cyAssertRegistration(STUDENT_2, 'NULL');
-        cyAssertRegistration(STUDENT_3, 'NULL');
-
         // Set up subsections
         cy.get(`[data-testid="edit-student-${STUDENT_1}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
@@ -38,26 +40,25 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cy.get('[data-testid="registration-subsection"]').type('cypress');
         cy.get('[data-testid="submit-user-form-button"]').click();
 
-        cyAssertRegistration(STUDENT_1, '1', 'cypress');
-
         cy.get(`[data-testid="edit-student-${STUDENT_2}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="registration-subsection"]').clear();
         cy.get('[data-testid="registration-subsection"]').type('cypress');
         cy.get('[data-testid="submit-user-form-button"]').click();
 
-        cyAssertRegistration(STUDENT_2, '1', 'cypress');
-
         // STUDENT_3 only gets a section (no subsection)
         // they are to be used for testing the creation of single-student teams
         cy.get(`[data-testid="edit-student-${STUDENT_3}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('1');
         cy.get('[data-testid="submit-user-form-button"]').click();
-
-        cyAssertRegistration(STUDENT_3, '1');
     });
 
     it('Should test Instructor creation, Student access, and deletion of teams', () => {
+        // Start with asserting that the test users are registered properly
+        cyAssertRegistration(STUDENT_1, '1', 'cypress');
+        cyAssertRegistration(STUDENT_2, '1', 'cypress');
+        cyAssertRegistration(STUDENT_3, '1');
+
         // ==========================================
         // Test Instructor creation of teams
         // ==========================================
@@ -163,19 +164,13 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         cy.get('[data-testid="registration-subsection"]').clear();
         cy.get('[data-testid="submit-user-form-button"]').click();
 
-        cyAssertRegistration(STUDENT_1, 'NULL');
-
         cy.get(`[data-testid="edit-student-${STUDENT_2}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('null');
         cy.get('[data-testid="registration-subsection"]').clear();
         cy.get('[data-testid="submit-user-form-button"]').click();
 
-        cyAssertRegistration(STUDENT_2, 'NULL');
-
         cy.get(`[data-testid="edit-student-${STUDENT_3}-button"]`).click();
         cy.get('[data-testid="registration-section-dropdown"]').select('null');
         cy.get('[data-testid="submit-user-form-button"]').click();
-
-        cyAssertRegistration(STUDENT_3, 'NULL');
     });
 });
