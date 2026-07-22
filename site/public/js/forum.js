@@ -1998,53 +1998,6 @@ function checkInputMaxLength(obj) {
     }
 }
 
-function sortTable(sort_element_index, reverse = false) {
-    const table = document.getElementById('forum_stats_table');
-    let switching = true;
-    while (switching) {
-        switching = false;
-        const rows = table.getElementsByTagName('TBODY');
-        // eslint-disable-next-line no-var
-        for (var i = 1; i < rows.length - 1; i++) {
-            const a = rows[i].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
-            const b = rows[i + 1].getElementsByTagName('TR')[0].getElementsByTagName('TD')[sort_element_index];
-            if (reverse) {
-                // eslint-disable-next-line eqeqeq
-                if (sort_element_index == 0 ? a.innerHTML < b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                }
-            }
-            else {
-                // eslint-disable-next-line eqeqeq
-                if (sort_element_index == 0 ? a.innerHTML > b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                }
-            }
-        }
-    }
-
-    const row0 = table.getElementsByTagName('TBODY')[0].getElementsByTagName('TR')[0];
-    const headers = row0.getElementsByTagName('TH');
-
-    // eslint-disable-next-line no-var, no-redeclare
-    for (var i = 0; i < headers.length; i++) {
-        const index = headers[i].innerHTML.indexOf(' ↓');
-        const reverse_index = headers[i].innerHTML.indexOf(' ↑');
-
-        if (index > -1 || reverse_index > -1) {
-            headers[i].innerHTML = escapeSpecialChars(headers[i].innerHTML.slice(0, -2));
-        }
-    }
-    if (reverse) {
-        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↑`);
-    }
-    else {
-        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↓`);
-    }
-}
-
 function loadThreadHandler() {
     $('a.thread_box_link').off('click').click(async function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
@@ -2464,8 +2417,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
-            // eslint-disable-next-line no-restricted-syntax
-            $('#thread-content').html(json['post']);
+            $('#thread-content').text(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');
             }

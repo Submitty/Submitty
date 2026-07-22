@@ -18,53 +18,44 @@
     vertical-align: bottom;
 }
 
-th {
-    background: var(--standard-light-gray);
+/* Data Table Header Width Styles */
+
+tr > th:nth-of-type(1),
+tr > td:nth-of-type(1) {
+    width: 20px;
 }
 
-tr > th:first-child,
-tr > td:first-child {
-    position: sticky;
-    left: 0;
-    border-left: 1px solid var(--standard-medium-gray);
+tr > th:nth-of-type(2),
+tr > td:nth-of-type(2) {
+    width: 70px;
 }
 
-tr > th:nth-child(2),
-tr > td:nth-child(2) {
-    position: sticky;
-    left: 1.25rem;
+tr > th:nth-of-type(3),
+tr > td:nth-of-type(3) {
+    width: 90px;
 }
 
-tr > th:nth-child(3),
-tr > td:nth-child(3) {
-    position: sticky;
-    left: 5.25rem;
+tr > th:nth-of-type(4),
+tr > td:nth-of-type(4) {
+    width: 110px;
 }
 
-tr > th:nth-child(4),
-tr > td:nth-child(4) {
-    position: sticky;
-    left: 10.75rem;
+tr > th:nth-of-type(5),
+tr > td:nth-of-type(5) {
+    width: 120px;
 }
 
-tr > th:nth-child(5),
-tr > td:nth-child(5) {
-    position: sticky;
-    left: 16.75rem;
-    border-right: 1px solid var(--standard-medium-gray);
+tbody {
+    counter-reset: student;
 }
 
-.highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
-    /* stylelint-disable-next-line declaration-no-important */
-    background: var(--standard-focus-cornflower-blue) !important ;
+tbody > tr:not(.info) {
+    counter-increment: student;
 }
 
-tr:nth-child(odd) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--default-white);
-}
-
-tr:nth-child(even) td:nth-child(n + 1):nth-child(-n + 5) {
-    background: var(--standard-hover-light-gray);
+tbody > tr:not(.info) > td:nth-child(1)::after {
+    content: counter(student);
+    padding: 0 1em;
 }
 
 #data-table td:focus,
@@ -98,6 +89,8 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+/* Key Styles */
+
 .simple-key-full-credit,
 .simple-full-credit {
     color: var(--simple-full-credit-dark-blue);
@@ -123,7 +116,13 @@ input[type="number"]::-webkit-outer-spin-button {
     text-align: center;
 }
 
-/* styling for fields that aren't icons */
+.simple-icon {
+    transform: scaleX(3);
+    width: 20px;
+}
+
+/* Checkpoint Cell Styles */
+
 .simple-full-credit:not(i) {
     background-color: var(--simple-full-credit-dark-blue);
 }
@@ -134,11 +133,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .simple-save-error:not(i) {
     background-color: var(--simple-save-error-red);
-}
-
-.simple-icon {
-    transform: scaleX(3);
-    width: 20px;
 }
 
 #details-legend li {

@@ -46,7 +46,7 @@ describe('Test cases involving the files panel', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
         cy.get('[data-testid="view-sections"]').uncheck();
-        cy.get('#details-table').contains('mccule').siblings().eq(6).click();
+        cy.get('#details-table').contains('hamile').siblings().eq(6).click();
         cy.get('#submission_browser_btn').click();
     });
 
@@ -72,7 +72,7 @@ describe('Test cases involving the files panel', () => {
         cy.get('#autoscroll_id').click();
         cy.get('#autoscroll_id').should('be.checked');
 
-        cy.get('#grading-panel-student-name').should('contain.text', 'mccule');
+        cy.get('#grading-panel-student-name').should('contain.text', 'hamile');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
         cy.get('#submissions').click(); // open submissions browser
@@ -86,40 +86,40 @@ describe('Test cases involving the files panel', () => {
 
         // this second student has the same submission as the first
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
         assertSingleFileSubmissionOpen();
 
         // this third student has a different submission from the first and second
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
         assertSingleFileSubmissionClosed();
 
         // second submission name should still open; close it for later
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSingleFileSubmissionOpen();
         clickSingleFileSubmission();
         assertSingleFileSubmissionClosed();
 
         // third submission name should still be closed; open it for later
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSingleFileSubmissionClosed();
         clickSingleFileSubmission();
         assertSingleFileSubmissionOpen();
 
         // second submission name was closed; it should still be so
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSingleFileSubmissionClosed();
 
         // third submission name was opened; it should still be so
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSingleFileSubmissionOpen();
 
         // closing should work as well
@@ -131,7 +131,7 @@ describe('Test cases involving the files panel', () => {
         assertResultsBrowserClosed();
 
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
 
@@ -160,7 +160,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
         cy.get('[data-testid="view-sections"]').uncheck();
-        cy.get('#details-table').contains('rennea').siblings().eq(6).click();
+        cy.get('#details-table').contains('browna').siblings().eq(6).click();
         cy.get('#submission_browser_btn').click();
 
         cy.get('#autoscroll_id').click();
