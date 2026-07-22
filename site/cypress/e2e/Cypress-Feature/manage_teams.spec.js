@@ -62,7 +62,6 @@ describe('Test cases revolving around the manage teams section of Team Gradeable
         // ==========================================
         // Test Instructor creation of teams
         // ==========================================
-        cy.login('instructor');
         cy.visit(['sample', 'gradeable', GRADEABLE, 'team']);
 
         // Verify the inline team count messaging
