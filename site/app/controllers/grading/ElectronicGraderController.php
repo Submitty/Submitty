@@ -1490,7 +1490,7 @@ class ElectronicGraderController extends AbstractController {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
                 continue;
             }
-            if ($row_num == 1) {
+            if ($row_num === 1) {
                 $row_num += 1;
                 continue;
             }
