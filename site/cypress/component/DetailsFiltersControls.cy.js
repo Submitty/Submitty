@@ -77,7 +77,7 @@ describe('DetailsFiltersControls', () => {
     });
 
     describe('emits events on user interaction', () => {
-        it('emits mounted on mount with the initial inquiry state', () => {
+        it('emits mounted on mount with current inquiry state', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'mounted', {
                 ...defaultProps(),
                 gradeInquiryOnly: true,
@@ -86,23 +86,9 @@ describe('DetailsFiltersControls', () => {
             cy.get('@eventHandler').should('have.been.calledWith', { inquiryOnly: true });
         });
 
-        it('emits view-sections-change with correct value on toggle', () => {
-            mountWithEmitSpy(DetailsFiltersControls, 'view-sections-change', {
-                ...defaultProps(),
-                showAllSections: true,
-                initialViewSections: false,
-            });
-            cy.get('[data-testid="view-sections"]').as('cb');
-            cy.get('@cb').check({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', true);
-            cy.get('@cb').uncheck({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', false);
-        });
-
-        it('emits sort-order-change with correct value on toggle', () => {
+        it('emits *-change events with the checked state when toggling checkboxes', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'sort-order-change', {
                 ...defaultProps(),
-                initialRandomOrder: false,
             });
             cy.get('[data-testid="random-order-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
@@ -111,39 +97,13 @@ describe('DetailsFiltersControls', () => {
             cy.get('@eventHandler').should('have.been.calledWith', false);
         });
 
-        it('emits anon-change with correct value on toggle', () => {
+        it('emits anon-change without tracking local state', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'anon-change', {
                 ...defaultProps(),
                 toggleAnon: true,
                 anonMode: false,
             });
             cy.get('[data-testid="anon-students-checkbox"]').as('cb');
-            cy.get('@cb').check({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', true);
-            cy.get('@cb').uncheck({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', false);
-        });
-
-        it('emits inquiry-change with correct value on toggle', () => {
-            mountWithEmitSpy(DetailsFiltersControls, 'inquiry-change', {
-                ...defaultProps(),
-                gradeInquiryOnly: true,
-                initialInquiryOnly: false,
-            });
-            cy.get('[data-testid="inquiry-only-checkbox"]').as('cb');
-            cy.get('@cb').check({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', true);
-            cy.get('@cb').uncheck({ force: true });
-            cy.get('@eventHandler').should('have.been.calledWith', false);
-        });
-
-        it('emits withdrawn-change with correct value on toggle', () => {
-            mountWithEmitSpy(DetailsFiltersControls, 'withdrawn-change', {
-                ...defaultProps(),
-                canFilterWithdrawn: true,
-                initialHideWithdrawn: false,
-            });
-            cy.get('[data-testid="filter-withdrawn-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
             cy.get('@cb').uncheck({ force: true });

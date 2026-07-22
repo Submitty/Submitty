@@ -1,4 +1,8 @@
 export {};
+
+declare function updateSimpleGradingRowNumbersAndColors(): void;
+declare function updateElectronicGradingRowNumbersAndColors(): void;
+
 declare global {
     interface Window {
         filter_overriden_grades: () => void;
@@ -54,5 +58,5 @@ window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' 
     location.reload();
 };
 
-window.updateSimpleGradingRowNumbersAndColors = updateSimpleGradingRowNumbersAndColors as unknown as () => void;
-window.updateElectronicGradingRowNumbersAndColors = updateElectronicGradingRowNumbersAndColors as unknown as () => void;
+window.updateSimpleGradingRowNumbersAndColors = updateSimpleGradingRowNumbersAndColors;
+window.updateElectronicGradingRowNumbersAndColors = updateElectronicGradingRowNumbersAndColors;
