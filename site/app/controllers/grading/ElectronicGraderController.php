@@ -584,7 +584,7 @@ class ElectronicGraderController extends AbstractController {
             $isPeerGradeable = true;
         }
         $peer = false;
-        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
+        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() === User::GROUP_STUDENT)) {
             $peer = true;
         }
 
