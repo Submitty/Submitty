@@ -584,7 +584,7 @@ class ElectronicGraderController extends AbstractController {
             $isPeerGradeable = true;
         }
         $peer = false;
-        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() === User::GROUP_STUDENT)) {
+        if ($gradeable->hasPeerComponent() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
         }
 
@@ -1047,7 +1047,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
-        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() === User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -1490,7 +1490,7 @@ class ElectronicGraderController extends AbstractController {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
                 continue;
             }
-            if ($row_num === 1) {
+            if ($row_num == 1) {
                 $row_num += 1;
                 continue;
             }
