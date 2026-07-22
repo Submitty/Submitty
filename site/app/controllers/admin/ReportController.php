@@ -1223,7 +1223,7 @@ class ReportController extends AbstractController {
     /**
      * Collapse the build notices into a single banner, with error overriding warning.
      *
-     * @return array{level: string, messages: string[]}|null
+     * @return array{level: string, messages: string[], sysadmin_email: string}|null
      */
     private function getRainbowGradesBuildNotice(): ?array {
         $notices = $this->getRainbowGradesBuildNotices();
@@ -1239,6 +1239,10 @@ class ReportController extends AbstractController {
             }
         }
 
-        return ['level' => $level, 'messages' => array_column($notices, 'message')];
+        return [
+            'level' => $level,
+            'messages' => array_column($notices, 'message'),
+            'sysadmin_email' => $this->core->getConfig()->getSysAdminEmail(),
+        ];
     }
 }

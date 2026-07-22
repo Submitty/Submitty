@@ -162,7 +162,7 @@ creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
     error_exit(f'Unable to locate the submitty_admin.json credentials file at '
-               f'{creds_file}, please contact your sysadmin.')
+               f'{creds_file}')
 
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
@@ -174,12 +174,10 @@ if 'token' not in creds or not creds['token']:
     # Distinguish a missing key from a present-but-empty token in the output
     if 'token' not in creds:
         warn('No token field found in submitty_admin.json, attempting to '
-             'continue with previously generated grade summaries. Please '
-             'contact your sysadmin.')
+             'continue with previously generated grade summaries.')
     else:
         warn('The auth token in submitty_admin.json is empty, attempting to '
-             'continue with previously generated grade summaries. Please '
-             'contact your sysadmin.')
+             'continue with previously generated grade summaries.')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
