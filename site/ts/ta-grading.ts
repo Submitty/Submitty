@@ -34,7 +34,6 @@ declare global {
         updateCookies (): void;
         openFrame(html_file: string, url_file: string, num: string, pdf_full_panel: boolean, panel: string): void;
         rotateImage(url: string | undefined, rotateBy: string): void;
-        loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
     }
     interface JQueryStatic {
@@ -697,7 +696,7 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
 
-    const promise = loadPDF(name, path, page_num, panel);
+    const promise = loadFileForFullView(name, path, page_num, panel);
     $(fileFullPanelOptions[panel]['fileView']).show();
     $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
@@ -716,7 +715,7 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 }
 window.viewFileFullPanel = viewFileFullPanel;
 
-function loadPDF(name: string, path: string, page_num: number, panelStr: string = 'submission') {
+function loadFileForFullView(name: string, path: string, page_num: number, panelStr: string = 'submission') {
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
@@ -819,7 +818,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
         }
     }
 }
-window.loadPDF = loadPDF;
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
