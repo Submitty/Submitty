@@ -285,7 +285,7 @@ class DatabaseQueries {
                     FROM electronic_gradeable_data where user_id = (table Input)
                     ORDER BY submission_time desc
                     LIMIT 1),
-                Forum_View AS 
+                Forum_View AS
                     (SELECT timestamp, user_id
                     FROM viewed_responses where user_id = (table Input)
                     ORDER BY timestamp desc
@@ -740,20 +740,20 @@ SQL;
      */
     public function getUpDucks(): array {
         $this->course_db->query("
-            SELECT 
+            SELECT
                 f.user_id,
-                COUNT(*) AS upducks 
-            FROM 
+                COUNT(*) AS upducks
+            FROM
                 forum_upducks f
-            JOIN 
+            JOIN
                 posts p
-            ON 
+            ON
                 f.post_id = p.id
-            WHERE 
-                p.deleted = FALSE 
-            GROUP BY 
+            WHERE
+                p.deleted = FALSE
+            GROUP BY
                 f.user_id
-            ORDER BY 
+            ORDER BY
                 upducks DESC
         ");
         return $this->course_db->rows();
@@ -776,7 +776,7 @@ SQL;
          */
     public function getUsersWhoLikedPost(int $post_id): array {
         $this->course_db->query("
-            SELECT u.user_id 
+            SELECT u.user_id
             FROM forum_upducks f
             JOIN users u ON f.user_id = u.user_id
             WHERE f.post_id = ?
@@ -1007,7 +1007,7 @@ SQL;
         );
 
         $this->course_db->query(
-            "UPDATE users SET 
+            "UPDATE users SET
                 rotating_section = NULL,
                 registration_type = NULL
             WHERE user_id = ?",
@@ -1025,14 +1025,18 @@ SQL;
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
         $this->submitty_db->query(
             "
-INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
-VALUES (?,?,?,?,?,?)",
+            INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
+            VALUES (?,?,?,?,?,?)",
             $params
         );
 
         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
-        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+        $this->course_db->query(
+            "UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=?,
+                date_registered=COALESCE(date_registered, NOW())
+            WHERE user_id=?",
+            $params
+        );
     }
 
     /**
@@ -1040,7 +1044,7 @@ VALUES (?,?,?,?,?,?)",
      * @param string|null $semester
      * @param string|null $course
      */
-    public function updateUser(User $user, $semester = null, $course = null) {
+    public function updateUser(User $user, $semester = null, $course = null, bool $is_registration_event = false) {
         $params = [$user->getNumericId(), $user->getPronouns(), $user->getDisplayPronouns(), $user->getLegalGivenName(), $user->getPreferredGivenName(),
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getLastInitialFormat(), $user->getDisplayNameOrder(), $user->getEmail(),
                        $user->getSecondaryEmail(), $this->submitty_db->convertBoolean($user->getEmailBoth()),
@@ -1082,10 +1086,14 @@ UPDATE courses_users SET user_group=?, registration_section=?, manual_registrati
 WHERE term=? AND course=? AND user_id=?",
                 $params
             );
-
+            $date_registered_sql = $is_registration_event
+            ? ", date_registered=COALESCE(date_registered, NOW())"
+            : "";
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
-            $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
-            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+            $this->course_db->query(
+                "UPDATE users SET rotating_section=?, registration_subsection=?{$date_registered_sql} WHERE user_id=?",
+                $params
+            );
         }
     }
 
@@ -1456,9 +1464,9 @@ WHERE term=? AND course=? AND user_id=?",
     public function generateLateDayCacheForUsers(): void {
         $default_late_days = $this->core->getConfig()->getDefaultStudentLateDays();
         $params = [$default_late_days];
-        $query = "INSERT INTO late_day_cache 
+        $query = "INSERT INTO late_day_cache
                     (SELECT (cache_row).*
-                         FROM 
+                         FROM
                         (SELECT
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
@@ -1483,8 +1491,8 @@ WHERE term=? AND course=? AND user_id=?",
 
         $user_or_team = $late_day_info->getGradedGradeable()->getGradeable()->isTeamAssignment() ? 'team_id' : 'user_id';
         $query = "INSERT INTO late_day_cache
-                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
-                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
+                    (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late,
+                    late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
@@ -1497,7 +1505,7 @@ WHERE term=? AND course=? AND user_id=?",
         $params[] = $late_day_info->getLateDaysChange();
 
         $query = "INSERT INTO late_day_cache
-                    (user_id, late_day_date, late_days_remaining, late_days_change) 
+                    (user_id, late_day_date, late_days_remaining, late_days_change)
                     VALUES (?, ?, ?, ?)
                     ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
@@ -1850,13 +1858,13 @@ ORDER BY {$orderby}",
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
-            ON 
+            ON
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.user_id=users.user_id
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0
             {$where}
             GROUP BY {$section_key}
@@ -2240,9 +2248,9 @@ ORDER BY merged_data.{$section_key}
 
         $this->course_db->query(
             "
-            SELECT 
+            SELECT
                 $unit.$section_key, COUNT($unit.$id) as verified_components_count
-            FROM 
+            FROM
                 gradeable_data as gd
                 JOIN gradeable_component_data as gcd ON (gd.gd_id = gcd.gd_id)
                 JOIN $unit ON (gd.gd_$id = $unit.$id)
@@ -2313,13 +2321,13 @@ ORDER BY merged_data.{$section_key}
             AND egv.active_version>0
             AND egv.g_id=?
             INNER JOIN electronic_gradeable AS eg
-            ON 
+            ON
             eg.g_id=egv.g_id
             AND eg.eg_submission_due_date IS NOT NULL
             INNER JOIN (SELECT DISTINCT ldc.{$user_or_team_id}
             FROM late_day_cache AS ldc
-            WHERE ldc.g_id=? 
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            WHERE ldc.g_id=?
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0) AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
             {$where}
             GROUP BY {$u_or_t}.{$section_key}
@@ -2489,7 +2497,7 @@ ORDER BY merged_data.{$section_key}
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2574,7 +2582,7 @@ ORDER BY gc_order
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2654,7 +2662,7 @@ ORDER BY gc_order
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
@@ -2776,7 +2784,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params = [$g_id,$g_id, $count];
         }
@@ -4346,14 +4354,14 @@ ORDER BY {$section_key}",
             AND electronic_gradeable_version.active_version>0
             AND electronic_gradeable_version.g_id=?
             INNER JOIN electronic_gradeable
-            ON 
+            ON
             electronic_gradeable.g_id=electronic_gradeable_version.g_id
             AND electronic_gradeable.eg_submission_due_date IS NOT NULL
             INNER JOIN late_day_cache AS ldc
             ON ldc.g_id=electronic_gradeable.g_id
             AND ldc.team_id=gradeable_teams.team_id
             AND ldc.submission_days_late>0
-            AND ldc.submission_days_late>ldc.late_day_exceptions 
+            AND ldc.submission_days_late>ldc.late_day_exceptions
             And ldc.late_days_change =0
             {$where}
             GROUP BY gradeable_teams.team_id, {$section_key}
@@ -4801,6 +4809,118 @@ SQL;
     }
 
     /**
+     * Inserts the preferred default notification settings
+     *
+     * @param string $user_id
+     * @param string $term
+     * @param string $course
+     */
+    public function saveNotificationDefaults(string $user_id, string $term, string $course): void {
+        $this->submitty_db->query(
+            "INSERT INTO notification_default (user_id, term, course)
+             VALUES (?, ?, ?)
+             ON CONFLICT (user_id) DO UPDATE SET
+                term = EXCLUDED.term,
+                course = EXCLUDED.course",
+            [$user_id, $term, $course]
+        );
+    }
+
+    /**
+     * @return array{term: string, course: string}|null
+     */
+    public function getNotificationDefault(string $user_id): ?array {
+        $this->submitty_db->query(
+            "SELECT term, course FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+        $row = $this->submitty_db->row();
+        return empty($row) ? null : $row;
+    }
+
+    public function deleteNotificationDefault(string $user_id): void {
+        $this->submitty_db->query(
+            "DELETE FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getNotificationSettingsForUser(string $user_id): ?array {
+        $this->course_db->query(
+            "SELECT * FROM notification_settings WHERE user_id = ?",
+            [$user_id]
+        );
+        $row = $this->course_db->row();
+        return empty($row) ? null : $row;
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     */
+    public function insertNotificationSettingsForUser(string $user_id, array $source): void {
+        $this->course_db->query(
+            "INSERT INTO notification_settings (
+                user_id, merge_threads, all_new_threads, all_new_posts,
+                all_modifications_forum, reply_in_post_thread, team_invite,
+                team_joined, team_member_submission, self_notification,
+                merge_threads_email, all_new_threads_email, all_new_posts_email,
+                all_modifications_forum_email, reply_in_post_thread_email,
+                team_invite_email, team_joined_email, team_member_submission_email,
+                self_notification_email, self_registration_email,
+                all_released_grades, all_released_grades_email,
+                all_gradeable_releases, all_gradeable_releases_email
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (user_id) DO UPDATE SET
+                merge_threads                  = EXCLUDED.merge_threads,
+                all_new_threads                = EXCLUDED.all_new_threads,
+                all_new_posts                  = EXCLUDED.all_new_posts,
+                all_modifications_forum        = EXCLUDED.all_modifications_forum,
+                reply_in_post_thread           = EXCLUDED.reply_in_post_thread,
+                team_invite                    = EXCLUDED.team_invite,
+                team_joined                    = EXCLUDED.team_joined,
+                team_member_submission         = EXCLUDED.team_member_submission,
+                self_notification              = EXCLUDED.self_notification,
+                merge_threads_email            = EXCLUDED.merge_threads_email,
+                all_new_threads_email          = EXCLUDED.all_new_threads_email,
+                all_new_posts_email            = EXCLUDED.all_new_posts_email,
+                all_modifications_forum_email  = EXCLUDED.all_modifications_forum_email,
+                reply_in_post_thread_email     = EXCLUDED.reply_in_post_thread_email,
+                team_invite_email              = EXCLUDED.team_invite_email,
+                team_joined_email              = EXCLUDED.team_joined_email,
+                team_member_submission_email   = EXCLUDED.team_member_submission_email,
+                self_notification_email        = EXCLUDED.self_notification_email,
+                self_registration_email        = EXCLUDED.self_registration_email,
+                all_released_grades            = EXCLUDED.all_released_grades,
+                all_released_grades_email      = EXCLUDED.all_released_grades_email,
+                all_gradeable_releases         = EXCLUDED.all_gradeable_releases,
+                all_gradeable_releases_email   = EXCLUDED.all_gradeable_releases_email",
+            [
+                $user_id,
+                $source['merge_threads'], $source['all_new_threads'], $source['all_new_posts'],
+                $source['all_modifications_forum'], $source['reply_in_post_thread'], $source['team_invite'],
+                $source['team_joined'], $source['team_member_submission'], $source['self_notification'],
+                $source['merge_threads_email'], $source['all_new_threads_email'], $source['all_new_posts_email'],
+                $source['all_modifications_forum_email'], $source['reply_in_post_thread_email'],
+                $source['team_invite_email'], $source['team_joined_email'], $source['team_member_submission_email'],
+                $source['self_notification_email'], $source['self_registration_email'],
+                $source['all_released_grades'], $source['all_released_grades_email'],
+                $source['all_gradeable_releases'], $source['all_gradeable_releases_email'],
+            ]
+        );
+    }
+
+    public function userHasNotificationDefaults(string $user_id): bool {
+        $this->submitty_db->query(
+            "SELECT 1 FROM notification_default WHERE user_id = ?",
+            [$user_id]
+        );
+        return count($this->submitty_db->row()) > 0;
+    }
+
+    /**
      * Adds an assignment for someone to grade another person for peer grading
      *
      * @param string $student
@@ -5159,6 +5279,84 @@ AND gc_id IN (
         );
 
         return intval($this->course_db->row()['cnt']);
+    }
+
+    public function getPeerGradingProgress(string $gradeable_id): float {
+        $this->course_db->query(
+            "SELECT
+                COUNT(DISTINCT pa.user_id) AS assigned_students,
+                COUNT(DISTINCT graded.user_id) AS graded_students
+            FROM peer_assign AS pa
+            LEFT JOIN (
+                SELECT DISTINCT
+                    gd.gd_user_id AS user_id
+                FROM gradeable_data AS gd
+                INNER JOIN gradeable_component_data AS gcd
+                    ON gcd.gd_id = gd.gd_id
+                INNER JOIN gradeable_component AS gc
+                    ON gc.gc_id = gcd.gc_id
+                    AND gc.g_id = gd.g_id
+                    AND gc.gc_is_peer = TRUE
+                WHERE gd.g_id = ?
+            ) AS graded
+                ON graded.user_id = pa.user_id
+            WHERE pa.g_id = ?",
+            [$gradeable_id, $gradeable_id]
+        );
+
+        $row = $this->course_db->row();
+        $assigned_students = intval($row['assigned_students']);
+
+        if ($assigned_students === 0) {
+            return NAN;
+        }
+
+        return intval($row['graded_students']) / $assigned_students;
+    }
+
+    public function getAssignedPeerGradingProgress(string $gradeable_id, string $grader_id): float {
+        $this->course_db->query(
+            "SELECT
+                COUNT(DISTINCT pa.user_id) AS assigned_students,
+                COUNT(DISTINCT CASE
+                    WHEN completed.user_id IS NOT NULL THEN pa.user_id
+                END) AS completed_students
+            FROM peer_assign AS pa
+            LEFT JOIN (
+                SELECT
+                    gd.gd_user_id AS user_id,
+                    gcd.gcd_grader_id
+                FROM gradeable_data AS gd
+                INNER JOIN gradeable_component_data AS gcd
+                    ON gcd.gd_id = gd.gd_id
+                INNER JOIN gradeable_component AS gc
+                    ON gc.gc_id = gcd.gc_id
+                    AND gc.g_id = gd.g_id
+                    AND gc.gc_is_peer = TRUE
+                WHERE gd.g_id = ?
+                GROUP BY gd.gd_user_id, gcd.gcd_grader_id
+                HAVING COUNT(DISTINCT gc.gc_id) = (
+                    SELECT COUNT(*)
+                    FROM gradeable_component
+                    WHERE g_id = ?
+                        AND gc_is_peer = TRUE
+                )
+            ) AS completed
+                ON completed.user_id = pa.user_id
+                AND completed.gcd_grader_id = pa.grader_id
+            WHERE pa.g_id = ?
+                AND pa.grader_id = ?",
+            [$gradeable_id, $gradeable_id, $gradeable_id, $grader_id]
+        );
+
+        $row = $this->course_db->row();
+        $assigned_students = intval($row['assigned_students']);
+
+        if ($assigned_students === 0) {
+            return NAN;
+        }
+
+        return intval($row['completed_students']) / $assigned_students;
     }
 
     public function getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections = []) {
@@ -6075,8 +6273,8 @@ AND gc_id IN (
                     INNER JOIN gradeable_component_data gcd ON (
                         gd.gd_id = gcd.gd_id
                     )
-                    WHERE 
-                        gi.status = -1 
+                    WHERE
+                        gi.status = -1
                         AND gi.g_id = ?
                 ) AS result
                 GROUP BY result.gcd_grader_id
@@ -6431,8 +6629,8 @@ AND gc_id IN (
                 LEFT JOIN (
                 SELECT
                   g_id AS pgp_g_id,
-                  autograding, 
-                  rubric, 
+                  autograding,
+                  rubric,
                   files,
                   solution_notes,
                   discussion
@@ -7787,11 +7985,11 @@ AND gc_id IN (
             FROM gradeable_data AS gd
             WHERE (
                 gd.g_id = ?
-                AND gd.gd_user_id = ?
+                AND (gd.gd_user_id = ? OR gd.gd_team_id = ?)
                 AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
                 AND gd.gd_id = gcd.gd_id
             )',
-            array_merge([$version, $gradeable_id, $submitter_id], $component_ids)
+            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids)
         );
     }
 

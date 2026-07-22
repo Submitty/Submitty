@@ -14,62 +14,6 @@ declare global {
 const coursePath = document.body.dataset.coursePath ?? '';
 const cookieArguments = { path: coursePath, expires: 365 };
 
-function updateSimpleGradingRowNumbersAndColors() {
-    $('tbody[id^="section-"]').each(function () {
-        let rowNumber = 1;
-
-        $(this).find('tr[data-student="simple-grade-active"], tr[data-student="simple-grade-withdrawn"]').each(function () {
-            if ($(this).is(':visible')) {
-                $(this).find('td:first').text(rowNumber);
-                const color = rowNumber % 2 === 1 ? 'var(--default-white)' : 'var(--standard-hover-light-gray)';
-
-                $(this).css('background-color', `${color} !important`);
-                $(this).find('td').each(function () {
-                    if ($(this).hasClass('simple-full-credit')) {
-                        $(this).css('background-color', 'var(--simple-full-credit-dark-blue) !important');
-                    }
-                    else if ($(this).hasClass('simple-half-credit')) {
-                        $(this).css('background-color', 'var(--simple-half-credit-light-blue) !important');
-                    }
-                    else if ($(this).hasClass('simple-save-error')) {
-                        $(this).css('background-color', 'var(--simple-save-error-red) !important');
-                    }
-                    else {
-                        $(this).css('background-color', `${color} !important`);
-                    }
-                });
-                rowNumber++;
-            }
-            else {
-                $(this).css('background-color', 'var(--default-white) !important');
-                $(this).find('td').css('background-color', 'var(--default-white) !important');
-            }
-        });
-    });
-}
-
-function updateElectronicGradingRowNumbersAndColors() {
-    $('tbody.details-content').each(function () {
-        let rowNumber = 1;
-
-        $(this).find('tr[data-student="electronic-grade-active"], tr[data-student="electronic-grade-withdrawn"]').each(function () {
-            if ($(this).is(':visible')) {
-                $(this).find('td:first').text(rowNumber);
-                if (rowNumber % 2 === 1) {
-                    $(this).css('background-color', 'var(--default-white) !important');
-                }
-                else {
-                    $(this).css('background-color', 'var(--standard-hover-light-gray) !important');
-                }
-                rowNumber++;
-            }
-            else {
-                $(this).css('background-color', 'var(--default-white) !important');
-            }
-        });
-    });
-}
-
 window.filter_overriden_grades = () => {
     const override_status = window.Cookies.get('include_grade_override') ?? 'omit';
     window.Cookies.set('include_grade_override', override_status === 'omit' ? 'include' : 'omit', cookieArguments);
@@ -86,30 +30,22 @@ window.filter_null_section = () => {
 };
 
 window.filter_withdrawn_students = () => {
-    const withdrawn_students = window.Cookies.get('include_withdrawn_students') || 'omit';
+    const withdrawn_students_visibility = window.Cookies.get('include_withdrawn_students') || 'omit';
 
-    // even if this does not exist, we can still hide and show it
-    // This helps as we don't have to determine which page we are on
-    const withdrawn_electronic = $('[data-student="electronic-grade-withdrawn"]');
-    const withdrawn_simple = $('[data-student="simple-grade-withdrawn"]');
+    // includes electronic-grade-withdrawn and simple-grade-withdrawn
+    // for the details and display pages respectively
+    const withdrawn_student_rows = $('[data-student$="grade-withdrawn"]');
 
-    if (withdrawn_students === 'include') {
-        withdrawn_electronic.hide();
-        withdrawn_simple.hide();
+    if (withdrawn_students_visibility === 'include') {
+        withdrawn_student_rows.hide();
+        withdrawn_student_rows.addClass('hidden-withdrawn-student-row');
         window.Cookies.set('include_withdrawn_students', 'omit', cookieArguments);
     }
     else {
-        withdrawn_electronic.show();
-        withdrawn_simple.show();
+        withdrawn_student_rows.show();
+        withdrawn_student_rows.removeClass('hidden-withdrawn-student-row');
         window.Cookies.set('include_withdrawn_students', 'include', cookieArguments);
     }
-
-    // Remove table-striped to prevent CSS conflicts with JS-set colors
-    $('table').removeClass('table-striped');
-
-    // Update row numbers and colors after filtering
-    updateSimpleGradingRowNumbersAndColors();
-    updateElectronicGradingRowNumbersAndColors();
 };
 
 window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {

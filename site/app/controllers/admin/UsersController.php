@@ -244,6 +244,7 @@ class UsersController extends AbstractController {
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
             'user_pronouns' => $user->getPronouns(),
+            'date_registered' => $user->getDateRegistered() !== null ? $user->getDateRegistered()->format(\DateTime::ATOM) : null,
             'user_display_pronouns' => $user->getDisplayPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
@@ -424,12 +425,24 @@ class UsersController extends AbstractController {
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
                 $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                if (
+                    $user->getGroup() === User::GROUP_STUDENT
+                    && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                ) {
+                    $this->applyNotificationDefaultsForUser($user->getId());
+                }
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
+                if (
+                    $user->getGroup() === User::GROUP_STUDENT
+                    && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                ) {
+                    $this->applyNotificationDefaultsForUser($user->getId());
+                }
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -653,6 +666,40 @@ class UsersController extends AbstractController {
             'section_id' => $section_id,
             'course_id'  => $course_id,
         ]);
+    }
+
+    // Helper function for appying notifications
+    private function applyNotificationDefaultsForUser(string $user_id): void {
+        $default = $this->core->getQueries()->getNotificationDefault($user_id);
+        if ($default === null) {
+            return;
+        }
+
+        // Source course no longer exists — drop the stale pointer so we don't re-check it
+        if (!$this->core->getQueries()->courseExists($default['term'], $default['course'])) {
+            $this->core->getQueries()->deleteNotificationDefault($user_id);
+            return;
+        }
+
+        $target_term = $this->core->getConfig()->getTerm();
+        $target_course = $this->core->getConfig()->getCourse();
+        if ($default['term'] === $target_term && $default['course'] === $target_course) {
+            return;
+        }
+
+        $original_config = clone $this->core->getConfig();
+        $this->core->loadCourseConfig($default['term'], $default['course']);
+        $this->core->loadCourseDatabase();
+        $source = $this->core->getQueries()->getNotificationSettingsForUser($user_id);
+
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+
+        if ($source === null) {
+            return;
+        }
+
+        $this->core->getQueries()->insertNotificationSettingsForUser($user_id, $source);
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
@@ -944,7 +991,6 @@ class UsersController extends AbstractController {
             try {
                 switch ($action) {
                     case 'insert':
-                        //User must first exist in Submitty before being enrolled to a course.
                         if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
                             if ($this->core->getAuthentication() instanceof SamlAuthentication) {
@@ -952,6 +998,14 @@ class UsersController extends AbstractController {
                             }
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+
+                        // Apply notification defaults if the user has them set and is a student
+                        if (
+                            $user->getGroup() === User::GROUP_STUDENT
+                            && $this->core->getQueries()->userHasNotificationDefaults($user->getId())
+                        ) {
+                            $this->applyNotificationDefaultsForUser($user->getId());
+                        }
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);
