@@ -8,7 +8,7 @@
             "method": "diff",
             "actual_file": "STDOUT.txt",
             "description": "Greeting for Ada",
-            "expected_file": "ada.txt"
+            "expected_file": "out_ada.txt"
         }
     ]
 }
