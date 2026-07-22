@@ -87,7 +87,10 @@ watch(
 
         <slot>Default popup content (you should probably override this)</slot>
 
-        <div v-if="!noFooter" class="form-buttons">
+        <div
+          v-if="!noFooter"
+          class="form-buttons"
+        >
           <div class="form-button-container">
             <button
               class="btn btn-default close-button"
