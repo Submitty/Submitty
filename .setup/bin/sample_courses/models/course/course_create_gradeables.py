@@ -367,7 +367,7 @@ class Course_create_gradeables:
                                         break
                                     grader_id = self.instructor.id
 
-                                    if component.is_peer_component:
+                                    if gradeable.id == "closed_peer_student_graded_homework" and component.is_peer_component:
                                         stmt = select(self.peer_assign.columns.grader_id).where(
                                             self.peer_assign.columns.g_id == gradeable.id
                                         ).where(
