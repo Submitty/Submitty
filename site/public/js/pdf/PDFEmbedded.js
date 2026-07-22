@@ -1,7 +1,7 @@
 /* global pdfjsLib, csrfToken */
 
 /*
-    renderPDF() is used in PDFEmbedded.js,
+    renderPDF() is used in PDFEmbedded.twig,
     and the rest of the functions are helper functions.
 */
 
