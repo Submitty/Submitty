@@ -58,6 +58,9 @@ def cleanup(test):
     print ("TEST CLEANUP")
 
     subprocess.call(["rm"] + ["-f"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "*py")))
+
+    subprocess.call(["rm"] + ["-f"] +
         glob.glob(os.path.join(test.testcase_path, "data", "result*")))
     subprocess.call(["rm"] + ["-rf"] +
         glob.glob(os.path.join(test.testcase_path, "data", "test*")))
@@ -65,6 +68,9 @@ def cleanup(test):
         glob.glob(os.path.join(test.testcase_path, "data", "*out")))
 
     os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(["cp"] +
+        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "*.txt")) +
+        [os.path.join(test.testcase_path, "data")])
     subprocess.call(["cp"] +
         glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
         [os.path.join(test.testcase_path, "data", "test_output")])
