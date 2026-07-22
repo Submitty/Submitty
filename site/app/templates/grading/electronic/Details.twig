@@ -172,7 +172,7 @@
         <thead>
             <tr>
                 {% for column in columns %}
-                    {% if column.data_type is defined %}
+                    {% if column.data_type is defined and not is_student %}
                         {{ table_sort.sortable_table_header('details-table', column.title, column.header_key, column.data_type) }}
                     {% else %}
                         <th data-col-title="{{ column.title }}">{{ column.title }}</th>
