@@ -54,5 +54,5 @@ window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' 
     location.reload();
 };
 
-window.updateSimpleGradingRowNumbersAndColors = updateSimpleGradingRowNumbersAndColors;
-window.updateElectronicGradingRowNumbersAndColors = updateElectronicGradingRowNumbersAndColors;
+window.updateSimpleGradingRowNumbersAndColors = updateSimpleGradingRowNumbersAndColors as unknown as () => void;
+window.updateElectronicGradingRowNumbersAndColors = updateElectronicGradingRowNumbersAndColors as unknown as () => void;
