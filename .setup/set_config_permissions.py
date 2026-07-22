@@ -99,9 +99,7 @@ if not args.worker:
 shutil.chown(CONFIG_DATA_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_DATA_DIR, 0o755)
 os.chmod(SUBMITTY_JSON, 0o444)
-os.chmod(SUBMITTY_USERS_JSON, 0o440)
 os.chmod(PRESERVE_LIST_JSON, 0o444)
-shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
 
 # Users aren't created yet when running generate_configs,
 # so create the submitty_users json here
@@ -128,6 +126,9 @@ if not args.worker:
 
 with open(os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json'), 'w') as users_file:
     json.dump(config, users_file, indent=2)
+
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 with open(SUBMITTY_DIRECTORY_JSON, 'w') as directory_json:
     config = OrderedDict()
