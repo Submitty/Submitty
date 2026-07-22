@@ -23,9 +23,10 @@ declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
-        changeCurrentPeer(): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        clearPeerMarks: (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) => void;
         newEditPeerComponentsForm(): void;
+        editPeerComponentsFormArgs?: Record<string, unknown>;
+        editPeerComponentsFormEvents?: Record<string, string>;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
@@ -415,14 +416,7 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
     return stored_paths;
 }
 
-window.changeCurrentPeer = function () {
-    const peer = $('#edit-peer-select').val() as string;
-    $('.edit-peer-components-block').hide();
-    $(`#edit-peer-components-form-${peer}`).show();
-};
-
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -448,10 +442,10 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
 };
 
 window.newEditPeerComponentsForm = function () {
-    $('.popup-form').css('display', 'none');
-    const form = $('#edit-peer-components-form');
-    form.css('display', 'block');
-    captureTabInModal('edit-peer-components-form');
+    void window.submitty.render('#edit-peer-components-form', 'component', 'ta_grading/EditPeerComponentsForm', {
+        ...window.editPeerComponentsFormArgs,
+        visible: true,
+    }, window.editPeerComponentsFormEvents);
 };
 
 function rotateImage(url: string | undefined, rotateBy: string) {

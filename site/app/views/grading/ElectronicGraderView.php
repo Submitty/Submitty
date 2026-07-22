@@ -1840,6 +1840,7 @@ HTML;
         $peer_details = [];
         $component_scores = [];
         $peer_details["graders"] = [];
+        $peer_details["marks_assigned"] = [];
         $marks = [];
         foreach ($components as $component) {
             if ($component->isPeerComponent()) {
