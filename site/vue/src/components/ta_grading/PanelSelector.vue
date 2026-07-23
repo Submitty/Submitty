@@ -5,6 +5,7 @@ const props = defineProps<{
     optionId: string;
     label: string;
     draw: (ctx: CanvasRenderingContext2D) => void;
+    testid?: string;
 }>();
 
 defineEmits<{
@@ -32,6 +33,7 @@ onMounted(() => {
       <button
         type="button"
         class="btn btn-primary"
+        :data-testid="testid ?? undefined"
         @click="$emit('select')"
       >
         Apply

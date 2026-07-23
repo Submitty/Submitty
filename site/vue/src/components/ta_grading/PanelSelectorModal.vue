@@ -20,6 +20,7 @@ interface LayoutOption {
     id: string;
     label: string;
     draw: (ctx: CanvasRenderingContext2D) => void;
+    testid: string;
     onSelect: () => void;
 }
 
@@ -31,6 +32,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'single-panel',
                 label: 'single panel',
+                testid: 'layout-single-panel-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 5, 2, 288, 15);
@@ -47,6 +49,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'equal-height',
                 label: 'side-by-side',
+                testid: 'layout-two-panel-equal-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 5, 2, 288, 15);
@@ -58,6 +61,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'tall-left',
                 label: 'side-by-side, taller left',
+                testid: 'layout-two-panel-tall-left-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 153, 2, 140, 15);
@@ -75,6 +79,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'equal-two-in-left',
                 label: 'two on left, one on right',
+                testid: 'layout-three-panel-two-left-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 5, 2, 288, 15);
@@ -87,6 +92,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'tall-left-two-in-left',
                 label: 'two on left, one on right, taller left',
+                testid: 'layout-three-panel-two-left-tall-left-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 153, 2, 140, 15);
@@ -99,6 +105,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'equal-two-in-right',
                 label: 'one on left, two on right',
+                testid: 'layout-three-panel-two-right-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 5, 2, 288, 15);
@@ -111,6 +118,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'tall-left-two-in-right',
                 label: 'one on left, two on right, taller left',
+                testid: 'layout-three-panel-two-right-tall-left-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 153, 2, 140, 15);
@@ -129,6 +137,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'equal-four-panel',
                 label: 'two on left, two on right',
+                testid: 'layout-four-panel-equal-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 5, 2, 288, 15);
@@ -142,6 +151,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             {
                 id: 'tall-left-four-panel',
                 label: 'two on left, two on right, taller left',
+                testid: 'layout-four-panel-tall-left-apply',
                 draw: (ctx) => {
                     rect(ctx, 0, 0, 350, 200, 'aliceblue');
                     rect(ctx, 153, 2, 140, 15);
@@ -185,6 +195,7 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
             :option-id="opt.id"
             :label="opt.label"
             :draw="opt.draw"
+            :testid="opt.testid"
             @select="opt.onSelect"
           />
         </div>
