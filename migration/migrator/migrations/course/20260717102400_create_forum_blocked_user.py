@@ -37,8 +37,12 @@ def up(config, database, semester, course):
                 CHECK (action IN ('no_forum_posts')),
             UNIQUE (user_id, action)
         );
+    """
+    )
 
-        CREATE INDEX forum_blocked_user_created_by_idx
+    database.execute(
+    """
+        CREATE INDEX IF NOT EXISTS forum_blocked_user_created_by_idx
             ON forum_blocked_user (created_by);
     """
     )
