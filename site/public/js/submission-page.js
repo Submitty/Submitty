@@ -33,7 +33,7 @@ function initializeTimer(gradeableID, is_timed) {
 function syncWithServer(criticalSync) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['gradeable', gradeable_id, 'time_remaining_data']);
-    return $.ajax({
+    $.ajax({
         url,
         type: 'GET',
         processData: false,
@@ -105,10 +105,10 @@ function syncWithServer(criticalSync) {
 async function checkDeadline() {
     if (Math.abs(Date.now() - lastTime) > 5000) {
         // we need to sync back up
-        await syncWithServer(true);
+        syncWithServer(true);
     }
     if (ticks_till_update <= 0) {
-        await syncWithServer(false);
+        syncWithServer(false);
     }
     else {
         curTime += (Date.now() - lastTime);
