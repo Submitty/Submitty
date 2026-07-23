@@ -23,8 +23,13 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$gradeable->isClusteringAllowed()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
         $algorithm = GradingClusterAlgorithm::tryFrom($_POST['algorithm'] ?? '');
@@ -61,8 +66,13 @@ class GradingClusterController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/status", methods: ["GET"])]
     public function checkClusteringStatus(string $gradeable_id): JsonResponse {
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$gradeable->isClusteringAllowed()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
         $semester = $this->core->getConfig()->getTerm();
@@ -86,8 +96,13 @@ class GradingClusterController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$gradeable->isClusteringAllowed()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
         $config = $this->core->getCourseEntityManager()

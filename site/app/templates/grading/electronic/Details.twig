@@ -82,7 +82,7 @@
                     <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
-                {% if full_access_grader_permission %}
+                {% if full_access_grader_permission and is_clustering_allowed %}
                 <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
                     <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_clustering_mode %}checked{% endif %}>
                 </label>
@@ -123,7 +123,7 @@
                 'format': 'json',
             },
         } %}
-        {% if full_access_grader_permission %}
+        {% if full_access_grader_permission and is_clustering_allowed %}
             {% include 'Vue.twig' with {
                 'type': 'component',
                 'name': 'CreateClustersModal',

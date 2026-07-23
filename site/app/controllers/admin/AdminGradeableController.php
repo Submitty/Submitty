@@ -1475,7 +1475,8 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory',
             'has_due_date',
             'has_release_date',
-            'allow_custom_marks'
+            'allow_custom_marks',
+            'is_clustering_allowed'
         ];
 
         $discussion_ids = 'discussion_thread_id';

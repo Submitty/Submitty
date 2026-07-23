@@ -145,6 +145,9 @@ class Gradeable extends AbstractModel {
      * @var bool If the gradeable is using any manual grading */
     protected $ta_grading = true;
     /** @prop
+     * @var bool If the gradeable allows submission clustering */
+    protected $is_clustering_allowed = true;
+    /** @prop
      * @var bool If students can view submissions */
     protected $student_view = false;
     /** @prop
@@ -334,6 +337,7 @@ class Gradeable extends AbstractModel {
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
+            $this->setIsClusteringAllowedInternal($details['is_clustering_allowed'] ?? true);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentDownload($details['student_download']);
@@ -1404,6 +1408,23 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets whether this gradeable allows submission clustering
+     * @param bool $is_clustering_allowed
+     */
+    public function setIsClusteringAllowed(bool $is_clustering_allowed) {
+        $this->is_clustering_allowed = $is_clustering_allowed;
+        $this->modified = true;
+    }
+
+    /**
+     * @param bool $is_clustering_allowed
+     * @internal
+     */
+    private function setIsClusteringAllowedInternal(bool $is_clustering_allowed) {
+        $this->is_clustering_allowed = $is_clustering_allowed;
+    }
+
+    /**
      * Gets all of the teams formed for this gradeable
      * @return Team[]
      */
@@ -2465,6 +2486,10 @@ class Gradeable extends AbstractModel {
 
     public function isTaGrading(): bool {
         return $this->ta_grading;
+    }
+
+    public function isClusteringAllowed(): bool {
+        return $this->is_clustering_allowed;
     }
 
     public function isStudentView(): bool {
