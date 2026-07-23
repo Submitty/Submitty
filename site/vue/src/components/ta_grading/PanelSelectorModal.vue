@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PanelSelector from './PanelSelector.vue';
+import Popup from '../../components/Popup.vue';
 
 const emit = defineEmits<{
     'close': [];
@@ -8,10 +9,6 @@ const emit = defineEmits<{
 
 function selectLayout(panels: number, isLeftTaller: boolean, twoInRight = false) {
     emit('select-layout', panels, isLeftTaller, twoInRight);
-}
-
-function close() {
-    emit('close');
 }
 
 function rect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, fill = '#6d91b5') {
@@ -161,55 +158,43 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
 </script>
 
 <template>
-  <div
+  <Popup
     id="panels-selector-modal"
-    class="popup-form"
+    title="Panel Selector"
+    :visible="true"
+    @toggle="$emit('close')"
   >
-    <div
-      class="popup-box"
-      @click="close"
-    >
+    <template #trigger>
+      <span class="trigger-placeholder" />
+    </template>
+    <div class="form-body">
       <div
-        class="popup-window"
-        data-testid="popup-window"
-        @click.stop
+        v-for="section in sections"
+        :id="section.id"
+        :key="section.title"
+        class="layout-option"
       >
-        <div class="form-title">
-          <h1>Panel Selector</h1>
-          <button
-            data-testid="close-button"
-            class="btn btn-default close-button"
-            tabindex="-1"
-            type="button"
-            @click="close"
-          >
-            Close
-          </button>
+        <div class="layout-option-title">
+          <h2>{{ section.title }}</h2>
         </div>
-        <div class="form-body">
-          <div
-            v-for="section in sections"
-            :id="section.id"
-            :key="section.title"
-            class="layout-option"
-          >
-            <div class="layout-option-title">
-              <h2>{{ section.title }}</h2>
-            </div>
-            <hr />
-            <div class="layout-option-cont">
-              <PanelSelector
-                v-for="opt in section.options"
-                :key="opt.id"
-                :option-id="opt.id"
-                :label="opt.label"
-                :draw="opt.draw"
-                @select="opt.onSelect"
-              />
-            </div>
-          </div>
+        <hr />
+        <div class="layout-option-cont">
+          <PanelSelector
+            v-for="opt in section.options"
+            :key="opt.id"
+            :option-id="opt.id"
+            :label="opt.label"
+            :draw="opt.draw"
+            @select="opt.onSelect"
+          />
         </div>
       </div>
     </div>
-  </div>
+  </Popup>
 </template>
+
+<style scoped>
+.trigger-placeholder {
+  display: none;
+}
+</style>

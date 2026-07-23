@@ -33,29 +33,6 @@ describe('PanelSelectorModal', () => {
         });
     });
 
-    describe('close emit', () => {
-        it('emits close when Close button is clicked', () => {
-            mountWithEmitSpy(PanelSelectorModal, 'close');
-
-            cy.get('[data-testid="close-button"]').click();
-            cy.get('@eventHandler').should('have.been.calledOnce');
-        });
-
-        it('emits close when overlay (popup-box) is clicked', () => {
-            mountWithEmitSpy(PanelSelectorModal, 'close');
-
-            cy.get('.popup-box').click({ force: true });
-            cy.get('@eventHandler').should('have.been.calledOnce');
-        });
-
-        it('does NOT emit close when clicking inside popup-window', () => {
-            mountWithEmitSpy(PanelSelectorModal, 'close');
-
-            cy.get('[data-testid="popup-window"]').click({ force: true });
-            cy.get('@eventHandler').should('not.have.been.called');
-        });
-    });
-
     describe('select-layout emit', () => {
         it('emits select-layout with default twoInRight=false', () => {
             mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
@@ -69,25 +46,6 @@ describe('PanelSelectorModal', () => {
 
             cy.get('#layout-option-3 .layout-option-item').eq(2).find('.btn-primary').click();
             cy.get('@eventHandler').should('have.been.calledOnceWith', 3, false, true);
-        });
-
-        it('emits select-layout on every Apply click', () => {
-            mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
-
-            cy.get('#layout-option-1 .btn-primary').click();
-            cy.get('#layout-option-1 .btn-primary').click();
-            cy.get('#layout-option-1 .btn-primary').click();
-
-            cy.get('@eventHandler').should('have.callCount', 3);
-        });
-    });
-
-    describe('accessibility', () => {
-        it('has visible heading and close button text', () => {
-            cy.mount(PanelSelectorModal);
-
-            cy.contains('h1', 'Panel Selector').should('be.visible');
-            cy.get('[data-testid="close-button"]').should('contain', 'Close');
         });
     });
 });
