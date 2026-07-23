@@ -1,5 +1,14 @@
 /* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
 /* global csrfToken, displayErrorMessage, displaySuccessMessage */
+
+// how often to check for changes to the docker images when idle
+const DOCKER_IDLE_POLL_INTERVAL = 30000;
+
+// how often to check for changes while an update is actively running
+const DOCKER_UPDATE_POLL_INTERVAL = 3000;
+
+let isUpdateInProgress = false;
+
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -79,11 +88,13 @@ function removeImage(url, id) {
             image: id,
             csrf_token: csrfToken,
         },
-        success: (data) => {
-            const json = JSON.parse(data);
+        dataType: 'json',
+        success: (json) => {
             if (json.status === 'success') {
-                sessionStorage.setItem('successMessage', json.data);
-                location.reload();
+                $('#add-field').val('');
+                $('#docker-status-badge').text(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`);
+                setDockerStatusBadge(true);
+                displaySuccessMessage(json.data);
             }
             else {
                 displayErrorMessage(json.message);
@@ -111,30 +122,8 @@ function addImage(url) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                sessionStorage.setItem('successMessage', json.data);
-                location.reload();
-            }
-            else {
-                displayErrorMessage(json.message);
-            }
-        },
-        error: (err) => {
-            console.error(err);
-            window.alert('Something went wrong. Please try again.');
-        },
-    });
-}
-
-function updateImage(url) {
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {
-            csrf_token: csrfToken,
-        },
-        success: (data) => {
-            const json = JSON.parse(data);
-            if (json.status === 'success') {
+                $('#docker-status-badge').text(`${image} has been added to the configuration! Click "Update dockers and machines" to apply the changes.`);
+                setDockerStatusBadge(true);
                 displaySuccessMessage(json.data);
             }
             else {
@@ -147,12 +136,147 @@ function updateImage(url) {
         },
     });
 }
+/**
+ * @param {string} logContent
+ */
+function showDockerLogButton(logContent) {
+    $('#show-docker-log-button').show();
+    $('#docker-status-log').empty();
+    if (logContent) {
+        $('#docker-status-log').append(`<pre>${logContent}</pre>`);
+    }
+}
+
+/**
+ * @param {boolean} updateNeeded
+ */
+function setDockerStatusBadge(updateNeeded) {
+    const badge = $('#docker-status-badge');
+    badge.removeClass('btn-danger btn-success');
+    if (updateNeeded) {
+        badge.addClass('btn-danger');
+    }
+    else {
+        badge.addClass('btn-success');
+    }
+}
+
+function updateImage() {
+    if (!window.dockerAdminUrl) {
+        return;
+    }
+
+    isUpdateInProgress = true;
+
+    $('#docker-status-badge').text('Changes applying...');
+
+    $.ajax({
+        url: `${window.dockerAdminUrl}/update_docker`,
+        type: 'POST',
+        data: {
+            csrf_token: csrfToken,
+        },
+        success: (data) => {
+            const response = JSON.parse(data);
+            if (response.status === 'success') {
+                checkDockerUpdateStatus();
+            }
+            else {
+                $('#docker-status-badge').text('An error occurred while updating');
+                showDockerLogButton(response.message);
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            $('#docker-status-badge').text('An error occurred while making the request');
+        },
+    });
+}
+
+/**
+ * checks for changes while an update is in progress and applies them to the table
+ */
+function checkDockerUpdateStatus() {
+    $.ajax({
+        type: 'POST',
+        url: `${window.dockerAdminUrl}/docker_update_status`,
+        data: { csrf_token: csrfToken },
+        dataType: 'json',
+        success: (response) => {
+            if (response.status === 'success') {
+                if (response.data && response.data.in_progress) {
+                    $('#docker-status-badge').text('Changes applying...');
+                    setTimeout(checkDockerUpdateStatus, DOCKER_UPDATE_POLL_INTERVAL);
+                    return;
+                }
+
+                isUpdateInProgress = false;
+                $('#docker-status-badge').text('Changes applied, manually reload the page to view them!');
+                showDockerLogButton(response.data && response.data.log);
+                setDockerStatusBadge(false);
+            }
+            else if (response.status === 'fail') {
+                isUpdateInProgress = false;
+                $('#docker-status-badge').text('A failure occurred while applying changes');
+                showDockerLogButton(response.message);
+            }
+            else {
+                isUpdateInProgress = false;
+                $('#docker-status-badge').text('Internal Server Error');
+                console.log(response);
+            }
+        },
+        error: (xhr) => {
+            isUpdateInProgress = false;
+            console.error(`Failed to parse response from server: ${xhr.responseText}`);
+            $('#docker-status-badge').text('An error occurred while checking the container status');
+        },
+    });
+}
+
+/**
+ * checks whether the container configuration is in sync
+ */
+function pollDockerStatus() {
+    if (isUpdateInProgress) {
+        return;
+    }
+    if (!window.dockerAdminUrl) {
+        return;
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: `${window.dockerAdminUrl}/status`,
+        dataType: 'json',
+        success: (response) => {
+            if (response.status === 'success' && response.data) {
+                setDockerStatusBadge(response.data.update_needed);
+            }
+        },
+        error: (xhr) => {
+            console.error(`Failed to get docker status: ${xhr.responseText}`);
+        },
+    });
+}
 
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#show-all').on('click', showAll);
     $('#add-field').on('input', addFieldOnChange);
     $('#add-field').trigger('input');
+
+    // Toggle the log panel, same interaction as RainbowGrades' #show_log_button
+    $('#show-docker-log-button').click(() => {
+        $('#docker-status-log').toggle();
+    });
+
+    if (typeof window.dockerUpdateNeeded !== 'undefined') {
+        setDockerStatusBadge(window.dockerUpdateNeeded);
+    }
+
+    // Keep the status badge live even if the user doesn't touch anything on the page.
+    setInterval(pollDockerStatus, DOCKER_IDLE_POLL_INTERVAL);
 });
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -9,25 +9,45 @@
     Should be added back eventually, ideally showing workers' version as well
     <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
     #}
-    <p>Docker info updated on: {{ last_updated }}</p>
-    <p>System info updated on: {{ sysinfo_last_updated }}</p>
-    {% if error_logs | length > 0 %}
-        <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
-        <pre class="error-log">
-            {% for error_log in error_logs %}
-                {{error_log }} <br>
-            {% endfor %}
-        </pre>
-    {% endif %}
-    {% if is_faculty %}
-        <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
-    {% endif %}
+    <p>Docker info updated on: {{ last_updated | date("Y-m-d H:i:s") }}</p>
+    <p>System info updated on: {{ sysinfo_last_updated | date("Y-m-d H:i:s") }}</p>
 
-    {% if update_needed %}
-        <span class="btn btn-danger status" data-testid="docker-status" style="margin-top: 1em">Changes Pending</span>
-    {% else %}
-        <span class="btn btn-success status" data-testid="docker-status" style="margin-top: 1em">Up-to-Date</span>
-    {% endif %}
+    <div id="docker-status-container" class="docker-status-bar">
+        <div id="status-head">
+            <div id="build-buttons">
+                {% if is_faculty %}
+                    <button id="update-machines" data-testid="update-machines" class="btn btn-primary" tabindex="0" type="button" onclick="updateImage()">
+                        <i class="fas fa-sync" title="Update machines"></i>
+                        Update dockers and machines
+                    </button>
+                {% endif %}
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div id="docker-status-label" style="padding-right: 4px;">Status: </div>
+                <span id="docker-status-badge" class="btn {{ update_needed ? 'btn-danger' : 'btn-success' }} status" data-testid="docker-status">
+                    {% if error_logs|length > 0 %}
+                        Last update failed
+                    {% else %}
+                        Up-to-Date
+                    {% endif %}
+                </span>
+            </div>
+            <div id="docker-status-buttons">
+                <button style="padding: 5px 12px;" class="btn btn-default" id="show-docker-log-button" data-testid="docker-log-button" type="button" {% if error_logs|length == 0 %}style="display:none;"{% endif %}>
+                    Log
+                </button>
+            </div>
+        </div>
+        <div id="docker-status-log">
+            {% if error_logs|length > 0 %}
+                <pre>
+                    {% for error_log in error_logs %}
+                        {{ error_log }}
+                    {% endfor %}
+                </pre>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 <div class="content">
@@ -199,3 +219,8 @@
         </h4>
     </div>
 {% endif %}
+
+<script>
+    window.dockerAdminUrl = '{{ admin_url }}';
+    window.dockerUpdateNeeded = {{ update_needed ? 'true' : 'false' }};
+</script>
