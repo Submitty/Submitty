@@ -19,14 +19,18 @@
 			<form id="forum-search-form" action="javascript:void(0);" data-ays-ignore="true">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<div class="search-input-wrapper">
-					<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" data-ays-ignore="true" />
-					<button type="button" title="Clear search" id="search-clear" aria-label="Clear search" data-ays-ignore="true">
-						<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-					</button>
-				</div>
+				<input type="hidden" name="search-content" id="search-content" value="" />
+				{% include "Vue.twig" with {
+					'type': 'component',
+					'name': 'forum/SearchBar',
+					'args': { 'csrfToken': csrf_token, 'searchQuery': '' },
+					'class': 'search-bar-wrapper',
+					'events': {
+						'search': '(query) => { $("#search-content").val(query); updateClearFilterButton(); updateThreads(true, saveFilterState); }'
+					}
+				} %}
 				<div class="search-actions">
-					<button type="button" name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
+					<button type="button" name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit" onclick="searchForum();">
 						Search
 					</button>
 

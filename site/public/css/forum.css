@@ -67,6 +67,12 @@
     min-width: 30px;
 }
 
+.forum-bar .toolbar-left .search-bar-wrapper {
+    flex: 1 1 auto;
+    min-width: 30px;
+    display: flex;
+}
+
 .forum-bar .toolbar-left #search-content {
     height: 100%;
     width: 100%;
