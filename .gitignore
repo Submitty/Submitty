@@ -1,6 +1,7 @@
 /.idea/
 /output/
 /.vagrant/
+build
 
 selenium*.jar
 .DS_Store
@@ -50,5 +51,7 @@ Pipfile
 Pipfile.lock
 .phpunit.result.cache
 
+.claude
 .env
 .github_actions_ci_flag
+uv.lock
