@@ -3058,6 +3058,13 @@ ALTER TABLE ONLY public.viewed_responses
 
 
 --
+-- Name: forum_blocked_user_created_by_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX forum_blocked_user_created_by_idx ON public.forum_blocked_user USING btree (created_by);
+
+
+--
 -- Name: forum_posts_history_edit_timestamp_index; Type: INDEX; Schema: public; Owner: -
 --
 
