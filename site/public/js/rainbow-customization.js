@@ -814,6 +814,8 @@ function refreshBuildNotices() {
             if (response.status !== 'success') {
                 return;
             }
+            // notice_html is rendered server-side from RainbowBuildNotice.twig and is
+            // escaped by Twig
             // eslint-disable-next-line no-restricted-syntax
             $('#rg-build-notices').html(response.data.notice_html);
         },
