@@ -58,11 +58,12 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('be.checked');
         });
 
-        it('respects anonMode prop directly as anon checkbox state', () => {
+        it('respects anonMode prop directly as anon checkbox state with gradeableId', () => {
             cy.mount(DetailsFiltersControls, {
-                props: { ...defaultProps(), toggleAnon: true, anonMode: true },
+                props: { ...defaultProps(), toggleAnon: true, anonMode: true, gradeableId: 'g1' },
             });
             cy.get('[data-testid="anon-students-checkbox"]').should('be.checked');
+            cy.get('[data-testid="anon-students-label"]').should('have.attr', 'data-gradeable-id', 'g1');
         });
 
         it('defaults all initial* props to false when undefined', () => {
@@ -102,8 +103,10 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="random-order-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').should('be.checked');
             cy.get('@cb').uncheck({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', false);
+            cy.get('@cb').should('not.be.checked');
         });
 
         it('emits view-sections-change when toggling assigned sections checkbox', () => {
@@ -114,8 +117,10 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="view-sections"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').should('be.checked');
             cy.get('@cb').uncheck({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', false);
+            cy.get('@cb').should('not.be.checked');
         });
 
         it('emits inquiry-change when toggling grade inquiries only checkbox', () => {
@@ -126,8 +131,10 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="inquiry-only-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').should('be.checked');
             cy.get('@cb').uncheck({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', false);
+            cy.get('@cb').should('not.be.checked');
         });
 
         it('emits withdrawn-change when toggling hide withdrawn checkbox', () => {
@@ -138,8 +145,10 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="filter-withdrawn-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').should('be.checked');
             cy.get('@cb').uncheck({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', false);
+            cy.get('@cb').should('not.be.checked');
         });
 
         it('emits anon-change without tracking local state', () => {
