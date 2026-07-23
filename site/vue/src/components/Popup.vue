@@ -14,6 +14,8 @@ const props = withDefaults(defineProps<{
     dismissText?: string;
     /** The text to show for the save button */
     saveText?: string;
+    /** Whether to hide the bottom form buttons */
+    noFooter?: boolean;
 }>(), {
     id: 'popup',
     dismissText: (props) => props.savable ? 'Discard' : 'Close',
@@ -85,7 +87,10 @@ watch(
 
         <slot>Default popup content (you should probably override this)</slot>
 
-        <div class="form-buttons">
+        <div
+          v-if="!noFooter"
+          class="form-buttons"
+        >
           <div class="form-button-container">
             <button
               class="btn btn-default close-button"

@@ -982,6 +982,9 @@ HTML;
             "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
             "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
+            "course_url" => $this->core->buildCourseUrl([]),
+            "storage_key" => $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $gradeable->getId() . '-message',
+
             "blind_status" => $gradeable->getPeerBlind(),
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
