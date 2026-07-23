@@ -203,6 +203,19 @@ class ReportController extends AbstractController {
     }
 
     /**
+     * Re-evaluate whether the served Rainbow Grades HTML was generated outside the server
+     * build pipeline. Used to refresh the warning banner after a build without reloading
+     * the page.
+     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_manual_status", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_manual_status", methods: ["POST"])]
+    public function rainbowGradesManualStatus(): JsonResponse {
+        return JsonResponse::getSuccessResponse([
+            'rainbow_grades_generated_manually' => $this->isRainbowGradesLikelyManuallyGenerated(),
+        ]);
+    }
+
+    /**
      * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
      * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
