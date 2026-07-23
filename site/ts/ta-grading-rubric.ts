@@ -3263,7 +3263,7 @@ async function saveMarkList(component_id: number) {
     }));
     // If conflicts, open the popup
     if (Object.keys(conflictMarks).length !== 0) {
-        await openMarkConflictPopup(component_id, Object.values(conflictMarks));
+        await openMarkConflictPopup(component_id, conflictMarks);
     }
 
     const markOrder: Record<number, number> = {};
