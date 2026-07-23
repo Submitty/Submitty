@@ -67,8 +67,8 @@ if __name__ == '__main__':
                     "--daemon", "worker", "--target", "primary"])
 
     print('Stopping all remote worker daemons...')
-    cmd = 'python3 {0} stop --daemon worker --target perform_on_all_workers'
-    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
+    cmd = '{0} {1} stop --daemon worker --target perform_on_all_workers'
+    cmd = cmd.format(sys.executable, SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c",  cmd])
 
@@ -85,8 +85,8 @@ if __name__ == '__main__':
                     "worker", "--target", "primary"])
 
     print('Starting all worker daemons...')
-    cmd = 'python3 {0} start --daemon worker --target perform_on_all_workers'
-    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
+    cmd = '{0} {1} start --daemon worker --target perform_on_all_workers'
+    cmd = cmd.format(sys.executable, SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
 
@@ -95,8 +95,8 @@ if __name__ == '__main__':
     time.sleep(delay_in_seconds)
 
     print("Verifying all worker daemons...")
-    cmd = "python3 {0} status --daemon worker --target perform_on_all_workers"
-    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
+    cmd = "{0} {1} status --daemon worker --target perform_on_all_workers"
+    cmd = cmd.format(sys.executable, SYSTEMCTL_WRAPPER_SCRIPT)
 
     result = subprocess.run(["su", '-', "submitty_daemon", "-c", cmd],
                             stdout=subprocess.PIPE, universal_newlines=True)
