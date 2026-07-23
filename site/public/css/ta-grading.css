@@ -6,3 +6,13 @@
 .hotkeys-button {
     width: 125px;
 }
+
+/* stylelint-disable-next-line selector-class-pattern */
+.key_to_click:focus-visible,
+.rubric-interactive-element:focus-visible,
+[tabindex="0"]:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--standard-focus-cornflower-blue);
+    outline-offset: 2px;
+}

@@ -3656,3 +3656,13 @@ function addItempoolOptions(componentId: number) {
     select_ele.html(itempool_options.join(''));
     select_ele.val(selected_value!).change();
 }
+
+$(() => {
+    // Accessibility: Trigger click for rubric-interactive-element on Enter or Space
+    $(document).on('keydown', '.rubric-interactive-element', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            $(e.currentTarget).trigger('click');
+        }
+    });
+});
