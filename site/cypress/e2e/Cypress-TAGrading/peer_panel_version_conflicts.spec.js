@@ -126,7 +126,7 @@ describe('Test that instructors are able to properly clear version conflicts', (
 
         cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().check();
         cy.get('.peer-save-component[data-component-id="84"][data-peer-id="baliss"]').click();
-        
+
         cy.get('[data-testid="close-button"][onclick*="edit-peer-components-form"]').should('have.length', 1).should('be.visible').click();
 
         cy.get('[aria-label="Edit Peer Components"]').should('be.visible').click();
