@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -333,6 +332,16 @@ class HomePageController extends AbstractController {
             );
         }
 
+        if (!$this->core->getQueries()->termExists($semester)) {
+            $error = "Semester doesn't exist.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
         if ($this->core->getQueries()->courseExists($_POST['course_semester'], $_POST['course_title'])) {
             $error = "Course with that semester/title already exists.";
             $this->core->addErrorMessage($error);
@@ -395,24 +404,95 @@ class HomePageController extends AbstractController {
             );
         }
 
-        $json = [
-            "job" => 'CreateCourse',
-            'semester' => $semester,
-            'course' => $course_title,
-            'head_instructor' => $head_instructor,
-            'group_name' => $group_name
-        ];
+        $queries = $this->core->getQueries();
 
-        $json = json_encode($json, JSON_PRETTY_PRINT);
-        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
+        try {
+            $queries->createCourseDatabase($semester, $course_title);
+        }
+        catch (\Exception $e) {
+            $error = "Failed to create course database.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
 
-        $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse(null),
-            null,
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
+        try {
+            $queries->grantCoursePrivileges($semester, $course_title);
+        }
+        catch (\Exception $e) {
+            $error = "Failed to grant privileges on course database.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        try {
+            $queries->insertCourse($semester, $course_title, $group_name, $head_instructor);
+        }
+        catch (\Exception $e) {
+            $error = "Failed to insert course into Submitty database.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        $migration_success = $queries->runCourseMigrations($semester, $course_title);
+        if (!$migration_success) {
+            $queries->deleteCourse($semester, $course_title);
+            $error = "Failed to run course migration.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        try {
+            $queries->insertDefaultForumCategories($semester, $course_title);
+        }
+        catch (\Exception $e) {
+            $error = "Failed to insert default forum categories.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        // $json = [
+        //     "job" => 'CreateCourse',
+        //     'semester' => $semester,
+        //     'course' => $course_title,
+        //     'head_instructor' => $head_instructor,
+        //     'group_name' => $group_name
+        // ];
+
+        // $json = json_encode($json, JSON_PRETTY_PRINT);
+        // $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        // file_put_contents(FileUtils::joinPaths($daemon_job_queue_path, 'create_' . $semester . '_' . $course_title . '.json'), $json);
+
+        $this->core->addSuccessMessage("Course creation successful.");
+            return new MultiResponse(
+                JsonResponse::getSuccessResponse([
+                    "semester" => $semester,
+                    "course" => $course_title,
+                    "head_instructor" => $head_instructor,
+                    "group_name" => $group_name,
+                ]),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home']))
+            );
     }
 
     #[Route("/home/courses/new", methods: ["GET"])]
