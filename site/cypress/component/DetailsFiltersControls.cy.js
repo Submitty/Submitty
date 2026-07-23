@@ -8,7 +8,6 @@ describe('DetailsFiltersControls', () => {
         gradeInquiryOnly: false,
         canFilterWithdrawn: false,
         anonMode: false,
-        isTeamAssignment: false,
         gradeableId: 'test',
     });
 
@@ -69,6 +68,25 @@ describe('DetailsFiltersControls', () => {
         it('defaults all initial* props to false when undefined', () => {
             cy.mount(DetailsFiltersControls, {
                 props: { ...defaultProps(), showAllSections: true, gradeInquiryOnly: true, canFilterWithdrawn: true },
+            });
+            cy.get('[data-testid="view-sections"]').should('not.be.checked');
+            cy.get('[data-testid="random-order-checkbox"]').should('not.be.checked');
+            cy.get('[data-testid="inquiry-only-checkbox"]').should('not.be.checked');
+            cy.get('[data-testid="filter-withdrawn-checkbox"]').should('not.be.checked');
+        });
+
+        it('handles initial* props set to false explicitly (?? false takes left operand)', () => {
+            cy.mount(DetailsFiltersControls, {
+                props: {
+                    ...defaultProps(),
+                    showAllSections: true,
+                    gradeInquiryOnly: true,
+                    canFilterWithdrawn: true,
+                    initialViewSections: false,
+                    initialRandomOrder: false,
+                    initialInquiryOnly: false,
+                    initialHideWithdrawn: false,
+                },
             });
             cy.get('[data-testid="view-sections"]').should('not.be.checked');
             cy.get('[data-testid="random-order-checkbox"]').should('not.be.checked');
@@ -162,6 +180,25 @@ describe('DetailsFiltersControls', () => {
             cy.get('@eventHandler').should('have.been.calledWith', true);
             cy.get('@cb').uncheck({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', false);
+        });
+
+        it('verifies input elements exist when all conditional filters are visible', () => {
+            cy.mount(DetailsFiltersControls, {
+                props: {
+                    ...defaultProps(),
+                    showAllSections: true,
+                    toggleAnon: true,
+                    gradeInquiryOnly: true,
+                    canFilterWithdrawn: true,
+                    gradeableId: 'g1',
+                },
+            });
+            cy.get('[data-testid="view-sections"]').should('exist');
+            cy.get('[data-testid="random-order-checkbox"]').should('exist');
+            cy.get('[data-testid="anon-students-checkbox"]').should('exist');
+            cy.get('[data-testid="inquiry-only-checkbox"]').should('exist');
+            cy.get('[data-testid="filter-withdrawn-checkbox"]').should('exist');
+            cy.get('[data-testid="anon-students-label"]').should('have.attr', 'data-gradeable-id', 'g1');
         });
     });
 });

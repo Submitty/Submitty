@@ -8,7 +8,6 @@ const props = defineProps<{
     canFilterWithdrawn: boolean;
     anonMode: boolean;
     gradeableId: string;
-    isTeamAssignment: boolean;
     initialViewSections?: boolean;
     initialRandomOrder?: boolean;
     initialInquiryOnly?: boolean;
@@ -34,30 +33,30 @@ onMounted(() => {
 });
 
 const onChangeSections = (event: Event) => {
-    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    const checked = (event.target as HTMLInputElement).checked;
     viewSectionsChecked.value = checked;
     emit('view-sections-change', checked);
 };
 
 const onChangeSortOrder = (event: Event) => {
-    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    const checked = (event.target as HTMLInputElement).checked;
     randomOrderChecked.value = checked;
     emit('sort-order-change', checked);
 };
 
 const onChangeInquiry = (event: Event) => {
-    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    const checked = (event.target as HTMLInputElement).checked;
     inquiryOnlyChecked.value = checked;
     emit('inquiry-change', checked);
 };
 
 const onChangeAnon = (event: Event) => {
-    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    const checked = (event.target as HTMLInputElement).checked;
     emit('anon-change', checked);
 };
 
 const onFilterWithdrawn = (event: Event) => {
-    const checked = (event.target as HTMLInputElement | null)?.checked ?? false;
+    const checked = (event.target as HTMLInputElement).checked;
     withdrawnHiddenChecked.value = checked;
     emit('withdrawn-change', checked);
 };
