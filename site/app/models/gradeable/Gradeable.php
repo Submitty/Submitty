@@ -1411,7 +1411,7 @@ class Gradeable extends AbstractModel {
      * Sets whether this gradeable allows submission clustering
      * @param bool $is_clustering_allowed
      */
-    public function setIsClusteringAllowed(bool $is_clustering_allowed) {
+    public function setIsClusteringAllowed(bool $is_clustering_allowed): void {
         $this->is_clustering_allowed = $is_clustering_allowed;
         $this->modified = true;
     }
@@ -1420,7 +1420,7 @@ class Gradeable extends AbstractModel {
      * @param bool $is_clustering_allowed
      * @internal
      */
-    private function setIsClusteringAllowedInternal(bool $is_clustering_allowed) {
+    private function setIsClusteringAllowedInternal(bool $is_clustering_allowed): void {
         $this->is_clustering_allowed = $is_clustering_allowed;
     }
 

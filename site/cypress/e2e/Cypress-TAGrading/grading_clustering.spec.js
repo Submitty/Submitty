@@ -28,4 +28,26 @@ describe('Grading Clustering Mode', () => {
         cy.get('[data-testid="group-by-clusters-checkbox"]').uncheck();
         cy.getCookie('group_by_clusters').should('have.property', 'value', 'false');
     });
+    it('hides clustering options when clustering is disabled', () => {
+        cy.login();
+
+        // Disable clustering
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
+        cy.get('#page_2_nav').click();
+        cy.intercept('POST', '**/gradeable/*/update').as('updateGradeable');
+        cy.get('#no_clustering_allowed').click();
+        cy.wait('@updateGradeable');
+
+        // Check if buttons are hidden on the grading page
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('button').contains('Create Clusters').should('not.exist');
+        cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.exist');
+
+        // Re-enable clustering
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
+        cy.get('#page_2_nav').click();
+        cy.intercept('POST', '**/gradeable/*/update').as('updateGradeable2');
+        cy.get('#yes_clustering_allowed').click();
+        cy.wait('@updateGradeable2');
+    });
 });
