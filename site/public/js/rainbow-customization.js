@@ -813,6 +813,7 @@ function refreshBuildNotices() {
             if (response.status !== 'success') {
                 return;
             }
+            // eslint-disable-next-line no-restricted-syntax
             $('#rg-build-notices').html(response.data.notice_html);
         },
         error: function (xhr) {
