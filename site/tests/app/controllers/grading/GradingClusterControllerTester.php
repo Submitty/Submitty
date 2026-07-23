@@ -37,8 +37,10 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
             ->getMock();
+        $mock_config = $this->createMock(\app\models\Config::class);
+        $mock_config->method('isSubmissionClusteringEnabled')->willReturn(true);
+        $core->method('getConfig')->willReturn($mock_config);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
-        $mock_gradeable->method('isClusteringAllowed')->willReturn(true);
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         $response = $controller->createClustering('test_gradeable');
@@ -61,8 +63,10 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
             ->getMock();
+        $mock_config = $this->createMock(\app\models\Config::class);
+        $mock_config->method('isSubmissionClusteringEnabled')->willReturn(true);
+        $core->method('getConfig')->willReturn($mock_config);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
-        $mock_gradeable->method('isClusteringAllowed')->willReturn(true);
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         $response = $controller->getClusters('test_gradeable');
@@ -83,8 +87,8 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
             ->getMock();
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
-        $mock_gradeable->method('isClusteringAllowed')->willReturn(true);
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         // Use a non-existent gradeable ID so files definitely don't exist

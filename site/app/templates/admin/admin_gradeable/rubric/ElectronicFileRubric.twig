@@ -24,16 +24,6 @@
             {{ not allow_custom_marks ? 'checked' : '' }} /> <label for="no_custom_marks">No</label>
 </fieldset>
 <br>
-<fieldset>
-    <legend>
-    Allow Submission Clustering?
-    </legend>
-    <input type="radio" id="yes_clustering_allowed" name="is_clustering_allowed" value="true"
-            {{ gradeable.isClusteringAllowed() ? 'checked' : '' }} /> <label for="yes_clustering_allowed">Yes</label>
-    <input type="radio" id="no_clustering_allowed" name="is_clustering_allowed" value="false"
-            {{ not gradeable.isClusteringAllowed() ? 'checked' : '' }} /> <label for="no_clustering_allowed">No</label>
-</fieldset>
-<br>
 <div class="electronic_file ignore" id="gradeable_rubric" data-itempool-available="{{ itempool_available}}" data-itempool-options="{{ itempool_options }}">
     <fieldset>
         <legend>

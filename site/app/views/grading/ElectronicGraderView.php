@@ -534,7 +534,7 @@ HTML;
     public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_clustering_mode = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
-        if (!$gradeable->isClusteringAllowed()) {
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
             $is_clustering_mode = false;
         }
 
@@ -986,7 +986,7 @@ HTML;
             "columns" => $shown_columns,
             "all_columns" => $columns,
             "is_clustering_mode" => $is_clustering_mode,
-            "is_clustering_allowed" => $gradeable->isClusteringAllowed(),
+            "is_clustering_allowed" => $this->core->getConfig()->isSubmissionClusteringEnabled(),
             "algorithms" => $algorithms,
             "current_algorithm" => $current_algorithm,
             "create_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'create_clustering']),

@@ -1,6 +1,21 @@
+import { buildUrl } from '../../support/utils.js';
+
 describe('Grading Clustering Mode', () => {
     it('allows opening create modal and toggling cluster view', () => {
         cy.login();
+        // Enable clustering at course level
+        cy.window().then((window) => {
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'config'], true),
+                body: {
+                    csrf_token: window.csrfToken,
+                    name: 'submission_clustering_enabled',
+                    entry: 'true'
+                },
+                form: true
+            });
+        });
         cy.setCookie('view', 'all');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
 
@@ -31,23 +46,41 @@ describe('Grading Clustering Mode', () => {
     it('hides clustering options when clustering is disabled', () => {
         cy.login();
 
-        // Disable clustering
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
-        cy.get('#page_2_nav').click();
-        cy.intercept('POST', '**/gradeable/*/update').as('updateGradeable');
-        cy.get('#no_clustering_allowed').click();
-        cy.wait('@updateGradeable');
+        // Enable clustering at course level
+        cy.window().then((window) => {
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'config'], true),
+                body: {
+                    csrf_token: window.csrfToken,
+                    name: 'submission_clustering_enabled',
+                    entry: 'true'
+                },
+                form: true
+            });
+        });
+
+        // Verify clustering features are visible
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('button').contains('Create Clusters').should('be.visible');
+
+        // Disable clustering at course level
+        cy.window().then((window) => {
+            cy.request({
+                method: 'POST',
+                url: buildUrl(['sample', 'config'], true),
+                body: {
+                    csrf_token: window.csrfToken,
+                    name: 'submission_clustering_enabled',
+                    entry: 'false'
+                },
+                form: true
+            });
+        });
 
         // Check if buttons are hidden on the grading page
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('button').contains('Create Clusters').should('not.exist');
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.exist');
-
-        // Re-enable clustering
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
-        cy.get('#page_2_nav').click();
-        cy.intercept('POST', '**/gradeable/*/update').as('updateGradeable2');
-        cy.get('#yes_clustering_allowed').click();
-        cy.wait('@updateGradeable2');
     });
 });

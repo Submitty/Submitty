@@ -28,7 +28,7 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
         }
 
-        if (!$gradeable->isClusteringAllowed()) {
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
             return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
@@ -71,7 +71,7 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
         }
 
-        if (!$gradeable->isClusteringAllowed()) {
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
             return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
@@ -101,7 +101,7 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
         }
 
-        if (!$gradeable->isClusteringAllowed()) {
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
             return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 

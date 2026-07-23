@@ -6556,7 +6556,6 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
-              g_is_clustering_allowed AS is_clustering_allowed,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gamo.*,
@@ -7308,8 +7307,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
-            $gradeable->getAllowCustomMarks(),
-            $gradeable->isClusteringAllowed()
+            $gradeable->getAllowCustomMarks()
         ];
         $this->course_db->query(
             "
@@ -7326,9 +7324,8 @@ AND gc_id IN (
               g_grade_released_date,
               g_min_grading_group,
               g_syllabus_bucket,
-              g_allow_custom_marks,
-              g_is_clustering_allowed)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_allow_custom_marks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -7498,7 +7495,6 @@ AND gc_id IN (
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
-                $gradeable->isClusteringAllowed(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -7515,8 +7511,7 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?,
-                  g_is_clustering_allowed=?
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
