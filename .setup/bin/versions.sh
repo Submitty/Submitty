@@ -8,7 +8,7 @@
 export AnalysisTools_Version=v22.03.00
 export AnalysisToolsTS_Version=v26.04.00
 export Lichen_Version=v26.04.01
-export RainbowGrades_Version=v26.07.02
+export RainbowGrades_Version=v26.07.03
 export Tutorial_Version=v26.07.00
 export SubmittyCLI_Version=v26.07.01
 export SysadminTools_Version=v25.01.00
