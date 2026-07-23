@@ -321,7 +321,7 @@
 
 .post-action-container {
     margin-top: 8px;
-    margin-left: 10px;
+    margin-left: auto;
     float: right;
     white-space: nowrap;
 }
@@ -336,6 +336,13 @@
     display: inline-block;
     align-items: center;
     justify-content: center;
+}
+
+.post-button-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .upduck-button {
