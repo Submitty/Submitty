@@ -131,9 +131,9 @@ describe('Test that instructors are able to properly clear version conflicts', (
 
         cy.get('#peer_info').should('exist');
         cy.get('body').then(($body) => {
-        if (!$body.find('#peer_info').is(':visible')) {
-            cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
-        }
+            if (!$body.find('#peer_info').is(':visible')) {
+                cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+            }
         });
         cy.get('#peer_info').should('be.visible');
 
