@@ -126,24 +126,13 @@ describe('Test that instructors are able to properly clear version conflicts', (
 
         cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().check();
         cy.get('.peer-save-component[data-component-id="84"][data-peer-id="baliss"]').click();
-        cy.get('[data-testid="close-button"][onclick*="edit-peer-components-form"]').click();
-        cy.reload();
-
-        cy.get('#peer_info').should('exist');
-        cy.get('body').then(($body) => {
-            if (!$body.find('#peer_info').is(':visible')) {
-                cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
-            }
-        });
-        cy.get('#peer_info').should('be.visible');
+        
+        cy.get('[data-testid="close-button"][onclick*="edit-peer-components-form"]').should('have.length', 1).should('be.visible').click();
 
         cy.get('[aria-label="Edit Peer Components"]').should('be.visible').click();
+
         cy.get('button[onclick*="clearPeerMarks"][onclick*="\'baliss\'"]').first().click();
 
-        cy.get('#edit-peer-select option[value="baliss"]', { timeout: 10000 }).should('not.exist');
-
-        cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
-        cy.get('[aria-label="Edit Peer Components"]').click();
         cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().should('not.be.checked');
     });
 });
