@@ -369,29 +369,57 @@ class Course_create_gradeables:
                                         score = 0
                                     else:
                                         max_value_score = random.randint(int(component.lower_clamp * 2), int(component.max_value * 2)) / 2
-                                        uppser_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
-                                        score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
+                                        upper_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
+                                        score = generate_probability_space({0.7: max_value_score, 0.2: upper_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                                    self.conn.execute(
-                                        insert(self.gradeable_component_data).values(
-                                            gc_id=component.key, gd_id=gd_id, gcd_score=score,
-                                            gcd_component_comment=generate_random_ta_comment(), gcd_grader_id=self.instructor.id,
-                                            gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit
-                                        )
-                                    )
+                                    # Generate the comment and selected marks before determining the graders.
+                                    component_comment = generate_random_ta_comment()
+                                    selected_marks = []
                                     first = True
                                     first_set = False
                                     for mark in component.marks:
                                         if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                            self.conn.execute(
-                                                insert(self.gradeable_component_mark_data).values(
-                                                    gc_id=component.key, gd_id=gd_id,
-                                                    gcm_id=mark.key, gcd_grader_id=self.instructor.id
-                                                )
-                                            )
-                                            if(first):
+                                            selected_marks.append(mark.key)
+                                            if first:
                                                 first_set = True
                                         first = False
+
+                                    if component.is_peer_component:
+                                        stmt = (
+                                            select(self.peer_assign.columns.grader_id)
+                                            .where(
+                                                self.peer_assign.columns.g_id == gradeable.id
+                                            )
+                                            .where(
+                                                self.peer_assign.columns.user_id == user.id
+                                            )
+                                            .order_by(self.peer_assign.columns.grader_id)
+                                        )
+
+                                        grader_ids = self.conn.execute(stmt).scalars().all()
+                                    else:
+                                        grader_ids = [self.instructor.id]
+                                    for grader_id in grader_ids:
+                                        self.conn.execute(
+                                            insert(self.gradeable_component_data).values(
+                                                gc_id=component.key,
+                                                gd_id=gd_id,
+                                                gcd_score=score,
+                                                gcd_component_comment=component_comment,
+                                                gcd_grader_id=grader_id,
+                                                gcd_grade_time=grade_time,
+                                                gcd_graded_version=versions_to_submit
+                                            )
+                                        )
+                                        for mark_id in selected_marks:
+                                            self.conn.execute(
+                                                insert(self.gradeable_component_mark_data).values(
+                                                    gc_id=component.key,
+                                                    gd_id=gd_id,
+                                                    gcm_id=mark_id,
+                                                    gcd_grader_id=grader_id
+                                                )
+                                            )
                                 self.conn.commit()
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
