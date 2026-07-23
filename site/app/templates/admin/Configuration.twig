@@ -25,6 +25,36 @@
         </label>
         <input class="config-row" type="text" name="course_home_url" id="course-home-url" value="{{ fields['course_home_url'] }}" />
 
+        <h2>Course Repository</h2>
+        <hr>
+
+        <label for="course-repo-url" class="config-row">
+            <span class="option-title">Repository URL</span>
+            <br>
+            <span class="option-alt">Git URL used as the source of truth for course-managed files.</span>
+        </label>
+        <input class="config-row" type="text" name="course_repo_url" id="course-repo-url" value="{{ fields['course_repo_url'] }}" />
+
+        <label for="course-repo-branch" class="config-row">
+            <span class="option-title">Repository Branch</span>
+            <br>
+            <span class="option-alt">Branch that Submitty should pull from when syncing this course.</span>
+        </label>
+        <input class="config-row" type="text" name="course_repo_branch" id="course-repo-branch" value="{{ fields['course_repo_branch'] }}" />
+
+        <label for="course-repo-subdirectory" class="config-row">
+            <span class="option-title">Repository Subdirectory (Optional)</span>
+            <br>
+            <span class="option-alt">Relative path inside the repo where <kbd>course.json</kbd> and <kbd>gradeables/</kbd> live.</span>
+        </label>
+        <input class="config-row" type="text" name="course_repo_subdirectory" id="course-repo-subdirectory" value="{{ fields['course_repo_subdirectory'] }}" />
+
+        <div class="config-row">
+            <button class="btn btn-primary" id="pull-course-repository" type="button">Pull Course Repository</button>
+            <span id="course-repo-sync-state" style="margin-left:10px;"></span>
+        </div>
+        <div class="config-row option-alt" id="course-repo-sync-message"></div>
+
         <h2>Discussion Forum</h2>
         <hr>
         <div id="forum-enabled-wrapper" class="config-row checkbox-row">

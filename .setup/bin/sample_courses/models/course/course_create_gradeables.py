@@ -354,7 +354,6 @@ class Course_create_gradeables:
                                 values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                             ins = insert(self.gradeable_data).values(**values)
                             res = self.conn.execute(ins)
-                            self.conn.commit()
                             gd_id = res.inserted_primary_key[0]
                             if gradeable.type != 0 or gradeable.use_ta_grading:
                                 skip_grading = random.random()
