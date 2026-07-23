@@ -11,9 +11,9 @@ describe('Grading Clustering Mode', () => {
                 body: {
                     csrf_token: window.csrfToken,
                     name: 'submission_clustering_enabled',
-                    entry: 'true'
+                    entry: 'true',
                 },
-                form: true
+                form: true,
             });
         });
         cy.setCookie('view', 'all');
@@ -54,9 +54,9 @@ describe('Grading Clustering Mode', () => {
                 body: {
                     csrf_token: window.csrfToken,
                     name: 'submission_clustering_enabled',
-                    entry: 'true'
+                    entry: 'true',
                 },
-                form: true
+                form: true,
             });
         });
 
@@ -72,9 +72,9 @@ describe('Grading Clustering Mode', () => {
                 body: {
                     csrf_token: window.csrfToken,
                     name: 'submission_clustering_enabled',
-                    entry: 'false'
+                    entry: 'false',
                 },
-                form: true
+                form: true,
             });
         });
 

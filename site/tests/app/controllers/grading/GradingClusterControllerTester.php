@@ -37,9 +37,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
             ->getMock();
-        $mock_config = $this->createMock(\app\models\Config::class);
-        $mock_config->method('isSubmissionClusteringEnabled')->willReturn(true);
-        $core->method('getConfig')->willReturn($mock_config);
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
@@ -63,9 +61,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
             ->getMock();
-        $mock_config = $this->createMock(\app\models\Config::class);
-        $mock_config->method('isSubmissionClusteringEnabled')->willReturn(true);
-        $core->method('getConfig')->willReturn($mock_config);
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
@@ -78,7 +74,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
 
     public function testCheckClusteringStatusDone(): void {
         $core = $this->createMockCore();
-        $core->method('getConfig')->willReturn($this->createMock(\app\models\Config::class));
+        $core->method('getConfig')->willReturn($this->createMockModel(\app\models\Config::class));
         $core->getConfig()->method('getTerm')->willReturn('f22');
         $core->getConfig()->method('getCourse')->willReturn('sample');
         $core->getConfig()->method('getSubmittyPath')->willReturn('/var/local/submitty');
