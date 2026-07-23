@@ -165,8 +165,11 @@ if not os.path.exists(creds_file):
                f'{creds_file}')
 
 # Load credentials out of admin file
-with open(creds_file, 'r') as file:
-    creds = json.load(file)
+try:
+    with open(creds_file, 'r') as file:
+        creds = json.load(file)
+except PermissionError as e:
+    error_exit(f'Error opening submitty_admin.json: {e}')
 
 # Take this path if we DID NOT get an auth token
 if 'token' not in creds or not creds['token']:

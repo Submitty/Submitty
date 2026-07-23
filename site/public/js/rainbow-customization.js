@@ -803,33 +803,6 @@ function checkBuildStatus() {
     });
 }
 
-function renderBuildNotices(notice) {
-    const container = $('#rg-build-notices');
-    container.empty();
-    if (!notice) {
-        return;
-    }
-    const banner = $('<div></div>')
-        .addClass(`rg-build-notice rg-build-notice-${notice.level}`)
-        .attr('data-testid', 'rainbow-build-notice');
-
-    notice.messages.forEach((message) => {
-        banner.append($('<p></p>').text(message));
-    });
-
-    if (notice.sysadmin_email) {
-        const contact = $('<p></p>').addClass('rg-build-notice-contact').text('Contact your system administrator at ');
-        $('<a></a>')
-            .attr('href', `mailto:${notice.sysadmin_email}`)
-            .text(notice.sysadmin_email)
-            .appendTo(contact);
-        contact.append(document.createTextNode(' for assistance.'));
-        banner.append(contact);
-    }
-
-    container.append(banner);
-}
-
 function refreshBuildNotices() {
     $.ajax({
         type: 'POST',
@@ -840,7 +813,7 @@ function refreshBuildNotices() {
             if (response.status !== 'success') {
                 return;
             }
-            renderBuildNotices(response.data.notice);
+            $('#rg-build-notices').html(response.data.notice_html);
         },
         error: function (xhr) {
             console.error(`Failed to refresh build notices: ${xhr.responseText}`);

@@ -195,9 +195,11 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_build_notices", methods: ["POST"])]
     public function rainbowGradesBuildNotices(): JsonResponse {
-        return JsonResponse::getSuccessResponse([
-            'notice' => $this->getRainbowGradesBuildNotice(),
-        ]);
+        $html = $this->core->getOutput()->renderTwigTemplate(
+            'admin/RainbowBuildNotice.twig',
+            ['notice' => $this->getRainbowGradesBuildNotice()]
+        );
+        return JsonResponse::getSuccessResponse(['notice_html' => $html]);
     }
 
     /**
