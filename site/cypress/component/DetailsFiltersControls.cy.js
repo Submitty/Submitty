@@ -77,7 +77,7 @@ describe('DetailsFiltersControls', () => {
     });
 
     describe('emits events on user interaction', () => {
-        it('emits mounted on mount with current inquiry state', () => {
+        it('emits mounted with inquiryOnly true when initialInquiryOnly is true', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'mounted', {
                 ...defaultProps(),
                 gradeInquiryOnly: true,
@@ -86,11 +86,56 @@ describe('DetailsFiltersControls', () => {
             cy.get('@eventHandler').should('have.been.calledWith', { inquiryOnly: true });
         });
 
+        it('emits mounted with inquiryOnly false when initialInquiryOnly is false', () => {
+            mountWithEmitSpy(DetailsFiltersControls, 'mounted', {
+                ...defaultProps(),
+                gradeInquiryOnly: true,
+                initialInquiryOnly: false,
+            });
+            cy.get('@eventHandler').should('have.been.calledWith', { inquiryOnly: false });
+        });
+
         it('emits *-change events with the checked state when toggling checkboxes', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'sort-order-change', {
                 ...defaultProps(),
             });
             cy.get('[data-testid="random-order-checkbox"]').as('cb');
+            cy.get('@cb').check({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').uncheck({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', false);
+        });
+
+        it('emits view-sections-change when toggling assigned sections checkbox', () => {
+            mountWithEmitSpy(DetailsFiltersControls, 'view-sections-change', {
+                ...defaultProps(),
+                showAllSections: true,
+            });
+            cy.get('[data-testid="view-sections"]').as('cb');
+            cy.get('@cb').check({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').uncheck({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', false);
+        });
+
+        it('emits inquiry-change when toggling grade inquiries only checkbox', () => {
+            mountWithEmitSpy(DetailsFiltersControls, 'inquiry-change', {
+                ...defaultProps(),
+                gradeInquiryOnly: true,
+            });
+            cy.get('[data-testid="inquiry-only-checkbox"]').as('cb');
+            cy.get('@cb').check({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').uncheck({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', false);
+        });
+
+        it('emits withdrawn-change when toggling hide withdrawn checkbox', () => {
+            mountWithEmitSpy(DetailsFiltersControls, 'withdrawn-change', {
+                ...defaultProps(),
+                canFilterWithdrawn: true,
+            });
+            cy.get('[data-testid="filter-withdrawn-checkbox"]').as('cb');
             cy.get('@cb').check({ force: true });
             cy.get('@eventHandler').should('have.been.calledWith', true);
             cy.get('@cb').uncheck({ force: true });
