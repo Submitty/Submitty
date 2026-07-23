@@ -804,6 +804,26 @@ function checkBuildStatus() {
     });
 }
 
+function renderBuildNotices(notice) {
+    const banner = $('#rainbow-build-notice');
+    if (!notice) {
+        banner.hide();
+        return;
+    }
+    banner.removeClass('rg-build-notice-error rg-build-notice-warning')
+          .addClass(`rg-build-notice-${notice.level}`);
+    $('#rainbow-build-notice-messages').text(notice.messages.join('\n'));
+    const contact = $('#rainbow-build-notice-contact');
+    if (notice.sysadmin_email) {
+        $('#rainbow-build-notice-email').attr('href', `mailto:${notice.sysadmin_email}`).text(notice.sysadmin_email);
+        contact.show();
+    }
+    else {
+        contact.hide();
+    }
+    banner.show();
+}
+
 function refreshBuildNotices() {
     $.ajax({
         type: 'POST',
@@ -814,10 +834,7 @@ function refreshBuildNotices() {
             if (response.status !== 'success') {
                 return;
             }
-            // notice_html is rendered server-side from RainbowBuildNotice.twig and is
-            // escaped by Twig
-            // eslint-disable-next-line no-restricted-syntax
-            $('#rg-build-notices').html(response.data.notice_html);
+            renderBuildNotices(response.data.notice);
         },
         error: function (xhr) {
             console.error(`Failed to refresh build notices: ${xhr.responseText}`);
@@ -850,6 +867,7 @@ function refreshManualGenerationBanner() {
 $(document).ready(() => {
     // Run when page loads
     DetectSameSectionName();
+    renderBuildNotices(window.rainbowBuildNotice);
     $('input[name*=\'display\']').change(() => {
         saveChanges();
     });
