@@ -972,7 +972,7 @@ function changeDisplayOptions(option) {
 function readCategoryValues() {
     const categories_value = [];
     $('#thread_category button').each(function () {
-        if ($(this).data('btn-selected') === 'true') {
+        if ($(this).attr('data-btn-selected') === 'true') {
             categories_value.push($(this).data('cat_id'));
         }
     });
@@ -981,11 +981,11 @@ function readCategoryValues() {
 
 function setCategoryValues(cat_ids) {
     $('#thread_category button').each(function () {
-        if (cat_ids.includes($(this).data('cat_id'))) {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-        else {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        const btnCatId = Number($(this).data('cat_id'));
+        const isActive = $(this).attr('data-btn-selected') === 'true';
+        const shouldBeActive = cat_ids.includes(btnCatId);
+        if (isActive !== shouldBeActive) {
+            this.click();
         }
     });
 }
@@ -993,7 +993,7 @@ function setCategoryValues(cat_ids) {
 function readThreadStatusValues() {
     const thread_status_value = [];
     $('#thread_status_select button').each(function () {
-        if ($(this).data('btn-selected') === 'true') {
+        if ($(this).attr('data-btn-selected') === 'true') {
             thread_status_value.push($(this).data('sel_id'));
         }
     });
@@ -1002,11 +1002,11 @@ function readThreadStatusValues() {
 
 function setThreadStatusValues(sel_ids) {
     $('#thread_status_select button').each(function () {
-        if (sel_ids.includes($(this).data('sel_id'))) {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-        else {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        const btnSelId = Number($(this).data('sel_id'));
+        const isActive = $(this).attr('data-btn-selected') === 'true';
+        const shouldBeActive = sel_ids.includes(btnSelId);
+        if (isActive !== shouldBeActive) {
+            this.click();
         }
     });
 }
@@ -1214,7 +1214,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
         && thread_status_value === Cookies.get('forum_thread_status')
-        && search_query === previous_search_query) {
+        && unread_select_value === (Cookies.get('unread_select_value') === 'true')
+        && search_query === Cookies.get('search_query')) {
         return;
     }
 
@@ -2219,16 +2220,17 @@ if (!Array.prototype.toggleElement) {
 }
 
 function clearForumFilter() {
-    if (checkUnread()) {
-        $('#filter_unread_btn').click();
+    // keeping Vue's reactive state in sync with the DOM
+    document.querySelectorAll('#thread_category .btn.filter-active').forEach((btn) => {
+        btn.click();
+    });
+    document.querySelectorAll('#thread_status_select .btn.filter-active').forEach((btn) => {
+        btn.click();
+    });
+    const unreadBtn = document.getElementById('filter_unread_btn');
+    if (unreadBtn?.classList.contains('filter-active')) {
+        unreadBtn.click();
     }
-    $('#search-content').val('').trigger('change');
-    $('#search-clear').hide();
-    $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').css('visibility', 'hidden');
-
-    return false;
 }
 
 function updateClearFilterButton() {
@@ -2241,26 +2243,6 @@ function updateClearFilterButton() {
 }
 
 function loadFilterHandlers() {
-    $('#filter_unread_btn').on('mousedown', function (e) {
-        $(this).toggleClass('filter-inactive filter-active');
-    });
-
-    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
-        e.preventDefault();
-        const current_selection = $(this).data('btn-selected');
-
-        if (current_selection === 'true') {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-        }
-        else {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-
-        updateClearFilterButton();
-        updateThreads(true, saveFilterState);
-        return true;
-    });
-
     $('#search-submit').on('mousedown', (e) => {
         e.preventDefault();
         updateClearFilterButton();
@@ -2286,13 +2268,6 @@ function loadFilterHandlers() {
         return true;
     });
 
-    $('#unread').change((e) => {
-        e.preventDefault();
-        updateThreads(true, saveFilterState);
-        checkUnread();
-        return true;
-    });
-
     window.onpopstate = function (e) {
         setFilterState(e.state);
     };
@@ -2302,15 +2277,11 @@ function loadFilterHandlers() {
 }
 
 function getFilterState() {
-    return {
-        'categories': readCategoryValues(),
-        'thread-status': readThreadStatusValues(),
-        'search-content': $('#search-content').val(),
-    };
+    return window.getFilterState?.();
 }
 
 function saveFilterState() {
-    history.pushState(getFilterState(), '');
+    window.saveFilterState?.();
 }
 
 function setFilterState(state) {
@@ -2327,7 +2298,10 @@ function setFilterState(state) {
         $('#search-content').val(state['search-content']);
     }
     updateClearFilterButton();
-    updateThreads(true, null);
+    // Don't call updateThreads here — the filter-change handler (setTimeout(0))
+    if (!('categories' in state) && !('thread-status' in state) && 'search-content' in state) {
+        setTimeout(() => updateThreads(true, null), 0);
+    }
 }
 
 function thread_post_handler() {
