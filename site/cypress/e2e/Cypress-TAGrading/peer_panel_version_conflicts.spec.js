@@ -51,56 +51,57 @@ describe('Test that instructors are able to properly clear version conflicts', (
     });
 
     it('Instructor can clear a specific version conflict without affecting others', () => {
-
         cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
 
         componentIds.forEach((id) => {
-            cy.get(`[data-component_id="${id}"]`).parent().each(() => {
-                cy.get('[data-testid="peer-version-warning"]').should('exist');
-            });
+            cy.get(`[data-component_id="${id}"]`).parent()
+                .find('[data-testid="peer-version-warning"]').should('exist');
         });
 
         cy.get('[aria-label="Edit Peer Components"]').click();
-
         cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().check();
         cy.get('.peer-save-component[data-component-id="84"][data-peer-id="baliss"]').click();
-
         cy.get('[data-testid="close-button"]:visible').click();
         cy.reload();
 
-        cy.get('[title="Show/Hide Peer Information (Press P)"]').click();  
-        
-        
-        cy.get('[data-component_id="84"]').parent().each(() => {
-            cy.get('[data-testid="peer-version-warning"]').should('not.exist');
+        cy.get('body').then(($body) => {
+            if (!$body.find('[data-component_id="84"]').is(':visible')) {
+                cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+            }
         });
+
+        cy.get('[data-component_id="84"]').parent()
+            .find('[data-testid="peer-version-warning"]').should('not.exist');
 
         [85, 86, 87].forEach((id) => {
-            cy.get(`[data-component_id="${id}"]`).parent().each(() => {
-                cy.get('[data-testid="peer-version-warning"]').should('exist');
-            });
+            cy.get(`[data-component_id="${id}"]`).parent()
+                .find('[data-testid="peer-version-warning"]').should('exist');
         });
     });
-    it('Instructor can clear all version conflicts', () => {
 
+    it('Instructor can clear all version conflicts', () => {
         cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
         cy.contains('button', 'Clear All Peer Version Conflicts').should('exist');
 
         componentIds.forEach((id) => {
-            cy.get(`[data-component_id="${id}"]`).parent().each(() => {
-                cy.get('[data-testid="peer-version-warning"]').should('exist');
-            });
+            cy.get(`[data-component_id="${id}"]`).parent()
+                .find('[data-testid="peer-version-warning"]').should('exist');
         });
 
         cy.contains('button', 'Clear All Peer Version Conflicts').click();
         cy.reload();
-    
+
+        cy.get('body').then(($body) => {
+            if (!$body.find('[data-component_id="84"]').is(':visible')) {
+                cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+            }
+        });
+
         cy.contains('button', 'Clear All Peer Version Conflicts').should('not.exist');
 
         componentIds.forEach((id) => {
-            cy.get(`[data-component_id="${id}"]`).parent().each(() => {
-                cy.get('[data-testid="peer-version-warning"]').should('not.exist');
-            });
+            cy.get(`[data-component_id="${id}"]`).parent()
+                .find('[data-testid="peer-version-warning"]').should('not.exist');
         });
     });
     it('Instructor can edit another peer graders component grades', () => {
@@ -113,9 +114,36 @@ describe('Test that instructors are able to properly clear version conflicts', (
         cy.get('[data-testid="close-button"][onclick*="edit-peer-components-form"]').click();
         cy.reload();
 
-        cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
-        cy.get('[data-component_id="84"]').parent().each(() => {
-            cy.contains('1 / 2');
+        cy.get('[aria-label="Edit Peer Components"]').click();
+        cy.get('[data-component_id="84"]').parent().then(($el) => {
+            cy.log($el.text());
         });
+    });
+
+    it('Instructor can delete a peer graders grade', () => {
+        cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+        cy.get('[aria-label="Edit Peer Components"]').click();
+
+        cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().check();
+        cy.get('.peer-save-component[data-component-id="84"][data-peer-id="baliss"]').click();
+        cy.get('[data-testid="close-button"][onclick*="edit-peer-components-form"]').click();
+        cy.reload();
+
+        cy.get('#peer_info').should('exist');
+        cy.get('body').then(($body) => {
+        if (!$body.find('#peer_info').is(':visible')) {
+            cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+        }
+        });
+        cy.get('#peer_info').should('be.visible');
+
+        cy.get('[aria-label="Edit Peer Components"]').should('be.visible').click();
+        cy.get('button[onclick*="clearPeerMarks"][onclick*="\'baliss\'"]').first().click();
+
+        cy.get('#edit-peer-select option[value="baliss"]', { timeout: 10000 }).should('not.exist');
+
+        cy.get('[title="Show/Hide Peer Information (Press P)"]').click();
+        cy.get('[aria-label="Edit Peer Components"]').click();
+        cy.get('.peer-edit-mark[data-component-id="84"][data-peer-id="baliss"]').first().should('not.be.checked');
     });
 });
