@@ -3,9 +3,20 @@
         <p>Loading...</p>
     </div>
     <div id="rg_web_ui">
-        <div id="rg-build-notices">
-            {% include 'admin/RainbowBuildNotice.twig' with { notice: rainbow_build_notice } only %}
-        </div>
+        {% if notice is not null %}
+            <div class="rg-build-notice rg-build-notice-{{ notice.level }}" data-testid="rainbow-build-notice">
+                {% for message in notice.messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+                {% if notice.sysadmin_email is not empty %}
+                    <p class="rg-build-notice-contact">
+                        Contact your system administrator at
+                        <a href="mailto:{{ notice.sysadmin_email }}">{{ notice.sysadmin_email }}</a>
+                        for assistance.
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
         <h1>Rainbow Grades Configuration</h1>
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
