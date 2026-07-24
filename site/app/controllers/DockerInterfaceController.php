@@ -261,13 +261,25 @@ class DockerInterfaceController extends AbstractController {
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         $docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "docker" . $now . ".json");
         $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
-
         // Check the filesystem for the jobs file
-        // JS handles looping by checking $is_in_progress to see that the jobs have left the queue
+        // docker_interface.js handles looping by checking $is_in_progress
+        // to see that the jobs have left the queue
         $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
 
-        // TODO: Return the log file to the js for output
-        $log_output = "";
+        $log_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker", $now . ".txt");
+
+        $log_output = "Log file not found.";
+
+        if (file_exists($log_file)) {
+            $log_content = file_get_contents($log_file);
+            $delimiter = "================== Simplified Output ==================";
+
+            // Search backwards for the last time the simplified output started
+            $last_pos = strrpos($log_content, $delimiter);
+
+            // get everything from 'Simplified Output' to the end of the file
+            $log_output = trim(substr($log_content, $last_pos));
+        }
 
         return JsonResponse::getSuccessResponse([
             'in_progress' => $is_in_progress,
