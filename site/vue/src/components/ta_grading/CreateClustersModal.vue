@@ -148,7 +148,10 @@ async function submitClustering() {
               No clustering algorithms available.
             </div>
 
-            <p v-if="selectedAlgorithm && algorithms[selectedAlgorithm]" style="margin-top: 15px;">
+            <p
+              v-if="selectedAlgorithm && algorithms[selectedAlgorithm]"
+              style="margin-top: 15px;"
+            >
               {{ algorithms[selectedAlgorithm].description }}
             </p>
 
