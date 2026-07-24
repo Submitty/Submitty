@@ -1,6 +1,12 @@
 <div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}" data-testid="submission-browser">
     <div >
         <div id="directory_view">
+            {% if not user_assignment_settings_exists %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong>
+                    The user_assignment_settings.json file is missing for this submission. Some submission metadata may be unavailable.
+                </div>
+            {% endif %}
             <span style="line-height: 40px;">
                 {% if not student_grader %}
                 <span class="grading_label">Submissions and Results Browser</span>
@@ -53,7 +59,7 @@
                     {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
                 {% endif %}
-                {% if not anon_mode and not blind_grader %}
+                {% if not anon_mode and not blind_grader and user_assignment_settings_exists %}
                     {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader) }}
                 {% endif %}
             </div>
