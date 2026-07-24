@@ -1,13 +1,17 @@
 // Map to store the XMLHttpRequest object returned by getJSON when getting the
 // output to display in loadTestCaseOutput()
 // Key: div_name ("testcase_" + index)   Value: XMLHttpRequest object
-const loading_test_cases_xml_http_requests = new Map();
-
+if (window.loading_test_cases_xml_http_requests === undefined) {
+    window.loading_test_cases_xml_http_requests = new Map();
+}
 // String containing the name of the div for expand all toggle
-const expand_all_toggle_div_name = '#tc_expand_all';
-
+if (window.expand_all_toggle_div_name === undefined) {
+    window.expand_all_toggle_div_name = '#tc_expand_all';
+}
 // String containing the name of the div for collapse all toggle
-const collapse_all_toggle_div_name = '#tc_collapse_all';
+if (window.collapse_all_toggle_div_name === undefined) {
+    window.collapse_all_toggle_div_name = '#tc_collapse_all';
+}
 
 /**
  * Collapses test case output. If all test cases have been collapsed,
@@ -40,7 +44,7 @@ function CollapseTestCaseOutput(div_name, index, num_test_cases, loadingTools, c
 /**
  * Enables "Expand All Test Cases" toggle or "Collapse All Test Cases" toggle.
  *
- * @global {expand_all_toggle_div_name} : String - name of the div for expand all toggle
+ * @global {window.expand_all_toggle_div_name} : String - name of the div for expand all toggle
  * @global {collapse_all_loading_tools} : String - name of the div for collapse all toggle
  *
  * @param {boolean} enable_expand_all - should the "Expand All Test Cases" toggle (true) or
@@ -48,14 +52,14 @@ function CollapseTestCaseOutput(div_name, index, num_test_cases, loadingTools, c
  */
 function EnableExpandAllOrCollapseAllToggles(enable_expand_all) {
     if (enable_expand_all) {
-        $(expand_all_toggle_div_name).css('cursor', 'pointer');
-        const expand_all_loading_tools = $(expand_all_toggle_div_name).find('.loading-tools');
+        $(window.expand_all_toggle_div_name).css('cursor', 'pointer');
+        const expand_all_loading_tools = $(window.expand_all_toggle_div_name).find('.loading-tools');
         expand_all_loading_tools.find('.loading-tools-show').css('color', 'var(--standard-deep-blue)');
         expand_all_loading_tools.find('.loading-tools-show').css('textDecoration', 'underline');
     }
     else {
-        $(collapse_all_toggle_div_name).css('cursor', 'pointer');
-        const collapse_all_loading_tools = $(collapse_all_toggle_div_name).find('.loading-tools');
+        $(window.collapse_all_toggle_div_name).css('cursor', 'pointer');
+        const collapse_all_loading_tools = $(window.collapse_all_toggle_div_name).find('.loading-tools');
         collapse_all_loading_tools.find('.loading-tools-hide').css('color', 'var(--standard-deep-blue)');
         collapse_all_loading_tools.find('.loading-tools-hide').css('textDecoration', 'underline');
     }
@@ -67,7 +71,7 @@ function EnableExpandAllOrCollapseAllToggles(enable_expand_all) {
  * If all are collapse, disable "Collapse All Test Cases" toggle and enable "Expand All Test Cases" toggle.
  * If some are expanded and some are collapse, enable "Expand All Test Cases" and "Collapse All Test Cases" toggles.
  *
- * @global {expand_all_toggle_div_name} : String - name of the div for expand all toggle
+ * @global {window.expand_all_toggle_div_name} : String - name of the div for expand all toggle
  * @global {collapse_all_loading_tools} : String - name of the div for collapse all toggle
  *
  * @param {int} num_test_cases - number of test cases
@@ -93,15 +97,15 @@ function CheckStatesOfAllTestCases(num_test_cases, are_test_cases_expanded) {
     if (test_cases_have_same_state) {
         if (are_test_cases_expanded) {
             EnableExpandAllOrCollapseAllToggles(false);
-            $(expand_all_toggle_div_name).css('cursor', 'default');
-            const expand_all_loading_tools = $(expand_all_toggle_div_name).find('.loading-tools');
+            $(window.expand_all_toggle_div_name).css('cursor', 'default');
+            const expand_all_loading_tools = $(window.expand_all_toggle_div_name).find('.loading-tools');
             expand_all_loading_tools.find('.loading-tools-show').css('color', 'var(--standard-medium-dark-gray)');
             expand_all_loading_tools.find('.loading-tools-show').css('textDecoration', 'none');
         }
         else {
             EnableExpandAllOrCollapseAllToggles(true);
-            $(collapse_all_toggle_div_name).css('cursor', 'default');
-            const collapse_all_loading_tools = $(collapse_all_toggle_div_name).find('.loading-tools');
+            $(window.collapse_all_toggle_div_name).css('cursor', 'default');
+            const collapse_all_loading_tools = $(window.collapse_all_toggle_div_name).find('.loading-tools');
             collapse_all_loading_tools.find('.loading-tools-hide').css('color', 'var(--standard-medium-dark-gray)');
             collapse_all_loading_tools.find('.loading-tools-hide').css('textDecoration', 'none');
         }
@@ -115,7 +119,7 @@ function CheckStatesOfAllTestCases(num_test_cases, are_test_cases_expanded) {
 /**
  * Expands or Collapses test case output.
  *
- * @global {loading_test_cases_xml_http_requests} : Map (div_name ("testcase_" + index); Value - XMLHttpRequest object)
+ * @global {window.loading_test_cases_xml_http_requests} : Map (div_name ("testcase_" + index); Value - XMLHttpRequest object)
  *                        to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - ID of div containing the output of the test case
@@ -134,13 +138,13 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
     const loadingTools = $(`#tc_${index}`).find('.loading-tools');
 
     // Checks if output for this div is being loaded
-    if (loading_test_cases_xml_http_requests.has(orig_div_name)) {
+    if (window.loading_test_cases_xml_http_requests.has(orig_div_name)) {
         // Checks if xhr is defined and has not succeeded yet
         // If so, abort loading
-        const xhr = loading_test_cases_xml_http_requests.get(orig_div_name);
+        const xhr = window.loading_test_cases_xml_http_requests.get(orig_div_name);
         if (xhr && xhr.readyState !== 4) {
             xhr.abort();
-            loading_test_cases_xml_http_requests.delete(orig_div_name);
+            window.loading_test_cases_xml_http_requests.delete(orig_div_name);
         }
     }
 
@@ -163,7 +167,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
             CheckStatesOfAllTestCases(num_test_cases, true);
         }
 
-        loading_test_cases_xml_http_requests.set(orig_div_name, $.getJSON({
+        window.loading_test_cases_xml_http_requests.set(orig_div_name, $.getJSON({
             url: url,
             async: true,
             success: function (response) {
@@ -171,7 +175,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
                     alert(`Error getting file diff: ${response.message}`);
                     return;
                 }
-                loading_test_cases_xml_http_requests.delete(orig_div_name);
+                window.loading_test_cases_xml_http_requests.delete(orig_div_name);
 
                 $(div_name).empty();
                 // eslint-disable-next-line no-restricted-syntax
@@ -187,14 +191,14 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
             },
             error: function (e) {
                 // Check if error was occurred by candelling a test case
-                if (loading_test_cases_xml_http_requests.has(orig_div_name) && loading_test_cases_xml_http_requests.get(orig_div_name).readyState === 0) {
-                    loading_test_cases_xml_http_requests.delete(orig_div_name);
+                if (window.loading_test_cases_xml_http_requests.has(orig_div_name) && window.loading_test_cases_xml_http_requests.get(orig_div_name).readyState === 0) {
+                    window.loading_test_cases_xml_http_requests.delete(orig_div_name);
                     CollapseTestCaseOutput(orig_div_name, index, num_test_cases, loadingTools, check_all_test_cases_states);
                 }
                 else {
                     // Display error message once
-                    loading_test_cases_xml_http_requests.delete(orig_div_name);
-                    if (loading_test_cases_xml_http_requests.size === 0) {
+                    window.loading_test_cases_xml_http_requests.delete(orig_div_name);
+                    if (window.loading_test_cases_xml_http_requests.size === 0) {
                         alert('Could not load diff, please refresh the page and try again.');
                         console.log(e);
                         // eslint-disable-next-line no-undef
@@ -209,7 +213,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
 /**
  * Expands or Collapses all test case outputs.
  *
- * @global {loading_test_cases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
+ * @global {window.loading_test_cases_xml_http_requests} : Map (Key - string [orig_div_name]; Value - XMLHttpRequest object)
  *                        to store the XMLHttpRequest object returned by getJSON when getting the output to display
  *
  * @param {string} div_name - ID of div that calls this function
