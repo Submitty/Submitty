@@ -1,6 +1,4 @@
 describe('Test cases for TA grading page', () => {
-    /*
-    FIX ME: This test heavily relies on specific data from randomly generated sources. This could be more optimally done.
     it('Grader should be able to add and remove overall comments', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
@@ -14,12 +12,12 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-container"]').eq(3).should('contain', 'Extra Credit');
         cy.get('[data-testid="component-64"]').should('contain', 'Read Me');
         cy.get('[data-testid="component-64"]').click(20, 25);
-        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
-            .should('contain', 'Save');
         cy.get('[data-testid="component-64"]')
             .should('contain', 'Full Credit')
             .and('contain', 'Minor errors in Read Me')
             .and('contain', 'Major errors in Read Me or Read Me missing');
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]', { timeout: 20000 })
+            .should('contain', 'Save');
         cy.get('body').type('{0}');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="save-tools-save"]').click();
@@ -29,7 +27,7 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Major errors in Read Me or Read Me missing');
         cy.get('[data-testid="component-65"]').should('contain', 'Coding Style');
         cy.get('[data-testid="component-65"]').click(20, 25);
-        cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.get('[data-testid="component-65"]')
             .should('contain', 'Full Credit')
@@ -46,7 +44,7 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Code is difficult to understand');
         cy.get('[data-testid="component-66"]').should('contain', 'Documentation');
         cy.get('[data-testid="component-66"]').click(20, 25);
-        cy.get('[data-testid="component-66"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-66"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.get('[data-testid="component-66"]')
             .should('contain', 'Full Credit')
@@ -63,7 +61,7 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Way too much documentation and/or documentation makes no sense');
         cy.get('[data-testid="component-67"]').should('contain', 'Extra Credit');
         cy.get('[data-testid="component-67"]').click(20, 25);
-        cy.get('[data-testid="component-67"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-67"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.get('[data-testid="component-67"]')
             .should('contain', 'No Credit')
@@ -82,7 +80,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
         cy.get('[data-testid="grading-total"]').eq(4).should('contain', '8 / 12');
         cy.get('[data-testid="component-64"]').click(20, 25);
-        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.clearCookies();
         cy.login('ta');
@@ -101,11 +99,11 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('body').type('{downArrow}');
-        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.get('body').type('{0}');
         cy.get('body').type('{downArrow}');
-        cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]')
+        cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]', { timeout: 20000 })
             .should('contain', 'Save');
         cy.get('body').type('{1}');
         cy.get('body').type('{leftArrow}');
@@ -117,7 +115,7 @@ describe('Test cases for TA grading page', () => {
     });
     it('Grader should only see selected mark and published marks when component collapses', () => {
         cy.login('ta');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=aYl92mR3NvJYGrK&sort=id&direction=ASC']);
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '/ 2');
@@ -136,5 +134,5 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-64"]').should('contain', 'Full Credit');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.contains('Full Credit').should('not.be.visible');
-    }); */
+    });
 });
