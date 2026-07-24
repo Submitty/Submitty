@@ -64,11 +64,7 @@ describe('Test that instructors are able to properly clear version conflicts', (
         cy.get('[data-testid="close-button"]:visible').click();
         cy.reload();
 
-        cy.get('body').then(($body) => {
-            if (!$body.find('[data-component_id="84"]').is(':visible')) {
-                cy.get('[data-testid="peer-info-btn"]').click();
-            }
-        });
+        cy.get('[data-testid="peer-info-btn"]').click();
 
         cy.get('[data-component_id="84"]').parent()
             .find('[data-testid="peer-version-warning"]').should('not.exist');
@@ -91,11 +87,7 @@ describe('Test that instructors are able to properly clear version conflicts', (
         cy.contains('button', 'Clear All Peer Version Conflicts').click();
         cy.reload();
 
-        cy.get('body').then(($body) => {
-            if (!$body.find('[data-component_id="84"]').is(':visible')) {
-                cy.get('[data-testid="peer-info-btn"]').click();
-            }
-        });
+        cy.get('[data-testid="peer-info-btn"]').click();
 
         cy.contains('button', 'Clear All Peer Version Conflicts').should('not.exist');
 
