@@ -60,5 +60,5 @@
   "/courses/<term>/<course>/no_access",
   "/courses/<term>/<course>/gradeable/<gradeable>/verify",
   "/courses/<term>/<course>/forum/search",
-  "/courses/<term>/<course>/gradeable/bulk_upload_test/split_pdf/upload"
+  "/courses/<term>/<course>/gradeable/<gradeable>/split_pdf/upload"
 ]
