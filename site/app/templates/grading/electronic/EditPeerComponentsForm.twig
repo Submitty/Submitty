@@ -4,14 +4,12 @@
 {% block title %}Edit Peer Components Form{% endblock %}
 {% block body %}
 	<span>
-		Select the student whose marks you want to clear 
-		</br> WARNING this will remove all of the peer grading done by this student:
-		</br>
-		** WIP: Editing and deletion of individual components**
+		Select the peer grader whose grades you want to edit.
 	</span>
+	<div id="peer-edit-active-version" data-active-version="{{active_version}}" hidden></div>
 	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
 		{% for peer in peers %}
-			<option value = {{peer}}>{{peer}}</option>
+			<option value = "{{peer}}">{{peer_names[peer]}}</option>
 		{% endfor %}
 	</select>
 	{% set first_peer = true %}
@@ -22,38 +20,73 @@
 		{% else %}
 			<div id="edit-peer-components-form-{{peer}}" class = "edit-peer-components-block" style="display: none;">
 		{% endif %}
-	    	<button type="button" class="btn" onclick="clearPeerMarks('{{submitter_id}}', '{{gradeable_id}}', '{{csrf_token}}')">Clear All Grading</button>
-	    	</br>
-	    	{% for component in components %}
-				{% if component_scores[component.id] is defined and component_scores[component.id][peer] is defined %}
-	    		<div class="box-badge">
-	        		{{ Badge.render(component_scores[component.id][peer], component.max, false, true) }}
-	        	</div>
+            {% set peer_has_version_conflict = false %}
+			{% for component in components %}
+				{% if peer_details.version_conflicts is defined and
+					peer_details.version_conflicts[component.id] is defined and
+					peer_details.version_conflicts[component.id][peer] is defined and
+					peer_details.version_conflicts[component.id][peer] %}
+					{% set peer_has_version_conflict = true %}
 				{% endif %}
-	        	<span class="component-title col-no-gutters">
-    				<b>{{ component.title|escape }}</b>
-				</span>
-				<div class="received-marks-list container">
-			        {% for mark in component.marks %}
-		                <div class="row">
-		                    <div class="col-no-gutters indicator">
-		                    	{% if peer_details.marks_assigned is defined and 
-		                    		peer_details.marks_assigned[component.id][peer] is defined and mark in peer_details.marks_assigned[component.id][peer] %}
-		                        	<i class="far fa-check-square fa-1g"></i>
-		                        {% else %}
-		                        	<i class="far fa-square fa-1g"></i>
-		            			{% endif %}
-		                    </div>
-		                    <div class="col-no-gutters point-value">
-		                        <span>{{ marks[mark].points }}</span>
-		                    </div>
-		                    <div class="col">
-		                        <span>{{ marks[mark].title|nl2br }}</span>
-		                    </div>
-		                </div>
-			        {% endfor %}
-			    </div>
-	        {% endfor %}
+			{% endfor %}
+	    	<button type="button" class="btn btn-danger" onclick="clearPeerMarks( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Delete All Grading by Peer Grader {{peer}} for Student {{submitter_id}}'s Submission</button>
+            {% if peer_has_version_conflict %}
+	    		<button type="button" class="btn clear-peer-version-conflicts" data-peer-id="{{peer}}" onclick="resolvePeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Clear Version Conflicts</button>
+	    	{% endif %}
+	    	</br>
+            <div class="peer-edit-components">
+                {% for component in components %}
+                    <div class="peer-edit-component">
+                        {% if peer_details.marks_assigned is defined and
+                            peer_details.marks_assigned[component.id] is defined and
+                            peer_details.marks_assigned[component.id][peer] is defined %}
+                            <div class="box-badge">
+                                {{ Badge.render(component_scores[component.id][peer], component.max, component.extra_credit, true) }}
+                            </div>
+                        {% endif %}
+                        <span class="component-title col-no-gutters">
+                            <b>{{ component.title|escape }}</b>
+                        </span>
+                        {% if peer_details.version_conflicts is defined and
+                            peer_details.version_conflicts[component.id] is defined and
+                            peer_details.version_conflicts[component.id][peer] is defined and
+                            peer_details.version_conflicts[component.id][peer] %}
+                            <div class="version-warning peer-edit-version-warning" data-component-id="{{component.id}}" data-peer-id="{{peer}}">
+                                Version Conflict: {{peer}} graded version
+                                {{peer_details.graded_versions[component.id][peer]}},
+                                but version {{active_version}} is active.
+                            </div>
+                        {% endif %}
+                        <div class="received-marks-list peer-edit-marks-list container">
+                            {% for mark in component.marks %}
+                                <div class="row">
+                                    <div class="col-no-gutters indicator">
+                                        <input type="checkbox" class="peer-edit-mark" data-component-id="{{component.id}}" data-peer-id="{{peer}}" value="{{mark}}" onchange="peerComponentMarksChanged('{{peer}}', '{{component.id}}')"
+                                            {% if peer_details.marks_assigned is defined and
+                                                peer_details.marks_assigned[component.id][peer] is defined and
+                                                mark in peer_details.marks_assigned[component.id][peer] %}
+                                                checked
+                                            {% endif %}
+                                        >
+                                    </div>
+                                    <div class="col-no-gutters point-value">
+                                        <span>{{ marks[mark].points }}</span>
+                                    </div>
+                                    <div class="col">
+                                        <span>{{ marks[mark].title|nl2br }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn peer-save-component" data-component-id="{{component.id}}" data-peer-id="{{peer}}" onclick="savePeerComponent( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{component.id}}', '{{csrf_token}}')">
+                            Save Component
+                        </button>
+                        <span class="peer-component-save-status" data-component-id="{{component.id}}" data-peer-id="{{peer}}">
+                        </span>
+                        </br>
+                    </div>
+                {% endfor %}
+            </div>
 	    </div>
     {% endfor %}
     </br> 
