@@ -28,6 +28,11 @@ def error_exit(message):
     sys.exit(1)
 
 
+# Print an a non fatal warning that should be surfaced to the UI
+def warn(message):
+    print(f'WARNING: {message}', flush=True)
+
+
 # Verify correct number of command line arguments
 if len(sys.argv) != 4:
     raise Exception('You must pass 3 command line arguments - semester, course, and source')
@@ -157,22 +162,25 @@ creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
     error_exit(f'Unable to locate the submitty_admin.json credentials file at '
-               f'{creds_file}, cannot read the auth token')
+               f'{creds_file}')
 
 # Load credentials out of admin file
-with open(creds_file, 'r') as file:
-    creds = json.load(file)
+try:
+    with open(creds_file, 'r') as file:
+        creds = json.load(file)
+except PermissionError as e:
+    error_exit(f'Error opening submitty_admin.json: {e}')
 
 # Take this path if we DID NOT get an auth token
 if 'token' not in creds or not creds['token']:
 
     # Distinguish a missing key from a present-but-empty token in the output
     if 'token' not in creds:
-        print('No token field found in submitty_admin.json, attempting to continue '
-              'with previously generated grade summaries', flush=True)
+        warn('No token field found in submitty_admin.json, attempting to '
+             'continue with previously generated grade summaries.')
     else:
-        print('The auth token in submitty_admin.json is empty, attempting to continue '
-              'with previously generated grade summaries', flush=True)
+        warn('The auth token in submitty_admin.json is empty, attempting to '
+             'continue with previously generated grade summaries.')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
