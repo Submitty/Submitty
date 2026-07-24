@@ -79,7 +79,13 @@
     }
 }
 
+#docker-status-info {
+    display: flex;
+    align-items: center;
+}
+
 #docker-status-label {
+    padding-right: 4px;
     font-weight: bold;
 }
 
@@ -98,6 +104,7 @@
 #show-docker-log-button {
     display: none;
     margin-left: 10px;
+    padding: 5px 12px;
 }
 
 #docker-status-log {
@@ -170,14 +177,6 @@
 #docker-name-example {
     margin-bottom: 1em;
     padding: 10px;
-}
-
-.error-log {
-    width: 100%;
-    height: fit-content;
-    white-space: normal;
-    padding: 1em;
-    background: var(--standard-light-gray);
 }
 
 .status {

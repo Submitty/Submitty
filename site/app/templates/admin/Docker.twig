@@ -22,8 +22,8 @@
                     </button>
                 {% endif %}
             </div>
-            <div style="display: flex; align-items: center;">
-                <div id="docker-status-label" style="padding-right: 4px;">Status: </div>
+            <div id="docker-status-info">
+                <div id="docker-status-label">Status: </div>
                 <span id="docker-status-badge" class="btn {{ update_needed ? 'btn-danger' : 'btn-success' }} status" data-testid="docker-status">
                     {% if error_logs|length > 0 %}
                         Last update failed
@@ -33,7 +33,7 @@
                 </span>
             </div>
             <div id="docker-status-buttons">
-                <button style="padding: 5px 12px;" class="btn btn-default" id="show-docker-log-button" data-testid="docker-log-button" type="button" {% if error_logs|length == 0 %}style="display:none;"{% endif %}>
+                <button class="btn btn-default" id="show-docker-log-button" data-testid="docker-log-button" type="button" {% if error_logs|length == 0 %}style="display:none;"{% endif %}>
                     Log
                 </button>
             </div>
