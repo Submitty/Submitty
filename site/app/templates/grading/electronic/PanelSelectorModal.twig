@@ -7,7 +7,7 @@
         'name': 'ta_grading/PanelSelectorModal',
         'args': {},
         'events': {
-            'select-layout': '(panels, isLeftTaller, twoInRight) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight ?? false); document.getElementById("panels-selector-modal-wrapper").style.display = "none"; }',
+            'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); document.getElementById("panels-selector-modal-wrapper").style.display = "none"; }',
             'close': '() => { document.getElementById("panels-selector-modal-wrapper").style.display = "none"; }'
         }
     } %}

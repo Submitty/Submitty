@@ -4,11 +4,11 @@ import Popup from '../../components/Popup.vue';
 
 const emit = defineEmits<{
     'close': [];
-    'select-layout': [panels: number, isLeftTaller: boolean, twoInRight?: boolean];
+    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
 
 function selectLayout(panels: number, isLeftTaller: boolean, twoInRight = false) {
-    emit('select-layout', panels, isLeftTaller, twoInRight);
+    emit('select-layout', { panels, isLeftTaller, twoInRight });
 }
 
 function rect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, fill = '#6d91b5') {

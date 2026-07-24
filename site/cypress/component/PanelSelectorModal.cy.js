@@ -38,14 +38,14 @@ describe('PanelSelectorModal', () => {
             mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
 
             cy.get('#layout-option-1 .btn-primary').click();
-            cy.get('@eventHandler').should('have.been.calledOnceWith', 1, false, false);
+            cy.get('@eventHandler').should('have.been.calledOnceWith', { panels: 1, isLeftTaller: false, twoInRight: false });
         });
 
         it('emits select-layout with twoInRight=true', () => {
             mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
 
             cy.get('#layout-option-3 .layout-option-item').eq(2).find('.btn-primary').click();
-            cy.get('@eventHandler').should('have.been.calledOnceWith', 3, false, true);
+            cy.get('@eventHandler').should('have.been.calledOnceWith', { panels: 3, isLeftTaller: false, twoInRight: true });
         });
     });
 });
