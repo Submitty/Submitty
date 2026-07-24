@@ -409,7 +409,7 @@ def prepare_job(
             f"ERROR: failed preparing submission zip or accessing next to grade {e}"
         )
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
-        return False
+        raise
 
     with open(todo_queue_file_tmp, 'w') as outfile:
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
@@ -685,8 +685,52 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
         if try_short_circuit(config, queue_file):
             grading_cleanup(config, my_name, queue_file, grading_file)
             return
+    except RuntimeError as e:
+        # If the submission directory is permanently missing, there is no point
+        # in attempting to grade normally — it will also fail. Clean up the
+        # broken queue file immediately so no other shipper thread retries it.
+        if e.args and ("the submission directory does not exist" in e.args[0]):
+            msg = (f"ERROR: [RUNTIME ERROR in submitty_autograding_shipper.py] the submission directory does not exist for {queue_file}. "
+                   "Removing broken queue file and skipping job.")
+            config.logger.log_message(msg)
+            config.logger.log_stack_trace(traceback.format_exc())
+
+            grading_cleanup(config, my_name, queue_file, grading_file)
+            return
+        # For any other RuntimeError, fall through to attempt grading normally.
+        config.logger.log_message(
+            f"Unexpected error when attempting to short-circuit {queue_file}: {e}. "
+            f"Attempting to grade normally. See stack traces for more details."
+        )
+        config.logger.log_stack_trace(traceback.format_exc())
     except Exception as e:
-        # Catch-all to help prevent the shipper from getting into a weird stuck state.
+        # Before falling through to grade normally, check if the submission
+        # directory is permanently missing. If so, clean up immediately.
+        # This handles cases like FileNotFoundError from try_short_circuit
+        # when the submission folder does not exist on disk.
+        try:
+            with open(queue_file) as fd:
+                q = json.load(fd)
+            term = q.get("term", q.get("semester"))
+            submission_dir = os.path.join(
+                config.submitty['submitty_data_dir'],
+                'courses', term, q['course'],
+                'submissions', q['gradeable'], q['who'], str(q['version'])
+            )
+            if not os.path.isdir(submission_dir):
+                msg = (f"ERROR: [EXCEPTION in submitty_autograding_shipper.py] the submission directory does not exist: {submission_dir}. "
+                       "Removing broken queue file and skipping job.")
+                config.logger.log_message(msg)
+                config.logger.log_stack_trace(traceback.format_exc())
+
+                grading_cleanup(config, my_name, queue_file, grading_file)
+                return
+        except Exception:
+            # If we can't read the queue file, fall through as before.
+            pass
+
+        # Catch-all for non-RuntimeError exceptions to help prevent the shipper
+        # from getting into a weird stuck state. Fall through to grade normally.
         config.logger.log_message(
             f"Unexpected error when attempting to short-circuit {queue_file}: {e}. "
             f"Attempting to grade normally. See stack traces for more details."
