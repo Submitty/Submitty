@@ -57,32 +57,30 @@
                     </li>
                 {% endif %}
             </ul>
-
-            <div class="row-wrapper">
-                {% if show_all_sections_button %}
-                <label for="toggle-view-sections" data-testid="view-sections-label" class="column-wrapper" > Only Assigned Sections
-                    <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
-                </label>
-                {% endif %}
-                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
-                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
-                </label>
-                {% if toggle_anon_button %}
-                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
-                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>
-                </label>
-                {% endif %}
-                {% if grade_inquiry_only_button %}
-                <label for="toggle-inquiry-only" data-testid="inquiry-only-label" class="column-wrapper"> Grade Inquiries Only
-                    <input type="checkbox" id="toggle-inquiry-only" data-testid="inquiry-only-checkbox" onchange="changeInquiry()">
-                </label>
-                {% endif %}
-                {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
-                <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
-                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
-                </label>
-                {% endif %}
-            </div>
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'ta_grading/DetailsFiltersControls',
+                'args': {
+                    'showAllSections': show_all_sections_button,
+                    'toggleAnon': toggle_anon_button,
+                    'gradeInquiryOnly': grade_inquiry_only_button,
+                    'canFilterWithdrawn': full_access_grader_permission and not gradeable.isTeamAssignment(),
+                    'anonMode': anon_mode,
+                    'gradeableId': gradeable.getId(),
+                    'initialViewSections': initial_view_sections,
+                    'initialRandomOrder': initial_random_order,
+                    'initialInquiryOnly': initial_inquiry_only,
+                    'initialHideWithdrawn': initial_hide_withdrawn
+                },
+                'events': {
+                    'mounted': 'handleDetailsFiltersMounted',
+                    'view-sections-change': 'handleViewSectionsChange',
+                    'sort-order-change': 'handleSortOrderChange',
+                    'anon-change': 'handleAnonChange',
+                    'inquiry-change': 'handleInquiryChange',
+                    'withdrawn-change': 'handleWithdrawnChange'
+                }
+            } %}
         </div>
     </div>
     <div class="student-info-btns-container">
@@ -122,6 +120,11 @@
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
+    </div>
+    {% endif %}
+    {% if grade_inquiry_only_button %}
+    <div id="inquiry-banner" class="details-warning-box details-warning-highlight" data-testid="inquiry-banner"{{ inquiry_status ? '' : ' style="display: none"' }}>
+        Notice: You are viewing students with active grade inquiries.
     </div>
     {% endif %}
     <div class="details-action-box">
@@ -268,7 +271,8 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, override_data, anon_ids, max_team_name_length, active_graders) %}
-    <tr data-testid="grade-table"
+    {% set inquiry_hidden = context.inquiry_status and not graded_gradeable.hasActiveGradeInquiry() %}
+    <tr class="grade-table{% if inquiry_hidden %} inquiry-only-disabled{% endif %}" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             class="grade-table highlighted-row"
         {% else %}
@@ -812,10 +816,6 @@
 
 {# /Column functions #}
 <script>
-    {% if grade_inquiry_only_button %}
-        inquiryUpdate();
-    {% endif %}
-
     // Set global variable for electronic-grading JavaScript
     window.is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     window.is_student = {{ is_student ? 'true' : 'false' }};
