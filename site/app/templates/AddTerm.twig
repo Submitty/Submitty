@@ -8,10 +8,38 @@
 {% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+    {% if terms is defined and terms|length > 0 %}
+        <div class="my-3">
+            <span class="option-title block">Existing Terms</span>
+            <span class="block mb-2">Please check the dates below before choosing a start/end date to avoid creating overlapping terms.</span>
+            <div style="max-height: 160px; overflow-y: auto; border: 1px solid #666; border-radius: 4px;">
+                <table class="table" style="margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for term in terms %}
+                            <tr>
+                                <td>{{ term.getName() }}</td>
+                                <td>{{ term.getStartDate()|date('m/d/Y') }}</td>
+                                <td>{{ term.getEndDate()|date('m/d/Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="flex-col my-3">
         <div class="row">
             <div class="row col-md-6">
-                <label class="col-md-5" for="term-id">Term id:</label>
+                <label class="col-md-5" for="term-id">Term ID:</label>
                 <input type="text" name="term_id" placeholder="s20" id="term-id" class="col-md-6" required/>
             </div>
             <div class="row col-md-6">
@@ -21,17 +49,60 @@
         </div>
         <div class="row mt-3">
             <div class="row col-md-6">
-                <label class="col-md-5" for="term-name">Term name:</label>
+                <label class="col-md-5" for="term-name">Term Name:</label>
                 <input type="text" name="term_name" placeholder="Spring 2020" id="term-name" class="col-md-6" required/>
             </div>
             <div class="row col-md-6">
-                <label class="col-md-5" for="end-date">End Date</label>
+                <label class="col-md-5" for="end-date">End Date:</label>
                 <input type="date" name="end_date" id="end-date" class="col-md-6" required/>
             </div>
         </div>
+        <div class="row mt-2">
+            <div id="term-length-msg" class="col-md-12"></div>
+        </div>
     </div>
+
+    <script>
+        (function() {
+            let startInput = document.getElementById('start-date');
+            let endInput = document.getElementById('end-date');
+            let message = document.getElementById('term-length-msg');
+            let submitBtn = document.getElementById('add-term-submit');
+
+            function updateTermLength() {
+                if (!startInput.value || !endInput.value) {
+                    message.textContent = '';
+                    if (submitBtn) { submitBtn.disabled = false; }
+                    return;
+                }
+
+                let start = new Date(startInput.value);
+                let end = new Date(endInput.value);
+                let days = Math.round((end - start)/(1000*60*60*24));
+
+                if (days < 0) {
+                    message.textContent = 'Warning: End date is before start date.';
+                    message.style.color = '#d9534f';
+                    if (submitBtn) { submitBtn.disabled = true; }
+                }
+                else if (days > 360) {
+                    message.textContent = 'Warning: This term is ' + days + ' days long, which exceeds the 360 day maximum.';
+                    message.style.color = '#d9534f';
+                    if (submitBtn) { submitBtn.disabled = true; }
+                }
+                else {
+                    message.textContent = 'Term length: ' + days + ' day' + (days === 1 ? '' : 's');
+                    message.style.color = '';
+                    if (submitBtn) { submitBtn.disabled = false; }
+                }
+            }
+
+            startInput.addEventListener('change', updateTermLength);
+            endInput.addEventListener('change', updateTermLength);
+        })();
+    </script>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" id="add-term-submit" value="Submit" />
 {% endblock %}
