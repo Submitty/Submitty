@@ -33,6 +33,8 @@ exclude=
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
     sbin/untrusted_canary.py,
+    site/cypress/fixtures,
+    site/node_modules,
     tests
 
 per-file-ignores =

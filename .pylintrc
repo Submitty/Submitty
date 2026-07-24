@@ -1,6 +1,7 @@
 [MASTER]
 ignore-paths=
     site/node_modules,
+    site/cypress/fixtures,
     more_autograding_examples,
     grading/python/submitty_router.py,
     bin/regrade.py,
