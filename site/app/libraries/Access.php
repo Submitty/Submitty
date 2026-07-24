@@ -496,7 +496,7 @@ class Access {
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
+                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() <= 0) {
                     $grading_checks = false;
                 }
             }
