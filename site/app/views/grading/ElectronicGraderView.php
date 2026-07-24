@@ -525,10 +525,18 @@ HTML;
      *      ag_user_id: ?string,
      *      ag_team_id: ?string,
      * }>> $active_graders
+     * @param bool $is_clustering_mode
+     * @param array<string, string> $algorithms
+     * @param ?string $current_algorithm
+     * @param array<string, string> $cluster_map
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_clustering_mode = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            $is_clustering_mode = false;
+        }
 
         $peer = false;
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
@@ -540,6 +548,9 @@ HTML;
         $columns = [];
         $columns[] = ["title" => "#", "header_key" => "index"];
         $columns[] = ["title" => "Section", "header_key" => "section"];
+        if ($is_clustering_mode) {
+            $columns[] = ["title" => "Cluster", "header_key" => "cluster"];
+        }
 
         $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
             $gradeable->getLimitedAccessBlind() === 2);
@@ -665,6 +676,10 @@ HTML;
             ];
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
+            }
+            elseif ($is_clustering_mode) {
+                $submitter_id = $row->getSubmitter()->getId();
+                $section_title = $cluster_map[$submitter_id] ?? "Unclustered";
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $row->getSubmitter()->getRegistrationSection();
@@ -808,6 +823,9 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
+            }
+            elseif ($is_clustering_mode) {
+                $section_title = $cluster_map[$teamless_user->getId()] ?? "Unclustered";
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $teamless_user->getRegistrationSection();
@@ -967,6 +985,12 @@ HTML;
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $shown_columns,
             "all_columns" => $columns,
+            "is_clustering_mode" => $is_clustering_mode,
+            "is_clustering_allowed" => $this->core->getConfig()->isSubmissionClusteringEnabled(),
+            "algorithms" => $algorithms,
+            "current_algorithm" => $current_algorithm,
+            "create_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'create_clustering']),
+            "check_clustering_status_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'clustering', 'status']),
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),

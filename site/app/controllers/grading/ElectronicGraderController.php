@@ -1199,7 +1199,36 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders);
+        $is_clustering_mode = ($_COOKIE['group_by_clusters'] ?? '') === 'true';
+        $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findWithClustersAndMembers($gradeable->getId());
+        $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
+
+        $cluster_map = [];
+        if ($is_clustering_mode && $config !== null) {
+            $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+            $active_versions = [];
+            foreach ($submitters as $submitter) {
+                $id = $submitter['user_id'] ?? $submitter['team_id'];
+                $active_versions[$id] = (int) $submitter['active_version'];
+            }
+
+            foreach ($config->getClusters() as $cluster) {
+                foreach ($cluster->getValidMembers($active_versions) as $member) {
+                    $id = $member->getUserId() ?? $member->getTeamId();
+                    $cluster_map[$id] = $cluster->getClusterName();
+                }
+            }
+        }
+
+        $algorithms = [];
+        foreach (\app\entities\grading_cluster\GradingClusterAlgorithm::cases() as $case) {
+            $algorithms[$case->value] = [
+                'name' => $case->name,
+                'description' => $case->description()
+            ];
+        }
+
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_clustering_mode, $algorithms, $current_algorithm, $cluster_map);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -2483,14 +2512,10 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        // Get / create the TA grade
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-        // Get / create the graded component
-        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-
         try {
-            // Once we've parsed the inputs and checked permissions, perform the operation
+            $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+            $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+
             $this->saveGradedComponent(
                 $ta_graded_gradeable,
                 $graded_component,

@@ -62,6 +62,7 @@ class ConfigurationController extends AbstractController {
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'submission_clustering_enabled'  => $this->core->getConfig()->isSubmissionClusteringEnabled(),
             'chat_enabled'                   => $this->core->getConfig()->isChatEnabled(),
             'course_status'                  => $course_info['status'] ?? null,
             'unarchivable'                   => (bool) ($course_info['unarchivable'] ?? false),
@@ -161,6 +162,7 @@ class ConfigurationController extends AbstractController {
                     'queue_enabled',
                     'seek_message_enabled',
                     'polls_enabled',
+                    'submission_clustering_enabled',
                     'chat_enabled'
                 ]
             )

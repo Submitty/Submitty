@@ -82,6 +82,11 @@
                     <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
+                {% if full_access_grader_permission and is_clustering_allowed %}
+                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
+                    <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_clustering_mode %}checked{% endif %}>
+                </label>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -118,12 +123,41 @@
                 'format': 'json',
             },
         } %}
+        {% if full_access_grader_permission and is_clustering_allowed %}
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'ta_grading/CreateClustersModal',
+                'style': 'display: contents;',
+                'args': {
+                    'gradeableId': gradeable.getId(),
+                    'algorithms': algorithms,
+                    'currentAlgorithm': current_algorithm,
+                    'createClusteringUrl': create_clustering_url,
+                    'checkClusteringStatusUrl': check_clustering_status_url,
+                    'csrfToken': core.getCsrfToken(),
+                    'canCreateClustering': full_access_grader_permission
+                },
+                'events': {
+                    'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); const banner = document.getElementById("clustering-loading-banner"); if(banner) { banner.style.display = status === "fetching" ? "block" : "none"; } }',
+                    'clustering-done': '() => { window.location.reload(); }',
+                    'clustering-error': '(message) => alert(message)'
+                }
+            } %}
+        {% endif %}
     </div>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
     </div>
     {% endif %}
+    {% if is_clustering_mode and current_algorithm is null %}
+    <div class="details-warning-box details-warning-highlight">
+        No clusters have been generated for this assignment. Please click 'Create Clusters' to begin.
+    </div>
+    {% endif %}
+    <div id="clustering-loading-banner" style="display: none;" class="details-warning-box details-warning-highlight">
+        <i class="fas fa-spinner fa-spin"></i> Generating clusters... This may take a few moments.
+    </div>
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
@@ -195,7 +229,9 @@
                             <td colspan="{{ columns|length }}" style="text-align: center">
                                 <i class="collapse-icon fas fa-caret-right"></i>
                                 <i class="expand-icon fas fa-caret-down"></i>
-                                {% if gradeable.isGradeByRegistration()%}
+                                {% if is_clustering_mode %}
+                                    Students in Cluster {{ section.title }}
+                                {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
                                 {% else %}
                                     Students Assigned to Rotating Section {{ section.title }}
@@ -203,9 +239,11 @@
                             </td>
                         {% endif %}
                     </tr>
-                    <tr class="info">
-                        <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
-                    </tr>
+                    {% if not is_clustering_mode %}
+                        <tr class="info">
+                            <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
                 {# /Section heading #}
                 {# Student list #}
@@ -302,7 +340,9 @@
             {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "section" %}
-                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column, null) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.header_key == "team_id" %}
@@ -354,7 +394,9 @@
             {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, null, index, null, column) }}
             {% elseif column.header_key == "section" %}
-                {{ _self.render_column_section(context, section, null, index, null, column) }}
+                {{ _self.render_column_section(context, section, null, index, null, column, user) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, null, index, null, column) }}
             {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
             {% elseif column.header_key == "team_id" %}
@@ -634,7 +676,23 @@
 {% endmacro %}
 
 {# Section Number #}
-{% macro render_column_section(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_section(context, section, graded_gradeable, index, info, column, teamless_user) %}
+    <td>
+        {% if context.is_clustering_mode %}
+            {% set user = graded_gradeable ? graded_gradeable.getSubmitter().getUser() : teamless_user %}
+            {% if context.gradeable.isGradeByRegistration() %}
+                {{ user.getRegistrationSection() ?? "NULL" }}
+            {% else %}
+                {{ user.getRotatingSection() ?? "NULL" }}
+            {% endif %}
+        {% else %}
+            {{ section.title }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Cluster #}
+{% macro render_column_cluster(context, section, graded_gradeable, index, info, column) %}
     <td>{{ section.title }}</td>
 {% endmacro %}
 
