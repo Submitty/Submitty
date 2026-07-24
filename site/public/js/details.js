@@ -190,10 +190,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
     }
-    // Randomize Order - all graders have permission
+    // Randomize Order
     const randomFilterBox = document.getElementById('toggle-random-order');
-    const randomFilterStatus = Cookies.get('sort');
-    randomFilterBox.checked = (randomFilterStatus === 'random');
+    if (randomFilterBox !== null) {
+        const randomFilterStatus = Cookies.get('sort');
+        randomFilterBox.checked = (randomFilterStatus === 'random');
+    }
 
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
