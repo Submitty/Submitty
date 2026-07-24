@@ -1,5 +1,6 @@
 import { viewFileFullPanel } from './ta-grading';
 import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
+import { updateVueComponent, unmountVueComponent } from './utils/vue';
 
 declare global {
     interface Window {
@@ -48,6 +49,7 @@ declare global {
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
+        closeMarkStatsPopup: () => void;
     }
 }
 
@@ -1818,43 +1820,51 @@ function toggleDOMCustomMark(component_id: number) {
 }
 
 /**
- * Opens the 'users who got mark' dialog
+ * Computes student links for the mark stats popup.
+ */
+function computeStudentLinks(stats: Stats): { name: string; url: string }[] {
+    const loc = window.location.href.split('?');
+    let base = loc[0];
+    if (base.endsWith('update')) {
+        base = `${base.slice(0, -6)}grading/grade`;
+    }
+    const params = new URLSearchParams(loc[1] ?? '');
+    return stats.submitter_ids.map((id) => {
+        params.set('who_id', stats.submitter_anon_ids[id] ?? id);
+        return { name: id, url: `${base}?${params.toString()}` };
+    });
+}
+
+/**
+ * Reloads the Vue ReceivedMarkForm component with updated mark stats data.
  * @param {string} component_title
  * @param {string} mark_title
  * @param {Object} stats
  */
 function openMarkStatsPopup(component_title: string, mark_title: string, stats: Stats) {
-    const popup = $('#student-marklist-popup');
-
-    popup.find('.question-title').html(component_title);
-    popup.find('.mark-title').html(mark_title);
-    popup.find('.section-submitter-count').html(stats.section_submitter_count);
-    popup.find('.total-submitter-count').html(stats.total_submitter_count);
-    popup.find('.section-graded-component-count').html(stats.section_graded_component_count);
-    popup.find('.total-graded-component-count').html(stats.total_graded_component_count);
-    popup.find('.section-total-component-count').html(stats.section_total_component_count);
-    popup.find('.total-total-component-count').html(stats.total_total_component_count);
-
-    // Create an array of links for each submitter
-    const submitterHtmlElements: string[] = [];
-    const location = window.location.href.split('?');
-    let base_url = location[0];
-    if (base_url.slice(base_url.length - 6) === 'update') {
-        base_url = `${base_url.slice(0, -6)}grading/grade`;
-    }
-    const search_params = new URLSearchParams(location[1]);
-    stats.submitter_ids.forEach((id: string | number) => {
-        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
-        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
-    });
-    popup.find('.student-names').html(submitterHtmlElements.join(', '));
-
-    // Hide all other (potentially) open popups
     $('.popup-form').hide();
 
-    // Open the popup
-    popup.show();
+    const el = document.querySelector('.js-received-mark-form');
+    if (!el) {
+        return;
+    }
+
+    const studentLinks = computeStudentLinks(stats);
+
+    updateVueComponent(el, {
+        show: true,
+        componentTitle: component_title,
+        markTitle: mark_title,
+        stats: stats,
+        studentLinks: studentLinks,
+    });
 }
+
+// Closes the mark stats popup by fully unmounting the Vue app.
+
+window.closeMarkStatsPopup = function () {
+    unmountVueComponent('.js-received-mark-form');
+};
 
 /**
  * Gets if there are any loaded unverified components
