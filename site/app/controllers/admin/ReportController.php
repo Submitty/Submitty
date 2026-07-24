@@ -35,6 +35,7 @@ use app\exceptions\ValidationException;
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
+    const RG_MANUAL_GENERATION_THRESHOLD_SECONDS = 600; // Allow a small gap between build metadata and pushed HTML files
 
     private $all_overrides = [];
     private ?bool $rg_manual_generation_cache = null;        // Cache result of isRainbowGradesLikelyManuallyGenerated()
@@ -222,27 +223,77 @@ class ReportController extends AbstractController {
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
         $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
 
-        $served_files = glob(FileUtils::joinPaths($summary_html_dir, '*.html'));
-        if ($served_files === false || count($served_files) === 0) {
-            $this->rg_manual_generation_cache = false;   // nothing generated at all
+        $latest_pushed_html = $this->getLatestFileTimestamp(
+            $summary_html_dir,
+            function (string $file_path): bool {
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
+            }
+        );
+
+        if ($latest_pushed_html === null || $latest_pushed_html === 0) {
+            $this->rg_manual_generation_cache = false;
             return false;
         }
 
-        $manual = false;
-        foreach ($served_files as $served) {
-            $twin = FileUtils::joinPaths($server_build_dir, basename($served));
-            if (
-                !file_exists($twin)
-                || filesize($served) !== filesize($twin)
-                || md5_file($served) !== md5_file($twin)
-            ) {
-                $manual = true;
-                break;
+        $latest_server_build = $this->getLatestFileTimestamp(
+            $server_build_dir,
+            function (string $file_path): bool {
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
             }
+        );
+
+        // Summaries exist but no server build produced them -> uploaded manually.
+        if ($latest_server_build === null || $latest_server_build === 0) {
+            $this->rg_manual_generation_cache = true;
+            return true;
         }
 
-        $this->rg_manual_generation_cache = $manual;
-        return $manual;
+        $result = ($latest_pushed_html - $latest_server_build) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $this->rg_manual_generation_cache = $result;
+        return $result;
+    }
+
+    /**
+     * Get the most recent file modification timestamp in a directory tree.
+     *
+     * @param string $directory
+     * @param callable(string):bool|null $file_filter
+     * @return int|null Returns null if directory doesn't exist or can't be read, otherwise returns latest mtime or 0 if no matching files found.
+     * Catches and logs permission/read errors to distinguish from missing directories.
+     */
+    private function getLatestFileTimestamp(string $directory, ?callable $file_filter = null): ?int {
+        if (!is_dir($directory)) {
+            return null;
+        }
+
+        $latest_timestamp = 0;  // Use 0 as default for "no files found" instead of null
+        $flags = \FilesystemIterator::SKIP_DOTS;
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, $flags));
+            foreach ($iterator as $file_info) {
+                if (!$file_info->isFile()) {
+                    continue;
+                }
+
+                $file_path = $file_info->getPathname();
+                if ($file_filter !== null && !$file_filter($file_path)) {
+                    continue;
+                }
+
+                $file_mtime = $file_info->getMTime();
+                if ($file_mtime > $latest_timestamp) {
+                    $latest_timestamp = $file_mtime;
+                }
+            }
+        }
+        catch (\UnexpectedValueException $e) {
+            // Permission denied or unreadable directory—log the error for debugging
+            error_log("Warning: Unable to read directory '{$directory}': " . $e->getMessage());
+            return null;
+        }
+
+        return $latest_timestamp > 0 ? $latest_timestamp : 0;
     }
 
     /**
@@ -1038,30 +1089,104 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
-        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
-        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
-        $grade_file = null;
-        if (file_exists($grade_path)) {
-            $grade_file = file_get_contents($grade_path);
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
+
+        $selected_sort = 'overall';
+        $requested = $_GET['sort'] ?? null;
+        if (is_string($requested) && isset($available_sorts[$requested])) {
+            $selected_sort = $requested;
         }
+        elseif (!isset($available_sorts['overall']) && count($available_sorts) > 0) {
+            $selected_sort = array_key_first($available_sorts);
+        }
+
+        $grade_file = null;
+        if (isset($available_sorts[$selected_sort])) {
+            $grade_path = FileUtils::joinPaths($rainbow_grades_dir, $available_sorts[$selected_sort]['file']);
+            if (file_exists($grade_path)) {
+                $grade_file = file_get_contents($grade_path);
+            }
+        }
+
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file,
-                $grade_summaries_last_run
+                $grade_summaries_last_run,
+                $available_sorts,
+                $selected_sort
             )
         );
     }
 
     /**
+     * Discover which rainbow grades tables have been built in the given directory and
+     * return them as an ordered map of sort-key => ['file' => <filename>, 'label' => <label>].
+     * Recognizes output.html (overall) and output-by-<x>.html (e.g. output-by-section.html).
+     *
+     * @return array<string, array{file: string, label: string}>
+     */
+    private function getAvailableGradebookSorts(string $rainbow_grades_dir): array {
+        $labels = [
+            'overall' => 'By Cumulative Average',
+            'name' => 'By Student Name',
+            'section' => 'By Registration Section',
+            'lab' => 'By Lab',
+            'hw' => 'By Homework',
+            'test' => 'By Test',
+            'quiz' => 'By Quiz',
+            'exam' => 'By Exam',
+            'reading' => 'By Reading',
+            'worksheet' => 'By Worksheet',
+            'project' => 'By Project',
+            'participation' => 'By Participation',
+            'zone' => 'By Exam Seating Zone',
+        ];
+
+        $found = [];
+        foreach (glob(FileUtils::joinPaths($rainbow_grades_dir, 'output*.html')) as $path) {
+            $name = basename($path);
+            if ($name === 'output.html') {
+                $key = 'overall';
+            }
+            elseif (preg_match('/^output-by-([a-z0-9_]+)\.html$/', $name, $m)) {
+                $key = $m[1];
+            }
+            else {
+                continue;
+            }
+            $found[$key] = [
+                'file' => $name,
+                'label' => $labels[$key] ?? ('By ' . ucwords(str_replace('_', ' ', $key))),
+            ];
+        }
+
+        $ordered = [];
+        foreach (array_keys($labels) as $key) {
+            if (isset($found[$key])) {
+                $ordered[$key] = $found[$key];
+                unset($found[$key]);
+            }
+        }
+        foreach ($found as $key => $info) {
+            $ordered[$key] = $info;
+        }
+        return $ordered;
+    }
+
+
+    /**
      * Generate a custom filename for the downloaded CSV file
      */
-    private function generateCustomFilename(): string {
+    private function generateCustomFilename(string $sort = 'overall'): string {
         $course = $this->core->getConfig()->getCourse();
         $timestamp = DateUtils::getFileNameTimeStamp();
-        return "{$course}_rainbow_grades_{$timestamp}.csv";
+        $sort_part = ($sort === 'overall') ? '' : "_{$sort}";
+        return "{$course}_rainbow_grades{$sort_part}_{$timestamp}.csv";
     }
 
 
@@ -1070,13 +1195,18 @@ class ReportController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile(): ?DownloadResponse {
+        // Which sorted CSV to download, should be same as selected
+        $requested = $_GET['sort'] ?? 'overall';
+        $sort = preg_match('/^[a-z0-9_]+$/', $requested) ? $requested : 'overall';
+        $csv_filename = ($sort === 'overall') ? 'output.csv' : 'output-by-' . $sort . '.csv';
+
         // Path to the CSV file for Rainbow Grades
         $csvFilePath = FileUtils::joinPaths(
             '/var/local/submitty/courses',
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
             'rainbow_grades',
-            'output.csv'
+            $csv_filename
         );
 
 
@@ -1084,7 +1214,7 @@ class ReportController extends AbstractController {
         if (file_exists($csvFilePath)) {
             return DownloadResponse::getDownloadResponse(
                 file_get_contents($csvFilePath),
-                $this->generateCustomFilename(),
+                $this->generateCustomFilename($sort),
                 "application/csv"
             );
         }
