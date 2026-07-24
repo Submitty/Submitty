@@ -194,7 +194,7 @@ function updateImage() {
 }
 
 /**
- * checks for changes while an update is in progress and applies them to the table
+ * checks for changes while an update is in progress and applies them to the images table
  */
 function checkDockerUpdateStatus() {
     $.ajax({

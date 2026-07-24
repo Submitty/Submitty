@@ -257,29 +257,18 @@ class DockerInterfaceController extends AbstractController {
             return JsonResponse::getFailResponse("You don't have access to this endpoint.");
         }
 
-        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        $is_in_progress = false;
+        $now = $this->core->getDateTimeNow()->format('Ymd');
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "docker" . $now . ".json");
+        $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
 
-        // Check if any docker/sysinfo job files are still in the daemon_job_queue
-        if (is_dir($daemon_queue_dir)) {
-            $files = scandir($daemon_queue_dir);
-            if ($files !== false) {
-                foreach ($files as $file) {
-                    // If job files starting with 'docker' or 'sysinfo' are in the queue the job is still running
-                    // (guess based on other functions in this file)
-                    // TODO: Update to match specifically
-                    if ((str_starts_with($file, 'docker') || str_starts_with($file, 'sysinfo')) && pathinfo($file, PATHINFO_EXTENSION) === 'json') {
-                        $is_in_progress = true;
-                        break;
-                    }
-                }
-            }
-        }
+        // Check the filesystem for the jobs file
+        // JS handles looping to see that the jobs have left the queue
+        $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
 
+        // TODO: Return the log file to the js for output
         $log_output = "";
-        /*
-        Note, this log_output is a placeholder until I can figure out if there is a log file to display
-        */
+
         return JsonResponse::getSuccessResponse([
             'in_progress' => $is_in_progress,
             'log'         => $log_output
