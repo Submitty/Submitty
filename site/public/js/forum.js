@@ -2745,3 +2745,17 @@ function highlightAndScrollToCurrentThread() {
         }
     }
 }
+
+// Wrappers for Vue component event handlers that read state from DOM/cookies.
+function forumToggleMerged() {
+    const course = document.body.dataset.courseUrl.split('/').filter(Boolean).pop();
+    const current = Cookies.get(`${course}_show_merged_thread`);
+    alterShowMergeThreadStatus(current === '1' ? 0 : 1, course);
+}
+function forumToggleDeleted() {
+    const current = Cookies.get('show_deleted');
+    alterShowDeletedStatus(current === '1' ? 0 : 1);
+}
+function forumMarkUnread() {
+    markThreadUnread($('#current-thread').val());
+}
