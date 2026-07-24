@@ -163,10 +163,10 @@
                         {% if student.accessGrading() %}
                             {% set class = "highlighted-row" %}
                         {% endif %}
-                        <tr id="user-{{ student.getId() }}" class="{{ class }}">
+                        <tr id="user-{{ student.getId() }}" data-testid="user-row-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
                             {% if active_student_columns[0] %}
-                                <td class="td-registration-section">
+                                <td class="td-registration-section" data-testid="registration-section">
                                     {{ registration }}
                                     {% if  student.getRegistrationSubsection is not empty %}
                                         -  {{ student.getRegistrationSubsection }}
