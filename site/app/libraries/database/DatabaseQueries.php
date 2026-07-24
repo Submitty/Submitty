@@ -9014,6 +9014,7 @@ WHERE current_state IN
               u.course_section_id,
               u.rotating_section,
               u.registration_type,
+              u.date_registered,
               ldeu.late_day_exceptions,
               ldeu.reason_for_exception,
               u.registration_subsection';
