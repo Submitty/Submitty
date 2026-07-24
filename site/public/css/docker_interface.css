@@ -92,6 +92,7 @@
 #docker-status-badge {
     display: inline-block;
     margin-left: 10px;
+    text-wrap: wrap;
 }
 
 #docker-status-buttons {
