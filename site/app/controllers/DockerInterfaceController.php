@@ -263,7 +263,7 @@ class DockerInterfaceController extends AbstractController {
         $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
 
         // Check the filesystem for the jobs file
-        // JS handles looping to see that the jobs have left the queue
+        // JS handles looping by checking $is_in_progress to see that the jobs have left the queue
         $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
 
         // TODO: Return the log file to the js for output
