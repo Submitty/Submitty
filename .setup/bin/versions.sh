@@ -13,3 +13,6 @@ export Tutorial_Version=v26.07.00
 export SubmittyCLI_Version=v26.07.01
 export SysadminTools_Version=v25.01.00
 export Localization_Version=v23.08.02
+
+# THIRD PARTY LIBRARIES
+export nlohmann_json_Version=v3.12.0
