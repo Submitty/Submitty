@@ -173,7 +173,6 @@ function handleDetailsFiltersMounted(state) {
         });
         document.getElementById('inquiry-banner').style.display = '';
     }
-    $('table').removeClass('table-striped');
     window.updateElectronicGradingRowNumbersAndColors?.();
 }
 
@@ -214,7 +213,6 @@ function handleWithdrawnChange(checked) {
     Cookies.set('include_withdrawn_students', checked ? 'omit' : 'include', { path: document.body.dataset.coursePath, expires: 365 });
     $('[data-student="electronic-grade-withdrawn"]').toggle(!checked);
     $('[data-student="simple-grade-withdrawn"]').toggle(!checked);
-    $('table').removeClass('table-striped');
     window.updateSimpleGradingRowNumbersAndColors?.();
     window.updateElectronicGradingRowNumbersAndColors?.();
 }
