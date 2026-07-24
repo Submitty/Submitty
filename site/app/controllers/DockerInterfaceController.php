@@ -265,7 +265,7 @@ class DockerInterfaceController extends AbstractController {
             $files = scandir($daemon_queue_dir);
             if ($files !== false) {
                 foreach ($files as $file) {
-                    // If job files starting with 'docker' or 'sysinfo' are in the queue the job is still running 
+                    // If job files starting with 'docker' or 'sysinfo' are in the queue the job is still running
                     // (guess based on other functions in this file)
                     // TODO: Update to match specifically
                     if ((str_starts_with($file, 'docker') || str_starts_with($file, 'sysinfo')) && pathinfo($file, PATHINFO_EXTENSION) === 'json') {

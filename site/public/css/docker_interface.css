@@ -68,10 +68,6 @@
     margin-right: 10px;
 }
 
-#build-buttons .status {
-    margin-left: 10px;
-}
-
 @media (max-width: 700px) {
     #status-head {
         flex-flow: column wrap;
