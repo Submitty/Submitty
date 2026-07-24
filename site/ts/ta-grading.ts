@@ -24,7 +24,12 @@ declare global {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        peerComponentMarksChanged (peer_id: string, component_id: string): void;
+        clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
+        resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
+        reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
@@ -236,33 +241,36 @@ export function changeStudentArrowTooltips(data: string) {
     }
 }
 
-window.updateCookies = function () {
+window.updateCookies = function (clear_open_files: boolean = false) {
     window.Cookies.set('silent_edit_enabled', String(isSilentEditModeEnabled()), {
         path: '/',
     });
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
-    let files: string[] = [];
-    $('#file-container')
-        .children()
-        .each(function () {
-            $(this)
-                .children('div[id^=div_viewer_]')
-                .each(function () {
-                    files = files.concat(
-                        findAllOpenedFiles(
-                            $(this),
-                            '',
-                            $(this)[0].dataset.file_name!,
-                            [],
-                            true,
-                        ),
-                    );
-                });
-        });
+    let open_files_array: string[] = [];
+    if (!clear_open_files) {
+        // keep open files persistent across cookie updates
+        const prev_open_files = window.Cookies.get('open_files') || '[]';
+        const prev_open_files_array = JSON.parse(prev_open_files) as string[];
+        open_files_array = open_files_array.concat(prev_open_files_array);
+        // search for and add open files to our array, then remove closed files
+        $('#file-container')
+            .children()
+            .each(function () {
+                $(this)
+                    .children('div[id^=div_viewer_]')
+                    .each(function () {
+                        open_files_array = open_files_array.concat(findAllOpenFiles($(this)));
+                        const closed_files_array: string[] = findAllClosedFiles($(this));
+                        open_files_array = open_files_array.filter((item) => !closed_files_array.includes(item));
+                    });
+            });
+    }
+    // remove duplicates from the auto-open list
+    open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
-    window.Cookies.set('files', JSON.stringify(files), { path: '/' });
+    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -311,8 +319,8 @@ function openDiv(num: string) {
 }
 window.openDiv = openDiv;
 
-// finds all the open files and folder and stores them in stored_paths
-function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
+// finds all the open files and folders and stores them in stored_paths
+function findAllOpenFiles(elem: JQuery<HTMLElement>, current_path: string = '', path: string = elem[0].dataset.file_name!, stored_paths: string[] = [], first: boolean = true) {
     if (first === true) {
         current_path += path;
         if ($(elem)[0].classList.contains('open')) {
@@ -350,17 +358,65 @@ function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, pat
                         stored_paths.push(
                             `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
                         );
-                        stored_paths = findAllOpenedFiles(
+                        stored_paths = findAllOpenFiles(
                             $(this),
                             current_path,
-                            $(this)[0].dataset.file_name!,
+                            $(this)[0].dataset.file_name,
                             stored_paths,
                             false,
                         );
                     }
                 });
         });
+    return stored_paths;
+}
 
+// finds all the closed files and folders and stores them in stored_paths
+function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = '', path: string = elem[0].dataset.file_name!, stored_paths: string[] = [], first: boolean = true) {
+    if (first === true) {
+        current_path += path;
+        if (!$(elem)[0].classList.contains('open')) {
+            stored_paths.push(path);
+        }
+    }
+    else {
+        current_path += `#$SPLIT#$${path}`;
+    }
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=file_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('shown')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                    }
+                });
+        });
+
+    $(elem)
+        .children()
+        .each(function () {
+            $(this)
+                .children('div[id^=div_viewer_]')
+                .each(function () {
+                    if (!$(this)[0].classList.contains('open')) {
+                        stored_paths.push(
+                            `${current_path}#$SPLIT#$${$(this)[0].dataset.file_name}`,
+                        );
+                    }
+                    stored_paths = findAllClosedFiles(
+                        $(this),
+                        current_path,
+                        $(this)[0].dataset.file_name,
+                        stored_paths,
+                        false,
+                    );
+                });
+        });
     return stored_paths;
 }
 
@@ -370,8 +426,15 @@ window.changeCurrentPeer = function () {
     $(`#edit-peer-components-form-${peer}`).show();
 };
 
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
+    $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
+};
+
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmed = confirm(`Are you sure you want to delete all grading from ${peer_id}?`);
+    if (!confirmed) {
+        return;
+    }
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -391,7 +454,104 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
             window.location.reload();
         },
         error: function () {
-            console.log('Failed to delete');
+            console.log('Failed to delete peer marks');
+        },
+    });
+};
+
+window.savePeerComponent = function (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string) {
+    const mark_ids = $(
+        `.peer-edit-mark[data-component-id="${component_id}"][data-peer-id="${peer_id}"]:checked`,
+    ).map(function () {
+        return $(this).val();
+    }).get();
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'save_peer_component',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+            component_id,
+            mark_ids,
+        },
+        type: 'POST',
+        success: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Saved');
+            $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
+            $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+            setTimeout(() => {
+                save_status.text('');
+            }, 2000);
+        },
+        error: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Save failed');
+        },
+    });
+};
+
+window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'resolve_peer_version_conflicts',
+    ]);
+
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            $(`.peer-edit-version-warning[data-peer-id="${peer_id}"]`).remove();
+            $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+        },
+        error: function () {
+            console.log('Failed to resolve peer version conflicts');
+        },
+    });
+};
+
+window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components for all graders without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'clear_all_peer_version_conflicts',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            void window.reloadPeerRubric(gradeable_id, anon_id);
+        },
+        error: function () {
+            console.log('Failed to clear all peer version conflicts');
         },
     });
 };
@@ -671,6 +831,12 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
+
+    // Clean up any open annotation editor when loading a new file
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     const extension = name.split('.').pop();
     if (fileFullPanelOptions[panel]['pdf'] && extension === 'pdf') {
         const gradeable_id = document.getElementById(
@@ -693,38 +859,77 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
+                // Clear previous PDF content before appending new content
+                $('#file-content').empty();
                 $('#file-content').append(data);
             },
         });
     }
     else {
+        // Check if the file is an image
+        const isImage = isImageFile(name);
         $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
-        $(fileFullPanelOptions[panel]['saveStatus']).hide();
-        $(fileFullPanelOptions[panel]['fileContent']).append(
-            `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            name,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            path,
-        );
-        openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
-        $(
-            `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
-        ).css('max-height', '1200px');
-        // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
+
+        if (isImage) {
+            // For images, use server-side annotation system
+            const gradeable_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.gradeableId;
+            const anon_submitter_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.anonSubmitterId;
+            $(fileFullPanelOptions[panel]['saveStatus']).show();
+
+            return $.ajax({
+                type: 'POST',
+                url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'img']),
+                data: {
+                    user_id: anon_submitter_id,
+                    filename: name,
+                    file_path: path,
+                    is_anon: true,
+                    csrf_token: window.csrfToken,
+                },
+                success: function (data: string) {
+                    // Clean up annotation editor and reset manager before loading new content
+                    if (typeof window.cleanupAnnotationEditor === 'function') {
+                        window.cleanupAnnotationEditor();
+                    }
+
+                    // Clear previous image content before appending new content
+                    $(fileFullPanelOptions[panel]['fileContent']).empty();
+                    $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                },
+            });
+        }
+        else {
+            $(fileFullPanelOptions[panel]['saveStatus']).hide();
+            // For other file types, use the original iframe approach
+            $(fileFullPanelOptions[panel]['fileContent']).append(
+                `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                name,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                path,
+            );
+            openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
+            $(
+                `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
+            ).css('max-height', '1200px');
+        }
     }
 }
 window.loadPDF = loadPDF;
@@ -733,6 +938,14 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    // Also remove image annotation containers
+    $(`${fileFullPanelOptions[panel]['fileContent']}`).empty();
+
+    // Clean up any open annotation editor when collapsing files
+    if (typeof window.cleanupAnnotationEditor === 'function') {
+        window.cleanupAnnotationEditor();
+    }
+
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
         if ($('#pdf_annotation_bar').is(':visible')) {
@@ -894,6 +1107,13 @@ window.deleteAttachment = function (target: string, file_name: string) {
     }
 };
 
+// Utility function to check if a file extension is an image
+function isImageFile(filename: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'tif'];
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return extension ? imageExtensions.includes(extension) : false;
+}
+
 function checkOpenComponentMark(index: number) {
     const component_id = getFirstOpenComponentId();
     if (component_id !== NO_COMPONENT_ID) {
@@ -918,7 +1138,7 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 }
 
 $(() => {
-// Navigate to the prev / next student buttons
+    // Navigate to the prev / next student buttons
     registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
         gotoPrevStudent();
     });

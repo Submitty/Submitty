@@ -142,7 +142,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('#clear_peer_matrix').click();
         cy.get('#clear_peer_matrix').then(() => {
-            cy.on('window:confirm', () => false);
+            cy.on('window:confirm', (str) => {
+                expect(str).to.equal('This will clear peer matrix. Are you sure?');
+                return false;
+            });
         });
 
         cy.get('#download_peer_csv').click();
@@ -189,7 +192,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#yes_student_download').click();
         cy.get('#yes_student_submit').click();
 
-        logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
+        logoutLogin('adamsg', ['sample', 'gradeable', 'open_peer_homework']);
         cy.get('#upload1').should('exist');
         cy.get('#submission-version-select').should('exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('not.exist');
@@ -307,6 +310,20 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // Reset grading due date to old date
         updateDates('#date_grade_due', '9998-12-31 23:59:59', 'All Changes Saved');
 
+        // Set the grades released date to the past (SHOULD WORK since all previous dates have no constraints)
+        updateDates('#date_released', past_date, 'All Changes Saved');
+
+        // The gradeable should be visible to all levels and be shown as "grades available"
+        ['student', 'grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        });
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
+
+        // Reset grades released date to old date
+        updateDates('#date_released', '9998-12-31 23:59:59', 'All Changes Saved');
+
         // Reset TA testing to old date
         updateDates('#date_ta_view', past_date, 'All Changes Saved');
 
@@ -366,7 +383,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_grade', future_date, 'All Changes Saved');
 
         // The gradeable should only be visible to instructors
-        ['grader', 'ta'].forEach((user) => {
+        ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
             cy.get('#gradeables-content').should('not.contain.text', 'Future (TAs) Lab');
         });
@@ -389,10 +406,36 @@ describe('Tests cases revolving around modifying gradeables', () => {
             cy.get('#gradeables-content').should('contain.text', 'Future (TAs) Lab');
         });
 
+        // Students should not be able to view this gradeable
+        logoutLogin('student', ['sample']);
+        cy.get('#gradeables-content').should('not.contain.text', 'Future (TAs) Lab');
+
         logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
 
         // Reset dates
         updateDates('#date_ta_view', '1970-01-01 23:59:59', 'All Changes Saved');
         updateDates('#date_grade_due', '9998-12-31 23:59:59', 'All Changes Saved');
+
+        // Set grades released date to the past (SHOULD work as no previous dates have anymore constraints)
+        updateDates('#date_released', '1970-02-10 23:59:59', 'All Changes Saved');
+
+        // Set the TA View date to the future so it does not interfere
+        updateDates('#date_ta_view', '9997-12-31 23:59:59', 'All Changes Saved');
+
+        // The gradeable should be visible to graders because the grade due date takes priority over the other dates
+        ['grader', 'ta'].forEach((user) => {
+            logoutLogin(user, ['sample']);
+            cy.get('#gradeables-content').should('contain.text', 'Future (TAs) Lab');
+        });
+
+        // Students should not be able to view this gradeable
+        logoutLogin('student', ['sample']);
+        cy.get('#gradeables-content').should('not.contain.text', 'Future (TAs) Lab');
+
+        logoutLogin('instructor', ['sample', 'gradeable', 'future_tas_lab', 'update?nav_tab=5']);
+
+        // Reset dates
+        updateDates('#date_ta_view', '1970-01-01 23:59:59', 'All Changes Saved');
+        updateDates('#date_released', '9998-12-31 23:59:59', 'All Changes Saved');
     });
 });

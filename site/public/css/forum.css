@@ -81,6 +81,11 @@
     gap: 0.5rem;
 }
 
+.attachment-preview a {
+    display: flex;
+    justify-content: center;
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {

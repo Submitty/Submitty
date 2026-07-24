@@ -145,7 +145,8 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT
+                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
+                "email_enabled" => $generatePostContent["email_enabled"]
             ]);
         }
         else {
@@ -172,7 +173,9 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
-                "render_markdown" => $markdown_enabled
+                "render_markdown" => $markdown_enabled,
+                "show_reply_announcement" => $generatePostContent["show_reply_announcement"],
+                "email_enabled" => $generatePostContent["email_enabled"]
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html" => json_encode($return)]);
@@ -378,7 +381,9 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
+            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ];
         if ($render) {
             $generated_post_list = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", $generated_post_list);
@@ -701,6 +706,8 @@ class ForumThreadView extends AbstractView {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+        // Raw ISO timestamp for Twig date comparisons (avoids locale-formatted string parsing failures)
+        $post_date_raw = DateUtils::dateTimeToString($post->getTimestamp());
 
         if (!$post->getHistory()->isEmpty()) {
             $edit_timestamp = max($post->getHistory()->map(function ($x) {
@@ -852,6 +859,7 @@ class ForumThreadView extends AbstractView {
             "post_user_info" => $post_user_info,
             "post_up_duck" => $post_up_duck,
             "post_date" => $date,
+            "post_date_raw" => $post_date_raw,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
             "visible_username" => $visible_username,
@@ -864,6 +872,8 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];
 
         if ($render) {
@@ -910,13 +920,13 @@ class ForumThreadView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
-            "back_to_threads_url" => $back_to_threads_url,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "thread_exists" => $thread_exists,
             "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
+            "back_to_threads_url" => $back_to_threads_url,
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
-            "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "expiration_placeholder" => $expiration->add(new \DateInterval('P7D'))->format('Y-m-d'),
             "render_markdown" => isset($_COOKIE['markdown_enabled']) ? $_COOKIE['markdown_enabled'] : 0
