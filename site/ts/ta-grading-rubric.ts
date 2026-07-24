@@ -2520,10 +2520,14 @@ window.reloadGradingRubric = async function (gradeable_id: string, anon_id: stri
     }
     try {
         loadComponentData(gradeable, GRADED_GRADEABLE);
+        const useVue = isVueTotalScoreBoxEnabled();
         const elements = await renderGradingGradeable(getGraderId(), gradeable, GRADED_GRADEABLE!,
             ACTIVE_GRADERS_LIST,
             isGradingDisabled(), !!canVerifyGraders(), getDisplayVersion());
         setRubricDOMElements(elements);
+        if (useVue) {
+            await mountVueTotalScoreBox();
+        }
         await openCookieComponent();
     }
     catch (err) {
@@ -2584,10 +2588,14 @@ async function updateTotals(gradeable_id: string | undefined, anon_id: string | 
     catch (err) {
         alert(`Could not fetch graded gradeable: ${(err as Error).message}`);
     }
+    const useVue = isVueTotalScoreBoxEnabled();
     const elements = await renderGradingGradeable(getGraderId(), gradeable as object, graded_gradeable as object,
         ACTIVE_GRADERS_LIST,
         isGradingDisabled(), !!canVerifyGraders(), getDisplayVersion());
     setRubricDOMElements(elements);
+    if (useVue) {
+        await mountVueTotalScoreBox();
+    }
 }
 
 /**
@@ -3617,12 +3625,68 @@ async function injectGradingComponentHeader(component: Component, graded_compone
 }
 
 /**
+ * Check if the Vue total score box is enabled (URL param vue_score=1 or localStorage).
+ */
+function isVueTotalScoreBoxEnabled(): boolean {
+    return window.location.search.includes('vue_score=1') || localStorage.getItem('vue_score') === '1';
+}
+
+// Mount (or re-mount) a TotalScoreBox Vue app.
+// Creates a fresh mount target inside #total-score-container and renders the score box component.
+// Called after dynamic re-renders where jQuery .html() destroys the initial Vue.twig mount.
+
+async function mountVueTotalScoreBox(): Promise<void> {
+    const container = document.querySelector('#total-score-container');
+    if (!container) {
+        return;
+    }
+
+    // Replace container contents with a fresh mount point
+    const mountId = 'vue-total-score-box';
+    const mountDiv = document.createElement('div');
+    mountDiv.id = mountId;
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+    container.appendChild(mountDiv);
+
+    const scores = getScoresFromDOM();
+
+    const args = {
+        autoGradingEarned: scores.auto_grading_earned,
+        autoGradingTotal: scores.auto_grading_total,
+        taGradingEarned: scores.ta_grading_earned,
+        taGradingTotal: scores.ta_grading_total,
+        peerGradeEarned: scores.peer_grade_earned,
+        peerTotal: scores.peer_total,
+        combinedPeerScore: (GRADED_GRADEABLE as Record<string, unknown> | null)?.combined_peer_score as number | undefined,
+        userGroup: scores.user_group,
+        peerOnlyGrader: scores.peer_only_grader,
+        peerGradeable: GRADED_GRADEABLE?.peer_gradeable ?? false,
+        decimalPrecision: getPointPrecision(),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    await (window as any).submitty.render(
+        `#${mountId}`,
+        'component',
+        'ta_grading/TotalScoreBox',
+        args,
+        {},
+    );
+}
+
+/**
  * Renders the total scores box
  * @param {Object} scores
  * @async
  * @return {void}
  */
 async function injectTotalScoreBox(scores: object) {
+    if (isVueTotalScoreBoxEnabled()) {
+        await mountVueTotalScoreBox();
+        return;
+    }
     try {
         const elements = await renderTotalScoreBox(scores);
         setTotalScoreBoxContents(elements);
