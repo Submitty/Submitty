@@ -811,7 +811,7 @@ function renderBuildNotices(notice) {
         return;
     }
     banner.removeClass('rg-build-notice-error rg-build-notice-warning')
-          .addClass(`rg-build-notice-${notice.level}`);
+        .addClass(`rg-build-notice-${notice.level}`);
     $('#rainbow-build-notice-messages').text(notice.messages.join('\n'));
     const contact = $('#rainbow-build-notice-contact');
     if (notice.sysadmin_email) {
