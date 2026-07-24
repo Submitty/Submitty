@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 const props = defineProps<{
-    algorithms: Record<string, {name: string, description: string}>;
+    algorithms: Record<string, { name: string; description: string; }>;
     currentAlgorithm?: string;
     createClusteringUrl: string;
     checkClusteringStatusUrl: string;

@@ -126,7 +126,7 @@
         {% if full_access_grader_permission and is_clustering_allowed %}
             {% include 'Vue.twig' with {
                 'type': 'component',
-                'name': 'CreateClustersModal',
+                'name': 'ta_grading/CreateClustersModal',
                 'style': 'display: contents;',
                 'args': {
                     'gradeableId': gradeable.getId(),
