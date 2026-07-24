@@ -192,10 +192,10 @@ def prepare_autograding_and_submission_zip(
         submission_path = os.path.join(config.submitty['submitty_data_dir'], "courses", item_name)
         if not os.path.isdir(submission_path):
             config.logger.log_message(
-                f"ERROR: [PACKER UNPACKER] the submission directory does not exist: {submission_path}",
+                f"ERROR: [packer_unpacker.py] the submission directory does not exist: {submission_path}",
                 job_id=job_id
             )
-            raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
+            raise RuntimeError("ERROR: [packer_unpacker.py] the submission directory does not exist", submission_path)
         print(which_machine, which_untrusted, "prepare zip", submission_path)
         (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
          using_subdirectory, vcs_subdirectory) = get_vcs_info(

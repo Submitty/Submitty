@@ -689,8 +689,8 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
         # If the submission directory is permanently missing, there is no point
         # in attempting to grade normally — it will also fail. Clean up the
         # broken queue file immediately so no other shipper thread retries it.
-        if e.args and e.args[0] == "ERROR: the submission directory does not exist":
-            msg = (f"ERROR: [RUNTIME ERROR] the submission directory does not exist for {queue_file}. "
+        if e.args and ("the submission directory does not exist" in e.args[0]):
+            msg = (f"ERROR: [RUNTIME ERROR in submitty_autograding_shipper.py] the submission directory does not exist for {queue_file}. "
                    "Removing broken queue file and skipping job.")
             config.logger.log_message(msg)
             config.logger.log_stack_trace(traceback.format_exc())
@@ -718,7 +718,7 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
                 'submissions', q['gradeable'], q['who'], str(q['version'])
             )
             if not os.path.isdir(submission_dir):
-                msg = (f"ERROR: [EXCEPTION] the submission directory does not exist: {submission_dir}. "
+                msg = (f"ERROR: [EXCEPTION in submitty_autograding_shipper.py] the submission directory does not exist: {submission_dir}. "
                        "Removing broken queue file and skipping job.")
                 config.logger.log_message(msg)
                 config.logger.log_stack_trace(traceback.format_exc())
@@ -728,7 +728,7 @@ def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file
         except Exception:
             # If we can't read the queue file, fall through as before.
             pass
-        
+
         # Catch-all for non-RuntimeError exceptions to help prevent the shipper
         # from getting into a weird stuck state. Fall through to grade normally.
         config.logger.log_message(
