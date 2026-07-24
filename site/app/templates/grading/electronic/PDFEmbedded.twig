@@ -1,0 +1,15 @@
+{% for stylesheet in localcss %}
+    <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
+{% endfor %}
+{% for script in localjs %}
+    <script src="{{ script }}"></script>
+{% endfor %}
+<div id="content-wrapper">
+    <div id="viewer" class="pdfViewer">
+        <div id="pdf-error-message" style="display: none; color: red; font-weight: bold; padding: 10px; text-align: center;"></div>
+    </div>
+</div>
+
+<script>
+    renderPDF("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename | e('js') }}', "{{ file_path | e('js') }}", {{ page_num }}, "{{ pdf_url_base | e('js')}}");
+</script>

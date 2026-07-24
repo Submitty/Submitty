@@ -13,13 +13,8 @@ class PDFView extends AbstractView {
         string $user_id,
         ?string $file_name,
         ?string $file_path,
-        ?string $anon_path,
-        ?string $download_path,
-        array $annotation_jsons,
-        bool $is_student,
         ?int $page_num,
         bool $jquery = false,
-        bool $is_peer_grader = false
     ): void {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
@@ -30,82 +25,23 @@ class PDFView extends AbstractView {
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.css'), 'vendor');
 
         $localjs = [];
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFEmbedded.js'), 'js');
 
         //This jquery file should not need to be added here as jquery should already be in the header on any page
         if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
-        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
             'user_id' => $user_id,
             'grader_id' => $this->core->getUser()->getId(),
             'filename' => $file_name,
             'file_path' => $file_path,
-            'annotation_jsons' => json_encode($annotation_jsons),
-            'student_popup' => $is_student,
-            'can_download' => !$is_peer_grader,
             'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
             'localjs' => $localjs,
-            'csrfToken' => $this->core->getCsrfToken(),
-            'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'download_pdf']),
-            'anon_path' => $anon_path,
-            'download_path' => $download_path
-        ]);
-    }
-
-    /**
-     * adds to our buffer a twig output of either student view or grader view.
-     */
-    public function downloadPDFEmbedded(
-        string $gradeable_id,
-        string $user_id,
-        string $file_name,
-        string $file_path,
-        array $annotation_jsons,
-        bool $rerender_annotated_pdf,
-        bool $is_student,
-        int $page_num,
-        bool $jquery
-    ): void {
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'encode_pdf']);
-
-        $localcss = [];
-        $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
-        $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.css'), 'vendor');
-
-        $localjs = [];
-
-        //This jquery file should not need to be added here as jquery should already be in the header on any page
-        if ($jquery) {
-            $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
-        }
-
-        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
-
-        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $gradeable_id,
-            'user_id' => $user_id,
-            'grader_id' => $this->core->getUser()->getId(),
-            'filename' => $file_name,
-            'file_path' => $file_path,
-            'annotation_jsons' => json_encode($annotation_jsons),
-            'rerender_annotated_pdf' => $rerender_annotated_pdf,
-            'student_download' => $is_student,
-            'page_num' => $page_num,
-            'pdf_url_base' => $pdf_url,
-            'localcss' => $localcss,
-            'localjs' => $localjs,
-            'csrfToken' => $this->core->getCsrfToken()
         ]);
     }
 }
