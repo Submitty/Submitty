@@ -248,4 +248,41 @@ class DockerInterfaceController extends AbstractController {
         return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
                                                             Click \'Update dockers and machines\' to apply changes.');
     }
+
+    #[Route("/admin/docker_update_status", methods: ["POST"])]
+    public function checkDockerUpdateStatus(): JsonResponse {
+        $user = $this->core->getUser();
+
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
+
+        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $is_in_progress = false;
+
+        // Check if any docker/sysinfo job files are still in the daemon_job_queue
+        if (is_dir($daemon_queue_dir)) {
+            $files = scandir($daemon_queue_dir);
+            if ($files !== false) {
+                foreach ($files as $file) {
+                    // If job files starting with 'docker' or 'sysinfo' are in the queue the job is still running
+                    // (guess based on other functions in this file)
+                    // TODO: Update to match specifically
+                    if ((str_starts_with($file, 'docker') || str_starts_with($file, 'sysinfo')) && pathinfo($file, PATHINFO_EXTENSION) === 'json') {
+                        $is_in_progress = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $log_output = "";
+        /*
+        Note, this log_output is a placeholder until I can figure out if there is a log file to display
+        */
+        return JsonResponse::getSuccessResponse([
+            'in_progress' => $is_in_progress,
+            'log'         => $log_output
+        ]);
+    }
 }

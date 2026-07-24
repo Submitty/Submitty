@@ -47,6 +47,66 @@
     background-color: var(--danger-red);
 }
 
+.docker-status-bar {
+    border: none;
+    background-color: var(--standard-hover-light-gray);
+    padding: 5px 5px 5px 20px;
+    margin-top: 10px;
+    border-radius: 25px;
+}
+
+#status-head {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+#build-buttons {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+@media (max-width: 700px) {
+    #status-head {
+        flex-flow: column wrap;
+        justify-content: start;
+    }
+    #status-head > div {
+        width: 100%;
+        margin: 3px 0;
+    }
+}
+
+#docker-status-label {
+    font-weight: bold;
+}
+
+#docker-status-badge {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+#docker-status-buttons {
+    display: flex;
+    flex-direction: row;
+    margin-right: 10px;
+    border: none;
+}
+
+#show-docker-log-button {
+    display: none;
+    margin-left: 10px;
+}
+
+#docker-status-log {
+    display: none;
+    margin: 10px 0;
+    overflow: auto;
+    width: 100%;
+}
+
 /* desktop view */
 @media (min-width: 550px) {
     .docker-images-container {
