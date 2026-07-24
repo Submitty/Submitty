@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/submitty/venv/bin/python3
 
 """
 Use this script to create new users.

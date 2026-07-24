@@ -74,7 +74,7 @@ if __name__ == "__main__":
     To test this script, you'll have to run this as www-data or PHP_USER or CGI_USER so
     that when it creates the temp files, pam_check.cgi has access to them. Run it like
     this:
-    sudo -u www-data /usr/local/submitty/sbin/authentication.py
+    sudo -u www-data /usr/local/submitty/venv/bin/python3 /usr/local/submitty/sbin/authentication.py
 
     The output should be:
     True

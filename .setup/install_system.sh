@@ -34,12 +34,12 @@ fi
 #################
 
 # PATHS
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
-RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
-LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_DATA_DIR=/var/local/submitty
+export CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+export RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
+export LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
+export SUBMITTY_INSTALL_DIR=/usr/local/submitty
+export SUBMITTY_DATA_DIR=/var/local/submitty
 
 
 # USERS / GROUPS
@@ -409,7 +409,7 @@ if [ ${WORKER} == 0 ]; then
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/Require host __your_domain__/Require host localhost/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require local/g" /etc/apache2/sites-available/submitty.conf
         sed -i -e "s/\*:80/*:${SUBMISSION_PORT}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
@@ -597,6 +597,10 @@ if [ ! -d "${clangsrc}" ]; then
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
 
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
+
+source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -658,7 +662,7 @@ if [ ${WORKER} == 1 ]; then
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
         echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
@@ -684,6 +688,17 @@ if [ ${WORKER} == 0 ]; then
     else
         echo "Submitty master database already exists"
     fi
+fi
+
+if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
+    chown -R root:root /etc/systemd/system/nullsmtpd.service
+    chmod 444 /etc/systemd/system/nullsmtpd.service
+    systemctl restart nullsmtpd
+    # also, set it to automatically start on boot
+    systemctl enable nullsmtpd
 fi
 
 echo Beginning Install Submitty Script
@@ -715,9 +730,9 @@ if [ ${WORKER} == 0 ]; then
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
     fi
 
 fi
@@ -737,17 +752,6 @@ if [ ${WORKER} == 0 ]; then
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
         python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_emails.py
     fi
-fi
-
-if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
-    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
-    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
-    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
-    chown -R root:root /etc/systemd/system/nullsmtpd.service
-    chmod 444 /etc/systemd/system/nullsmtpd.service
-    systemctl restart nullsmtpd
-    # also, set it to automatically start on boot
-    systemctl enable nullsmtpd
 fi
 
 

@@ -5,6 +5,8 @@
 #
 # This script has one required argument, config=<config dir>.
 
+source /usr/local/submitty/venv/bin/activate
+
 echo -e "Copy the user scripts"
 
 # Get arguments

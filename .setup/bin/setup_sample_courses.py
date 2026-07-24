@@ -253,7 +253,7 @@ def main() -> None:
         regrade_extras = "*/testing/"
     if (not NO_GRADING) or TEST_ONLY_GRADING:
         # queue up all of the newly created submissions to grade!
-        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}")
+        os.system(f"python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}")
 
 
 if __name__ == "__main__":

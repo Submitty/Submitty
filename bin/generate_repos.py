@@ -6,7 +6,8 @@ the repositories at a per course level (for a repo that would carry through
 all gradeables for example) or on a per gradeable level.
 
 usage:
-sudo /usr/local/submitty/bin/generate_repos.py <semester> <course_code> <project_name/gradeable_id>
+sudo /usr/local/submitty/venv/bin/python3 /usr/local/submitty/bin/generate_repos.py <semester> <course_code> \
+<project_name/gradeable_id>
 
 """
 
