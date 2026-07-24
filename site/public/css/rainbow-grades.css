@@ -9,9 +9,17 @@
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
+    align-self: flex-start;
+    margin-left: auto;
 }
 
 #rainbow-grades-header > .btn-wrapper {
+    margin: 0;
+    width: auto;
+}
+
+#rainbow-grades-header > .btn-wrapper > .btn {
+    flex: 0 0 auto;
     margin: 0;
 }
 
@@ -31,3 +39,4 @@
     white-space: nowrap;
     margin: 0;
 }
+
