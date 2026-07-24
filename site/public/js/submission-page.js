@@ -102,7 +102,7 @@ function syncWithServer(criticalSync) {
         }
     }
 }
-function checkDeadline() {
+async function checkDeadline() {
     if (Math.abs(Date.now() - lastTime) > 5000) {
         // we need to sync back up
         syncWithServer(true);
@@ -115,7 +115,7 @@ function checkDeadline() {
         const time = Math.abs(Math.floor((curTime - deadline) / 1000));
         const days = Math.floor(time / (3600 * 24));
         if (document.getElementById('gradeable-time-remaining-text') !== null) {
-            if (curTime > deadline) {
+            if (curTime > deadline && deadline !== 0) {
                 return 1 + days;
             }
         }
