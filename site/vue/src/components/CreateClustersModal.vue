@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 const props = defineProps<{
-    algorithms: Record<string, string>;
+    algorithms: Record<string, {name: string, description: string}>;
     currentAlgorithm?: string;
     createClusteringUrl: string;
     checkClusteringStatusUrl: string;
@@ -137,16 +137,20 @@ async function submitClustering() {
                 Select an algorithm...
               </option>
               <option
-                v-for="(name, id) in algorithms"
+                v-for="(algo, id) in algorithms"
                 :key="id"
                 :value="id"
               >
-                {{ name }}
+                {{ algo.name }}
               </option>
             </select>
             <div v-else>
               No clustering algorithms available.
             </div>
+
+            <p v-if="selectedAlgorithm && algorithms[selectedAlgorithm]" style="margin-top: 15px;">
+              {{ algorithms[selectedAlgorithm].description }}
+            </p>
 
             <div class="form-buttons">
               <div

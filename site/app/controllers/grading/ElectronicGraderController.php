@@ -1222,7 +1222,10 @@ class ElectronicGraderController extends AbstractController {
 
         $algorithms = [];
         foreach (\app\entities\grading_cluster\GradingClusterAlgorithm::cases() as $case) {
-            $algorithms[$case->value] = $case->name;
+            $algorithms[$case->value] = [
+                'name' => $case->name,
+                'description' => $case->description()
+            ];
         }
 
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_clustering_mode, $algorithms, $current_algorithm, $cluster_map);
