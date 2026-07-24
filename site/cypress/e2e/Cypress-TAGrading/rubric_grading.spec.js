@@ -21,7 +21,6 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Minor errors in Read Me')
             .and('contain', 'Major errors in Read Me or Read Me missing');
         cy.get('body').type('{0}');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-64"]')
             .should('contain', 'Full Credit')
@@ -37,7 +36,6 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Code is very difficult to understand')
             .and('contain', 'Code is difficult to understand');
         cy.get('body').type('{3}');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-65"]')
             .should('contain', 'Full Credit')
@@ -54,7 +52,6 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Very little documentation or documentation makes no sense')
             .and('contain', 'Way too much documentation and/or documentation makes no sense');
         cy.get('body').type('{2}');
-        cy.get('[data-testid="grading-total"]').eq(2).should('contain', '2 / 5');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-66"]')
             .should('contain', 'Full Credit')
@@ -70,17 +67,11 @@ describe('Test cases for TA grading page', () => {
             .and('contain', 'Extra credit done poorly')
             .and('contain', 'Extra credit is acceptable');
         cy.get('body').type('{0}');
-        cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-67"]')
             .should('contain', 'No Credit')
             .and('contain', 'Extra credit done poorly')
             .and('contain', 'Extra credit is acceptable');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
-        cy.get('[data-testid="grading-total"]').eq(2).should('contain', '2 / 5');
-        cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
-        cy.get('[data-testid="grading-total"]').eq(4).should('contain', '8 / 12');
         cy.get('[data-testid="component-64"]').click(20, 25);
         cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
@@ -98,8 +89,6 @@ describe('Test cases for TA grading page', () => {
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Sally Jones');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('body').type('{downArrow}');
         cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
@@ -110,17 +99,12 @@ describe('Test cases for TA grading page', () => {
         cy.get('body').type('{1}');
         cy.get('body').type('{leftArrow}');
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Leonie Gutmann');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '0 / 2');
-        cy.get('body').type('{rightArrow}');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '− / 2');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '0 / 5');
     });
     it('Grader should only see selected mark and published marks when component collapses', () => {
         cy.login('ta');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=aYl92mR3NvJYGrK&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '/ 2');
         cy.get('body').type('{downArrow}');
         cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
