@@ -1074,8 +1074,14 @@ class ElectronicGraderController extends AbstractController {
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
 
-        $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
-        $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
+        $sort = $_COOKIE['sort'] ?? 'id';
+        $direction = $_COOKIE['direction'] ?? 'ASC';
+        if ($peer) {
+            $sort = $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
+                ? 'random'
+                : 'peer';
+            $direction = 'ASC';
+        }
 
 
         //Get grading_details Columns
