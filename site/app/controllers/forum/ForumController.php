@@ -21,6 +21,8 @@ use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
 use DateTime;
+use app\entities\forum\ForumBlockAction;
+use app\entities\forum\ForumBlockedUser;
 
 /**
  * Class ForumHomeController
@@ -352,6 +354,12 @@ class ForumController extends AbstractController {
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
+
+        if (!$this->core->getUser()->accessAdmin() && $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->isUserBlockedFromForumPosts($current_user_id)) {
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
+            return $this->core->getOutput()->renderJsonFail("You are currently blocked from making forum posts.", $result);
+        }
+
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -528,6 +536,10 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         }
+        elseif (!$this->core->getUser()->accessAdmin() && $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->isUserBlockedFromForumPosts($current_user_id)) {
+            $this->core->addErrorMessage("You are currently blocked from making forum posts.");
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+        }
         elseif ($this->core->getQueries()->isThreadLocked(intval($thread_id)) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
@@ -666,6 +678,12 @@ class ForumController extends AbstractController {
         $post->setReplyLevel($_POST['reply_level']);
         $GLOBALS['totalAttachments'] = 0;
 
+        $blocked_author_ids = [];
+        if ($this->core->getUser()->accessAdmin()) {
+            $blocked_author_ids = array_flip(
+                $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->getUsersBlockedFromForumPosts([$post->getAuthor()->getId()])
+            );
+        }
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
@@ -676,6 +694,7 @@ class ForumController extends AbstractController {
             'tree',
             true,
             $_POST['post_box_id'],
+            $blocked_author_ids,
             true,
             $post->getThread()->isAnnounced()
         );
@@ -903,6 +922,94 @@ class ForumController extends AbstractController {
         foreach ($post->getChildren() as $child) {
             $this->recursiveDeletePost($child);
         }
+    }
+
+    /**
+     * @return mixed[]
+     */
+    #[AccessControl(permission: "forum.block_user")]
+    #[Route("/courses/{_semester}/{_course}/forum/users/block", methods: ["POST"])]
+    public function blockUserFromForum(): array {
+        $user_id = $_POST['user_id'] ?? '';
+        $expiration_date_str = $_POST['expiration_date'] ?? '';
+        $current_user_id = $this->core->getUser()->getId();
+
+        if ($user_id === '') {
+            return $this->core->getOutput()->renderJsonFail("User ID is required.");
+        }
+        if ($user_id === $current_user_id) {
+            return $this->core->getOutput()->renderJsonFail("You cannot block yourself.");
+        }
+
+        $target_user = $this->core->getQueries()->getUserById($user_id);
+        if ($target_user === null) {
+            return $this->core->getOutput()->renderJsonFail("User not found.");
+        }
+        if ($target_user->accessAdmin()) {
+            return $this->core->getOutput()->renderJsonFail("You cannot block an instructor.");
+        }
+
+        $expiration_date = null;
+        if ($expiration_date_str !== '') {
+            $expiration_date = DateUtils::parseDateTime($expiration_date_str, $this->core->getUser()->getUsableTimeZone());
+        }
+
+        $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->addBlockedUser($user_id, ForumBlockAction::NoForumPosts, $expiration_date, $current_user_id);
+        return $this->core->getOutput()->renderJsonSuccess("User has been blocked from making forum posts.");
+    }
+
+    /**
+     * @return mixed[]
+     */
+    #[AccessControl(permission: "forum.block_user")]
+    #[Route("/courses/{_semester}/{_course}/forum/users/unblock", methods: ["POST"])]
+    public function unblockUserFromForum(): array {
+        $user_id = $_POST['user_id'] ?? '';
+
+        if ($user_id === '') {
+            return $this->core->getOutput()->renderJsonFail("User ID is required.");
+        }
+
+        $active_blocks = $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->getActiveBlockedUsers($user_id);
+        $block_id = null;
+        foreach ($active_blocks as $block) {
+            if ($block->getAction() === ForumBlockAction::NoForumPosts) {
+                $block_id = $block->getId();
+                break;
+            }
+        }
+
+        if ($block_id === null) {
+            return $this->core->getOutput()->renderJsonFail("User is not currently blocked from forum posts.");
+        }
+
+        $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->deleteBlockedUser($block_id);
+        return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/forum/users/blocked", methods: ["GET"])]
+    public function getBlockedUsers(): JsonResponse {
+        if (!$this->core->getUser()->accessAdmin()) {
+            return JsonResponse::getFailResponse("You do not have permission to view this.");
+        }
+        $active_blocks = $this->core->getCourseEntityManager()
+            ->getRepository(ForumBlockedUser::class)
+            ->getActiveBlockedUsers();
+        $blocked_users = [];
+        foreach ($active_blocks as $block) {
+            if ($block->getAction() !== ForumBlockAction::NoForumPosts) {
+                continue;
+            }
+            $user = $this->core->getQueries()->getUserById($block->getUserId());
+            $display_name = $user !== null ? $user->getDisplayFullName() : $block->getUserId();
+            $expiration_date = $block->getExpirationDate();
+            $blocked_users[] = [
+                'user_id' => $block->getUserId(),
+                'display_name' => $display_name,
+                'expiration_date' => $expiration_date !== null ? $expiration_date->format('Y-m-d H:i:sO') : null,
+            ];
+        }
+        return JsonResponse::getSuccessResponse(['users' => $blocked_users]);
     }
 
     #[AccessControl(permission: "forum.merge_thread")]
