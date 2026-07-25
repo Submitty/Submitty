@@ -1,0 +1,29 @@
+# Complete code
+"""
+Template for the autograding status page.
+"""
+from jinja2 import Template
+
+def render_autograding_status_template(autograding_status_data: Dict) -> str:
+    """
+    Renders the autograding status template with the provided data.
+
+    Args:
+        autograding_status_data (Dict): The data for the autograding status page.
+
+    Returns:
+        str: The rendered template.
+    """
+    try:
+        # Get the template
+        template = Template(open('base.html').read())
+
+        # Render the template with the data
+        rendered_template = template.render(autograding_status_data=autograding_status_data)
+
+        return rendered_template
+
+    except Exception as e:
+        # Handle any exceptions that occur
+        print(f"An error occurred: {e}")
+        return ""
