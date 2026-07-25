@@ -2759,3 +2759,14 @@ function forumToggleDeleted() {
 function forumMarkUnread() {
     markThreadUnread($('#current-thread').val());
 }
+function forumHandleMoreItemClick(itemId) {
+    if (itemId === 'mark-unread') {
+        forumMarkUnread();
+    }
+    else if (itemId === 'toggle-attachments') {
+        loadAllInlineImages();
+    }
+}
+function forumNavigateStats() {
+    window.location.href = buildCourseUrl(['forum', 'stats']);
+}

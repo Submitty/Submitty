@@ -6,13 +6,13 @@ interface MoreDropdownItem {
     link?: string;
     optionalClass?: string;
     dividerBefore?: boolean;
+    dividerAfter?: boolean;
+    badgeText?: string;
 }
 
 const props = defineProps<{
     items: MoreDropdownItem[];
     currentDisplayOption: string;
-    showMerged: boolean;
-    showDeleted: boolean;
     threadExists: boolean;
     isFullThreadsPage: boolean;
 }>();
@@ -22,6 +22,7 @@ const emit = defineEmits<{
     'toggle-merged': [];
     'toggle-deleted': [];
     'navigate-stats': [];
+    'navigate': [url: string];
     'item-click': [itemId: string];
 }>();
 
@@ -53,7 +54,7 @@ function handleItemClick(item: MoreDropdownItem) {
             break;
         default:
             if (item.link && item.link !== '#') {
-                window.location.href = item.link;
+                emit('navigate', item.link);
             }
             else {
                 emit('item-click', item.id);
@@ -100,8 +101,20 @@ function handleOptionClick(option: string) {
             href="#"
             @click.prevent="handleItemClick(item)"
           >
-            {{ item.displayText }}
+            <span
+              v-if="item.badgeText"
+              class="status"
+            />
+            <span v-if="item.displayText">{{ item.displayText }}</span>
+            <span
+              v-if="item.badgeText"
+              class="attachment-badge badge"
+            >{{ item.badgeText }}</span>
           </a>
+          <div
+            v-if="item.dividerAfter"
+            class="dropdown-divider"
+          />
         </template>
         <template v-if="items.length > 0 && threadExists && !isFullThreadsPage">
           <div class="dropdown-divider" />

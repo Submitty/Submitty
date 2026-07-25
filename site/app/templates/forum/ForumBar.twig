@@ -56,10 +56,11 @@
 			{% set moreItems = [] %}
 			{% if activeThread is not null %}
 				{% set moreItems = moreItems|merge([{
-					'id': 'mark-unread',
-					'displayText': 'Unread Thread',
-					'title': 'Mark Thread Unread'
-				}]) %}
+						'id': 'mark-unread',
+						'displayText': 'Unread Thread',
+						'title': 'Mark Thread Unread',
+						'dividerAfter': true
+					}]) %}
 			{% endif %}
 			{% if more_data is defined %}
 				{% for more in more_data|slice(1) %}
@@ -85,11 +86,12 @@
 			{% endif %}
 			{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 				{% set moreItems = moreItems|merge([{
-					'id': 'toggle-attachments',
-					'displayText': 'Toggle Attachments',
-					'title': 'Click to toggle all post attachments',
-					'dividerBefore': true
-				}]) %}
+						'id': 'toggle-attachments',
+						'displayText': 'Show Attachments',
+						'title': 'Click to toggle all post attachments',
+						'badgeText': total_attachments is defined ? ''~total_attachments : '',
+						'dividerBefore': true
+					}]) %}
 			{% endif %}
 			{% include "Vue.twig" with {
 				'type': 'component',
@@ -97,18 +99,17 @@
 				'args': {
 					'items': moreItems,
 					'currentDisplayOption': display_option is defined ? display_option : '',
-					'showMerged': show_merged_thread is defined and show_merged_thread,
-					'showDeleted': show_deleted is defined and show_deleted,
 					'threadExists': thread_exists is defined and thread_exists,
 					'isFullThreadsPage': is_full_threads_page is defined and is_full_threads_page
 				},
 				'class': 'more-dropdown',
 				'events': {
-					'display-option-change': '(option) => changeDisplayOptions(option)',
-					'toggle-merged': '() => forumToggleMerged()',
-					'toggle-deleted': '() => forumToggleDeleted()',
-					'navigate-stats': '() => { window.location.href = buildCourseUrl(["forum", "stats"]); }',
-					'item-click': '(itemId) => { if (itemId === "mark-unread") { forumMarkUnread(); } else if (itemId === "toggle-attachments") { loadAllInlineImages(); } }',
+					'display-option-change': 'changeDisplayOptions',
+					'toggle-merged': 'forumToggleMerged',
+					'toggle-deleted': 'forumToggleDeleted',
+					'navigate-stats': 'forumNavigateStats',
+					'navigate': '(url) => { window.location.href = url; }',
+					'item-click': 'forumHandleMoreItemClick',
 				}
 			} %}
 			{% endif %}
