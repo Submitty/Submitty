@@ -39,7 +39,13 @@ class ChatroomView extends AbstractView {
                 "chatrooms" => $chatroom_rows,
                 "userAdmin" => $this->core->getUser()->accessAdmin(),
                 "baseUrl" => $this->core->buildCourseUrl() . '/chat',
-                "csrfToken" => $this->core->getCsrfToken(),
+            ],
+            "events" => [
+                'delete-chatroom' => '(event) => { window.deleteChatroom(event); }',
+                'clear-chatroom' => '(event) => { window.clearChatroom(event); }',
+                'toggle-chatroom' => '(event) => { window.toggleChatroom(event); }',
+                'create-chatroom' => '(event) => { window.saveChatroom({...event, mode: \'create\'}); }',
+                'edit-chatroom' => '(event) => { window.saveChatroom({...event, mode: \'edit\'}); }',
             ]
         ]);
     }
