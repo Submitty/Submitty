@@ -12,7 +12,7 @@ interface MoreDropdownItem {
     badgeText?: string;
 }
 
-const props = defineProps<{
+defineProps<{
     items: MoreDropdownItem[];
     currentDisplayOption: string;
     threadExists: boolean;
