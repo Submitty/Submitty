@@ -17,7 +17,7 @@
         {
             "title": "Check output",
             "details": "Run Racket program",
-            "command": "racket main.rkt",
+            "command": "/usr/bin/racket *.rkt",
             "points": 5,
             "validation": [
                 {
@@ -29,4 +29,10 @@
             ]
         }
     ]
+
+
+
+
+
+
 }
