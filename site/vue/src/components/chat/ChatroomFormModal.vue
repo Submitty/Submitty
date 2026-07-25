@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import Popup from '@/components/Popup.vue';
+import Popup from '../Popup.vue';
 
 interface Chatroom {
-    id: number;
     title: string;
     description: string;
     isAllowAnon: boolean;
@@ -13,8 +12,6 @@ interface Chatroom {
 interface Props {
     visible: boolean;
     mode: 'create' | 'edit';
-    baseUrl: string;
-    csrfToken: string;
     chatroom?: Chatroom | null;
 }
 
@@ -23,7 +20,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    (e: 'close'): void;
+    close: [];
+    save: [data: { title: string; description: string; allowAnon: boolean; allowReadOnlyAfterEnd: boolean }];
 }>();
 
 const title = ref('');
@@ -48,25 +46,13 @@ watch(() => props.visible, (visible) => {
     }
 });
 
-const formAction = ref('');
-watch(
-    [() => props.mode, () => props.chatroom, () => props.baseUrl],
-    () => {
-        if (props.mode === 'edit' && props.chatroom) {
-            formAction.value = `${props.baseUrl}/${props.chatroom.id}/edit`;
-        }
-        else {
-            formAction.value = `${props.baseUrl}/new`;
-        }
-    },
-    { immediate: true },
-);
-
 function submitForm() {
-    const form = document.getElementById('chatroom-modal-form') as HTMLFormElement;
-    if (form) {
-        form.submit();
-    }
+    emit('save', {
+        title: title.value,
+        description: description.value,
+        allowAnon: allowAnon.value,
+        allowReadOnlyAfterEnd: allowReadOnlyAfterEnd.value,
+    });
 }
 </script>
 
@@ -81,68 +67,63 @@ function submitForm() {
     @save="submitForm"
   >
     <template #trigger>
-      <span style="display: none" />
+      <span class="hidden-trigger" />
     </template>
-    <form
-      id="chatroom-modal-form"
-      :action="formAction"
-      method="post"
-    >
-      <div class="flex-col flex-col-space">
+    <div class="flex-col flex-col-space">
+      <label for="chatroom-modal-title">
+        Chatroom Title:
+      </label>
+      <input
+        id="chatroom-modal-title"
+        v-model="title"
+        type="text"
+        name="title"
+        :data-testid="mode === 'create' ? 'chatroom-name-entry' : 'chatroom-name-edit'"
+        placeholder="Enter name here..."
+      >
+      <label for="chatroom-modal-description">
+        Description:
+      </label>
+      <input
+        id="chatroom-modal-description"
+        v-model="description"
+        type="text"
+        name="description"
+        :data-testid="mode === 'create' ? 'chatroom-description-entry' : 'chatroom-description-edit'"
+        placeholder="Enter description here..."
+      >
+      <label
+        id="allow-anon-label"
+        for="chatroom-modal-allow-anon"
+      >
+        Allow people to join anonymously?
         <input
-          type="hidden"
-          name="csrf_token"
-          :value="csrfToken"
+          id="chatroom-modal-allow-anon"
+          v-model="allowAnon"
+          type="checkbox"
+          name="allow-anon"
+          :data-testid="mode === 'create' ? 'enable-disable-anon' : 'edit-anon'"
         >
-        <label for="chatroom-modal-title">
-          Chatroom Title:
-        </label>
+      </label>
+      <label
+        id="allow-read-only-label"
+        for="chatroom-modal-read-only"
+      >
+        Enable read-only after session ends?
         <input
-          id="chatroom-modal-title"
-          v-model="title"
-          type="text"
-          name="title"
-          :data-testid="mode === 'create' ? 'chatroom-name-entry' : 'chatroom-name-edit'"
-          placeholder="Enter name here..."
+          id="chatroom-modal-read-only"
+          v-model="allowReadOnlyAfterEnd"
+          type="checkbox"
+          name="allow_read_only_after_end"
+          :data-testid="mode === 'create' ? 'edit-read-only' : 'edit-read-only'"
         >
-        <label for="chatroom-modal-description">
-          Description:
-        </label>
-        <input
-          id="chatroom-modal-description"
-          v-model="description"
-          type="text"
-          name="description"
-          :data-testid="mode === 'create' ? 'chatroom-description-entry' : 'chatroom-description-edit'"
-          placeholder="Enter description here..."
-        >
-        <label
-          for="chatroom-modal-allow-anon"
-          id="allow-anon-label"
-        >
-          Allow people to join anonymously?
-          <input
-            id="chatroom-modal-allow-anon"
-            v-model="allowAnon"
-            type="checkbox"
-            name="allow-anon"
-            :data-testid="mode === 'create' ? 'enable-disable-anon' : 'edit-anon'"
-          >
-        </label>
-        <label
-          for="chatroom-modal-read-only"
-          id="allow-read-only-label"
-        >
-          Enable read-only after session ends?
-          <input
-            id="chatroom-modal-read-only"
-            v-model="allowReadOnlyAfterEnd"
-            type="checkbox"
-            name="allow_read_only_after_end"
-            :data-testid="mode === 'create' ? 'edit-read-only' : 'edit-read-only'"
-          >
-        </label>
-      </div>
-    </form>
+      </label>
+    </div>
   </Popup>
 </template>
+
+<style scoped>
+.hidden-trigger {
+    display: none;
+}
+</style>

@@ -16,14 +16,14 @@ interface Props {
     chatroom: Chatroom;
     isAdmin: boolean;
     baseUrl: string;
-    csrfToken: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-    (e: 'edit', chatroom: Chatroom): void;
-    (e: 'delete', chatroom: Chatroom): void;
-    (e: 'clear', chatroom: Chatroom): void;
+    'edit': [chatroom: Chatroom];
+    'delete': [chatroom: Chatroom];
+    'clear': [chatroom: Chatroom];
+    'toggle-chatroom': [chatroom: Chatroom];
 }>();
 
 const truncatedTitle = computed(() => {
@@ -47,18 +47,9 @@ const statusLabel = computed(() => {
 
 const joinUrl = computed(() => `${props.baseUrl}/${props.chatroom.id}`);
 const anonJoinUrl = computed(() => `${props.baseUrl}/${props.chatroom.id}/anonymous`);
-const toggleFormAction = computed(() => `${props.baseUrl}/${props.chatroom.id}/toggleActiveStatus`);
 
 function toggleChatroom() {
-    if (props.chatroom.isActive) {
-        if (!confirm('This will close the chatroom. Are you sure?')) {
-            return;
-        }
-    }
-    const form = document.getElementById(`chatroom_toggle_form_${props.chatroom.id}`) as HTMLFormElement;
-    if (form) {
-        form.submit();
-    }
+    emit('toggle-chatroom', props.chatroom);
 }
 
 function onDelete() {
@@ -123,17 +114,6 @@ function onClear() {
       </span>
     </td>
     <td>
-      <form
-        :id="`chatroom_toggle_form_${chatroom.id}`"
-        :action="toggleFormAction"
-        method="post"
-      >
-        <input
-          type="hidden"
-          name="csrf_token"
-          :value="csrfToken"
-        >
-      </form>
       <button
         v-if="!chatroom.isActive"
         data-testid="enable-chatroom"

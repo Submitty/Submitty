@@ -1,8 +1,22 @@
 <script setup lang="ts">
-/* global WebSocketClient, buildCourseUrl, csrfToken, displaySuccessMessage, displayErrorMessage */
 import { ref, onMounted } from 'vue';
 import ChatroomRow from '@/components/chat/ChatroomRow.vue';
 import ChatroomFormModal from '@/components/chat/ChatroomFormModal.vue';
+
+interface ChatroomMessage {
+    chatroom_id: number;
+    title: string;
+    description: string;
+    host_name: string;
+    allow_anon: boolean;
+    allow_read_only_after_end: boolean;
+    type: 'chat_open' | 'chat_close' | 'chat_create' | 'chat_delete';
+}
+
+interface WebSocketClient {
+    onmessage: (msg: ChatroomMessage) => void;
+    open: (channel: string) => void;
+}
 
 interface Chatroom {
     id: number;
@@ -19,10 +33,16 @@ interface Props {
     chatrooms: Chatroom[];
     userAdmin: boolean;
     baseUrl: string;
-    csrfToken: string;
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits<{
+    'delete-chatroom': [chatroom: Chatroom];
+    'clear-chatroom': [chatroom: Chatroom];
+    'toggle-chatroom': [chatroom: Chatroom];
+    'create-chatroom': [data: { title: string; description: string; allowAnon: boolean; allowReadOnlyAfterEnd: boolean }];
+    'edit-chatroom': [data: { id: number; title: string; description: string; allowAnon: boolean; allowReadOnlyAfterEnd: boolean }];
+}>();
 
 const chatroomList = ref<Chatroom[]>([...props.chatrooms]);
 
@@ -48,57 +68,35 @@ function closeModal() {
     editingChatroom.value = null;
 }
 
-function deleteChatroom(chatroom: Chatroom) {
-    if (!confirm(`This will delete chatroom '${chatroom.title}'. Are you sure?`)) {
-        return;
-    }
-    const url = `${props.baseUrl}/delete`;
-    const fd = new FormData();
-    fd.append('csrf_token', props.csrfToken);
-    fd.append('chatroom_id', String(chatroom.id));
-
-    fetch(url, { method: 'POST', body: fd })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== 'success') {
-                (window as any).displayErrorMessage?.(data.message || 'Something went wrong. Please try again.');
-            }
-            else {
-                window.location.reload();
-            }
-        })
-        .catch(() => {
-            window.alert('Something went wrong. Please try again.');
-        });
+function onDeleteChatroom(chatroom: Chatroom) {
+    emit('delete-chatroom', chatroom);
 }
 
-function clearChatroom(chatroom: Chatroom) {
-    if (!confirm('This will clear all messages in the chatroom. Are you sure?')) {
-        return;
-    }
-    const url = (window as any).buildCourseUrl(['chat', chatroom.id, 'clear']);
-    const fd = new FormData();
-    fd.append('csrf_token', props.csrfToken);
+function onClearChatroom(chatroom: Chatroom) {
+    emit('clear-chatroom', chatroom);
+}
 
-    fetch(url, { method: 'POST', body: fd })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status !== 'success') {
-                (window as any).displayErrorMessage?.(data.message || 'Something went wrong. Please try again.');
-            }
-            else {
-                (window as any).displaySuccessMessage?.(`Cleared ${chatroom.title} successfully`);
-            }
-        })
-        .catch(() => {
-            window.alert('Something went wrong. Please try again.');
+function onToggleChatroom(chatroom: Chatroom) {
+    emit('toggle-chatroom', chatroom);
+}
+
+function onSaveForm(data: { title: string; description: string; allowAnon: boolean; allowReadOnlyAfterEnd: boolean }) {
+    if (modalMode.value === 'create') {
+        emit('create-chatroom', data);
+    }
+    else if (editingChatroom.value) {
+        emit('edit-chatroom', {
+            id: editingChatroom.value.id,
+            ...data,
         });
+    }
+    closeModal();
 }
 
 // WebSocket integration
-function handleChatStateChange(msg: any, isActive: boolean) {
+function handleChatStateChange(msg: ChatroomMessage, isActive: boolean) {
     // Remove existing row if present
-    const idx = chatroomList.value.findIndex(c => c.id === msg.chatroom_id);
+    const idx = chatroomList.value.findIndex((c) => c.id === msg.chatroom_id);
     if (idx !== -1) {
         chatroomList.value.splice(idx, 1);
     }
@@ -117,7 +115,7 @@ function handleChatStateChange(msg: any, isActive: boolean) {
 }
 
 function removeChatroomRow(chatroomId: number) {
-    const idx = chatroomList.value.findIndex(c => c.id === chatroomId);
+    const idx = chatroomList.value.findIndex((c) => c.id === chatroomId);
     if (idx !== -1) {
         chatroomList.value.splice(idx, 1);
     }
@@ -125,15 +123,16 @@ function removeChatroomRow(chatroomId: number) {
 
 const initWebSocket = (retries = 10) => {
     try {
-        if (typeof (window as any).WebSocketClient === 'undefined') {
+        const wsClient = (window as unknown as { WebSocketClient?: new () => WebSocketClient }).WebSocketClient;
+        if (typeof wsClient === 'undefined') {
             if (retries > 0) {
                 setTimeout(() => initWebSocket(retries - 1), 500);
             }
             return;
         }
 
-        const socketClient = new (window as any).WebSocketClient();
-        socketClient.onmessage = (msg: any) => {
+        const socketClient = new wsClient();
+        socketClient.onmessage = (msg: ChatroomMessage) => {
             const isActive = msg.type === 'chat_open';
             switch (msg.type) {
                 case 'chat_open':
@@ -150,7 +149,7 @@ const initWebSocket = (retries = 10) => {
         };
         socketClient.open('chatrooms');
     }
-    catch (err) {
+    catch {
         // Failed to initialize WebSocket
     }
 };
@@ -226,10 +225,10 @@ onMounted(() => {
               :chatroom="chatroom"
               :is-admin="true"
               :base-url="baseUrl"
-              :csrf-token="csrfToken"
               @edit="openEditModal"
-              @delete="deleteChatroom"
-              @clear="clearChatroom"
+              @delete="onDeleteChatroom"
+              @clear="onClearChatroom"
+              @toggle-chatroom="onToggleChatroom"
             />
           </tbody>
         </template>
@@ -271,7 +270,6 @@ onMounted(() => {
               :chatroom="chatroom"
               :is-admin="false"
               :base-url="baseUrl"
-              :csrf-token="csrfToken"
             />
           </tbody>
         </template>
@@ -282,10 +280,9 @@ onMounted(() => {
     <ChatroomFormModal
       :visible="modalVisible"
       :mode="modalMode"
-      :base-url="baseUrl"
-      :csrf-token="csrfToken"
       :chatroom="editingChatroom"
       @close="closeModal"
+      @save="onSaveForm"
     />
   </div>
 </template>
