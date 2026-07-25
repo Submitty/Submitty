@@ -2,7 +2,8 @@
 
 """
 # USAGE
-# config_syntax_check.py   <path to config file for gradeable>   <assignment>   <semester>  <course>
+# config_syntax_check.py <path to config file for gradeable>
+#                        <assignment> <semester> <course>
 """
 
 import argparse
@@ -12,7 +13,9 @@ from submitty_utils import submitty_schema_validator
 import sys
 import traceback
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), '..', 'config'
+)
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
@@ -62,25 +65,41 @@ def main():
     # Verify that the two files exist
     for json_path in [complete_config_json_path, complete_config_schema_path]:
         if not os.path.isfile(json_path):
-            print(f"Error, the following file is missing on your system: {json_path}")
+            print(
+                "Error, the following file is missing on your system: "
+                f"{json_path}"
+            )
             sys.exit(1)
 
     # Run the schema validator, printing an error on failure.
     try:
-        submitty_schema_validator.validate_complete_config_schema_using_filenames(
+        validator = submitty_schema_validator
+        validator.validate_complete_config_schema_using_filenames(
             complete_config_json_path,
             complete_config_schema_path,
             warn=False
         )
     except submitty_schema_validator.SubmittySchemaException as s:
         s.print_human_readable_error()
-        print("The submitty configuration validator detected the above error in your config.")
-        print("If the reported line number does not match your source config.json,")
+        print(
+            "The submitty configuration validator detected the above error "
+            "in your config."
+        )
+        print(
+            "If the reported line number does not match your source "
+            "config.json,"
+        )
         print("compare it against the generated files used during the build:")
         print(f"  preprocessed config: {preprocessed_config_json_path}")
         print(f"  generated complete config: {complete_config_json_path}")
-        print("This is a new feature. If you feel that an error was incorrectly identified,")
-        print("please submit an error report at https://github.com/Submitty/Submitty")
+        print(
+            "This is a new feature. If you feel that an error was "
+            "incorrectly identified,"
+        )
+        print(
+            "please submit an error report at "
+            "https://github.com/Submitty/Submitty"
+        )
         print()
     except Exception:
         traceback.print_exc()

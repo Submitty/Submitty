@@ -30,7 +30,11 @@ def print_error_context(contents, line_number, column_number, radius=2):
     print("ERROR: Context from the generated config used during this build:")
     for current_line in range(start, end + 1):
         marker = ">" if current_line == line_number else " "
-        print(f"{marker} {current_line:>{line_number_width}} | {lines[current_line - 1]}")
+        line_content = lines[current_line - 1]
+        print(
+            f"{marker} {current_line:>{line_number_width}} | "
+            f"{line_content}"
+        )
         if current_line == line_number:
             caret_padding = max(column_number - 1, 0)
             print(f"  {' ' * line_number_width} | {' ' * caret_padding}^")
@@ -38,10 +42,16 @@ def print_error_context(contents, line_number, column_number, radius=2):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Preprocess a instructor config json to prepare it for main_configure.cpp"
+        description=(
+            "Preprocess a instructor config json to prepare it for "
+            "main_configure.cpp"
+        )
     )
     parser.add_argument(
-        "file", metavar="file_name", type=str, help="File name of JSON file to validate"
+        "file",
+        metavar="file_name",
+        type=str,
+        help="File name of JSON file to validate",
     )
     args = parser.parse_args()
     if not os.path.isfile(args.file):
@@ -58,8 +68,11 @@ if __name__ == "__main__":
         output = json.loads(j_string, object_pairs_hook=detect_duplicate_keys)
 
         if duplicate_keys:
-            # Print each level of duplicate keys in reverse order (outer most to inner most)
-            keys_str = ", ".join(f"{{ {keys} }}" for keys in reversed(duplicate_keys))
+            # Print each level of duplicate keys in reverse order
+            # (outer most to inner most)
+            keys_str = ", ".join(
+                f"{{ {keys} }}" for keys in reversed(duplicate_keys)
+            )
             print(f"WARNING: Duplicate JSON key(s) found - {keys_str}")
     except json.JSONDecodeError as error:
         print(f'ERROR: Could not load {args.file}')
