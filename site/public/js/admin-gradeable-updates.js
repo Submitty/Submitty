@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig, loadTemplates, CodeMirror */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, Twig, loadTemplates, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -560,7 +560,6 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
-            let alerted = false;
             const build_info = response['data']['build_output'] ?? null;
             const cmake_info = response['data']['cmake_output'] ?? null;
             const preprocessed_config = response['data']['preprocessed_config'] ?? null;
@@ -570,16 +569,6 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             if (build_info !== null) {
                 // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
-                for (const line of build_info.split('\n')) {
-                    if (line.includes('WARNING:')) {
-                        alerted = true;
-                        displayWarningMessage(line.split('WARNING:')[1].trim());
-                    }
-                    else if (line.includes('ERROR:')) {
-                        alerted = true;
-                        displayErrorMessage(line.split('ERROR:')[1].trim());
-                    }
-                }
             }
             else {
                 $('#build-log-body').text('There is currently no build output.');
@@ -605,7 +594,7 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             else {
                 $('#generated-complete-config-body').text('There is currently no generated complete config.');
             }
-            if (alerted || !rebuilt) {
+            if (build_info !== null || !rebuilt) {
                 // Display the build log for respective rebuild warnings/errors or manual instructor requests
                 $('.log-container').show();
                 $('#generated-config-help').toggle(generated_config_note);
@@ -653,8 +642,8 @@ function ajaxCheckBuildStatus() {
             else if (response['data'] == false) {
                 $('#rebuild-status').text('Gradeable build failed');
                 $('#autograding_config_error').text(
-                    'The current configuration is not valid. Check the build log for details, ' +
-                    'and use the generated config sections if the reported line numbers do not match your source file.'
+                    'The current configuration is not valid. Check the build log for details, '
+                    + 'and use the generated config sections if the reported line numbers do not match your source file.',
                 );
                 $('.config_search_error').show();
             }
