@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 interface MoreDropdownItem {
     id: string;
     displayText: string;
@@ -24,6 +26,7 @@ const emit = defineEmits<{
     'navigate-stats': [];
     'navigate': [url: string];
     'item-click': [itemId: string];
+    'toggle-attachments': [];
 }>();
 
 interface DisplayOption {
@@ -41,8 +44,21 @@ const displayOptions: DisplayOption[] = [
     { id: 'alpha_by_rotating', label: 'Alpha by Rotating Post Order' },
 ];
 
+const showAttachments = ref(false);
+
+function displayTextForItem(item: MoreDropdownItem): string {
+    if (item.id === 'toggle-attachments') {
+        return showAttachments.value ? 'Hide Attachments' : 'Show Attachments';
+    }
+    return item.displayText;
+}
+
 function handleItemClick(item: MoreDropdownItem) {
     switch (item.id) {
+        case 'toggle-attachments':
+            showAttachments.value = !showAttachments.value;
+            emit('toggle-attachments');
+            break;
         case 'merge_thread':
             emit('toggle-merged');
             break;
@@ -105,7 +121,7 @@ function handleOptionClick(option: string) {
               v-if="item.badgeText"
               class="status"
             />
-            <span v-if="item.displayText">{{ item.displayText }}</span>
+            <span v-if="displayTextForItem(item)">{{ displayTextForItem(item) }}</span>
             <span
               v-if="item.badgeText"
               class="attachment-badge badge"
