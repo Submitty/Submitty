@@ -12,11 +12,14 @@ jobs:
   vagrant-up:
     runs-on: macos-15-intel
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install vagrant
-        run: brew install vagrant
+        run: |
+          brew tap hashicorp/tap
+          brew trust --formula hashicorp/tap/vagrant
+          brew install hashicorp/tap/hashicorp-vagrant
 
       - name: install virtual box 7.0.20
         run: |

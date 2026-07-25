@@ -65,6 +65,7 @@ use app\libraries\FileUtils;
  * @method array getCourseJson()
  * @method array getAcceptedEmails()
  * @method array getUserIdRequirements()
+ * @method array<string, mixed> getPasswordRequirements()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
@@ -81,6 +82,7 @@ use app\libraries\FileUtils;
  * @method string getSeekMessageInstructions()
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
+ * @method string getSubmittyDataPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
  * @method string getSystemMessage()
@@ -121,6 +123,10 @@ class Config extends AbstractModel {
     /** @prop
      * @var array<mixed> */
     protected $user_id_requirements = [];
+
+    /** @prop
+     * @var array<mixed> */
+    protected $password_requirements = [];
 
     /** @prop
      * @var array<string> */
@@ -356,6 +362,9 @@ class Config extends AbstractModel {
      * @var string */
     protected $submitty_install_path;
     /** @prop
+     * @var string */
+    protected $submitty_data_path;
+    /** @prop
      * @var bool */
     protected $duck_banner_enabled;
     /** @prop
@@ -473,6 +482,8 @@ class Config extends AbstractModel {
             $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
         }
 
+        $this->password_requirements = $submitty_json['password_requirements'];
+
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
@@ -528,6 +539,7 @@ class Config extends AbstractModel {
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+        $this->submitty_data_path = $submitty_json['submitty_data_dir'];
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 

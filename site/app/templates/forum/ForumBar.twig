@@ -51,6 +51,7 @@
 			{% endif %}
 		</div>
 		<div class="toolbar-right">
+			{% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton' } %}
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">
 				<div class="btn-group">

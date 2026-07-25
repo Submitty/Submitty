@@ -87,14 +87,6 @@ function draghandle(e) {
 
 // ADD FILES FOR NEW SUBMISSION
 // ========================================================================================
-// check if adding a file is valid (not exceeding the limit)
-function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
-        alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
-        return false;
-    }
-    return true;
-}
 
 // initialize maximum no of files with that of the php_ini value
 function initMaxNoFiles(max_no_of_files) {
@@ -105,12 +97,10 @@ function initMaxNoFiles(max_no_of_files) {
 function drop(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    for (let i = 0; i < filestream.length; i++) {
+        addFileWithCheck(filestream[i], part); // check for folders
+        total_files_added++;
     }
 }
 
@@ -118,12 +108,10 @@ function drop(e) {
 function dropWithMultipleZips(e) {
     draghandle(e);
     const filestream = e.dataTransfer.files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        const part = get_part_number(e);
-        for (let i = 0; i < filestream.length; i++) {
-            addFileWithCheck(filestream[i], part, false); // check for folders
-            total_files_added++;
-        }
+    const part = get_part_number(e);
+    for (let i = 0; i < filestream.length; i++) {
+        addFileWithCheck(filestream[i], part, false); // check for folders
+        total_files_added++;
     }
 }
 
@@ -154,11 +142,9 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
-    if (addIsValid(filestream.length, total_files_added)) {
-        for (let i = 0; i < filestream.length; i++) {
-            addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
-            total_files_added++;
-        }
+    for (let i = 0; i < filestream.length; i++) {
+        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+        total_files_added++;
     }
     $(`#input-file${part}`).val('');
 }

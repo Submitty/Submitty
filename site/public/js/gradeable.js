@@ -180,16 +180,26 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
 
     const peer_details = {};
 
-    // Group together some useful data for rendering:
+    // Group together the peer graders, their selected marks, and whether
+    // their grade was created against a different submission version.
     gradeable.components.forEach((component) => {
-        // The peer details for a specific component (who has graded it and what marks have they chosen.)
         peer_details[component.id] = {
             graders: [],
             marks_assigned: {},
+            graded_versions: {},
+            version_conflicts: {},
         };
-        graded_gradeable.graded_components[component.id].forEach((graded_component) => {
-            peer_details[component.id]['graders'].push(graded_component.grader_id);
-            peer_details[component.id]['marks_assigned'][graded_component.grader_id] = graded_component.mark_ids;
+
+        const gradedComponents = graded_gradeable.graded_components[component.id] ?? [];
+
+        gradedComponents.forEach((graded_component) => {
+            const graderId = graded_component.grader_id;
+
+            peer_details[component.id].graders.push(graderId);
+            peer_details[component.id].marks_assigned[graderId] = graded_component.mark_ids;
+            peer_details[component.id].graded_versions[graderId] = graded_component.graded_version;
+            peer_details[component.id].version_conflicts[graderId]
+                = graded_component.graded_version !== displayVersion;
         });
     });
     // TODO: i don't think this is async

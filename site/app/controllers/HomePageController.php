@@ -296,8 +296,21 @@ class HomePageController extends AbstractController {
             );
         }
 
+        $course_title = trim($_POST['course_title']);
+        // course title can only contain lowercase letters, digits, and the underscore character
+        // also check for "" (if only whitespace is input, it all gets trimmed)
+        if (preg_match('/[^a-z0-9_]/', $course_title) || $course_title === "") {
+            $error = "The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        $course_title = strtolower($course_title);
+
         $semester = trim($_POST['course_semester']);
-        $course_title = trim(strtolower($_POST['course_title']));
         $head_instructor = $_POST['head_instructor'];
 
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
@@ -471,6 +484,7 @@ class HomePageController extends AbstractController {
      * @return MultiResponse
      */
     #[Route("/term/new", methods: ["POST"])]
+    #[Route("/api/terms", methods: ["POST"])]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -478,36 +492,81 @@ class HomePageController extends AbstractController {
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
-        $response = new MultiResponse();
-        if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
-            $term_id = $_POST['term_id'];
-            $term_name = $_POST['term_name'];
-            $start_date = $_POST['start_date'];
-            $end_date = $_POST['end_date'];
-            $em = $this->core->getSubmittyEntityManager();
-            $term = $em->find(Term::class, $term_id);
 
-            if ($term !== null) {
-                $this->core->addErrorMessage("Term id already exists.");
-            }
-            elseif ($end_date < $start_date) {
-                $this->core->addErrorMessage("End date should be after Start date.");
-            }
-            else {
-                $term = new Term(
-                    $term_id,
-                    $term_name,
-                    new \DateTime($start_date),
-                    new \DateTime($end_date),
-                );
-                $em->persist($term);
-                $em->flush();
-                $this->core->addSuccessMessage("Term added successfully.");
-            }
-            $url = $this->core->buildUrl(['home', 'courses', 'new']);
-            $response = $response->RedirectOnlyResponse(new RedirectResponse($url));
+        if (
+            !isset($_POST['term_id'])
+            || !isset($_POST['term_name'])
+            || !isset($_POST['start_date'])
+            || !isset($_POST['end_date'])
+        ) {
+            $error = "Term ID, term name, start date, or end date not set.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
         }
-        return $response;
+
+        $term_id = $_POST['term_id'];
+        $term_name = $_POST['term_name'];
+        $start_date = $_POST['start_date'];
+        $end_date = $_POST['end_date'];
+        $em = $this->core->getSubmittyEntityManager();
+        $term = $em->find(Term::class, $term_id);
+
+        if ($term !== null) {
+            $error = "Term with that ID already exists.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        elseif ($end_date < $start_date) {
+            $error = "End date should be after Start date.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        $start_date_obj = new \DateTime($start_date);
+        $end_date_obj = new \DateTime($end_date);
+        $term_length_days = $start_date_obj->diff($end_date_obj)->days;
+
+        if ($term_length_days > 360) {
+            $error = "Term length cannot exceed 360 days (this term spans $term_length_days days).";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
+        $term = new Term(
+            $term_id,
+            $term_name,
+            new \DateTime($start_date),
+            new \DateTime($end_date),
+        );
+        $em->persist($term);
+        $em->flush();
+        $this->core->addSuccessMessage("Term added successfully.");
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                "term_id" => $term_id,
+                "term_name" => $term_name,
+                "start_date" => $start_date,
+                "end_date" => $end_date
+            ]),
+            null,
+            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+        );
     }
 
     /**

@@ -44,6 +44,12 @@ class Button extends AbstractModel implements \JsonSerializable {
      * @var float|null $progress */
     protected $progress;
     /** @prop
+     * @var float|null $peer_progress */
+    protected $peer_progress;
+    /** @prop
+     * @var string|null $peer_progress_class */
+    protected $peer_progress_class;
+    /** @prop
      * @var bool $title_on_hover */
     protected $title_on_hover;
     /** @prop
@@ -79,6 +85,11 @@ class Button extends AbstractModel implements \JsonSerializable {
         if ($this->progress !== null) {
             $this->progress = floatval($this->progress);
         }
+        $this->peer_progress = $details["peer_progress"] ?? null;
+        if ($this->peer_progress !== null) {
+            $this->peer_progress = floatval($this->peer_progress);
+        }
+        $this->peer_progress_class = $details["peer_progress_class"] ?? null;
         $this->title_on_hover = $details["title_on_hover"] ?? false;
         $this->aria_label = $details["aria_label"] ?? null;
         $this->badge = $details["badge"] ?? null;
@@ -135,6 +146,12 @@ class Button extends AbstractModel implements \JsonSerializable {
     public function getProgress(): ?float {
         return $this->progress;
     }
+    public function getPeerProgress(): ?float {
+        return $this->peer_progress;
+    }
+    public function getPeerProgressClass(): ?string {
+        return $this->peer_progress_class;
+    }
     public function getAriaLabel(): ?string {
         return $this->aria_label;
     }
@@ -180,6 +197,12 @@ class Button extends AbstractModel implements \JsonSerializable {
     public function setProgress(?float $progress): void {
         $this->progress = $progress;
     }
+    public function setPeerProgress(?float $progress): void {
+        $this->peer_progress = $progress;
+    }
+    public function setPeerProgressClass(?string $class): void {
+        $this->peer_progress_class = $class;
+    }
     public function setAriaLabel(?string $ariaLabel): void {
         $this->aria_label = $ariaLabel;
     }
@@ -204,6 +227,8 @@ class Button extends AbstractModel implements \JsonSerializable {
      * disabled: bool,
      * prerequisite: string|null,
      * progress: float|null,
+     * peer_progress: float|null,
+     * peer_progress_class: string|null,
      * title_on_hover: bool,
      * aria_label: string|null,
      * badge: string|null,
@@ -224,6 +249,8 @@ class Button extends AbstractModel implements \JsonSerializable {
             'disabled' => $this->disabled,
             'prerequisite' => $this->prerequisite,
             'progress' => $this->progress,
+            'peer_progress' => $this->peer_progress,
+            'peer_progress_class' => $this->peer_progress_class,
             'title_on_hover' => $this->title_on_hover,
             'aria_label' => $this->aria_label,
             'badge' => $this->badge,

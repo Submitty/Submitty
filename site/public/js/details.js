@@ -31,14 +31,14 @@ $(document).ready(() => {
         }
     });
 
-    // Creating and adding style for the pseudo selector in the details-table
+    // Adds labels to values in mobile view using pseudo selector :before
     const style = document.createElement('style');
     let content = '';
     // loop over the head row of `details-table`
     $('#details-table thead tr th').each(function (idx) {
         if (idx) {
-            // the content to be added is inside this data attr
-            content = $(this).data('col-title');
+            // add each header's text as a label for that column's values in the student's submission
+            content = $(this).data('col-title') ?? '';
             style.innerHTML += `
               #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
                   content: "${escapeSpecialChars(content)}";
@@ -190,10 +190,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
     }
-    // Randomize Order - all graders have permission
+    // Randomize Order
     const randomFilterBox = document.getElementById('toggle-random-order');
-    const randomFilterStatus = Cookies.get('sort');
-    randomFilterBox.checked = (randomFilterStatus === 'random');
+    if (randomFilterBox !== null) {
+        const randomFilterStatus = Cookies.get('sort');
+        randomFilterBox.checked = (randomFilterStatus === 'random');
+    }
 
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
