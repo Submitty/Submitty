@@ -189,3 +189,101 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// Event handlers for Vue chatroom list page
+window.deleteChatroom = function (chatroom) {
+    if (!confirm(`This will delete chatroom '${chatroom.title}'. Are you sure?`)) {
+        return;
+    }
+    const url = buildCourseUrl(['chat', 'delete']);
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('chatroom_id', String(chatroom.id));
+
+    fetch(url, { method: 'POST', body: fd })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status !== 'success') {
+                displayErrorMessage(data.message || 'Something went wrong. Please try again.');
+            }
+            else {
+                window.location.reload();
+            }
+        })
+        .catch(() => {
+            window.alert('Something went wrong. Please try again.');
+        });
+};
+
+window.clearChatroom = function (chatroom) {
+    if (!confirm('This will clear all messages in the chatroom. Are you sure?')) {
+        return;
+    }
+    const url = buildCourseUrl(['chat', chatroom.id, 'clear']);
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+
+    fetch(url, { method: 'POST', body: fd })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status !== 'success') {
+                displayErrorMessage(data.message || 'Something went wrong. Please try again.');
+            }
+            else {
+                displaySuccessMessage(`Cleared ${chatroom.title} successfully`);
+            }
+        })
+        .catch(() => {
+            window.alert('Something went wrong. Please try again.');
+        });
+};
+
+window.toggleChatroom = function (chatroom) {
+    if (chatroom.isActive) {
+        if (!confirm('This will close the chatroom. Are you sure?')) {
+            return;
+        }
+    }
+    const url = buildCourseUrl(['chat', chatroom.id, 'toggleActiveStatus']);
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+
+    fetch(url, { method: 'POST', body: fd })
+        .then((response) => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+            else {
+                window.location.reload();
+            }
+        })
+        .catch(() => {
+            window.alert('Something went wrong. Please try again.');
+        });
+};
+
+window.saveChatroom = function (data) {
+    const mode = data.mode || 'create';
+    const url = mode === 'create'
+        ? buildCourseUrl(['chat', 'new'])
+        : buildCourseUrl(['chat', data.id, 'edit']);
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('title', data.title);
+    fd.append('description', data.description);
+    fd.append('allow-anon', data.allowAnon ? 'true' : 'false');
+    fd.append('allow_read_only_after_end', data.allowReadOnlyAfterEnd ? 'true' : 'false');
+
+    fetch(url, { method: 'POST', body: fd })
+        .then((response) => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+            else {
+                window.location.reload();
+            }
+        })
+        .catch(() => {
+            window.alert('Something went wrong. Please try again.');
+        });
+};
