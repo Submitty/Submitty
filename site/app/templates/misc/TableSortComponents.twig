@@ -1,0 +1,52 @@
+{#
+Macro for rendering SortableTableHeader.vue within Twig
+#}
+
+{# using_row_groups is specifically for statPage.twig's forum post collapsible rows #}
+{% macro sortable_table_header(table_id, title, sort_key, col_data_type, using_row_groups = false) %}
+    {% set id = uniqid() %}
+    <th id="vue-{{ id }}" data-col-title="{{ title }}" scope="col">
+    </th>
+    <script>
+        window.submitty.render(
+            "#vue-{{ id }}",
+            "component",
+            "table_sorting/SortableTableHeader",
+            {{ 
+                { 
+                    tableId: table_id, 
+                    title: title, 
+                    sortKey: sort_key, 
+                    colDataType: col_data_type,
+                    usingRowGroups: using_row_groups,
+                } 
+                | json_encode() | raw() 
+            }},
+            {
+                'sort-table-column-click': '(payload) => { window.sortTableByColumn(payload.tableId, payload.sortKey, payload.colDataType, payload.usingRowGroups); }'
+            }
+        );
+    </script>
+{% endmacro %}
+
+{#
+Macro for rendering TableSortManager.vue within Twig
+#}
+
+{# This component must be added to any page where you want the table sorting to
+persist after reload #}
+{% macro table_sort_manager(table_id) %}
+    {% set id = uniqid() %}
+    <div id="vue-{{ id }}"></div>
+    <script>
+        window.submitty.render(
+            "#vue-{{ id }}",
+            "component",
+            "table_sorting/TableSortManager",
+            {{ { tableId: table_id, } | json_encode() | raw() }},
+            {
+                'restore-table-sort': '(tableId) => { window.restoreTableSort(tableId); }'
+            }
+        );
+    </script>
+{% endmacro %}

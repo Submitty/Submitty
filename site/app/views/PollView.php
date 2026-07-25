@@ -82,7 +82,7 @@ class PollView extends AbstractView {
             'file_data' => $file_data,
             'user_admin' => $this->core->getUser()->accessAdmin(),
             'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType()),
-            'end_time' => $poll->getEndTime()?->format('Y-m-d\TH:i:s'),
+            'end_time' => $poll->getEndTime()?->format('Y-m-d\TH:i:sP'),
             'timer_enabled' => $poll->isTimerEnabled(),
             'user_id' => $this->core->getUser()->getId()
         ]);

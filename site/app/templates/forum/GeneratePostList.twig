@@ -46,7 +46,8 @@
         "has_history": post_d.has_history,
         "thread_previously_merged": post_d.thread_previously_merged,
         "thread_announced": post_d.thread_announced,
-        "post_up_duck": post_d.post_up_duck
+        "post_up_duck": post_d.post_up_duck,
+        "post_date_raw": post_d.post_date_raw
     } only %}
 
 {% endfor %}
@@ -72,7 +73,9 @@
             "show_anon" : true,
             "submit_label" : "Submit Reply to All",
             "thread_id": thread_id,
-            "data_testid" : "forum-submit-reply-all"
+            "data_testid" : "forum-submit-reply-all",
+            "show_reply_announcement": show_reply_announcement is defined ? show_reply_announcement : false,
+            "email_enabled": email_enabled is defined ? email_enabled : false
         } %}
 
     </form>

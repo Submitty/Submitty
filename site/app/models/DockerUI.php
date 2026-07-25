@@ -84,7 +84,7 @@ class DockerUI extends AbstractModel {
         $this->docker_logpath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker");
 
         $containers_config_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
+            $this->core->getConfig()->getSubmittyDataPath(),
             "config",
             "autograding_containers.json"
         );

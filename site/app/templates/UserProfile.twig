@@ -127,7 +127,7 @@
                                 Change Password:
                             </span>
                             <span>
-                                <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password">
+                                <button class="icon" tabindex="0" onclick="showUpdatePasswordForm()" aria-label="Change password" title="Change password" data-testid="user-profile-change-password">
                                     <i class="fas fa-pencil-alt"></i>
                                 </button>
                             </span>
@@ -153,6 +153,23 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="user-info-cont">
+                <div class="user-info-title">
+                    <span>Date/Time Format:</span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="date_format_select">Choose preferred date format:</label>
+                        <select id="date_format_select" data-testid="date-format-dropdown">
+                            <option value="MDY" {% if user.getDateFormat() == 'MDY' %}selected{% endif %}>MDY (01/31/2024)</option>
+                            <option value="DMY" {% if user.getDateFormat() == 'DMY' %}selected{% endif %}>DMY (31/01/2024)</option>
+                            <option value="YMD" {% if user.getDateFormat() == 'YMD' %}selected{% endif %}>YMD (2024-01-31)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="user-info-cont">
                 <div class="user-info-title">
                     <span>Preferred Locale (Language/Region):

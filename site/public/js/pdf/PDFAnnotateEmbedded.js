@@ -230,10 +230,14 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
+                const pdfJsBaseUrl = `${window.location.origin}/vendor/pdfjs/`;
                 pdfjsLib.getDocument({
                     data: pdfData,
-                    cMapUrl: '../../vendor/pdfjs/cmaps/',
+                    cMapUrl: `${pdfJsBaseUrl}cmaps/`,
                     cMapPacked: true,
+                    wasmUrl: `${pdfJsBaseUrl}wasm/`,
+                    iccUrl: `${pdfJsBaseUrl}iccs/`,
+                    standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
                 }).promise.then((pdf) => {
                     const doc = new jspdf.jsPDF('p', 'mm');
                     renderPageForDownload(pdf, doc, 1, pdf.numPages + 1, file_name);
@@ -363,10 +367,14 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
+                const pdfJsBaseUrl = `${window.location.origin}/vendor/pdfjs/`;
                 pdfjsLib.getDocument({
                     data: pdfData,
-                    cMapUrl: '../../vendor/pdfjs/cmaps/',
+                    cMapUrl: `${pdfJsBaseUrl}cmaps/`,
                     cMapPacked: true,
+                    wasmUrl: `${pdfJsBaseUrl}wasm/`,
+                    iccUrl: `${pdfJsBaseUrl}iccs/`,
+                    standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
                 }).promise.then((pdf) => {
                     window.RENDER_OPTIONS.pdfDocument = pdf;
                     if (window.GENERAL_INFORMATION.broken) {
@@ -394,7 +402,8 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
                                 if (initialPage.length) {
-                                    $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
+                                    const scrollContainer = $('#file-content').length ? $('#file-content') : $('#submission_browser');
+                                    scrollContainer.scrollTop(Math.max(page.offsetTop, 0));
                                 }
                             }
                         }));

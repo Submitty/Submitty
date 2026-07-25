@@ -24,7 +24,7 @@ set_permissions () {
         css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi|cjs)
             chmod 445 ${fullpath}
             ;;
         html)
@@ -154,11 +154,11 @@ fi
 readarray -t result_array <<< "${result}"
 
 # clear old twig cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/twig"
+if [ -d "${SUBMITTY_DATA_DIR}/cache/twig" ]; then
+    rm -rf "${SUBMITTY_DATA_DIR}/cache/twig"
 fi
 # create twig cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
+mkdir -p ${SUBMITTY_DATA_DIR}/cache/twig
 
 # clear old routes cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
@@ -272,6 +272,9 @@ php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Loca
 chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
 chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
+chmod -R 751 ${SUBMITTY_DATA_DIR}/cache
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}/cache
+
 if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
     echo -e "Checking for and fetching latest browscap.ini if needed"
     # browscap.ini is needed for users' browser identification, this information is shown on session management page
@@ -372,7 +375,15 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp -R ${NODE_FOLDER}/pdfjs-dist/build/* ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.mjs ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs
+    mkdir ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs3/umd/markerjs3.js ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs3/umd/markerjs3.js.map ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs-ui/markerjs-ui.umd.cjs ${VENDOR_FOLDER}/markerjs3/markerjs-ui.umd.js
     cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/wasm ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/image_decoders ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/standard_fonts ${VENDOR_FOLDER}/pdfjs
+    cp -R ${NODE_FOLDER}/pdfjs-dist/iccs ${VENDOR_FOLDER}/pdfjs
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
