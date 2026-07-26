@@ -1,5 +1,3 @@
-#!/usr/local/submitty/venv/bin/python3
-
 """Run the migrator tool through its CLI."""
 from pathlib import Path
 import sys
