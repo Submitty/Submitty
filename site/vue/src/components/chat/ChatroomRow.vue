@@ -210,7 +210,7 @@ function onClear() {
 
 <style scoped>
 .white-icon {
-    color: #fff;
+    color: #ffffff;
 }
 .readonly-badge {
     margin-right: 5px;
