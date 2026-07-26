@@ -44,7 +44,7 @@ watch(() => props.visible, (visible) => {
             allowReadOnlyAfterEnd.value = false;
         }
     }
-});
+}, { immediate: true });
 
 function submitForm() {
     emit('save', {
