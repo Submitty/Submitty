@@ -3,7 +3,7 @@
 
 - name: Add student to submitty users.
   ansible.builtin.expect:
-    command: ./adduser.py "{{ submitty_course_add_user_username }}"
+    command:  /usr/local/submitty/venv/bin/python3 adduser.py "{{ submitty_course_add_user_username }}"
     chdir: /usr/local/submitty/sbin/
     echo: true
     responses:
@@ -17,7 +17,7 @@
 
 - name: Add existing students to the course database.
   ansible.builtin.command:
-    cmd: ./adduser_course.py "{{ submitty_course_add_user_username }}"
+    cmd: /usr/local/submitty/venv/bin/python3 adduser_course.py "{{ submitty_course_add_user_username }}"
       "{{ submitty_course_add_user_term }}" "{{ submitty_course_add_user_course }}"
       "{{ submitty_course_add_user_registration_section }}"
       --user_group "{{ submitty_course_add_user_user_group }}"

@@ -79,7 +79,7 @@
 
 - name: Add instructors to submitty users.
   ansible.builtin.expect:
-    command: ./adduser.py "{{ submitty_course_creation_username }}"
+    command:  /usr/local/submitty/venv/bin/python3 adduser.py "{{ submitty_course_creation_username }}"
     chdir: /usr/local/submitty/sbin/
     echo: true
     responses:
@@ -108,7 +108,7 @@
 
 - name: Add existing instructors to the course database.
   ansible.builtin.command:
-    cmd: ./adduser_course.py "{{ submitty_course_creation_username }}"
+    cmd: /usr/local/submitty/venv/bin/python3 adduser_course.py "{{ submitty_course_creation_username }}"
       "{{ submitty_course_creation_term }}" "{{ submitty_course_creation_course }}"
       "{{ submitty_course_creation_registration_section }}"
       --user_group "{{ submitty_course_creation_user_group }}"
