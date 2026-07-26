@@ -342,6 +342,8 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
+source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
+
 python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --course "${semester}" "${course}" migrate --initial
 if [[ $? -ne "0" ]] ; then
     PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE term='${semester}' AND course='${course}';"
