@@ -787,6 +787,7 @@ function checkBuildStatus() {
             if (response.status === 'success') {
                 $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data);
+                refreshManualGenerationBanner();
             }
             else if (response.status === 'fail') {
                 $('#save_status').text('A failure occurred generating rainbow grades');
@@ -799,6 +800,28 @@ function checkBuildStatus() {
         },
         error: function (xhr, status, error) {
             console.error(`Failed to parse response from server: ${xhr.responseText}`);
+        },
+    });
+}
+
+function refreshManualGenerationBanner() {
+    $.ajax({
+        type: 'POST',
+        url: buildCourseUrl(['reports', 'rainbow_grades_manual_status']),
+        data: { csrf_token: csrfToken },
+        dataType: 'json',
+        success: function (response) {
+            if (response.status !== 'success') {
+                return;
+            }
+            const manual = response.data.rainbow_grades_generated_manually;
+            window.rainbowGradesGeneratedManually = manual;
+            if (!manual) {
+                $('[data-testid="manual-generation-warning-banner"]').remove();
+            }
+        },
+        error: function (xhr) {
+            console.error(`Failed to refresh manual generation status: ${xhr.responseText}`);
         },
     });
 }
