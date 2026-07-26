@@ -1205,7 +1205,7 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $is_clustering_mode = ($_COOKIE['group_by_clusters'] ?? '') === 'true';
+        $is_clustering_mode = ($_COOKIE['group_by_clusters'] ?? '') === 'true' && $this->core->getUser()->accessFullGrading() && $this->core->getConfig()->isSubmissionClusteringEnabled();
         $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findWithClustersAndMembers($gradeable->getId());
         $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
 
