@@ -168,7 +168,7 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    #[Route("/admin/update_docker", methods: ["GET"])]
+    #[Route("/admin/update_docker", methods: ["POST"])]
     public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
