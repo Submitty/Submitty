@@ -13,6 +13,7 @@ usage: python3 auto_rainbow_grades.py <semester> <course> <source>
 # Imports
 import sys
 import os
+import glob
 import subprocess
 import shutil
 import pwd
@@ -209,10 +210,41 @@ else:
 print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
-# Run make
-print('Compiling rainbow grades', flush=True)
-cmd_output = os.popen('make').read()
+# Sorted summaries to build. Each Makefile target runs ./process_grades.out by_<x>
+# and writes output.html / output.csv, so we copy each result to
+# output-by-<order>.html / .csv before the next build overwrites it. 'overall' keeps
+# the output.html name, build it first, stash it, and restore it at the end.
+SORT_ORDERS = ['section', 'hw', 'lab', 'test', 'exam']
 
+# Remove stale tables so a sort order that no longer applies doesn't linger.
+print('Removing previous rainbow grades tables', flush=True)
+for stale in glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
+    os.remove(stale)
+
+
+def build_table(order):
+    print('Compiling rainbow grades table by {}'.format(order), flush=True)
+    result = subprocess.run(
+        ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    if result.returncode != 0:
+        print(result.stdout, flush=True)
+        raise Exception('Failure building rainbow grades table: {}'.format(order))
+
+
+# Build overall first and preserve it; the per-sort builds below overwrite output.html/.csv.
+build_table('overall')
+shutil.copyfile('output.html', 'overall-summary.html')
+shutil.copyfile('output.csv', 'overall-summary.csv')
+
+for order in SORT_ORDERS:
+    build_table(order)
+    shutil.copyfile('output.html', 'output-by-{}.html'.format(order))
+    shutil.copyfile('output.csv', 'output-by-{}.csv'.format(order))
+
+# Restore the overall table as the canonical output.html / output.csv.
+shutil.move('overall-summary.html', 'output.html')
+shutil.move('overall-summary.csv', 'output.csv')
 # Run make push_test
 print('Exporting to summary_html', flush=True)
 cmd_output = os.popen('make push_test').read()

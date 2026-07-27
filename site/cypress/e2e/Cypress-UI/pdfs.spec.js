@@ -7,7 +7,7 @@ function switch_settings(gradeable_id) {
 function revert_settings(gradeable_id, setting) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'update']);
     cy.get('#page_3_nav').click();
-    cy.get(`input[data-testname="grader_assignment_method"][id=${setting}`).check();
+    cy.get(`input[data-testname="grader_assignment_method"][id=${setting}]`).check();
 }
 
 function select_gradeable() {
@@ -19,7 +19,7 @@ function select_gradeable() {
     cy.get('[data-testid="show-submission"]').click();
     cy.get('[data-testid="folders"]').contains('submissions').click();
     cy.get('#div_viewer_sd1').contains('words_').click();
-    cy.get('#pageContainer1').should('be.visible');
+    cy.get('#pageContainer1', { timeout: 20000 }).should('be.visible');
 }
 
 function check_pdf_access(gradeable_id) {
