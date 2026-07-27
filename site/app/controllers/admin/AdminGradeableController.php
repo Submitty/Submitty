@@ -1823,7 +1823,11 @@ class AdminGradeableController extends AbstractController {
                     $status = 'warnings';
                 }
                 elseif (str_contains($haystack, 'WARNING:')) {
-                    $status = 'warnings';
+                    $is_sudo_warning = str_contains($haystack, 'build_homework_function script must be run as sudo') || str_contains($haystack, 'must be run as sudo');
+                    $warning_count = substr_count($haystack, 'WARNING:');
+                    if ($warning_count > 1 || !$is_sudo_warning) {
+                        $status = 'warnings';
+                    }
                 }
             }
         }

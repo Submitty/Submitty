@@ -571,10 +571,14 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             let has_errors_or_warnings = false;
             if (build_info !== null) {
                 const lower_build_info = build_info.toLowerCase();
-                has_errors_or_warnings = lower_build_info.includes('make error') ||
-                                         lower_build_info.includes('error') ||
-                                         lower_build_info.includes('warning') ||
-                                         lower_build_info.includes('the submitty configuration validator detected');
+                const clean_build_info = lower_build_info
+                    .replace(/warning:\s+to\s+insert\s+the\s+autograding\s+data\s+to\s+the\s+database,\s+the\s+build_homework_function\s+script\s+must\s+be\s+run\s+as\s+sudo/g, '')
+                    .replace(/warning:\s+to\s+set\s+the\s+autograding\s+config\s+allowed\s+minutes,\s+the\s+build_homework_function\s+script\s+must\s+be\s+run\s+as\s+sudo/g, '');
+
+                has_errors_or_warnings = clean_build_info.includes('make error') ||
+                                         clean_build_info.includes('error') ||
+                                         clean_build_info.includes('warning') ||
+                                         clean_build_info.includes('the submitty configuration validator detected');
             }
 
             const show_generated_configs = has_errors_or_warnings && (preprocessed_config !== null || generated_complete_config !== null);
