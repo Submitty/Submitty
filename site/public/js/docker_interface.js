@@ -220,9 +220,9 @@ function checkDockerUpdateStatus() {
                 console.log(response);
             }
         },
-        error: (xhr) => {
+        error: (err) => {
             isUpdateInProgress = false;
-            console.error(`Failed to parse response from server: ${xhr.responseText}`);
+            console.error(err);
             $('#docker-status-badge').text('An error occurred while checking the container status');
         },
     });
