@@ -2,6 +2,7 @@
 /* global csrfToken, displayErrorMessage, displaySuccessMessage */
 
 let isUpdateInProgress = false;
+const DOCKER_STATUS_BADGE = 'dockerStatusBadge';
 
 /**
 * toggles visibility of a content sections on the Docker UI
@@ -74,6 +75,41 @@ function confirmationDialog(url, id) {
     }
 }
 
+/**
+ * @param {string} logContent
+ */
+function showDockerLogButton(logContent) {
+    $('#show-docker-log-button').show();
+    const logs = $('#docker-status-log').empty();
+    if (logContent) {
+        $('<pre></pre>').text(logContent).appendTo(logs);
+    }
+}
+
+/**
+ * @param {string} text
+ * @param {boolean} updateNeeded
+ */
+function setDockerStatusBadge(text, updateNeeded) {
+    const badge = $('#docker-status-badge');
+    badge.text(text);
+    badge.removeClass('btn-danger btn-success');
+    if (updateNeeded) {
+        badge.addClass('btn-danger');
+    }
+    else {
+        badge.addClass('btn-success');
+    }
+    sessionStorage.setItem(DOCKER_STATUS_BADGE, JSON.stringify({ text, updateNeeded }));
+}
+
+function restoreDockerStatusBadge() {
+    const saved_status_badge = JSON.parse(sessionStorage.getItem(DOCKER_STATUS_BADGE));
+    if (saved_status_badge) {
+        setDockerStatusBadge(saved_status_badge.text, saved_status_badge.updateNeeded);
+    }
+}
+
 function removeImage(url, id) {
     $.ajax({
         url: url,
@@ -86,8 +122,7 @@ function removeImage(url, id) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                $('#docker-status-badge').text(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`);
-                setDockerStatusBadge(true);
+                setDockerStatusBadge(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, true);
                 displaySuccessMessage(json.data);
             }
             else {
@@ -116,8 +151,7 @@ function addImage(url) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                $('#docker-status-badge').text(`${image} has been added to the configuration! Click "Update dockers and machines" to apply the changes.`);
-                setDockerStatusBadge(true);
+                setDockerStatusBadge(`${image} has been added to the configuration! Click "Update dockers and machines" to apply the changes.`, true);
                 displaySuccessMessage(json.data);
             }
             else {
@@ -130,30 +164,6 @@ function addImage(url) {
         },
     });
 }
-/**
- * @param {string} logContent
- */
-function showDockerLogButton(logContent) {
-    $('#show-docker-log-button').show();
-    const logs = $('#docker-status-log').empty();
-    if (logContent) {
-        $('<pre></pre>').text(logContent).appendTo(logs);
-    }
-}
-
-/**
- * @param {boolean} updateNeeded
- */
-function setDockerStatusBadge(updateNeeded) {
-    const badge = $('#docker-status-badge');
-    badge.removeClass('btn-danger btn-success');
-    if (updateNeeded) {
-        badge.addClass('btn-danger');
-    }
-    else {
-        badge.addClass('btn-success');
-    }
-}
 
 function updateImage() {
     if (!window.dockerAdminUrl || isUpdateInProgress) {
@@ -162,7 +172,7 @@ function updateImage() {
 
     isUpdateInProgress = true;
 
-    $('#docker-status-badge').text('Changes applying...');
+    setDockerStatusBadge('Changes applying...', true);
 
     $.ajax({
         url: `${window.dockerAdminUrl}/update_docker`,
@@ -177,14 +187,14 @@ function updateImage() {
             }
             else {
                 displayErrorMessage(response.message);
-                $('#docker-status-badge').text('An error occurred while updating');
+                setDockerStatusBadge('An error occurred while updating', true);
                 showDockerLogButton(response.data.log);
             }
         },
         error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
-            $('#docker-status-badge').text('Something went wrong. Please try again.');
+            setDockerStatusBadge('Something went wrong. Please try again.', true);
         },
     });
 }
@@ -201,28 +211,26 @@ function checkDockerUpdateStatus() {
         success: (response) => {
             if (response.status === 'success') {
                 if (response.data && response.data.in_progress) {
-                    $('#docker-status-badge').text('Changes applying...');
+                    setDockerStatusBadge('Changes applying...', true);
                     checkDockerUpdateStatus();
                     return;
                 }
 
                 isUpdateInProgress = false;
-                $('#docker-status-badge').text('Changes applied, manually reload the page to view them!');
+                setDockerStatusBadge('Changes applied, manually reload the page to view them!', false);
                 showDockerLogButton(response.data.log);
-                setDockerStatusBadge(false);
             }
             else if (response.status === 'fail') {
                 isUpdateInProgress = false;
                 displayErrorMessage(response.data);
-                $('#docker-status-badge').text('A failure occurred while applying changes');
+                setDockerStatusBadge('A failure occurred while applying changes', true);
                 showDockerLogButton(response.data.log);
-                setDockerStatusBadge(true);
             }
         },
         error: (err) => {
             isUpdateInProgress = false;
             console.error(err);
-            $('#docker-status-badge').text('A site error occurred while updating dockers and machines');
+            setDockerStatusBadge('A site error occurred while updating dockers and machines', true);
         },
     });
 }
@@ -236,8 +244,15 @@ $(document).ready(() => {
         $('#docker-status-log').toggle();
     });
 
-    if (typeof window.dockerUpdateNeeded !== 'undefined') {
-        setDockerStatusBadge(window.dockerUpdateNeeded);
+    const saved_status_badge = sessionStorage.getItem(DOCKER_STATUS_BADGE);
+
+    if (saved_status_badge) {
+        if (window.dockerUpdateNeeded === false) {
+            sessionStorage.removeItem(DOCKER_STATUS_BADGE);
+        }
+        else {
+            restoreDockerStatusBadge();
+        }
     }
 
     // TODO: Fixme
