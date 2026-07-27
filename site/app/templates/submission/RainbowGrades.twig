@@ -15,11 +15,27 @@
             {% endif %}
         </h1>
         <div id="rainbow-grades-header">
+            {% if available_sorts is defined and available_sorts|length > 1 %}
+                <div class="btn-wrapper" id="rainbow-grades-sort-wrapper">
+                    <label for="rainbow-grades-sort-select" id="rainbow-grades-sort-label">Sort order:</label>
+                    <select
+                        id="rainbow-grades-sort-select"
+                        class="btn btn-primary"
+                        data-testid="rainbow-grades-sort-select"
+                        title="Choose which sorted version of the gradebook to view"
+                        onchange="window.location.href='{{ gradebook_url }}?sort=' + encodeURIComponent(this.value);"
+                    >
+                        {% for key, info in available_sorts %}
+                            <option value="{{ key }}"{{ key == selected_sort ? ' selected' : '' }}>{{ info.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
             {% if rainbow_grades_csv_url is defined %}
                 <div class="btn-wrapper">
                     <button
                         class="btn btn-primary"
-                        onclick='window.open("{{ rainbow_grades_csv_url }}", "_blank").focus()'
+                        onclick='window.open("{{ rainbow_grades_csv_url }}?sort={{ selected_sort|default("overall") }}", "_blank").focus()'
                         tabindex="0"
                     >
                         Download CSV of grades
