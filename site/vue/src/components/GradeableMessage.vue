@@ -51,8 +51,11 @@ function close(): void {
   <Popup
     :visible="visible"
     title="Your Responsibility as a Grader"
-    no-footer
-    @toggle="close"
+    :savable="canAgree"
+    :dismiss-text="canAgree ? 'Cancel' : 'Close'"
+    save-text="Agree"
+    @toggle="canAgree ? cancel() : close()"
+    @save="agree"
   >
     <template #trigger>
       <button
@@ -118,39 +121,6 @@ function close(): void {
         <p>
           Please communicate with your instructor if you realize you have a conflict of interest with a peer that you have been assigned to grade.
         </p>
-      </div>
-      <div class="form-buttons">
-        <div class="form-button-container">
-          <template v-if="canAgree">
-            <button
-              id="cancel-button"
-              class="btn btn-default close-button"
-              type="button"
-              @click="cancel"
-            >
-              Cancel
-            </button>
-            <button
-              id="agree-button"
-              class="btn btn-primary"
-              type="button"
-              data-testid="agree-popup-btn"
-              @click="agree"
-            >
-              Agree
-            </button>
-          </template>
-          <button
-            v-else
-            id="close-hidden-button"
-            class="btn btn-default close-button"
-            type="button"
-            data-testid="close-hidden-button"
-            @click="close"
-          >
-            Close
-          </button>
-        </div>
       </div>
     </div>
   </Popup>
