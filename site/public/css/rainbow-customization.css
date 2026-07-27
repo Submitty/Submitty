@@ -76,12 +76,10 @@
 
 .rg-build-notice-error {
     background: var(--standard-light-red);
-    color: var(--standard-black);
 }
 
 .rg-build-notice-warning {
     background: var(--standard-light-yellow-brown);
-    color: var(--standard-black);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
