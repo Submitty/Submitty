@@ -24,7 +24,12 @@ declare global {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        peerComponentMarksChanged (peer_id: string, component_id: string): void;
+        clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
+        resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
+        reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
@@ -421,8 +426,15 @@ window.changeCurrentPeer = function () {
     $(`#edit-peer-components-form-${peer}`).show();
 };
 
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
+    $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
+};
+
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmed = confirm(`Are you sure you want to delete all grading from ${peer_id}?`);
+    if (!confirmed) {
+        return;
+    }
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -442,7 +454,104 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
             window.location.reload();
         },
         error: function () {
-            console.log('Failed to delete');
+            console.log('Failed to delete peer marks');
+        },
+    });
+};
+
+window.savePeerComponent = function (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string) {
+    const mark_ids = $(
+        `.peer-edit-mark[data-component-id="${component_id}"][data-peer-id="${peer_id}"]:checked`,
+    ).map(function () {
+        return $(this).val();
+    }).get();
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'save_peer_component',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+            component_id,
+            mark_ids,
+        },
+        type: 'POST',
+        success: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Saved');
+            $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
+            $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+            setTimeout(() => {
+                save_status.text('');
+            }, 2000);
+        },
+        error: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Save failed');
+        },
+    });
+};
+
+window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'resolve_peer_version_conflicts',
+    ]);
+
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            $(`.peer-edit-version-warning[data-peer-id="${peer_id}"]`).remove();
+            $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+        },
+        error: function () {
+            console.log('Failed to resolve peer version conflicts');
+        },
+    });
+};
+
+window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components for all graders without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'clear_all_peer_version_conflicts',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            void window.reloadPeerRubric(gradeable_id, anon_id);
+        },
+        error: function () {
+            console.log('Failed to clear all peer version conflicts');
         },
     });
 };

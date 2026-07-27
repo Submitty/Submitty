@@ -969,10 +969,25 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
+        // Acquire lock to prevent race conditions when creating new versions (e.g., bulk upload race condition)
+        $lock_file = FileUtils::joinPaths($user_path, "submission.lock");
+        $lock_fp = fopen($lock_file, "c");
+        if (!$lock_fp || !flock($lock_fp, LOCK_EX)) {
+            return $this->uploadResult("Failed to acquire lock for submission.", false);
+        }
+
+        // Re-fetch the graded gradeable to ensure we have the most up-to-date version number
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        if ($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
+        }
+
         $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
 
@@ -1166,9 +1181,13 @@ class SubmissionController extends AbstractController {
         //add new job to queue
         if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
             $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
+        flock($lock_fp, LOCK_UN);
+        fclose($lock_fp);
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
 
