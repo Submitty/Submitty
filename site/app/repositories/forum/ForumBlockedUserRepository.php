@@ -21,16 +21,25 @@ class ForumBlockedUserRepository extends EntityRepository {
     /**
      * @return ForumBlockedUser[]
      */
-    public function getActiveBlockedUsers(?string $user_id = null): array {
+    public function getActiveBlockedUsers(): array {
         $qb = $this->createQueryBuilder('b');
         $qb->where('(b.expiration_date IS NULL OR b.expiration_date > :now)')
             ->setParameter('now', new DateTime())
             ->orderBy('b.created_at', 'DESC');
 
-        if ($user_id !== null) {
-            $qb->andWhere('b.user_id = :user_id')
-                ->setParameter('user_id', $user_id);
-        }
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return ForumBlockedUser[]
+     */
+    public function getActiveBlockedUsersForUser(string $user_id): array {
+        $qb = $this->createQueryBuilder('b');
+        $qb->where('(b.expiration_date IS NULL OR b.expiration_date > :now)')
+            ->andWhere('b.user_id = :user_id')
+            ->setParameter('now', new DateTime())
+            ->setParameter('user_id', $user_id)
+            ->orderBy('b.created_at', 'DESC');
 
         return $qb->getQuery()->getResult();
     }
@@ -50,7 +59,7 @@ class ForumBlockedUserRepository extends EntityRepository {
         $em->flush();
     }
 
-    public function updateBlockedUser(int $id, ?DateTime $expiration_date): void {
+    public function updateBlockedUserExpiration(int $id, ?DateTime $expiration_date): void {
         $em = $this->getEntityManager();
         $block = $this->find($id);
         if ($block !== null) {
