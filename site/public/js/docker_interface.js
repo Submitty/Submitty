@@ -78,7 +78,6 @@ function removeImage(url, id) {
     $.ajax({
         url: url,
         type: 'POST',
-        dataType: 'json',
         data: {
             image: id,
             csrf_token: csrfToken,
@@ -108,7 +107,6 @@ function addImage(url) {
     $.ajax({
         url: url,
         type: 'POST',
-        dataType: 'json',
         data: {
             capability: capability,
             image: image,
