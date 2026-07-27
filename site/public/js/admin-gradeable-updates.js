@@ -566,7 +566,18 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             const cmake_info = response['data']['cmake_output'] ?? null;
             const preprocessed_config = response['data']['preprocessed_config'] ?? null;
             const generated_complete_config = response['data']['generated_complete_config'] ?? null;
-            const generated_config_note = preprocessed_config !== null || generated_complete_config !== null;
+
+            // Determine if there are build errors or warnings
+            let has_errors_or_warnings = false;
+            if (build_info !== null) {
+                const lower_build_info = build_info.toLowerCase();
+                has_errors_or_warnings = lower_build_info.includes('make error') ||
+                                         lower_build_info.includes('error') ||
+                                         lower_build_info.includes('warning') ||
+                                         lower_build_info.includes('the submitty configuration validator detected');
+            }
+
+            const show_generated_configs = has_errors_or_warnings && (preprocessed_config !== null || generated_complete_config !== null);
 
             if (build_info !== null) {
                 // eslint-disable-next-line no-restricted-syntax
@@ -598,9 +609,22 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             }
             if (build_info !== null || !rebuilt) {
                 // Display the build log for respective rebuild warnings/errors or manual instructor requests
-                $('.log-container').show();
-                $('#generated-config-help').toggle(generated_config_note);
-                $('#generated-config-note').prop('hidden', !generated_config_note);
+                $('#build-log-container').show();
+                $('#cmake-log-container').show();
+
+                if (show_generated_configs) {
+                    $('#generated-config-help').show();
+                    $('#generated-config-note').prop('hidden', false).show();
+                    $('#preprocessed-config-container').show();
+                    $('#generated-complete-config-container').show();
+                }
+                else {
+                    $('#generated-config-help').hide();
+                    $('#generated-config-note').prop('hidden', true).hide();
+                    $('#preprocessed-config-container').hide();
+                    $('#generated-complete-config-container').hide();
+                }
+
                 $('#open-build-log').hide();
                 $('#close-build-log').show();
             }
