@@ -183,7 +183,7 @@ function updateImage() {
         },
         error: (err) => {
             console.error(err);
-            window.alert('Something went wrong. Please try again.')
+            window.alert('Something went wrong. Please try again.');
             $('#docker-status-badge').text('Something went wrong. Please try again.');
         },
     });
