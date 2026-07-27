@@ -5,32 +5,32 @@ describe('TA Grading Panel Switcher', () => {
         {
             name: 'Autograding',
             button: '[data-testid="show-autograding"]',
-            selector: '[data-testid="autograding-results-panel-position-select"]',
+            parent: '#autograding_results_btn',
         },
         {
             name: 'Rubric',
             button: '[data-testid="grading-rubric-panel-toggle"]',
-            selector: '[data-testid="grading-rubric-panel-position-select"]',
+            parent: '#grading_rubric_btn',
         },
         {
             name: 'Submission',
             button: '[data-testid="show-submission"]',
-            selector: '[data-testid="submission-browser-panel-position-select"]',
+            parent: '#submission_browser_btn',
         },
         {
             name: 'Student Info',
             button: '[data-testid="student-info-panel-toggle"]',
-            selector: '[data-testid="student-info-panel-position-select"]',
+            parent: '#student_info_btn',
         },
         {
             name: 'TA Notes',
             button: '[data-testid="solution-ta-notes-panel-toggle"]',
-            selector: '[data-testid="solution-ta-notes-panel-position-select"]',
+            parent: '#solution_ta_notes_btn',
         },
         {
             name: 'Grade Inquiry',
             button: '[data-testid="grade-inquiry-info-panel-toggle"]',
-            selector: '[data-testid="grade-inquiry-info-panel-position-select"]',
+            parent: '#grade_inquiry_info_btn',
         },
     ];
 
@@ -132,7 +132,7 @@ describe('TA Grading Panel Switcher', () => {
                 cy.get(panel.button).click();
 
                 layout.expectedOptions.forEach((option) => {
-                    cy.get(panel.selector).should('contain.text', option);
+                    cy.get(panel.parent).find('[data-testid="panel-position-select"]').should('contain.text', option);
                 });
 
                 cy.get(panel.button).click();
