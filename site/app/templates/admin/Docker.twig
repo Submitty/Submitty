@@ -42,7 +42,7 @@
         </div>
         <div id="docker-status-log">
             {% if error_logs|length > 0 %}
-                <pre>
+                <pre class="error-log">
                     {% for error_log in error_logs %}
                         {{ error_log }}
                     {% endfor %}

@@ -180,6 +180,14 @@
     padding: 10px;
 }
 
+.error-log {
+    width: 100%;
+    height: fit-content;
+    white-space: normal;
+    padding: 1em;
+    background: var(--standard-light-gray);
+}
+
 .status {
     pointer-events: none;
     cursor: default;
