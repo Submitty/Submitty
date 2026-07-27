@@ -1858,7 +1858,7 @@ class SubmissionController extends AbstractController {
                     for ($j = 0; $j < $count[$i]; $j++) {
                         if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) === "application/zip" && strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "zip") {
                             if (FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
-                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
+                                return $this->uploadResult("Error: You may not use double quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = true;
                             $reported_size = FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
@@ -1873,7 +1873,7 @@ class SubmissionController extends AbstractController {
                         }
                         else {
                             if (FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
-                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name " . $uploaded_files[$i]["name"][$j] . ".", false);
+                                return $this->uploadResult("Error: You may not use double quotes, backslashes or angle brackets in your file name " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = false;
                             $file_size += $uploaded_files[$i]["size"][$j];
