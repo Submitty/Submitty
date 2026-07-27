@@ -1,12 +1,6 @@
 /* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
 /* global csrfToken, displayErrorMessage, displaySuccessMessage */
 
-// how often to check for changes to the docker images when idle
-const DOCKER_IDLE_POLL_INTERVAL = 30000;
-
-// how often to check for changes while an update is actively running
-const DOCKER_UPDATE_POLL_INTERVAL = 3000;
-
 let isUpdateInProgress = false;
 
 /**
@@ -206,7 +200,7 @@ function checkDockerUpdateStatus() {
             if (response.status === 'success') {
                 if (response.data && response.data.in_progress) {
                     $('#docker-status-badge').text('Changes applying...');
-                    setTimeout(checkDockerUpdateStatus, DOCKER_UPDATE_POLL_INTERVAL);
+                    checkDockerUpdateStatus();
                     return;
                 }
 

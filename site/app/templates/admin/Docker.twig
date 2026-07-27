@@ -27,6 +27,8 @@
                 <span id="docker-status-badge" class="btn {{ update_needed ? 'btn-danger' : 'btn-success' }} status" data-testid="docker-status">
                     {% if error_logs|length > 0 %}
                         Last update failed
+                    {% elseif update_needed %}
+                        Changes Pending
                     {% else %}
                         Up-to-Date
                     {% endif %}
