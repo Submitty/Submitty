@@ -263,17 +263,17 @@ class DockerInterfaceController extends AbstractController {
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
         $docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "docker" . $now . ".json");
         $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
-        
+
         // Check the the queue for the jobs files every second to see if the update has finished yet
         $max_wait_time = self::MAX_DOCKER_UPDATE_WAIT_TIME;
         $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
-        while ($is_in_progress && $max_wait_time) {
+        while ($is_in_progress && $max_wait_time !== 0) {
             sleep(1);
             $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
             $max_wait_time--;
             clearstatcache();
         }
-        
+
         // return before searching for the log_file if we timed out
         if ($is_in_progress) {
             return JsonResponse::getSuccessResponse([
