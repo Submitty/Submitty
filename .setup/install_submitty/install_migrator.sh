@@ -35,6 +35,7 @@ rsync -rtz "${SUBMITTY_REPOSITORY}/migration/migrator/migrations" "${SUBMITTY_IN
 chown root:root "${SUBMITTY_INSTALL_DIR}/migrations"
 chmod 550 -R "${SUBMITTY_INSTALL_DIR}/migrations"
 
+# shellcheck disable=SC1091
 source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
 
 python3 "${SUBMITTY_REPOSITORY}/migration/run_migrator.py" -e system -e master -e course migrate
