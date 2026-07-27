@@ -1094,6 +1094,7 @@ WHERE term=? AND course=? AND user_id=?",
                 "UPDATE users SET rotating_section=?, registration_subsection=?{$date_registered_sql} WHERE user_id=?",
                 $params
             );
+            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
 
