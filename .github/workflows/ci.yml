@@ -730,7 +730,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
       - uses: ./.github/actions/e2e-Setup-Composite
-      # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v5
         with:
@@ -955,7 +954,6 @@ jobs:
             ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
                 '--test_only_grading' }}
 
-      # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v5
         with:
