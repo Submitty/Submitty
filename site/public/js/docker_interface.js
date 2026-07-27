@@ -78,6 +78,7 @@ function removeImage(url, id) {
     $.ajax({
         url: url,
         type: 'POST',
+        dataType: 'json',
         data: {
             image: id,
             csrf_token: csrfToken,
@@ -107,6 +108,7 @@ function addImage(url) {
     $.ajax({
         url: url,
         type: 'POST',
+        dataType: 'json',
         data: {
             capability: capability,
             image: image,
@@ -135,9 +137,9 @@ function addImage(url) {
  */
 function showDockerLogButton(logContent) {
     $('#show-docker-log-button').show();
-    $('#docker-status-log').empty();
+    const logs = $('#docker-status-log').empty();
     if (logContent) {
-        $('#docker-status-log').append(`<pre>${logContent}</pre>`);
+        $('<pre></pre>').text(logContent).appendTo(logs);
     }
 }
 
@@ -156,7 +158,7 @@ function setDockerStatusBadge(updateNeeded) {
 }
 
 function updateImage() {
-    if (!window.dockerAdminUrl) {
+    if (!window.dockerAdminUrl || isUpdateInProgress) {
         return;
     }
 
@@ -230,10 +232,8 @@ function checkDockerUpdateStatus() {
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#show-all').on('click', showAll);
-    $('#add-field').on('input', addFieldOnChange);
-    $('#add-field').trigger('input');
+    $('#add-field').on('input', addFieldOnChange).trigger('input');
 
-    // Toggle the log panel, same interaction as RainbowGrades' #show_log_button
     $('#show-docker-log-button').click(() => {
         $('#docker-status-log').toggle();
     });
@@ -241,14 +241,11 @@ $(document).ready(() => {
     if (typeof window.dockerUpdateNeeded !== 'undefined') {
         setDockerStatusBadge(window.dockerUpdateNeeded);
     }
-});
 
-window.addEventListener('DOMContentLoaded', () => {
+    // TODO: Fixme
     const successMessage = sessionStorage.getItem('successMessage');
     if (successMessage) {
         displaySuccessMessage(successMessage);
-
-        // Clear the message from sessionStorage so it doesn't show again
         sessionStorage.removeItem('successMessage');
     }
 });
