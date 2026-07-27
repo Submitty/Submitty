@@ -9,20 +9,25 @@
 import argparse
 import json
 import os
-from submitty_utils import submitty_schema_validator
 import sys
 import traceback
+
+from submitty_utils.submitty_schema_validator import (
+    validate_complete_config_schema_using_filenames,
+    SubmittySchemaException,
+)
 
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), '..', 'config'
 )
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+with open(os.path.join(CONFIG_PATH, 'submitty.json'), encoding='utf-8') as open_file:
     OPEN_JSON = json.load(open_file)
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 
 def parse_args():
+    """Parse the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file_path")
     parser.add_argument("assignment")
@@ -32,6 +37,7 @@ def parse_args():
 
 
 def main():
+    """Validate config using complete config schema."""
     # Parse the argument necessary to find the complete config json.
     args = parse_args()
     # Grab the path to the complete config json for this assignment
@@ -73,13 +79,12 @@ def main():
 
     # Run the schema validator, printing an error on failure.
     try:
-        validator = submitty_schema_validator
-        validator.validate_complete_config_schema_using_filenames(
+        validate_complete_config_schema_using_filenames(
             complete_config_json_path,
             complete_config_schema_path,
             warn=False
         )
-    except submitty_schema_validator.SubmittySchemaException as s:
+    except SubmittySchemaException as s:
         s.print_human_readable_error()
         print(
             "The submitty configuration validator detected the above error "
@@ -101,7 +106,7 @@ def main():
             "https://github.com/Submitty/Submitty"
         )
         print()
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         traceback.print_exc()
 
 

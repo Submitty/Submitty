@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""JSON syntax checker for Submitty configuration files."""
 import argparse
 import os
 import json
@@ -22,6 +23,7 @@ def detect_duplicate_keys(list_of_pairs):
 
 
 def print_error_context(contents, line_number, column_number, radius=2):
+    """Print context around the line where syntax error occurred."""
     lines = contents.splitlines()
     start = max(line_number - radius, 1)
     end = min(line_number + radius, len(lines))
@@ -40,7 +42,8 @@ def print_error_context(contents, line_number, column_number, radius=2):
             print(f"  {' ' * line_number_width} | {' ' * caret_padding}^")
 
 
-if __name__ == "__main__":
+def main():
+    """Load JSON file and validate syntax."""
     parser = argparse.ArgumentParser(
         description=(
             "Preprocess a instructor config json to prepare it for "
@@ -57,7 +60,7 @@ if __name__ == "__main__":
     if not os.path.isfile(args.file):
         raise SystemExit(f"Cannot find JSON file '{args.file}' to validate")
 
-    with open(args.file, "r") as input_file:
+    with open(args.file, "r", encoding="utf-8") as input_file:
         j_string = input_file.read()
 
     # Remove cpp # markers
@@ -87,10 +90,14 @@ if __name__ == "__main__":
         )
         print_error_context(j_string, error.lineno, error.colno)
         sys.exit(1)
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         print(f'ERROR: Could not load {args.file}')
         traceback.print_exc()
         sys.exit(1)
 
-    with open(args.file, "w") as out_file:
+    with open(args.file, "w", encoding="utf-8") as out_file:
         json.dump(output, out_file, indent=4, sort_keys=True)
+
+
+if __name__ == "__main__":
+    main()

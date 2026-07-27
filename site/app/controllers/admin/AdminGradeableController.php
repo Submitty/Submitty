@@ -1770,6 +1770,9 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     private function getBuildArtifactContents(string $gradeable_id): array {
         $course_path = $this->core->getConfig()->getCoursePath();
         $read_build_file = static function (string $path): ?string {
