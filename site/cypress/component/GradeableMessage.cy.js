@@ -67,17 +67,13 @@ describe('GradeableMessage', () => {
     });
 
     describe('buttons', () => {
-        it('shows Cancel and Agree when canAgree is true', () => {
-            cy.mount(GradeableMessage, { props: { storageKey: STORAGE_KEY, userGroup: 2, blindStatus: 0 } });
-            cy.contains('button', 'Cancel').should('be.visible');
-            cy.get('[data-testid="agree-popup-btn"]').should('be.visible');
-        });
-
-        it('shows only Close when canAgree is false', () => {
+        it('shows only Close when canAgree is false and popup is reopened', () => {
             localStorage.setItem(STORAGE_KEY, 'agreed');
             cy.mount(GradeableMessage, { props: { storageKey: STORAGE_KEY, userGroup: 2, blindStatus: 0 } });
-            cy.get('[data-testid="popup-window"]').should('not.exist');
-            cy.get('[data-testid="close-hidden-button"]').should('not.exist');
+            cy.get('[data-testid="grader-responsibility"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
+            cy.get('[data-testid="popup-close-button"]').should('contain', 'Close');
+            cy.get('[data-testid="popup-save-button"]').should('not.exist');
         });
     });
 
@@ -98,15 +94,15 @@ describe('GradeableMessage', () => {
             cy.mount(GradeableMessage, { props: { storageKey: STORAGE_KEY, userGroup: 2, blindStatus: 0 } });
             cy.get('[data-testid="grader-responsibility"]').click();
             cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.get('[data-testid="agree-popup-btn"]').should('not.exist');
-            cy.get('[data-testid="close-hidden-button"]').should('be.visible');
+            cy.get('[data-testid="popup-save-button"]').should('not.exist');
+            cy.get('[data-testid="popup-close-button"]').should('be.visible');
         });
     });
 
     describe('agree action', () => {
         it('stores agreement in localStorage and hides popup', () => {
             cy.mount(GradeableMessage, { props: { storageKey: STORAGE_KEY, userGroup: 2, blindStatus: 0 } });
-            cy.get('[data-testid="agree-popup-btn"]').click();
+            cy.get('[data-testid="popup-save-button"]').click();
             cy.get('[data-testid="popup-window"]').should('not.exist');
             cy.window().its('localStorage').invoke('getItem', STORAGE_KEY).should('equal', 'agreed');
         });
