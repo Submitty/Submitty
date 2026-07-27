@@ -234,32 +234,6 @@ function checkDockerUpdateStatus() {
     });
 }
 
-/**
- * checks whether the container configuration is in sync
- */
-function pollDockerStatus() {
-    if (isUpdateInProgress) {
-        return;
-    }
-    if (!window.dockerAdminUrl) {
-        return;
-    }
-
-    $.ajax({
-        type: 'GET',
-        url: `${window.dockerAdminUrl}/status`,
-        dataType: 'json',
-        success: (response) => {
-            if (response.status === 'success' && response.data) {
-                setDockerStatusBadge(response.data.update_needed);
-            }
-        },
-        error: (xhr) => {
-            console.error(`Failed to get docker status: ${xhr.responseText}`);
-        },
-    });
-}
-
 $(document).ready(() => {
     $('.filter-buttons').on('click', filterOnClick);
     $('#show-all').on('click', showAll);
@@ -274,9 +248,6 @@ $(document).ready(() => {
     if (typeof window.dockerUpdateNeeded !== 'undefined') {
         setDockerStatusBadge(window.dockerUpdateNeeded);
     }
-
-    // Keep the status badge live even if the user doesn't touch anything on the page.
-    setInterval(pollDockerStatus, DOCKER_IDLE_POLL_INTERVAL);
 });
 
 window.addEventListener('DOMContentLoaded', () => {
