@@ -82,8 +82,8 @@ function removeImage(url, id) {
             image: id,
             csrf_token: csrfToken,
         },
-        dataType: 'json',
-        success: (json) => {
+        success: (data) => {
+            const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
                 $('#docker-status-badge').text(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`);
@@ -176,13 +176,15 @@ function updateImage() {
                 checkDockerUpdateStatus();
             }
             else {
+                displayErrorMessage(response.message);
                 $('#docker-status-badge').text('An error occurred while updating');
-                showDockerLogButton(response.message);
+                showDockerLogButton(response.data.log);
             }
         },
         error: (err) => {
             console.error(err);
-            $('#docker-status-badge').text('An error occurred while making the request');
+            window.alert('Something went wrong. Please try again.')
+            $('#docker-status-badge').text('Something went wrong. Please try again.');
         },
     });
 }
@@ -206,24 +208,20 @@ function checkDockerUpdateStatus() {
 
                 isUpdateInProgress = false;
                 $('#docker-status-badge').text('Changes applied, manually reload the page to view them!');
-                showDockerLogButton(response.data && response.data.log);
+                showDockerLogButton(response.data.log);
                 setDockerStatusBadge(false);
             }
             else if (response.status === 'fail') {
                 isUpdateInProgress = false;
+                displayErrorMessage(response.data);
                 $('#docker-status-badge').text('A failure occurred while applying changes');
-                showDockerLogButton(response.message);
-            }
-            else {
-                isUpdateInProgress = false;
-                $('#docker-status-badge').text('Internal Server Error');
-                console.log(response);
+                showDockerLogButton(response.data.log);
             }
         },
         error: (err) => {
             isUpdateInProgress = false;
             console.error(err);
-            $('#docker-status-badge').text('An error occurred while checking the container status');
+            $('#docker-status-badge').text('A site error occurred while updating dockers and machines');
         },
     });
 }
