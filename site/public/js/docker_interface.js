@@ -216,6 +216,7 @@ function checkDockerUpdateStatus() {
                 displayErrorMessage(response.data);
                 $('#docker-status-badge').text('A failure occurred while applying changes');
                 showDockerLogButton(response.data.log);
+                setDockerStatusBadge(true);
             }
         },
         error: (err) => {

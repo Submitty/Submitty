@@ -179,7 +179,6 @@ class DockerInterfaceController extends AbstractController {
         if (!$this->updateDocker()) {
             return JsonResponse::getErrorResponse("Failed to write to file");
         }
-        return JsonResponse::getSuccessResponse("Successfully queued the system to update docker, please refresh the page in a bit.");
     }
 
     private function updateDocker(): bool {
