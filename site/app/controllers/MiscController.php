@@ -238,14 +238,12 @@ class MiscController extends AbstractController {
             }
         }
 
-        
         if (!is_readable($corrected_name)) {
             $this->core->getOutput()->showError(
                 'This file cannot be read. Please contact your system administrator.'
             );
             return false;
         }
-        $mime_type = mime_content_type($corrected_name);
         $mime_type = mime_content_type($corrected_name);
         // Fix BMP image on Chrome/Edge
         if (str_contains(strtolower($mime_type), 'bmp')) {
