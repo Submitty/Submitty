@@ -639,7 +639,7 @@ To remove a curve simply blank all boxes."></i>
             </div>
             <div id="bonus_late_days" data-testid="bonus_late_days" class="customization_item">
                 <h2>Bonus Late Days</h2>
-                <p class="rg_info_message">Award one addition late day to a subset of students, available starting on a selected date. Upload a CSV with one user id per line. Re-uploading for the same date replaced the existing file. </p>
+                <p class="rg_info_message">Award one additional late day to a subset of students, available starting on a selected date. Upload a CSV with one user id per line. Re-uploading for the same date replaced the existing file. </p>
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
                 <div class="option">
                     <label for="bonus-late-days-date">
@@ -682,7 +682,7 @@ To remove a curve simply blank all boxes."></i>
                             </tr>
                         </thead>
                         <tbody id="bonus-late-days-table-body" data-testid="bonus-late-days-table-body" style="text-align:left">
-                            {% for date, in bonus_latedays %}
+                            {% for date, filename in bonus_latedays %}
                                 <tr>
                                     <td>{{ date }}</td>
                                     <td>{{ filename }}</td>
