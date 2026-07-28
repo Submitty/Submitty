@@ -91,6 +91,7 @@ function showDockerLogButton(logContent) {
  * @param {boolean} updateNeeded
  */
 function setDockerStatusBadge(text, updateNeeded) {
+    //TODO: add a third option / argument of btn-warning
     const badge = $('#docker-status-badge');
     badge.text(text);
     badge.removeClass('btn-danger btn-success');
