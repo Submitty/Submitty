@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 
-class ImagesController extends AbstractController {
+class UserImagesController extends AbstractController {
     #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/student_photos")]
     public function viewImagesPage() {
