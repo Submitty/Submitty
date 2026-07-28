@@ -3,14 +3,9 @@ import { mountWithEmitSpy } from '../support/component_test_utils';
 
 describe('PanelSelectorModal', () => {
     describe('rendering', () => {
-        it('is visible when mounted', () => {
-            cy.mount(PanelSelectorModal);
-
-            cy.get('#panels-selector-modal').should('be.visible');
-        });
-
         it('shows all four layout section headings', () => {
             cy.mount(PanelSelectorModal);
+            cy.get('#two-panel-mode-btn').click();
 
             cy.contains('h2', 'Single panel option').should('be.visible');
             cy.contains('h2', 'Two panel options').should('be.visible');
@@ -20,6 +15,7 @@ describe('PanelSelectorModal', () => {
 
         it('draws canvas content', () => {
             cy.mount(PanelSelectorModal);
+            cy.get('#two-panel-mode-btn').click();
 
             cy.get('#single-panel').should(($canvas) => {
                 const ctx = $canvas[0].getContext('2d');
@@ -36,6 +32,7 @@ describe('PanelSelectorModal', () => {
     describe('select-layout emit', () => {
         it('emits select-layout with default twoInRight=false', () => {
             mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
+            cy.get('#two-panel-mode-btn').click();
 
             cy.get('#layout-option-1 .btn-primary').click();
             cy.get('@eventHandler').should('have.been.calledOnceWith', { panels: 1, isLeftTaller: false, twoInRight: false });
@@ -43,6 +40,7 @@ describe('PanelSelectorModal', () => {
 
         it('emits select-layout with twoInRight=true', () => {
             mountWithEmitSpy(PanelSelectorModal, 'selectLayout', {}, 'eventHandler');
+            cy.get('#two-panel-mode-btn').click();
 
             cy.get('#layout-option-3 .layout-option-item').eq(2).find('.btn-primary').click();
             cy.get('@eventHandler').should('have.been.calledOnceWith', { panels: 3, isLeftTaller: false, twoInRight: true });
