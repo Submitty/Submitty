@@ -1,6 +1,8 @@
 import { createApp, h, defineComponent } from 'vue';
 import Unknown from './components/Unknown.vue';
 
+const mountedApps = new Map<string, ReturnType<typeof createApp>>();
+
 const exports = {
     async render(
         target: string | Element,
@@ -9,6 +11,14 @@ const exports = {
         args: Record<string, unknown> = {},
         events: Record<string, string> = {},
     ) {
+        const mountKey = typeof target === 'string' ? target.replace(/^#/, '') : target.id ?? 'unknown';
+
+        // Unmount any existing app mounted on the same target to prevent leaks
+        if (mountedApps.has(mountKey)) {
+            mountedApps.get(mountKey)!.unmount();
+            mountedApps.delete(mountKey);
+        }
+
         const app = await (async () => {
             try {
                 // https://vite.dev/guide/features.html#glob-import
@@ -50,7 +60,21 @@ const exports = {
             }
         })();
 
+        mountedApps.set(mountKey, app);
         app.mount(target);
+
+        // Attach reRender + unmount so the element can be updated or destroyed without repeating type/name/events.
+        const el = typeof target === 'string' ? document.querySelector(target) : target;
+        if (el) {
+            (el as unknown as { reRender: (newArgs: Record<string, unknown>) => Promise<void> }).reRender
+                = (newArgs: Record<string, unknown>) => this.render(target, type, name, newArgs, events);
+            (el as unknown as { unmount: () => void }).unmount = () => {
+                if (mountedApps.has(mountKey)) {
+                    mountedApps.get(mountKey)!.unmount();
+                    mountedApps.delete(mountKey);
+                }
+            };
+        }
     },
 };
 
