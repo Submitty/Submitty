@@ -206,12 +206,18 @@ echo -e "\nBeginning installation of Submitty\n"
 
 nlohmann_dir="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json"
 
-# If we don't already have a copy of this repository, check it out
-if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 "https://github.com/nlohmann/json.git" "${nlohmann_dir}"
+# Fetch a pinned release of the nlohmann C++ JSON library.
+# Re-fetch only when the pinned version (.setup/bin/versions.sh) changes.
+mkdir -p "${nlohmann_dir}"
+pushd "${nlohmann_dir}" > /dev/null
+if [[ ! -f VERSION || $(< VERSION) != "${nlohmann_json_Version}" ]]; then
+    rm -rf include single_include
+    wget -nv "https://github.com/nlohmann/json/releases/download/${nlohmann_json_Version}/include.zip" -O nlohmann_json.zip
+    unzip -o -q nlohmann_json.zip "include/*"
+    rm -f nlohmann_json.zip
+    echo "${nlohmann_json_Version}" > VERSION
 fi
-
-# TODO: We aren't checking / enforcing a specific/minimum version of this library...
+popd > /dev/null
 
 # Add read & traverse permissions for RainbowGrades and vendor repos
 find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type d -exec chmod o+rx {} \;
