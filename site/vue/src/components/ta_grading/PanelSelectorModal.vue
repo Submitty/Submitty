@@ -1,14 +1,29 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import PanelSelector from './PanelSelector.vue';
 import Popup from '../../components/Popup.vue';
 
+const props = defineProps<{
+    visible?: boolean;
+}>();
+
 const emit = defineEmits<{
-    'close': [];
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
 
+const isVisible = ref(props.visible);
+
+watch(() => props.visible, (val) => {
+    isVisible.value = val;
+});
+
+function toggle() {
+    isVisible.value = !isVisible.value;
+}
+
 function selectLayout(panels: number, isLeftTaller: boolean, twoInRight = false) {
     emit('select-layout', { panels, isLeftTaller, twoInRight });
+    isVisible.value = false;
 }
 
 function rect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, fill = '#6d91b5') {
@@ -171,11 +186,16 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
   <Popup
     id="panels-selector-modal"
     title="Panel Selector"
-    :visible="true"
-    @toggle="$emit('close')"
+    :visible="isVisible"
+    @toggle="toggle"
   >
     <template #trigger>
-      <span class="trigger-placeholder" />
+      <button
+        class="btn btn-primary"
+        @click="toggle"
+      >
+        Panel Selector
+      </button>
     </template>
     <div class="form-body">
       <div
@@ -203,9 +223,3 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
     </div>
   </Popup>
 </template>
-
-<style scoped>
-.trigger-placeholder {
-  display: none;
-}
-</style>
