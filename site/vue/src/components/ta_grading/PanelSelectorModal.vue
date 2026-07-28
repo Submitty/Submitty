@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import PanelSelector from './PanelSelector.vue';
 import Popup from '../../components/Popup.vue';
-
-const props = defineProps<{
-    visible?: boolean;
-}>();
 
 const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
 
-const isVisible = ref(props.visible);
-
-watch(() => props.visible, (val) => {
-    isVisible.value = val;
-});
+const isVisible = ref(false);
 
 function toggle() {
     isVisible.value = !isVisible.value;
@@ -190,12 +182,17 @@ const sections: { id: string; title: string; options: LayoutOption[] }[] = [
     @toggle="toggle"
   >
     <template #trigger>
-      <button
-        class="btn btn-primary"
-        @click="toggle"
-      >
-        Panel Selector
-      </button>
+      <span class="ta-navlink-cont">
+        <button
+          id="two-panel-mode-btn"
+          class="invisible-btn"
+          title="Toggle the two panel mode"
+          data-testid="panel-selector-toggle"
+          @click="toggle"
+        >
+          <i class="fas fa-columns icon-header icon-streched" />
+        </button>
+      </span>
     </template>
     <div class="form-body">
       <div
