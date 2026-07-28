@@ -3621,8 +3621,32 @@ async function injectGradingComponent(component: Component, graded_component: Co
  * @return {void}
  */
 async function injectGradingComponentHeader(component: Component, graded_component: ComponentGradeInfo, showMarkList: boolean) {
+    // Unmount any existing Vue component in the header before .html() destroys it,
+    // preventing stale app instances in mountedApps.
+    const existing = getComponentJQuery(component.id).find('.header-block [id^="vue-"]').first();
+    if (existing.length > 0) {
+        unmountVueComponent(existing.get(0)!);
+    }
+
     const elements = await renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), !!canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component));
     setComponentHeaderContents(component.id, elements);
+
+    // jQuery .html() strips <script> tags from the Twig.js output, so the
+    // Vue component embedded via Vue.twig doesn't auto-mount via its inline
+    // <script> tag. Mount it manually now.
+    const mountEl = getComponentJQuery(component.id).find('.header-block [id^="vue-"]').first();
+    if (mountEl.length > 0) {
+        await window.submitty.render(
+            `#${mountEl.attr('id')!}`,
+            'component',
+            'ta_grading/RubricComponentHeader',
+            {
+                totalScore: graded_component.score,
+                maxValue: component.max_value,
+            },
+        );
+    }
+
     await refreshTotalScoreBox();
 }
 
