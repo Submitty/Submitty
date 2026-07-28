@@ -1083,6 +1083,35 @@ ALTER SEQUENCE public.forum_attachments_id_seq OWNED BY public.forum_attachments
 
 
 --
+-- Name: forum_blocked_user; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.forum_blocked_user (
+    id integer NOT NULL,
+    user_id character varying(255) NOT NULL,
+    action character varying(255) NOT NULL,
+    expiration_date timestamp with time zone,
+    created_by character varying(255) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT forum_blocked_user_action_check CHECK (((action)::text = 'no_forum_posts'::text))
+);
+
+
+--
+-- Name: forum_blocked_user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.forum_blocked_user ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.forum_blocked_user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: forum_posts_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2565,6 +2594,22 @@ ALTER TABLE ONLY public.forum_attachments
 
 
 --
+-- Name: forum_blocked_user forum_blocked_user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_user_id_action_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_user_id_action_key UNIQUE (user_id, action);
+
+
+--
 -- Name: forum_upducks forum_upducks_user_id_post_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3013,6 +3058,13 @@ ALTER TABLE ONLY public.viewed_responses
 
 
 --
+-- Name: forum_blocked_user_created_by_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX forum_blocked_user_created_by_idx ON public.forum_blocked_user USING btree (created_by);
+
+
+--
 -- Name: forum_posts_history_edit_timestamp_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3407,6 +3459,22 @@ ALTER TABLE ONLY public.course_materials_access
 
 ALTER TABLE ONLY public.gradeable_allowed_minutes_override
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: forum_blocked_user forum_blocked_user_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_blocked_user
+    ADD CONSTRAINT forum_blocked_user_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
