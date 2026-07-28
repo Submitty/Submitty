@@ -56,7 +56,6 @@ describe('Docker UI Test', () => {
             .eq(1)
             .should('contain.text', 'Changes applying...');
 
-
         // Allow the system to update the info
         // Don't reload so the log stays visible
         cy.get('[data-testid="docker-status"]')
@@ -196,7 +195,6 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="docker-status"]')
             .eq(1)
             .should('contain.text', 'Changes applying...');
-
 
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
