@@ -974,6 +974,19 @@ class ReportController extends AbstractController {
         return JsonReponse::getSuccessResponse(['date' => $date, 'filename' => $filename]);
     }
 
+    private funtion filterExistingBonusLateDays(object $entries): object {
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades');
+        $result = (object) [];
+        foreach ($entries as $date => $filename) {
+            if (file_exists(FileUtils::joinPaths($rainbow_grades_dir, $filename))) {
+                $result->$date = $filename;
+            } else {
+                this->core->addErrorMessage("Bonus late day file for {$date} is missing: entry removed");
+            }
+        }
+        return $result;
+    }
+
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
     public function downloadGUIRainbowConfig(): MultiResponse|DownloadResponse {
