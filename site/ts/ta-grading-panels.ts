@@ -5,6 +5,7 @@ declare global {
     interface Window {
         updateThePanelsElements(panelsAvailabilityObj: Record<PanelElement, boolean>): void;
         changePanelsLayout (panelsCount: string | number, isLeftTaller: boolean, twoOnRight: boolean): void;
+        setPanelsVisibilities (ele: string, forceVisible: boolean | null, position: string | null): void;
     }
 }
 
@@ -267,48 +268,11 @@ function checkForTwoPanelLayoutChange(
 }
 
 export function updatePanelOptions() {
-    if (taLayoutDet.numOfPanelsEnabled === 1) {
-        return;
-    }
-
-    const panels = taLayoutDet.numOfPanelsEnabled;
-    const dividedRight = taLayoutDet.dividedColName === 'RIGHT';
-    const is2Panel = panels === 2;
-    const is3PanelRight = panels === 3 && dividedRight;
-
-    const showLeftBottom = !is2Panel && !is3PanelRight;
-    const showRightBottom = !is2Panel && (panels === 4 || dividedRight);
-
-    const leftTopText = (is2Panel || is3PanelRight)
-        ? 'Open as left panel'
-        : 'Open as top left panel';
-    const rightTopText = !showRightBottom
-        ? 'Open as right panel'
-        : 'Open as top right panel';
-
-    const makeOption = (cls: string, value: string, text: string): JQuery<HTMLOptionElement> => {
-        return $('<option>')
-            .addClass(cls)
-            .attr('value', value)
-            .text(text) as JQuery<HTMLOptionElement>;
-    };
-
-    const newOptions: JQuery<HTMLOptionElement>[] = [
-        makeOption('panel-position-left', 'leftTop', leftTopText),
-    ];
-    if (showLeftBottom) {
-        newOptions.push(makeOption('panel-position-left', 'leftBottom', 'Open as bottom left panel'));
-    }
-    newOptions.push(makeOption('panel-position-right', 'rightTop', rightTopText));
-    if (showRightBottom) {
-        newOptions.push(makeOption('panel-position-right', 'rightBottom', 'Open as bottom right panel'));
-    }
-
-    $('.grade-panel .panel-position-cont')
-        .empty()
-        .append(...newOptions)
-        .attr('size', newOptions.length);
+    $('#grading-panel-header').attr('data-num-of-panels-enabled', taLayoutDet.numOfPanelsEnabled);
+    $('#grading-panel-header').attr('data-divided-col-name', taLayoutDet.dividedColName);
 }
+
+window.setPanelsVisibilities = setPanelsVisibilities;
 
 export function setPanelsVisibilities(
     ele: string,
@@ -373,6 +337,12 @@ export function setPanelsVisibilities(
     else {
         saveTaLayoutDetails();
     }
+
+    // Hide the panel's <select> listbox after a position is chosen
+    // so it doesn't block subsequent clicks on the button area
+    if (position !== null) {
+        $(`select#${ele}_select`).hide();
+    }
 }
 
 // Exchanges positions of left and right panels
@@ -403,7 +373,6 @@ export function exchangeTwoPanels() {
         )
             ? 'RIGHT'
             : 'LEFT';
-        updatePanelOptions();
         updatePanelLayoutModes();
         initializeHorizontalTwoPanelDrag();
     }
@@ -463,6 +432,7 @@ export function resetSinglePanelLayout() {
     if (taLayoutDet.currentOpenPanel) {
         setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
     }
+    updatePanelOptions();
 }
 
 export function togglePanelLayoutModes(forceVal = false) {
@@ -494,6 +464,7 @@ export function togglePanelLayoutModes(forceVal = false) {
         updatePanelLayoutModes();
     }
     else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
+        updatePanelOptions();
         twoPanelCont.addClass('active');
         $('.two-panel-item.two-panel-left, .two-panel-drag-bar').addClass(
             'active',
@@ -560,7 +531,6 @@ export function togglePanelLayoutModes(forceVal = false) {
             rightBottom: null,
         };
     }
-    updatePanelOptions();
 }
 
 export function toggleFullLeftColumnMode(forceVal = false) {
@@ -619,4 +589,7 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     if (!taLayoutDet.isFullLeftColumnMode) {
         $('#grading-panel-student-name').show();
     }
+    updatePanelOptions();
+    // Reload the page so Vue components receive updated layout state from Twig.
+    location.reload();
 };
