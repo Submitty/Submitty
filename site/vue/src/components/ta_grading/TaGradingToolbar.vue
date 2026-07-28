@@ -5,13 +5,25 @@ import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
+import Cookies from 'js-cookie';
+
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
     progress: number;
+    clusteringEnabled?: boolean;
+    clustersExist?: boolean;
+    taGradingClusterMode?: boolean;
 }>();
-
+const toggleClusteringMode = () => {
+    if (!clustersExist) {
+        return; // Disabled if no clusters
+    }
+    const currentMode = taGradingClusterMode;
+    Cookies.set('ta_grading_cluster_mode', currentMode ? 'false' : 'true', { expires: 1, path: '/' });
+    window.location.reload();
+};
 const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
@@ -35,6 +47,15 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="main-page"
     title="Go to the main page"
     :optional-href="homeUrl"
+  />
+
+  <NavigationButton
+    v-if="clusteringEnabled"
+    :on-click="toggleClusteringMode"
+    :visible-icon="taGradingClusterMode ? 'fa-user' : 'fa-users-rectangle'"
+    button-id="toggle-cluster-mode"
+    :title="clustersExist ? (taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)') : 'No clusters available for this assignment'"
+    :style="!clustersExist ? 'opacity: 0.5; cursor: not-allowed;' : (taGradingClusterMode ? 'color: var(--standard-vibrant-yellow);' : '')"
   />
 
   <NavigationButton

@@ -50,9 +50,10 @@
                     {% endif %}
 
                     {# Silent Edit Checkbox #}
-                    {% if show_silent_edit %}
+                    {% if show_silent_edit and not ta_grading_cluster_mode %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
+                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>
+                            <label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
@@ -62,6 +63,11 @@
                     </div>
                     {% endif %}
                 </div>
+                {% if ta_grading_cluster_mode %}
+                    <div class="blue-message w-100" style="margin-top: 5px; margin-bottom: 5px; text-align: center;">
+                        <strong>Clustering Mode Enabled:</strong> The grade you apply here will automatically be applied to all students within this student's cluster. But if this student is in the "Unclustered" group, they will be graded normally.<br>
+                    </div>
+                {% endif %}
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>
                 <div class="inner-container" id="grading-box">
