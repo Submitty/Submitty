@@ -57,15 +57,15 @@ describe('Docker UI Test', () => {
             .should('contain.text', 'Changes applying...');
 
 
-        // Allow the system to update the info and reload
-        // eslint-disable-next-line no-restricted-syntax
-        cy.waitAndReloadUntil(() => {
-            return cy.get('[data-testid="docker-version"]')
-                .invoke('text')
-                .then((text) => {
-                    return text !== 'Unknown';
-                });
-        }, 10000);
+        // Allow the system to update the info
+        // Don't reload so the log stays visible
+        cy.get('[data-testid="docker-status"]')
+            .eq(0, { timeout: 60000 })
+            .should('contain.text', 'Changes applied, manually reload the page to view them!');
+
+        cy.get('[data-testid="docker-status"]')
+            .eq(1, { timeout: 60000 }) // <-- Move timeout here
+            .should('contain.text', 'Changes applied, manually reload the page to view them!');
 
         // Log button should now be visible on both copies
         cy.get('[data-testid="docker-log-button"]').eq(0).should('be.visible');
@@ -80,6 +80,16 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="docker-status-log"]').eq(0).invoke('text').then((topText) => {
             cy.get('[data-testid="docker-status-log"]').eq(1).invoke('text').should('eq', topText);
         });
+
+        // Now reload
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-version"]')
+                .invoke('text')
+                .then((text) => {
+                    return text !== 'Unknown';
+                });
+        }, 10000);
 
         // Updated time should not be "Unknown"
         cy.get('[data-testid="systemwide-info"]')
