@@ -45,7 +45,7 @@ if ARGV[0] == 'workers'
  VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
  VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
 else
- VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '4096').to_i
+ VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '8192').to_i
  VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '4').to_i
 end
 

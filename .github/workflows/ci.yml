@@ -588,13 +588,13 @@ jobs:
         run: |
           psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
             -c "CREATE DATABASE submitty"
 
           psql -d postgres -h localhost -U postgres        -p ${{ job.services.postgres-branch.ports['5432'] }} \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }} \
             -c "CREATE DATABASE submitty"
 
@@ -618,6 +618,9 @@ jobs:
 
       - name: Setup Databases and Courses for main
         run: | # migrate main according to dumped master database (assume it is correct)
+          sudo mkdir -p /var/submitty
+          sudo ln -sfn ${MAIN_INSTALL_PATH}/config /var/submitty/config
+
           python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
           sudo ln -vs /usr/bin/true /usr/bin/ldapadd
@@ -633,6 +636,8 @@ jobs:
 
       - name: Setup Databases and Courses for Current Branch
         run: |
+          sudo ln -sfn ${PR_INSTALL_PATH}/config /var/submitty/config
+
           python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
           sudo -E python3 ${PR_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py       \
