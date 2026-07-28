@@ -203,7 +203,7 @@ function updateImage() {
 }
 
 /**
- * checks for changes while an update is in progress and applies them to the images table
+ * checks the status of the docker update command and displays a message to the user
  */
 function checkDockerUpdateStatus() {
     $.ajax({
@@ -215,7 +215,7 @@ function checkDockerUpdateStatus() {
             if (response.status === 'success') {
                 if (response.data && response.data.in_progress) {
                     setDockerStatusBadge('Changes applying...', 'btn-warning');
-                    checkDockerUpdateStatus();
+                    setTimeout(checkDockerUpdateStatus, 15000);
                     return;
                 }
 
@@ -255,6 +255,13 @@ $(document).ready(() => {
         }
         else {
             restoreDockerStatusBadge();
+
+            // run checkDockerUpdateStatus if the page was reloaded during an update
+            const badgeText = JSON.parse(saved_status_badge);
+            if (badgeText.text === 'Changes applying...') {
+                isUpdateInProgress = true;
+                checkDockerUpdateStatus();
+            }
         }
     }
 

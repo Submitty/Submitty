@@ -17,8 +17,6 @@ use app\models\DockerUI;
  *
  */
 class DockerInterfaceController extends AbstractController {
-    // Time in seconds a call to checkDockerUpdateStatus should wait before timing out
-    const MAX_DOCKER_UPDATE_WAIT_TIME = 60;
     /**
      * Entry point to render the Docker UI, handles both API and webresponse calls
      */
@@ -264,17 +262,10 @@ class DockerInterfaceController extends AbstractController {
         $docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "docker" . $now . ".json");
         $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
 
-        // Check the the queue for the jobs files every second to see if the update has finished yet
-        $max_wait_time = self::MAX_DOCKER_UPDATE_WAIT_TIME;
+        // check the the queue for the jobs files to see if the update has finished yet
         $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
-        while ($is_in_progress && $max_wait_time !== 0) {
-            sleep(1);
-            $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
-            $max_wait_time--;
-            clearstatcache();
-        }
 
-        // return before searching for the log_file if we timed out
+        // return before searching for the log file if the job is still in progress
         if ($is_in_progress) {
             return JsonResponse::getSuccessResponse([
                 'in_progress' => $is_in_progress,
@@ -290,7 +281,7 @@ class DockerInterfaceController extends AbstractController {
             $log_content = file_get_contents($log_file);
             $delimiter = "================== Simplified Output ==================";
 
-            // Search backwards for the last time the simplified output started
+            // search backwards for the last time the simplified output started
             $last_pos = strrpos($log_content, $delimiter);
 
             // get everything from 'Simplified Output' to the end of the file
