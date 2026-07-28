@@ -783,23 +783,61 @@ function checkBuildStatus() {
         data: { csrf_token: csrfToken },
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             if (response.status === 'success') {
                 $('#save_status').text('Rainbow grades successfully generated!');
                 showLogButton(response.data);
+                refreshBuildNotices();
                 refreshManualGenerationBanner();
             }
             else if (response.status === 'fail') {
                 $('#save_status').text('A failure occurred generating rainbow grades');
                 showLogButton(response.message);
+                refreshBuildNotices();
             }
             else {
                 $('#save_status').text('Internal Server Error');
-                console.log(response);
             }
         },
         error: function (xhr, status, error) {
             console.error(`Failed to parse response from server: ${xhr.responseText}`);
+        },
+    });
+}
+
+function renderBuildNotices(notice) {
+    const banner = $('#rainbow-build-notice');
+    if (!notice) {
+        banner.hide();
+        return;
+    }
+    banner.removeClass('rg-build-notice-error rg-build-notice-warning')
+        .addClass(`rg-build-notice-${notice.level}`);
+    $('#rainbow-build-notice-messages').text(notice.messages.join('\n'));
+    const contact = $('#rainbow-build-notice-contact');
+    if (notice.sysadmin_email) {
+        $('#rainbow-build-notice-email').attr('href', `mailto:${notice.sysadmin_email}`).text(notice.sysadmin_email);
+        contact.show();
+    }
+    else {
+        contact.hide();
+    }
+    banner.show();
+}
+
+function refreshBuildNotices() {
+    $.ajax({
+        type: 'POST',
+        url: buildCourseUrl(['reports', 'rainbow_grades_build_notices']),
+        data: { csrf_token: csrfToken },
+        dataType: 'json',
+        success: function (response) {
+            if (response.status !== 'success') {
+                return;
+            }
+            renderBuildNotices(response.data.notice);
+        },
+        error: function (xhr) {
+            console.error(`Failed to refresh build notices: ${xhr.responseText}`);
         },
     });
 }
@@ -829,6 +867,7 @@ function refreshManualGenerationBanner() {
 $(document).ready(() => {
     // Run when page loads
     DetectSameSectionName();
+    renderBuildNotices(window.rainbowBuildNotice);
     $('input[name*=\'display\']').change(() => {
         saveChanges();
     });
