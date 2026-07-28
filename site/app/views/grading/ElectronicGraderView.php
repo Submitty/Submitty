@@ -1288,7 +1288,6 @@ HTML;
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
         // Add MarkerJS libraries globally for image annotation
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
@@ -1597,7 +1596,6 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1614,7 +1612,6 @@ HTML;
             "results_public" => $results_public,
             "active_version" => $display_version,
             "anon_mode" => $anon_mode,
-            'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_assignment_settings_path" => $uas,
             "user_assignment_settings_missing" => $user_assignment_settings_missing,
@@ -2004,7 +2001,6 @@ HTML;
             "old_files" => $old_files,
             "is_grader_view" => true,
             "max_file_uploads" => ini_get('max_file_uploads'),
-            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
             "is_timed" => $is_timed,
             "allowed_minutes" => $allowed_minutes
             ]
