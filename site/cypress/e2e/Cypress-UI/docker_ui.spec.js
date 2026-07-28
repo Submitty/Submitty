@@ -45,13 +45,12 @@ describe('Docker UI Test', () => {
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
         cy.get('#update-machines')
-            .should('have.text', ' Update dockers and machines')
+            .should('contain', ' Update dockers and machines')
             .click();
         // Should prompt a success message
-        cy.get('.alert-success')
+        cy.get('#docker-status-badge')
             .invoke('text')
-            .should('contain', 'Successfully queued the system to update'
-            + ' docker, please refresh the page in a bit.');
+            .should('contain', 'Changes applying...');
 
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
@@ -151,8 +150,8 @@ describe('Docker UI Test', () => {
 
         // Update the machine to link existing image to a new tag
         cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('#docker-status-badge')
+            .should('contain.text', 'Changes applying...');
 
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
@@ -224,8 +223,8 @@ describe('Docker UI Test', () => {
 
         // Update the machine to pull the image
         cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('#docker-status-badge')
+            .should('contain.text', 'Changes applying...');
 
         // Allow the system to install the image and update UI
         // eslint-disable-next-line no-restricted-syntax
@@ -277,8 +276,8 @@ describe('Docker UI Test', () => {
 
         // Update the machine to remove the image
         cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('#docker-status-badge')
+            .should('contain.text', 'Changes applying...');
 
         // Reload the page and wait until the image is removed
         // eslint-disable-next-line no-restricted-syntax
