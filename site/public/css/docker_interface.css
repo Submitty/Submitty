@@ -47,6 +47,10 @@
     background-color: var(--danger-red);
 }
 
+.btn-warning {
+    background-color: var(--alert-warning-yellow);
+}
+
 .docker-status-bar {
     border: none;
     background-color: var(--standard-hover-light-gray);
