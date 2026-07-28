@@ -98,8 +98,8 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 100%;
 }
 
-#data-table.lab-dynamic-columns tr > th:nth-of-type(n+6),
-#data-table.lab-dynamic-columns tr > td:nth-of-type(n+6) {
+#data-table.lab-dynamic-columns tr > th:nth-of-type(n + 6),
+#data-table.lab-dynamic-columns tr > td:nth-of-type(n + 6) {
     width: calc((100% - 410px) / var(--lab-component-count));
 }
 
