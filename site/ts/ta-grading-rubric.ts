@@ -3621,13 +3621,6 @@ async function injectGradingComponent(component: Component, graded_component: Co
  * @return {void}
  */
 async function injectGradingComponentHeader(component: Component, graded_component: ComponentGradeInfo, showMarkList: boolean) {
-    // Unmount any existing Vue component in the header before .html() destroys it
-    // and preventing stale app instances in mountedApps.
-    const existing = getComponentJQuery(component.id).find('.header-block [id^="vue-"]').first();
-    if (existing.length > 0) {
-        unmountVueComponent(existing.get(0)!);
-    }
-
     const elements = await renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), !!canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component));
     setComponentHeaderContents(component.id, elements);
 
