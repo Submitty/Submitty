@@ -9,8 +9,8 @@
     Should be added back eventually, ideally showing workers' version as well
     <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
     #}
-    <p>Docker info updated on: {{ last_updated | date("Y-m-d H:i:s") }}</p>
-    <p>System info updated on: {{ sysinfo_last_updated | date("Y-m-d H:i:s") }}</p>
+    <p>Docker info updated on: {{ last_updated == 'Unknown' or not last_updated ? 'Unknown' : last_updated | date("Y-m-d H:i:s") }}</p>
+    <p>System info updated on: {{ sysinfo_last_updated == 'Unknown' or not sysinfo_last_updated ? 'Unknown' : sysinfo_last_updated | date("Y-m-d H:i:s") }}</p>
 
     <div id="docker-status-container" class="docker-status-bar">
         <div id="status-head">
