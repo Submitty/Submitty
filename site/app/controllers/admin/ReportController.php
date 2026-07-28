@@ -857,6 +857,9 @@ class ReportController extends AbstractController {
                 'show_gradeable_configuration' => $customization->getShowGradeableConfiguration(),
                 'customize_show_notes' => $customization->getCustomizeShowNotes(),
                 'plagiarism' => $customization->getPlagiarism(),
+                'bonus_latedays' => $customization->getBonusLateDays(),
+                'bonus_late_days_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'bonus_late_days', 'upload']),
+                'bonus_late_days_delete_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'bonus_late_days', 'delete']),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
                 'normalization_warnings' => $customization->getNormalizationWarnings(),
@@ -941,6 +944,34 @@ class ReportController extends AbstractController {
             'customization_path' => $rainbow_grades_dir,
             'manual_customization_exists' => true
         ]);
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/bonus_late_days/upload", methods: ["POST"])]
+    public function upoloadBonusLateDays(): JsonResponse {
+        $date = $_POST['date'] ?? '';
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+            return JsonResponse::getErrorResponse('Invalid date, expected YYYY-MM-DD');
+        }
+
+        if (empty($_FILES) || !isset($_FILES['bonus_late_days_upload'])) {
+            return JsonResponse::getErrorResponse('Upload failed: No file to upload');
+        }
+        $upload = $_FILES['bonus_late_days_upload'];
+        if (!isset($upload['tmp_name']) || trim($upload['tmp_name']) === '') {
+            return JsonResponse::getErrorResponse('Upload failed: Empty tmp name for file');
+        }
+
+        $filename = "bonus_late_days_{$date}.csv";
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades');
+        $destination_path = FileUtils::joinPaths($rainbow_grades_dir, $filename);
+
+        if (!copy($upload['tmp_name'], $destination_path) || !file_exists($destination_path)) {
+            return JsonReponse::getErrorResponse('Upload failed: Could not copy file');
+        }
+
+        return JsonReponse::getSuccessResponse(['date' => $date, 'filename' => $filename]);
     }
 
 
@@ -1283,6 +1314,7 @@ class ReportController extends AbstractController {
             'gradeables' => $this->buildGradeablesArray($customization),
             'plagiarism' => $customization->getPlagiarism(),
             'manual_grade' => $customization->getManualGrades(),
+            'bonus_latedays' => $this->filterExistingBonusLateDays($customization->getBonusLateDays()),
             'warning' => $customization->getPerformanceWarnings(),
         ];
         return json_encode($json, JSON_PRETTY_PRINT);

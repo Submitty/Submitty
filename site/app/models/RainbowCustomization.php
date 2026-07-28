@@ -740,6 +740,13 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
+     * Get bonus late days from json file if there are any
+     */
+    public function getBonusLateDays(): object {
+        return $this->RCJSON?->getBonusLateDays() ?? (object) [];
+    }
+
+    /**
      * Get performance warnings from json file if there are any
      *
      * @return array<object>  array of performance warnings JSON object
@@ -834,6 +841,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->display)) {
             foreach ($form_json->display as $display_option) {
                 $this->RCJSON->addDisplay($display_option);
+            }
+        }
+
+        if (isset($form_json->bonus_latedays)) {
+            foreach ($form_json->bonus_latedays as $date => $filename) {
+                $this->RCJSON->addBonusLateDay((string) $date, $filename);
             }
         }
 

@@ -67,6 +67,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @var bool
      */
     private bool $customize_show_notes = false;
+    /**
+     * @var object
+     */
+    private object $bonus_latedays;
 
     // The order of allowed_display and allowed_display_description has to match
     const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
@@ -98,6 +102,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->section = (object) [];
         $this->benchmark_percent = (object) [];
         $this->final_cutoff = (object) [];
+        $this->bonus_latedays = (object) [];
     }
 
     /**
@@ -171,6 +176,13 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->display;
     }
 
+    /**
+     * Get map of date, bonus late day csv filename
+     */
+    public function getBonusLateDays(): object {
+        return $this->bonus_latedays;
+    }
+
 
 
     /**
@@ -188,6 +200,24 @@ class RainbowCustomizationJSON extends AbstractModel {
         if (!in_array($benchmark, $this->display_benchmark, true)) {
             array_push($this->display_benchmark, $benchmark);
         }
+    }
+
+    /**
+     * Adds a bonus late day entry
+     * 
+     * @param string $date Date in YYYY-MM-DD format
+     * @param string $filename Name of the csv inside the rainbow_grades directory
+     * @throws BadArgumentException
+     */
+    public function addBonusLateDay(string $date, string $filename): void {
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+            throw new BadArgumentException('Bonus late day date must be in YYYY-MM-DD format.');
+        }
+        if ($filename === '') {
+            throw new BadArgumentException('Bonus late day file must not be empty.');
+        }
+        $this->bonus_latedays->$date = $filename;
     }
 
     /**
@@ -286,6 +316,10 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         if (isset($json->customize_show_notes)) {
             $this->customize_show_notes = $json->customize_show_notes;
+        }
+
+        if (isset($json->bonus_latedays)) {
+            $this->bonus_latedays = $json->bonus_latedays;
         }
     }
 
