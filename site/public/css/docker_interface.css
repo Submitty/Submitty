@@ -59,60 +59,60 @@
     border-radius: 25px;
 }
 
-#status-head {
+.status-head {
     display: flex;
     align-items: center;
     width: 100%;
     flex-wrap: wrap;
 }
 
-#build-buttons {
+.update-buttons {
     display: flex;
     align-items: center;
     margin-right: 10px;
 }
 
 @media (max-width: 700px) {
-    #status-head {
+    .status-head {
         flex-flow: column wrap;
         justify-content: start;
     }
-    #status-head > div {
+    .status-head > div {
         width: 100%;
         margin: 3px 0;
     }
 }
 
-#docker-status-info {
+.docker-status-info {
     display: flex;
     align-items: center;
 }
 
-#docker-status-label {
+.docker-status-label {
     padding-right: 4px;
     font-weight: bold;
 }
 
-#docker-status-badge {
+.docker-status-badge {
     display: inline-block;
     margin-left: 10px;
     text-wrap: wrap;
 }
 
-#docker-status-buttons {
+.docker-status-buttons {
     display: flex;
     flex-direction: row;
     margin-right: 10px;
     border: none;
 }
 
-#show-docker-log-button {
+.show-docker-log-button {
     display: none;
     margin-left: 10px;
     padding: 5px 12px;
 }
 
-#docker-status-log {
+.docker-status-log {
     display: none;
     margin: 10px 0;
     overflow: auto;

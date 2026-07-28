@@ -79,8 +79,8 @@ function confirmationDialog(url, id) {
  * @param {string} logContent
  */
 function showDockerLogButton(logContent) {
-    $('#show-docker-log-button').show();
-    const logs = $('#docker-status-log').empty();
+    $('.show-docker-log-button').show();
+    const logs = $('.docker-status-log').empty();
     if (logContent) {
         $('<pre></pre>').text(logContent).appendTo(logs);
     }
@@ -91,7 +91,7 @@ function showDockerLogButton(logContent) {
  * @param {string} btn_class
  */
 function setDockerStatusBadge(text, btn_class) {
-    const badge = $('#docker-status-badge');
+    const badge = $('.docker-status-badge');
     badge.text(text);
     badge.removeClass('btn-danger btn-warning btn-success');
     if (btn_class === 'btn-danger') {
@@ -243,8 +243,8 @@ $(document).ready(() => {
     $('#show-all').on('click', showAll);
     $('#add-field').on('input', addFieldOnChange).trigger('input');
 
-    $('#show-docker-log-button').click(() => {
-        $('#docker-status-log').toggle();
+    $('.show-docker-log-button').click(() => {
+        $('.docker-status-log').toggle();
     });
 
     const saved_status_badge = sessionStorage.getItem(DOCKER_STATUS_BADGE);
