@@ -239,20 +239,20 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const currentScore = parseFloat(elem.data('score')) || 0;
 
             if (currentScore === 1.0) {
+                elem.removeClass('simple-half-credit');
                 elem.addClass('simple-full-credit');
-                elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
             }
             else if (currentScore === 0.5) {
                 elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
                 elem.addClass('simple-half-credit');
-                elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
             }
             else {
                 elem.removeClass('simple-half-credit');
                 elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
             }
+
+            // mark cell as user-modified so stale WebSocket echoes are ignored
+            elem.data('user-modified', Date.now());
 
             // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
@@ -888,22 +888,23 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             elem.find('.simple-grade-grader').text(grader);
             elem.find('.simple-grade-date').text(date);
 
-            switch (score) {
-                case 1.0:
-                    elem.addClass('simple-full-credit');
-                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
-                    break;
-                case 0.5:
-                    elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
-                    elem.addClass('simple-half-credit');
-                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
-                    break;
-                default:
-                    elem.removeClass('simple-half-credit');
-                    elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
-                    break;
+            // skip color update if this user just modified the cell
+            const lastModified = elem.data('user-modified');
+            if (!lastModified || Date.now() - lastModified > 1000) {
+                switch (score) {
+                    case 1.0:
+                        elem.removeClass('simple-half-credit');
+                        elem.addClass('simple-full-credit');
+                        break;
+                    case 0.5:
+                        elem.removeClass('simple-full-credit');
+                        elem.addClass('simple-half-credit');
+                        break;
+                    default:
+                        elem.removeClass('simple-half-credit');
+                        elem.removeClass('simple-full-credit');
+                        break;
+                }
             }
         }
     }
