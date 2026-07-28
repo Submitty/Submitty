@@ -255,6 +255,12 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders access the files panel*/
     protected $peer_files = true;
     /** @prop
+     * @var bool whether peer graders are restricted to specific files */
+    protected bool $peer_files_restricted = false;
+    /** @prop
+     * @var array<string> file patterns visible to peer graders */
+    protected array $peer_file_patterns = [];
+    /** @prop
      * @var bool will peer graders access the solution/notes panel*/
     protected $peer_solutions = true;
     /** @prop
@@ -307,6 +313,8 @@ class Gradeable extends AbstractModel {
             'autograding' => 'setPeerAutograding',
             'rubric' => 'setPeerRubric',
             'files' => 'setPeerFiles',
+            'peer_files_restricted' => 'setPeerFilesRestricted',
+            'peer_file_patterns' => 'setPeerFilePatterns',
             'solution_notes' => 'setPeerSolutions',
             'discussion' => 'setPeerDiscussion'
         ];
@@ -2690,6 +2698,66 @@ class Gradeable extends AbstractModel {
 
     public function getPeerFiles(): bool {
         return $this->peer_files;
+    }
+
+    public function setPeerFilesRestricted(bool $peer_files_restricted): void {
+        $this->peer_files_restricted = $peer_files_restricted;
+        $this->modified = true;
+    }
+
+    public function getPeerFilesRestricted(): bool {
+        return $this->peer_files_restricted;
+    }
+
+    /**
+     * @param array<string>|string $peer_file_patterns
+     */
+    public function setPeerFilePatterns(array|string $peer_file_patterns): void {
+        if (is_string($peer_file_patterns)) {
+            $decoded_patterns = json_decode($peer_file_patterns, true);
+            if (!is_array($decoded_patterns)) {
+                throw new \InvalidArgumentException('Peer file patterns must be a valid JSON array.');
+            }
+            $peer_file_patterns = $decoded_patterns;
+        }
+        $cleaned_patterns = [];
+        foreach ($peer_file_patterns as $pattern) {
+            if (!is_string($pattern)) {
+                throw new \InvalidArgumentException('Each peer file pattern must be a string.');
+            }
+            $pattern = trim($pattern);
+            if ($pattern === '') {
+                continue;
+            }
+            if (str_contains($pattern, "\0")) {
+                throw new \InvalidArgumentException('Peer file patterns cannot contain null bytes.');
+            }
+            $cleaned_patterns[] = str_replace('\\', '/', $pattern);
+        }
+        $this->peer_file_patterns = array_values(array_unique($cleaned_patterns));
+        $this->modified = true;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getPeerFilePatterns(): array {
+        return $this->peer_file_patterns;
+    }
+
+    public function canPeerViewFile(string $relative_path): bool {
+        if (!$this->getPeerFilesRestricted()) {
+            return true;
+        }
+        $relative_path = ltrim(str_replace('\\', '/', $relative_path), '/');
+        $file_name = basename($relative_path);
+        foreach ($this->getPeerFilePatterns() as $pattern) {
+            $pattern = ltrim(str_replace('\\', '/', trim($pattern)), '/');
+            if (fnmatch($pattern, $relative_path, FNM_PATHNAME) || fnmatch($pattern, $file_name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function setPeerSolutions(bool $peer_solutions): void {
