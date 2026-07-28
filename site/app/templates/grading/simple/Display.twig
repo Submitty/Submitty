@@ -109,8 +109,21 @@
             id="data-table"
             data-current-grader="{{ user_id }}"
             class="table table-striped table-bordered persist-area {{ action == 'lab' ? 'lab-dynamic-columns' : '' }}"
-            style="table-layout: fixed; {{ action == 'lab' ? '--lab-component-count: ' ~ (gradeable.getComponents()|length > 0 ? gradeable.getComponents()|length : 1) ~ ';' : '' }}"
+            style="table-layout: fixed;"
         >
+            {% if action == 'lab' %}
+                {% set lab_component_count = gradeable.getComponents()|length > 0 ? gradeable.getComponents()|length : 1 %}
+                <colgroup>
+                    <col style="width: 5%;">
+                    <col style="width: 10%;">
+                    <col style="width: 12%;">
+                    <col style="width: 11%;">
+                    <col style="width: 12%;">
+                    {% for component in gradeable.getComponents() %}
+                        <col style="width: calc(50% / {{ lab_component_count }});">
+                    {% endfor %}
+                </colgroup>
+            {% endif %}
             <caption />
             {# Table header #}
             <thead>
