@@ -256,9 +256,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 
             // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
-
-            // create border we can animate to reflect ajax status
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         }
     });
 
@@ -285,11 +282,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
-                elems.each((idx, elem) => {
-                    elem = $(elem);
-                    elem.stop(true, true);
-                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
-                });
             }
             updateVisibility();
         },
@@ -913,8 +905,6 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
                     elem.css('background-color', '');
                     break;
             }
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-            elem.animate({ 'border-right-width': '0px' }, 400);
         }
     }
 }
