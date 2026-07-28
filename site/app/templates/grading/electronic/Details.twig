@@ -86,7 +86,7 @@
                 {% endif %}
                 {% if full_access_grader_permission and is_clustering_allowed %}
                 <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
-                    <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_clustering_mode %}checked{% endif %}>
+                    <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_group_by_clusters %}checked{% endif %}>
                 </label>
                 {% endif %}
             </div>
@@ -152,7 +152,7 @@
         {{ message|nl2br }}
     </div>
     {% endif %}
-    {% if is_clustering_mode and current_algorithm is null %}
+    {% if is_group_by_clusters and current_algorithm is null %}
     <div class="details-warning-box details-warning-highlight">
         No clusters have been generated for this assignment. Please click 'Create Clusters' to begin.
     </div>
@@ -231,7 +231,7 @@
                             <td colspan="{{ columns|length }}" style="text-align: center">
                                 <i class="collapse-icon fas fa-caret-right"></i>
                                 <i class="expand-icon fas fa-caret-down"></i>
-                                {% if is_clustering_mode %}
+                                {% if is_group_by_clusters %}
                                     Students in Cluster {{ section.title }}
                                 {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
@@ -241,7 +241,7 @@
                             </td>
                         {% endif %}
                     </tr>
-                    {% if not is_clustering_mode %}
+                    {% if not is_group_by_clusters %}
                         <tr class="info">
                             <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
                         </tr>
@@ -680,7 +680,7 @@
 {# Section Number #}
 {% macro render_column_section(context, section, graded_gradeable, index, info, column, teamless_user) %}
     <td>
-        {% if context.is_clustering_mode %}
+        {% if context.is_group_by_clusters %}
             {% set user = graded_gradeable ? graded_gradeable.getSubmitter().getUser() : teamless_user %}
             {% if context.gradeable.isGradeByRegistration() %}
                 {{ user.getRegistrationSection() ?? "NULL" }}

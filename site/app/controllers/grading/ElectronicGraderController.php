@@ -1205,12 +1205,12 @@ class ElectronicGraderController extends AbstractController {
             $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
-        $is_clustering_mode = ($_COOKIE['group_by_clusters'] ?? '') === 'true' && $this->core->getUser()->accessFullGrading() && $this->core->getConfig()->isSubmissionClusteringEnabled();
+        $is_group_by_clusters = ($_COOKIE['group_by_clusters'] ?? '') === 'true' && $this->core->getUser()->accessFullGrading() && $this->core->getConfig()->isSubmissionClusteringEnabled();
         $config = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->findWithClustersAndMembers($gradeable->getId());
         $current_algorithm = $config !== null ? $config->getAlgorithm()->value : null;
 
         $cluster_map = [];
-        if ($is_clustering_mode && $config !== null) {
+        if ($is_group_by_clusters && $config !== null) {
             $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
             $active_versions = [];
             foreach ($submitters as $submitter) {
@@ -1234,7 +1234,7 @@ class ElectronicGraderController extends AbstractController {
             ];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_clustering_mode, $algorithms, $current_algorithm, $cluster_map);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
