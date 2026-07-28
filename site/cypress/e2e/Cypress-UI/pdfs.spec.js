@@ -25,8 +25,8 @@ function select_gradeable() {
 function check_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
     cy.get('body').then(($body) => {
-        if ($body.find('#agree-button').length > 0) {
-            cy.get('#agree-button').click({ force: true });
+        if ($body.find('[data-testid="popup-save-button"]').length > 0) {
+            cy.get('[data-testid="popup-save-button"]').click({ force: true });
         }
     });
     cy.get('[data-testid="details-table"]').should('be.visible');
@@ -40,7 +40,7 @@ function check_pdf_access(gradeable_id) {
 
 function minimum_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
-    cy.get('#agree-button').click({ force: true });
+    cy.get('[data-testid="popup-save-button"]').click({ force: true });
     cy.get('[data-testid="details-table"]').should('be.visible');
     cy.get('[data-testid="view-sections-label"]').should('not.exist');
     select_gradeable();
