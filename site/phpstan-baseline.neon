@@ -5073,7 +5073,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
 			identifier: equal.notAllowed
-			count: 5
+			count: 4
 			path: app/libraries/FileUtils.php
 
 		-
