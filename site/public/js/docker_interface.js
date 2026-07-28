@@ -264,11 +264,4 @@ $(document).ready(() => {
             }
         }
     }
-
-    // TODO: Fixme
-    const successMessage = sessionStorage.getItem('successMessage');
-    if (successMessage) {
-        displaySuccessMessage(successMessage);
-        sessionStorage.removeItem('successMessage');
-    }
 });
