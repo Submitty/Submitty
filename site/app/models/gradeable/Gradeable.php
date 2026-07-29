@@ -160,6 +160,9 @@ class Gradeable extends AbstractModel {
      * @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
     /** @prop
+     * @var bool if this gradeable uses a custom grading order */
+    protected $custom_sort = false;
+    /** @prop
      * @var bool if graders will be allowed to use custom marks */
     protected $allow_custom_marks = true;
     /** @prop
@@ -290,6 +293,7 @@ class Gradeable extends AbstractModel {
         $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
+        $this->setCustomSort($details['custom_sort'] ?? false);
         $this->setTaInstructions($details['ta_instructions']);
         if (array_key_exists('any_manual_grades', $details)) {
             $this->setAnyManualGrades($details['any_manual_grades']);
@@ -2719,6 +2723,14 @@ class Gradeable extends AbstractModel {
         return $this->instructor_blind;
     }
 
+    public function getCustomSort(): bool {
+        return $this->custom_sort;
+    }
+
+    public function setCustomSort(bool $custom_sort): void {
+        $this->custom_sort = $custom_sort;
+        $this->modified = true;
+    }
     public function getAllowCustomMarks(): bool {
         return $this->allow_custom_marks;
     }
