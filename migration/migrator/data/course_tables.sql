@@ -1206,9 +1206,24 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
-    g_allow_custom_marks boolean DEFAULT true NOT NULL
+    g_allow_custom_marks boolean DEFAULT true NOT NULL,
+    g_custom_sort boolean DEFAULT false NOT NULL
 );
 
+--
+-- Name: gradeable_custom_order; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_custom_order (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    sort_order integer NOT NULL,
+    CONSTRAINT gradeable_custom_order_submitter_check CHECK (
+        (((user_id IS NOT NULL) AND (team_id IS NULL))
+        OR ((user_id IS NULL) AND (team_id IS NOT NULL)))
+    )
+);
 
 --
 -- Name: gradeable_access; Type: TABLE; Schema: public; Owner: -
@@ -2674,6 +2689,29 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment
 -- Name: gradeable_data_overall_comment gradeable_data_overall_comment_user_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
+--
+-- Name: gradeable_custom_order gradeable_custom_order_position_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_position_unique UNIQUE (g_id, sort_order);
+
+
+--
+-- Name: gradeable_custom_order gradeable_custom_order_team_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_team_unique UNIQUE (g_id, team_id);
+
+
+--
+-- Name: gradeable_custom_order gradeable_custom_order_user_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_user_unique UNIQUE (g_id, user_id);
+
 ALTER TABLE ONLY public.gradeable_data_overall_comment
     ADD CONSTRAINT gradeable_data_overall_comment_user_unique UNIQUE (g_id, goc_user_id, goc_grader_id);
 
@@ -3462,6 +3500,32 @@ ALTER TABLE ONLY public.grade_inquiries
 --
 -- Name: grade_inquiries grade_inquiries_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
+
+--
+-- Name: gradeable_custom_order gradeable_custom_order_gradeable_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_gradeable_fk
+    FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_custom_order gradeable_custom_order_team_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_team_fk
+    FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_custom_order gradeable_custom_order_user_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_custom_order
+    ADD CONSTRAINT gradeable_custom_order_user_fk
+    FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.grade_inquiries
     ADD CONSTRAINT grade_inquiries_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
