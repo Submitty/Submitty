@@ -9,16 +9,21 @@ describe('MoreDropdown', () => {
         { id: 'forum_stats', displayText: 'Stats', title: 'Forum Statistics' },
     ];
 
-    const baseProps = {
+    const defaultProps = {
         items: defaultItems,
         currentDisplayOption: 'tree',
         threadExists: true,
         isFullThreadsPage: false,
     };
 
+    function openDropdown() {
+        cy.get('[data-testid="more-dropdown-trigger"]').click();
+    }
+
     describe('rendering', () => {
-        it('renders each item display text', () => {
-            cy.mount(MoreDropdown, { props: baseProps });
+        it('renders each item display text when open', () => {
+            cy.mount(MoreDropdown, { props: defaultProps });
+            openDropdown();
             cy.contains('Unread Thread').should('be.visible');
             cy.contains('Merge').should('be.visible');
             cy.contains('Delete').should('be.visible');
@@ -29,65 +34,87 @@ describe('MoreDropdown', () => {
             const items = [
                 { id: 'toggle-attachments', displayText: 'Show Attachments', title: 'Toggle', badgeText: '2' },
             ];
-            cy.mount(MoreDropdown, { props: { ...baseProps, items } });
-            cy.get('.attachment-badge').should('have.text', '2');
-            cy.get('.status').should('exist');
+            cy.mount(MoreDropdown, { props: { ...defaultProps, items } });
+            openDropdown();
+            cy.get('[data-testid="attachment-badge"]').should('have.text', '2');
+            cy.get('[data-testid="attachment-status"]').should('exist');
         });
 
         it('hides badge and status when badgeText is absent', () => {
-            cy.mount(MoreDropdown, { props: baseProps });
-            cy.get('.attachment-badge').should('not.exist');
+            cy.mount(MoreDropdown, { props: defaultProps });
+            openDropdown();
+            cy.get('[data-testid="attachment-badge"]').should('not.exist');
         });
 
         it('renders divider before item when dividerBefore is set', () => {
             const items = [
                 { id: 'test', displayText: 'Test', title: 'Test', dividerBefore: true },
             ];
-            cy.mount(MoreDropdown, { props: { ...baseProps, items } });
-            cy.get('.dropdown-divider').should('exist');
+            cy.mount(MoreDropdown, { props: { ...defaultProps, items } });
+            openDropdown();
+            cy.get('[data-testid="dropdown-divider"]').should('exist');
         });
 
         it('renders divider after item when dividerAfter is set', () => {
             const items = [
                 { id: 'test', displayText: 'Test', title: 'Test', dividerAfter: true },
             ];
-            cy.mount(MoreDropdown, { props: { ...baseProps, items } });
-            cy.get('.dropdown-divider').should('exist');
+            cy.mount(MoreDropdown, { props: { ...defaultProps, items } });
+            openDropdown();
+            cy.get('[data-testid="dropdown-divider"]').should('exist');
         });
 
         it('renders only the conditional end divider when neither dividerBefore nor dividerAfter is set', () => {
             const items = [
                 { id: 'test', displayText: 'Test', title: 'Test' },
             ];
-            cy.mount(MoreDropdown, { props: { ...baseProps, items } });
-            // The template renders one conditional divider when items exist + threadExists
-            cy.get('.dropdown-divider').should('have.length', 1);
+            cy.mount(MoreDropdown, { props: { ...defaultProps, items } });
+            openDropdown();
+            cy.get('[data-testid="dropdown-divider"]').should('have.length', 1);
         });
 
         it('hides display options on fullThreadsPage', () => {
-            cy.mount(MoreDropdown, { props: { ...baseProps, isFullThreadsPage: true } });
+            cy.mount(MoreDropdown, { props: { ...defaultProps, isFullThreadsPage: true } });
+            openDropdown();
             cy.contains('Hierarchical Post Order').should('not.exist');
         });
 
         it('hides display options when threadExists is false', () => {
-            cy.mount(MoreDropdown, { props: { ...baseProps, threadExists: false } });
+            cy.mount(MoreDropdown, { props: { ...defaultProps, threadExists: false } });
+            openDropdown();
             cy.contains('Hierarchical Post Order').should('not.exist');
         });
     });
 
     describe('item clicks', () => {
         it('emits toggle-merged when merge_thread clicked', () => {
-            mountWithEmitSpy(MoreDropdown, 'toggle-merged', baseProps, 'onToggle');
-            cy.get('#merge_thread').click({ force: true });
-            cy.get('@onToggle').should('have.callCount', 1);
+            mountWithEmitSpy(MoreDropdown, 'toggle-merged', defaultProps, 'onToggleMerged');
+            openDropdown();
+            cy.get('[data-testid="merge_thread"]').click({ force: true });
+            cy.get('@onToggleMerged').should('have.callCount', 1);
+        });
+
+        it('emits toggle-deleted when delete clicked', () => {
+            mountWithEmitSpy(MoreDropdown, 'toggle-deleted', defaultProps, 'onToggleDeleted');
+            openDropdown();
+            cy.get('[data-testid="delete"]').click({ force: true });
+            cy.get('@onToggleDeleted').should('have.callCount', 1);
+        });
+
+        it('emits navigate-stats when forum_stats clicked', () => {
+            mountWithEmitSpy(MoreDropdown, 'navigate-stats', defaultProps, 'onNavigateStats');
+            openDropdown();
+            cy.get('[data-testid="forum_stats"]').click({ force: true });
+            cy.get('@onNavigateStats').should('have.callCount', 1);
         });
 
         it('emits navigate with URL for items with link', () => {
             const items = [
                 { id: 'goto', displayText: 'Go', title: 'Go Somewhere', link: '/some/url' },
             ];
-            mountWithEmitSpy(MoreDropdown, 'navigate', { ...baseProps, items }, 'onNavigate');
-            cy.get('#goto').click({ force: true });
+            mountWithEmitSpy(MoreDropdown, 'navigate', { ...defaultProps, items }, 'onNavigate');
+            openDropdown();
+            cy.get('[data-testid="goto"]').click({ force: true });
             cy.get('@onNavigate').should('have.been.calledWith', '/some/url');
         });
 
@@ -95,8 +122,9 @@ describe('MoreDropdown', () => {
             const items = [
                 { id: 'mark-unread', displayText: 'Unread', title: 'Unread Thread' },
             ];
-            mountWithEmitSpy(MoreDropdown, 'item-click', { ...baseProps, items }, 'onItemClick');
-            cy.get('#mark-unread').click({ force: true });
+            mountWithEmitSpy(MoreDropdown, 'item-click', { ...defaultProps, items }, 'onItemClick');
+            openDropdown();
+            cy.get('[data-testid="mark-unread"]').click({ force: true });
             cy.get('@onItemClick').should('have.been.calledWith', 'mark-unread');
         });
     });
@@ -106,28 +134,31 @@ describe('MoreDropdown', () => {
 
         it('emits toggle-attachments on click', () => {
             mountWithEmitSpy(MoreDropdown, 'toggle-attachments', {
-                ...baseProps, items: [attrs],
-            }, 'onToggle');
-            cy.get('#toggle-attachments').click({ force: true });
-            cy.get('@onToggle').should('have.callCount', 1);
+                ...defaultProps, items: [attrs],
+            }, 'onToggleAttachments');
+            openDropdown();
+            cy.get('[data-testid="toggle-attachments"]').click({ force: true });
+            cy.get('@onToggleAttachments').should('have.callCount', 1);
         });
 
         it('toggles display text between Show and Hide on successive clicks', () => {
-            cy.mount(MoreDropdown, { props: { ...baseProps, items: [attrs] } });
-            cy.get('#toggle-attachments').should('contain', 'Show Attachments');
-            cy.get('#toggle-attachments').click({ force: true });
-            cy.get('#toggle-attachments').should('contain', 'Hide Attachments');
-            cy.get('#toggle-attachments').click({ force: true });
-            cy.get('#toggle-attachments').should('contain', 'Show Attachments');
+            cy.mount(MoreDropdown, { props: { ...defaultProps, items: [attrs] } });
+            openDropdown();
+            cy.get('[data-testid="toggle-attachments"]').should('contain', 'Show Attachments');
+            cy.get('[data-testid="toggle-attachments"]').click({ force: true });
+            cy.get('[data-testid="toggle-attachments"]').should('contain', 'Hide Attachments');
+            cy.get('[data-testid="toggle-attachments"]').click({ force: true });
+            cy.get('[data-testid="toggle-attachments"]').should('contain', 'Show Attachments');
         });
     });
 
     describe('display options', () => {
         it('emits display-option-change when a display option is clicked', () => {
             mountWithEmitSpy(MoreDropdown, 'display-option-change', {
-                ...baseProps, currentDisplayOption: 'time',
+                ...defaultProps, currentDisplayOption: 'time',
             }, 'onChange');
-            cy.get('#alpha').click({ force: true });
+            openDropdown();
+            cy.get('[data-testid="display-option-alpha"]').click({ force: true });
             cy.get('@onChange').should('have.been.calledWith', 'alpha');
         });
     });
