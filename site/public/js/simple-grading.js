@@ -900,12 +900,7 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             // Get the current user's grader identity to detect self-echoes
             const currentGrader = $('#data-table').data('current-grader');
             const lastModified = elem.data('user-modified');
-
-            // Definitively detect self-echoes: the WebSocket broadcast of the
-            // current user's own change coming back. When the grader in the
-            // message matches the page's grader AND we have a local modification
-            // timestamp, this is a redundant echo — skip ALL updates to prevent
-            // flickering.
+            // Prevent updating the cell if the grader is the same as the current grader
             if (grader === currentGrader && lastModified) {
                 return;
             }
