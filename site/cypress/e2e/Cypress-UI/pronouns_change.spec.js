@@ -121,7 +121,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="thread-action-container"]').eq(1).should('contain', 'They/Them');
         cy.get('[data-testid="thread-action-container"]').eq(1).click();
         cy.get('[data-testid="post-user-pronouns"]').should('contain', 'They/Them');
-        cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
+        cy.get('.first_post .post-action-container .dropdown-menu ').find(':contains("Delete")').click({ force: true });
         cy.get('[data-testid="flex-row"]').contains('Test pronouns display').should('not.exist');
 
         // verify pronouns do not exist (post thread Anonymously) and remove thread
@@ -130,7 +130,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="thread-action-container"]').eq(0).click();
         cy.get('[data-testid="post-user-id"]').should('contain', 'Anonymous');
         cy.get('[data-testid="post-user-pronouns"]').should('not.exist');
-        cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
+        cy.get('.first_post .post-action-container .dropdown-menu ').find(':contains("Delete")').click({ force: true });
         cy.get('[data-testid="flex-row"]').contains('Test Anonymous thread, should not show pronouns').should('not.exist');
     });
 });
