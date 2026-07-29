@@ -154,6 +154,17 @@ input[type="number"]::-webkit-outer-spin-button {
     cursor: pointer;
 }
 
+@keyframes cell-save-shrink {
+    0%   { background-size: 50% 100%; }
+    100% { background-size: 0% 100%; }
+}
+
+.cell-fill-anim {
+    background-repeat: no-repeat;
+    background-position: right center;
+    animation: cell-save-shrink 0.4s ease;
+}
+
 .simple-grade-grader,
 .simple-grade-date {
     display: none;

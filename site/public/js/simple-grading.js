@@ -234,21 +234,38 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 
         if (set_new) {
             new_scores[elem.data('id')] = elem.data('score');
-
-            // update css to reflect score
-            const currentScore = parseFloat(elem.data('score')) || 0;
-
-            if (currentScore === 1.0) {
+            const oldScore = old_scores[elem.data('id')];
+            const newScore = parseFloat(elem.data('score')) || 0;
+            if (newScore === 1.0) {
                 elem.removeClass('simple-half-credit');
                 elem.addClass('simple-full-credit');
             }
-            else if (currentScore === 0.5) {
+            else if (newScore === 0.5) {
                 elem.removeClass('simple-full-credit');
                 elem.addClass('simple-half-credit');
             }
             else {
                 elem.removeClass('simple-half-credit');
                 elem.removeClass('simple-full-credit');
+            }
+
+            if (oldScore !== newScore) {
+                elem.css('background-image', 'linear-gradient(to right, var(--default-white), var(--default-white))');
+                elem.css('background-repeat', 'no-repeat');
+                elem.css('background-position', 'right center');
+                elem.css('background-size', '50% 100%');
+
+                elem.removeClass('cell-fill-anim');
+                void elem[0].offsetWidth;
+                elem.addClass('cell-fill-anim');
+
+                elem.off('animationend.cell').one('animationend.cell', () => {
+                    elem.css('background-image', '');
+                    elem.css('background-repeat', '');
+                    elem.css('background-position', '');
+                    elem.css('background-size', '');
+                    elem.removeClass('cell-fill-anim');
+                });
             }
 
             // mark cell as user-modified so stale WebSocket echoes are ignored
