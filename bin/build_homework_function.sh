@@ -243,12 +243,13 @@ function build_homework {
     # generate queue file for generated_output
     "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
 
-    # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
-    if [[ "$UID" -eq 0 ]]; then
+    # only the daemon (or root) can read database.json, so skip this for
+    # instructor command line builds
+    if [[ "$UID" -eq 0 || "$(whoami)" == "submitty_daemon" ]]; then
         # insert the gradeable data into the db
         "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
     else
-        echo -e "\nWARNING:  To insert the autograding data to the database, the build_homework_function script must be run as sudo."
+        echo -e "\nWARNING:  Autograding testcase data was not inserted into the database.  To update it, this gradeable must be rebuilt by the daemon (via the web interface) or the build script must be run as root."
     fi
 
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
