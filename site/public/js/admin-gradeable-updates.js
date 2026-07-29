@@ -334,7 +334,7 @@ $(document).ready(() => {
     renderPeerFilePatterns();
     $('#peer_files').on('change', function () {
         const filesPanelEnabled = $(this).is(':checked');
-        $('#peer-file-restriction-container').prop('hidden', !filesPanelEnabled,);
+        $('#peer-file-restriction-container').prop('hidden', !filesPanelEnabled);
     });
     $('#peer_files_restricted').on('change', function () {
         const restricted = $(this).is(':checked');
