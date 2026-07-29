@@ -93,15 +93,16 @@
 						'dividerBefore': true
 					}]) %}
 			{% endif %}
+			{% set moreDropdownArgs = {
+				'items': moreItems,
+				'currentDisplayOption': display_option is defined ? display_option : '',
+				'threadExists': thread_exists is defined and thread_exists,
+				'isFullThreadsPage': is_full_threads_page is defined and is_full_threads_page,
+			} %}
 			{% include "Vue.twig" with {
 				'type': 'component',
 				'name': 'forum/MoreDropdown',
-				'args': {
-					'items': moreItems,
-					'currentDisplayOption': display_option is defined ? display_option : '',
-					'threadExists': thread_exists is defined and thread_exists,
-					'isFullThreadsPage': is_full_threads_page is defined and is_full_threads_page
-				},
+				'args': moreDropdownArgs,
 				'class': 'more-dropdown',
 				'events': {
 					'display-option-change': 'changeDisplayOptions',
