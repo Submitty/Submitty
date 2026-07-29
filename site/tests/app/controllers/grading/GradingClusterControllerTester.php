@@ -39,6 +39,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->getMock();
         $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         $response = $controller->createClustering('test_gradeable');
@@ -63,6 +64,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->getMock();
         $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         $response = $controller->getClusters('test_gradeable');
@@ -85,6 +87,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
             ->getMock();
         $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
         $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('non_existent_gradeable_status');
         $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
 
         // Use a non-existent gradeable ID so files definitely don't exist
