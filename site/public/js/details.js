@@ -214,3 +214,19 @@ function changeGroupByClusters() {
     Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
     window.location.reload();
 }
+
+function updateClusteringStatus(status) {
+    document.body.setAttribute('data-clustering-status', status);
+    const banner = document.getElementById('clustering-loading-banner');
+    if (banner) {
+        banner.style.display = status === 'fetching' ? 'block' : 'none';
+    }
+}
+
+function handleClusteringDone() {
+    window.location.reload();
+}
+
+function handleClusteringError(message) {
+    alert(message);
+}

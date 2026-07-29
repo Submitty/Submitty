@@ -85,7 +85,7 @@
                 </label>
                 {% endif %}
                 {% if full_access_grader_permission and is_clustering_allowed %}
-                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
+                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper" title="Check this to group similar submissions together so you can grade them all at once."> Group by Clusters
                     <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_group_by_clusters %}checked{% endif %}>
                 </label>
                 {% endif %}
@@ -140,9 +140,9 @@
                     'canCreateClustering': full_access_grader_permission
                 },
                 'events': {
-                    'clustering-status': '(status) => { document.body.setAttribute("data-clustering-status", status); const banner = document.getElementById("clustering-loading-banner"); if(banner) { banner.style.display = status === "fetching" ? "block" : "none"; } }',
-                    'clustering-done': '() => { window.location.reload(); }',
-                    'clustering-error': '(message) => alert(message)'
+                    'clustering-status': 'updateClusteringStatus',
+                    'clustering-done': 'handleClusteringDone',
+                    'clustering-error': 'handleClusteringError'
                 }
             } %}
         {% endif %}

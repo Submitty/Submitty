@@ -23,8 +23,7 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
-        $gradeable = $this->tryGetGradeable($gradeable_id, false);
-        if ($gradeable === false) {
+        if ($this->tryGetGradeable($gradeable_id, false) === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
         }
 
@@ -40,7 +39,7 @@ class GradingClusterController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
 
-        $clustering_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json");
+        $clustering_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "clustering__" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json");
 
         $clustering_job_data = [
             "job" => "GradingClustering",
@@ -78,7 +77,7 @@ class GradingClusterController extends AbstractController {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
-        $job_name = "clustering__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
+        $job_name = "clustering__" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json";
 
         $clustering_job_file = FileUtils::joinPaths($daemon_job_queue_path, $job_name);
         $processing_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . $job_name);
