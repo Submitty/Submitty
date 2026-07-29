@@ -257,6 +257,12 @@ function renderPeerFilePatterns() {
     const patterns = getPeerFilePatterns();
     const tableBody = $('#peer-file-pattern-table tbody');
     tableBody.empty();
+    if (patterns.length === 0) {
+        const row = $('<tr>');
+        $('<td>').attr('colspan', 2).text('No patterns have been added. Peer graders will not see any submitted files.').appendTo(row);
+        tableBody.append(row);
+        return;
+    }
     patterns.forEach((pattern, index) => {
         const row = $('<tr>');
         $('<td>').text(pattern).appendTo(row);

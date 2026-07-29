@@ -1522,11 +1522,17 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader, bool $anon_mode) {
-        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
+        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable, bool $apply_peer_file_restriction = false) {
             $files[$start_dir_name] = [];
+            $gradeable = $graded_gradeable->getGradeable();
+            $user = $this->core->getUser();
+            $is_peer_grader = $gradeable->hasPeerComponent() && $user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup());
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
+                    if ($apply_peer_file_restriction && $is_peer_grader && !$gradeable->canPeerViewFile($file['relative_name'])) {
+                        continue;
+                    }
                     $skipping = false;
                     foreach ($hidden_files as $file_regex) {
                         $file_regex = trim($file_regex);
@@ -1576,7 +1582,7 @@ HTML;
             $gradeable = $graded_gradeable->getGradeable();
             $user = $this->core->getUser();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable, true);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
