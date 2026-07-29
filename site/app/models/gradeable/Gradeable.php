@@ -310,18 +310,18 @@ class Gradeable extends AbstractModel {
         }
 
         $mapping = [
-            'autograding' => 'setPeerAutograding',
-            'rubric' => 'setPeerRubric',
-            'files' => 'setPeerFiles',
-            'peer_files_restricted' => 'setPeerFilesRestricted',
-            'peer_file_patterns' => 'setPeerFilePatterns',
-            'solution_notes' => 'setPeerSolutions',
-            'discussion' => 'setPeerDiscussion'
+            'autograding' => ['setPeerAutograding', true],
+            'rubric' => ['setPeerRubric', true],
+            'files' => ['setPeerFiles', true],
+            'peer_files_restricted' => ['setPeerFilesRestricted', false],
+            'peer_file_patterns' => ['setPeerFilePatterns', []],
+            'solution_notes' => ['setPeerSolutions', true],
+            'discussion' => ['setPeerDiscussion', true],
         ];
 
-        foreach ($mapping as $key => $method) {
+        foreach ($mapping as $key => [$method, $default]) {
             if (array_key_exists($key, $details)) {
-                call_user_func([$this, $method], $details[$key] ?? true);
+                call_user_func([$this, $method], $details[$key] ?? $default);
             }
         }
 
@@ -2712,25 +2712,46 @@ class Gradeable extends AbstractModel {
     /**
      * @param array<string>|string $peer_file_patterns
      */
-    public function setPeerFilePatterns(array|string $peer_file_patterns): void {
-        if (is_string($peer_file_patterns)) {
-            $decoded_patterns = json_decode($peer_file_patterns, true);
-            if (!is_array($decoded_patterns)) {
-                throw new \InvalidArgumentException('Peer file patterns must be a valid JSON array.');
+    public function setPeerFilePatterns(array|string|null $peer_file_patterns): void {
+        if ($peer_file_patterns === null || $peer_file_patterns === '') {
+            $peer_file_patterns = [];
+        }
+        elseif (is_string($peer_file_patterns)) {
+            // Handle an empty PostgreSQL array if the column was previously
+            // created or returned as an array type.
+            if ($peer_file_patterns === '{}') {
+                $peer_file_patterns = [];
             }
-            $peer_file_patterns = $decoded_patterns;
+            else {
+                try {
+                    $decoded_patterns = json_decode($peer_file_patterns, true, 512, JSON_THROW_ON_ERROR);
+                }
+                catch (\JsonException $e) {
+                    throw new \InvalidArgumentException('Peer file patterns must be a valid JSON array.', 0, $e);
+                }
+                if (!is_array($decoded_patterns)) {
+                    throw new \InvalidArgumentException(
+                        'Peer file patterns must be a valid JSON array.'
+                    );
+                }
+                $peer_file_patterns = $decoded_patterns;
+            }
         }
         $cleaned_patterns = [];
         foreach ($peer_file_patterns as $pattern) {
             if (!is_string($pattern)) {
-                throw new \InvalidArgumentException('Each peer file pattern must be a string.');
+                throw new \InvalidArgumentException(
+                    'Each peer file pattern must be a string.'
+                );
             }
             $pattern = trim($pattern);
             if ($pattern === '') {
                 continue;
             }
             if (str_contains($pattern, "\0")) {
-                throw new \InvalidArgumentException('Peer file patterns cannot contain null bytes.');
+                throw new \InvalidArgumentException(
+                    'Peer file patterns cannot contain null bytes.'
+                );
             }
             $cleaned_patterns[] = str_replace('\\', '/', $pattern);
         }

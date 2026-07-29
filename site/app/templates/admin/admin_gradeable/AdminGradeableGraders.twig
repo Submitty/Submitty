@@ -123,7 +123,44 @@ Form
             {{ (gradeable.getPeerRubric() == true) ? 'checked' : '' }}> <label for="rubric">Rubric</label>
 
         <input type="checkbox" name="peer_panel" value="3" id="peer_files"
-            {{ (gradeable.getPeerFiles() == true) ? 'checked' : '' }}><label for="files">Files</label>
+            {{ gradeable.getPeerFiles() ? 'checked' : '' }}><label for="peer_files">Files</label>
+        
+        <div id="peer-file-restriction-container" class="std-margin" {{ not gradeable.getPeerFiles() ? 'hidden' : '' }}>
+            <div>
+                <input type="checkbox" name="peer_files_restricted" id="peer_files_restricted" value="true" {{ gradeable.getPeerFilesRestricted() ? 'checked' : '' }}>
+                <label for="peer_files_restricted">
+                    Restrict which submitted files peer graders can view
+                </label>
+            </div>
+            <div id="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
+                <div class="std-margin">
+                    <label for="peer-file-pattern-input">
+                        Visible file pattern:
+                    </label>
+                    <input type="text" id="peer-file-pattern-input" placeholder="Examples: report.pdf, *.java, src/*" autocomplete="off">
+                    <button type="button" id="add-peer-file-pattern" class="btn btn-primary">
+                        Add
+                    </button>
+                </div>
+                <p>
+                    Use an exact file name or a wildcard pattern.
+                    <code>*</code> matches any number of characters and
+                    <code>?</code> matches one character.
+                </p>
+                <div class="table-wrapper">
+                    <table id="peer-file-pattern-table" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Visible file pattern</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <input type="hidden" id="peer_file_patterns" value="{{ gradeable.getPeerFilePatterns()|json_encode|e('html_attr') }}">
+        </div>
 
         <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
             {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
