@@ -212,19 +212,18 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/admin/remove_image", methods: ["POST"])]
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
-        $image = $_POST['image'] ?? '';
 
-        if (!preg_match($pattern, $image)) {
-            return JsonResponse::getFailResponse('Invalid Docker image name.');
+        $images = $_POST['images'] ?? null;
+        if (!is_array($images)) {
+            $images = isset($_POST['image']) ? $_POST['image'] : [];
         }
+        $images = array_values(array_unique(arrray_filer(
+            $images,
+            fn($i) => is_string($i) && $i !== ''
+        )));
 
-        if ($this->core->getQueries()->getDockerImageOwner($image) === false) {
-            return JsonResponse::getFailResponse('This image is not listed.');
-        }
-
-        $user = $this->core->getUser();
-        if (!$this->core->getQueries()->removeDockerImageOwner($image, $user)) {
-            return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
+        if (count($images) === 0) {
+            return JsonResponse::getFailResponse("No images selected for removal.");
         }
 
         $jsonFilePath = FileUtils::joinPaths(
@@ -234,9 +233,50 @@ class DockerInterfaceController extends AbstractController {
         );
         $json = FileUtils::readJsonFile($jsonFilePath);
 
-        foreach ($json as $capability_key => $capability) {
-            if (($key = array_search($image, $capability, true)) !== false) {
-                array_splice($json[$capability_key], $key, 1);
+        // names present in the config
+        foreach ($json as $capability) {
+            foreach ($catability as $name) {
+                $in_config[$name] = true;
+            }
+        }
+
+        $user = $this->core->getUser();
+        $removed = [];
+        $skipped = [];
+
+        foreach ($images as $image) {
+            if (!preg_match($pattern, $image)) {
+                $skipped[] = $image;
+                continue;
+            }
+
+            if ($owner == false && !isset($in_config[$image])) {
+                $skipped[] = $image;
+                continue;
+            }
+
+            if ($owner !== false && $owner !== '' && !user->isSuperUser() && $owner !== $user->getId()) {
+                $skipped[] = $image;
+                continue;
+            }
+
+            if ($owner !== false) {
+                $this->core->getQueries()->removeDockerImageOwner($image, $user);
+            }
+            $removed[] = $image;
+        }
+
+        if (count($removed) === 0) {
+            return JsonResponse::getFailResponse(
+                'Nothing was removed. The selected image(s) are not listed or are managed by another instructor/superuser.'
+            );
+        }
+
+        foreach ($removed as $name) {
+            foreach ($json as $capability_key => $capability) {
+                if (($key = array_search($name, $capability, true)) !== false) {
+                    array_splice($json[$capability_key], $key, 1);
+                }
             }
         }
 
@@ -245,7 +285,12 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
-                                                            Click \'Update dockers and machines\' to apply changes.');
+        $message = implode(', ', $removed) . " has been removed from the configuration. "
+            . "Click 'Update dockers and machines' to apply changes.";
+        if (count($skipped) > 0) {
+            $message .= ' Could not remove (not listed or managed by another instructor/superuser): ' . implode(', ', $skipped) . '.';
+        }
+
+        return JsonResponse::getSuccessResponse($message);
     }
 }
