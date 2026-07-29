@@ -217,7 +217,7 @@ class DockerInterfaceController extends AbstractController {
         if (!is_array($images)) {
             $images = isset($_POST['image']) ? $_POST['image'] : [];
         }
-        $images = array_values(array_unique(arrray_filer(
+        $images = array_values(array_unique(array_filter    (
             $images,
             fn($i) => is_string($i) && $i !== ''
         )));
@@ -235,7 +235,7 @@ class DockerInterfaceController extends AbstractController {
 
         // names present in the config
         foreach ($json as $capability) {
-            foreach ($catability as $name) {
+            foreach ($capability as $name) {
                 $in_config[$name] = true;
             }
         }
@@ -249,6 +249,8 @@ class DockerInterfaceController extends AbstractController {
                 $skipped[] = $image;
                 continue;
             }
+
+            $owner = $this->core->getQueries()->getDockerImageOwner($image);
 
             if ($owner == false && !isset($in_config[$image])) {
                 $skipped[] = $image;
