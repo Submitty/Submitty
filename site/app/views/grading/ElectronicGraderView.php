@@ -1526,11 +1526,11 @@ HTML;
             $files[$start_dir_name] = [];
             $gradeable = $graded_gradeable->getGradeable();
             $user = $this->core->getUser();
-            $is_peer_grader = $gradeable->hasPeerComponent() && $user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup());
+            $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
-                    if ($apply_peer_file_restriction && $is_peer_grader && !$gradeable->canPeerViewFile($file['relative_name'])) {
+                    if ($apply_peer_file_restriction && $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && !$gradeable->canPeerViewFile($file['relative_name'])) {
                         continue;
                     }
                     $skipping = false;
