@@ -155,11 +155,11 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 @keyframes cell-save-shrink {
-    0% { 
+    0% {
         background-size: 50% 100%;
     }
-    100% { 
-        background-size: 0% 100%; 
+    100% {
+        background-size: 0% 100%;
     }
 }
 
