@@ -879,6 +879,20 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
         else {
             const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
             const score = parseFloat(value);
+
+            // Get the current user's grader identity to detect self-echoes
+            const currentGrader = $('#data-table').data('current-grader');
+            const lastModified = elem.data('user-modified');
+
+            // Definitively detect self-echoes: the WebSocket broadcast of the
+            // current user's own change coming back. When the grader in the
+            // message matches the page's grader AND we have a local modification
+            // timestamp, this is a redundant echo — skip ALL updates to prevent
+            // flickering.
+            if (grader === currentGrader && lastModified) {
+                return;
+            }
+
             elem.data('score', score);
             elem.attr('data-score', score);
             elem.data('grader', grader);
@@ -888,23 +902,19 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             elem.find('.simple-grade-grader').text(grader);
             elem.find('.simple-grade-date').text(date);
 
-            // skip color update if this user just modified the cell
-            const lastModified = elem.data('user-modified');
-            if (!lastModified || Date.now() - lastModified > 1000) {
-                switch (score) {
-                    case 1.0:
-                        elem.removeClass('simple-half-credit');
-                        elem.addClass('simple-full-credit');
-                        break;
-                    case 0.5:
-                        elem.removeClass('simple-full-credit');
-                        elem.addClass('simple-half-credit');
-                        break;
-                    default:
-                        elem.removeClass('simple-half-credit');
-                        elem.removeClass('simple-full-credit');
-                        break;
-                }
+            switch (score) {
+                case 1.0:
+                    elem.removeClass('simple-half-credit');
+                    elem.addClass('simple-full-credit');
+                    break;
+                case 0.5:
+                    elem.removeClass('simple-full-credit');
+                    elem.addClass('simple-half-credit');
+                    break;
+                default:
+                    elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
+                    break;
             }
         }
     }
