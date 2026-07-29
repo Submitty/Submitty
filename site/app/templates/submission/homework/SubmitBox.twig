@@ -22,6 +22,16 @@
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">
+    {% if user_assignment_settings_missing %}
+        <div class="alert alert-danger">
+            <strong>Error: The user_assignment_settings.json file is missing for this submission. Some submission metadata may be unavailable; please contact your system administrator. </strong>
+        </div>
+    {% endif %}
+    {% if user_assignment_settings_unreadable %}
+        <div class="alert alert-danger">
+            <strong> Error: The user_assignment_settings.json file cannot be read due to incorrect file permissions. Please contact your system administrator. </strong>
+        </div>
+    {% endif %}
     <header id="gradeable-info">
         <h1 data-testid="new-submission-info">
             New submission for: {{ gradeable_name }}
