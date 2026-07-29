@@ -121,10 +121,11 @@ Form
             {{ (gradeable.getPeerAutograding() == true) ? 'checked' : ''}}><label for="autograding">Autograding</label>
         <input type="checkbox" name="peer_panel" value="2" id="peer_rubric"
             {{ (gradeable.getPeerRubric() == true) ? 'checked' : '' }}> <label for="rubric">Rubric</label>
-
         <input type="checkbox" name="peer_panel" value="3" id="peer_files"
             {{ gradeable.getPeerFiles() ? 'checked' : '' }}><label for="peer_files">Files</label>
-        
+        <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
+            {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
+
         <div id="peer-file-restriction-container" class="std-margin" {{ not gradeable.getPeerFiles() ? 'hidden' : '' }}>
             <div>
                 <input type="checkbox" name="peer_files_restricted" id="peer_files_restricted" value="true" {{ gradeable.getPeerFilesRestricted() ? 'checked' : '' }}>
@@ -161,9 +162,6 @@ Form
             </div>
             <input type="hidden" id="peer_file_patterns" value="{{ gradeable.getPeerFilePatterns()|json_encode|e('html_attr') }}">
         </div>
-
-        <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
-            {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
 
         {% if isDiscussionPanel %}
 
