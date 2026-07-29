@@ -23,7 +23,8 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
         }
 
@@ -45,7 +46,7 @@ class GradingClusterController extends AbstractController {
             "job" => "GradingClustering",
             "semester" => $semester,
             "course" => $course,
-            "gradeable" => $gradeable_id,
+            "gradeable" => $gradeable->getId(),
             "algorithm" => $algorithm->value
         ];
 
@@ -106,16 +107,16 @@ class GradingClusterController extends AbstractController {
 
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
-            ->findWithClustersAndMembers($gradeable_id);
+            ->findWithClustersAndMembers($gradeable->getId());
 
         if ($config === null) {
             return JsonResponse::getSuccessResponse([
-                "gradeable_id" => $gradeable_id,
+                "gradeable_id" => $gradeable->getId(),
                 "clusters"     => [],
             ]);
         }
 
-        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable->getId());
         $active_versions = [];
         foreach ($submitters as $submitter) {
             $id = $submitter['user_id'] ?? $submitter['team_id'];
@@ -144,7 +145,7 @@ class GradingClusterController extends AbstractController {
         }
 
         return JsonResponse::getSuccessResponse([
-            "gradeable_id" => $gradeable_id,
+            "gradeable_id" => $gradeable->getId(),
             "clusters"     => $result,
         ]);
     }
