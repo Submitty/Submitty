@@ -255,7 +255,7 @@ class ImageController extends AbstractController {
         if ($submitter->isTeam()) {
             $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
         }
-        
+
         return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
     }
 }
