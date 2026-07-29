@@ -648,10 +648,11 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'submission_clustering_enabled',
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled',
             'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions', 'chat_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
+        $this->submission_clustering_enabled = $this->course_json['course_details']['submission_clustering_enabled'] ?? false;
 
         if (empty($this->vcs_base_url)) {
             $this->vcs_base_url = $this->vcs_url . $this->term . '/' . $this->course;

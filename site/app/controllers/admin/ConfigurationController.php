@@ -192,7 +192,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_json = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_json['course_details'][$name]) && !str_contains($name, 'self_registration') && $name !== 'default_section_id') {
+        if (!isset($config_json['course_details'][$name]) && !str_contains($name, 'self_registration') && $name !== 'default_section_id' && $name !== 'submission_clustering_enabled') {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
