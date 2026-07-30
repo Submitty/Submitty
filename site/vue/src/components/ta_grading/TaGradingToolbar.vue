@@ -50,12 +50,12 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   />
 
   <NavigationButton
-    v-if="clusteringEnabled"
+    v-if="clusteringEnabled && clustersExist"
     :on-click="toggleClusteringMode"
-    :visible-icon="taGradingClusterMode ? 'fa-user' : 'fa-users-rectangle'"
+    :visible-icon="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-timeline'"
     button-id="toggle-cluster-mode"
-    :title="clustersExist ? (taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)') : 'No clusters available for this assignment'"
-    :style="!clustersExist ? 'opacity: 0.5; cursor: not-allowed;' : (taGradingClusterMode ? 'color: var(--standard-vibrant-yellow);' : '')"
+    :title="taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)'"
+    :style="taGradingClusterMode ? 'color: var(--standard-vibrant-yellow);' : ''"
   />
 
   <NavigationButton

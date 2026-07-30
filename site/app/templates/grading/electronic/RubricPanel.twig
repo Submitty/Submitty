@@ -64,9 +64,15 @@
                     {% endif %}
                 </div>
                 {% if ta_grading_cluster_mode %}
-                    <div class="blue-message w-100" style="margin-top: 5px; margin-bottom: 5px; text-align: center;">
-                        <strong>Clustering Mode Enabled:</strong> The grade you apply here will automatically be applied to all students within this student's cluster. But if this student is in the "Unclustered" group, they will be graded normally.<br>
-                    </div>
+                    {% if is_unclustered %}
+                        <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
+                            Clustering Mode Enabled: This student is in the "Unclustered" group and will be graded normally as an individual.
+                        </div>
+                    {% else %}
+                        <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
+                            Clustering Mode Enabled: The grade you apply here will automatically be applied to all students within this student's cluster.
+                        </div>
+                    {% endif %}
                 {% endif %}
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>

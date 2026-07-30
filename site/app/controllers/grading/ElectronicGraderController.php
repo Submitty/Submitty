@@ -2143,7 +2143,7 @@ class ElectronicGraderController extends AbstractController {
 
         $is_unclustered = true; // default to true, meaning they won't trigger cluster cascade unless proven otherwise
         if ($ta_grading_cluster_mode) {
-            $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $who_id);
+            $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $graded_gradeable->getSubmitter()->getId());
             if ($cluster !== null && strtolower($cluster->getClusterName() ?? '') !== 'unclustered') {
                 $is_unclustered = false;
             }
