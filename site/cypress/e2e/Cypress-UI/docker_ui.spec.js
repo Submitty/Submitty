@@ -256,6 +256,10 @@ describe('Docker UI Test', () => {
             .should('be.visible')
             .click();
 
+        // Popup lists the name(s); primary is pre-checked. Confirm removal.
+        cy.get('[data-testid="remove-image-form"]').should('be.visible');
+        cy.get('[data-testid="remove-image-submit"]').click();
+
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
 
