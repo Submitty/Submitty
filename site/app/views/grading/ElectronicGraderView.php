@@ -1563,12 +1563,20 @@ HTML;
                     }
                 }
             }
+            if (empty($files[$start_dir_name] && $is_restricted_peer_grader)) {
+                unset($files[$start_dir_name]);
+            }
         };
         $submissions = [];
         $results = [];
         $results_public = [];
         $checkout = [];
         $submissions_processed = [];
+
+        $gradeable = $graded_gradeable->getGradeable();
+        $user = $this->core->getUser();
+        $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
+        $user_assignment_settings_path = $is_restricted_peer_grader ? null : $uas;
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
@@ -1620,7 +1628,7 @@ HTML;
             "anon_mode" => $anon_mode,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $uas,
+            "user_assignment_settings_path" => $user_assignment_settings_path,
         ]);
     }
 
