@@ -1589,6 +1589,8 @@ HTML;
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
+        $user_assignment_settings_missing = $display_version_instance !== null && !file_exists($uas);
+        $user_assignment_settings_unreadable = $display_version_instance !== null && file_exists($uas) && !is_readable($uas);
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
@@ -1611,6 +1613,8 @@ HTML;
             "anon_mode" => $anon_mode,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_assignment_settings_path" => $uas,
+            "user_assignment_settings_missing" => $user_assignment_settings_missing,
+            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable
         ]);
     }
 
