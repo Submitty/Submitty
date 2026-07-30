@@ -289,7 +289,7 @@ class DockerInterfaceController extends AbstractController {
             }
 
             // if you don't own this image, can't delete it
-            if ($owner !== false && $owner !== '' && !$user->isSuperUser() && $owner !== $user->getId()) {
+            if ($owner !== false && !$user->isSuperUser() && $owner !== $user->getId()) {
                 $skipped[] = $image;
                 continue;
             }
