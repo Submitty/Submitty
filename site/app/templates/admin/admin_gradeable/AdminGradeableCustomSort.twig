@@ -1,0 +1,70 @@
+<div id="custom-sort-control" data-testid="custom-sort-control">
+    <h2>Custom Grading Order</h2>
+    <div class="row">
+        <div class="col-md-12 pl-md-0">
+            <p>
+                Download the current grading order as a CSV, reorder the rows in a spreadsheet editor,
+                then upload it back. The order of rows in the CSV determines the order submissions appear 
+                while grading. This does not change peer assignments.
+            </p>
+            <p data-testid="custom-sort-status">
+                Custom order is currently
+                <strong>{{ gradeable.hasCustomOrder() ? 'enabled' : 'disabled (default order in use)' }}</strong>.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6 pl-md-0">
+            <a class="btn btn-default key_to_click"
+               id="download_custom_sort_csv"
+               tabindex="0"
+               data-testid="download-custom-sort-csv"
+               href="{{ core.buildCourseUrl(['gradeable', gradeable.getId(), 'custom_sort', 'csv']) }}">
+                Download CSV
+            </a>
+        </div>
+        <div class="col-md-6 pr-md-0">
+            <label for="custom_sort_csv_file">Upload CSV</label>
+            <input class="custom-file-input" type="file" accept=".csv" name="custom_sort_csv_file"
+                   id="custom_sort_csv_file" data-testid="upload-custom-sort-csv-file">
+            <input type="button" name="custom_sort_csv_submit" class="btn btn-primary key_to_click ignore"
+                   id="custom_sort_csv_submit" tabindex="0" value="Upload"
+                   data-testid="upload-custom-sort-csv-submit">
+        </div>
+    </div>
+
+    {% if gradeable.hasCustomOrder() %}
+    <div class="row mt-3">
+        <div class="col-md-12 pl-0">
+            <input type="button" name="clear_custom_sort" class="btn btn-default key_to_click ignore"
+                   id="clear_custom_sort" tabindex="0" value="Revert to Default Order"
+                   data-testid="clear-custom-sort">
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mt-3">
+        <div id="custom_sort_loader" class="loader hide"></div>
+        <div class="table-wrapper" data-testid="custom-sort-table-wrapper">
+            <table id="custom-sort-table" class="table table-striped mobile-table directory-table">
+                <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>{{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }}</th>
+                </tr>
+                </thead>
+                <tbody id="custom-sort-table-body">
+                {% for submitter_id in custom_sort_submitters %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ submitter_id }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="2">No submitters found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -128,15 +128,9 @@ class GradingOrder extends AbstractModel {
      * Sort grading order.
      */
     public function sort($type, $direction) {
-        error_log("SORT TYPE: " . $type);
         if ($type === 'custom') {
             $custom_order = $this->core->getQueries()->getCustomGradingOrder(
                 $this->gradeable->getId()
-            );
-            error_log('CUSTOM ORDER COUNT: ' . count($custom_order));
-            error_log(
-                'CUSTOM ORDER FIRST: '
-                . implode(', ', array_slice(array_keys($custom_order), 0, 10))
             );
 
             if (count($custom_order) === 0) {
@@ -150,14 +144,6 @@ class GradingOrder extends AbstractModel {
                     $submitters[] = $submitter;
                 }
             }
-
-            error_log(
-                'CUSTOM POSITION CHECK: '
-                . 'adamsg=' . ($custom_order['adamsg'] ?? 'missing')
-                . ', farred=' . ($custom_order['farred'] ?? 'missing')
-                . ', fishea=' . ($custom_order['fishea'] ?? 'missing')
-                . ', abernl=' . ($custom_order['abernl'] ?? 'missing')
-            );
             usort(
                 $submitters,
                 function (Submitter $a, Submitter $b) use ($custom_order) {
@@ -172,19 +158,6 @@ class GradingOrder extends AbstractModel {
                     return strcmp($a->getId(), $b->getId());
                 }
             );
-            error_log(
-                'SORTED SUBMITTERS FIRST: '
-                . implode(
-                    ', ',
-                    array_map(
-                        function (Submitter $submitter) {
-                            return $submitter->getId();
-                        },
-                        array_slice($submitters, 0, 10)
-                    )
-                )
-            );
-
             $this->section_submitters = [
                 'custom' => $submitters,
             ];

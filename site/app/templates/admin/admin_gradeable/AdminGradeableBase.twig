@@ -37,6 +37,7 @@
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
             <a class="nav-bar key_to_click normal-btn{{(gradeable is not null and gradeable.hasPeerComponent()) ? '' : ' hidden-no-peers'}}" id="page_4_nav" onclick="onChangeNavTab(4);">Peer Matrix</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Dates</a>
+            <a class="nav-bar key_to_click normal-btn{{(gradeable is not null and gradeable.hasPeerComponent()) ? ' ': ' hidden-no-peers'}}" id="page_6_nav" onclick="onChangeNavTab(6);" data-testid="page-6-nav"> Custom Sort</a>
         </div>
         <br/>
         <br/>
@@ -50,6 +51,7 @@
                 <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
                 <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeablePeers.twig')    }}</div>
                 <div class="page-content" id="page_5_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+                <div class="page-content" id="page_6_content">{{ include('admin/admin_gradeable/AdminGradeableCustomSort.twig') }}</div>
             {% endif %}
         </div>
         <br/>
@@ -63,10 +65,10 @@
 <script>
 
     let adminGradeableNavTab = 0;
-    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',false],['5',true]]);
+    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',false],['5',true],['6',false]]);
     function onChangeNavTab(tab) {
 
-        if (tab > 5 || tab < 0) {
+        if (tab > 6 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -81,6 +83,7 @@
         let yesPeer = !$("#page_4_nav").hasClass("hidden-no-peers");
         let yesTAGrade = !$("#page_4_nav").hasClass("hidden_ta_grading");
         navItemsStatus.set('4', yesPeer && yesTAGrade);
+        navItemsStatus.set('6', yesPeer && yesTAGrade);
 
         $('.nav-bar').each(function () {
             if (navItemsStatus.get(this.id.split('_')[1]) === false) {
@@ -94,7 +97,7 @@
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
-        for (var i =0 ; i<6 ;i++)
+        for (var i =0 ; i<7 ;i++)
         {
             $('#page_' + i + '_nav').removeClass('active-btn');
         }
