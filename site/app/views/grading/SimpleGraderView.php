@@ -5,7 +5,6 @@ namespace app\views\grading;
 use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\Component;
 use app\models\User;
 use app\views\AbstractView;
 
@@ -13,12 +12,13 @@ class SimpleGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables
+     * @param string $student_full
      * @param array $graders
-     * @param string $section_type
      * @param bool $show_all_sections_button
+     * @param array $anon_ids
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $anon_ids) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $show_all_sections_button, $anon_ids) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -84,7 +84,6 @@ class SimpleGraderView extends AbstractView {
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
             "action" => $action,
-            "section_type" => $section_type,
             "show_all_sections_button" => $show_all_sections_button,
             "view_all" => $view_all,
             "student_full" => $student_full,
@@ -92,7 +91,6 @@ class SimpleGraderView extends AbstractView {
             "components_text" => $components_text,
             "sections" => $sections,
             "component_ids" => $component_ids,
-            "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
             "gradeable_url" => $gradeable->getInstructionsUrl(),
             "csv_download_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'csv']),
@@ -111,24 +109,5 @@ class SimpleGraderView extends AbstractView {
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
         return $return;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @param string $section
-     * @param User[] $students
-     * @return string
-     */
-    public function displayPrintLab(Gradeable $gradeable, string $section, $students) {
-        //Get the names of all of the checkpoints
-        $checkpoints = array_map(function (Component $component) {
-            return $component->getTitle();
-        }, $gradeable->getComponents());
-        return $this->core->getOutput()->renderTwigTemplate("grading/simple/PrintLab.twig", [
-            "gradeable" => $gradeable,
-            "section" => $section,
-            "checkpoints" => $checkpoints,
-            "students" => $students
-        ]);
     }
 }
