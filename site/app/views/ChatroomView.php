@@ -14,6 +14,7 @@ class ChatroomView extends AbstractView {
         $this->core->getOutput()->addInternalCss('chatroom.css');
         $this->core->getOutput()->addInternalJs('chatroom.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
+        $this->core->getOutput()->addInternalModuleJs('full-screen.js');
     }
 
     /**
