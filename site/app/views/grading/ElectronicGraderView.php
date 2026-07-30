@@ -1288,7 +1288,6 @@ HTML;
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
         // Add MarkerJS libraries globally for image annotation
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
@@ -1607,7 +1606,8 @@ HTML;
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
-        $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
+        $user_assignment_settings_missing = $display_version_instance !== null && !file_exists($uas);
+        $user_assignment_settings_unreadable = $display_version_instance !== null && file_exists($uas) && !is_readable($uas);
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
@@ -1630,10 +1630,10 @@ HTML;
             "results_public" => $results_public,
             "active_version" => $display_version,
             "anon_mode" => $anon_mode,
-            'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $user_assignment_settings_path,
-            "show_no_matching_peer_files_banner" => $show_no_matching_peer_files_banner,
+            "user_assignment_settings_path" => $uas,
+            "user_assignment_settings_missing" => $user_assignment_settings_missing,
+            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable
         ]);
     }
 
@@ -2019,7 +2019,6 @@ HTML;
             "old_files" => $old_files,
             "is_grader_view" => true,
             "max_file_uploads" => ini_get('max_file_uploads'),
-            "toolbar_css" => $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css'),
             "is_timed" => $is_timed,
             "allowed_minutes" => $allowed_minutes
             ]
