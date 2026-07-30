@@ -858,8 +858,6 @@ class ReportController extends AbstractController {
                 'customize_show_notes' => $customization->getCustomizeShowNotes(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'bonus_latedays' => $customization->getBonusLateDays(),
-                'bonus_late_days_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'bonus_late_days', 'upload']),
-                'bonus_late_days_delete_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'bonus_late_days', 'delete']),
                 'manual_grade' => $customization->getManualGrades(),
                 'warning' => $customization->getPerformanceWarnings(),
                 'normalization_warnings' => $customization->getNormalizationWarnings(),
@@ -948,10 +946,10 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/bonus_late_days/upload", methods: ["POST"])]
-    public function upoloadBonusLateDays(): JsonResponse {
+    public function uploadBonusLateDays(): JsonResponse {
         $date = $_POST['date'] ?? '';
-        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
-        if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+        $path = $this->getBonusLateDayPath($date);
+        if ($path === null) {
             return JsonResponse::getErrorResponse('Invalid date, expected YYYY-MM-DD');
         }
 
@@ -963,15 +961,166 @@ class ReportController extends AbstractController {
             return JsonResponse::getErrorResponse('Upload failed: Empty tmp name for file');
         }
 
-        $filename = "bonus_late_days_{$date}.csv";
-        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades');
-        $destination_path = FileUtils::joinPaths($rainbow_grades_dir, $filename);
-
-        if (!copy($upload['tmp_name'], $destination_path) || !file_exists($destination_path)) {
-            return JsonReponse::getErrorResponse('Upload failed: Could not copy file');
+        // Normalize through the same read/write path the modal uses, so a gradebook
+        // export and a hand-typed list both land as one user id per line.
+        $users = $this->readBonusLateDayRoster($upload['tmp_name']);
+        if (!$this->writeBonusLateDayRoster($path, $users)) {
+            return JsonResponse::getErrorResponse('Upload failed: Could not write file');
         }
 
-        return JsonReponse::getSuccessResponse(['date' => $date, 'filename' => $filename]);
+        return JsonResponse::getSuccessResponse([
+            'date' => $date,
+            'filename' => basename($path),
+            'users' => $users,
+        ]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/bonus_late_days/roster", methods: ["GET"])]
+    public function getBonusLateDayRoster(): JsonResponse {
+        $date = $_GET['date'] ?? '';
+        $path = $this->getBonusLateDayPath($date);
+        if ($path === null) {
+            return JsonResponse::getErrorResponse('Invalid date, expected YYYY-MM-DD');
+        }
+
+        // A date with no file yet is not an error -- it is a new entry the instructor
+        // has just created, so the caller gets an empty list rather than a 404.
+        return JsonResponse::getSuccessResponse([
+            'date' => $date,
+            'users' => $this->readBonusLateDayRoster($path),
+        ]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/bonus_late_days/roster", methods: ["POST"])]
+    public function saveBonusLateDayRoster(): JsonResponse {
+        $date = $_POST['date'] ?? '';
+        $path = $this->getBonusLateDayPath($date);
+        if ($path === null) {
+            return JsonResponse::getErrorResponse('Invalid date, expected YYYY-MM-DD');
+        }
+
+        $submitted = $_POST['users'] ?? [];
+        if (!is_array($submitted)) {
+            return JsonResponse::getErrorResponse('Invalid student list');
+        }
+
+        $valid_ids = [];
+        foreach ($this->core->getQueries()->getAllUsers() as $user) {
+            $valid_ids[$user->getId()] = true;
+        }
+
+        $users = [];
+        $unknown = [];
+        foreach ($submitted as $user_id) {
+            $user_id = trim((string) $user_id);
+            if ($user_id === '') {
+                continue;
+            }
+            if (!isset($valid_ids[$user_id])) {
+                $unknown[] = $user_id;
+                continue;
+            }
+            $users[$user_id] = true;
+        }
+
+        if (count($unknown) > 0) {
+            return JsonResponse::getErrorResponse(
+                'Not a user in this course: ' . implode(', ', $unknown)
+            );
+        }
+
+        $users = array_keys($users);
+        if (!$this->writeBonusLateDayRoster($path, $users)) {
+            return JsonResponse::getErrorResponse('Could not write the student list');
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'date' => $date,
+            'filename' => basename($path),
+            'users' => $users,
+        ]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/bonus_late_days/delete", methods: ["POST"])]
+    public function deleteBonusLateDays(): JsonResponse {
+        $date = $_POST['date'] ?? '';
+        $path = $this->getBonusLateDayPath($date);
+        if ($path === null) {
+            return JsonResponse::getErrorResponse('Invalid date, expected YYYY-MM-DD');
+        }
+
+        // An already absent file is not a failure -- the caller wants it gone either way.
+        if (file_exists($path) && !unlink($path)) {
+            return JsonResponse::getErrorResponse('Could not delete the student list');
+        }
+
+        return JsonResponse::getSuccessResponse(['date' => $date]);
+    }
+
+    /**
+     * Validate a bonus late day date and return the path to its roster file.
+     *
+     * The filename is derived solely from the validated date, never from user input,
+     * so there is no path traversal surface.
+     *
+     * @return string|null Null when the date is not a well formed YYYY-MM-DD
+     */
+    private function getBonusLateDayPath(string $date): ?string {
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+            return null;
+        }
+        return FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            "bonus_late_days_{$date}.csv"
+        );
+    }
+
+    /**
+     * Read a roster file into a list of user ids.
+     *
+     * Tolerant of hand-authored files: takes the first comma separated field of each
+     * line and skips a header row, so an instructor can drop in a gradebook export.
+     *
+     * @return string[]
+     */
+    private function readBonusLateDayRoster(string $path): array {
+        if (!file_exists($path)) {
+            return [];
+        }
+        $users = [];
+        foreach (explode("\n", (string) file_get_contents($path)) as $line) {
+            $user_id = trim(explode(',', $line)[0]);
+            if ($user_id === '' || strtolower($user_id) === 'user_id') {
+                continue;
+            }
+            $users[] = $user_id;
+        }
+        return array_values(array_unique($users));
+    }
+
+    /**
+     * Write a roster file atomically.
+     *
+     * A nightly build can fire while an instructor is saving, so the file is staged
+     * in the same directory and renamed into place rather than written directly.
+     * RainbowGrades therefore never observes a partially written roster.
+     *
+     * @param string[] $users
+     */
+    private function writeBonusLateDayRoster(string $path, array $users): bool {
+        $tmp_path = $path . '.tmp';
+        $contents = count($users) > 0 ? implode("\n", $users) . "\n" : '';
+        if (file_put_contents($tmp_path, $contents) === false) {
+            return false;
+        }
+        chmod($tmp_path, 0660);
+        if (!rename($tmp_path, $path)) {
+            unlink($tmp_path);
+            return false;
+        }
+        return true;
     }
 
     private function filterExistingBonusLateDays(object $entries): object {
@@ -980,8 +1129,9 @@ class ReportController extends AbstractController {
         foreach ($entries as $date => $filename) {
             if (file_exists(FileUtils::joinPaths($rainbow_grades_dir, $filename))) {
                 $result->$date = $filename;
-            } else {
-                this->core->addErrorMessage("Bonus late day file for {$date} is missing: entry removed");
+            } 
+            else {
+                $this->core->addErrorMessage("Bonus late day file for {$date} is missing: entry removed");
             }
         }
         return $result;
@@ -1327,7 +1477,7 @@ class ReportController extends AbstractController {
             'gradeables' => $this->buildGradeablesArray($customization),
             'plagiarism' => $customization->getPlagiarism(),
             'manual_grade' => $customization->getManualGrades(),
-            'bonus_latedays' => $this->filterExistingBonusLateDays($customization->getBonusLateDays()),
+            
             'warning' => $customization->getPerformanceWarnings(),
         ];
         return json_encode($json, JSON_PRETTY_PRINT);
