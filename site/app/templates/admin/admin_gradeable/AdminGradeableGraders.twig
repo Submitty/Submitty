@@ -130,7 +130,7 @@ Form
             <div>
                 <input type="checkbox" name="peer_files_restricted" id="peer_files_restricted" value="true" {{ gradeable.getPeerFilesRestricted() ? 'checked' : '' }}>
                 <label for="peer_files_restricted">
-                    Restrict which submitted files peer graders can view
+                    Specify which submitted files peer graders can view
                 </label>
             </div>
             <div id="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
