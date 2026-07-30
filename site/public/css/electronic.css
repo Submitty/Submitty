@@ -262,7 +262,7 @@ progress::-webkit-progress-value {
 [data-theme="dark"] .grade-panel input:focus-visible,
 [data-theme="dark"] .grade-panel textarea:focus-visible,
 [data-theme="dark"] .grade-panel .key_to_click:focus-visible {
-    outline: 3px solid #7ec8ff;
+    outline: 2px solid #7ec8ff;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
