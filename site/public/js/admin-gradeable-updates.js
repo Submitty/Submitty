@@ -426,7 +426,10 @@ $(document).ready(() => {
         }
 
         const data = { csrf_token: csrfToken };
-        if (this.name === 'hidden_files') {
+        if (this.name === 'peer_files_restricted') {
+            data[this.name] = $(this).is(':checked');
+        }
+        else if (this.name === 'hidden_files') {
             data[this.name] = $(this).val().replace(/\s*,\s*/, ',');
         }
         else {
