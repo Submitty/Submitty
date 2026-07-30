@@ -2516,16 +2516,16 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         $clustering_enabled = $this->core->getConfig()->isSubmissionClusteringEnabled() && $this->core->getUser()->accessFullGrading();
-        $clusters_exist = false;
-        if ($clustering_enabled) {
-            $clusters_exist = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
+        $ta_grading_cluster_mode = false;
+        if ($clustering_enabled && ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true') {
+            $ta_grading_cluster_mode = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
         }
-        $ta_grading_cluster_mode = ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true' && $clustering_enabled && $clusters_exist;
 
         // Check if the user can silently edit assigned marks
         if ($ta_grading_cluster_mode) {
             $silent_edit = false;
-        } elseif (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
+        }
+        elseif (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
         }
 

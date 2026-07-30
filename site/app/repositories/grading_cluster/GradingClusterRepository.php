@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityRepository;
  * @extends EntityRepository<\app\entities\grading_cluster\GradingCluster>
  */
 class GradingClusterRepository extends EntityRepository {
-
     /**
      * Fetches the specific GradingCluster that the given submitter (user or team) belongs to
      * for a specific gradeable, bypassing the need to load all clusters.
