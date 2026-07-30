@@ -2,6 +2,22 @@
 # HELPER FUNCTION FOR INSTALLING INDIVIDUAL HOMEWORKS
 ##########################################################################
 
+##########################################################################
+# Check if this function is being run by daemon/root
+##########################################################################
+
+function is_daemon_or_root {
+    if [[ "$UID" -eq 0 ]]; then
+        return 0
+    fi
+    # the daemon user's name is installation specific, so read it from the config.
+    # stderr is discarded because submitty_users.json is not readable by
+    # instructors -- which itself means this is not the daemon.
+    local daemon_user
+    daemon_user=$(jq -r '.daemon_user // empty' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json" 2>/dev/null)
+    [[ -n "$daemon_user" && "$(whoami)" == "$daemon_user" ]]
+}
+
 function clean_homework {
     # which assignment to cleanup
     semester="$1"
@@ -179,7 +195,7 @@ function build_homework {
     fi
 
     # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
-    if [[ "$UID" -eq 0 || "$(whoami)" == "submitty_daemon" ]]; then
+    if is_daemon_or_root; then
         # Add allowed minutes in database from config if exists
         python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
         set_minutes="$?"
@@ -245,9 +261,9 @@ function build_homework {
 
     # only the daemon (or root) can read database.json, so skip this for
     # instructor command line builds
-    if [[ "$UID" -eq 0 || "$(whoami)" == "submitty_daemon" ]]; then
-        # insert the gradeable data into the db
-        "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
+    if is_daemon_or_root; then
+    # insert the gradeable data into the db
+    "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
     else
         echo -e "\nWARNING:  Autograding testcase data was not inserted into the database.  To update it, this gradeable must be rebuilt by the daemon (via the web interface) or the build script must be run as root."
     fi
