@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Popup from '../Popup.vue';
 
 interface MarkInfo {
@@ -16,75 +16,51 @@ interface ConflictInfo {
     localDeleted: boolean;
 }
 
-interface ShowConflictPopupDetail {
+const props = defineProps<{
     conflicts: ConflictInfo[];
     componentTitle: string;
-}
+    currentIndex: number;
+}>();
+
+const emit = defineEmits<{
+    resolve: [{ markId: number; resolution: 'dom' | 'server' | 'old-server' }];
+    close: [];
+}>();
 
 const visible = ref(false);
-const conflicts = ref<ConflictInfo[]>([]);
-const componentTitle = ref('');
-const currentIndex = ref(0);
 
-watch(currentIndex, (idx) => {
-    // Triggers template re-render for the new conflict
-    currentConflict.value = conflicts.value[idx] ?? null;
-});
+const currentConflict = computed(() => props.conflicts[props.currentIndex] ?? null);
 
-const currentConflict = ref<ConflictInfo | null>(null);
-
-function handleShowConflictPopup(e: Event) {
-    const detail = (e as CustomEvent).detail as ShowConflictPopupDetail;
-    conflicts.value = detail.conflicts;
-    componentTitle.value = detail.componentTitle;
-    currentIndex.value = 0;
-    currentConflict.value = detail.conflicts[0] ?? null;
-    visible.value = true;
-}
-
-function handleConflictResolved() {
-    const nextIdx = currentIndex.value + 1;
-    if (nextIdx >= conflicts.value.length) {
-        visible.value = false;
-        currentConflict.value = null;
-        window.dispatchEvent(new CustomEvent('all-conflicts-resolved'));
+watch(() => props.conflicts, (newConflicts) => {
+    if (newConflicts.length > 0) {
+        visible.value = true;
     }
-    else {
-        currentIndex.value = nextIdx;
+}, { immediate: true });
+
+function toggle() {
+    const wasVisible = visible.value;
+    visible.value = !visible.value;
+    if (wasVisible) {
+        emit('close');
     }
 }
 
-function resolve(markId: number, resolution: 'dom' | 'server' | 'old-server') {
-    window.dispatchEvent(new CustomEvent('resolve-conflict', {
-        detail: { markId, resolution },
-    }));
+function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old-server') {
+    const conflict = currentConflict.value;
+    if (conflict) {
+        emit('resolve', { markId, resolution });
+    }
 }
-
-function close() {
-    visible.value = false;
-    currentConflict.value = null;
-    window.dispatchEvent(new CustomEvent('close-conflict-popup'));
-}
-
-onMounted(() => {
-    window.addEventListener('show-conflict-popup', handleShowConflictPopup);
-    window.addEventListener('conflict-resolved', handleConflictResolved);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('show-conflict-popup', handleShowConflictPopup);
-    window.removeEventListener('conflict-resolved', handleConflictResolved);
-});
 </script>
 
 <template>
   <Popup
     :visible="visible"
     :title="`Mark Conflicts: ${componentTitle}`"
-    @toggle="close"
+    @toggle="toggle"
   >
     <template #trigger>
-      <span style="display: none;" />
+      <span class="hidden-trigger" />
     </template>
     <template #default>
       <h4 data-testid="mark-conflict-description">
@@ -117,8 +93,9 @@ onUnmounted(() => {
                   type="button"
                   class="btn btn-default"
                   value="Revert to Original"
+                  title="Revert to original mark"
                   data-testid="mark-conflict-old-server-btn"
-                  @click="resolve(currentConflict.domMark.id, 'old-server')"
+                  @click="handleResolve(currentConflict.domMark.id, 'old-server')"
                 >
               </span>
             </div>
@@ -142,8 +119,9 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Ignore My Edits"
+                    title="Ignore my edits, keep server version"
                     data-testid="mark-conflict-server-btn"
-                    @click="resolve(currentConflict.domMark.id, 'server')"
+                    @click="handleResolve(currentConflict.domMark.id, 'server')"
                   >
                 </span>
               </template>
@@ -157,8 +135,9 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Delete Mark"
+                    title="Delete the mark from server"
                     data-testid="mark-conflict-server-btn"
-                    @click="resolve(currentConflict.domMark.id, 'server')"
+                    @click="handleResolve(currentConflict.domMark.id, 'server')"
                   >
                 </span>
               </template>
@@ -183,8 +162,9 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Use My Edits"
+                    title="Use my local edits"
                     data-testid="mark-conflict-dom-btn"
-                    @click="resolve(currentConflict.domMark.id, 'dom')"
+                    @click="handleResolve(currentConflict.domMark.id, 'dom')"
                   >
                 </span>
               </template>
@@ -198,8 +178,9 @@ onUnmounted(() => {
                     type="button"
                     class="btn btn-primary"
                     value="Delete Mark"
+                    title="Delete the mark"
                     data-testid="mark-conflict-dom-btn"
-                    @click="resolve(currentConflict.domMark.id, 'dom')"
+                    @click="handleResolve(currentConflict.domMark.id, 'dom')"
                   >
                 </span>
               </template>
@@ -219,6 +200,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.hidden-trigger {
+    display: none;
+}
+
 .mark-conflict-row span {
     padding: 3px;
     border-width: 2px;

@@ -1,5 +1,14 @@
 {% include 'Vue.twig' with {
     'type': 'component',
     'name': 'ta_grading/MarkConflictPopup',
-    'args': {},
+    'class': 'js-mark-conflict-popup',
+    'args': {
+        'conflicts': [],
+        'componentTitle': '',
+        'currentIndex': 0
+    },
+    'events': {
+        'resolve': 'window.handleConflictResolve',
+        'close': 'window.handleConflictClose'
+    }
 } %}

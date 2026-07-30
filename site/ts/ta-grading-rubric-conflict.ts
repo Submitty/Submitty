@@ -1,4 +1,5 @@
 import { ajaxAddNewMark, ajaxDeleteMark, ajaxSaveMark, getComponentJQuery, getGradeableId, isMarkDeleted, MarkConflicts } from './ta-grading-rubric';
+import { updateVueComponent } from './utils/vue';
 
 interface MarkInfo {
     id: number;
@@ -10,6 +11,13 @@ interface MarkInfo {
 interface ResolveConflictDetail {
     markId: number;
     resolution: 'dom' | 'server' | 'old-server';
+}
+
+declare global {
+    interface Window {
+        handleConflictResolve?: (detail: ResolveConflictDetail) => void;
+        handleConflictClose?: () => void;
+    }
 }
 
 function prepConflictMarks(conflictMarks: MarkConflicts) {
@@ -24,11 +32,9 @@ function buildMarkInfo(mark: { id: number; points: number; title: string | undef
     return { id: mark.id, points: mark.points, title: mark.title ?? null, publish: mark.publish };
 }
 
-/**
- * Prompts the user with an array of conflict marks so they can individually resolve them.
- * Dispatches a CustomEvent to the Vue MarkConflictPopup component and returns a Promise
- * that resolves once all conflicts are resolved or the popup is closed.
- */
+// Shows the MarkConflictPopup Vue component via updateVueComponent and returns a Promise
+// that resolves once all conflicts are resolved or the popup is closed.
+
 export function openMarkConflictPopup(component_id: number, conflictMarks: MarkConflicts): Promise<void> {
     return new Promise((resolve) => {
         const gradeable_id = getGradeableId();
@@ -44,30 +50,26 @@ export function openMarkConflictPopup(component_id: number, conflictMarks: MarkC
             localDeleted: c.localDeleted,
         }));
 
-        // Signal the Vue component to show the popup
-        window.dispatchEvent(new CustomEvent('show-conflict-popup', {
-            detail: { conflicts: conflictsData, componentTitle },
-        }));
+        let currentIndex = 0;
 
-        let cleanedUp = false;
-        function cleanup() {
-            if (cleanedUp) {
-                return;
-            }
-            cleanedUp = true;
-            window.removeEventListener('resolve-conflict', resolveConflictHandler);
-            window.removeEventListener('all-conflicts-resolved', resolveAllHandler);
-            window.removeEventListener('close-conflict-popup', closeHandler);
-            resolve();
+        function showConflict() {
+            updateVueComponent('.js-mark-conflict-popup', {
+                conflicts: conflictsData,
+                componentTitle: componentTitle,
+                currentIndex: currentIndex,
+            });
         }
 
-        // Handle each resolution choice from the component
-        const resolveConflictHandler = (e: Event) => {
-            void (async () => {
-                const detail = (e as CustomEvent).detail as ResolveConflictDetail;
-                const { markId, resolution } = detail;
-                const conflict = conflictMarks[markId];
+        function cleanup() {
+            delete window.handleConflictResolve;
+            delete window.handleConflictClose;
+        }
 
+        window.handleConflictResolve = (detail: ResolveConflictDetail) => {
+            const { markId, resolution } = detail;
+            const conflict = conflictMarks[markId];
+
+            void (async () => {
                 try {
                     if (resolution === 'dom') {
                         if (conflict.localDeleted) {
@@ -94,16 +96,31 @@ export function openMarkConflictPopup(component_id: number, conflictMarks: MarkC
                     console.error(`Failed to resolve conflict for mark ${markId}:`, err);
                 }
 
-                // Tell the component to advance to the next conflict
-                window.dispatchEvent(new CustomEvent('conflict-resolved'));
+                // Advance to next conflict or close if all resolved
+                currentIndex++;
+                if (currentIndex >= conflictsData.length) {
+                    // Clear conflicts to prevent the component's watcher from re-showing the popup
+                    updateVueComponent('.js-mark-conflict-popup', {
+                        conflicts: [],
+                        componentTitle: '',
+                        currentIndex: 0,
+                    });
+                    cleanup();
+                    resolve();
+                }
+                else {
+                    showConflict();
+                }
             })();
         };
 
-        const resolveAllHandler = () => cleanup();
-        const closeHandler = () => cleanup();
+        window.handleConflictClose = () => {
+            cleanup();
+            resolve();
+        };
 
-        window.addEventListener('resolve-conflict', resolveConflictHandler);
-        window.addEventListener('all-conflicts-resolved', resolveAllHandler);
-        window.addEventListener('close-conflict-popup', closeHandler);
+        // Show the popup with first conflict
+        // The Vue component auto-shows when conflicts.length > 0
+        showConflict();
     });
 }
