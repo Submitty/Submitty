@@ -243,8 +243,8 @@ $(document).ready(() => {
     $('#show-all').on('click', showAll);
     $('#add-field').on('input', addFieldOnChange).trigger('input');
 
-    $('.show-docker-log-button').click(() => {
-        $('.docker-status-log').toggle();
+    $('.show-docker-log-button').click(function () {
+        $(this).closest('.docker-status-container').find('.docker-status-log').toggle();
     });
 
     const saved_status_badge = sessionStorage.getItem(DOCKER_STATUS_BADGE);
