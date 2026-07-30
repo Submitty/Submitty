@@ -10,9 +10,15 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
     {% if terms is defined and terms|length > 0 %}
+        {% set now_ts = "now"|date("U") %}
         <div class="my-3">
             <span class="option-title block">Existing Terms</span>
             <span class="block mb-2">Please check the dates below before choosing a start/end date to avoid creating overlapping terms.</span>
+            <div class="term-legend">
+                <span class="term-legend-item"><span class="term-legend-dot term-status-active"></span>Active</span>
+                <span class="term-legend-item"><span class="term-legend-dot term-status-future"></span>Future</span>
+                <span class="term-legend-item"><span class="term-legend-dot term-status-ended"></span>Ended</span>
+            </div>
             <div style="max-height: 160px; overflow-y: auto; border: 1px solid #666; border-radius: 4px;">
                 <table class="table" style="margin-bottom: 0;">
                     <thead>
@@ -20,20 +26,48 @@
                             <th>Term</th>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for term in terms %}
-                            <tr>
+                        {% for term in terms|sort((a,b) => b.getStartDate() <=> a.getStartDate()) %}
+                            {% set start_ts = term.getStartDate()|date("U") %}
+                            {% set end_ts = term.getEndDate()|date("U") %}
+                            {% if now_ts < start_ts %}
+                                {% set status = 'future' %}
+                            {% elseif now_ts > end_ts %}
+                                {% set status = 'ended' %}
+                            {% else %}
+                                {% set status = 'active' %}
+                            {% endif %}
+                            <tr class="term-row-{{ status }}">
                                 <td>{{ term.getName() }}</td>
                                 <td>{{ term.getStartDate()|date('m/d/Y') }}</td>
                                 <td>{{ term.getEndDate()|date('m/d/Y') }}</td>
+                                <td><span class="term-status-dot term-status-{{ status }}"></span>{{ status|capitalize }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+        <style>
+            .term-legend { margin: 6px 0 10px; font-size: 0.85em; }
+            .term-legend-item { margin-right: 14px; white-space: nowrap; }
+            .term-legend-dot, .term-status-dot {
+                display: inline-block;
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                margin-right: 5px;
+            }
+            .term-status-active { background-color: #28a745; }
+            .term-status-future { background-color: #007bff; }
+            .term-status-ended { background-color: #6c757d; }
+            tr.term-row-active { background-color: rgba(40, 167, 69, 0.12); }
+            tr.term-row-future { background-color: rgba(0, 123, 255, 0.12); }
+            tr.term-row-ended { color: #888; }
+        </style>
     {% endif %}
 
     <div class="flex-col my-3">
@@ -72,7 +106,6 @@
             function updateTermLength() {
                 if (!startInput.value || !endInput.value) {
                     message.textContent = '';
-                    if (submitBtn) { submitBtn.disabled = false; }
                     return;
                 }
 
