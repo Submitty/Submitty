@@ -87,7 +87,7 @@ function openRemoveDialog(button, url) {
             id: checkboxId,
             class: 'remove-image-checkbox',
             value: entry.name,
-        }).prop('checked', entry.primary);
+        });
         checkbox.attr('data-testid', 'remove-image-checkbox');
         label.append(checkbox);
         label.append(document.createTextNode(` ${entry.name}${entry.primary ? ' (primary)' : ''}`));

@@ -242,6 +242,18 @@ class DockerInterfaceController extends AbstractController {
             }
         }
 
+        $system_images = FileUtils::readJsonFile(FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            ".setup",
+            "data",
+            "system_docker_containers.json"
+        ));
+        if (!is_array($system_images)) {
+            $system_images = [];
+        }
+        $system_images = array_flip($system_images);
+        Logger::debug('SYSTEM IMAGES: ' . json_encode(array_keys($system_images)));
+
         $user = $this->core->getUser();
         $removed = [];
         $skipped = [];
@@ -252,27 +264,42 @@ class DockerInterfaceController extends AbstractController {
                 continue;
             }
 
-            $owner = $this->core->getQueries()->getDockerImageOwner($image); // string|false
+            Logger::debug('CHECKING [' . $image . '] system=' . (isset($system_images[$image]) ? 'yes' : 'no'));
+            if (isset($system_images[$image])) {
+                $skipped[] = $image;
+                continue;
+            }
 
-            // Nothing to act on: no owner row and not in the config.
+            $owner = $this->core->getQueries()->getDockerImageOwner($image);
+            // sometimes the image will have no owner, and the query can return an empty string
+            if ($owner === '') {
+                $owner = false;
+            }
+
+            // if there is no owner, you should probably not be deleting this
             if ($owner === false && !isset($in_config[$image])) {
                 $skipped[] = $image;
                 continue;
             }
 
-            // Protect images managed by another instructor from non-superusers.
-            if ($owner !== false && $owner !== '' && !$user->isSuperUser() && $owner !== $user->getId()) {
+            //if the image has no owner and the user is not a superuser, they probably shouldn't be deleting this
+            if ($owner === false && !$user->isSuperUser()) {
                 $skipped[] = $image;
                 continue;
             }
 
-            // Drop the ownership row if one exists; a missing row is fine.
+            // if you don't own this image, can't delete it
+            if ($owner !== false && $owner !== '' && !$user->isSuperUser() && $owner !== $user->getId()) {
+                $skipped[] = $image;
+                continue;
+            }
+            
             if ($owner !== false) {
                 $this->core->getQueries()->removeDockerImageOwner($image, $user);
             }
             $removed[] = $image;
         }
-
+        
         if (count($removed) === 0) {
             return JsonResponse::getFailResponse(
                 'Nothing was removed. The selected image(s) are not listed or are managed by another instructor/superuser.'
