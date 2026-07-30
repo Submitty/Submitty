@@ -259,7 +259,7 @@ function renderPeerFilePatterns() {
     tableBody.empty();
     if (patterns.length === 0) {
         const row = $('<tr>');
-        $('<td>').attr('colspan', 2).text('No patterns have been added. Peer graders will not see any submitted files.').appendTo(row);
+        $('<td>').attr('colspan', 2).text('No regular expressions have been added. Peer graders will not see any submitted files.').appendTo(row);
         tableBody.append(row);
         return;
     }
@@ -269,7 +269,7 @@ function renderPeerFilePatterns() {
         const actionCell = $('<td>');
         $('<button>').attr('type', 'button')
             .attr('data-pattern-index', index)
-            .attr('aria-label', `Delete file pattern ${pattern}`)
+            .attr('aria-label', `Delete file regular expression ${pattern}`)
             .addClass('btn btn-default peer-file-pattern-delete')
             .append(
                 $('<i>')
@@ -299,16 +299,42 @@ function savePeerFilePatterns(patterns) {
     );
 }
 
+function isValidPeerFileRegex(pattern) {
+    if (pattern.length < 3) {
+        return false;
+    }
+    const delimiter = pattern[0];
+    const lastDelimiter = pattern.lastIndexOf(delimiter);
+    if (lastDelimiter <= 0) {
+        return false;
+    }
+    const expression = pattern.slice(1, lastDelimiter);
+    const flags = pattern.slice(lastDelimiter + 1);
+    try {
+        new RegExp(expression, flags);
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
+
 function addPeerFilePattern() {
     const input = $('#peer-file-pattern-input');
     const pattern = input.val().trim();
     if (pattern === '') {
-        displayErrorMessage('Enter a file name or wildcard pattern.');
+        displayErrorMessage('Enter a file regular expression.');
+        return;
+    }
+    if (!isValidPeerFileRegex(pattern)) {
+        displayErrorMessage(
+            'Enter a valid regular expression, including delimiters, such as /^report\\.pdf$/ or /\\.java$/.',
+        );
         return;
     }
     const patterns = getPeerFilePatterns();
     if (patterns.includes(pattern)) {
-        displayErrorMessage('That file pattern has already been added.');
+        displayErrorMessage('That file regular expression has already been added.');
         return;
     }
     patterns.push(pattern);

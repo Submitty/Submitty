@@ -136,23 +136,27 @@ Form
             <div id="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
                 <div class="std-margin peer-file-pattern-input-row">
                     <label for="peer-file-pattern-input">
-                        Visible file pattern:
+                        Visible file regular expression:
                     </label>
-                    <input type="text" id="peer-file-pattern-input" class="peer-file-pattern-input" placeholder="Examples: report.pdf, *.java, src/*" autocomplete="off">
+                    <input type="text" id="peer-file-pattern-input" class="peer-file-pattern-input" placeholder="Examples: /^report\.pdf$/, /\.java$/, /^src\/.*$/" autocomplete="off">
                     <button type="button" id="add-peer-file-pattern" class="btn btn-primary">
                         Add
                     </button>
                 </div>
                 <p>
-                    Use an exact file name or a wildcard pattern.
-                    <code>*</code> matches any number of characters and
-                    <code>?</code> matches one character.
+                    Enter a regular expression including delimiters.
+                    The expression is matched against both the full relative path and
+                    the file name.
+                    Examples:
+                    <code>/^report\.pdf$/</code>,
+                    <code>/\.java$/</code>, and
+                    <code>/^src\/.*$/</code>.
                 </p>
                 <div class="table-wrapper">
                     <table id="peer-file-pattern-table" class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Visible file pattern</th>
+                                <th>Visible file regular expression</th>
                                 <th>Action</th>
                             </tr>
                         </thead>

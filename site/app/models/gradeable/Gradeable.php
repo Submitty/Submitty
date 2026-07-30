@@ -2753,7 +2753,12 @@ class Gradeable extends AbstractModel {
                     'Peer file patterns cannot contain null bytes.'
                 );
             }
-            $cleaned_patterns[] = str_replace('\\', '/', $pattern);
+            if (@preg_match($pattern, '') === false) {
+                throw new \InvalidArgumentException(
+                    "Invalid peer file regular expression: {$pattern}"
+                );
+            }
+            $cleaned_patterns[] = $pattern;
         }
         $this->peer_file_patterns = array_values(array_unique($cleaned_patterns));
         $this->modified = true;
@@ -2773,8 +2778,7 @@ class Gradeable extends AbstractModel {
         $relative_path = ltrim(str_replace('\\', '/', $relative_path), '/');
         $file_name = basename($relative_path);
         foreach ($this->getPeerFilePatterns() as $pattern) {
-            $pattern = ltrim(str_replace('\\', '/', trim($pattern)), '/');
-            if (fnmatch($pattern, $relative_path, FNM_PATHNAME) || fnmatch($pattern, $file_name)) {
+            if (preg_match($pattern, $relative_path) === 1 || preg_match($pattern, $file_name) === 1) {
                 return true;
             }
         }
