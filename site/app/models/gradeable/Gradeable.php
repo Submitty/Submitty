@@ -2858,6 +2858,13 @@ class Gradeable extends AbstractModel {
         return $this->has_unseen_gradeable_notification;
     }
 
+    public function hasCustomOrder(): bool {
+        return $this->custom_sort;
+    }
+
+    public function setCustomOrder(bool $custom_sort): void {
+        $this->custom_sort = $custom_sort;
+    }
     /**
      * Gets the redactions for this gradeable
      * @return array<Redaction>
