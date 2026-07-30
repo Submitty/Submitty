@@ -673,9 +673,6 @@ function getBonusLateDays() {
     const ret = {};
     const tableBody = document.getElementById('bonus-late-days-table-body');
     const rows = tableBody.getElementsByTagName('tr');
-    for (let i = 0; i < rows.length(); i++) {
-        ret[rows[i].cells.textContent.trim()] = rows[i].cells[1].textContent.trim();
-    }
     return ret;
 }
 
