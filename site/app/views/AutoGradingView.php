@@ -454,11 +454,6 @@ class AutoGradingView extends AbstractView {
             $display_version = $version_instance->getVersion();
         }
 
-        $id = $this->core->getUser()->getId();
-        if ($gradeable->isTeamAssignment()) {
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
-        }
-
         // Check for image annotation files
         $img_annotation_paths = [];
         foreach ($uploaded_imgs as $image_file) {
