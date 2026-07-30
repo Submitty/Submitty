@@ -257,17 +257,21 @@ describe('Docker UI Test', () => {
             .click();
 
         // Submitting with nothing selected shows an error
-        cy.get('[data-image-id="submitty/prolog:8"]').click();
+        cy.get('[data-image-id="submitty/prolog:8"]').click({ force: true });
         cy.get('[data-testid="remove-image-form"]').should('be.visible');
-        cy.get('[data-testid="remove-image-submit"]').click();
+        cy.get('[data-testid="remove-image-submit"]').click({ force: true });
         cy.get('[data-testid="remove-image-error"]')
             .should('contain.text', 'Select at least one name to remove.');
         cy.get('[data-testid="remove-image-form"]').should('be.visible');
 
         // Popup lists the names, select the one to remove.
+        cy.get('[data-image-id="submitty/prolog:8"]').click({ force: true });
         cy.get('[data-testid="remove-image-form"]').should('be.visible');
-        cy.get('[data-testid="remove-image-checkbox"][value="submitty/prolog:8"]').check();
+        cy.get('[data-testid="remove-image-checkbox"]').should('have.length', 1);
+        cy.get('[data-testid="remove-image-checkbox"][value="submitty/prolog:8"]').check({ force: true });
+        cy.get('[data-testid="remove-image-checkbox"][value="submitty/prolog:8"]').should('be.checked');
         cy.get('[data-testid="remove-image-submit"]').click();
+        cy.get('[data-testid="remove-image-form"]').should('not.be.visible');
 
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
