@@ -137,7 +137,7 @@ class DockerUI extends AbstractModel {
      */
     public function getDockerImageOwners(): array {
         return $this->json_data['image_owners'];
-    }   
+    }
 
     /**
      * Collect which capabilities are present along with the workers associated with and any that are unaassociated
