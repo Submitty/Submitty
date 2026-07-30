@@ -1,9 +1,12 @@
 describe('Test cases revolving around course creation through UI', () => {
     let valid_course_code;
 
+    before(() => {
+        valid_course_code = `${Math.random().toString(36).substring(2, 8)}_course_creation_test`;
+    });
+
     beforeEach(() => {
         cy.login();
-        valid_course_code = `${Math.random().toString(36).substring(2, 8)}_course_creation_test`;
     });
 
     it('Should see all default courses on home page', () => {
@@ -40,13 +43,40 @@ describe('Test cases revolving around course creation through UI', () => {
     });
 
     it('Archived course should be moved to archive section on home page', () => {
-        // cy.visit(`/courses/f26/${valid_course_code}/config`);
-        // cy.get('[data-testid="course-archive"]').click();
-        // cy.visit('/home');
+        // archive the course
+        cy.visit([valid_course_code, 'config']);
+        cy.get('[data-testid="course-archive"]').click();
+        cy.visit('/home');
         // new course should be within archived section
-        // cy.get(`[data-testid=${valid_course_code}-button]`).should('exist');
+        cy.get('[data-testid="archived_courses-button-list"]')
+            .find(`[data-testid=${valid_course_code}-button]`).should('exist');
+
+        // unarchive the course
+        cy.visit([valid_course_code, 'config']);
+        cy.get('[data-testid="course-archive"]').click();
+        cy.visit('/home');
+        // new course should be within unarchived section
+        cy.get('[data-testid="unarchived_courses-button-list"]')
+            .find(`[data-testid=${valid_course_code}-button]`).should('exist');
     });
 
-    it('Once removed from course, instructor should not see that course', () => {
+    it('Once removed from a course, you should not see that course on the home page', () => {
+        // instructor can see the course because they're in it
+        cy.get(`[data-testid="${valid_course_code}-button"]`).should('exist');
+        cy.logout();
+
+        // remove instructor from the course as submitty-admin
+        cy.login('submitty-admin');
+        cy.visit([valid_course_code, 'users']);
+        // cy.get('.content').find('[data-testid="delete-student-instructor-button"]').scrollIntoView();
+        cy.get('[data-testid="delete-student-instructor-button"]').click();
+        cy.get('[data-testid="confirm-delete-button"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain', 'Quinn Instructor has been removed from your course.');
+        cy.visit('/home');
+        cy.logout();
+
+        // instructor shouldn't see the course on their homepage anymore
+        cy.login();
+        cy.get(`[data-testid="${valid_course_code}-button"]`).should('not.exist');
     });
 });
