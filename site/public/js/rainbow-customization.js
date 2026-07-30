@@ -696,7 +696,7 @@ function buildJSON() {
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
         manual_grade: getTableData('manualGrade'),
-        bonus_latedays: getBonusLateDays(),
+        bonus_latedays: window.rainbowBonusLateDays ?? {},
         warning: getTableData('performanceWarnings'),
     };
 
