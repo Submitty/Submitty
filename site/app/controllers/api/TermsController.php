@@ -4,7 +4,6 @@ namespace app\controllers\api;
 
 use app\controllers\AbstractController;
 use app\libraries\response\RedirectResponse;
-use app\libraries\Core;
 use app\entities\Term;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
