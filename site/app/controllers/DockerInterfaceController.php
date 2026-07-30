@@ -293,13 +293,13 @@ class DockerInterfaceController extends AbstractController {
                 $skipped[] = $image;
                 continue;
             }
-            
+
             if ($owner !== false) {
                 $this->core->getQueries()->removeDockerImageOwner($image, $user);
             }
             $removed[] = $image;
         }
-        
+
         if (count($removed) === 0) {
             return JsonResponse::getFailResponse(
                 'Nothing was removed. The selected image(s) are not listed or are managed by another instructor/superuser.'
