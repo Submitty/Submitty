@@ -441,8 +441,8 @@ class AutoGradingView extends AbstractView {
         foreach ($img_files as $file) {
             if (array_key_exists('path', $file)) {
                 $content_type = mime_content_type($file['path']);
-                if (substr($content_type, 0, 5) === "image") {
-                    $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
+                if (substr($content_type, 0, 5) === 'image') {
+                    $file['encoded_name'] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
                     $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
                     $uploaded_imgs[] = $file;
                 }
