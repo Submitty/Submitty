@@ -449,12 +449,9 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
-            $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            $files = array_merge($files['submissions'], $files['checkout']);
         }
 
         $id = $this->core->getUser()->getId();
@@ -519,7 +516,6 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'ta_components' => $ta_component_data,
@@ -669,12 +665,9 @@ class AutoGradingView extends AbstractView {
 
         $id = $this->core->getUser()->getId();
 
-        $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
-            $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            $files = array_merge($files['submissions'], $files['checkout']);
         }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
@@ -712,7 +705,6 @@ class AutoGradingView extends AbstractView {
         $gradeable_id = $gradeable->getId();
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
-            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'grader_info' => $grader_info,
