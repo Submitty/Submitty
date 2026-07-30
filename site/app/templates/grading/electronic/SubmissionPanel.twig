@@ -42,6 +42,13 @@
                 <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies(true);" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
             <br />
+            {% if show_no_matching_peer_files_banner %}
+                <div class="details-warning-box details-warning-highlight" data-testid="no-matching-peer-files-warning">
+                    This student has not submitted any files matching the file patterns
+                    specified by the instructor. Contact the instructor or a TA if this is
+                    unexpected.
+                </div>
+            {% endif %}
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}

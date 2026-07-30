@@ -1572,6 +1572,7 @@ HTML;
         $results_public = [];
         $checkout = [];
         $submissions_processed = [];
+        $show_no_matching_peer_files_banner = false;
 
         $gradeable = $graded_gradeable->getGradeable();
         $user = $this->core->getUser();
@@ -1595,6 +1596,8 @@ HTML;
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
+            
+            $show_no_matching_peer_files_banner = $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && empty($submissions);
         }
         $student_grader = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
@@ -1610,6 +1613,7 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
+        $this->core->getOutput()->addInternalCss('details.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1629,6 +1633,7 @@ HTML;
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_assignment_settings_path" => $user_assignment_settings_path,
+            "show_no_matching_peer_files_banner" => $show_no_matching_peer_files_banner,
         ]);
     }
 
