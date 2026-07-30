@@ -198,6 +198,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     // keep track of changes
     const new_scores = {};
     const old_scores = {};
+    const changedElems = [];
 
     elems = $(elems);
     elems.each((idx, el) => {
@@ -249,23 +250,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                 elem.removeClass('simple-full-credit');
             }
 
+            // create border-right to reflect AJAX save status
             if (oldScore !== newScore) {
-                elem.css('background-image', 'linear-gradient(to right, var(--default-white), var(--default-white))');
-                elem.css('background-repeat', 'no-repeat');
-                elem.css('background-position', 'right center');
-                elem.css('background-size', '50% 100%');
-
-                elem.removeClass('cell-fill-anim');
-                void elem[0].offsetWidth;
-                elem.addClass('cell-fill-anim');
-
-                elem.off('animationend.cell').one('animationend.cell', () => {
-                    elem.css('background-image', '');
-                    elem.css('background-repeat', '');
-                    elem.css('background-position', '');
-                    elem.css('background-size', '');
-                    elem.removeClass('cell-fill-anim');
-                });
+                elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+                changedElems.push(elem);
             }
 
             // mark cell as user-modified so stale WebSocket echoes are ignored
@@ -299,6 +287,17 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
+                changedElems.forEach((elem) => {
+                    elem.stop(true, true);
+                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
+                });
+            }
+            else {
+                changedElems.forEach((elem) => {
+                    elem.stop(true, true);
+                    elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+                    elem.animate({ 'border-right-width': '0px' }, 400);
+                });
             }
             updateVisibility();
         },
@@ -928,6 +927,10 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
                     elem.removeClass('simple-full-credit');
                     break;
             }
+
+            // create border-right and animate to 0px to indicate save was received
+            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+            elem.animate({ 'border-right-width': '0px' }, 400);
         }
     }
 }
