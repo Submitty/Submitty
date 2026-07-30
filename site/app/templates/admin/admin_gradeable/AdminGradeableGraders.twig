@@ -134,11 +134,11 @@ Form
                 </label>
             </div>
             <div id="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
-                <div class="std-margin">
+                <div class="std-margin peer-file-pattern-input-row">
                     <label for="peer-file-pattern-input">
                         Visible file pattern:
                     </label>
-                    <input type="text" id="peer-file-pattern-input" placeholder="Examples: report.pdf, *.java, src/*" autocomplete="off">
+                    <input type="text" id="peer-file-pattern-input" class="peer-file-pattern-input" placeholder="Examples: report.pdf, *.java, src/*" autocomplete="off">
                     <button type="button" id="add-peer-file-pattern" class="btn btn-primary">
                         Add
                     </button>
