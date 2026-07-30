@@ -10,16 +10,9 @@ import {
     isIsoDate,
 } from '../../../../ts/rainbow-bonus-late-days';
 
-export interface StudentOption {
-    value: string;
-    label?: string;
-}
-
-const { entries: initialEntries, students } = defineProps<{
+const { entries: initialEntries } = defineProps<{
     /** Map of YYYY-MM-DD => csv filename, from gui_customization.json */
     entries: Record<string, string>;
-    /** Valid user ids, used to reject typos before they reach the build */
-    students: StudentOption[];
 }>();
 
 const emit = defineEmits<{
@@ -39,7 +32,6 @@ const newUser = ref('');
 const uploadFile = ref<File | null>(null);
 
 const today = new Date().toISOString().slice(0, 10);
-const validUserIds = computed(() => new Set(students.map((student) => student.value)));
 const sortedDates = computed(() => Object.keys(entries.value).sort());
 
 function syncEntries() {
@@ -74,10 +66,6 @@ function closeRoster() {
 function addUser() {
     const id = newUser.value.trim();
     if (id === '') {
-        return;
-    }
-    if (!validUserIds.value.has(id)) {
-        rosterError.value = `${id} is not a user in this course.`;
         return;
     }
     if (roster.value.includes(id)) {
@@ -268,18 +256,10 @@ async function removeDate(date: string) {
                 v-model="newUser"
                 class="option-input"
                 type="text"
-                list="bonus-late-days-user-options"
                 data-testid="bonus-late-days-user"
                 @keyup.enter="addUser"
               >
             </label>
-            <datalist id="bonus-late-days-user-options">
-              <option
-                v-for="student in students"
-                :key="student.value"
-                :value="student.value"
-              />
-            </datalist>
             <button
               type="button"
               class="btn btn-primary"
