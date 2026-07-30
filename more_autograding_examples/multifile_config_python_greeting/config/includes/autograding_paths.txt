@@ -1,0 +1,7 @@
+"submission_to_runner": ["*.py"],
+"work_to_details": [
+    "test*/*.txt",
+    "test*/*_diff.json",
+    "SubmissionLimit/*.*",
+    "SubmissionLimit/*_diff.json"
+]

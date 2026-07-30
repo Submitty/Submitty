@@ -272,7 +272,9 @@ describe('Test Rainbow Grading', () => {
         // Add grades to numeric gradeable
         const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
         cy.visit(['testing', 'gradeable', 'numeric', 'grading']);
-        cy.get('#csvUpload').selectFile(gradesfile, { action: 'drag-drop' });
+        cy.get('[data-testid="numeric-csv-upload-button"]').click();
+        cy.get('[data-testid="numeric-csv-upload-file"]').selectFile(gradesfile, { action: 'drag-drop' });
+        cy.get('[data-testid="numeric-csv-upload-submit"]').click();
         cy.on('window:confirm', () => true);
         cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
         cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);

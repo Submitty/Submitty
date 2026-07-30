@@ -969,10 +969,25 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
+        // Acquire lock to prevent race conditions when creating new versions (e.g., bulk upload race condition)
+        $lock_file = FileUtils::joinPaths($user_path, "submission.lock");
+        $lock_fp = fopen($lock_file, "c");
+        if (!$lock_fp || !flock($lock_fp, LOCK_EX)) {
+            return $this->uploadResult("Failed to acquire lock for submission.", false);
+        }
+
+        // Re-fetch the graded gradeable to ensure we have the most up-to-date version number
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        if ($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
+        }
+
         $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
 
@@ -1166,9 +1181,13 @@ class SubmissionController extends AbstractController {
         //add new job to queue
         if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
             $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
+        flock($lock_fp, LOCK_UN);
+        fclose($lock_fp);
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
 
@@ -1203,6 +1222,10 @@ class SubmissionController extends AbstractController {
         );
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
+
+        if (!$this->core->getAccess()->canI("path.write", ["path" => $uploaded_file, "dir" => "split_pdf"])) {
+            return $this->uploadResult("Invalid path", false);
+        }
 
         if (!@unlink($uploaded_file)) {
             return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
@@ -1789,6 +1812,7 @@ class SubmissionController extends AbstractController {
                     for ($i = 1; $i <= $num_parts; $i++) {
                         if (isset($uploaded_files[$i])) {
                             $current_files_set = array_flip($uploaded_files[$i]["name"]);
+                            $current_files_base_set = array_map(fn($name) => pathinfo($name, PATHINFO_FILENAME), $uploaded_files[$i]["name"]);
                             $previous_files_src[$i] = [];
                             $previous_files_dst[$i] = [];
                             $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
@@ -1797,7 +1821,8 @@ class SubmissionController extends AbstractController {
                             foreach ($filenames as $filename) {
                                 $file_base_name = basename($filename);
                                 $previous_files_src[$i][$j] = $file_base_name;
-                                if (!$clobber && isset($current_files_set[$file_base_name])) {
+                                $old_file_base = pathinfo($file_base_name, PATHINFO_FILENAME);
+                                if (!$clobber && (isset($current_files_set[$file_base_name]) || in_array($old_file_base, $current_files_base_set, true))) {
                                     $parts = explode(".", $file_base_name);
                                     $parts[0] .= "_version_" . $highest_version;
                                     $file_base_name = implode(".", $parts);
