@@ -6312,7 +6312,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 13
+			count: 14
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
