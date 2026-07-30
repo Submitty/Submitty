@@ -70,12 +70,12 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="docker-log-button"]').eq(0).should('be.visible');
         cy.get('[data-testid="docker-log-button"]').eq(1).should('be.visible');
 
-        // Click one Log button, both logs should open
+        // Click one Log button, the closes log should open
         cy.get('[data-testid="docker-log-button"]').eq(0).click();
         cy.get('[data-testid="docker-status-log"]').eq(0).should('be.visible');
-        cy.get('[data-testid="docker-status-log"]').eq(1).should('be.visible');
+        cy.get('[data-testid="docker-status-log"]').eq(1).should('not.be.visible');
 
-        // Both logs should show identical log content
+        // Both logs should show identical log content (this works even if the log isn't visible)
         cy.get('[data-testid="docker-status-log"]').eq(0).invoke('text').then((topText) => {
             cy.get('[data-testid="docker-status-log"]').eq(1).invoke('text').should('eq', topText);
         });
