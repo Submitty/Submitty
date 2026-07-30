@@ -68,11 +68,10 @@ describe('Test cases revolving around course creation through UI', () => {
         // remove instructor from the course as submitty-admin
         cy.login('submitty-admin');
         cy.visit([valid_course_code, 'users']);
-        // cy.get('.content').find('[data-testid="delete-student-instructor-button"]').scrollIntoView();
         cy.get('[data-testid="delete-student-instructor-button"]').click();
         cy.get('[data-testid="confirm-delete-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain', 'Quinn Instructor has been removed from your course.');
-        cy.visit('/home');
+        cy.visit('/');
         cy.logout();
 
         // instructor shouldn't see the course on their homepage anymore
