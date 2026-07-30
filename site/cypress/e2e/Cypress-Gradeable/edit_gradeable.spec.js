@@ -192,7 +192,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#yes_student_download').click();
         cy.get('#yes_student_submit').click();
 
-        logoutLogin('student', ['sample', 'gradeable', 'open_peer_homework']);
+        logoutLogin('adamsg', ['sample', 'gradeable', 'open_peer_homework']);
         cy.get('#upload1').should('exist');
         cy.get('#submission-version-select').should('exist');
         cy.contains('Submissions are no longer being accepted for this assignment').should('not.exist');

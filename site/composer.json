@@ -23,7 +23,7 @@
     "browscap/browscap-php": "7.6.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/dbal": "3.8.3",
-    "doctrine/orm": "3.6.2",
+    "doctrine/orm": "3.6.7",
     "egulias/email-validator": "4.0.4",
     "lcobucci/jwt": "5.6.0",
     "league/commonmark": "2.8.2",
@@ -54,6 +54,7 @@
   "scripts": {
     "test": "phpunit",
     "lint": "php vendor/bin/phpcs --extensions=php ./app",
+    "lint:fix": "php vendor/bin/phpcbf --extensions=php ./app",
     "static-analysis": "php vendor/bin/phpstan analyze"
   }
 }

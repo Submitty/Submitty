@@ -13,6 +13,7 @@ usage: python3 auto_rainbow_grades.py <semester> <course> <source>
 # Imports
 import sys
 import os
+import glob
 import subprocess
 import shutil
 import pwd
@@ -20,6 +21,18 @@ import json
 import datetime
 from pathlib import Path
 import getpass
+
+
+# Print an error message without a traceback and exit non-zero.
+def error_exit(message):
+    print(f'ERROR: {message}', file=sys.stderr, flush=True)
+    sys.exit(1)
+
+
+# Print an a non fatal warning that should be surfaced to the UI
+def warn(message):
+    print(f'WARNING: {message}', flush=True)
+
 
 # Verify correct number of command line arguments
 if len(sys.argv) != 4:
@@ -149,17 +162,26 @@ os.chdir(rg_course_path)
 creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
-    raise Exception('Unable to locate submitty_admin.json credentials file')
+    error_exit(f'Unable to locate the submitty_admin.json credentials file at '
+               f'{creds_file}')
 
 # Load credentials out of admin file
-with open(creds_file, 'r') as file:
-    creds = json.load(file)
+try:
+    with open(creds_file, 'r') as file:
+        creds = json.load(file)
+except PermissionError as e:
+    error_exit(f'Error opening submitty_admin.json: {e}')
 
 # Take this path if we DID NOT get an auth token
 if 'token' not in creds or not creds['token']:
 
-    print('Attempting to continue with previously generated grade summaries',
-          flush=True)
+    # Distinguish a missing key from a present-but-empty token in the output
+    if 'token' not in creds:
+        warn('No token field found in submitty_admin.json, attempting to '
+             'continue with previously generated grade summaries.')
+    else:
+        warn('The auth token in submitty_admin.json is empty, attempting to '
+             'continue with previously generated grade summaries.')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
@@ -167,14 +189,15 @@ if 'token' not in creds or not creds['token']:
     file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
 
     if file_count == 0:
-        raise Exception('Failure - The grade summaries directory is empty')
+        error_exit(f'Failure: No usable auth token in submitty_admin.json and the '
+                   f'grade summaries directory is empty ({reports_path})')
 
 # Take this path if we DID get an auth token
 else:
 
     # Construct cmd string
     cmd = [
-        '{}/sbin/generate_grade_summaries.py'.format(install_dir),
+        f'{install_dir}/sbin/generate_grade_summaries.py',
         semester,
         course,
         source
@@ -187,16 +210,49 @@ else:
 
     # Check return code of generate_grade_summaries.py execution
     if cmd_return_code != 0:
-        raise Exception('Failure generating grade summaries')
+        error_exit(f'Failure generating grade summaries, the auth token in '
+                   f'submitty_admin.json may be invalid or expired '
+                   f'(generate_grade_summaries.py exited with code {cmd_return_code})')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
-# Run make
-print('Compiling rainbow grades', flush=True)
-cmd_output = os.popen('make').read()
+# Sorted summaries to build. Each Makefile target runs ./process_grades.out by_<x>
+# and writes output.html / output.csv, so we copy each result to
+# output-by-<order>.html / .csv before the next build overwrites it. 'overall' keeps
+# the output.html name, build it first, stash it, and restore it at the end.
+SORT_ORDERS = ['section', 'hw', 'lab', 'test', 'exam']
 
+# Remove stale tables so a sort order that no longer applies doesn't linger.
+print('Removing previous rainbow grades tables', flush=True)
+for stale in glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
+    os.remove(stale)
+
+
+def build_table(order):
+    print('Compiling rainbow grades table by {}'.format(order), flush=True)
+    result = subprocess.run(
+        ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    if result.returncode != 0:
+        print(result.stdout, flush=True)
+        raise Exception('Failure building rainbow grades table: {}'.format(order))
+
+
+# Build overall first and preserve it; the per-sort builds below overwrite output.html/.csv.
+build_table('overall')
+shutil.copyfile('output.html', 'overall-summary.html')
+shutil.copyfile('output.csv', 'overall-summary.csv')
+
+for order in SORT_ORDERS:
+    build_table(order)
+    shutil.copyfile('output.html', 'output-by-{}.html'.format(order))
+    shutil.copyfile('output.csv', 'output-by-{}.csv'.format(order))
+
+# Restore the overall table as the canonical output.html / output.csv.
+shutil.move('overall-summary.html', 'output.html')
+shutil.move('overall-summary.csv', 'output.csv')
 # Run make push_test
 print('Exporting to summary_html', flush=True)
 cmd_output = os.popen('make push_test').read()
