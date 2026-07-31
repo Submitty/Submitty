@@ -87,8 +87,8 @@ run_php_stan() {
 
 run_php_cs() {
     parse_args "${@:2}"
-    script=lint
-    $FIX && script=lint:fix
+    script="lint"
+    $FIX && script="lint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site composer run-script "$script" -- "${ARGS[@]}"
@@ -99,8 +99,8 @@ run_php_cs() {
 
 run_js_es() {
     parse_args "${@:2}"
-    script=eslint
-    $FIX && script=eslint:fix
+    script="eslint"
+    $FIX && script="eslint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
@@ -112,18 +112,18 @@ run_js_es() {
 run_js_unit() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
-        script=test:api
+        script="test:api"
         run_in_container /home/submitty/site npm run "$script"
     else
-        script=test
+        script="test"
         run_in_container /home/submitty/site npm run "$script"
     fi
 }
 
 run_css_style() {
     parse_args "${@:2}"
-    script=css-stylelint
-    $FIX && script=css-stylelint:fix
+    script="css-stylelint"
+    $FIX && script="css-stylelint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
