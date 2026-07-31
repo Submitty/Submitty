@@ -205,8 +205,8 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route(
-    "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
-    methods: ["GET"]
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
+        methods: ["GET"]
     )]
     public function downloadCustomSortCsv(string $gradeable_id): DownloadResponse|WebResponse {
         try {
@@ -291,11 +291,11 @@ class AdminGradeableController extends AbstractController {
             "{$gradeable_id}_custom_sort.csv",
             'application/csv'
         );
-    }    
+    }
 
     #[Route(
-    "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
-    methods: ["POST"]
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
+        methods: ["POST"]
     )]
     public function uploadCustomSortCsv(string $gradeable_id): JsonResponse {
         try {
@@ -425,8 +425,8 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route(
-    "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/clear",
-    methods: ["POST"]
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/clear",
+        methods: ["POST"]
     )]
     public function clearCustomSortOrder(string $gradeable_id): JsonResponse {
         try {
