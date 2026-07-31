@@ -1594,7 +1594,7 @@ HTML;
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
-            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable); 
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
             $show_no_matching_peer_files_banner = $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && empty($submissions);
         }
         $student_grader = false;
