@@ -251,9 +251,14 @@ progress::-webkit-progress-value {
 .grade-panel button:focus-visible,
 .grade-panel input:focus-visible,
 .grade-panel textarea:focus-visible,
-.grade-panel .key_to_click:focus-visible {
+.grade-panel .key_to_click:focus-visible,
+.rubric_panel button:focus-visible,
+.rubric_panel input:focus-visible,
+.rubric_panel textarea:focus-visible,
+.rubric_panel .key_to_click:focus-visible {
     outline: 2px solid var(--standard-focus-cornflower-blue);
-    outline-offset: 2px;
+    outline-offset: -2px;
+    border-radius: 4px;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
