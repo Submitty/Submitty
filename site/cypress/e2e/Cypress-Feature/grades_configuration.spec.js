@@ -59,6 +59,7 @@ describe('Test Rainbow Grading', () => {
 
         // TODO: add checks for instructor notes once feature is implemented
         checkCheckbox('[data-testid="display-instructor-notes"]');
+        checkCheckbox('[data-testid="display-date-registered"]');
 
         cy.get('[data-testid="display-benchmarks-lowest_a-"]').should('not.be.checked');
         cy.get('[data-testid="display-benchmarks-lowest_b-"]').should('not.be.checked');
