@@ -29,10 +29,10 @@ const emit = defineEmits<{
 
 const visible = ref(false);
 
-const currentConflict = computed(() => props.conflicts[props.currentIndex] ?? null);
+const currentConflict = computed(() => props.conflicts?.[props.currentIndex] ?? null);
 
 watch(() => props.conflicts, (newConflicts) => {
-    if (newConflicts.length > 0) {
+    if (newConflicts && newConflicts.length > 0) {
         visible.value = true;
     }
 }, { immediate: true });

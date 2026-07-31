@@ -1,4 +1,5 @@
 import MarkConflictPopup from '../../vue/src/components/ta_grading/MarkConflictPopup.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
 const makeMark = (overrides = {}) => ({
     id: 1, points: 2, title: 'Read me', publish: false, ...overrides,
@@ -12,35 +13,29 @@ const makeConflict = (overrides = {}) => ({
     ...overrides,
 });
 
-const showPopup = (conflicts, componentTitle = 'Test Component') => {
-    cy.window().then((win) => {
-        win.dispatchEvent(new CustomEvent('show-conflict-popup', {
-            detail: { conflicts, componentTitle },
-        }));
-    });
-};
-
-const resolveCurrent = () => {
-    cy.window().then((win) => {
-        win.dispatchEvent(new CustomEvent('conflict-resolved'));
-    });
+const defaultProps = {
+    conflicts: [],
+    componentTitle: 'Test Component',
+    currentIndex: 0,
 };
 
 describe('MarkConflictPopup', () => {
-    beforeEach(() => {
-        cy.mount(MarkConflictPopup);
-    });
-
-    it('is hidden by default', () => {
+    it('is hidden by default when there are no conflicts', () => {
+        cy.mount(MarkConflictPopup, { props: defaultProps });
         cy.get('[data-testid="popup-window"]').should('not.exist');
     });
 
-    it('opens popup and renders conflict rows with all three mark versions', () => {
-        showPopup([makeConflict({
-            domMark: makeMark({ id: 1, points: 2, title: 'Edited', publish: false }),
-            serverMark: makeMark({ id: 1, points: 1, title: 'Server', publish: false }),
-            oldServerMark: makeMark({ id: 1, points: 0, title: 'Original', publish: false }),
-        })]);
+    it('auto-opens and renders the title and all three mark versions when conflicts are provided', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict({
+                    domMark: makeMark({ id: 1, points: 2, title: 'Edited', publish: false }),
+                    serverMark: makeMark({ id: 1, points: 1, title: 'Server', publish: false }),
+                    oldServerMark: makeMark({ id: 1, points: 0, title: 'Original', publish: false }),
+                })],
+            },
+        });
 
         cy.get('[data-testid="popup-window"]').should('be.visible');
         cy.contains('h1', 'Mark Conflicts: Test Component');
@@ -49,133 +44,159 @@ describe('MarkConflictPopup', () => {
         cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', '(2) Edited');
     });
 
-    it('handles missing old server mark gracefully', () => {
-        showPopup([makeConflict({ oldServerMark: null })]);
-        cy.get('[data-testid="popup-window"]').should('be.visible');
+    it('omits the old-server row when the old server mark is missing', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict({ oldServerMark: null })],
+            },
+        });
         cy.get('[data-testid="mark-conflict-old-server"]').should('not.exist');
     });
 
-    it('shows deleted-message when server mark is null', () => {
-        showPopup([makeConflict({ serverMark: null })]);
+    it('shows deleted message and emits resolve when the server mark was deleted', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+            ...defaultProps,
+            conflicts: [makeConflict({ serverMark: null })],
+        }, 'onResolve');
+
         cy.get('[data-testid="mark-conflict-server-deleted"]').should('be.visible');
         cy.get('[data-testid="mark-conflict-server-btn"]').should('have.value', 'Delete Mark');
+        cy.get('[data-testid="mark-conflict-server-btn"]').click();
+        cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'server' });
     });
 
-    it('shows deleted-message when local mark is deleted', () => {
-        showPopup([makeConflict({ localDeleted: true })]);
+    it('shows deleted message and emits resolve when the local mark was deleted', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+            ...defaultProps,
+            conflicts: [makeConflict({ localDeleted: true })],
+        }, 'onResolve');
+
         cy.get('[data-testid="mark-conflict-dom-deleted"]').should('be.visible');
         cy.get('[data-testid="mark-conflict-dom-btn"]').should('have.value', 'Delete Mark');
+        cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+        cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'dom' });
     });
 
-    it('shows publish indicator and hides it for non-publishable marks', () => {
-        // publish: true
-        showPopup([makeConflict({
-            domMark: makeMark({ id: 1, title: 'Pub', publish: true }),
-        })]);
+    it('shows the publish indicator only for publishable marks', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict({
+                    domMark: makeMark({ id: 1, title: 'Pub', publish: true }),
+                })],
+            },
+        });
         cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'Show mark to all students');
 
-        // Re-open with publish: false
-        cy.get('[data-testid="close-button"]').click();
-        showPopup([makeConflict({
-            domMark: makeMark({ id: 1, title: 'Unpub', publish: false }),
-        })]);
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict({
+                    domMark: makeMark({ id: 1, title: 'Unpub', publish: false }),
+                })],
+            },
+        });
         cy.get('[data-testid="mark-conflict-dom-info"]').should('not.contain.text', 'Show mark to all students');
     });
 
-    it('shows and hides progress indicator based on conflict count', () => {
-        showPopup([makeConflict(), makeConflict({ domMark: makeMark({ id: 2 }) })]);
+    it('shows the progress indicator only when there are multiple conflicts', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict(), makeConflict({ domMark: makeMark({ id: 2 }) })],
+                currentIndex: 0,
+            },
+        });
         cy.get('[data-testid="mark-conflict-progress"]').should('be.visible').and('contain.text', '1 out of 2');
 
-        cy.get('[data-testid="close-button"]').click();
-        showPopup([makeConflict()]);
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict()],
+                currentIndex: 0,
+            },
+        });
         cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
     });
 
-    it('advances to next conflict and dispatches all-conflicts-resolved on last', () => {
-        const resolvedSpy = cy.stub();
-        cy.window().then((win) => {
-            win.addEventListener('all-conflicts-resolved', resolvedSpy);
+    it('renders the conflict at the given currentIndex', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [
+                    makeConflict({ domMark: makeMark({ id: 1, title: 'First' }) }),
+                    makeConflict({ domMark: makeMark({ id: 2, title: 'Second' }) }),
+                ],
+                currentIndex: 0,
+            },
         });
-
-        showPopup([
-            makeConflict({ domMark: makeMark({ id: 1, title: 'First' }) }),
-            makeConflict({ domMark: makeMark({ id: 2, title: 'Second' }) }),
-        ]);
-
-        // On first conflict
         cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'First');
-        resolveCurrent();
+        cy.get('[data-testid="mark-conflict-progress"]').should('contain.text', '1 out of 2');
 
-        // Advances to second
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [
+                    makeConflict({ domMark: makeMark({ id: 1, title: 'First' }) }),
+                    makeConflict({ domMark: makeMark({ id: 2, title: 'Second' }) }),
+                ],
+                currentIndex: 1,
+            },
+        });
         cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'Second');
-        resolveCurrent();
-
-        // Last: popup closes, event fires
-        cy.get('[data-testid="popup-window"]').should('not.exist');
-        cy.wrap(resolvedSpy).should('have.been.calledOnce');
+        cy.get('[data-testid="mark-conflict-progress"]').should('contain.text', '2 out of 2');
     });
 
-    it('emits correct resolution type per button', () => {
-        const spy = cy.stub();
-        cy.window().then((win) => {
-            win.addEventListener('resolve-conflict', spy);
-        });
-
-        showPopup([makeConflict()]);
-
-        cy.get('[data-testid="mark-conflict-old-server-btn"]').click();
-        cy.wrap(spy).should('have.been.calledWithMatch', { detail: { markId: 1, resolution: 'old-server' } });
-
-        cy.get('[data-testid="mark-conflict-server-btn"]').click();
-        cy.wrap(spy).should('have.been.calledWithMatch', { detail: { markId: 1, resolution: 'server' } });
+    it('emits resolve with dom resolution when Use My Edits is clicked', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+            ...defaultProps,
+            conflicts: [makeConflict({ domMark: makeMark({ id: 7 }) })],
+        }, 'onResolve');
 
         cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-        cy.wrap(spy).should('have.been.calledWithMatch', { detail: { markId: 1, resolution: 'dom' } });
+        cy.get('@onResolve').should('have.been.calledWith', { markId: 7, resolution: 'dom' });
     });
 
-    it('closes popup on X and dispatches close-conflict-popup', () => {
-        const spy = cy.stub();
-        cy.window().then((win) => {
-            win.addEventListener('close-conflict-popup', spy);
-        });
+    it('emits resolve with server resolution when Ignore My Edits is clicked', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+            ...defaultProps,
+            conflicts: [makeConflict()],
+        }, 'onResolve');
 
-        showPopup([makeConflict()]);
+        cy.get('[data-testid="mark-conflict-server-btn"]').click();
+        cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'server' });
+    });
+
+    it('emits resolve with old-server resolution when Revert to Original is clicked', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+            ...defaultProps,
+            conflicts: [makeConflict()],
+        }, 'onResolve');
+
+        cy.get('[data-testid="mark-conflict-old-server-btn"]').click();
+        cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'old-server' });
+    });
+
+    it('emits close when the close button is clicked', () => {
+        mountWithEmitSpy(MarkConflictPopup, 'close', {
+            ...defaultProps,
+            conflicts: [makeConflict()],
+        }, 'onClose');
+
         cy.get('[data-testid="close-button"]').click();
-        cy.get('[data-testid="popup-window"]').should('not.exist');
-        cy.wrap(spy).should('have.been.calledOnce');
+        cy.get('@onClose').should('have.callCount', 1);
     });
 
-    it('closes on Escape key', () => {
-        showPopup([makeConflict()]);
-        cy.get('[data-testid="popup-window"]').should('be.visible');
-        cy.document().trigger('keydown', { key: 'Escape' });
-        cy.get('[data-testid="popup-window"]').should('not.exist');
-    });
-
-    it('handles close mid-resolution without false all-conflicts-resolved', () => {
-        const spy = cy.stub();
-        cy.window().then((win) => {
-            win.addEventListener('all-conflicts-resolved', spy);
+    it('has title attributes on the resolution buttons', () => {
+        cy.mount(MarkConflictPopup, {
+            props: {
+                ...defaultProps,
+                conflicts: [makeConflict()],
+            },
         });
-
-        showPopup([makeConflict(), makeConflict({ domMark: makeMark({ id: 2 }) })]);
-        cy.get('[data-testid="close-button"]').click();
-        cy.wrap(spy).should('not.have.been.called');
-    });
-
-    it('resets state when re-opened with new data', () => {
-        showPopup([makeConflict({ domMark: makeMark({ id: 1, title: 'A' }) }),
-            makeConflict({ domMark: makeMark({ id: 2, title: 'B' }) })]);
-        resolveCurrent();
-        cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'B');
-
-        showPopup([makeConflict({ domMark: makeMark({ id: 3, title: 'Fresh' }) })]);
-        cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'Fresh');
-        cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
-    });
-
-    it('has accessible close button', () => {
-        showPopup([makeConflict()]);
-        cy.get('[data-testid="close-button"]').should('be.visible').and('not.have.attr', 'aria-hidden');
+        cy.get('[data-testid="mark-conflict-old-server-btn"]').should('have.attr', 'title', 'Revert to original mark');
+        cy.get('[data-testid="mark-conflict-server-btn"]').should('have.attr', 'title', 'Ignore my edits, keep server version');
+        cy.get('[data-testid="mark-conflict-dom-btn"]').should('have.attr', 'title', 'Use my local edits');
     });
 });
