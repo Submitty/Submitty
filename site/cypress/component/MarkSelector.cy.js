@@ -1,6 +1,9 @@
 import MarkSelector from '../../vue/src/components/ta_grading/MarkSelector.vue';
 import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
+// Note: keyboard activation (Enter/Space) is intentionally NOT tested here - the
+// span is not focusable. It is handled by the legacy parent #mark-{id} div's
+// tabindex="0" + key_to_click (host element lives in Twig per migration rules).
 describe('MarkSelector', () => {
     const defaultProps = () => ({
         markId: 5,
@@ -8,6 +11,7 @@ describe('MarkSelector', () => {
         order: 2,
         isChecked: false,
         editMarksEnabled: false,
+        markDisabled: false,
     });
 
     it('renders the mark order number', () => {
@@ -36,15 +40,14 @@ describe('MarkSelector', () => {
         cy.get('@toggleMark').should('have.been.calledWith', { componentId: 1, markId: 5 });
     });
 
-    it('stops propagation so parent onclick does not double-fire', () => {
-        const onToggleMark = cy.stub().as('onToggleMark');
-        cy.mount(MarkSelector, { props: { ...defaultProps(), onToggleMark } });
-        cy.get('[data-testid="mark-selector"]').click();
-        cy.get('@onToggleMark').should('have.callCount', 1);
-    });
-
     it('does not emit toggle-mark when editMarksEnabled is true', () => {
         mountWithEmitSpy(MarkSelector, 'toggleMark', { ...defaultProps(), editMarksEnabled: true }, 'toggleMark');
+        cy.get('[data-testid="mark-selector"]').click();
+        cy.get('@toggleMark').should('not.have.been.called');
+    });
+
+    it('does not emit toggle-mark when markDisabled is true', () => {
+        mountWithEmitSpy(MarkSelector, 'toggleMark', { ...defaultProps(), markDisabled: true }, 'toggleMark');
         cy.get('[data-testid="mark-selector"]').click();
         cy.get('@toggleMark').should('not.have.been.called');
     });

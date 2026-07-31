@@ -5,6 +5,7 @@ const props = defineProps<{
     order: number;
     isChecked: boolean;
     editMarksEnabled: boolean;
+    markDisabled: boolean;
 }>();
 
 // PR #1: routed through events bridge to window.onToggleMarkById.
@@ -15,7 +16,8 @@ const emit = defineEmits<{
 
 function handleClick(event: MouseEvent): void {
     event.stopPropagation();
-    if (props.editMarksEnabled) {
+    // Match the legacy div's onclick guard: `edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)'`
+    if (props.editMarksEnabled || props.markDisabled) {
         return;
     }
     emit('toggle-mark', { componentId: props.componentId, markId: props.markId });
