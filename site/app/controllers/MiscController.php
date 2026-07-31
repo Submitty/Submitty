@@ -146,7 +146,7 @@ class MiscController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/display_file")]
-    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null) {
+    public function displayFile($dir = null, $path = null, $gradeable_id = null, $user_id = null, $ta_grading = null, $course_material_id = null, string $view_annotated_file = 'false') {
         $cm = null;
         //Is this per-gradeable?
         if ($course_material_id === null && ($dir !== null && $path !== null)) {
@@ -189,7 +189,7 @@ class MiscController extends AbstractController {
         }
         else {
             // Check access through Access library
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "view_annotated_file" => $view_annotated_file])) {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
@@ -440,7 +440,7 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $origin !== 'submission';
         $blind_grading = ($peer && $gradeable->getPeerBlind() !== Gradeable::UNBLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER);
         if ($blind_grading || $is_anon === "true") {
             $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);

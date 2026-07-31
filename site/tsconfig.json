@@ -4,7 +4,7 @@
         "./ts/**/*.ts",
         "./tests/**/*.ts",
         "./vue/src/**/*.vue",
-        "./public/js/**/*.js"
+        "./public/js/**/*.js",
     ],
     "compilerOptions": {
         "baseUrl": ".",

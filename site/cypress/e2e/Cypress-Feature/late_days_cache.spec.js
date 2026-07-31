@@ -72,20 +72,20 @@ const CheckStatusUpdated = (exceptions_given, late_days_remaining) => {
 const all_late_users = {}; // {user_id: #days_late}
 const all_user_ids = [];
 
-all_late_users['moscie'] = 3;
+all_late_users['moscie'] = 1;
 all_user_ids.push('moscie');
-// Submission is 3 days late and 0 late days => Bad (too many late days used this term)
+// Submission is 1 days late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Bad (too many late days used this term)
 // Or After given 2 extentions => Bad (too many late days used this term)
-all_late_users['barteh'] = 2;
-all_user_ids.push('barteh');
-// Submission is 2 days late and 0 late days => Bad (too many late days used this term)
-// After given 2 late days => Bad (too many late days used on this assignment) because only 1 late day is allowed
-// Or After given 2 extentions => Good
-all_late_users['harbel'] = 1;
-all_user_ids.push('harbel');
-// Submission is 1 day late and 0 late days => Bad (too many late days used this term)
+all_late_users['ziemeb'] = 2;
+all_user_ids.push('ziemeb');
+// Submission is 2 day late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Late (valid submission)
+// Or After given 2 extentions => Good
+all_late_users['barteh'] = 3;
+all_user_ids.push('barteh');
+// Submission is 3 days late and 0 late days => Bad (too many late days used this term)
+// After given 2 late days => Bad (too many late days used on this assignment) because only 1 late day is allowed
 // Or After given 2 extentions => Good
 
 describe('Test cases involving late day cache updates', () => {
@@ -127,7 +127,6 @@ describe('Test cases involving late day cache updates', () => {
             cy.visit(['sample', 'gradeable', 'late_allowed_homework']);
             const testfile = 'cypress/fixtures/file1.txt';
             // Make a new submission
-            cy.get('#startnew').click();
             cy.get('#upload1').selectFile(testfile, { action: 'drag-drop' });
             cy.waitPageChange(() => {
                 cy.get('#submit').click();
