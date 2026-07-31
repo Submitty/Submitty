@@ -1,12 +1,27 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import Popup from '../Popup.vue';
+import { buildCourseUrl, getCsrfToken } from '../../../../ts/utils/server';
 
 interface MarkInfo {
     id: number;
     points: number;
     title: string | null;
     publish: boolean;
+}
+
+interface RawMark {
+    id: number;
+    points: number;
+    title: string | undefined;
+    publish: boolean;
+}
+
+interface RawConflictInfo {
+    domMark: RawMark;
+    serverMark: RawMark | null;
+    oldServerMark: RawMark | null;
+    localDeleted: boolean;
 }
 
 interface ConflictInfo {
@@ -17,22 +32,38 @@ interface ConflictInfo {
 }
 
 const props = defineProps<{
-    conflicts: ConflictInfo[];
+    conflicts: Record<number, RawConflictInfo>;
     componentTitle: string;
-    currentIndex: number;
+    componentId: number;
+    gradeableId: string;
 }>();
 
 const emit = defineEmits<{
-    resolve: [{ markId: number; resolution: 'dom' | 'server' | 'old-server' }];
-    close: [];
+    'all-resolved': [];
+    'close': [];
 }>();
 
 const visible = ref(false);
+const currentIndex = ref(0);
 
-const currentConflict = computed(() => props.conflicts?.[props.currentIndex] ?? null);
+function buildMarkInfo(mark: RawMark): MarkInfo {
+    return { id: mark.id, points: mark.points, title: mark.title ?? null, publish: mark.publish };
+}
+
+const conflictsList = computed<ConflictInfo[]>(() =>
+    Object.values(props.conflicts).map((c) => ({
+        domMark: buildMarkInfo(c.domMark),
+        serverMark: c.serverMark ? buildMarkInfo(c.serverMark) : null,
+        oldServerMark: c.oldServerMark ? buildMarkInfo(c.oldServerMark) : null,
+        localDeleted: c.localDeleted,
+    })),
+);
+
+const currentConflict = computed(() => conflictsList.value[currentIndex.value] ?? null);
 
 watch(() => props.conflicts, (newConflicts) => {
-    if (newConflicts && newConflicts.length > 0) {
+    if (newConflicts && Object.keys(newConflicts).length > 0) {
+        currentIndex.value = 0;
         visible.value = true;
     }
 }, { immediate: true });
@@ -45,10 +76,111 @@ function toggle() {
     }
 }
 
-function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old-server') {
-    const conflict = currentConflict.value;
-    if (conflict) {
-        emit('resolve', { markId, resolution });
+// --- AJAX helpers (switched from $.ajax to fetch + FormData per sql-toolbox.ts pattern) ---
+
+async function ajaxAddNewMark(title: string, points: number, publish: boolean) {
+    const formData = new FormData();
+    formData.append('csrf_token', getCsrfToken());
+    formData.append('component_id', String(props.componentId));
+    formData.append('title', title);
+    formData.append('points', String(points));
+    formData.append('publish', String(publish));
+
+    const resp = await fetch(
+        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'add']),
+        { method: 'POST', body: formData },
+    );
+    if (!resp.ok) {
+        throw new Error(`Server returned ${resp.status}`);
+    }
+    const response = await resp.json() as { status: string; message: string; data: { mark_id: number } };
+    if (response.status !== 'success') {
+        throw new Error(response.message);
+    }
+    return response.data;
+}
+
+async function ajaxDeleteMark(mark_id: number) {
+    const formData = new FormData();
+    formData.append('csrf_token', getCsrfToken());
+    formData.append('component_id', String(props.componentId));
+    formData.append('mark_id', String(mark_id));
+
+    const resp = await fetch(
+        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'delete']),
+        { method: 'POST', body: formData },
+    );
+    if (!resp.ok) {
+        throw new Error(`Server returned ${resp.status}`);
+    }
+    const response = await resp.json() as { status: string; message: string };
+    if (response.status !== 'success') {
+        throw new Error(response.message);
+    }
+}
+
+async function ajaxSaveMark(mark_id: number, title: string, points: number, publish: boolean) {
+    const formData = new FormData();
+    formData.append('csrf_token', getCsrfToken());
+    formData.append('component_id', String(props.componentId));
+    formData.append('mark_id', String(mark_id));
+    formData.append('title', title);
+    formData.append('points', String(points));
+    formData.append('publish', String(publish));
+
+    const resp = await fetch(
+        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'save']),
+        { method: 'POST', body: formData },
+    );
+    if (!resp.ok) {
+        throw new Error(`Server returned ${resp.status}`);
+    }
+    const response = await resp.json() as { status: string; message: string };
+    if (response.status !== 'success') {
+        throw new Error(response.message);
+    }
+}
+
+async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old-server') {
+    const conflict = props.conflicts[markId];
+    if (!conflict) {
+        return;
+    }
+    try {
+        if (resolution === 'dom') {
+            if (conflict.localDeleted) {
+                await ajaxDeleteMark(markId);
+            }
+            else {
+                const isServerDeleted = conflict.serverMark === null;
+                if (isServerDeleted) {
+                    const data = await ajaxAddNewMark(conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
+                    // Mutates the raw conflict object, which shares references with
+                    // saveMarkList's domMarkList so mark order uses the new server id.
+                    conflict.domMark.id = data.mark_id;
+                }
+                else {
+                    await ajaxSaveMark(markId, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
+                }
+            }
+        }
+        else if (resolution === 'old-server') {
+            const mark = conflict.oldServerMark!;
+            await ajaxSaveMark(markId, mark.title!, mark.points, mark.publish);
+        }
+        // resolution === 'server': accept server state, no AJAX needed
+    }
+    catch (err) {
+        // Keep the popup open so the user can retry; never silently drop a resolution.
+        console.error(`Failed to resolve conflict for mark ${markId}:`, err);
+        return;
+    }
+
+    // Advance to the next conflict, or finish once all conflicts are resolved
+    currentIndex.value++;
+    if (currentIndex.value >= conflictsList.value.length) {
+        visible.value = false;
+        emit('all-resolved');
     }
 }
 </script>
@@ -188,11 +320,11 @@ function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old-serve
           </div>
         </div>
         <div
-          v-if="conflicts.length > 1"
+          v-if="conflictsList.length > 1"
           class="conflict-resolve-progress"
           data-testid="mark-conflict-progress"
         >
-          <i><span class="conflict-resolve-progress-indicator">{{ currentIndex + 1 }}</span> out of {{ conflicts.length }}</i>
+          <i><span class="conflict-resolve-progress-indicator">{{ currentIndex + 1 }}</span> out of {{ conflictsList.length }}</i>
         </div>
       </div>
     </template>

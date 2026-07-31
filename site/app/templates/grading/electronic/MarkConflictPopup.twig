@@ -3,12 +3,13 @@
     'name': 'ta_grading/MarkConflictPopup',
     'class': 'js-mark-conflict-popup',
     'args': {
-        'conflicts': [],
+        'conflicts': {},
         'componentTitle': '',
-        'currentIndex': 0
+        'componentId': 0,
+        'gradeableId': ''
     },
     'events': {
-        'resolve': 'window.handleConflictResolve',
+        'all-resolved': 'window.handleAllConflictsResolved',
         'close': 'window.handleConflictClose'
     }
 } %}

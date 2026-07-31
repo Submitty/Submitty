@@ -1,5 +1,4 @@
 import { viewFileFullPanel } from './ta-grading';
-import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 import { updateVueComponent, unmountVueComponent } from './utils/vue';
 
 declare global {
@@ -50,6 +49,8 @@ declare global {
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
         closeMarkStatsPopup: () => void;
+        handleAllConflictsResolved?: () => void;
+        handleConflictClose?: () => void;
     }
 }
 
@@ -1865,6 +1866,40 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
 window.closeMarkStatsPopup = function () {
     unmountVueComponent('.js-received-mark-form');
 };
+
+/**
+ * Shows the MarkConflictPopup Vue component and returns a Promise that resolves
+ * once all conflicts are resolved or the popup is closed.
+ * @param component_id
+ * @param conflictMarks
+ */
+function openMarkConflictPopup(component_id: number, conflictMarks: MarkConflicts): Promise<void> {
+    return new Promise((resolve) => {
+        const gradeable_id = getGradeableId();
+        const componentTitle = getComponentJQuery(component_id).attr('data-title')!;
+
+        const cleanup = () => {
+            delete window.handleAllConflictsResolved;
+            delete window.handleConflictClose;
+        };
+
+        window.handleAllConflictsResolved = () => {
+            cleanup();
+            resolve();
+        };
+        window.handleConflictClose = () => {
+            cleanup();
+            resolve();
+        };
+
+        updateVueComponent('.js-mark-conflict-popup', {
+            conflicts: conflictMarks,
+            componentTitle: componentTitle,
+            componentId: component_id,
+            gradeableId: gradeable_id,
+        });
+    });
+}
 
 /**
  * Gets if there are any loaded unverified components
