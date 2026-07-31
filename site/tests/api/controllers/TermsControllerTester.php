@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\api\controller;
+namespace tests\api\controllers;
 
 use app\controllers\api\TermsController;
 use app\entities\Term;
@@ -29,18 +29,19 @@ class TermsControllerTester extends BaseUnitTest {
      *
      * @param bool $is_super_user
      * @param Term|null $existing_term
+     * @param bool $expect_persist whether this test path should reach persist()/flush()
      */
-    private function buildCore(bool $is_super_user, ?Term $existing_term = null): Core {
+    private function buildCore(bool $is_super_user, ?Term $existing_term = null, bool $expect_persist = false): Core {
         $this->em = $this->createMock(EntityManager::class);
         $this->em->method('find')->willReturn($existing_term);
-        $this->em->expects($existing_term === null && $is_super_user ? $this->once() : $this->never())
+        $this->em->expects($expect_persist ? $this->once() : $this->never())
             ->method('persist');
-        $this->em->expects($existing_term === null && $is_super_user ? $this->once() : $this->never())
+        $this->em->expects($expect_persist ? $this->once() : $this->never())
             ->method('flush');
 
         $user = $this->createMock(User::class);
         $user->method('isSuperUser')->willReturn($is_super_user);
- 
+
         $core = $this->createMock(Core::class);
         $core->method('getUser')->willReturn($user);
         $core->method('getSubmittyEntityManager')->willReturn($this->em);
@@ -63,7 +64,7 @@ class TermsControllerTester extends BaseUnitTest {
         ];
 
         $response = $controller->addNewTerm();
- 
+
         $this->assertEquals('fail', $response->json_response->json['status']);
         $this->assertEquals("You don't have access to this endpoint.", $response->json_response->json['message']);
     }
@@ -71,13 +72,13 @@ class TermsControllerTester extends BaseUnitTest {
     public function testAddNewTermFailsWithMissingFields(): void {
         $core = $this->buildCore(true);
         $controller = new TermsController($core);
- 
+
         $_POST = [
             'term_name' => 'Missing Term Data',
         ];
 
         $response = $controller->addNewTerm();
- 
+
         $this->assertEquals('fail', $response->json_response->json['status']);
         $this->assertEquals(
             'Term ID, term name, start date, or end date not set.',
@@ -98,7 +99,7 @@ class TermsControllerTester extends BaseUnitTest {
         ];
 
         $response = $controller->addNewTerm();
- 
+
         $this->assertEquals('fail', $response->json_response->json['status']);
         $this->assertEquals('Term with that ID already exists.', $response->json_response->json['message']);
     }
@@ -141,7 +142,7 @@ class TermsControllerTester extends BaseUnitTest {
     }
 
     public function testAddNewTermSucceeds(): void {
-        $core = $this->buildCore(true);
+        $core = $this->buildCore(true, null, true);
         $controller = new TermsController($core);
 
         $_POST = [
