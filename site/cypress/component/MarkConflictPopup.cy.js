@@ -128,6 +128,57 @@ describe('MarkConflictPopup', () => {
             });
             cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
         });
+
+        it('renders empty titles when marks have no title', () => {
+            cy.mount(MarkConflictPopup, {
+                props: {
+                    ...defaultProps,
+                    conflicts: makeConflicts(makeConflict({
+                        domMark: makeMark({ id: 1, title: undefined }),
+                        serverMark: makeMark({ id: 1, title: undefined }),
+                        oldServerMark: makeMark({ id: 1, title: undefined }),
+                    })),
+                },
+            });
+            cy.get('[data-testid="mark-conflict-old-server-info"]')
+                .should('contain.text', '(2)')
+                .and('not.contain.text', 'Read me');
+            cy.get('[data-testid="mark-conflict-server-info"]')
+                .should('contain.text', '(2)')
+                .and('not.contain.text', 'Read me');
+            cy.get('[data-testid="mark-conflict-dom-info"]')
+                .should('contain.text', '(2)')
+                .and('not.contain.text', 'Read me');
+        });
+
+        it('shows the publish indicator on the old server mark', () => {
+            cy.mount(MarkConflictPopup, {
+                props: {
+                    ...defaultProps,
+                    conflicts: makeConflicts(makeConflict({
+                        oldServerMark: makeMark({ id: 1, title: 'Old', publish: true }),
+                    })),
+                },
+            });
+            cy.get('[data-testid="mark-conflict-old-server-info"]').should('contain.text', 'Show mark to all students');
+        });
+
+        it('shows the publish indicator on the server mark', () => {
+            cy.mount(MarkConflictPopup, {
+                props: {
+                    ...defaultProps,
+                    conflicts: makeConflicts(makeConflict({
+                        serverMark: makeMark({ id: 1, title: 'Srv', publish: true }),
+                    })),
+                },
+            });
+            cy.get('[data-testid="mark-conflict-server-info"]').should('contain.text', 'Show mark to all students');
+        });
+
+        it('stays hidden when conflicts is null', () => {
+            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: null } });
+            cy.get('[data-testid="popup-window"]').should('not.exist');
+        });
     });
 
     describe('conflict resolution (success path)', () => {
@@ -210,6 +261,61 @@ describe('MarkConflictPopup', () => {
             cy.get('[data-testid="mark-conflict-dom-btn"]').click();
             cy.get('[data-testid="popup-window"]').should('be.visible');
             cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
+        });
+
+        it('keeps the popup open when save returns an HTTP error', () => {
+            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
+
+            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
+            cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
+        });
+
+        it('keeps the popup open when add returns an HTTP error', () => {
+            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
+
+            cy.mount(MarkConflictPopup, {
+                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) },
+            });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
+        });
+
+        it('keeps the popup open when delete returns an HTTP error', () => {
+            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
+
+            cy.mount(MarkConflictPopup, {
+                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) },
+            });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
+        });
+
+        it('stays on the conflict when add returns a non-success status', () => {
+            cy.stub(window, 'fetch').as('fetch').resolves({
+                ok: true,
+                json: cy.stub().resolves({ status: 'fail', message: 'Bad mark' }),
+            });
+
+            cy.mount(MarkConflictPopup, {
+                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) },
+            });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
+        });
+
+        it('stays on the conflict when delete returns a non-success status', () => {
+            cy.stub(window, 'fetch').as('fetch').resolves({
+                ok: true,
+                json: cy.stub().resolves({ status: 'fail', message: 'Bad mark' }),
+            });
+
+            cy.mount(MarkConflictPopup, {
+                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) },
+            });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('[data-testid="popup-window"]').should('be.visible');
         });
     });
 
