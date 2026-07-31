@@ -242,36 +242,19 @@ class DockerInterfaceController extends AbstractController {
             }
         }
 
-        $system_images = FileUtils::readJsonFile(FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyInstallPath(),
-            ".setup",
-            "data",
-            "system_docker_containers.json"
-        ));
-        if (!is_array($system_images)) {
-            $system_images = [];
-        }
-        $system_images = array_flip($system_images);
-        Logger::debug('SYSTEM IMAGES: ' . json_encode(array_keys($system_images)));
-
         $user = $this->core->getUser();
         $removed = [];
         $skipped = [];
 
+        $owner = $this->core->getQueries()->getAllDockerImageOwners();
         foreach ($images as $image) {
             if (!preg_match($pattern, $image)) {
                 $skipped[] = $image;
                 continue;
             }
-
-            Logger::debug('CHECKING [' . $image . '] system=' . (isset($system_images[$image]) ? 'yes' : 'no'));
-            if (isset($system_images[$image])) {
-                $skipped[] = $image;
-                continue;
-            }
-
-            $owner = $this->core->getQueries()->getDockerImageOwner($image);
-            // sometimes the image will have no owner, and the query can return an empty string
+            
+            // sometimes the image will have no owner, and the query returns an empty string
+            $owner = $owners[$image] ?? false;
             if ($owner === '') {
                 $owner = false;
             }
@@ -282,7 +265,7 @@ class DockerInterfaceController extends AbstractController {
                 continue;
             }
 
-            //if the image has no owner and the user is not a superuser, they probably shouldn't be deleting this
+            // if the image has no owner and the user is not a superuser, they probably shouldn't be deleting this
             if ($owner === false && !$user->isSuperUser()) {
                 $skipped[] = $image;
                 continue;
