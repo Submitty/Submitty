@@ -4,12 +4,12 @@
         <div class="col-md-12 pl-md-0">
             <p>
                 Download the current grading order as a CSV, reorder the rows in a spreadsheet editor,
-                then upload it back. The order of rows in the CSV determines the order submissions appear 
-                while grading. This does not change peer assignments.
+                then upload it back. The order of rows in the file becomes the order graders see
+                submitters in on the details page &mdash; it does not change who is assigned to grade whom.
             </p>
             <p data-testid="custom-sort-status">
                 Custom order is currently
-                <strong>{{ gradeable.hasCustomOrder() ? 'enabled' : 'disabled (default order in use)' }}</strong>.
+                <strong>{{ gradeable.getCustomSort() ? 'enabled' : 'disabled (default order in use)' }}</strong>.
             </p>
         </div>
     </div>
@@ -25,16 +25,13 @@
             </a>
         </div>
         <div class="col-md-6 pr-md-0">
-            <label for="custom_sort_csv_file">Upload CSV</label>
-            <input class="custom-file-input" type="file" accept=".csv" name="custom_sort_csv_file"
-                   id="custom_sort_csv_file" data-testid="upload-custom-sort-csv-file">
-            <input type="button" name="custom_sort_csv_submit" class="btn btn-primary key_to_click ignore"
-                   id="custom_sort_csv_submit" tabindex="0" value="Upload"
-                   data-testid="upload-custom-sort-csv-submit">
+            <a href="javascript:newCustomSortCsvUploadForm()" class="btn btn-primary" data-testid="custom-sort-csv-upload-button">
+                Upload CSV
+            </a>
         </div>
     </div>
 
-    {% if gradeable.hasCustomOrder() %}
+    {% if gradeable.getCustomSort() %}
     <div class="row mt-3">
         <div class="col-md-12 pl-0">
             <input type="button" name="clear_custom_sort" class="btn btn-default key_to_click ignore"
@@ -45,7 +42,6 @@
     {% endif %}
 
     <div class="row mt-3">
-        <div id="custom_sort_loader" class="loader hide"></div>
         <div class="table-wrapper" data-testid="custom-sort-table-wrapper">
             <table id="custom-sort-table" class="table table-striped mobile-table directory-table">
                 <thead>
@@ -68,3 +64,5 @@
         </div>
     </div>
 </div>
+
+{% include 'admin/admin_gradeable/AdminGradeableCustomSortUploadForm.twig' %}

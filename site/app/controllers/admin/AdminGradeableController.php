@@ -410,7 +410,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable->isTeamAssignment()
             );
 
-            $gradeable->setCustomOrder(true);
+            $gradeable->setCustomSort(true);
             $this->core->getQueries()->updateGradeable($gradeable);
         }
         catch (\Exception $exception) {
@@ -438,7 +438,7 @@ class AdminGradeableController extends AbstractController {
 
         try {
             $this->core->getQueries()->clearCustomGradingOrder($gradeable_id);
-            $gradeable->setCustomOrder(false);
+            $gradeable->setCustomSort(false);
             $this->core->getQueries()->updateGradeable($gradeable);
         }
         catch (\Exception $exception) {
