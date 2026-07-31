@@ -33,6 +33,7 @@ describe('Grading Clustering Mode', () => {
         cy.get('[data-testid="group-by-clusters-checkbox"]').click();
         cy.getCookie('group_by_clusters').should('have.property', 'value', 'false');
     });
+    
     it('hides clustering options when clustering is disabled', () => {
         cy.login();
 

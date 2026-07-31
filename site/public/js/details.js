@@ -200,7 +200,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
     if (groupByClustersBox) {
         const groupByClustersStatus = Cookies.get('group_by_clusters');
-        groupByClustersBox.checked = (groupByClustersStatus === 'true');
+        groupByClustersBox.checked = groupByClustersStatus === 'true';
     }
 
     // Withdrawn students should always be visible in team gradeables
@@ -217,10 +217,7 @@ function changeGroupByClusters() {
 
 function updateClusteringStatus(status) {
     document.body.setAttribute('data-clustering-status', status);
-    const banner = document.getElementById('clustering-loading-banner');
-    if (banner) {
-        banner.style.display = status === 'fetching' ? 'block' : 'none';
-    }
+    $('#clustering-loading-banner').toggle(status === 'fetching');
 }
 
 function handleClusteringDone() {
