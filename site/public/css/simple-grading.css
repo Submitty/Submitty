@@ -90,12 +90,11 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 #data-table {
-    width: max-content;
-    min-width: 100%;
+    --fixed-cols-width: 410px;
 }
 
 #data-table.lab-dynamic-columns {
-    width: 100%;
+    min-width: max(100%, calc(var(--fixed-cols-width) + var(--lab-checkpoint-cols, 1) * 125px));
 }
 
 /* Key Styles */
