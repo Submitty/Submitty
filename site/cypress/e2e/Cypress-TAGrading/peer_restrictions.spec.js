@@ -19,7 +19,7 @@ describe('Test that grading restrictions on peer graders work', () => {
             },
         ];
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
+        cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
         panelOptions.forEach(({ setting }) => {
             cy.get(setting, { timeout: 10000 }).should('be.checked').uncheck();
         });
@@ -28,22 +28,25 @@ describe('Test that grading restrictions on peer graders work', () => {
         panelOptions.forEach(({ setting }) => {
             cy.get(setting, { timeout: 10000 }).should('not.be.checked');
         });
+        cy.visit('/');
         cy.logout();
         cy.login('bitdiddle');
         cy.visit([
             'sample',
             'gradeable',
-            'grading_homework',
+            'grading_pdf_peer_homework',
             'grading',
             'details',
         ]);
+        cy.get('[data-testid="agree-popup-btn"]').click();
         cy.get('[data-testid="grade-button"]', { timeout: 10000 }).filter(':visible').first().click();
         panelOptions.forEach(({ gradingButton }) => {
             cy.get(gradingButton, { timeout: 10000 }).should('not.exist');
         });
+        cy.visit('/');
         cy.logout();
         cy.login('instructor');
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
+        cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
         panelOptions.forEach(({ setting }) => {
             cy.get(setting, { timeout: 10000 }).should('not.be.checked').check();
         });
