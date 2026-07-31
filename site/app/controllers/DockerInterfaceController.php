@@ -246,7 +246,7 @@ class DockerInterfaceController extends AbstractController {
         $removed = [];
         $skipped = [];
 
-        $owner = $this->core->getQueries()->getAllDockerImageOwners();
+        $owners = $this->core->getQueries()->getAllDockerImageOwners();
         foreach ($images as $image) {
             if (!preg_match($pattern, $image)) {
                 $skipped[] = $image;
