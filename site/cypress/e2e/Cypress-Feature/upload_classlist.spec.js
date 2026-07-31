@@ -1,15 +1,19 @@
+import { getCurrentSemester } from '/cypress/support/utils.js'
+
 describe('Test cases revolving around uploading a classlist on the Manage Students page', () => {
-    // id of new student used for testing
+    // ID of new student used for testing
     const NEW_STUDENT = 'cypress';
+    const FIXTURE_PATH = 'cypress/fixtures/upload_classlist';
+    const DOWNLOAD_PATH = 'cypress/downloads';
 
     function assertStudentRow(studentId, section) {
-        // check that the student appears in the table as expected
+        // Check that the student appears in the table as expected
         cy.get(`[data-testid="user-row-${studentId}"]`).within(() => {
-            // check the first & last name
+            // Check the first & last name
             cy.get('[data-testid="student-given-name"]').should('contain.text', 'cypress');
             cy.get('[data-testid="student-family-name"]').should('contain.text', 'cypress');
 
-            // check the registration section
+            // Check the registration section
             cy.get('[data-testid="registration-section"]')
                 .invoke('text')
                 .invoke('replace', /\s+/g, '') // strips whitespace characters
@@ -17,23 +21,66 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         });
     }
 
-    function uploadClasslist(fixture) {
+    function uploadClasslist(filePath) {
         cy.get('[data-testid="upload-classlist-button"]').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
-        cy.get('[data-testid="classlist-upload-file"]').selectFile(`cypress/fixtures/upload_classlist/${fixture}`, { force: true });
+        cy.get('[data-testid="classlist-upload-file"]').selectFile(filePath, { force: true });
         cy.get('[data-testid="submit-classlist-upload"]').click();
+    }
+
+    function downloadAndAssertClasslist(filePath) {
+        // Download the CSV
+        cy.get('[data-testid="download-users-button"]').click();
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="submit-download-users"]').click();
+
+        // Close the Download Users modal by pressing the Escape key
+        cy.get('body').type('{esc}');
+        cy.get('[data-testid="popup-window"]').should('not.be.visible');
+
+        // path to the downloaded file
+        const downloadedFilePath = `${DOWNLOAD_PATH}/${getCurrentSemester()}_sample_users_data.csv`;
+
+        // verify the file exists
+        cy.readFile(downloadedFilePath).should('exist');
+
+        // compare the file against the fixture with the expected values
+        cy.readFile(`${FIXTURE_PATH}/${filePath}`).then((expectedCsv) => {
+            cy.readFile(downloadedFilePath).then((downloadedCsv) => {
+
+                // Normalize line endings (\r\n to \n) and trim whitespace
+                const normalize = (csvString) => csvString.replace(/\r\n/g, '\n').trim();
+
+                const expected = normalize(expectedCsv);
+                const actual = normalize(downloadedCsv);
+
+                // Assert that the entire file contents match exactly
+                expect(actual).to.equal(expected);
+            });
+        });
     }
 
     it('Should upload classlists to add, update, and validate student data', () => {
         cy.login('instructor');
         cy.visit(['sample', 'users']);
+
+        // Test the Download Users button
+        downloadAndAssertClasslist('sample_users_data.csv');
+
+        // Verify the Upload and Download features are compatible
+        uploadClasslist(`${DOWNLOAD_PATH}/${getCurrentSemester()}_sample_users_data.csv`);
+        cy.get('[data-testid="popup-message"]')
+            .should('contain.text', `${getCurrentSemester()}_sample_users_data.csv`)
+            .and('contain.text', '0 added, 109 updated');
+
+        // Test the Upload Users button with the new student
         // Test the "User ID" header being required
-        uploadClasslist('upload_missing_userid_header.csv');
+        uploadClasslist(`${FIXTURE_PATH}/upload_missing_userid_header.csv`);
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Missing "User ID" column in uploaded CSV');
         cy.get(`[data-testid="user-row-${NEW_STUDENT}"]`).should('not.exist');
 
         // Test adding a new student via classlist upload
-        uploadClasslist('upload_new_student.csv');
+        uploadClasslist(`${FIXTURE_PATH}/upload_new_student.csv`);
         cy.get('[data-testid="popup-message"]')
             .should('contain.text', 'upload_new_student.csv')
             .and('contain.text', '1 added, 0 updated');
@@ -41,11 +88,14 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         assertStudentRow(NEW_STUDENT, '1');
 
         // Test updating an existing student via classlist upload
-        uploadClasslist('upload_update_student.csv');
+        uploadClasslist(`${FIXTURE_PATH}/upload_update_student.csv`);
         cy.get('[data-testid="popup-message"]')
             .should('contain.text', 'upload_update_student.csv')
             .and('contain.text', '0 added, 1 updated');
         assertStudentRow(NEW_STUDENT, '2');
+
+        // Test the Download Users button with the new cypress student
+        downloadAndAssertClasslist('sample_users_data_with_cypress.csv');
     });
 
     after(() => {
@@ -66,4 +116,5 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         cy.wait(500);
         cy.logout('instructor');
     });
+
 });
