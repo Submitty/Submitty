@@ -248,6 +248,14 @@ progress::-webkit-progress-value {
     justify-content: center;
 }
 
+.grade-panel button:focus-visible,
+.grade-panel input:focus-visible,
+.grade-panel textarea:focus-visible,
+.grade-panel .key_to_click:focus-visible {
+    outline: 2px solid var(--standard-focus-cornflower-blue);
+    outline-offset: 2px;
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
     margin-right: 5px;
