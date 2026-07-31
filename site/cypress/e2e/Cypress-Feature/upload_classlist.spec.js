@@ -1,4 +1,4 @@
-import { getCurrentSemester } from '/cypress/support/utils.js'
+import { getCurrentSemester } from '/cypress/support/utils.js';
 
 describe('Test cases revolving around uploading a classlist on the Manage Students page', () => {
     // ID of new student used for testing
@@ -47,7 +47,6 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         // compare the file against the fixture with the expected values
         cy.readFile(`${FIXTURE_PATH}/${filePath}`).then((expectedCsv) => {
             cy.readFile(downloadedFilePath).then((downloadedCsv) => {
-
                 // Normalize line endings (\r\n to \n) and trim whitespace
                 const normalize = (csvString) => csvString.replace(/\r\n/g, '\n').trim();
 
@@ -116,5 +115,4 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         cy.wait(500);
         cy.logout('instructor');
     });
-
 });
