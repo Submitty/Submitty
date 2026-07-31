@@ -14,6 +14,8 @@
             Previously peer graders could leave annotations, but they would never see annotations
             received by other peers because PeerResults.twig doesn't display them.
             (Will also require changes to AutoGradingView.php.)
+
+            See Issue #13122, https://github.com/Submitty/Submitty/issues/13122
         #}
         {% if directory === "submissions_processed" and not is_peer_grader %}
             <div class="image-annotation-container">
