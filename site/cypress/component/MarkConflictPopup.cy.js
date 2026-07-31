@@ -139,22 +139,18 @@ describe('MarkConflictPopup', () => {
         });
 
         it('calls the correct endpoint for each resolution type', () => {
-            // dom -> save
             cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
             cy.get('[data-testid="mark-conflict-dom-btn"]').click();
             cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/save$/, { method: 'POST' });
 
-            // old-server -> save
             cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
             cy.get('[data-testid="mark-conflict-old-server-btn"]').click();
             cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/save$/, { method: 'POST' });
 
-            // server (deleted) -> add
             cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) } });
             cy.get('[data-testid="mark-conflict-dom-btn"]').click();
             cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/add$/, { method: 'POST' });
 
-            // localDeleted -> delete
             cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) } });
             cy.get('[data-testid="mark-conflict-dom-btn"]').click();
             cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/delete$/, { method: 'POST' });

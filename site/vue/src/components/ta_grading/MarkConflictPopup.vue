@@ -76,8 +76,6 @@ function toggle() {
     }
 }
 
-// --- AJAX helpers (switched from $.ajax to fetch + FormData per sql-toolbox.ts pattern) ---
-
 async function ajaxAddNewMark(title: string, points: number, publish: boolean) {
     const formData = new FormData();
     formData.append('csrf_token', getCsrfToken());
@@ -155,8 +153,6 @@ async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old
                 const isServerDeleted = conflict.serverMark === null;
                 if (isServerDeleted) {
                     const data = await ajaxAddNewMark(conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
-                    // Mutates the raw conflict object, which shares references with
-                    // saveMarkList's domMarkList so mark order uses the new server id.
                     conflict.domMark.id = data.mark_id;
                 }
                 else {
@@ -274,7 +270,6 @@ async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old
                 </span>
               </template>
             </div>
-            <!-- Local (DOM) mark -->
             <div
               class="row mark-resolve mark-resolve-dom"
               data-testid="mark-conflict-dom"
