@@ -44,16 +44,43 @@ describe('Docker UI Test', () => {
 
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
-        cy.get('#update-machines')
-            .should('have.text', ' Update dockers and machines')
+        cy.get('[data-testid="update-machines"]')
+            .first()
+            .should('contain', ' Update dockers and machines')
             .click();
         // Should prompt a success message
-        cy.get('.alert-success')
-            .invoke('text')
-            .should('contain', 'Successfully queued the system to update'
-            + ' docker, please refresh the page in a bit.');
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'Changes applying...');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'Changes applying...');
 
-        // Allow the system to update the info and reload
+        // Allow the system to update the info
+        // Don't reload so the log stays visible
+        cy.get('[data-testid="docker-status"]')
+            .eq(0, { timeout: 60000 })
+            .should('contain.text', 'Changes applied, manually reload the page to view them!');
+
+        cy.get('[data-testid="docker-status"]')
+            .eq(1, { timeout: 60000 }) // <-- Move timeout here
+            .should('contain.text', 'Changes applied, manually reload the page to view them!');
+
+        // Log button should now be visible on both copies
+        cy.get('[data-testid="docker-log-button"]').eq(0).should('be.visible');
+        cy.get('[data-testid="docker-log-button"]').eq(1).should('be.visible');
+
+        // Click one Log button, the closes log should open
+        cy.get('[data-testid="docker-log-button"]').eq(0).click();
+        cy.get('[data-testid="docker-status-log"]').eq(0).should('be.visible');
+        cy.get('[data-testid="docker-status-log"]').eq(1).should('not.be.visible');
+
+        // Both logs should show identical log content (this works even if the log isn't visible)
+        cy.get('[data-testid="docker-status-log"]').eq(0).invoke('text').then((topText) => {
+            cy.get('[data-testid="docker-status-log"]').eq(1).invoke('text').should('eq', topText);
+        });
+
+        // Now reload
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker-version"]')
@@ -62,6 +89,7 @@ describe('Docker UI Test', () => {
                     return text !== 'Unknown';
                 });
         }, 10000);
+
         // Updated time should not be "Unknown"
         cy.get('[data-testid="systemwide-info"]')
             .should('not.contain.text', 'Unknown');
@@ -139,6 +167,14 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
 
+        // Badge should show the same confirmation on both copies
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration! Click "Update dockers and machines" to apply the changes.');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration! Click "Update dockers and machines" to apply the changes.');
+
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
@@ -150,9 +186,15 @@ describe('Docker UI Test', () => {
         }, 2000);
 
         // Update the machine to link existing image to a new tag
-        cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('[data-testid="update-machines"]')
+            .first()
+            .click();
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'Changes applying...');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'Changes applying...');
 
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
@@ -212,6 +254,13 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/prolog:8 has been added to the configuration!');
 
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'submitty/prolog:8 has been added to the configuration! Click "Update dockers and machines" to apply the changes.');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'submitty/prolog:8 has been added to the configuration! Click "Update dockers and machines" to apply the changes.');
+
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
@@ -223,9 +272,15 @@ describe('Docker UI Test', () => {
         }, 2000);
 
         // Update the machine to pull the image
-        cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('[data-testid="update-machines"]')
+            .first()
+            .click();
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'Changes applying...');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'Changes applying...');
 
         // Allow the system to install the image and update UI
         // eslint-disable-next-line no-restricted-syntax
@@ -275,6 +330,13 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/prolog:8 has been removed from the configuration.');
 
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration! Click "Update dockers and machines" to apply the changes.');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration! Click "Update dockers and machines" to apply the changes.');
+
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
@@ -286,9 +348,15 @@ describe('Docker UI Test', () => {
         }, 2000);
 
         // Update the machine to remove the image
-        cy.get('#update-machines').click();
-        cy.get('.alert-success')
-            .should('contain.text', 'Successfully queued the system to update');
+        cy.get('[data-testid="update-machines"]')
+            .first()
+            .click();
+        cy.get('[data-testid="docker-status"]')
+            .eq(0)
+            .should('contain.text', 'Changes applying...');
+        cy.get('[data-testid="docker-status"]')
+            .eq(1)
+            .should('contain.text', 'Changes applying...');
 
         // Reload the page and wait until the image is removed
         // eslint-disable-next-line no-restricted-syntax
@@ -325,7 +393,7 @@ describe('Docker UI Test', () => {
         cy.visit(docker_ui_path);
 
         // Update docker and machines button should not exist
-        cy.get('#update-machines').should('not.exist');
+        cy.get('[data-testid="update-machines"]').should('not.exist');
 
         // images should be visible
         cy.get('[data-testid="image-row"]').should('exist');
