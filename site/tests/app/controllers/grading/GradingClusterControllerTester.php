@@ -188,8 +188,7 @@ class GradingClusterControllerTester extends BaseUnitTest {
     }
 
     public function testGetClustersInvalidGradeable(): void {
-        $core = $this->createMockCore();
-        
+        $core = $this->createMockCore();  
         $controller = $this->getMockBuilder(GradingClusterController::class)
             ->setConstructorArgs([$core])
             ->onlyMethods(['tryGetGradeable'])
