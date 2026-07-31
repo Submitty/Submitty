@@ -324,6 +324,7 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="remove-image-checkbox"][value="submitty/prolog:8"]').check();
         cy.get('[data-testid="remove-image-checkbox"][value="submitty/prolog:8"]').should('be.checked');
         cy.get('[data-testid="remove-image-submit"]').click();
+        cy.get('[data-testid="remove-image-form"]').should('not.be.visible');
 
         cy.wait('@removeImage');
 

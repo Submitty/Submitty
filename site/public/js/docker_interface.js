@@ -1,4 +1,4 @@
-/* exported collapseSection, openRemoveDialog, confirmationDialog, submitRemoveImage, removeImage, addImage, updateImage */
+/* exported collapseSection, openRemoveDialog, submitRemoveImage, removeImage, addImage, updateImage */
 /* global csrfToken, displayErrorMessage, displaySuccessMessage, showPopup, closePopup */
 
 let isUpdateInProgress = false;
@@ -167,7 +167,7 @@ function removeImage(url, images) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                setDockerStatusBadge(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
+                setDockerStatusBadge(`${images.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
                 displaySuccessMessage(json.data);
             }
             else {
