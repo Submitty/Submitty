@@ -139,8 +139,8 @@ class GradingOrder extends AbstractModel {
 
             $submitters = [];
 
-            foreach($this->section_submitters as $section) {
-                foreach($section as $submitter) {
+            foreach ($this->section_submitters as $section) {
+                foreach ($section as $submitter) {
                     $submitters[] = $submitter;
                 }
             }
