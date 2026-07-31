@@ -7635,6 +7635,9 @@ AND gc_id IN (
         $this->updateGradeableComponents($gradeable);
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function getCustomGradingOrder(string $gradeable_id): array {
         $this->course_db->query(
             "
@@ -7666,6 +7669,9 @@ AND gc_id IN (
         );
     }
 
+    /**
+     * @param array<int, string> $ordered_submitter_ids
+     */
     public function replaceCustomGradingOrder(
         string $gradeable_id,
         array $ordered_submitter_ids,
