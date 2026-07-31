@@ -23,6 +23,7 @@ HELP_MESSAGE="
     php-lint  : phpcs & phpstan (with default options only)
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
+    js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     py-flake8 : run flake8 [option: specific_file.py]
     py-pylint : run pylint [option: specific_file.py]
@@ -52,7 +53,7 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
-    docker run --rm $terminal_flag -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
+    docker run --rm $terminal_flag --network host -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
@@ -104,6 +105,17 @@ run_js_es() {
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
     else
+        run_in_container /home/submitty/site npm run "$script"
+    fi
+}
+
+run_js_unit() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        script=test:api
+        run_in_container /home/submitty/site npm run "$script"
+    else
+        script=test
         run_in_container /home/submitty/site npm run "$script"
     fi
 }
@@ -180,6 +192,9 @@ case "${1:-}" in
         ;;
     js-lint)
         run_js_es "$@"
+        ;;
+    js-unit)
+        run_js_unit "$@"
         ;;
     css-lint)
         run_css_style "$@"
