@@ -385,6 +385,53 @@ describe('Docker UI Test', () => {
             .should('not.exist');
     });
 
+    // This test also tests instructor permissions to remove an image they should not be able to remove in the removal modal
+    it('Should not remove an image the user does not own', () => {
+        cy.get('[data-testid="docker-status"]').should('contain.text', 'Up-to-Date');
+
+        cy.intercept('POST', '**/admin/add_image').as('addImage');
+
+        // Add a tag that shares an underlying image with the default submitty/python:latest
+        cy.get('#capability-form').select('python');
+        cy.get('#add-field').clear();
+        cy.get('#add-field').type('submitty/python:3.10');
+        cy.get('#send-button').should('not.be.disabled').click();
+        cy.wait('@addImage');
+
+        cy.get('[data-testid="update-machines"]')
+            .first()
+            .click();
+
+        // Wait for the tag to be pulled and reported
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('body').then(($body) => {
+                return $body.find('[data-image-id="submitty/python:3.10"]').length > 0;
+            });
+        }, 60000, 500);
+
+        cy.intercept('POST', '**/admin/remove_image').as('removeImage');
+
+        // Both names should be offered
+        cy.get('[data-image-id="submitty/python:3.10"]').click();
+        cy.get('[data-testid="remove-image-form"]').should('be.visible');
+        cy.get('[data-testid="remove-image-checkbox"]').should('have.length', 2);
+
+        cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:3.10"]').check();
+        cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:latest"]').check();
+        cy.get('[data-testid="remove-image-submit"]').click();
+        cy.wait('@removeImage');
+
+        // Partial result: 3.10 removed, latest refused
+        cy.get('.alert-success')
+            .should('contain.text', 'submitty/python:3.10 has been removed from the configuration.')
+            .and('contain.text', 'submitty/python:latest');
+
+        // The default survives
+        cy.reload();
+        cy.get('[data-testid="image-row"]').should('contain.text', 'submitty/python:latest');
+    });
+
     it('Should test instructor user permissions', () => {
         // Logout current user
         cy.logout();
