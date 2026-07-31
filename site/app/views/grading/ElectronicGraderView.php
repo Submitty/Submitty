@@ -1633,6 +1633,7 @@ HTML;
             "user_assignment_settings_path" => $uas,
             "user_assignment_settings_missing" => $user_assignment_settings_missing,
             "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable
+            "show_no_matching_peer_files_banner" => $show_no_matching_peer_files_banner,
         ]);
     }
 
