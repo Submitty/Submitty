@@ -252,7 +252,7 @@ class DockerInterfaceController extends AbstractController {
                 $skipped[] = $image;
                 continue;
             }
-            
+
             // sometimes the image will have no owner, and the query returns an empty string
             $owner = $owners[$image] ?? false;
             if ($owner === '') {
