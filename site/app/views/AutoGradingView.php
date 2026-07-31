@@ -458,6 +458,11 @@ class AutoGradingView extends AbstractView {
         $img_annotation_paths = [];
         foreach ($uploaded_imgs as $image_file) {
             // Following ImageController pattern - use MD5 of path for matching
+            /*
+                TODO: switching path to anon_path allows for image annotations not just made on
+                files in submissions_processed to be shown to the student through TAResults.twig,
+                but when trying to view the annotation the student gets 'No annotations found.' error
+            */
             $image_path_md5 = md5($image_file['path']);
 
             if (is_dir($img_annotation_dir)) {
