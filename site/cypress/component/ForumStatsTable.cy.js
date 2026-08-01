@@ -113,4 +113,48 @@ describe('ForumStatsTable', () => {
         cy.get('[data-testid="expand-button"]').eq(0).type('{enter}');
         cy.get('[data-testid="post-detail-row"]').should('have.length', 2);
     });
+
+    it('sorts by user name and reverses direction on a second click', () => {
+        cy.mount(ForumStatsTable, { props: { users } });
+        cy.get('[data-testid="sortable-header-link"]').contains('User').click();
+        // ASC: Instructor before Student.
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Instructor, Quinn');
+        cy.get('[data-testid="sortable-header-link"]').contains('User').click();
+        // DESC: Student before Instructor.
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Student, Joe');
+    });
+
+    it('sorts by total posts ascending', () => {
+        cy.mount(ForumStatsTable, { props: { users } });
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Posts (not deleted)').click();
+        // Student has 0 posts, Instructor has 2.
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Student, Joe');
+        cy.get('[data-testid="user-stat"]').eq(1).should('contain', 'Instructor, Quinn');
+    });
+
+    it('sorts by total threads ascending', () => {
+        cy.mount(ForumStatsTable, { props: { users } });
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Threads').click();
+        // Student has 0 threads, Instructor has 1.
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Student, Joe');
+        cy.get('[data-testid="user-stat"]').eq(1).should('contain', 'Instructor, Quinn');
+    });
+
+    it('sorts by total deleted posts ascending', () => {
+        cy.mount(ForumStatsTable, { props: { users } });
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Deleted Posts').click();
+        // Instructor has 0 deleted, Student has 1.
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Instructor, Quinn');
+        cy.get('[data-testid="user-stat"]').eq(1).should('contain', 'Student, Joe');
+    });
+
+    it('returns to ascending direction on a third click of the same header', () => {
+        cy.mount(ForumStatsTable, { props: { users } });
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Upducks').click();
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Student, Joe'); // ASC: 1 before 6.
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Upducks').click();
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Instructor, Quinn'); // DESC: 6 before 1.
+        cy.get('[data-testid="sortable-header-link"]').contains('Total Upducks').click();
+        cy.get('[data-testid="user-stat"]').eq(0).should('contain', 'Student, Joe'); // ASC again.
+    });
 });
