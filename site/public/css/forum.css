@@ -81,6 +81,15 @@
     gap: 0.5rem;
 }
 
+.full-screen-mode #thread-container {
+    height: 100vh;
+}
+
+.full-screen-mode #thread_list,
+.full-screen-mode #posts_list {
+    max-height: 100vh;
+}
+
 .attachment-preview a {
     display: flex;
     justify-content: center;

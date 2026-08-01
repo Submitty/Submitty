@@ -54,7 +54,6 @@
 			{% include "Vue.twig" with {
 				'type': 'component',
 				'name': 'FullScreenButton',
-				'class': 'fullscreen-btn-wrapper',
 				'args': { 'initialFullScreen': false },
 				'events': { 'toggle': '(on) => { setFullScreenMode(on); }' }
 			} %}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const { initialFullScreen } = defineProps<{
     initialFullScreen?: boolean;
@@ -16,6 +16,16 @@ function toggle() {
     isFullScreen.value = !isFullScreen.value;
     emit('toggle', isFullScreen.value);
 }
+
+function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && isFullScreen.value) {
+        isFullScreen.value = false;
+        emit('toggle', false);
+    }
+}
+
+onMounted(() => document.addEventListener('keydown', handleKeydown));
+onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
 </script>
 
 <template>
@@ -33,3 +43,19 @@ function toggle() {
     />
   </button>
 </template>
+
+<style>
+.full-screen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    z-index: 10;
+}
+
+.full-screen-mode .content {
+    margin: 0;
+}
+</style>
