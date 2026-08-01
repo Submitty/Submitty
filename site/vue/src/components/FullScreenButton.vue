@@ -1,3 +1,17 @@
+<!-- If you are planning to use this component, you will have to add the
+     module JS to the PHP view file of whatever page you are implementing
+     the component in.
+
+     $this->core->getOutput()->addInternalModuleJs('full-screen.js');
+
+     You will also need to add the emit in the Twig include:
+
+     'events': { 'toggle': '(on) => { setFullScreenMode(on); }' }
+
+     Note that one Twig template can be rendered by multiple view methods
+     (ForumBar.twig is rendered by four), and each one needs the module JS.
+-->
+
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 
