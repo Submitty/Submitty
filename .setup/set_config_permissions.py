@@ -33,7 +33,7 @@ parser.add_argument('--worker', action='store_true', default=False,
 args = parser.parse_args()
 
 SUBMITTY_INSTALL_DIR = args.install_dir
-SUBMITTY_DIRECTORY_DIR = '/var/local/submitty/config'
+SUBMITTY_DIRECTORY_DIR = '/var/submitty/config'
 SUBMITTY_DIRECTORY_JSON = os.path.join(SUBMITTY_DIRECTORY_DIR, 'submitty.json')
 
 os.makedirs(SUBMITTY_DIRECTORY_DIR, exist_ok=True)
