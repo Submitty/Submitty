@@ -620,10 +620,12 @@
     height: 100vh;
 }
 
+/* stylelint-disable selector-id-pattern */
 .full-screen-mode #thread_list,
 .full-screen-mode #posts_list {
     max-height: 100vh;
 }
+/* stylelint-enable selector-id-pattern */
 
 .stats-table-container {
     padding-left: 20px;
