@@ -12,7 +12,7 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-CONF_DIR="/var/submitty/config"
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
 CONF_DIR="$SUBMITTY_INSTALL_DIR/config"
 
