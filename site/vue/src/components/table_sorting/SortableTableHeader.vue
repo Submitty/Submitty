@@ -8,10 +8,6 @@ const props = defineProps<{
     sortKey: string;
     colDataType: colDataTypes;
     usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
-    // Optional active-state props so Vue-owned tables (e.g. forum/ForumStatsTable)
-    // can render the current sort column and direction. Legacy tables that sort via
-    // sort-table-by-column.ts still get their active class / icons updated through
-    // DOM manipulation and never pass these props.
     active?: boolean;
     sortDirection?: 'ASC' | 'DESC';
 }>();
