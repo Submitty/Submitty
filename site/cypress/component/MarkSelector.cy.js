@@ -1,9 +1,6 @@
 import MarkSelector from '../../vue/src/components/ta_grading/MarkSelector.vue';
 import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
-// Note: keyboard activation (Enter/Space) is intentionally NOT tested here - the
-// span is not focusable. It is handled by the legacy parent #mark-{id} div's
-// tabindex="0" + key_to_click (host element lives in Twig per migration rules).
 describe('MarkSelector', () => {
     const defaultProps = () => ({
         markId: 5,
