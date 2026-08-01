@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { colDataTypes } from '../../../../ts/sort-table-by-column';
 
 const props = defineProps<{
@@ -7,11 +8,24 @@ const props = defineProps<{
     sortKey: string;
     colDataType: colDataTypes;
     usingRowGroups: boolean; // specifically for statPage.twig's forum post collapsible rows
+    // Optional active-state props so Vue-owned tables (e.g. forum/ForumStatsTable)
+    // can render the current sort column and direction. Legacy tables that sort via
+    // sort-table-by-column.ts still get their active class / icons updated through
+    // DOM manipulation and never pass these props.
+    active?: boolean;
+    sortDirection?: 'ASC' | 'DESC';
 }>();
 
 const emit = defineEmits<{
     'sort-table-column-click': [payload: { tableId: string; sortKey: string; colDataType: colDataTypes; usingRowGroups: boolean }];
 }>();
+
+const iconClass = computed(() => {
+    if (!props.active) {
+        return 'fa-sort';
+    }
+    return props.sortDirection === 'DESC' ? 'fa-sort-down' : 'fa-sort-up';
+});
 
 function handleClick() {
     emit('sort-table-column-click', {
@@ -28,6 +42,7 @@ function handleClick() {
   <a
     href="#"
     class="sortable-header"
+    :class="{ 'active-sort': active }"
     :title="'Sort by ' + title"
     :aria-label="'Sort by ' + title"
     :data-sort-key="sortKey"
@@ -35,7 +50,10 @@ function handleClick() {
     @click.prevent="handleClick"
   >
     {{ title }}
-    <i class="fa fa-sort" />
+    <i
+      class="fa"
+      :class="iconClass"
+    />
   </a>
 </template>
 
