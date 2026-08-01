@@ -251,7 +251,11 @@ progress::-webkit-progress-value {
 .grade-panel button:focus-visible,
 .grade-panel input:focus-visible,
 .grade-panel textarea:focus-visible,
-.grade-panel .key_to_click:focus-visible,
+.grade-panel .key_to_click:focus-visible {
+    outline: 2px solid var(--standard-focus-cornflower-blue);
+    outline-offset: 2px;
+}
+
 .rubric_panel button:focus-visible,
 .rubric_panel input:focus-visible,
 .rubric_panel textarea:focus-visible,
@@ -259,6 +263,19 @@ progress::-webkit-progress-value {
     outline: 2px solid var(--standard-focus-cornflower-blue);
     outline-offset: -2px;
     border-radius: 4px;
+}
+
+/* In dark mode, --standard-focus-cornflower-blue is too dark to be visible
+   against the dark background and button colors, so use a brighter blue */
+[data-theme="dark"] .grade-panel button:focus-visible,
+[data-theme="dark"] .grade-panel input:focus-visible,
+[data-theme="dark"] .grade-panel textarea:focus-visible,
+[data-theme="dark"] .grade-panel .key_to_click:focus-visible,
+[data-theme="dark"] .rubric_panel button:focus-visible,
+[data-theme="dark"] .rubric_panel input:focus-visible,
+[data-theme="dark"] .rubric_panel textarea:focus-visible,
+[data-theme="dark"] .rubric_panel .key_to_click:focus-visible {
+    outline-color: #7ec8ff;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */

@@ -18,6 +18,7 @@ declare global {
         onCancelEditRubricComponent(me: HTMLElement): void;
         onChangeOverallComment(me: HTMLElement): Promise<void>;
         onCancelComponent(me: HTMLElement): Promise<void>;
+        onSaveComponent(me: HTMLElement): Promise<void>;
         onCustomMarkChange(me: HTMLElement): Promise<void>;
         onToggleMark(me: HTMLElement): Promise<void>;
         onToggleCustomMark(me: HTMLElement): Promise<void>;
@@ -2154,6 +2155,16 @@ window.onCancelComponent = async function (me: HTMLElement) {
             console.error(err);
             alert(`Error closing component! ${(err as Error).message}`);
         }
+    }
+};
+window.onSaveComponent = async function (me: HTMLElement) {
+    const component_id = getComponentIdFromDOMElement(me);
+    try {
+        await toggleComponent(component_id, true);
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error saving component! ${(err as Error).message}`);
     }
 };
 
