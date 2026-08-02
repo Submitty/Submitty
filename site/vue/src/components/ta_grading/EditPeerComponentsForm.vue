@@ -7,6 +7,7 @@ interface PeerComponent {
     title: string;
     max: number;
     marks: number[];
+    extra_credit?: boolean;
 }
 
 interface MarkInfo {
@@ -17,10 +18,13 @@ interface MarkInfo {
 interface PeerDetails {
     graders: Record<string, string[]>;
     marks_assigned: Record<string, Record<string, number[]>>;
+    graded_versions?: Record<string, Record<string, number>>;
+    version_conflicts?: Record<string, Record<string, boolean>>;
 }
 
 const props = defineProps<{
     peers: string[];
+    peerNames?: Record<string, string>;
     submitterId: string;
     gradeableId: string;
     csrfToken: string;
@@ -28,7 +32,7 @@ const props = defineProps<{
     componentScores: Record<string, Record<string, number>>;
     peerDetails: PeerDetails;
     marks: Record<string, MarkInfo>;
-    visible?: boolean;
+    activeVersion?: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -38,10 +42,36 @@ const emit = defineEmits<{
         peer: string;
         csrfToken: string;
     }];
+    'resolve-version-conflicts': [detail: {
+        submitterId: string;
+        gradeableId: string;
+        peer: string;
+        csrfToken: string;
+    }];
+    'save-component': [detail: {
+        submitterId: string;
+        gradeableId: string;
+        peer: string;
+        componentId: string;
+        csrfToken: string;
+    }];
+    'mark-change': [detail: {
+        peer: string;
+        componentId: string;
+    }];
 }>();
 
-const visible = ref(props.visible);
+// The popup manages its own open/close state, like MarkSeenPopup.vue.
+const visible = ref(false);
 const selectedPeer = ref(props.peers[0] ?? '');
+
+function toggle() {
+    visible.value = !visible.value;
+}
+
+function peerDisplayName(peer: string): string {
+    return props.peerNames?.[peer] ?? peer;
+}
 
 function clearMarks() {
     emit('clear-marks', {
@@ -52,7 +82,66 @@ function clearMarks() {
     });
 }
 
-function badgeClass(earned: number, max: number): string {
+function resolveVersionConflicts() {
+    emit('resolve-version-conflicts', {
+        submitterId: props.submitterId ?? '',
+        gradeableId: props.gradeableId ?? '',
+        peer: selectedPeer.value,
+        csrfToken: props.csrfToken ?? '',
+    });
+}
+
+function saveComponent(componentId: string) {
+    emit('save-component', {
+        submitterId: props.submitterId ?? '',
+        gradeableId: props.gradeableId ?? '',
+        peer: selectedPeer.value,
+        componentId,
+        csrfToken: props.csrfToken ?? '',
+    });
+}
+
+function onMarkChange(componentId: string) {
+    emit('mark-change', {
+        peer: selectedPeer.value,
+        componentId,
+    });
+}
+
+function hasVersionConflict(componentId: string, peer: string): boolean {
+    return props.peerDetails?.version_conflicts?.[componentId]?.[peer] ?? false;
+}
+
+function peerHasVersionConflict(peer: string): boolean {
+    return props.components.some((component) => hasVersionConflict(component.id, peer));
+}
+
+function gradedVersion(componentId: string, peer: string): number | undefined {
+    return props.peerDetails?.graded_versions?.[componentId]?.[peer];
+}
+
+function isExtraCredit(component: PeerComponent): boolean {
+    return component.extra_credit ?? false;
+}
+
+// Badge helpers ported from functions/Badge.twig for server-side parity.
+
+function shouldShowBadge(earned: number, max: number, extraCredit: boolean): boolean {
+    if (extraCredit) {
+        // Extra credit always shows, since even +0 is useful information
+        return true;
+    }
+    if (max > 0) {
+        return true;
+    }
+    // Negative points only show if they were actually earned
+    return earned < 0;
+}
+
+function badgeClass(earned: number, max: number, extraCredit: boolean): string {
+    if (extraCredit) {
+        return earned === 0 ? 'gray-background' : 'green-background';
+    }
     if (earned < 0) {
         return earned < 0.5 * max ? 'red-background' : 'yellow-background';
     }
@@ -65,13 +154,15 @@ function badgeClass(earned: number, max: number): string {
     return 'red-background';
 }
 
-function shouldShowBadge(earned: number, max: number): boolean {
-    return max > 0 || earned < 0;
-}
-
-function badgeText(earned: number, max: number): string {
+function badgeText(earned: number, max: number, extraCredit: boolean): string {
+    if (extraCredit) {
+        return `+${earned}`;
+    }
     if (earned < 0) {
-        return `\u2212${Math.abs(earned)} / ${max}`;
+        if (max !== 0) {
+            return `\u2212${Math.abs(earned)} / ${max}`;
+        }
+        return `\u2212${Math.abs(earned)}`;
     }
     return `${earned} / ${max}`;
 }
@@ -93,107 +184,165 @@ function hasScore(componentId: string, peer: string): boolean {
   <Popup
     title="Edit Peer Components Form"
     :visible="visible"
-    @toggle="visible = !visible"
+    @toggle="toggle"
   >
-    <template #trigger />
-    <span data-testid="warning-text">
-      Select the student whose marks you want to clear
-      <br>WARNING this will remove all of the peer grading done by this student:
-      <br>
-      ** WIP: Editing and deletion of individual components**
-    </span>
-    <select
-      id="edit-peer-select"
-      v-model="selectedPeer"
-      data-testid="edit-peer-select"
-    >
-      <option
-        v-for="peer in peers"
-        :key="peer"
-        :value="peer"
-      >
-        {{ peer }}
-      </option>
-    </select>
-    <div
-      v-for="peer in peers"
-      v-show="selectedPeer === peer"
-      :key="peer"
-      class="edit-peer-components-block"
-    >
+    <template #trigger>
       <button
         type="button"
-        class="btn"
-        data-testid="clear-peer-marks"
-        @click="clearMarks"
+        class="btn btn-primary"
+        title="Edit Peer Components"
+        aria-label="Edit Peer Components"
+        data-testid="edit-peer-trigger"
+        @click="toggle"
       >
-        Clear All Grading
+        <i
+          class="fas fa-pencil-alt"
+          aria-hidden="true"
+        />
+        Edit Peer Components
       </button>
-      <br>
-      <div
-        v-for="component in components"
-        :key="component.id"
-        :data-testid="'component-block-' + component.id"
+    </template>
+    <template #default>
+      <span data-testid="warning-text">
+        Select the peer grader whose grades you want to edit.
+        <br>
+        WARNING: clearing a peer grader's marks will remove all of the peer grading done by that student.
+      </span>
+      <select
+        id="edit-peer-select"
+        v-model="selectedPeer"
+        data-testid="edit-peer-select"
       >
-        <div
-          v-if="hasScore(component.id, peer)"
-          class="box-badge"
-          data-testid="box-badge"
+        <option
+          v-for="peer in peers"
+          :key="peer"
+          :value="peer"
         >
-          <span
-            v-if="shouldShowBadge(scoreForComponent(component.id, peer) ?? 0, component.max)"
-            class="badge"
-            :class="badgeClass(scoreForComponent(component.id, peer) ?? 0, component.max)"
-            data-testid="score-pill-badge"
+          {{ peerDisplayName(peer) }}
+        </option>
+      </select>
+      <div
+        v-for="peer in peers"
+        v-show="selectedPeer === peer"
+        :id="'edit-peer-components-form-' + peer"
+        :key="peer"
+        class="edit-peer-components-block"
+        data-testid="peer-block"
+      >
+        <button
+          type="button"
+          class="btn btn-danger"
+          title="Delete all grading by this peer grader"
+          data-testid="clear-peer-marks"
+          @click="clearMarks"
+        >
+          Delete All Grading by Peer Grader {{ peer }} for Student {{ submitterId }}'s Submission
+        </button>
+        <button
+          v-if="peerHasVersionConflict(peer)"
+          type="button"
+          class="btn clear-peer-version-conflicts"
+          :data-peer-id="peer"
+          title="Update the version for all components without inspecting each one"
+          data-testid="clear-version-conflicts"
+          @click="resolveVersionConflicts"
+        >
+          Clear Version Conflicts
+        </button>
+        <br>
+        <div
+          v-for="component in components"
+          :key="component.id"
+          class="peer-edit-component"
+          :data-testid="'component-block-' + component.id"
+        >
+          <div
+            v-if="hasScore(component.id, peer)"
+            class="box-badge"
+            data-testid="box-badge"
           >
-            {{ badgeText(scoreForComponent(component.id, peer) ?? 0, component.max) }}
+            <span
+              v-if="shouldShowBadge(scoreForComponent(component.id, peer) ?? 0, component.max, isExtraCredit(component))"
+              class="badge"
+              :class="badgeClass(scoreForComponent(component.id, peer) ?? 0, component.max, isExtraCredit(component))"
+              data-testid="score-pill-badge"
+            >
+              {{ badgeText(scoreForComponent(component.id, peer) ?? 0, component.max, isExtraCredit(component)) }}
+            </span>
+            <div
+              v-else
+              class="no-badge"
+              data-testid="no-badge"
+            />
+          </div>
+          <span
+            class="component-title col-no-gutters"
+            data-testid="component-title"
+          >
+            <b>{{ component.title }}</b>
           </span>
           <div
-            v-else
-            class="no-badge"
-            data-testid="no-badge"
-          />
-        </div>
-        <span
-          class="component-title col-no-gutters"
-          data-testid="component-title"
-        >
-          <b>{{ component.title }}</b>
-        </span>
-        <div
-          class="received-marks-list container"
-          data-testid="marks-list"
-        >
-          <div
-            v-for="markId in component.marks"
-            :key="markId"
-            class="row"
-            :data-testid="'mark-row-' + markId"
+            v-if="hasVersionConflict(component.id, peer)"
+            class="version-warning peer-edit-version-warning"
+            :data-component-id="component.id"
+            :data-peer-id="peer"
+            data-testid="version-warning"
           >
-            <div class="col-no-gutters indicator">
-              <i
-                v-if="isMarkAssigned(component.id, peer, markId)"
-                class="far fa-check-square fa-1g"
-                data-testid="mark-checked"
-              />
-              <i
-                v-else
-                class="far fa-square fa-1g"
-                data-testid="mark-unchecked"
-              />
-            </div>
-            <div class="col-no-gutters point-value">
-              <span data-testid="mark-points">{{ marks[String(markId)]?.points }}</span>
-            </div>
-            <div class="col">
-              <span
-                style="white-space: pre-wrap;"
-                data-testid="mark-title"
-              >{{ marks[String(markId)]?.title }}</span>
+            Version Conflict: {{ peer }} graded version {{ gradedVersion(component.id, peer) }},
+            but version {{ activeVersion }} is active.
+          </div>
+          <div
+            class="received-marks-list peer-edit-marks-list container"
+            data-testid="marks-list"
+          >
+            <div
+              v-for="markId in component.marks"
+              :key="markId"
+              class="row"
+              :data-testid="'mark-row-' + markId"
+            >
+              <div class="col-no-gutters indicator">
+                <input
+                  type="checkbox"
+                  class="peer-edit-mark"
+                  :data-component-id="component.id"
+                  :data-peer-id="peer"
+                  :value="markId"
+                  :checked="isMarkAssigned(component.id, peer, markId)"
+                  data-testid="mark-checkbox"
+                  @change="onMarkChange(component.id)"
+                >
+              </div>
+              <div class="col-no-gutters point-value">
+                <span data-testid="mark-points">{{ marks[String(markId)]?.points }}</span>
+              </div>
+              <div class="col">
+                <span
+                  style="white-space: pre-wrap;"
+                  data-testid="mark-title"
+                >{{ marks[String(markId)]?.title }}</span>
+              </div>
             </div>
           </div>
+          <button
+            type="button"
+            class="btn peer-save-component"
+            :data-component-id="component.id"
+            :data-peer-id="peer"
+            title="Save the selected marks for this component"
+            data-testid="save-peer-component"
+            @click="saveComponent(component.id)"
+          >
+            Save Component
+          </button>
+          <span
+            class="peer-component-save-status"
+            :data-component-id="component.id"
+            :data-peer-id="peer"
+          />
+          <br>
         </div>
       </div>
-    </div>
+    </template>
   </Popup>
 </template>

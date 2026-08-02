@@ -3,10 +3,16 @@
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <span class="col grading_label">Peer Grading
-                    <button type="button" class="btn btn-primary" title="Edit Peer Components" aria-label="Edit Peer Components" onclick="newEditPeerComponentsForm()">
-                        <i class="fas fa-pencil-alt" aria-hidden="true"></i>
-                        Edit Peer Components
-                    </button>
+                    <span id="edit-peer-components-form"></span>
+                    <script>
+                        window.submitty.render(
+                            "#edit-peer-components-form",
+                            "component",
+                            "ta_grading/EditPeerComponentsForm",
+                            {{ { peers: peers, peerNames: peer_names, submitterId: submitter_id, gradeableId: gradeable_id, csrfToken: csrf_token, components: components, componentScores: component_scores, peerDetails: peer_details, marks: marks, activeVersion: active_version } | json_encode() | raw() }},
+                            {{ { 'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, detail.csrfToken); }', 'resolve-version-conflicts': '(detail) => { resolvePeerVersionConflicts(detail.submitterId, detail.gradeableId, detail.peer, detail.csrfToken); }', 'save-component': '(detail) => { savePeerComponent(detail.submitterId, detail.gradeableId, detail.peer, detail.componentId, detail.csrfToken); }', 'mark-change': '(detail) => { peerComponentMarksChanged(detail.peer, detail.componentId); }' } | json_encode() | raw() }}
+                        );
+                    </script>
                     {% if has_peer_version_conflict %}
                         <button type="button" class="btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
                             Clear All Peer Version Conflicts

@@ -30,9 +30,6 @@ declare global {
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
         reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
-        newEditPeerComponentsForm(): void;
-        editPeerComponentsFormArgs?: Record<string, unknown>;
-        editPeerComponentsFormEvents?: Record<string, string>;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
@@ -421,9 +418,9 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
     return stored_paths;
 }
 
-<<<<<<< HEAD
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
-=======
+// Kept for upstream parity: the EditPeerComponentsForm Vue component now manages
+// the peer switch internally with v-model, so this global is currently unused.
+// It will be removed in the post-migration cleanup.
 window.changeCurrentPeer = function () {
     const peer = $('#edit-peer-select').val() as string;
     $('.edit-peer-components-block').hide();
@@ -439,7 +436,6 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, pe
     if (!confirmed) {
         return;
     }
->>>>>>> upstream/main
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -559,13 +555,6 @@ window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_
             console.log('Failed to clear all peer version conflicts');
         },
     });
-};
-
-window.newEditPeerComponentsForm = function () {
-    void window.submitty.render('#edit-peer-components-form', 'component', 'ta_grading/EditPeerComponentsForm', {
-        ...window.editPeerComponentsFormArgs,
-        visible: true,
-    }, window.editPeerComponentsFormEvents);
 };
 
 function rotateImage(url: string | undefined, rotateBy: string) {
