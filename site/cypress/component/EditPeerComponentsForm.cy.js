@@ -341,6 +341,31 @@ describe('EditPeerComponentsForm', () => {
     });
 
     describe('edge cases', () => {
+        it('falls back to empty strings in payloads when identifiers are missing', () => {
+            mountWithEmitSpy(EditPeerComponentsForm, 'clearMarks', {
+                ...defaultProps,
+                submitterId: undefined,
+                gradeableId: undefined,
+                csrfToken: undefined,
+                peerDetails: {
+                    ...defaultProps.peerDetails,
+                    version_conflicts: { comp_1: { student_aaa: true } },
+                },
+            }, 'onClearMarks');
+            openPopup();
+
+            cy.get('[data-testid="clear-peer-marks"]').first().click();
+            cy.get('@onClearMarks').should('have.been.calledOnceWith', {
+                submitterId: '',
+                gradeableId: '',
+                peer: 'student_aaa',
+                csrfToken: '',
+            });
+
+            cy.get('[data-testid="clear-version-conflicts"]').click();
+            cy.get('[data-testid="save-peer-component"]').first().click();
+        });
+
         it('handles empty peers and missing mark entries without crashing', () => {
             mountDefault({ peers: [], componentScores: {}, peerDetails: { graders: {}, marks_assigned: {} } });
             openPopup();
