@@ -251,6 +251,49 @@ describe('EditPeerComponentsForm', () => {
             });
             cy.get('@onMarkChange').should('have.been.calledWith', { peer: 'student_aaa', componentId: 'comp_1' });
         });
+
+        it('keeps a mark the grader checked after closing and reopening the popup', () => {
+            mountDefault();
+            openPopup();
+
+            cy.get('[data-testid="peer-block"]').first().within(() => {
+                cy.get('[data-testid="mark-row-102"]').within(() => {
+                    cy.get('[data-testid="mark-checkbox"]').check();
+                });
+            });
+
+            cy.get('[data-testid="close-button"]').click();
+            openPopup();
+
+            cy.get('[data-testid="peer-block"]').first().within(() => {
+                cy.get('[data-testid="mark-row-102"]').within(() => {
+                    cy.get('[data-testid="mark-checkbox"]').should('be.checked');
+                });
+                cy.get('[data-testid="mark-row-101"]').within(() => {
+                    cy.get('[data-testid="mark-checkbox"]').should('be.checked');
+                });
+            });
+        });
+
+        it('keeps a mark the grader unchecked after closing and reopening the popup', () => {
+            mountDefault();
+            openPopup();
+
+            cy.get('[data-testid="peer-block"]').first().within(() => {
+                cy.get('[data-testid="mark-row-101"]').within(() => {
+                    cy.get('[data-testid="mark-checkbox"]').uncheck();
+                });
+            });
+
+            cy.get('[data-testid="close-button"]').click();
+            openPopup();
+
+            cy.get('[data-testid="peer-block"]').first().within(() => {
+                cy.get('[data-testid="mark-row-101"]').within(() => {
+                    cy.get('[data-testid="mark-checkbox"]').should('not.be.checked');
+                });
+            });
+        });
     });
 
     describe('version conflicts', () => {

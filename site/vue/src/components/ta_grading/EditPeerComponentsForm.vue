@@ -61,9 +61,13 @@ const emit = defineEmits<{
     }];
 }>();
 
-// The popup manages its own open/close state, like MarkSeenPopup.vue.
 const visible = ref(false);
 const selectedPeer = ref(props.peers[0] ?? '');
+const checkedMarkOverrides = ref<Record<string, boolean>>({});
+
+function markKey(componentId: string, peer: string, markId: number): string {
+    return `${peer}:${componentId}:${markId}`;
+}
 
 function toggle() {
     visible.value = !visible.value;
@@ -101,9 +105,10 @@ function saveComponent(componentId: string) {
     });
 }
 
-function onMarkChange(componentId: string) {
+function onMarkChange(peer: string, componentId: string, markId: number, event: Event) {
+    checkedMarkOverrides.value[markKey(componentId, peer, markId)] = (event.target as HTMLInputElement).checked;
     emit('mark-change', {
-        peer: selectedPeer.value,
+        peer,
         componentId,
     });
 }
@@ -123,8 +128,6 @@ function gradedVersion(componentId: string, peer: string): number | undefined {
 function isExtraCredit(component: PeerComponent): boolean {
     return component.extra_credit ?? false;
 }
-
-// Badge helpers ported from functions/Badge.twig for server-side parity.
 
 function shouldShowBadge(earned: number, max: number, extraCredit: boolean): boolean {
     if (extraCredit) {
@@ -168,6 +171,10 @@ function badgeText(earned: number, max: number, extraCredit: boolean): string {
 }
 
 function isMarkAssigned(componentId: string, peer: string, markId: number): boolean {
+    const key = markKey(componentId, peer, markId);
+    if (key in checkedMarkOverrides.value) {
+        return checkedMarkOverrides.value[key];
+    }
     return props.peerDetails?.marks_assigned?.[componentId]?.[peer]?.includes(markId) ?? false;
 }
 
@@ -310,7 +317,7 @@ function hasScore(componentId: string, peer: string): boolean {
                   :value="markId"
                   :checked="isMarkAssigned(component.id, peer, markId)"
                   data-testid="mark-checkbox"
-                  @change="onMarkChange(component.id)"
+                  @change="onMarkChange(peer, component.id, markId, $event)"
                 >
               </div>
               <div class="col-no-gutters point-value">
