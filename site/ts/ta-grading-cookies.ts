@@ -1,14 +1,14 @@
 export {};
+
 declare global {
     interface Window {
         filter_overriden_grades: () => void;
         filter_bad_grades: () => void;
         filter_null_section: () => void;
         filter_withdrawn_students: () => void;
-        changeSections: () => void;
-        changeInquiry: () => void;
-        changeSortOrder: () => void;
-        changeAnon: () => void;
+        sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
+        updateSimpleGradingRowNumbersAndColors: () => void;
+        updateElectronicGradingRowNumbersAndColors: () => void;
     }
 }
 
@@ -49,32 +49,8 @@ window.filter_withdrawn_students = () => {
     }
 };
 
-window.changeSections = () => {
-    const view_all = window.Cookies.get('view') ?? 'assigned';
-    if (view_all === 'all') {
-        window.Cookies.set('view', 'assigned', cookieArguments);
-        localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
-    }
-    else {
-        window.Cookies.set('view', 'all', cookieArguments);
-        localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
-    }
-    location.reload();
-};
-
-window.changeInquiry = () => {
-    const inquiry_status = window.Cookies.get('inquiry_status') ?? 'off';
-    window.Cookies.set('inquiry_status', inquiry_status === 'off' ? 'on' : 'off', cookieArguments);
-    location.reload();
-};
-
-window.changeSortOrder = () => {
-    const sort = window.Cookies.get('sort');
-    window.Cookies.set('sort', sort === 'random' ? 'id' : 'random', cookieArguments);
-    location.reload();
-};
-
-window.changeAnon = () => {
-    window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', cookieArguments);
+window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
+    window.Cookies.set('sort', sort_type, cookieArguments);
+    window.Cookies.set('direction', direction, cookieArguments);
     location.reload();
 };
