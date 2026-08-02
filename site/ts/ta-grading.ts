@@ -418,9 +418,6 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
     return stored_paths;
 }
 
-// Kept for upstream parity: the EditPeerComponentsForm Vue component now manages
-// the peer switch internally with v-model, so this global is currently unused.
-// It will be removed in the post-migration cleanup.
 window.changeCurrentPeer = function () {
     const peer = $('#edit-peer-select').val() as string;
     $('.edit-peer-components-block').hide();
