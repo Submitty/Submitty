@@ -251,9 +251,15 @@ progress::-webkit-progress-value {
 .grade-panel button:focus-visible,
 .grade-panel input:focus-visible,
 .grade-panel textarea:focus-visible,
-.grade-panel .key_to_click:focus-visible {
-    outline: 2px solid var(--standard-focus-cornflower-blue);
-    outline-offset: 2px;
+.grade-panel .key_to_click:focus-visible,
+.grading_toolbar button:focus-visible,
+.grading_toolbar input:focus-visible,
+.grading_toolbar textarea:focus-visible,
+.grading_toolbar .key_to_click:focus-visible {
+    outline: none;
+    border-color: transparent;
+    border-radius: inherit;
+    box-shadow: 0 0 0 2px var(--standard-focus-cornflower-blue), 0 0 0 3px #ffffff;
 }
 
 /* In dark mode, --standard-focus-cornflower-blue is too dark to be visible
@@ -261,8 +267,12 @@ progress::-webkit-progress-value {
 [data-theme="dark"] .grade-panel button:focus-visible,
 [data-theme="dark"] .grade-panel input:focus-visible,
 [data-theme="dark"] .grade-panel textarea:focus-visible,
-[data-theme="dark"] .grade-panel .key_to_click:focus-visible {
-    outline: 2px solid #7ec8ff;
+[data-theme="dark"] .grade-panel .key_to_click:focus-visible,
+[data-theme="dark"] .grading_toolbar button:focus-visible,
+[data-theme="dark"] .grading_toolbar input:focus-visible,
+[data-theme="dark"] .grading_toolbar textarea:focus-visible,
+[data-theme="dark"] .grading_toolbar .key_to_click:focus-visible {
+    box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px #ffffff;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
