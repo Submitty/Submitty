@@ -1869,6 +1869,8 @@ HTML;
     /**
      * Builds the data consumed by the EditPeerComponentsForm Vue component,
      * which is mounted inline inside PeerPanel.twig.
+     *
+     * @return array<string, mixed> String-keyed bag of data for the component.
      */
     private function getPeerEditData(GradedGradeable $graded_gradeable): array {
         $gradeable = $graded_gradeable->getGradeable();
