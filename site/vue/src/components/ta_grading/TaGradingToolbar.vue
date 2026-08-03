@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
-import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
+import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
@@ -12,12 +12,20 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     progress: number;
 }>();
 
+const emit = defineEmits<{
+    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
+}>();
+
 // need to assign because ta-grading-panels-init.ts is not called
 Object.assign(taLayoutDet, getSavedTaLayoutDetails());
 if (taLayoutDet.isFullScreenMode) {
     toggleFullScreenMode();
 }
 const fullScreened = taLayoutDet.isFullScreenMode;
+
+function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }) {
+    emit('select-layout', layout);
+}
 </script>
 
 <template>
@@ -59,21 +67,14 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     optional-spanid="fullscreen-btn-cont"
   />
   <NavigationButton
-    :on-click="() => togglePanelSelectorModal(true)"
-    visible-icon="fa-columns"
-    button-id="two-panel-mode-btn"
-    title="Toggle the two panel mode"
-    optional-spanid="two-panel-mode-btn"
-    optional-test-id="panel-selector-toggle"
-  />
-
-  <NavigationButton
     :on-click="exchangeTwoPanels"
     visible-icon="fa-exchange-alt"
     button-id="two-panel-exchange-button"
     title="Exchange the panel positions"
     optional-spanid="two-panel-exchange-btn"
   />
+
+  <PanelSelectorModal @select-layout="selectLayout" />
 
   <NavigationButton
     :on-click="showSettings"
