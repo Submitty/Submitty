@@ -42,7 +42,7 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         const downloadedFilePath = `${DOWNLOAD_PATH}/${getCurrentSemester()}_sample_users_data.csv`;
 
         // verify the file exists
-        cy.readFile(downloadedFilePath).should('exist');
+        cy.readFile(downloadedFilePath);
 
         // compare the file against the fixture with the expected values
         cy.readFile(`${FIXTURE_PATH}/${filePath}`).then((expectedCsv) => {
