@@ -945,11 +945,12 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("You cannot block yourself.");
         }
 
-        $target_user = $this->core->getQueries()->getUserById($user_id);
-        if ($target_user === null) {
+        $user_group = $this->core->getQueries()->getUserGroup($user_id);
+        if ($user_group === null) {
             return $this->core->getOutput()->renderJsonFail("User not found.");
         }
-        if ($target_user->accessAdmin()) {
+
+        if ($user_group <= 2) {
             return $this->core->getOutput()->renderJsonFail("You cannot block an instructor.");
         }
 
