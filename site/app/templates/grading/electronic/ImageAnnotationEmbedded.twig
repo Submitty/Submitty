@@ -49,7 +49,7 @@
 
 <script defer>
     $(()=>{
-        if({{ directory }} === "submissions_processed" && {{ is_peer_grader ? "true" : "false" }} === false) {
+        if("{{ directory }}" === "submissions_processed" && {{ is_peer_grader ? "true" : "false" }} === false) {
             window.initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons | json_encode | raw }});
         }
     })
