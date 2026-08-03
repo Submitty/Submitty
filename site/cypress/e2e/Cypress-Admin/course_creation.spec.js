@@ -11,21 +11,17 @@ describe('Test cases revolving around course creation through UI', () => {
         valid_course_code = `${Math.random().toString(36).substring(2, 8)}_course_creation_test`;
     });
 
-    beforeEach(() => {
+    it('Courses the instructor is in should display properly on their home page', () => {
         cy.login();
-    });
-
-    it('Should see all default courses on home page', () => {
-        // List of all default courses that should be on home page for instructor
-        // List is different on CI vs. locally , so we just check for sample since that's guaranteed on both
+        // Should see all default courses on home page
+        // list is different on CI vs. locally, so we just check for sample since that's guaranteed on both
         const default_courses = ['sample'];
         for (const default_course of default_courses) {
             cy.get(`[data-testid=${default_course}-button]`).should('exist');
         }
-    });
 
-    it('Should successfully create course only if using valid course code', () => {
-        // Requirements for course code: only lowercase letters (a-z), digits (0-9), and the underscore character.
+        // Should fail to make a course when using an invalid course code
+        // requirements for course code: only lowercase letters (a-z), digits (0-9), and the underscore character.
         const invalid_course_codes = ['UPPER', 'special!@#', 'sp a ces', 'hyph-en', '_punc.,', 'other%`~'];
         cy.visit('/home/courses/new');
         for (const invalid_course_code of invalid_course_codes) {
@@ -33,6 +29,7 @@ describe('Test cases revolving around course creation through UI', () => {
             cy.get('[data-testid="popup-message"]').should('contain', 'The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.');
         }
 
+        // Should see course on home page once it is created
         tryCreateCourse(valid_course_code);
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
@@ -40,9 +37,8 @@ describe('Test cases revolving around course creation through UI', () => {
                 return $body.find(`[data-testid="${valid_course_code}-button"]`).length > 0;
             });
         }, 5000, 100);
-    });
 
-    it('Archived course should be moved to archive section on home page', () => {
+        // Archived course should be moved to archive section on home page
         // archive the course
         cy.visit([valid_course_code, 'config']);
         cy.get('[data-testid="course-archive"]').click();
@@ -58,13 +54,9 @@ describe('Test cases revolving around course creation through UI', () => {
         // new course should be within unarchived section
         cy.get('[data-testid="unarchived_courses-button-list"]')
             .find(`[data-testid=${valid_course_code}-button]`).should('exist');
-    });
-
-    it('Once removed from a course, you should not see that course on the home page', () => {
-        // instructor can see the course because they're in it
-        cy.get(`[data-testid="${valid_course_code}-button"]`).should('exist');
         cy.logout();
 
+        // Once removed from a course, you should not see that course on home
         // remove instructor from the course as submitty-admin
         cy.login('submitty-admin');
         cy.visit([valid_course_code, 'users']);
