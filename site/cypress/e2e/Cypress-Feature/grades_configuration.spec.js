@@ -299,16 +299,12 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="btn-build-customization"]').click();
         cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'Rainbow grades successfully generated!');
 
-        // The instructor gradebook renders the artifacts this build just produced, so assert
-        // them here rather than paying for a second 30s build in a separate test.
+        // Verify the sort order dropdown and registration date are present
         cy.visit(['testing', 'gradebook']);
-        // date_registered is an instructor-only column; header text comes from RainbowGrades.
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'reg date');
-        // The sort selector only renders once more than one sorted table exists on disk.
         cy.get('[data-testid="rainbow-grades-sort-select"]').should('be.visible');
 
-        // A server-side build means the served summaries match what the server produced,
-        // so the manual-generation heuristic must report false.
+        // Check that the table exists and the warning banner is not present
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="display-grade-summary"]').should('be.visible');
         cy.window().its('rainbowGradesGeneratedManually').should('eq', false);
@@ -355,11 +351,10 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['testing', 'grades']);
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Rainbow Grades are not enabled for this course.');
     });
-    // The three tests below read artifacts produced by 'Build Rainbow Grades and View Table'
-    // above and must run after it. They do not rebuild, so they stay cheap.
+
     it('Gradebook Sort Selector Switches Between Generated Tables', () => {
         // auto_rainbow_grades.py builds 'overall' plus SORT_ORDERS and deletes stale
-        // output-by-*.html first, so this list is exact, not a lower bound.
+        // output-by-*.html first, so this list is exact
         const expectedSorts = ['overall', 'section', 'hw', 'lab', 'test', 'exam'];
 
         cy.visit(['testing', 'gradebook']);
@@ -369,36 +364,33 @@ describe('Test Rainbow Grading', () => {
             cy.get('@sort-select').find(`option[value="${key}"]`).should('exist');
         });
 
-        // No ?sort= defaults to the overall table.
         cy.get('@sort-select').should('have.value', 'overall');
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
 
-        // Selecting a sort navigates, and the server echoes the selection back.
         cy.get('@sort-select').select('section');
         cy.location('search').should('eq', '?sort=section');
         cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'section');
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
 
-        // Deep links work without going through the dropdown.
+        // Test that sort orders can be accessed by a link
         cy.visit(['testing', 'gradebook?sort=hw']);
         cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'hw');
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
 
-        // An unrecognized sort falls back to overall rather than rendering an empty page.
+        // an unrecognized sort falls back to overall rather than rendering an empty page
         cy.visit(['testing', 'gradebook?sort=not_a_real_sort']);
         cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'overall');
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
     });
     it('CSV Download Follows The Selected Sort', () => {
         const csvUrl = buildUrl(['testing', 'reports', 'rainbow_grades_csv'], true);
-        // generateCustomFilename() omits the sort segment for overall.
         const overallFilename = /filename=testing_rainbow_grades_\d/;
 
         cy.request(`${csvUrl}?sort=overall`).then((response) => {
             expect(response.status).to.equal(200);
             expect(response.headers['content-type']).to.contain('application/csv');
             expect(response.headers['content-disposition']).to.match(overallFilename);
-            // date_registered is written to the CSV as well as the HTML table.
+            // date_registered is written to the CSV as well as the HTML table
             expect(String(response.body)).to.contain('reg date');
         });
 
@@ -407,8 +399,6 @@ describe('Test Rainbow Grading', () => {
             expect(response.headers['content-disposition']).to.contain('testing_rainbow_grades_section_');
         });
 
-        // The preg_match guard in downloadRainbowGradesCSVFile() must reject anything that
-        // could escape the rainbow_grades directory and quietly serve overall instead.
         cy.request(`${csvUrl}?sort=../../../../etc/passwd`).then((response) => {
             expect(response.status).to.equal(200);
             expect(response.headers['content-disposition']).to.match(overallFilename);
