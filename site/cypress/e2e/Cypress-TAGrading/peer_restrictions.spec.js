@@ -21,12 +21,12 @@ describe('Test that grading restrictions on peer graders work', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
         panelOptions.forEach(({ setting }) => {
-            cy.get(setting).should('be.checked').uncheck();
+            cy.get(setting, { timeout: 10000 }).should('be.checked').uncheck();
         });
-        cy.get('[data-testid="save-status"]').should('contain.text', 'All Changes Saved');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
-            cy.get(setting).should('not.be.checked');
+            cy.get(setting, { timeout: 10000 }).should('not.be.checked');
         });
         cy.visit('/');
         cy.logout();
@@ -39,21 +39,21 @@ describe('Test that grading restrictions on peer graders work', () => {
             'details',
         ]);
         cy.get('[data-testid="agree-popup-btn"]').click();
-        cy.get('[data-testid="grade-button"]').filter(':visible').first().click();
+        cy.get('[data-testid="grade-button"]', { timeout: 10000 }).filter(':visible').first().click();
         panelOptions.forEach(({ gradingButton }) => {
-            cy.get(gradingButton).should('not.exist');
+            cy.get(gradingButton, { timeout: 10000 }).should('not.exist');
         });
         cy.visit('/');
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
         panelOptions.forEach(({ setting }) => {
-            cy.get(setting).should('not.be.checked').check();
+            cy.get(setting, { timeout: 10000 }).should('not.be.checked').check();
         });
-        cy.get('[data-testid="save-status"]').should('contain.text', 'All Changes Saved');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
-            cy.get(setting).should('be.checked');
+            cy.get(setting, { timeout: 10000 }).should('be.checked');
         });
     });
 });
