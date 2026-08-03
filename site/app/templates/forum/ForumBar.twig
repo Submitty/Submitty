@@ -54,8 +54,7 @@
 			{% include "Vue.twig" with {
 				'type': 'component',
 				'name': 'FullScreenButton',
-				'args': { 'initialFullScreen': false },
-				'events': { 'toggle': '(on) => { setFullScreenMode(on); }' }
+				'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
 			} %}
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">

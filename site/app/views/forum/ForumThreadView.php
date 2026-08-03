@@ -119,7 +119,6 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
             $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-            $this->core->getOutput()->addInternalModuleJs('full-screen.js');
 
 
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
@@ -432,7 +431,6 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
-        $this->core->getOutput()->addInternalModuleJs('full-screen.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
@@ -942,7 +940,6 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
-        $this->core->getOutput()->addInternalModuleJs('full-screen.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
@@ -996,7 +993,6 @@ class ForumThreadView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
-        $this->core->getOutput()->addInternalModuleJs('full-screen.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
         $buttons = [
