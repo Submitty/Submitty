@@ -67,7 +67,7 @@
                     {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
                 {% endif %}
-                {% if not anon_mode and not blind_grader and not user_assignment_settings_missing and not user_assignment_settings_unreadable%}
+                {% if not anon_mode and not blind_grader and not user_assignment_settings_missing and not user_assignment_settings_unreadable and user_assignment_settings_path is not null %}
                     {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader) }}
                 {% endif %}
             </div>
