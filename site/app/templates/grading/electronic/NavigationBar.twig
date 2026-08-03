@@ -25,7 +25,10 @@
                 'nextStudentUrl': next_student_url,
                 'progress': progress
             },
-            'class': 'grading_toolbar'
+            'class': 'grading_toolbar',
+            'events': {
+                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }'
+            }
         }%}
     </div>
 </div>
