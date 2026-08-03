@@ -154,7 +154,7 @@ WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND pid <> pg_backend_pid();
     )
     migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'run_migrator.py')
     subprocess.check_call(
-        ['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial']
+        [str(SUBMITTY_INSTALL_DIR / "venv" / "bin" / "python3"), migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial']
     )
     del os.environ['PGPASSWORD']
 
