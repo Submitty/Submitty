@@ -999,7 +999,7 @@ class ForumController extends AbstractController {
      * Expected payload:
      *   None
      *
-     * @return JsonResponse{status: string, message?: string, data?: array{users: array}}
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/forum/users/blocked", methods: ["GET"])]
     public function getBlockedUsers(): JsonResponse {
