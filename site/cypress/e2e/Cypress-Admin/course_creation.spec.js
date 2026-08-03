@@ -1,6 +1,12 @@
 describe('Test cases revolving around course creation through UI', () => {
     let valid_course_code;
 
+    function tryCreateCourse(course_code) {
+        cy.get('[data-testid="course-title-input"]').type(course_code);
+        cy.get('[data-testid="course-group-select"]').select('sample_tas_www');
+        cy.get('[data-testid="create-course-submit"]').click();
+    }
+
     before(() => {
         valid_course_code = `${Math.random().toString(36).substring(2, 8)}_course_creation_test`;
     });
@@ -18,23 +24,16 @@ describe('Test cases revolving around course creation through UI', () => {
         }
     });
 
-    it('Should fail to make a course when using an invalid course code', () => {
+    it('Should successfully create course only if using valid course code', () => {
         // Requirements for course code: only lowercase letters (a-z), digits (0-9), and the underscore character.
         const invalid_course_codes = ['UPPER', 'special!@#', 'sp a ces', 'hyph-en', '_punc.,', 'other%`~'];
         cy.visit('/home/courses/new');
         for (const invalid_course_code of invalid_course_codes) {
-            cy.get('[data-testid="course-title-input"]').type(invalid_course_code);
-            cy.get('[data-testid="course-group-select"]').select('sample_tas_www');
-            cy.get('[data-testid="create-course-submit"]').click();
+            tryCreateCourse(invalid_course_code);
             cy.get('[data-testid="popup-message"]').should('contain', 'The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.');
         }
-    });
 
-    it('Should see course on home page once it is created', () => {
-        cy.visit('/home/courses/new');
-        cy.get('[data-testid="course-title-input"]').type(valid_course_code);
-        cy.get('[data-testid="course-group-select"]').select('sample_tas_www');
-        cy.get('[data-testid="create-course-submit"]').click();
+        tryCreateCourse(valid_course_code);
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('body').then(($body) => {
