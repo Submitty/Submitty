@@ -995,6 +995,12 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess("User has been unblocked from making forum posts.");
     }
 
+    /**
+     * Expected payload:
+     *   None
+     *
+     * @return JsonResponse{status: string, message?: string, data?: array{users: array}}
+     */
     #[Route("/courses/{_semester}/{_course}/forum/users/blocked", methods: ["GET"])]
     public function getBlockedUsers(): JsonResponse {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -1401,11 +1407,21 @@ class ForumController extends AbstractController {
             $user,
             $block_number
         );
+        $blocked_author_ids = [];
+        if ($this->core->getUser()->accessAdmin()) {
+            $author_ids = array_unique(array_map(
+                fn($p) => $p->getAuthor()->getId(),
+                $thread->getPosts()->toArray()
+            ));
+            $blocked_author_ids = array_flip(
+                $this->core->getCourseEntityManager()->getRepository(ForumBlockedUser::class)->getUsersBlockedFromForumPosts($author_ids)
+            );
+        }
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, $blocked_author_ids, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, $blocked_author_ids, false);
         }
     }
 

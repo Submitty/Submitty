@@ -51,9 +51,10 @@ class ForumThreadView extends AbstractView {
      * displayed in the left panel.
      * @param Thread[] $threads
      * @param Thread[] $merge_thread_options
+     * @param array<string, int> $blocked_author_ids
      * @return mixed[]|string
      */
-    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, bool $ajax = false): array|string {
+    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, array $blocked_author_ids, bool $ajax = false): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $categories = $repo->getCategories();
@@ -81,7 +82,7 @@ class ForumThreadView extends AbstractView {
         $arrowup_visibility = ($initialPageNumber === 0) ? "display:none;" : "";
         $displayThreadContent = $this->displayThreadList($threads, false);
 
-        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false);
+        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, $blocked_author_ids, false);
 
         $this->core->getQueries()->visitThread($user, $thread->getId());
 
@@ -309,10 +310,11 @@ class ForumThreadView extends AbstractView {
      * @param bool $includeReply
      * @param string $display_option
      * @param Thread[] $merge_thread_options
+     * @param array<string, int> $blocked_author_ids
      * @param bool $render
      * @return mixed[]|string
      */
-    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, array $blocked_author_ids, bool $render = true): array|string {
         $first = true;
         $post_data = [];
         $anon_user_id = hash('sha3-224', $this->core->getUser()->getId());
@@ -333,19 +335,6 @@ class ForumThreadView extends AbstractView {
             $posts = $thread->getPosts()->toArray();
         }
         $post_box_id = 2;
-        $blocked_author_ids = [];
-        if ($user->accessAdmin()) {
-            $author_ids = array_unique(array_map(
-                fn($p) => $p->getAuthor()->getId(),
-                $posts
-            ));
-            $blocked_author_ids = array_flip(
-                $this->core
-                    ->getCourseEntityManager()
-                    ->getRepository(ForumBlockedUser::class)
-                    ->getUsersBlockedFromForumPosts($author_ids)
-            );
-        }
         foreach ($posts as $post) {
             $post_data[] = $this->createPost(
                 $first_post,
