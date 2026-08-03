@@ -9,7 +9,6 @@ use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\entities\forum\Thread;
 use app\entities\forum\Post;
-use app\entities\forum\ForumBlockedUser;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
