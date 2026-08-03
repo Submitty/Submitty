@@ -1,4 +1,3 @@
-import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
 
 declare global {
@@ -585,7 +584,6 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
         saveResizedColsDimensions,
     );
     initializeHorizontalTwoPanelDrag();
-    togglePanelSelectorModal(false);
     if (!taLayoutDet.isFullLeftColumnMode) {
         $('#grading-panel-student-name').show();
     }
