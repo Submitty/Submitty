@@ -15,7 +15,7 @@ describe('Test cases revolving around course creation through UI', () => {
         cy.login();
         // Should see all default courses on home page
         // list is different on CI vs. locally, so we just check for sample since that's guaranteed on both
-        const default_courses = ['sample'];
+        const default_courses = ['sample', 'testing', 'archived'];
         for (const default_course of default_courses) {
             cy.get(`[data-testid=${default_course}-button]`).should('exist');
         }
