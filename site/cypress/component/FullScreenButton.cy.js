@@ -71,26 +71,26 @@ describe('FullScreenButton', () => {
     describe('escape key', () => {
         it('emits false when Escape is pressed while full screen', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
-            cy.get('[data-testid="content-main"]').type('{esc}');
+            cy.get('[data-testid="fullscreen-btn"]').type('{esc}');
             cy.get('@eventHandler').should('have.been.calledOnceWith', false);
         });
 
         it('does not emit when Escape is pressed while not full screen', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', {});
-            cy.get('[data-testid="content-main"]').type('{esc}');
+            cy.get('[data-testid="fullscreen-btn"]').type('{esc}');
             cy.get('@eventHandler').should('not.have.been.called');
         });
 
         it('resets the icon when Escape exits full screen', () => {
             cy.mount(FullScreenButton, { props: { initialFullScreen: true } });
-            cy.get('[data-testid="content-main"]').type('{esc}');
+            cy.get('[data-testid="fullscreen-btn"]').type('{esc}');
             cy.get('[data-testid="fullscreen-btn"] i').should('have.class', 'fa-expand');
         });
 
         it('emits only once when Escape is pressed twice', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
-            cy.get('[data-testid="content-main"]').type('{esc}');
-            cy.get('[data-testid="content-main"]').type('{esc}');
+            cy.get('[data-testid="fullscreen-btn"]').type('{esc}');
+            cy.get('[data-testid="fullscreen-btn"]').type('{esc}');
             cy.get('@eventHandler').should('have.been.calledOnce');
         });
     });

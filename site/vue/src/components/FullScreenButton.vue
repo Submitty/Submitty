@@ -1,19 +1,17 @@
-<!-- If you are planning to use this component, you will have to add the
-     module JS to the PHP view file of whatever page you are implementing
-     the component in.
+<!-- This component only emits `toggle`; applying full screen is the host page's job.
+     Wire it up in the Twig include:
 
-     $this->core->getOutput()->addInternalModuleJs('full-screen.js');
+     'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
 
-     You will also need to add the emit in the Twig include:
+     The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
+     loads on every page, so no per-page CSS is needed.
 
-     'events': { 'toggle': '(on) => { setFullScreenMode(on); }' }
-
-     Note that one Twig template can be rendered by multiple view methods
-     (ForumBar.twig is rendered by four), and each one needs the module JS.
+     Escape only exits full screen while this button has focus, since the handler
+     is bound to the button rather than the document.
 -->
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 
 const { initialFullScreen } = defineProps<{
     initialFullScreen?: boolean;
@@ -31,15 +29,14 @@ function toggle() {
     emit('toggle', isFullScreen.value);
 }
 
-function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && isFullScreen.value) {
-        isFullScreen.value = false;
-        emit('toggle', false);
+function onEscape() {
+    if (!isFullScreen.value) {
+        return;
     }
+    isFullScreen.value = false;
+    emit('toggle', false);
 }
 
-onMounted(() => document.addEventListener('keydown', handleKeydown));
-onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
 </script>
 
 <template>
@@ -49,6 +46,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
     class="btn btn-default"
     title="Toggle full screen mode"
     @click="toggle"
+    @keydown.esc="onEscape"
   >
     <i
       class="fas"
