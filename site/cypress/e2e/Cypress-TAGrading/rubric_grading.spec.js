@@ -10,6 +10,10 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-container"]').eq(1).should('contain', 'Coding Style');
         cy.get('[data-testid="component-container"]').eq(2).should('contain', 'Documentation');
         cy.get('[data-testid="component-container"]').eq(3).should('contain', 'Extra Credit');
+        // Badges of never-opened components should be mounted on initial load (score value
+        // correctness is covered by the 'save and move with arrows' test on a fresh visit)
+        cy.get('[data-testid="component-64"] [data-testid="grading-total"]').should('contain', '/ 2');
+        cy.get('[data-testid="component-65"] [data-testid="grading-total"]').should('contain', '/ 5');
         cy.get('[data-testid="component-64"]').should('contain', 'Read Me');
         cy.get('[data-testid="component-64"]').click(20, 25);
         cy.get('[data-testid="component-64"]')
@@ -110,7 +114,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Sally Jones');
         cy.get('[data-testid="component-64"] [data-testid="grading-total"]').should('contain', '0 / 2');
         cy.get('body').type('{rightArrow}');
-        cy.get('[data-testid="component-64"] [data-testid="grading-total"]').should('contain', '— / 2');
+        cy.get('[data-testid="component-64"] [data-testid="grading-total"]').should('contain', '− / 2');
         cy.get('[data-testid="component-65"] [data-testid="grading-total"]').should('contain', '0 / 5');
     });
     it('Grader should only see selected mark and published marks when component collapses', () => {

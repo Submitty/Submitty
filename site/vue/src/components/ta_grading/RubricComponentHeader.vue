@@ -5,7 +5,7 @@ const props = defineProps<{
 }>();
 
 function getBadgeStyle(earned: number | null, total: number): string {
-    if (earned === null || total === undefined) {
+    if (earned === null) {
         return '';
     }
     if (total === 0 && earned === 0) {
@@ -26,7 +26,7 @@ const badgeClass = getBadgeStyle(props.totalScore, props.maxValue);
 // Round to full integers to match the badge's pre-refactor visual style
 const displayScore = props.totalScore !== null
     ? Math.round(props.totalScore).toString()
-    : '\u2014';
+    : '\u2212';
 const displayMax = Math.round(props.maxValue).toString();
 </script>
 

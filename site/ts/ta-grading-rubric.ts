@@ -3623,23 +3623,6 @@ async function injectGradingComponent(component: Component, graded_component: Co
 async function injectGradingComponentHeader(component: Component, graded_component: ComponentGradeInfo, showMarkList: boolean) {
     const elements = await renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), !!canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component));
     setComponentHeaderContents(component.id, elements);
-
-    // jQuery .html() removes <script> tags from the Twig.js output, so the
-    // Vue component mounted via Vue.twig doesn't auto-mount via its inline
-    // <script> tag. So we mount it manually.
-    const mountEl = getComponentJQuery(component.id).find('.header-block [id^="vue-"]').first();
-    if (mountEl.length > 0) {
-        await window.submitty.render(
-            `#${mountEl.attr('id')!}`,
-            'component',
-            'ta_grading/RubricComponentHeader',
-            {
-                totalScore: graded_component.score,
-                maxValue: component.max_value,
-            },
-        );
-    }
-
     await refreshTotalScoreBox();
 }
 

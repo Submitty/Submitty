@@ -6,9 +6,9 @@ describe('RubricComponentHeader', () => {
         cy.get('[data-testid="grading-total"]').should('contain', '8 / 10');
     });
 
-    it('renders em-dash when totalScore is null (ungraded)', () => {
+    it('renders minus sign when totalScore is null (ungraded)', () => {
         cy.mount(RubricComponentHeader, { props: { totalScore: null, maxValue: 10 } });
-        cy.get('[data-testid="grading-total"]').should('contain', '\u2014 / 10');
+        cy.get('[data-testid="grading-total"]').should('contain', '\u2212 / 10');
     });
 
     it('applies no extra class when total=0 and max=0', () => {
