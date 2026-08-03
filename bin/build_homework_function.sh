@@ -170,7 +170,7 @@ function build_homework {
     fi
 
     # Run the complete config json through a python json syntax checker.
-    python3 "${GRADINGCODE}/json_syntax_checker.py" complete_config.json
+    "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${GRADINGCODE}/json_syntax_checker.py" complete_config.json
     py_res="$?"
     if (( "$py_res" != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
@@ -181,7 +181,7 @@ function build_homework {
     # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
     if [[ "$UID" -eq 0 || "$(whoami)" == "submitty_daemon" ]]; then
         # Add allowed minutes in database from config if exists
-        python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
+        "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
         set_minutes="$?"
 
         if (("$set_minutes" != 0)); then
@@ -246,7 +246,7 @@ function build_homework {
     # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
     if [[ "$UID" -eq 0 ]]; then
         # insert the gradeable data into the db
-        "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
+        "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
     else
         echo -e "\nWARNING:  To insert the autograding data to the database, the build_homework_function script must be run as sudo."
     fi
