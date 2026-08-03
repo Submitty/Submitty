@@ -247,7 +247,7 @@ class ImageController extends AbstractController {
         }
 
         // Annotation added or updated, and the student hasn't seen it yet
-        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         $ta_graded_gradeable->resetUserViewedDate();
         // save this change to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
