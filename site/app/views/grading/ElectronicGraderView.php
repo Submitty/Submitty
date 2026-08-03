@@ -982,6 +982,8 @@ HTML;
             "stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']),
             "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
+            "course_url" => $this->core->buildCourseUrl([]),
+            "storage_key" => $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $gradeable->getId() . '-message',
             "blind_status" => $gradeable->getPeerBlind(),
             "is_instructor" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
             "is_student" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
@@ -1298,8 +1300,6 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
-        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
-        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
