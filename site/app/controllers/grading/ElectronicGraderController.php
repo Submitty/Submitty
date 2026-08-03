@@ -1097,6 +1097,23 @@ class ElectronicGraderController extends AbstractController {
 
         $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
 
+        $sort = $_COOKIE['sort'] ?? 'id';
+        $direction = $_COOKIE['direction'] ?? 'ASC';
+        if (
+            $peer
+            && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
+        ) {
+            $sort = 'random';
+            $direction = 'ASC';
+        }
+        elseif ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
+        elseif ($peer) {
+            $sort = 'peer';
+            $direction = 'ASC';
+        }
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
