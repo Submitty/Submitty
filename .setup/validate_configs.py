@@ -48,7 +48,10 @@ for item in os.listdir(CONFIG_REPOSITORY):
                 existing = json.load(f2).keys()
                 difference = required - existing
                 if len(difference) > 0:
-                    raise KeyError(f'Required key(s) {difference} not present in {destination_path}.')
+                    raise KeyError(
+                        f'Required key(s) {difference} not '
+                        f'present in {destination_path}.'
+                    )
             except FileNotFoundError as error:
                 raise FileNotFoundError(
                     f'Required file {destination_path} not found. '
