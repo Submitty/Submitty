@@ -1523,6 +1523,7 @@ HTML;
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader, bool $anon_mode) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable, bool $apply_peer_file_restriction = false) {
             $files[$start_dir_name] = [];
+            $added_visible_file = false;
             $gradeable = $graded_gradeable->getGradeable();
             $user = $this->core->getUser();
             $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
@@ -1559,10 +1560,11 @@ HTML;
                             $working_dir = &$working_dir[$dir];
                         }
                         $working_dir[$file['name']] = $file['path'];
+                        $added_visible_file = true;
                     }
                 }
             }
-            if ($is_restricted_peer_grader && $files[$start_dir_name] === []) {
+            if ($is_restricted_peer_grader && !$added_visible_file) {
                 unset($files[$start_dir_name]);
             }
         };
