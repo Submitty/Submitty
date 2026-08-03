@@ -34,6 +34,13 @@
         </div> {# /#submitty-body #}
     {% if is_debug %}
         <div id='page-info'>
+            <p style="margin-bottom: 1rem;">
+                <strong>Note:</strong> To ignore excessive database queries failure on a specific page, add the URL path to
+                <code>site/.performance_warning_ignore.json</code>.
+                <br>
+                Example:
+                <code>/courses/&lt;term&gt;/&lt;course&gt;/gradeable/&lt;gradeable&gt;/update</code>
+            </p>
             Runtime: {{ runtime }}<br /><br />
             <h2>Site Details</h2>
             Total Submitty Details: {{ submitty_queries|length }}<br /><br />
