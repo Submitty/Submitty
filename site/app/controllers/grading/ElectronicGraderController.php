@@ -2141,11 +2141,20 @@ class ElectronicGraderController extends AbstractController {
         }
         $ta_grading_cluster_mode = ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true' && $clustering_enabled && $clusters_exist;
 
-        $is_unclustered = true; // default to true, meaning they won't trigger cluster cascade unless proven otherwise
+        $is_unclustered = true; // default to true
         if ($ta_grading_cluster_mode) {
             $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $graded_gradeable->getSubmitter()->getId());
-            if ($cluster !== null && strtolower($cluster->getClusterName() ?? '') !== 'unclustered') {
-                $is_unclustered = false;
+            if ($cluster !== null) {
+                $submitter_id = $graded_gradeable->getSubmitter()->getId();
+                $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, [$submitter_id]);
+                $valid_members = $cluster->getValidMembers($active_versions);
+                
+                foreach ($valid_members as $member) {
+                    if (($member->getUserId() ?? $member->getTeamId()) === $submitter_id) {
+                        $is_unclustered = false;
+                        break;
+                    }
+                }
             }
         }
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_unclustered);
@@ -2541,50 +2550,92 @@ class ElectronicGraderController extends AbstractController {
         Logger::logTAGrading($logger_params);
 
         try {
-            $submitters_to_grade = [];
-            if ($ta_grading_cluster_mode) {
-                $active_versions = [];
-                foreach ($this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id) as $s) {
-                    $id = $s['user_id'] ?? $s['team_id'];
-                    $active_versions[$id] = (int) $s['active_version'];
-                }
+            if (!$ta_grading_cluster_mode) {
+                $gg = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+                if ($gg !== false) {
+                    $ta_gg = $gg->getOrCreateTaGradedGradeable();
+                    $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
 
+                    $this->saveGradedComponent(
+                        $ta_gg,
+                        $gc,
+                        $grader,
+                        $custom_points,
+                        $custom_message,
+                        $marks,
+                        $component_version,
+                        !$silent_edit,
+                        true //execute database query immediately
+                    );
+                }
+            } else {
+                $submitters_to_grade = [];
+                $active_versions = [];
                 $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $submitter_id);
                 if ($cluster !== null) {
-                    foreach ($cluster->getValidMembers($active_versions) as $member) {
-                        $submitters_to_grade[] = $member->getUserId() ?? $member->getTeamId();
+                    $member_ids = [];
+                    foreach ($cluster->getMembers() as $member) {
+                        $member_ids[] = $member->getUserId() ?? $member->getTeamId();
+                    }
+                    $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, $member_ids);
+
+                    $valid_members = $cluster->getValidMembers($active_versions);
+                    $is_current_valid = false; //this tells us that if this student is valid itself or not (i.e. whether student should belong in Unclustered mode)
+                    foreach ($valid_members as $member) {
+                        if (($member->getUserId() ?? $member->getTeamId()) === $submitter_id) {
+                            $is_current_valid = true;
+                        }
+                    }
+                    // if this student is valid then other students in its cluster can also be graded simultaneously
+                    if ($is_current_valid) {
+                        foreach ($valid_members as $member) {
+                            $submitters_to_grade[] = $member->getUserId() ?? $member->getTeamId();
+                        }
+                    }
+                }
+                //if the student is "Unclustered" that means he just needs to be graded individually
+                if (count($submitters_to_grade) === 0) {
+                    $submitters_to_grade[] = $submitter_id;
+                }
+                $ta_graded_gradeables_to_save = [];
+
+                foreach ($submitters_to_grade as $s_id) {
+                    $gg = $this->tryGetGradedGradeable($gradeable, $s_id);
+                    if ($gg === false) {
+                        continue;
+                    }
+
+                    // We have skipped permission check for current submitter as it was already checked at the top of the function
+                    if ($s_id !== $submitter_id && !$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $gg, "component" => $component])) {
+                        continue;
+                    }
+
+                    $ta_gg = $gg->getOrCreateTaGradedGradeable();
+                    $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
+
+                    $this->saveGradedComponent(
+                        $ta_gg,
+                        $gc,
+                        $grader,
+                        $custom_points,
+                        $custom_message,
+                        $marks,
+                        $component_version,
+                        !$silent_edit,
+                        false //do not save to database yet
+                    );
+                    $ta_graded_gradeables_to_save[] = $ta_gg;
+                }
+                
+                $this->core->getQueries()->bulkSaveTaGradedGradeables($ta_graded_gradeables_to_save);
+                foreach ($ta_graded_gradeables_to_save as $ta_gg) {
+                    $submitter = $ta_gg->getGradedGradeable()->getSubmitter();
+                    if ($submitter->isTeam()) {
+                        $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
                     }
                 }
             }
-            if (count($submitters_to_grade) === 0) {
-                $submitters_to_grade[] = $submitter_id;
-            }
-
-            foreach ($submitters_to_grade as $s_id) {
-                $gg = $this->tryGetGradedGradeable($gradeable, $s_id);
-                if ($gg === false) {
-                    continue;
-                }
-
-                // Skip permission check for current submitter as it was already checked at the top of the function
-                if ($s_id !== $submitter_id && !$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $gg, "component" => $component])) {
-                    continue;
-                }
-
-                $ta_gg = $gg->getOrCreateTaGradedGradeable();
-                $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
-
-                $this->saveGradedComponent(
-                    $ta_gg,
-                    $gc,
-                    $grader,
-                    $custom_points,
-                    $custom_message,
-                    $marks,
-                    $component_version,
-                    !$silent_edit
-                );
-            }
+            
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
@@ -2696,7 +2747,7 @@ class ElectronicGraderController extends AbstractController {
         return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::CLOSE_COMPONENT);
     }
 
-    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
+    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite, bool $save_to_db = true) {
         // Only update the grader if we're set to overwrite it
         if ($overwrite) {
             $graded_component->setGrader($grader);
@@ -2733,11 +2784,13 @@ class ElectronicGraderController extends AbstractController {
         // Reset the user viewed date since we updated the grade
         $ta_graded_gradeable->resetUserViewedDate();
 
-        // Finally, save the changes to the database
-        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
-        if ($submitter->isTeam()) {
-            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        if ($save_to_db) {
+            // Finally, save the changes to the database
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+            $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+            if ($submitter->isTeam()) {
+                $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+            }
         }
     }
 
