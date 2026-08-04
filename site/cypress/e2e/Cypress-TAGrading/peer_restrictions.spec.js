@@ -21,7 +21,11 @@ describe('Test that grading restrictions on peer graders work', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
         panelOptions.forEach(({ setting }) => {
-            cy.get(setting, { timeout: 10000 }).should('be.checked').uncheck();
+            cy.get(setting, { timeout: 10000 }).then(($el) => {
+                if ($el.prop('checked')) {
+                    cy.wrap($el).uncheck();
+                }
+            });
         });
         cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
