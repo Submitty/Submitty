@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 
 const props = defineProps<{
-    csrfToken: string;
     searchQuery?: string;
 }>();
 
@@ -36,42 +35,87 @@ function handleKeydown(e: KeyboardEvent) {
     class="search-input-wrapper"
     data-testid="search-bar-vue"
   >
-    <input
-      v-model="query"
-      class="search-bar-input"
-      type="text"
-      placeholder="Search here..."
-      aria-label="Forum Search Input Box"
-      data-ays-ignore="true"
-      data-testid="search-content-input"
-      @keydown="handleKeydown"
-      @change="query = query.trim()"
-    />
-    <button
-      v-if="query.length > 0"
-      id="search-clear"
-      type="button"
-      title="Clear search"
-      aria-label="Clear search"
-      data-ays-ignore="true"
-      @click="clearSearch"
-    >
-      <i
-        class="fa-solid fa-circle-xmark"
-        aria-hidden="true"
+    <div class="search-input-inner">
+      <input
+        v-model="query"
+        class="search-bar-input"
+        type="text"
+        placeholder="Search here..."
+        aria-label="Forum Search Input Box"
+        data-ays-ignore="true"
+        data-testid="search-content-input"
+        @keydown="handleKeydown"
+        @change="query = query.trim()"
       />
+      <button
+        v-if="query.length > 0"
+        class="search-clear"
+        type="button"
+        title="Clear search"
+        aria-label="Clear search"
+        data-ays-ignore="true"
+        data-testid="search-clear"
+        @click="clearSearch"
+      >
+        <i
+          class="fa-solid fa-circle-xmark"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+    <button
+      type="button"
+      name="search"
+      title="Submit search"
+      class="btn btn-primary"
+      data-testid="search-submit"
+      @click="submitSearch"
+    >
+      Search
     </button>
   </div>
 </template>
 
 <style scoped>
+.search-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.search-input-inner {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 30px;
+}
+
 .search-bar-input {
+    box-sizing: border-box;
     height: 100%;
     width: 100%;
     padding-right: 2rem;
 }
 
-#search-clear {
-    display: block;
+.search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--standard-medium-gray);
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.search-clear:hover,
+.search-clear:focus {
+    color: var(--default-black);
 }
 </style>
