@@ -1,6 +1,14 @@
 describe('test for discussion post panel', () => {
-    it('Enable discussion form and post', () => {
+    before(() => {
         cy.login();
+        // Reset the gradeable to the expected state
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
+        // toggle between options to trigger the save status
+        cy.get('[data-testid="yes-discussion"]').click();
+        cy.get('[data-testid="no-discussion"]').click();
+        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');    });
+
+    it('Enable discussion form and post', () => {
         cy.visit(['sample', 'config']);
         cy.get('[data-testid="forum-enabled"]').should('be.checked');
 
