@@ -2151,7 +2151,7 @@ class ElectronicGraderController extends AbstractController {
                 $submitter_id = $graded_gradeable->getSubmitter()->getId();
                 $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, [$submitter_id]);
                 $valid_members = $cluster->getValidMembers($active_versions);
-                
+
                 foreach ($valid_members as $member) {
                     if (($member->getUserId() ?? $member->getTeamId()) === $submitter_id) {
                         $is_unclustered = false;
@@ -2554,24 +2554,22 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             if (!$ta_grading_cluster_mode) {
-                $gg = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-                if ($gg !== false) {
-                    $ta_gg = $gg->getOrCreateTaGradedGradeable();
-                    $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
+                $ta_gg = $graded_gradeable->getOrCreateTaGradedGradeable();
+                $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
 
-                    $this->saveGradedComponent(
-                        $ta_gg,
-                        $gc,
-                        $grader,
-                        $custom_points,
-                        $custom_message,
-                        $marks,
-                        $component_version,
-                        !$silent_edit,
-                        true //execute database query immediately
-                    );
-                }
-            } else {
+                $this->saveGradedComponent(
+                    $ta_gg,
+                    $gc,
+                    $grader,
+                    $custom_points,
+                    $custom_message,
+                    $marks,
+                    $component_version,
+                    !$silent_edit,
+                    true //execute database query immediately
+                );
+            }
+            else {
                 $submitters_to_grade = [];
                 $active_versions = [];
                 $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $submitter_id);
@@ -2629,7 +2627,7 @@ class ElectronicGraderController extends AbstractController {
                     );
                     $ta_graded_gradeables_to_save[] = $ta_gg;
                 }
-                
+
                 $this->core->getQueries()->bulkSaveTaGradedGradeables($ta_graded_gradeables_to_save);
                 foreach ($ta_graded_gradeables_to_save as $ta_gg) {
                     $submitter = $ta_gg->getGradedGradeable()->getSubmitter();
@@ -2638,7 +2636,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
             }
-            
+
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {

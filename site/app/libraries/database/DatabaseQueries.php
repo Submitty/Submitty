@@ -7991,17 +7991,18 @@ AND gc_id IN (
         foreach ($ta_graded_gradeables as $ta_graded_gradeable) {
             if ($ta_graded_gradeable->getId() < 1) {
                 $insert_ta_gradeables[] = $ta_graded_gradeable;
-                
+
                 $is_team = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->isTeam();
                 $submitter_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
                 $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
-                
+
                 $gd_insert_values[] = '(?, ?, ?, ?)';
                 $gd_insert_params[] = $g_id;
                 $gd_insert_params[] = $is_team ? null : $submitter_id;
                 $gd_insert_params[] = $is_team ? $submitter_id : null;
                 $gd_insert_params[] = $ta_graded_gradeable->getUserViewedDate() !== null ? DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null;
-            } else {
+            }
+            else {
                 $update_ta_gradeables[] = $ta_graded_gradeable;
             }
         }
@@ -8014,7 +8015,7 @@ AND gc_id IN (
             ";
             $this->course_db->query($gd_insert_query, $gd_insert_params);
             $returned_gds = $this->course_db->rows();
-            
+
             foreach ($insert_ta_gradeables as $ta_graded_gradeable) {
                 $is_team = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->isTeam();
                 $submitter_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
@@ -8022,7 +8023,8 @@ AND gc_id IN (
                     if ($is_team && $row['gd_team_id'] === $submitter_id) {
                         $ta_graded_gradeable->setIdFromDatabase($row['gd_id']);
                         break;
-                    } elseif (!$is_team && $row['gd_user_id'] === $submitter_id) {
+                    }
+                    elseif (!$is_team && $row['gd_user_id'] === $submitter_id) {
                         $ta_graded_gradeable->setIdFromDatabase($row['gd_id']);
                         break;
                     }
@@ -8055,15 +8057,15 @@ AND gc_id IN (
 
         $gcd_insert_values = [];
         $gcd_insert_params = [];
-        
+
         $gcd_update_values = [];
         $gcd_update_params = [];
-        
+
         $gcd_peer_update_values = [];
         $gcd_peer_update_params = [];
 
         $marks_to_delete = [];
-        
+
         $gcmd_insert_values = [];
         $gcmd_insert_params = [];
 
@@ -8081,7 +8083,8 @@ AND gc_id IN (
                         $gcd_insert_params[] = DateUtils::dateTimeToString($component_grade->getGradeTime());
                         $gcd_insert_params[] = $component_grade->getVerifierId() !== '' ? $component_grade->getVerifierId() : null;
                         $gcd_insert_params[] = !is_null($component_grade->getVerifyTime()) ? DateUtils::dateTimeToString($component_grade->getVerifyTime()) : null;
-                    } else if ($component_grade->isModified()) {
+                    }
+                    elseif ($component_grade->isModified()) {
                         if (!$component_grade->getComponent()->isPeerComponent()) {
                             $gcd_update_values[] = '(CAST(? AS integer), CAST(? AS integer), CAST(? AS double precision), CAST(? AS varchar), CAST(? AS integer), CAST(? AS timestamp), CAST(? AS varchar), CAST(? AS varchar), CAST(? AS timestamp))';
                             $gcd_update_params[] = $ta_graded_gradeable->getId();
@@ -8093,7 +8096,8 @@ AND gc_id IN (
                             $gcd_update_params[] = $component_grade->getGraderId();
                             $gcd_update_params[] = $component_grade->getVerifierId() !== '' ? $component_grade->getVerifierId() : null;
                             $gcd_update_params[] = !is_null($component_grade->getVerifyTime()) ? DateUtils::dateTimeToString($component_grade->getVerifyTime()) : null;
-                        } else {
+                        }
+                        else {
                             $gcd_peer_update_values[] = '(CAST(? AS integer), CAST(? AS integer), CAST(? AS varchar), CAST(? AS double precision), CAST(? AS varchar), CAST(? AS integer), CAST(? AS timestamp), CAST(? AS varchar), CAST(? AS timestamp))';
                             $gcd_peer_update_params[] = $ta_graded_gradeable->getId();
                             $gcd_peer_update_params[] = $component_grade->getComponentId();
@@ -8110,7 +8114,7 @@ AND gc_id IN (
                     if ($component_grade->isMarksModified()) {
                         $new_marks = array_diff($component_grade->getMarkIds(), $component_grade->getDbMarkIds() ?? []);
                         $deleted_marks = array_diff($component_grade->getDbMarkIds() ?? [], $component_grade->getMarkIds());
-                        
+
                         foreach ($deleted_marks as $mark_id) {
                             $marks_to_delete[] = ['gc_id' => $component_grade->getComponentId(), 'gd_id' => $ta_graded_gradeable->getId(), 'gcm_grader_id' => $component_grade->getGraderId(), 'gcm_id' => $mark_id];
                         }
@@ -8129,7 +8133,7 @@ AND gc_id IN (
                 $this->deleteGradedComponent($component_grade);
             }
             $ta_graded_gradeable->clearDeletedGradedComponents();
-            
+
             $this->updateOverallComments($ta_graded_gradeable);
         }
 

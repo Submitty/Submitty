@@ -7,6 +7,10 @@ import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutD
 
 import Cookies from 'js-cookie';
 
+const emit = defineEmits<{
+    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
+}>();
+
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
@@ -24,9 +28,6 @@ const toggleClusteringMode = () => {
     Cookies.set('ta_grading_cluster_mode', currentMode ? 'false' : 'true', { expires: 1, path: '/' });
     window.location.reload();
 };
-const emit = defineEmits<{
-    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
-}>();
 
 // need to assign because ta-grading-panels-init.ts is not called
 Object.assign(taLayoutDet, getSavedTaLayoutDetails());
