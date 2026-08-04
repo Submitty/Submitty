@@ -46,10 +46,11 @@ $(document).ready(() => {
 
                     if (parsed['status'] === 'success') {
                         closePopup('custom-sort-csv-upload-form');
-                        displaySuccessMessage('Custom grading order uploaded successfully. Refreshing page...');
+                        const warning = parsed['data'] && parsed['data']['warning'];
+                        displaySuccessMessage(warning ? `Uploaded with a warning: ${warning}` : 'Custom grading order uploaded successfully. Refreshing page...');
                         setTimeout(() => {
                             window.location.reload();
-                        }, 1000);
+                        }, warning ? 2500 : 1000);
                     }
                     else {
                         showCustomSortUploadError(parsed['message'] || 'Failed to upload the custom grading order.');

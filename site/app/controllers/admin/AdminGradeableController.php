@@ -387,20 +387,20 @@ class AdminGradeableController extends AbstractController {
         sort($uploaded_ids_sorted);
         sort($current_ids_sorted);
 
-        if ($uploaded_ids_sorted !== $current_ids_sorted) {
-            $missing_ids = array_diff($current_ids_sorted, $uploaded_ids_sorted);
-            $unknown_ids = array_diff($uploaded_ids_sorted, $current_ids_sorted);
-            $errors = [];
+        $unknown_ids = array_diff($uploaded_ids_sorted, $current_ids_sorted);
+        if (count($unknown_ids) > 0) {
+            return JsonResponse::getErrorResponse(
+                'Unknown submitter ID(s), please check for typos: ' . implode(', ', $unknown_ids)
+            );
+        }
 
-            if (count($missing_ids) > 0) {
-                $errors[] = 'Missing submitters: ' . implode(', ', $missing_ids);
-            }
+        $missing_ids = array_diff($current_ids_sorted, $uploaded_ids_sorted);
+        $warning_message = null;
 
-            if (count($unknown_ids) > 0) {
-                $errors[] = 'Unknown submitters: ' . implode(', ', $unknown_ids);
-            }
-
-            return JsonResponse::getErrorResponse(implode(' ', $errors));
+        if (count($missing_ids) > 0) {
+            sort($missing_ids);
+            $ordered_submitter_ids = array_merge($ordered_submitter_ids, $missing_ids);
+            $warning_message = 'The following submitters were missing from the CSV and were appended to the bottom of the order: ' . implode(', ', $missing_ids);
         }
 
         try {
@@ -419,9 +419,10 @@ class AdminGradeableController extends AbstractController {
             );
         }
 
-        return JsonResponse::getSuccessResponse(
-            'Custom grading order uploaded successfully.'
-        );
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Custom grading order uploaded successfully.',
+            'warning' => $warning_message,
+        ]);
     }
 
     #[Route(
