@@ -258,18 +258,27 @@ function renderPeerFilePatterns() {
     const tableBody = $('#peer-file-pattern-table tbody');
     tableBody.empty();
     if (patterns.length === 0) {
-        const row = $('<tr>');
-        $('<td>').attr('colspan', 2).text('No regular expressions have been added. Peer graders will not see any submitted files.').appendTo(row);
+        const row = $('<tr>').attr('data-testid', 'peer-file-pattern-empty-row');
+        $('<td>').attr('colspan', 2).text(
+            'No regular expressions have been added. '
+            + 'Peer graders will not see any submitted files.',
+        )
+            .appendTo(row);
         tableBody.append(row);
         return;
     }
     patterns.forEach((pattern, index) => {
-        const row = $('<tr>');
-        $('<td>').text(pattern).appendTo(row);
+        const row = $('<tr>').attr('data-testid', 'peer-file-pattern-row');
+        $('<td>').attr('data-testid', 'peer-file-pattern-value').text(pattern).appendTo(row);
         const actionCell = $('<td>');
-        $('<button>').attr('type', 'button')
+        $('<button>')
+            .attr('type', 'button')
             .attr('data-pattern-index', index)
-            .attr('aria-label', `Delete file regular expression ${pattern}`)
+            .attr('data-testid', 'delete-peer-file-pattern')
+            .attr(
+                'aria-label',
+                `Delete file regular expression ${pattern}`,
+            )
             .addClass('btn btn-default peer-file-pattern-delete')
             .append(
                 $('<i>')

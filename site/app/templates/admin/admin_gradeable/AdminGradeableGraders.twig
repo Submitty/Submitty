@@ -129,20 +129,20 @@ Form
         <input type="checkbox" name="peer_panel" value="4" id="peer_solutions" data-testid="peer-solutions-panel-option"
             {{ gradeable.getPeerSolutions() ? 'checked' : '' }}><label for="peer_solutions">Solution/Notes</label>
 
-        <div id="peer-file-restriction-container" class="std-margin" {{ not gradeable.getPeerFiles() ? 'hidden' : '' }}>
+        <div id="peer-file-restriction-container" class="std-margin" data-testid="peer-file-restriction-container" {{ not gradeable.getPeerFiles() ? 'hidden' : '' }}>
             <div>
-                <input type="checkbox" name="peer_files_restricted" id="peer_files_restricted" value="true" {{ gradeable.getPeerFilesRestricted() ? 'checked' : '' }}>
+                <input type="checkbox" name="peer_files_restricted" id="peer_files_restricted" value="true" data-testid="peer-files-restricted" {{ gradeable.getPeerFilesRestricted() ? 'checked' : '' }}>
                 <label for="peer_files_restricted">
                     Specify which submitted files peer graders can view
                 </label>
             </div>
-            <div id="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
+            <div id="peer-file-pattern-controls" data-testid="peer-file-pattern-controls" {{ not gradeable.getPeerFilesRestricted() ? 'hidden' : '' }}>
                 <div class="std-margin peer-file-pattern-input-row">
                     <label for="peer-file-pattern-input">
                         Visible file regular expression:
                     </label>
-                    <input type="text" id="peer-file-pattern-input" class="peer-file-pattern-input" placeholder="Examples: /^report\.pdf$/, /\.java$/, /^src\/.*$/" autocomplete="off">
-                    <button type="button" id="add-peer-file-pattern" class="btn btn-primary">
+                    <input type="text" id="peer-file-pattern-input" class="peer-file-pattern-input" data-testid="peer-file-pattern-input" placeholder="Examples: /^report\.pdf$/, /\.java$/, /^src\/.*$/" autocomplete="off">
+                    <button type="button" id="add-peer-file-pattern" class="btn btn-primary" data-testid="add-peer-file-pattern">
                         Add
                     </button>
                 </div>
@@ -156,7 +156,7 @@ Form
                     <code>/^src\/.*$/</code>.
                 </p>
                 <div class="table-wrapper">
-                    <table id="peer-file-pattern-table" class="table table-striped">
+                    <table id="peer-file-pattern-table" class="table table-striped" data-testid="peer-file-pattern-table">
                         <thead>
                             <tr>
                                 <th>Visible file regular expression</th>
