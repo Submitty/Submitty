@@ -163,6 +163,9 @@ class Gradeable extends AbstractModel {
      * @var bool if this gradeable uses a custom grading order */
     protected $custom_sort = false;
     /** @prop
+     * @var bool if admin enables custom grading order */
+    protected $enable_custom_sort = false;
+    /** @prop
      * @var bool if graders will be allowed to use custom marks */
     protected $allow_custom_marks = true;
     /** @prop
@@ -300,6 +303,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setCustomSort($details['custom_sort'] ?? false);
+        $this->setEnableCustomSort($details['enable_custom_sort'] ?? false);
         $this->setTaInstructions($details['ta_instructions']);
         if (array_key_exists('any_manual_grades', $details)) {
             $this->setAnyManualGrades($details['any_manual_grades']);
@@ -2827,6 +2831,16 @@ class Gradeable extends AbstractModel {
         $this->custom_sort = $custom_sort;
         $this->modified = true;
     }
+
+    public function getEnableCustomSort(): bool {
+        return $this->enable_custom_sort;
+    }
+
+    public function setEnableCustomSort(bool $enable_custom_sort): void {
+        $this->enable_custom_sort = $enable_custom_sort;
+        $this->modified = true;
+    }
+
     public function getAllowCustomMarks(): bool {
         return $this->allow_custom_marks;
     }

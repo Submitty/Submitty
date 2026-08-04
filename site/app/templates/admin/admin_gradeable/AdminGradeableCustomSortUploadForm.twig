@@ -6,11 +6,12 @@
         Upload a .csv file to set the grading order. Uploading will completely replace the current order.
     </p>
     <ol class="full-list">
-        <li>"{{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }}": required, one per row.</li>
-        <li>The order of rows in the file becomes the grading order &mdash; top row first.</li>
-        <li>Every current submitter must appear exactly once. Nothing else (names, grades, other columns) is read.</li>
-        <li>This does not change peer assignments, only the order submitters appear while grading.</li>
+        <li>"{{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }}": Required; used to identify each submitter.</li>
+        <li>Any additional columns: Optional; ignored during upload.</li>
+        <li>The order of rows in the file becomes the grading order (top row first).</li>
     </ol>
+        <p>Only the {{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }} column is used to reorder submissions. Additional columns may be left unchanged and will be ignored.</p>
+        <p><em>This does not change peer assignments—only the order submitters appear while grading.</em></p>
     <br />
     <input type="file" id="custom-sort-csv-upload-file" name="upload" class="ignore" accept=".csv" aria-label="Choose File" data-testid="custom-sort-csv-upload-file">
     <div id="custom-sort-csv-upload-error" class="popup-error-message" style="display:none; color: red; margin-top: 10px;" data-testid="custom-sort-csv-upload-error"></div>

@@ -58,6 +58,10 @@ def up(config, database, semester, course):
                 ON DELETE CASCADE
         )
     """)
+    database.execute("""
+        ALTER TABLE gradeable
+        ADD COLUMN IF NOT EXISTS g_enable_custom_sort BOOLEAN NOT NULL DEFAULT FALSE
+    """)
 
 
 def down(config, database, semester, course):
@@ -80,4 +84,8 @@ def down(config, database, semester, course):
     database.execute("""
         ALTER TABLE gradeable
         DROP COLUMN IF EXISTS g_custom_sort
+    """)
+    database.execute("""
+        ALTER TABLE gradeable
+        DROP COLUMN IF EXISTS g_enable_custom_sort
     """)
