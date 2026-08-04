@@ -2218,16 +2218,21 @@ if (!Array.prototype.toggleElement) {
     });
 }
 
+function setVueSearchQuery(query) {
+    // TODO: remove this bridge when the FilterBar migration (#12804) brings the toolbar
+    // clear button into Vue and clearing flows through the events mapping instead.
+    const searchBar = document.querySelector('.search-bar-wrapper');
+    if (searchBar && typeof searchBar.reRender === 'function') {
+        searchBar.reRender({ searchQuery: query });
+    }
+}
+
 function clearForumFilter() {
     if (checkUnread()) {
         $('#filter_unread_btn').click();
     }
     $('#search-content').val('');
-    const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
-    if (searchInput) {
-        searchInput.value = '';
-        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    setVueSearchQuery('');
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
@@ -2235,6 +2240,19 @@ function clearForumFilter() {
     return false;
 }
 
+/**
+ * TODO for (#12804): When the filter bar migrates to Vue, this function should move into
+ * ForumFilterBar.vue. The earlier #12804 draft kept it here and had the Vue component
+ * call it — but then the component reached outside its own DOM
+ * to toggle a button it doesn't own,
+ * which breaks our rule that components only manage their own markup.
+ *
+ * Cleaner approach: render the Clear Filters button inside ForumFilterBar.vue, tie its
+ * visibility to the component's own reactive filter state and on-click just
+ * reset the refs and emit 'clear-filters'. Then the Vue.twig events mapping hand that
+ * event to clearForumFilter() here, which already clears the search input (via
+ * setVueSearchQuery('')) and refreshes the thread list.
+ */
 function updateClearFilterButton() {
     if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0) {
         $('#clear_filter_button').css('visibility', 'hidden');
@@ -2279,15 +2297,6 @@ function loadFilterHandlers() {
     updateClearFilterButton();
 }
 
-function searchForum() {
-    const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
-    if (searchInput) {
-        $('#search-content').val(searchInput.value.trim());
-    }
-    updateClearFilterButton();
-    updateThreads(true, saveFilterState);
-}
-
 function getFilterState() {
     return {
         'categories': readCategoryValues(),
@@ -2312,11 +2321,7 @@ function setFilterState(state) {
     }
     if ('search-content' in state) {
         $('#search-content').val(state['search-content']);
-        const searchInput = document.querySelector('[data-testid="search-bar-vue"] input');
-        if (searchInput) {
-            searchInput.value = state['search-content'];
-            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        setVueSearchQuery(state['search-content']);
     }
     updateClearFilterButton();
     updateThreads(true, null);

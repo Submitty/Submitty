@@ -73,12 +73,6 @@
     display: flex;
 }
 
-.forum-bar .toolbar-left #search-content {
-    height: 100%;
-    width: 100%;
-    padding-right: 2rem;
-}
-
 .forum-bar .toolbar-left .search-actions {
     flex: 0 0 auto;
     display: flex;
@@ -1070,23 +1064,4 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
-}
-
-#search-clear {
-    display: none;
-    position: absolute;
-    top: 50%;
-    right: 0.6rem;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: var(--standard-medium-gray);
-    padding: 0;
-    line-height: 1;
-    cursor: pointer;
-}
-
-#search-clear:hover,
-#search-clear:focus {
-    color: var(--default-black);
 }
