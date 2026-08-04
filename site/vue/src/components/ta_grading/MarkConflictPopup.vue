@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 import Popup from '../Popup.vue';
-import { buildCourseUrl, getCsrfToken } from '../../../../ts/utils/server';
+import MarkConflictOption from './MarkConflictOption.vue';
 
-interface MarkInfo {
-    id: number;
-    points: number;
-    title: string | null;
-    publish: boolean;
-}
+type MarkConflictResolution = 'dom' | 'server' | 'old-server';
 
 interface RawMark {
     id: number;
@@ -24,6 +19,13 @@ interface RawConflictInfo {
     localDeleted: boolean;
 }
 
+interface MarkInfo {
+    id: number;
+    points: number;
+    title: string | null;
+    publish: boolean;
+}
+
 interface ConflictInfo {
     domMark: MarkInfo;
     serverMark: MarkInfo | null;
@@ -34,24 +36,20 @@ interface ConflictInfo {
 const props = defineProps<{
     conflicts: Record<number, RawConflictInfo>;
     componentTitle: string;
-    componentId: number;
-    gradeableId: string;
+    currentIndex?: number;
 }>();
 
 const emit = defineEmits<{
-    'all-resolved': [];
-    'close': [];
+    resolve: [payload: { markId: number; resolution: MarkConflictResolution }];
+    close: [];
 }>();
-
-const visible = ref(false);
-const currentIndex = ref(0);
 
 function buildMarkInfo(mark: RawMark): MarkInfo {
     return { id: mark.id, points: mark.points, title: mark.title ?? null, publish: mark.publish };
 }
 
 const conflictsList = computed<ConflictInfo[]>(() =>
-    Object.values(props.conflicts).map((c) => ({
+    Object.values(props.conflicts ?? {}).map((c) => ({
         domMark: buildMarkInfo(c.domMark),
         serverMark: c.serverMark ? buildMarkInfo(c.serverMark) : null,
         oldServerMark: c.oldServerMark ? buildMarkInfo(c.oldServerMark) : null,
@@ -59,124 +57,20 @@ const conflictsList = computed<ConflictInfo[]>(() =>
     })),
 );
 
+const currentIndex = computed(() => props.currentIndex ?? 0);
 const currentConflict = computed(() => conflictsList.value[currentIndex.value] ?? null);
+const visible = computed(() => conflictsList.value.length > 0);
 
-watch(() => props.conflicts, (newConflicts) => {
-    if (newConflicts && Object.keys(newConflicts).length > 0) {
-        currentIndex.value = 0;
-        visible.value = true;
+function onResolve(resolution: MarkConflictResolution) {
+    const conflict = currentConflict.value;
+    if (conflict) {
+        emit('resolve', { markId: conflict.domMark.id, resolution });
     }
-}, { immediate: true });
+}
 
-function toggle() {
-    const wasVisible = visible.value;
-    visible.value = !visible.value;
-    if (wasVisible) {
+function onToggle() {
+    if (visible.value) {
         emit('close');
-    }
-}
-
-async function ajaxAddNewMark(title: string, points: number, publish: boolean) {
-    const formData = new FormData();
-    formData.append('csrf_token', getCsrfToken());
-    formData.append('component_id', String(props.componentId));
-    formData.append('title', title);
-    formData.append('points', String(points));
-    formData.append('publish', String(publish));
-
-    const resp = await fetch(
-        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'add']),
-        { method: 'POST', body: formData },
-    );
-    if (!resp.ok) {
-        throw new Error(`Server returned ${resp.status}`);
-    }
-    const response = await resp.json() as { status: string; message: string; data: { mark_id: number } };
-    if (response.status !== 'success') {
-        throw new Error(response.message);
-    }
-    return response.data;
-}
-
-async function ajaxDeleteMark(mark_id: number) {
-    const formData = new FormData();
-    formData.append('csrf_token', getCsrfToken());
-    formData.append('component_id', String(props.componentId));
-    formData.append('mark_id', String(mark_id));
-
-    const resp = await fetch(
-        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'delete']),
-        { method: 'POST', body: formData },
-    );
-    if (!resp.ok) {
-        throw new Error(`Server returned ${resp.status}`);
-    }
-    const response = await resp.json() as { status: string; message: string };
-    if (response.status !== 'success') {
-        throw new Error(response.message);
-    }
-}
-
-async function ajaxSaveMark(mark_id: number, title: string, points: number, publish: boolean) {
-    const formData = new FormData();
-    formData.append('csrf_token', getCsrfToken());
-    formData.append('component_id', String(props.componentId));
-    formData.append('mark_id', String(mark_id));
-    formData.append('title', title);
-    formData.append('points', String(points));
-    formData.append('publish', String(publish));
-
-    const resp = await fetch(
-        buildCourseUrl(['gradeable', props.gradeableId, 'components', 'marks', 'save']),
-        { method: 'POST', body: formData },
-    );
-    if (!resp.ok) {
-        throw new Error(`Server returned ${resp.status}`);
-    }
-    const response = await resp.json() as { status: string; message: string };
-    if (response.status !== 'success') {
-        throw new Error(response.message);
-    }
-}
-
-async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old-server') {
-    const conflict = props.conflicts[markId];
-    if (!conflict) {
-        return;
-    }
-    try {
-        if (resolution === 'dom') {
-            if (conflict.localDeleted) {
-                await ajaxDeleteMark(markId);
-            }
-            else {
-                const isServerDeleted = conflict.serverMark === null;
-                if (isServerDeleted) {
-                    const data = await ajaxAddNewMark(conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
-                    conflict.domMark.id = data.mark_id;
-                }
-                else {
-                    await ajaxSaveMark(markId, conflict.domMark.title!, conflict.domMark.points, conflict.domMark.publish);
-                }
-            }
-        }
-        else if (resolution === 'old-server') {
-            const mark = conflict.oldServerMark!;
-            await ajaxSaveMark(markId, mark.title!, mark.points, mark.publish);
-        }
-        // resolution === 'server': accept server state, no AJAX needed
-    }
-    catch (err) {
-        // Keep the popup open so the user can retry; never silently drop a resolution.
-        console.error(`Failed to resolve conflict for mark ${markId}:`, err);
-        return;
-    }
-
-    // Advance to the next conflict, or finish once all conflicts are resolved
-    currentIndex.value++;
-    if (currentIndex.value >= conflictsList.value.length) {
-        visible.value = false;
-        emit('all-resolved');
     }
 }
 </script>
@@ -185,7 +79,7 @@ async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old
   <Popup
     :visible="visible"
     :title="`Mark Conflicts: ${componentTitle}`"
-    @toggle="toggle"
+    @toggle="onToggle"
   >
     <template #trigger>
       <span class="hidden-trigger" />
@@ -202,116 +96,36 @@ async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old
         <div class="row mark-conflict-row">
           <div class="col container">
             <!-- Old server mark -->
-            <div
+            <MarkConflictOption
               v-if="currentConflict.oldServerMark"
-              class="row mark-resolve mark-resolve-old-server"
-              data-testid="mark-conflict-old-server"
-            >
-              <span
-                class="col"
-                data-testid="mark-conflict-old-server-info"
-              >
-                ({{ currentConflict.oldServerMark.points }}) {{ currentConflict.oldServerMark.title ?? '' }}
-                <template v-if="currentConflict.oldServerMark.publish">
-                  -- <i>Show mark to all students</i>
-                </template>
-              </span>
-              <span class="col-no-gutters button-container">
-                <input
-                  type="button"
-                  class="btn btn-default"
-                  value="Revert to Original"
-                  title="Revert to original mark"
-                  data-testid="mark-conflict-old-server-btn"
-                  @click="handleResolve(currentConflict.domMark.id, 'old-server')"
-                >
-              </span>
-            </div>
+              :mark="currentConflict.oldServerMark"
+              button-label="Revert to Original"
+              button-title="Revert to original mark"
+              button-style="default"
+              testid="mark-conflict-old-server"
+              resolution="old-server"
+              @resolve="onResolve"
+            />
             <!-- Current server mark -->
-            <div
-              class="row mark-resolve mark-resolve-server"
-              data-testid="mark-conflict-server"
-            >
-              <template v-if="currentConflict.serverMark">
-                <span
-                  class="col"
-                  data-testid="mark-conflict-server-info"
-                >
-                  ({{ currentConflict.serverMark.points }}) {{ currentConflict.serverMark.title ?? '' }}
-                  <template v-if="currentConflict.serverMark.publish">
-                    -- <i>Show mark to all students</i>
-                  </template>
-                </span>
-                <span class="col-no-gutters button-container">
-                  <input
-                    type="button"
-                    class="btn btn-primary"
-                    value="Ignore My Edits"
-                    title="Ignore my edits, keep server version"
-                    data-testid="mark-conflict-server-btn"
-                    @click="handleResolve(currentConflict.domMark.id, 'server')"
-                  >
-                </span>
-              </template>
-              <template v-else>
-                <span
-                  class="col mark-deleted-message"
-                  data-testid="mark-conflict-server-deleted"
-                >Mark Deleted From Server</span>
-                <span class="col-no-gutters button-container">
-                  <input
-                    type="button"
-                    class="btn btn-primary"
-                    value="Delete Mark"
-                    title="Delete the mark from server"
-                    data-testid="mark-conflict-server-btn"
-                    @click="handleResolve(currentConflict.domMark.id, 'server')"
-                  >
-                </span>
-              </template>
-            </div>
-            <div
-              class="row mark-resolve mark-resolve-dom"
-              data-testid="mark-conflict-dom"
-            >
-              <template v-if="!currentConflict.localDeleted">
-                <span
-                  class="col"
-                  data-testid="mark-conflict-dom-info"
-                >
-                  ({{ currentConflict.domMark.points }}) {{ currentConflict.domMark.title ?? '' }}
-                  <template v-if="currentConflict.domMark.publish">
-                    -- <i>Show mark to all students</i>
-                  </template>
-                </span>
-                <span class="col-no-gutters button-container">
-                  <input
-                    type="button"
-                    class="btn btn-primary"
-                    value="Use My Edits"
-                    title="Use my local edits"
-                    data-testid="mark-conflict-dom-btn"
-                    @click="handleResolve(currentConflict.domMark.id, 'dom')"
-                  >
-                </span>
-              </template>
-              <template v-else>
-                <span
-                  class="col mark-deleted-message"
-                  data-testid="mark-conflict-dom-deleted"
-                >You Deleted the Mark</span>
-                <span class="col-no-gutters button-container">
-                  <input
-                    type="button"
-                    class="btn btn-primary"
-                    value="Delete Mark"
-                    title="Delete the mark"
-                    data-testid="mark-conflict-dom-btn"
-                    @click="handleResolve(currentConflict.domMark.id, 'dom')"
-                  >
-                </span>
-              </template>
-            </div>
+            <MarkConflictOption
+              :mark="currentConflict.serverMark"
+              :deleted-message="currentConflict.serverMark ? '' : 'Mark Deleted From Server'"
+              :button-label="currentConflict.serverMark ? 'Ignore My Edits' : 'Delete Mark'"
+              :button-title="currentConflict.serverMark ? 'Ignore my edits, keep server version' : 'Delete the mark from server'"
+              testid="mark-conflict-server"
+              resolution="server"
+              @resolve="onResolve"
+            />
+            <!-- Local (DOM) mark -->
+            <MarkConflictOption
+              :mark="currentConflict.localDeleted ? null : currentConflict.domMark"
+              :deleted-message="currentConflict.localDeleted ? 'You Deleted the Mark' : ''"
+              :button-label="currentConflict.localDeleted ? 'Delete Mark' : 'Use My Edits'"
+              :button-title="currentConflict.localDeleted ? 'Delete the mark' : 'Use my local edits'"
+              testid="mark-conflict-dom"
+              resolution="dom"
+              @resolve="onResolve"
+            />
           </div>
         </div>
         <div
@@ -331,20 +145,9 @@ async function handleResolve(markId: number, resolution: 'dom' | 'server' | 'old
     display: none;
 }
 
-.mark-conflict-row span {
-    padding: 3px;
-    border-width: 2px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-}
-
-.mark-conflict-row .button-container {
-    width: 150px;
-}
-
-.mark-conflict-row .button-container input {
-    width: 100%;
+.mark-conflict-row {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .conflict-resolve-progress {

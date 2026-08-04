@@ -5,11 +5,10 @@
     'args': {
         'conflicts': {},
         'componentTitle': '',
-        'componentId': 0,
-        'gradeableId': ''
+        'currentIndex': 0
     },
     'events': {
-        'all-resolved': 'window.handleAllConflictsResolved',
-        'close': 'window.handleConflictClose'
+        'resolve': '(detail) => window.onMarkConflictResolve(detail)',
+        'close': 'window.onMarkConflictClose'
     }
 } %}
