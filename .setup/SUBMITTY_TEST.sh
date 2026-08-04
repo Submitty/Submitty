@@ -42,6 +42,18 @@ case "${1:-}" in
         ;;
 esac
 
+# determine the OS to set Docker run command network opts, as well as Jest env variables
+# this is necessary for javascript unit testing with the --api option
+OS_NAME="$(uname -s)"
+if [[ "$OS_NAME" == *"Linux"* ]]; then
+    DOCKER_NET_ARGS="--network=host"
+    API_BASE_URL="http://127.0.0.1:1511"
+else
+    # For macOS and Windows
+    DOCKER_NET_ARGS=""
+    API_BASE_URL="http://host.docker.internal:1511"
+fi
+
 # build docker image using SUBMITTY_ROOT
 echo "Setting up Docker image '$IMAGE_NAME'..."
 docker build -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SUBMITTY_ROOT"
@@ -53,7 +65,7 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
-    docker run --rm $terminal_flag --network=host --add-host host.docker.internal:host-gateway -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
+    docker run --rm $terminal_flag $DOCKER_NET_ARGS -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
@@ -113,7 +125,8 @@ run_js_unit() {
     parse_args "${@:2}"
     if [ ${#ARGS[@]} -gt 0 ]; then
         script="test:api"
-        run_in_container /home/submitty/site env BASE_URL=http://127.0.0.1:1511 npm run "$script"
+        # see site/test/api/utils.ts for more info about env BASE_URL
+        run_in_container /home/submitty/site env BASE_URL="$API_BASE_URL" npm run "$script"
     else
         script="test"
         run_in_container /home/submitty/site npm run "$script"
