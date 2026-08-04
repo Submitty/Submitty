@@ -6,7 +6,8 @@ describe('test for discussion post panel', () => {
         // toggle between options to trigger the save status
         cy.get('[data-testid="yes-discussion"]').click();
         cy.get('[data-testid="no-discussion"]').click();
-        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');    });
+        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');
+    });
 
     it('Enable discussion form and post', () => {
         cy.visit(['sample', 'config']);
