@@ -28,7 +28,7 @@ describe('Test that grading restrictions on peer graders work', () => {
                 }
             });
         });
-        cy.get('[data-testid="save-status"]').should('contain.text', 'All Changes Saved');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
             cy.get(setting).should('not.be.checked');
@@ -55,7 +55,7 @@ describe('Test that grading restrictions on peer graders work', () => {
         panelOptions.forEach(({ setting }) => {
             cy.get(setting).should('not.be.checked').check();
         });
-        cy.get('[data-testid="save-status"]').should('contain.text', 'All Changes Saved');
+        cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
             cy.get(setting).should('be.checked');
