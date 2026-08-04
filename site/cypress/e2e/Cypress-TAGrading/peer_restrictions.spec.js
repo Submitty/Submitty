@@ -20,7 +20,7 @@ describe('Test that grading restrictions on peer graders work', () => {
         ];
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_pdf_peer_homework', 'update?nav_tab=3']);
-        cy.get('[data-testid="content-main"]').should('be.visible')
+        cy.get('[data-testid="content-main"]').should('be.visible');
         panelOptions.forEach(({ setting }) => {
             cy.get(setting).then(($el) => {
                 if ($el.prop('checked')) {
