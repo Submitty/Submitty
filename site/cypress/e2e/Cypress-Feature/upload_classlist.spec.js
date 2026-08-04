@@ -6,7 +6,7 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
     const FIXTURE_PATH = 'cypress/fixtures/upload_classlist';
     const DOWNLOAD_PATH = 'cypress/downloads';
 
-    function assertStudentRow(studentId, section) {
+    function assertStudentRow(studentId, section = 'NULL') {
         // Check that the student appears in the table as expected
         cy.get(`[data-testid="user-row-${studentId}"]`).within(() => {
             // Check the first & last name
@@ -32,6 +32,7 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         // Download the CSV
         cy.get('[data-testid="download-users-button"]').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="registration-section-null-checkbox"]').click();
         cy.get('[data-testid="submit-download-users"]').click();
 
         // Close the Download Users modal by pressing the Escape key
@@ -70,7 +71,7 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         uploadClasslist(`${DOWNLOAD_PATH}/${getCurrentSemester()}_sample_users_data.csv`);
         cy.get('[data-testid="popup-message"]')
             .should('contain.text', `${getCurrentSemester()}_sample_users_data.csv`)
-            .and('contain.text', '0 added, 109 updated');
+            .and('contain.text', '0 added, 139 updated');
 
         // Test the Upload Users button with the new student
         // Test the "User ID" header being required
@@ -95,6 +96,15 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
 
         // Test the Download Users button with the new cypress student
         downloadAndAssertClasslist('sample_users_data_with_cypress.csv');
+
+        // Test 'Move students missing from the classlist to NULL section'
+        cy.get('[data-testid="upload-classlist-button"]').click();
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="move-missing-checkbox"]').click();
+        cy.get('[data-testid="classlist-upload-file"]').selectFile(`${FIXTURE_PATH}/sample_users_data.csv`, { force: true });
+        cy.get('[data-testid="submit-classlist-upload"]').click();
+        cy.get('[data-testid="popup-message"]').should('contain.text', '0 added, 140 updated');
+        assertStudentRow(NEW_STUDENT);
     });
 
     after(() => {
