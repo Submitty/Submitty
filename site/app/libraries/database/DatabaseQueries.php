@@ -6558,6 +6558,7 @@ AND gc_id IN (
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
               g_custom_sort AS custom_sort,
+              g_enable_custom_sort AS enable_custom_sort,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gamo.*,
@@ -7310,7 +7311,8 @@ AND gc_id IN (
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
             $gradeable->getAllowCustomMarks(),
-            $gradeable->getCustomSort()
+            $gradeable->getCustomSort(),
+            $gradeable->getEnableCustomSort()
         ];
         $this->course_db->query(
             "
@@ -7328,8 +7330,9 @@ AND gc_id IN (
               g_min_grading_group,
               g_syllabus_bucket,
               g_allow_custom_marks,
-              g_custom_sort)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_custom_sort,
+              g_enable_custom_sort)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -7500,6 +7503,7 @@ AND gc_id IN (
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
                 $gradeable->getCustomSort(),
+                $gradeable->getEnableCustomSort(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -7517,7 +7521,8 @@ AND gc_id IN (
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
                   g_allow_custom_marks=?,
-                  g_custom_sort=?
+                  g_custom_sort=?,
+                  g_enable_custom_sort=?
                 WHERE g_id=?",
                 $params
             );

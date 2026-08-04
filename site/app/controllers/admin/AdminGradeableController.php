@@ -873,6 +873,7 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
+            'enable_custom_sort' => $gradeable->getEnableCustomSort(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
             'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
@@ -1568,6 +1569,7 @@ class AdminGradeableController extends AbstractController {
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
+                'enable_custom_sort' => false,
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
@@ -1737,7 +1739,8 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory',
             'has_due_date',
             'has_release_date',
-            'allow_custom_marks'
+            'allow_custom_marks',
+            'enable_custom_sort'
         ];
 
         $discussion_ids = 'discussion_thread_id';
