@@ -213,7 +213,7 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('Creating annotation version folder failed');
         }
 
-        $decoded_annotations = json_decode($annotations, true) !== null ? json_decode($annotations, true) : [];
+        $decoded_annotations = json_decode($annotations, true) ?? [];
         $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
 
         // Check if annotations have no markers (empty annotations)
