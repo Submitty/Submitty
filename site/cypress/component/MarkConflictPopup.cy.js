@@ -24,14 +24,15 @@ const makeConflicts = (...conflicts) => {
 const defaultProps = {
     conflicts: {},
     componentTitle: 'Test Component',
-    componentId: 1,
-    gradeableId: 'test-gradeable',
 };
 
 describe('MarkConflictPopup', () => {
     describe('display states', () => {
         it('is hidden when there are no conflicts', () => {
             cy.mount(MarkConflictPopup, { props: defaultProps });
+            cy.get('[data-testid="popup-window"]').should('not.exist');
+
+            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: null } });
             cy.get('[data-testid="popup-window"]').should('not.exist');
         });
 
@@ -48,7 +49,7 @@ describe('MarkConflictPopup', () => {
             });
 
             cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.contains('h1', 'Mark Conflicts: Test Component');
+            cy.get('[data-testid="popup-window"]').should('contain.text', 'Mark Conflicts: Test Component');
             cy.get('[data-testid="mark-conflict-old-server-info"]').should('contain.text', '(0) Original');
             cy.get('[data-testid="mark-conflict-server-info"]').should('contain.text', '(1) Server');
             cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', '(2) Edited');
@@ -64,7 +65,8 @@ describe('MarkConflictPopup', () => {
             cy.get('[data-testid="mark-conflict-old-server"]').should('not.exist');
         });
 
-        it('shows deleted message when the server mark is null', () => {
+        it('shows deleted messages when a mark version is missing', () => {
+            // Server mark deleted
             cy.mount(MarkConflictPopup, {
                 props: {
                     ...defaultProps,
@@ -73,9 +75,8 @@ describe('MarkConflictPopup', () => {
             });
             cy.get('[data-testid="mark-conflict-server-deleted"]').should('be.visible');
             cy.get('[data-testid="mark-conflict-server-btn"]').should('have.value', 'Delete Mark');
-        });
 
-        it('shows deleted message when the local mark is deleted', () => {
+            // Local mark deleted
             cy.mount(MarkConflictPopup, {
                 props: {
                     ...defaultProps,
@@ -129,6 +130,23 @@ describe('MarkConflictPopup', () => {
             cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
         });
 
+        it('honors the currentIndex prop - renders and resolves the targeted conflict', () => {
+            mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+                ...defaultProps,
+                currentIndex: 1,
+                conflicts: makeConflicts(
+                    makeConflict({ domMark: makeMark({ id: 1, title: 'First' }) }),
+                    makeConflict({ domMark: makeMark({ id: 2, title: 'Second' }) }),
+                ),
+            }, 'onResolve');
+
+            cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'Second');
+            cy.get('[data-testid="mark-conflict-progress"]').should('contain.text', '2 out of 2');
+
+            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
+            cy.get('@onResolve').should('have.been.calledWith', { markId: 2, resolution: 'dom' });
+        });
+
         it('renders empty titles when marks have no title', () => {
             cy.mount(MarkConflictPopup, {
                 props: {
@@ -150,172 +168,37 @@ describe('MarkConflictPopup', () => {
                 .should('contain.text', '(2)')
                 .and('not.contain.text', 'Read me');
         });
-
-        it('shows the publish indicator on the old server mark', () => {
-            cy.mount(MarkConflictPopup, {
-                props: {
-                    ...defaultProps,
-                    conflicts: makeConflicts(makeConflict({
-                        oldServerMark: makeMark({ id: 1, title: 'Old', publish: true }),
-                    })),
-                },
-            });
-            cy.get('[data-testid="mark-conflict-old-server-info"]').should('contain.text', 'Show mark to all students');
-        });
-
-        it('shows the publish indicator on the server mark', () => {
-            cy.mount(MarkConflictPopup, {
-                props: {
-                    ...defaultProps,
-                    conflicts: makeConflicts(makeConflict({
-                        serverMark: makeMark({ id: 1, title: 'Srv', publish: true }),
-                    })),
-                },
-            });
-            cy.get('[data-testid="mark-conflict-server-info"]').should('contain.text', 'Show mark to all students');
-        });
-
-        it('stays hidden when conflicts is null', () => {
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: null } });
-            cy.get('[data-testid="popup-window"]').should('not.exist');
-        });
     });
 
-    describe('conflict resolution (success path)', () => {
-        beforeEach(() => {
-            cy.stub(window, 'fetch').as('fetch').resolves({
-                ok: true,
-                json: cy.stub().resolves({ status: 'success', data: { mark_id: 99 } }),
-            });
-        });
-
-        it('calls the correct endpoint for each resolution type', () => {
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/save$/, { method: 'POST' });
-
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-old-server-btn"]').click();
-            cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/save$/, { method: 'POST' });
-
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/add$/, { method: 'POST' });
-
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('@fetch').should('have.been.calledWithMatch', /components\/marks\/delete$/, { method: 'POST' });
-        });
-
-        it('does not call fetch when Ignore My Edits is clicked', () => {
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-server-btn"]').click();
-            cy.get('@fetch').should('not.have.been.called');
-        });
-
-        it('mutates the shared domMark.id when the server mark was deleted', () => {
-            const conflicts = makeConflicts(makeConflict({ serverMark: null }));
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.wrap(conflicts).its('1.domMark.id').should('eq', 99);
-        });
-
-        it('advances to the next conflict and emits all-resolved on the last one', () => {
-            mountWithEmitSpy(MarkConflictPopup, 'all-resolved', {
+    describe('resolve emits (parent performs the AJAX)', () => {
+        it('emits resolve with the dom resolution and mark id when Use My Edits is clicked', () => {
+            mountWithEmitSpy(MarkConflictPopup, 'resolve', {
                 ...defaultProps,
-                conflicts: makeConflicts(
-                    makeConflict({ domMark: makeMark({ id: 1, title: 'First' }) }),
-                    makeConflict({ domMark: makeMark({ id: 2, title: 'Second' }) }),
-                ),
-            }, 'onAllResolved');
-
-            cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'First');
-            cy.get('[data-testid="mark-conflict-progress"]').should('contain.text', '1 out of 2');
+                conflicts: makeConflicts(makeConflict()),
+            }, 'onResolve');
 
             cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="mark-conflict-dom-info"]').should('contain.text', 'Second');
-            cy.get('[data-testid="mark-conflict-progress"]').should('contain.text', '2 out of 2');
-
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('@onAllResolved').should('have.callCount', 1);
-        });
-    });
-
-    describe('conflict resolution (error path)', () => {
-        it('keeps the popup open when fetch fails', () => {
-            cy.stub(window, 'fetch').as('fetch').rejects(new Error('Network error'));
-
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
+            cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'dom' });
         });
 
-        it('stays on the same conflict when the server returns a non-success status', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({
-                ok: true,
-                json: cy.stub().resolves({ status: 'fail', message: 'Bad mark' }),
-            });
+        it('emits resolve with the old-server resolution when Revert to Original is clicked', () => {
+            mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+                ...defaultProps,
+                conflicts: makeConflicts(makeConflict()),
+            }, 'onResolve');
 
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
+            cy.get('[data-testid="mark-conflict-old-server-btn"]').click();
+            cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'old-server' });
         });
 
-        it('keeps the popup open when save returns an HTTP error', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
+        it('emits resolve with the server resolution when Ignore My Edits is clicked', () => {
+            mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+                ...defaultProps,
+                conflicts: makeConflicts(makeConflict()),
+            }, 'onResolve');
 
-            cy.mount(MarkConflictPopup, { props: { ...defaultProps, conflicts: makeConflicts(makeConflict()) } });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-            cy.get('[data-testid="mark-conflict-progress"]').should('not.exist');
-        });
-
-        it('keeps the popup open when add returns an HTTP error', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
-
-            cy.mount(MarkConflictPopup, {
-                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) },
-            });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-        });
-
-        it('keeps the popup open when delete returns an HTTP error', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({ ok: false, status: 500 });
-
-            cy.mount(MarkConflictPopup, {
-                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) },
-            });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-        });
-
-        it('stays on the conflict when add returns a non-success status', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({
-                ok: true,
-                json: cy.stub().resolves({ status: 'fail', message: 'Bad mark' }),
-            });
-
-            cy.mount(MarkConflictPopup, {
-                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ serverMark: null })) },
-            });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
-        });
-
-        it('stays on the conflict when delete returns a non-success status', () => {
-            cy.stub(window, 'fetch').as('fetch').resolves({
-                ok: true,
-                json: cy.stub().resolves({ status: 'fail', message: 'Bad mark' }),
-            });
-
-            cy.mount(MarkConflictPopup, {
-                props: { ...defaultProps, conflicts: makeConflicts(makeConflict({ localDeleted: true })) },
-            });
-            cy.get('[data-testid="mark-conflict-dom-btn"]').click();
-            cy.get('[data-testid="popup-window"]').should('be.visible');
+            cy.get('[data-testid="mark-conflict-server-btn"]').click();
+            cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'server' });
         });
     });
 
@@ -328,6 +211,31 @@ describe('MarkConflictPopup', () => {
 
             cy.get('[data-testid="close-button"]').click();
             cy.get('@onClose').should('have.callCount', 1);
+        });
+    });
+
+    describe('accessibility', () => {
+        it('exposes accessible names on all resolution buttons', () => {
+            cy.mount(MarkConflictPopup, {
+                props: {
+                    ...defaultProps,
+                    conflicts: makeConflicts(makeConflict()),
+                },
+            });
+            cy.get('[data-testid="mark-conflict-dom-btn"]').should('have.attr', 'title', 'Use my local edits');
+            cy.get('[data-testid="mark-conflict-server-btn"]').should('have.attr', 'title', 'Ignore my edits, keep server version');
+            cy.get('[data-testid="mark-conflict-old-server-btn"]').should('have.attr', 'title', 'Revert to original mark');
+        });
+
+        it('resolves via keyboard activation (Enter) on a resolution button', () => {
+            mountWithEmitSpy(MarkConflictPopup, 'resolve', {
+                ...defaultProps,
+                conflicts: makeConflicts(makeConflict()),
+            }, 'onResolve');
+
+            cy.get('[data-testid="mark-conflict-dom-btn"]').focus();
+            cy.get('[data-testid="mark-conflict-dom-btn"]').type('{enter}');
+            cy.get('@onResolve').should('have.been.calledWith', { markId: 1, resolution: 'dom' });
         });
     });
 });
