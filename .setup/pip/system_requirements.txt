@@ -28,7 +28,7 @@ PyMuPDF==1.24.3
 distro==1.9.0
 jsonschema==4.26.0
 jsonref==1.1.0
-docker==7.1.0
+docker==7.2.0
 urllib3==2.7.0
 
 # Python libraries for QR bulk upload
