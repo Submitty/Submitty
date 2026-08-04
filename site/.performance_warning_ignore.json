@@ -22,6 +22,8 @@
   "/courses/<term>/<course>/gradeable/<gradeable>/grading",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/details",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/grade",
+  "/courses/<term>/<course>/gradeable/<gradeable>/grading/save_peer_component",
+  "/courses/<term>/<course>/gradeable/<gradeable>/grading/clear_peer_marks",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/graded_gradeable",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/status",
   "/courses/<term>/<course>/gradeable/<gradeable>/update",
