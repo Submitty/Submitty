@@ -65,6 +65,10 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
+
+    # $DOCKER_NET_ARGS and $terminal_flag unquoted so they expand their contents
+    # (including if they have no contents)
+    # shellcheck disable=SC2086
     docker run --rm $terminal_flag $DOCKER_NET_ARGS -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
