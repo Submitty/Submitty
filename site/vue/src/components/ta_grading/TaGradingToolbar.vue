@@ -7,10 +7,6 @@ import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutD
 
 import Cookies from 'js-cookie';
 
-const emit = defineEmits<{
-    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
-}>();
-
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
@@ -19,6 +15,10 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, cl
     clusteringEnabled?: boolean;
     clustersExist?: boolean;
     taGradingClusterMode?: boolean;
+}>();
+
+const emit = defineEmits<{
+    'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
 const toggleClusteringMode = () => {
     if (!clustersExist) {
