@@ -8,6 +8,9 @@
   "/courses/<term>/<course>/gradeable/<gradeable>/team/invitation/new",
   "/courses/<term>/<course>/gradeable/<gradeable>/team/invitation/accept",
   "/courses/<term>/<course>/gradeable/<gradeable>/team",
+  "/courses/<term>/<course>/gradeable/<gradeable>/team/create_teams_from_subsections",
+  "/courses/<term>/<course>/gradeable/<gradeable>/team/create_single_student_teams",
+  "/courses/<term>/<course>/gradeable/<gradeable>/team/delete_all_teams",
   "/courses/<term>/<course>/gradeable/<gradeable>/upload",
   "/courses/<term>/<course>/extensions/update",
   "/courses/<term>/<course>/gradeable/<gradeable>/components/save_pages",
@@ -59,5 +62,6 @@
   "/courses/<term>/<course>/users/details",
   "/courses/<term>/<course>/no_access",
   "/courses/<term>/<course>/gradeable/<gradeable>/verify",
-  "/courses/<term>/<course>/forum/search"
+  "/courses/<term>/<course>/forum/search",
+  "/courses/<term>/<course>/gradeable/<gradeable>/split_pdf/upload"
 ]

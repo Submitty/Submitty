@@ -212,12 +212,18 @@ echo -e "\nBeginning installation of Submitty\n"
 
 nlohmann_dir="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json"
 
-# If we don't already have a copy of this repository, check it out
-if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 "https://github.com/nlohmann/json.git" "${nlohmann_dir}"
+# Fetch a pinned release of the nlohmann C++ JSON library.
+# Re-fetch only when the pinned version (.setup/bin/versions.sh) changes.
+mkdir -p "${nlohmann_dir}"
+pushd "${nlohmann_dir}" > /dev/null
+if [[ ! -f VERSION || $(< VERSION) != "${nlohmann_json_Version}" ]]; then
+    rm -rf include single_include
+    wget -nv "https://github.com/nlohmann/json/releases/download/${nlohmann_json_Version}/include.zip" -O nlohmann_json.zip
+    unzip -o -q nlohmann_json.zip "include/*"
+    rm -f nlohmann_json.zip
+    echo "${nlohmann_json_Version}" > VERSION
 fi
-
-# TODO: We aren't checking / enforcing a specific/minimum version of this library...
+popd > /dev/null
 
 # Add read & traverse permissions for RainbowGrades and vendor repos
 find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type d -exec chmod o+rx {} \;
@@ -592,7 +598,7 @@ done
 if [ "${IS_WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u "${DAEMON_USER}" /usr/local/submitty/venv/bin/python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
+    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
     echo -e "done"
 fi
 
@@ -683,7 +689,7 @@ fi
 # errors, and delete them from the table.  A maximum of 10,000 email
 # receipts will be deleted.
 if [ "${IS_WORKER}" == 0 ]; then
-    "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
+    python3 "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
 fi
 
 #############################################################################
@@ -691,7 +697,7 @@ fi
 
 # Deletes all expired sessions from the main Submitty database
 if [ "${IS_WORKER}" == 0 ]; then
-    "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
+    python3 "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
 fi
 
 #############################################################################
@@ -836,7 +842,7 @@ else
     echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
-    sudo -H -u "${DAEMON_USER}" /usr/local/submitty/venv/bin/python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
+    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
     echo -e -n "Done updating workers and installing docker images\n\n"
 
     if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
@@ -844,7 +850,7 @@ else
     else
         # Restart the shipper & workers
         echo -e -n "Restart shipper & workers\n\n"
-        python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py"
+        "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" -u "${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py"
         echo -e -n "Done restarting shipper & workers\n\n"
     fi
 
