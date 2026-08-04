@@ -178,6 +178,7 @@ export DAEMONPHP_GROUP=${DAEMONPHP_GROUP}
 export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
 export DAEMONPHPCGI_GROUP=${DAEMONPHPCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
+source ${SUBMITTY_INSTALL_DIR}/venv/bin/activate
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias install_lichen='bash /usr/local/submitty/GIT_CHECKOUT/Lichen/install_lichen.sh'
