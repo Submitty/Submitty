@@ -75,6 +75,11 @@ function openRemoveDialog(button, url) {
     removeDialogUrl = url;
     const primary = button.dataset.imageId;
     const aliases = (button.dataset.aliases || '').split(',').filter(Boolean);
+    const ownerMap = {};
+    (button.dataset.owners || '').split(',').filter(Boolean).forEach((pair) => {
+        const idx = pair.indexOf('|');
+        ownerMap[pair.slice(0, idx)] = pair.slice(idx + 1);
+    });
 
     const options = $('#remove-image-options');
     options.empty();
@@ -93,8 +98,25 @@ function openRemoveDialog(button, url) {
             value: entry.name,
         });
         checkbox.attr('data-testid', 'remove-image-checkbox');
+
+        const owner = ownerMap[entry.name] ?? '';
+        const isLocked = !window.dockerIsSuperUser && owner !== window.dockerUserId;
+        if (isLocked) {
+            checkbox.prop('disabled', true);
+        }
+
         label.append(checkbox);
-        label.append(document.createTextNode(` ${entry.name}${entry.primary ? ' (primary)' : ''}`));
+        label.append(document.createTextNode(
+            ` ${entry.name}${entry.primary && aliases.length > 0 ? ' (primary)' : ''}`,
+        ));
+
+        const note = $('<span>', { class: isLocked ? 'remove-image-locked' : 'remove-image-owner' });
+        if (isLocked) {
+            note.append(document.createTextNode(' - not removable, '));
+        }
+        note.append(document.createTextNode(owner === '' ? ' owned by system' : ` owned by ${owner}`));
+        label.append(note);
+
         wrapper.append(label);
         options.append(wrapper);
     });
@@ -168,10 +190,16 @@ function removeImage(url, images) {
             if (json.status === 'success') {
                 $('#add-field').val('');
                 setDockerStatusBadge(`${images.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
-                displaySuccessMessage(json.data);
-            }
-            else {
-                displayErrorMessage(json.message);
+                if (json.status === 'success') {
+                    setDockerStatusBadge(`${json.data.removed.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
+                    displaySuccessMessage(json.data.success_message);
+                    if (json.data.error_message) {
+                        displayErrorMessage(json.data.error_message);
+                    }
+                }
+                else {
+                    displayErrorMessage(json.message);
+                }
             }
         },
         error: (err) => {
