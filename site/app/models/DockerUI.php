@@ -420,7 +420,7 @@ class DockerUI extends AbstractModel {
     /**
      * Per-image data for the remove dialog, keyed by primary name.
      * 'owners' is a comma-separated list of name|owner pairs (primary first)
-     * an empty owner means no instructor owns that name, likely added by 
+     * an empty owner means no instructor owns that name, likely added by
      * sysadmin or is default
      * @return array<string, array{owners: string, can_remove: bool}>
      */
@@ -442,9 +442,7 @@ class DockerUI extends AbstractModel {
                 }
             }
 
-            $unique_owners = array_unique(array_map(
-                fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names
-            ));
+            $unique_owners = array_unique(array_map(fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names));
 
             if (count($unique_owners) <= 1) {
                 $owner_display = reset($unique_owners) ?: '';
