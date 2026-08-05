@@ -764,7 +764,7 @@ class User extends AbstractModel implements \JsonSerializable {
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
-                return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
+                return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", (string) $data) === 1 || is_null($data);
             case 'registration_subsection':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens, spaces.
                 // AND between 0 and 20 chars.
