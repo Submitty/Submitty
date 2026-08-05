@@ -108,7 +108,7 @@ function openRemoveDialog(button, url) {
         label.append(nameSpan);
 
         const note = $('<span>', { class: isLocked ? 'remove-image-locked' : 'remove-image-owner' });
-        note.text(entry.owner === '' ? 'system image' : `owned by ${entry.owner}`);
+        note.text(entry.owner === '' ? 'owned by system' : `owned by ${entry.owner}`);
         label.append(note);
 
         wrapper.append(label);
