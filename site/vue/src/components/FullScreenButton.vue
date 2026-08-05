@@ -1,4 +1,4 @@
-<!-- This component only emits `toggle`; applying full screen is the host page's job.
+<!-- This component only emits `toggle`, applying full screen is the host page's job.
      Wire it up in the Twig include:
 
      'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
@@ -6,8 +6,7 @@
      The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
      loads on every page, so no per-page CSS is needed.
 
-     Escape only exits full screen while this button has focus, since the handler
-     is bound to the button rather than the document.
+     Pressing escape to exit fullscreen only works when the button is in focus due to our current Vue standards and setup.
 -->
 
 <script setup lang="ts">
