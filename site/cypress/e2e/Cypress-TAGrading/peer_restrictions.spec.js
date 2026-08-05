@@ -28,6 +28,7 @@ describe('Test that grading restrictions on peer graders work', () => {
                 }
             });
         });
+        // Timeout on save-status message necessary for potentially long load times
         cy.get('[data-testid="save-status"]', { timeout: 20000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
