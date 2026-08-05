@@ -43,7 +43,7 @@ describe('Test that grading restrictions on peer graders work', () => {
             'grading',
             'details',
         ]);
-        cy.get('[data-testid="agree-popup-btn"]').click();
+        cy.get('[data-testid="popup-save-button"]').click();
         cy.get('[data-testid="grade-button"]').filter(':visible').first().click();
         panelOptions.forEach(({ gradingButton }) => {
             cy.get(gradingButton).should('not.exist');
