@@ -11,6 +11,14 @@
         "#vue-{{ id }}",
         "{{ type }}",
         "{{ name }}",
-        {{ args | default({}) | json_encode() | raw() }}
+        {{ args | default({}) | json_encode() | raw() }},
+        {{ events | default({}) | json_encode() | raw() }}
+    );
+    document.getElementById("vue-{{ id }}").reRender = (newArgs) => window.submitty.render(
+        "#vue-{{ id }}",
+        "{{ type }}",
+        "{{ name }}",
+        newArgs,
+        {{ events | default({}) | json_encode() | raw() }}
     );
 </script>

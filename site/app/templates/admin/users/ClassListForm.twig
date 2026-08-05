@@ -14,7 +14,7 @@
         <li>"Email": Only read for new students.</li>
         <li>"Secondary Email": Only read for new students.</li>
         <li>"Registration Section": For graders, this is a comma-separated list of sections in quotes, e.g. "10AM,11AM,12PM".</li>
-        <li>"Registration Sub-Section": Can contain alphanumeric letters, spaces, hyphens or underscores.</li>
+        <li>"Registration Subsection": Can contain alphanumeric letters, spaces, hyphens or underscores.</li>
         <li>"Registration Type": "graded", "audit", "withdrawn", or "staff"</li>
         {% if use_database %}
             <li>"Password": Only works for new students on installations using database uploads.</li>
@@ -36,9 +36,9 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label class="std-margin" for="move_missing">
         Move students missing from the classlist to NULL section?
-        <input type="checkbox" name="move_missing" id="move_missing" />
+        <input type="checkbox" name="move_missing" id="move_missing" data-testid="move-missing-checkbox" />
     </label>
-    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File" data-testid="classlist-upload-file">
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ return_url_upload_class_list }}" enctype="multipart/form-data">
@@ -47,5 +47,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" data-testid="submit-classlist-upload" />
 {% endblock %}

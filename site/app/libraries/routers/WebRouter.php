@@ -13,11 +13,12 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use app\libraries\Utils;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Routing\Loader\AttributeDirectoryLoader;
+use app\libraries\routers\AttributeRouteLoader;
 use Symfony\Contracts\Cache\ItemInterface;
 
 class WebRouter {
@@ -62,8 +63,8 @@ class WebRouter {
      */
     private function getCompiledRoutes(): array {
         $fileLocator = new FileLocator();
-        $annotationLoader = new AnnotatedRouteLoader();
-        $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
+        $attributeRouteLoader = new AttributeRouteLoader();
+        $loader = new AttributeDirectoryLoader($fileLocator, $attributeRouteLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         return (new CompiledUrlMatcherDumper($collection))->getCompiledRoutes();
     }

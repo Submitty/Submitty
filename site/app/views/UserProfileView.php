@@ -23,7 +23,9 @@ class UserProfileView extends AbstractView {
         string $csrf_token
     ) {
         $this->output->addInternalJs('user-profile.js');
+        $this->output->addInternalJs('authentication.js');
         $this->output->addInternalCss('user-profile.css');
+        $this->output->addInternalCss('authentication.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Profile');
         $this->output->addSelect2WidgetCSSAndJs(); /* Adding select2 CSS and JS widgets*/
@@ -56,7 +58,8 @@ class UserProfileView extends AbstractView {
             'user_time_zone_with_offset' => $user_time_zone_with_offset,
             'user_utc_offset' => $user_utc_offset,
             'supported_locales' => $supported_locales,
-            'default_locale_name' => $default_locale_name
+            'default_locale_name' => $default_locale_name,
+            'password_requirements' => $this->core->getConfig()->getPasswordRequirements()
         ]);
     }
 }

@@ -1,5 +1,6 @@
 import { viewFileFullPanel } from './ta-grading';
 import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
+import { updateVueComponent, unmountVueComponent } from './utils/vue';
 
 declare global {
     interface Window {
@@ -19,6 +20,7 @@ declare global {
         onCancelComponent(me: HTMLElement): Promise<void>;
         onCustomMarkChange(me: HTMLElement): Promise<void>;
         onToggleMark(me: HTMLElement): Promise<void>;
+        onToggleMarkById(data: { componentId: number; markId: number }): Promise<void>;
         onToggleCustomMark(me: HTMLElement): Promise<void>;
         onVerifyAll(me: HTMLElement): Promise<void>;
         onVerifyComponent(me: HTMLElement): Promise<void>;
@@ -48,6 +50,7 @@ declare global {
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
+        closeMarkStatsPopup: () => void;
     }
 }
 
@@ -91,6 +94,7 @@ type MarkConflictInfo = {
     localDeleted: boolean;
 };
 type GradedGradeable = {
+    peer_only_grader: boolean;
     peer_gradeable: boolean;
     user_group: number;
     active_graders: Record<string, string[]>;
@@ -140,6 +144,8 @@ const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {
 const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
 const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
 let GRADED_GRADEABLE: GradedGradeable | null = null;
+// added to prevent double clicks from registering
+const COMPONENT_TOGGLE_IN_PROGRESS: Record<number, boolean> = {};
 
 export type MarkConflicts = Record<number, MarkConflictInfo>;
 
@@ -273,11 +279,12 @@ async function ajaxGetGradeableRubric(gradeable_id: string) {
  * @param {number} upper_clamp
  * @param {boolean} is_itempool_linked
  * @param {string} itempool_option
+ * @param {boolean} peer
  * @async
  * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
  */
-async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined) {
+async function ajaxSaveComponent(gradeable_id: string | undefined, component_id: number, title: string | number | string[] | undefined, ta_comment: string | number | string[] | undefined, student_comment: string | number | string[] | undefined, page: number, lower_clamp: number, default_value: number, max_value: number, upper_clamp: number, is_itempool_linked: boolean, itempool_option: string | number | string[] | undefined, peer: boolean) {
     let response: Record<string, string> | null;
     try {
         response = await $.ajax({
@@ -298,7 +305,7 @@ async function ajaxSaveComponent(gradeable_id: string | undefined, component_id:
                 upper_clamp: upper_clamp,
                 is_itempool_linked: is_itempool_linked,
                 itempool_option: itempool_option === 'null' ? undefined : itempool_option,
-                peer: false,
+                peer: peer,
             },
         }) as Record<string, string>;
     }
@@ -1345,7 +1352,7 @@ function getComponentFromDOM(component_id: number): Component {
             marks: getMarkListFromDOM(component_id),
             is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
             itempool_option: domElement.find('select[name="component-itempool"]').val() as string,
-            peer: (domElement.attr('data-peer') === 'true'),
+            peer: domElement.attr('data-peer') === 'true' || domElement.hasClass('peer-component'),
         };
     }
     return {
@@ -1361,7 +1368,7 @@ function getComponentFromDOM(component_id: number): Component {
         marks: getMarkListFromDOM(component_id),
         is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
         itempool_option: domElement.find('select[name="component-itempool"]').val() as string,
-        peer: (domElement.attr('data-peer') === 'true'),
+        peer: domElement.attr('data-peer') === 'true' || domElement.hasClass('peer-component'),
     };
 }
 
@@ -1468,17 +1475,18 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
         comment = rawComment?.toString() ?? '';
     }
 
-    const dataDOMElement = domElement.find('.graded-component-data');
-    let gradedVersion = dataDOMElement.attr('data-graded_version')!;
+    const dataDOMElement = domElement.find('.graded-component-data, .peer-graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version') ?? '';
     if (gradedVersion === '') {
         gradedVersion = getDisplayVersion().toString();
     }
+    const parsedGradedVersion = parseInt(gradedVersion);
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(gradedVersion),
+        graded_version: Number.isNaN(parsedGradedVersion) ? getDisplayVersion() : parsedGradedVersion,
         grade_time: dataDOMElement.attr('data-grade_time')!,
         grader_id: dataDOMElement.attr('data-grader_id')!,
         verifier_id: dataDOMElement.attr('data-verifier_id')!,
@@ -1500,6 +1508,7 @@ function getScoresFromDOM() {
         auto_grading_earned?: number;
         auto_grading_total?: number;
         auto_grading_complete: boolean;
+        peer_only_grader: boolean;
     } = {
         user_group: GRADED_GRADEABLE!.user_group,
         ta_grading_earned: getTaGradingEarned(),
@@ -1507,6 +1516,7 @@ function getScoresFromDOM() {
         peer_grade_earned: getPeerGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false,
+        peer_only_grader: GRADED_GRADEABLE!.peer_only_grader,
     };
 
     // Then check if auto grading scorse exist before adding them
@@ -1811,43 +1821,51 @@ function toggleDOMCustomMark(component_id: number) {
 }
 
 /**
- * Opens the 'users who got mark' dialog
+ * Computes student links for the mark stats popup.
+ */
+function computeStudentLinks(stats: Stats): { name: string; url: string }[] {
+    const loc = window.location.href.split('?');
+    let base = loc[0];
+    if (base.endsWith('update')) {
+        base = `${base.slice(0, -6)}grading/grade`;
+    }
+    const params = new URLSearchParams(loc[1] ?? '');
+    return stats.submitter_ids.map((id) => {
+        params.set('who_id', stats.submitter_anon_ids[id] ?? id);
+        return { name: id, url: `${base}?${params.toString()}` };
+    });
+}
+
+/**
+ * Reloads the Vue ReceivedMarkForm component with updated mark stats data.
  * @param {string} component_title
  * @param {string} mark_title
  * @param {Object} stats
  */
 function openMarkStatsPopup(component_title: string, mark_title: string, stats: Stats) {
-    const popup = $('#student-marklist-popup');
-
-    popup.find('.question-title').html(component_title);
-    popup.find('.mark-title').html(mark_title);
-    popup.find('.section-submitter-count').html(stats.section_submitter_count);
-    popup.find('.total-submitter-count').html(stats.total_submitter_count);
-    popup.find('.section-graded-component-count').html(stats.section_graded_component_count);
-    popup.find('.total-graded-component-count').html(stats.total_graded_component_count);
-    popup.find('.section-total-component-count').html(stats.section_total_component_count);
-    popup.find('.total-total-component-count').html(stats.total_total_component_count);
-
-    // Create an array of links for each submitter
-    const submitterHtmlElements: string[] = [];
-    const location = window.location.href.split('?');
-    let base_url = location[0];
-    if (base_url.slice(base_url.length - 6) === 'update') {
-        base_url = `${base_url.slice(0, -6)}grading/grade`;
-    }
-    const search_params = new URLSearchParams(location[1]);
-    stats.submitter_ids.forEach((id: string | number) => {
-        search_params.set('who_id', stats.submitter_anon_ids[id] ?? id);
-        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
-    });
-    popup.find('.student-names').html(submitterHtmlElements.join(', '));
-
-    // Hide all other (potentially) open popups
     $('.popup-form').hide();
 
-    // Open the popup
-    popup.show();
+    const el = document.querySelector('.js-received-mark-form');
+    if (!el) {
+        return;
+    }
+
+    const studentLinks = computeStudentLinks(stats);
+
+    updateVueComponent(el, {
+        show: true,
+        componentTitle: component_title,
+        markTitle: mark_title,
+        stats: stats,
+        studentLinks: studentLinks,
+    });
 }
+
+// Closes the mark stats popup by fully unmounting the Vue app.
+
+window.closeMarkStatsPopup = function () {
+    unmountVueComponent('.js-received-mark-form');
+};
 
 /**
  * Gets if there are any loaded unverified components
@@ -2074,13 +2092,32 @@ window.onGetMarkStats = async function (me: HTMLElement) {
  */
 window.onClickComponent = async function (me: HTMLElement, edit_mode = false) {
     const component_id = getComponentIdFromDOMElement(me);
+
+    if (COMPONENT_TOGGLE_IN_PROGRESS[component_id]) {
+        return;
+    }
+
+    COMPONENT_TOGGLE_IN_PROGRESS[component_id] = true;
+
     try {
+        const wasOpen = isComponentOpen(component_id);
+
+        // Only update component metadata when opening, not when closing
+        if (!wasOpen) {
+            const component = getComponentFromDOM(component_id);
+            component.peer = component.peer || COMPONENT_RUBRIC_LIST[component_id]?.peer === true;
+            COMPONENT_RUBRIC_LIST[component_id] = component;
+        }
+
         await toggleComponent(component_id, true, edit_mode);
     }
     catch (err) {
         console.error(err);
         setComponentInProgress(component_id, false);
         alert(`Error opening/closing component! ${(err as Error).message}`);
+    }
+    finally {
+        COMPONENT_TOGGLE_IN_PROGRESS[component_id] = false;
     }
 };
 
@@ -2167,6 +2204,18 @@ async function onComponentOrderChange() {
 window.onToggleMark = async function (me: HTMLElement) {
     try {
         await toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error toggling mark! ${(err as Error).message}`);
+    }
+};
+
+// Called via events bridge from MarkSelector.vue's 'toggle-mark' emit
+// Receives structured data instead of a DOM element to derive IDs from
+window.onToggleMarkById = async function (data: { componentId: number; markId: number }) {
+    try {
+        await toggleCommonMark(data.componentId, data.markId);
     }
     catch (err) {
         console.error(err);
@@ -2881,10 +2930,33 @@ async function openComponentGrading(component_id: number) {
         displayAjaxError(err);
         throw err;
     }
-    window.OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id]!;
-    OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
+    const component = await ajaxGetComponentRubric(getGradeableId(), component_id);
+    let graded_component = await ajaxGetGradedComponent(getGradeableId(), component_id, getAnonId());
 
-    await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id]!, isEditModeEnabled(), true);
+    if (graded_component === undefined) {
+        // create a new empty one to pass down.
+        graded_component = {
+            ...component,
+            comment: '',
+            score: 0.0,
+            custom_mark_selected: false,
+            mark_ids: [],
+            graded_version: getDisplayVersion(),
+            grade_time: '',
+            grader_id: '',
+            verifier_id: '',
+            custom_mark_enabled: CUSTOM_MARK_ID,
+            component_id: component.id,
+        };
+    }
+
+    OLD_MARK_LIST[component_id] = component.marks;
+    COMPONENT_RUBRIC_LIST[component_id] = component;
+    window.OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+    GRADED_COMPONENTS_LIST[component_id] = graded_component;
+
+    await injectGradingComponent(component, graded_component, isEditModeEnabled(), true);
+
     const page = getComponentPageNumber(component_id);
     if (page) {
         scrollToPage(page);
@@ -3011,7 +3083,7 @@ async function closeComponentInstructorEdit(component_id: number, saveChanges: b
         // Save the component title and comments
         await ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
             component.student_comment, component.page, component.lower_clamp,
-            component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
+            component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option, component.peer);
     }
     const component_rubric = await ajaxGetComponentRubric(getGradeableId(), component_id);
     await injectInstructorEditComponent(component_rubric, false);
@@ -3057,7 +3129,9 @@ async function closeComponentGrading(component_id: number, saveChanges: boolean)
 
     if (saveChanges) {
         GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
-        COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
+        const component = getComponentFromDOM(component_id);
+        component.peer = COMPONENT_RUBRIC_LIST[component_id].peer;
+        COMPONENT_RUBRIC_LIST[component_id] = component;
         await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden
@@ -3141,7 +3215,7 @@ async function checkMark(component_id: number, mark_id: number) {
     $(`#mark-${mark_id} .mark-selector`).addClass('mark-selected');
 
     // Finally, re-render the component
-    await injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], gradedComponent, false, true);
 }
 
 /**
@@ -3166,7 +3240,7 @@ function unCheckMark(component_id: number, mark_id: number) {
     $(`#mark-${mark_id} .mark-selector`).removeClass('mark-selected');
 
     // Finally, re-render the component
-    return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    return injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], gradedComponent, false, true);
 }
 
 /**
@@ -3460,9 +3534,10 @@ window.updateAllComponentVersions = async function () {
  */
 function refreshGradedComponent(component_id: number, showMarkList: boolean) {
     return injectGradingComponent(
-        getComponentFromDOM(component_id),
+        COMPONENT_RUBRIC_LIST[component_id],
         getGradedComponentFromDOM(component_id),
-        isEditModeEnabled(), showMarkList);
+        isEditModeEnabled(),
+        showMarkList);
 }
 
 /**
@@ -3542,7 +3617,11 @@ async function injectInstructorEditComponentHeader(component: Component, showMar
  */
 async function injectGradingComponent(component: Component, graded_component: ComponentGradeInfo, editable: boolean, showMarkList: boolean) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), !!canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), !!student_grader, TA_GRADING_PEER, getAllowCustomMarks());
+    component.peer = component.peer === true
+        || getComponentJQuery(component.id).attr('data-peer') === 'true'
+        || getComponentJQuery(component.id).hasClass('peer-component');
+    const allow_custom_marks = !component.peer && getAllowCustomMarks();
+    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), !!canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), !!student_grader, TA_GRADING_PEER, allow_custom_marks);
     setComponentContents(component.id, elements);
 }
 

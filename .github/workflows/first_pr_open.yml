@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check if this is user's first PR
         id: check-first-pr

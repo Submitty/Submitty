@@ -4,6 +4,12 @@
     </strong>
 </span>
 
+{% if component.peer_component %}
+    <span class="peer-component-icon col-no-gutters">
+        <i class="fas fa-users" title="Peer grading component"></i>
+    </span>
+{% endif %}
+
 <span class="component-title col-no-gutters">
     <b><span class="component-title-text">{{ component.title|escape }}</span></b>
 </span>

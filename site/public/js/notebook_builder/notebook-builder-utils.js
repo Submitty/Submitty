@@ -1,5 +1,5 @@
 /* global buildCourseUrl, csrfToken, displayErrorMessage */
-/* exported uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents */
+/* exported uploadFiles, getBadItemNames, getBadImageInputs, getBadMarkdownContents, getBadFileSubmissionDirectories */
 
 /**
  * Asynchronous upload of configuration dependency file.
@@ -112,4 +112,26 @@ function getBadMarkdownContents() {
     });
 
     return Array.from(bad_markdown_conents);
+}
+
+/**
+ * Determines if any file submission widget has a blank or duplicated directory.
+ *
+ * @returns {Array} Returns an array containing the blank and/or duplicated directory values.
+*/
+
+function getBadFileSubmissionDirectories() {
+    const used_directories = new Set();
+    const bad_directories = new Set();
+
+    const directory_inputs = document.querySelectorAll('.directory-input');
+    directory_inputs.forEach((directory_input) => {
+        if (directory_input.value === '' || used_directories.has(directory_input.value)) {
+            bad_directories.add(directory_input.value);
+        }
+
+        used_directories.add(directory_input.value);
+    });
+
+    return Array.from(bad_directories);
 }

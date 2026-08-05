@@ -1,0 +1,15 @@
+{
+  "cwd": "..",
+  "all": false,
+  "reporter": [
+    "text-summary",
+    "html",
+    "lcov"
+  ],
+  "exclude": [
+    "site/cypress/**",
+    "**/*.cy.*",
+    "**/*.spec.*",
+    "site/node_modules/**"
+  ]
+}

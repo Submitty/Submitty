@@ -2,6 +2,22 @@
 # HELPER FUNCTION FOR INSTALLING INDIVIDUAL HOMEWORKS
 ##########################################################################
 
+##########################################################################
+# Check if this function is being run by daemon/root
+##########################################################################
+
+function is_daemon_or_root {
+    if [[ "$UID" -eq 0 ]]; then
+        return 0
+    fi
+    # the daemon user's name is installation specific, so read it from the config.
+    # stderr is discarded because submitty_users.json is not readable by
+    # instructors -- which itself means this is not the daemon.
+    local daemon_user
+    daemon_user=$(jq -r '.daemon_user // empty' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json" 2>/dev/null)
+    [[ -n "$daemon_user" && "$(whoami)" == "$daemon_user" ]]
+}
+
 function clean_homework {
     # which assignment to cleanup
     semester="$1"
@@ -178,14 +194,19 @@ function build_homework {
         return 1
     fi
 
-    # Add allowed minutes in database from config if exists
-    python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
-    set_minutes="$?"
+    # if this script is run by root or the submitty_daemon user, then run the set allowed minutes script
+    if is_daemon_or_root; then
+        # Add allowed minutes in database from config if exists
+        python3 "${SUBMITTY_INSTALL_DIR}/bin/set_allowed_mins.py" "${hw_build_path}/complete_config.json" "${semester}" "${course}" "${assignment}"
+        set_minutes="$?"
 
-    if (("$set_minutes" != 0)); then
-        echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
-        popd > /dev/null
-        return 1
+        if (("$set_minutes" != 0)); then
+            echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
+            popd > /dev/null
+            return 1
+        fi
+    else
+        echo -e "\nWARNING:  To set the autograding config allowed minutes, the build_homework_function script must be run as sudo."
     fi
 
     # Call configure.out (which has its main in /grading/main_configure.cpp)
@@ -237,6 +258,15 @@ function build_homework {
 
     # generate queue file for generated_output
     "$SUBMITTY_INSTALL_DIR"/bin/make_generated_output.py "$hw_source" "$assignment" "$semester" "$course"
+
+    # only the daemon (or root) can read database.json, so skip this for
+    # instructor command line builds
+    if is_daemon_or_root; then
+    # insert the gradeable data into the db
+    "$SUBMITTY_INSTALL_DIR"/bin/insert_build_data.py "$hw_config" "$assignment" "$semester" "$course"
+    else
+        echo -e "\nWARNING:  Autograding testcase data was not inserted into the database.  To update it, this gradeable must be rebuilt by the daemon (via the web interface) or the build script must be run as root."
+    fi
 
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
     popd > /dev/null

@@ -1,4 +1,3 @@
-{% import _self as self %}
 <script>
     const autograding_results = {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %} true {% else %} false {% endif %};
     const grading_rubric = {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %} true {% else %} false {% endif %};
@@ -25,7 +24,7 @@
     })
 </script>
 
-<div id="grading-panel-header">
+<div id="grading-panel-header" data-num-of-panels-enabled="1" data-divided-col-name="LEFT">
     <div class="panel-header-box">
         {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %}
             <span class="grade-panel" id="autograding_results_btn">
@@ -36,7 +35,12 @@
                 >
                     <i class="fas fa-list"></i><span>Autograding</span>
                 </button>
-                {{ self.renderPanelPositionSelector('autograding_results') }}
+                {% include 'Vue.twig' with { 
+                    'type': 'component', 
+                    'name': 'PanelPositionSelector', 
+                    'args': { 'panelId': 'autograding_results' }, 
+                    'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+                } %}
             </span>
         {% endif %}
         {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %}
@@ -44,10 +48,16 @@
                 <button title="Show/Hide Grading Rubric (Press G)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grading-rubric-panel-toggle"
                 >
                     <i class="fas fa-edit"></i><span>Rubric</span>
                 </button>
-                {{ self.renderPanelPositionSelector('grading_rubric') }}
+                {% include 'Vue.twig' with { 
+                    'type': 'component', 
+                    'name': 'PanelPositionSelector', 
+                    'args': { 'panelId': 'grading_rubric' }, 
+                    'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+                } %}
             </span>
         {% endif %}
         {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %}
@@ -59,7 +69,12 @@
                 >
                     <i class="fas fa-folder-open"></i><span>Files</span>
                 </button>
-                {{ self.renderPanelPositionSelector('submission_browser') }}
+                {% include 'Vue.twig' with { 
+                    'type': 'component', 
+                    'name': 'PanelPositionSelector', 
+                    'args': { 'panelId': 'submission_browser' }, 
+                    'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+                } %}
             </span>
         {% endif %}
         {% if isStudentInfoPanel %}
@@ -67,10 +82,16 @@
                 <button title="Show/Hide Student Information (Press S)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="student-info-panel-toggle"
                 >
                     <i class="fas fa-user"></i><span>Student Info</span>
                 </button>
-            {{ self.renderPanelPositionSelector('student_info') }}
+            {% include 'Vue.twig' with { 
+                'type': 'component', 
+                'name': 'PanelPositionSelector', 
+                'args': { 'panelId': 'student_info' }, 
+                'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+            } %}
             </span>
         {% endif %}
         {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %}
@@ -78,10 +99,16 @@
                 <button title="Show Solution and TA notes"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="solution-ta-notes-panel-toggle"
                 >
                     <i class="fas fa-check"></i><span>Solutions/Notes</span>
                 </button>
-                {{ self.renderPanelPositionSelector('solution_ta_notes') }}
+                {% include 'Vue.twig' with { 
+                    'type': 'component', 
+                    'name': 'PanelPositionSelector', 
+                    'args': { 'panelId': 'solution_ta_notes' }, 
+                    'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+                } %}
             </span>
         {% endif %}
         {% if isPeerPanel %}
@@ -92,7 +119,12 @@
                 >
                     <i class="fas fa-users"></i><span>Peer</span>
                 </button>
-            {{ self.renderPanelPositionSelector('peer_info') }}
+            {% include 'Vue.twig' with { 
+                'type': 'component', 
+                'name': 'PanelPositionSelector', 
+                'args': { 'panelId': 'peer_info' }, 
+                'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+            } %}
             </span>
         {% endif %}
         {% if not isPeerGrader or (isPeerGrader and isPeerDiscussion) %}
@@ -104,7 +136,12 @@
                     >
                         <i class="fas fa-comment-alt"></i><span>Discussion</span>
                     </button>
-                {{ self.renderPanelPositionSelector('discussion_browser') }}
+                {% include 'Vue.twig' with { 
+                    'type': 'component', 
+                    'name': 'PanelPositionSelector', 
+                    'args': { 'panelId': 'discussion_browser' }, 
+                    'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+                } %}
                 </span>
             {% endif %}
         {% endif %}
@@ -113,11 +150,17 @@
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn"
                         tabindex="0"
+                        data-testid="grade-inquiry-info-panel-toggle"
                 >
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    <span>Grade Inquiry</span>
                 </button>
-            {{ self.renderPanelPositionSelector('grade_inquiry_info') }}
+            {% include 'Vue.twig' with { 
+                'type': 'component', 
+                'name': 'PanelPositionSelector', 
+                'args': { 'panelId': 'grade_inquiry_info' }, 
+                'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+            } %}
             </span>
         {% endif %}
         {% if is_notebook %}
@@ -129,34 +172,27 @@
                    <i class="fas fa-book-open"></i>
                    <span>Notebook</span>
                 </button>
-            {{ self.renderPanelPositionSelector('notebook-view') }}
+            {% include 'Vue.twig' with { 
+                'type': 'component',
+                'name': 'PanelPositionSelector', 
+                'args': { 'panelId': 'notebook-view' },
+                'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' }
+            } %}
             </span>
         {% endif %}
 
     </div>
 </div>
 {% if error_message != "" %}
-    {% include "grading/electronic/ErrorMessage.twig" with {
-            "color" : error_color,
-            "message" : error_message
-    } only %}
+    {% include 'Vue.twig' with {
+        'type': 'component',
+        'name': 'StatusBanner',
+        'args': {
+            'message': error_message,
+            'color': error_color
+        },
+        'events': {
+            'color-change': '(event) => { document.body.style.background = event; }'
+        }
+    } %}
 {% endif %}
-
-{% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
-        <option class="panel-position-left" value="leftTop">
-            Open as top left panel
-        </option>
-        <option class="panel-position-left" value="leftBottom">
-            Open as bottom left panel
-        </option>
-        <option class="panel-position-left" value="rightTop">
-            Open as top right panel
-        </option>
-        <option class="panel-position-right" value="rightBottom">
-            Open as bottom right panel
-        </option>
-    </select>
-{% endmacro %}
-
-{% include 'grading/electronic/PanelSelectorModal.twig' %}

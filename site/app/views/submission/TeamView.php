@@ -18,10 +18,13 @@ class TeamView extends AbstractView {
      * @param \app\models\Team[] $invites_received
      * @param bool $seeking_partner
      * @param bool $lock
+     * @param int $students_not_on_teams_count
+     * @param int $students_on_teams_count
      * @return string
      */
-    public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, bool $seeking_partner, bool $lock): string {
+    public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, bool $seeking_partner, bool $lock, $students_not_on_teams_count, $students_on_teams_count): string {
         $gradeable_id = $gradeable->getId();
+        $is_instructor = $this->core->getUser()->getGroup() === 1;
 
         $this->core->getOutput()->addInternalModuleJs('team.js');
 
@@ -39,19 +42,29 @@ class TeamView extends AbstractView {
             $vcs_repo_exists = file_exists($path);
         }
 
+        $teams = $gradeable->getTeams();
+
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
             "seeking_enabled" => $this->core->getConfig()->isSeekMessageEnabled(),
             "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
+            "teams" => $teams,
+            "team_count" => count($teams),
+            "students_not_on_teams_count" => $students_not_on_teams_count,
+            "students_on_teams_count" => $students_on_teams_count,
             "team_name" => $team == null ? null : $team->getTeamName(),
             "team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
+            "grading_overview_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']),
+            "manage_students_url" => $this->core->buildCourseUrl(['users']),
             "user" => $this->core->getUser(),
             "user_id" => $this->core->getUser()->getId(),
             "lock" => $lock,
             "members" => $members,
             "seekers" => $seekers,
+            "is_instructor" => $is_instructor,
             "invites_received" => $invites_received,
             "seeking_partner" => $seeking_partner,
             "create_team_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'new']),
