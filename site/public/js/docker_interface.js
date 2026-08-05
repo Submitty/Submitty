@@ -106,15 +106,13 @@ function openRemoveDialog(button, url) {
         }
 
         label.append(checkbox);
-        label.append(document.createTextNode(
-            ` ${entry.name}${entry.primary && aliases.length > 0 ? ' (primary)' : ''}`,
-        ));
+
+        const nameSpan = $('<span>', { class: 'remove-image-name' });
+        nameSpan.text(`${entry.name}${entry.primary && aliases.length > 0 ? ' (primary)' : ''}`);
+        label.append(nameSpan);
 
         const note = $('<span>', { class: isLocked ? 'remove-image-locked' : 'remove-image-owner' });
-        if (isLocked) {
-            note.append(document.createTextNode(' - not removable, '));
-        }
-        note.append(document.createTextNode(owner === '' ? ' owned by system' : ` owned by ${owner}`));
+        note.text(owner === '' ? 'owned by system' : `owned by ${owner}`);
         label.append(note);
 
         wrapper.append(label);
