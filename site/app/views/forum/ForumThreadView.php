@@ -1029,8 +1029,8 @@ class ForumThreadView extends AbstractView {
                     $post_details[] = [
                         "id" => $details["id"][$i],
                         "timestamp" => $details["timestamps"][$i],
-                        "thread_id" => $details["thread_id"][$i],
-                        "thread_title" => $details["thread_title"][$i],
+                        "threadId" => $details["thread_id"][$i],
+                        "threadTitle" => $details["thread_title"][$i],
                         "content" => $content,
                     ];
                 }
