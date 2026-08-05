@@ -416,4 +416,31 @@ class DockerUI extends AbstractModel {
             }
         }
     }
+
+    /**
+     * Per-image data for the remove dialog, keyed by primary name.
+     * 'owners' is a comma-separated list of name|owner pairs (primary first);
+     * an empty owner means no instructor owns that name.
+     * @return array<string, array{owners: string, can_remove: bool}>
+     */
+    public function getRemoveImageData(string $user_id, bool $is_super_user): array {
+        $owners = $this->json_data['image_owners'];
+        $result = [];
+        foreach ($this->docker_images as $image) {
+            $pairs = [];
+            $can_remove = $is_super_user;
+            foreach (array_merge([$image->primary_name], $image->aliases) as $name) {
+                $owner = $owners[$name] ?? '';
+                $pairs[] = $name . '|' . $owner;
+                if ($owner !== '' && $owner === $user_id) {
+                    $can_remove = true;
+                }
+            }
+            $result[$image->primary_name] = [
+                'owners' => implode(',', $pairs),
+                'can_remove' => $can_remove,
+            ];
+        }
+        return $result;
+    }
 }

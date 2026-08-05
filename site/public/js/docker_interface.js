@@ -73,21 +73,17 @@ let removeDialogUrl = null;
 
 function openRemoveDialog(button, url) {
     removeDialogUrl = url;
-    const primary = button.dataset.imageId;
-    const aliases = (button.dataset.aliases || '').split(',').filter(Boolean);
-    const ownerMap = {};
-    (button.dataset.owners || '').split(',').filter(Boolean).forEach((pair) => {
+
+    // data-owners is an ordered list of name|owner pairs, the first is the primary
+    const entries = (button.dataset.owners || '').split(',').filter(Boolean).map((pair) => {
         const idx = pair.indexOf('|');
-        ownerMap[pair.slice(0, idx)] = pair.slice(idx + 1);
+        return { name: pair.slice(0, idx), owner: pair.slice(idx + 1) };
     });
 
     const options = $('#remove-image-options');
     options.empty();
 
-    const names = [{ name: primary, primary: true }]
-        .concat(aliases.map((a) => ({ name: a, primary: false })));
-
-    names.forEach((entry, i) => {
+    entries.forEach((entry, i) => {
         const checkboxId = `remove-image-option-${i}`;
         const wrapper = $('<div>', { class: 'remove-image-option' });
         const label = $('<label>', { for: checkboxId });
@@ -99,20 +95,20 @@ function openRemoveDialog(button, url) {
         });
         checkbox.attr('data-testid', 'remove-image-checkbox');
 
-        const owner = ownerMap[entry.name] ?? '';
-        const isLocked = !window.dockerIsSuperUser && owner !== window.dockerUserId;
+        const isLocked = !window.dockerIsSuperUser && entry.owner !== window.dockerUserId;
         if (isLocked) {
             checkbox.prop('disabled', true);
+            wrapper.addClass('locked');
         }
 
         label.append(checkbox);
 
         const nameSpan = $('<span>', { class: 'remove-image-name' });
-        nameSpan.text(`${entry.name}${entry.primary && aliases.length > 0 ? ' (primary)' : ''}`);
+        nameSpan.text(`${entry.name}${i === 0 && entries.length > 1 ? ' (primary)' : ''}`);
         label.append(nameSpan);
 
         const note = $('<span>', { class: isLocked ? 'remove-image-locked' : 'remove-image-owner' });
-        note.text(owner === '' ? 'owned by system' : `owned by ${owner}`);
+        note.text(entry.owner === '' ? 'system image' : `owned by ${entry.owner}`);
         label.append(note);
 
         wrapper.append(label);
