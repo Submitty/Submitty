@@ -14,7 +14,7 @@
                         );
                     </script>
                     {% if has_peer_version_conflict %}
-                        <button type="button" class="btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
+                        <button type="button" class="btn" data-testid="clear-all-peer-version-conflicts-btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
                             Clear All Peer Version Conflicts
                         </button>
                     {% endif %}

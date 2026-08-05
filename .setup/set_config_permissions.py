@@ -33,13 +33,10 @@ parser.add_argument('--worker', action='store_true', default=False,
 args = parser.parse_args()
 
 SUBMITTY_INSTALL_DIR = args.install_dir
-SUBMITTY_DIRECTORY_DIR = '/var/submitty/config'
-SUBMITTY_DIRECTORY_JSON = os.path.join(SUBMITTY_DIRECTORY_DIR, 'submitty.json')
-
-os.makedirs(SUBMITTY_DIRECTORY_DIR, exist_ok=True)
 
 SUBMITTY_DATA_DIR = '/var/local/submitty'
 CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
+SUBMITTY_DIRECTORY_JSON = os.path.join(CONFIG_DATA_DIR, 'submitty.json')
 CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_ADMIN_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_admin.json')
@@ -134,3 +131,6 @@ with open(SUBMITTY_DIRECTORY_JSON, 'w') as directory_json:
     config = OrderedDict()
     config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
     json.dump(config, directory_json, indent=2)
+
+shutil.chown(SUBMITTY_DIRECTORY_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+os.chmod(SUBMITTY_DIRECTORY_JSON, 0o440)
