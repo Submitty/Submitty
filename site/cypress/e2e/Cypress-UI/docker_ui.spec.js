@@ -418,14 +418,12 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="remove-image-checkbox"]').should('have.length', 2);
 
         cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:3.10"]').check();
-        cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:latest"]').check();
+        cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:latest"]').should('be.disabled');
         cy.get('[data-testid="remove-image-submit"]').click();
         cy.wait('@removeImage');
 
-        // Partial result: 3.10 removed, latest refused
         cy.get('.alert-success')
-            .should('contain.text', 'submitty/python:3.10 has been removed from the configuration.')
-            .and('contain.text', 'submitty/python:latest');
+            .should('contain.text', 'submitty/python:3.10 has been removed from the configuration.');
 
         // The default survives
         cy.reload();
