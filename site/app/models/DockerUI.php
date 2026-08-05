@@ -419,8 +419,9 @@ class DockerUI extends AbstractModel {
 
     /**
      * Per-image data for the remove dialog, keyed by primary name.
-     * 'owners' is a comma-separated list of name|owner pairs (primary first);
-     * an empty owner means no instructor owns that name.
+     * 'owners' is a comma-separated list of name|owner pairs (primary first)
+     * an empty owner means no instructor owns that name, likely added by 
+     * sysadmin or is default
      * @return array<string, array{owners: string, can_remove: bool}>
      */
     public function getRemoveImageData(string $user_id, bool $is_super_user): array {
@@ -429,16 +430,33 @@ class DockerUI extends AbstractModel {
         foreach ($this->docker_images as $image) {
             $pairs = [];
             $can_remove = $is_super_user;
+            $display = [];
             foreach (array_merge([$image->primary_name], $image->aliases) as $name) {
                 $owner = $owners[$name] ?? '';
+                $label = $owner === '' ? 'system' : $owner;
+                $display[] = $name === $image->primary_name ? $label . ' (primary)' : $label;
                 $pairs[] = $name . '|' . $owner;
                 if ($owner !== '' && $owner === $user_id) {
                     $can_remove = true;
                 }
             }
+
+            $unique_owners = array_unique(array_map(
+                fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name],
+                array_merge([$image->primary_name], $image->aliases)
+            ));
+
+            if (count($unique_owners) <= 1) {
+                $owner_display = reset($unique_owners) ?: '';
+            }
+            else {
+                $owner_display = implode(' / ', $display);
+            }
+
             $result[$image->primary_name] = [
                 'owners' => implode(',', $pairs),
                 'can_remove' => $can_remove,
+                'owner_display' => $owner_display,
             ];
         }
         return $result;

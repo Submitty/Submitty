@@ -159,7 +159,7 @@
                         <span class="badge badge-{{ capability_to_color_mapping[capability]}}">{{capability}}</span>
                     {% endfor %}
                 </td>
-                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
+                <td>{{ remove_image_data[image.primary_name].owner_display }}</td>
                 <td>
                     {% if remove_image_data[image.primary_name].can_remove %}
                         <button 
