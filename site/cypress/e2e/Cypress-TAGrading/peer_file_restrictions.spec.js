@@ -27,10 +27,6 @@ describe('Should be able to apply peer grader file restrictions', () => {
         cy.get('[data-testid="add-peer-file-pattern"]').click();
         cy.get('[data-testid="peer-file-pattern-row"]').contains('[data-testid="peer-file-pattern-value"]', pattern).should('exist');
     };
-    const openFirstAssignedPeerSubmission = () => {
-        cy.get('[data-testid="grade-button"]').first().click();
-        cy.get('[data-testid="submission-browser"]', { timeout: 10000 }).should('be.visible');
-    };
     beforeEach(() => {
         cy.login('instructor');
     });
@@ -61,6 +57,7 @@ describe('Should be able to apply peer grader file restrictions', () => {
         cy.visit(`/courses/f26/sample/gradeable/${gradeableId}/grading/details`);
         cy.get('[data-testid="popup-save-button"]').click();
         cy.get('[data-testid="grade-button"]').first().click();
+        // Panels take longer time to fully load after page
         cy.get('[data-testid="show-submission"]', { timeout: 10000 }).click();
         cy.get('[data-testid="submission-browser"]').should('be.visible');
         cy.get('[data-testid="submission-browser-file"]').should('exist').each(($file) => {
@@ -97,6 +94,7 @@ describe('Should be able to apply peer grader file restrictions', () => {
         visitGraderAssignment();
         cy.get('[data-testid="peer-files-restricted"]').uncheck();
         cy.get('[data-testid="peer-file-pattern-controls"]').should('not.be.visible');
+        // Timeout on save-status message necessary for potentially long load times
         cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         cy.get('[data-testid="grader-assignment-tab"]').click();

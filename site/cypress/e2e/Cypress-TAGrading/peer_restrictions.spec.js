@@ -28,6 +28,7 @@ describe('Test that grading restrictions on peer graders work', () => {
                 }
             });
         });
+        // Timeout on save-status message necessary for potentially long load times
         cy.get('[data-testid="save-status"]', { timeout: 20000 }).should('contain.text', 'All Changes Saved');
         cy.reload();
         panelOptions.forEach(({ setting }) => {
@@ -43,7 +44,7 @@ describe('Test that grading restrictions on peer graders work', () => {
             'grading',
             'details',
         ]);
-        cy.get('[data-testid="agree-popup-btn"]').click();
+        cy.get('[data-testid="popup-save-button"]').click();
         cy.get('[data-testid="grade-button"]').filter(':visible').first().click();
         panelOptions.forEach(({ gradingButton }) => {
             cy.get(gradingButton).should('not.exist');
