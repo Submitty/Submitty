@@ -1097,6 +1097,23 @@ class ElectronicGraderController extends AbstractController {
 
         $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
 
+        $sort = $_COOKIE['sort'] ?? 'id';
+        $direction = $_COOKIE['direction'] ?? 'ASC';
+        if (
+            $peer
+            && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
+        ) {
+            $sort = 'random';
+            $direction = 'ASC';
+        }
+        elseif ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
+        elseif ($peer) {
+            $sort = 'peer';
+            $direction = 'ASC';
+        }
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
@@ -1848,6 +1865,10 @@ class ElectronicGraderController extends AbstractController {
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;
+        if ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
         if ($who_id === '') {
             $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
             $order_grading_sections->sort($sort, $direction);

@@ -128,6 +128,46 @@ class GradingOrder extends AbstractModel {
      * Sort grading order.
      */
     public function sort($type, $direction) {
+        if ($type === 'custom') {
+            $custom_order = $this->core->getQueries()->getCustomGradingOrder(
+                $this->gradeable->getId()
+            );
+
+            if (count($custom_order) === 0) {
+                return;
+            }
+
+            $submitters = [];
+
+            foreach ($this->section_submitters as $section) {
+                foreach ($section as $submitter) {
+                    $submitters[] = $submitter;
+                }
+            }
+            usort(
+                $submitters,
+                function (Submitter $a, Submitter $b) use ($custom_order) {
+                    $a_position = $custom_order[$a->getId()] ?? PHP_INT_MAX;
+                    $b_position = $custom_order[$b->getId()] ?? PHP_INT_MAX;
+
+                    $comparison = $a_position <=> $b_position;
+
+                    if ($comparison !== 0) {
+                        return $comparison;
+                    }
+                    return strcmp($a->getId(), $b->getId());
+                }
+            );
+            $this->section_submitters = [
+                'custom' => $submitters,
+            ];
+
+             $this->section_submitters = [
+                'custom' => $submitters,
+             ];
+
+             return;
+        }
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
         $keyFn = function (Submitter $a) {
             return $a->getId();

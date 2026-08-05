@@ -6557,6 +6557,8 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
+              g_custom_sort AS custom_sort,
+              g_enable_custom_sort AS enable_custom_sort,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gamo.*,
@@ -7308,7 +7310,9 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
-            $gradeable->getAllowCustomMarks()
+            $gradeable->getAllowCustomMarks(),
+            $gradeable->getCustomSort(),
+            $gradeable->getEnableCustomSort()
         ];
         $this->course_db->query(
             "
@@ -7325,8 +7329,10 @@ AND gc_id IN (
               g_grade_released_date,
               g_min_grading_group,
               g_syllabus_bucket,
-              g_allow_custom_marks)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_allow_custom_marks,
+              g_custom_sort,
+              g_enable_custom_sort)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -7496,6 +7502,8 @@ AND gc_id IN (
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
+                $gradeable->getCustomSort(),
+                $gradeable->getEnableCustomSort(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -7512,7 +7520,9 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?
+                  g_allow_custom_marks=?,
+                  g_custom_sort=?,
+                  g_enable_custom_sort=?
                 WHERE g_id=?",
                 $params
             );
@@ -7630,7 +7640,80 @@ AND gc_id IN (
         $this->updateGradeableComponents($gradeable);
     }
 
+    /**
+     * @return array<string, int>
+     */
+    public function getCustomGradingOrder(string $gradeable_id): array {
+        $this->course_db->query(
+            "
+            SELECT user_id, team_id, sort_order
+            FROM gradeable_custom_order
+            WHERE g_id = ?
+            ORDER BY sort_order
+            ",
+            [$gradeable_id]
+        );
 
+        $order = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $submitter_id = $row['user_id'] ?? $row['team_id'];
+            $order[$submitter_id] = (int) $row['sort_order'];
+        }
+
+        return $order;
+    }
+
+    public function clearCustomGradingOrder(string $gradeable_id): void {
+        $this->course_db->query(
+            "
+            DELETE FROM gradeable_custom_order
+            WHERE g_id = ?
+            ",
+            [$gradeable_id]
+        );
+    }
+
+    /**
+     * @param array<int, string> $ordered_submitter_ids
+     */
+    public function replaceCustomGradingOrder(
+        string $gradeable_id,
+        array $ordered_submitter_ids,
+        bool $is_team
+    ): void {
+        $this->course_db->beginTransaction();
+
+        try {
+            $this->clearCustomGradingOrder($gradeable_id);
+
+            $submitter_column = $is_team ? 'team_id' : 'user_id';
+
+            foreach ($ordered_submitter_ids as $sort_order => $submitter_id) {
+                $this->course_db->query(
+                    "
+                    INSERT INTO gradeable_custom_order (
+                        g_id,
+                        {$submitter_column},
+                        sort_order
+                    )
+                    VALUES (?, ?, ?)
+                    ",
+                    [
+                        $gradeable_id,
+                        $submitter_id,
+                        $sort_order,
+                    ]
+                );
+            }
+
+            $this->course_db->commit();
+        }
+        catch (DatabaseException $db_exception) {
+            $this->course_db->rollback();
+            throw $db_exception;
+        }
+    }
     /**
      * Removes the provided mark ids from the marks assigned to a graded component
      *
