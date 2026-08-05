@@ -5,10 +5,24 @@ import * as markerjsUI from '@markerjs/markerjs-ui';
 export { };
 
 declare global {
+    interface Element {
+        reRender?: (newArgs: Record<string, unknown>) => Promise<void>;
+        unmount?: () => void;
+    }
+
     interface Window {
         csrfToken: string;
         $: JQueryStatic;
         Twig: typeof Twig;
+        submitty: {
+            render: (
+                target: string | Element,
+                type: 'component' | 'page',
+                name: string,
+                args?: Record<string, unknown>,
+                events?: Record<string, string>,
+            ) => Promise<void>;
+        };
         removeMessagePopup: (key: number) => void;
         displayErrorMessage: (message: string) => void;
         displaySuccessMessage: (message: string) => void;
