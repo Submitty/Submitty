@@ -119,8 +119,15 @@
         {% include 'Vue.twig' with {
             'type': 'component',
             'name': 'ta_grading/ToggleAllSectionsButton',
+            'class': 'js-toggle-all-sections',
             'style': 'display: inline;',
-        } %}        
+            'args': {
+                'collapsed': collapsed_sections|length > 0,
+            },
+            'events': {
+                'toggle-all': 'toggleAllSections',
+            },
+        } %}
         {% include 'Vue.twig' with {
             'type': 'component',
             'name': 'ToggleColumns',
