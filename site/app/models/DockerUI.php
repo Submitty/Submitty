@@ -431,7 +431,8 @@ class DockerUI extends AbstractModel {
             $pairs = [];
             $can_remove = $is_super_user;
             $display = [];
-            foreach (array_merge([$image->primary_name], $image->aliases) as $name) {
+            $names = array_merge([$image->primary_name], $image->aliases);
+            foreach ($names as $name) {
                 $owner = $owners[$name] ?? '';
                 $label = $owner === '' ? 'system' : $owner;
                 $display[] = $name === $image->primary_name ? $label . ' (primary)' : $label;
@@ -442,8 +443,7 @@ class DockerUI extends AbstractModel {
             }
 
             $unique_owners = array_unique(array_map(
-                fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name],
-                array_merge([$image->primary_name], $image->aliases)
+                fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names
             ));
 
             if (count($unique_owners) <= 1) {

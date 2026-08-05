@@ -185,7 +185,14 @@
                 <h1>Remove Image</h1>
             </div>
             <div class="form-body">
-                <p>Select which images/aliases to remove from the configuration. You can only remove images you own. Aliases point at the same underlying image, so any number of the options below can be removed.</p>
+                <p id="remove-image-intro-single" data-testid="remove-image-intro-single" style="display: none;">
+                    {# only one alias modal text here #}
+                    Remove this image from the configuration. You can only remove images you own.
+                </p>
+                <p id="remove-image-intro-multiple" data-testid="remove-image-intro-multiple" style="display: none;">
+                    {# more than one alias modal text here #}
+                    Select which images/aliases to remove from the configuration. Aliases point at the same underlying image, so any number of the options below can be removed. You can only remove images you own.
+                </p>
                 <div id="remove-image-options" data-testid="remove-image-options"></div>
                 <span id="remove-image-error" data-testid="remove-image-error" style="color: var(--standard-red, red);"></span>
                 <div class="form-buttons">

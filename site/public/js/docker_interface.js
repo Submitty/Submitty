@@ -79,6 +79,9 @@ function openRemoveDialog(button, url) {
         const idx = pair.indexOf('|');
         return { name: pair.slice(0, idx), owner: pair.slice(idx + 1) };
     });
+    const isMultiple = entries.length > 1;
+    $('#remove-image-intro-single').toggle(!isMultiple);
+    $('#remove-image-intro-multiple').toggle(isMultiple);
 
     const options = $('#remove-image-options');
     options.empty();
