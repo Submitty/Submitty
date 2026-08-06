@@ -1,0 +1,44 @@
+{
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDOUT.txt",
+                    "description": "Greeting for Ada",
+                    "difference_file": "test01/0_diff.json",
+                    "expected_file": "test_output/testassignment/out_ada.txt"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2784
+            },
+            "points_awarded": 0,
+            "test_name": "Visible greeting"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/STDOUT.txt",
+                    "description": "Greeting for Grace",
+                    "difference_file": "test02/0_diff.json",
+                    "expected_file": "test_output/testassignment/out_grace.txt"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2780
+            },
+            "points_awarded": 0,
+            "test_name": "Hidden greeting"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

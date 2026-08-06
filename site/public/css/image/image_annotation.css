@@ -1,0 +1,221 @@
+/* Image Annotation CSS */
+
+.image-annotation-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--standard-light-medium-gray);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--background-blue);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* Annotation Image CSS */
+
+#annotatable-image {
+    max-width: 90%;
+    max-height: calc(100% - 120px); /* Account for toolbar and padding */
+    height: auto;
+    display: block;
+    border: 1px solid var(--standard-light-medium-gray);
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    margin: 0 auto;
+    object-fit: contain;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+#image-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#image-viewer {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    margin-top: 75px;
+}
+
+#image-error-message {
+    color: var(--alert-danger-red);
+    background-color: var(--alert-background-danger-red);
+    border: 1px solid var(--alert-border-danger-red);
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Annotation Status CSS */
+
+#annotation-status {
+    margin-left: 20px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 3px;
+    min-width: 200px;
+    display: inline-block;
+}
+
+/* Annotation Toolbar CSS */
+
+.annotation-toolbar {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--standard-light-medium-gray);
+    background-color: var(--always-default-white);
+    border-radius: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: 90%;
+    width: 100%;
+    justify-content: left;
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    /* Annotation Buttons CSS */
+
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin: 0 10px 5px 0;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1.4286;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: none; /* .btn-primary has border on hover */
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    /* Annotation Button Icons CSS */
+
+    .fas,
+    .fas:hover {
+        color: var(--btn-text-black);
+    }
+
+    /* Add Annotations Button CSS */
+
+    .btn-primary,
+    .btn-primary:active {
+        background-color: var(--standard-aqua);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background-color: var(--standard-medium-blue);
+    }
+
+    .btn-primary:active:focus {
+        background-color: var(--standard-aqua);
+    }
+
+    /* Save Annotations Button CSS */
+
+    .btn-success,
+    .btn-success:active {
+        background-color: var(--standard-vibrant-green);
+    }
+
+    .btn-success:hover,
+    .btn-success:focus {
+        background-color: var(--standard-medium-green);
+    }
+
+    .btn-success:active:focus {
+        background-color: var(--standard-vibrant-green);
+    }
+
+    /* Clear Annotations Button CSS */
+
+    .btn-warning,
+    .btn-warning:active {
+        background-color: var(--standard-light-red);
+    }
+
+    .btn-warning:hover,
+    .btn-warning:focus {
+        background-color: var(--standard-medium-red);
+    }
+
+    .btn-warning:active:focus {
+        background-color: var(--standard-light-red);
+    }
+
+    /* Download Annotations Button CSS */
+
+    .btn-secondary,
+    .btn-secondary:active {
+        background-color: var(--standard-light-orange);
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background-color: var(--standard-medium-orange);
+    }
+
+    .btn-secondary:active:focus {
+        background-color: var(--standard-light-orange);
+    }
+}
+
+/* Annotation Editor CSS */
+
+#global-annotation-editor-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    background: rgb(0 0 0 / 80%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#global-annotation-editor {
+    width: 90vw;
+    height: 90vh;
+    background: var(--always-default-white);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
+}
+
+/* Mobile Media Queries */
+
+@media (max-width: 768px) {
+    .annotation-toolbar {
+        flex-direction: column;
+        align-items: normal;
+    }
+
+    .annotation-toolbar .btn {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #annotation-status {
+        margin-left: 0;
+        margin-top: 10px;
+        text-align: center;
+    }
+}
