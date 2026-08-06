@@ -52,8 +52,8 @@
                     'cookie': 'active_student_columns',
                 },
             } %}
-            <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
-            <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
+            <a href="javascript:newDownloadForm()" class="btn btn-primary" data-testid="download-users-button">Download Users</a>
+            <a href="javascript:newClassListForm()" class="btn btn-primary" data-testid="upload-classlist-button">Upload Classlist</a>
             <a href="javascript:newStudentForm()" class="btn btn-primary" data-testid="new-student-form-btn">New Student</a>
         </div>
     </header>
@@ -61,7 +61,7 @@
     {# This is a data table #}
     {% set count = 1 %}
     {% if sections|length > 0 %}
-        <table id="student-table" class="table table-striped mobile-table directory-table">
+        <table id="student-table" class="table table-striped mobile-table directory-table" data-testid="student-table">
             <caption>Students Enrolled</caption>
             <thead>
                 <tr>
@@ -183,10 +183,10 @@
                                 <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
                             {% endif %}
                             {% if active_student_columns[2] %}
-                                <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
+                                <td class="align-left td-given-name" data-testid="student-given-name">{{ student.getDisplayedGivenName() }}</td>
                             {% endif %}
                             {% if active_student_columns[3] %}
-                                <td class="align-left td-family-name">{{ student.getDisplayedFamilyName() }}</td>
+                                <td class="align-left td-family-name" data-testid="student-family-name">{{ student.getDisplayedFamilyName() }}</td>
                             {% endif %}
                             {% if active_student_columns[4] %}
                                 <td class="align-left td-pronouns">{{ student.getPronouns() }}</td>

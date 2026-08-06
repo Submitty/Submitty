@@ -31,12 +31,12 @@
     "onelogin/php-saml": "4.3.1",
     "php-ds/php-ds": "2.0.1",
     "ramsey/uuid": "4.9.2",
-    "symfony/cache": "6.4.7",
+    "symfony/cache": "6.4.40",
     "symfony/config": "6.4.4",
-    "symfony/http-foundation": "6.4.14",
-    "symfony/routing": "6.4.13",
+    "symfony/http-foundation": "6.4.41",
+    "symfony/routing": "6.4.41",
     "textalk/websocket": "1.6.3",
-    "twig/markdown-extra": "^3.24",
+    "twig/markdown-extra": "^3.26",
     "twig/twig": "3.27.0"
   },
   "require-dev": {
