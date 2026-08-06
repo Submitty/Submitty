@@ -505,51 +505,50 @@ const reset = () => {
         '[data-testid="display-benchmarks-lowest_d"]',
     ];
 
-    const textboxes = [
-        '[data-testid="cust-messages-textarea"]',
-        '[data-testid="benchmark-lowest_a-"]',
-        '[data-testid="benchmark-lowest_b-"]',
-        '[data-testid="benchmark-lowest_c-"]',
-        '[data-testid="benchmark-lowest_d"]',
-        '[data-testid="section-and-labels-1"]',
-        '[data-testid="section-and-labels-2"]',
-        '[data-testid="section-and-labels-3"]',
-        '[data-testid="section-and-labels-4"]',
-        '[data-testid="section-and-labels-5"]',
-        '[data-testid="section-and-labels-6"]',
-        '[data-testid="section-and-labels-7"]',
-        '[data-testid="section-and-labels-8"]',
-        '[data-testid="section-and-labels-9"]',
-        '[data-testid="section-and-labels-10"]',
-        '[data-testid="cutoff-A"]',
-        '[data-testid="cutoff-A-"]',
-        '[data-testid="cutoff-B+"]',
-        '[data-testid="cutoff-B"]',
-        '[data-testid="cutoff-B-"]',
-        '[data-testid="cutoff-C+"]',
-        '[data-testid="cutoff-C"]',
-        '[data-testid="cutoff-C-"]',
-        '[data-testid="cutoff-D+"]',
-        '[data-testid="cutoff-D"]',
-    ];
+    const textboxes = {
+        '[data-testid="cust-messages-textarea"]': '',
+        '[data-testid="benchmark-lowest_a-"]': '0.9',
+        '[data-testid="benchmark-lowest_b-"]': '0.8',
+        '[data-testid="benchmark-lowest_c-"]': '0.7',
+        '[data-testid="benchmark-lowest_d"]': '0.6',
+        '[data-testid="section-and-labels-1"]': '1',
+        '[data-testid="section-and-labels-2"]': '2',
+        '[data-testid="section-and-labels-3"]': '3',
+        '[data-testid="section-and-labels-4"]': '4',
+        '[data-testid="section-and-labels-5"]': '5',
+        '[data-testid="section-and-labels-6"]': '6',
+        '[data-testid="section-and-labels-7"]': '7',
+        '[data-testid="section-and-labels-8"]': '8',
+        '[data-testid="section-and-labels-9"]': '9',
+        '[data-testid="section-and-labels-10"]': '10',
+        '[data-testid="cutoff-A"]': '93',
+        '[data-testid="cutoff-A-"]': '90',
+        '[data-testid="cutoff-B+"]': '87',
+        '[data-testid="cutoff-B"]': '83',
+        '[data-testid="cutoff-B-"]': '80',
+        '[data-testid="cutoff-C+"]': '77',
+        '[data-testid="cutoff-C"]': '73',
+        '[data-testid="cutoff-C-"]': '70',
+        '[data-testid="cutoff-D+"]': '67',
+        '[data-testid="cutoff-D"]': '60',
+    };
 
     checkboxes.forEach((testId) => {
         cy.get('body').then(($body) => {
             const $el = $body.find(testId);
-            // Only uncheck and wait for save if the checkbox is checked
-            if ($el.is(':visible') && $el.length && $el.is(':checked')) {
+            if ($el.length && $el.is(':checked')) {
                 cy.wrap($el).uncheck({ force: true });
                 cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
             }
         });
     });
 
-    textboxes.forEach((testId) => {
+    Object.entries(textboxes).forEach(([testId, defaultValue]) => {
         cy.get('body').then(($body) => {
             const $el = $body.find(testId);
-            // Only clear and wait for save if the textbox is not empty
-            if ($el.is(':visible') && $el.length && $el.val() !== '') {
-                cy.wrap($el).clear();
+            if ($el.length && $el.val() !== defaultValue) {
+                cy.wrap($el).invoke('val', defaultValue);
+                cy.wrap($el).trigger('change', { force: true });
                 cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
             }
         });
