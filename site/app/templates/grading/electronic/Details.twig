@@ -85,7 +85,10 @@
                 </label>
                 {% endif %}
                 {% if full_access_grader_permission and is_clustering_allowed and current_algorithm is not null %}
-                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper" title="Group similar submissions into clusters."> Group by Clusters
+                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
+                    <a aria-label="Group by Clusters Help" href="https://submitty.org/grader/rubric_grading/cluster_grading" target="_blank">
+                        <i class="far fa-question-circle"></i>
+                    </a>
                     <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_group_by_clusters %}checked{% endif %}>
                 </label>
                 {% endif %}
