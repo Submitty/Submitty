@@ -69,7 +69,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -94,7 +94,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -119,7 +119,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -147,7 +147,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
@@ -619,9 +619,9 @@ jobs:
 
       - name: Setup Databases and Courses for main
         run: | # migrate main according to dumped master database (assume it is correct)
-          sudo mkdir -p /var/submitty
-          sudo rm -rf /var/submitty/config
-          sudo ln -sfn ${MAIN_INSTALL_PATH}/config /var/submitty/config
+          sudo mkdir -p /var/local/submitty
+          sudo rm -rf /var/local/submitty/config
+          sudo ln -sfn ${MAIN_INSTALL_PATH}/config /var/local/submitty/config
 
           python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
@@ -638,8 +638,8 @@ jobs:
 
       - name: Setup Databases and Courses for Current Branch
         run: |
-          sudo rm -rf /var/submitty/config
-          sudo ln -sfn ${PR_INSTALL_PATH}/config /var/submitty/config
+          sudo rm -rf /var/local/submitty/config
+          sudo ln -sfn ${PR_INSTALL_PATH}/config /var/local/submitty/config
 
           python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
@@ -999,7 +999,7 @@ jobs:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: submitty.json
@@ -1081,7 +1081,7 @@ jobs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
