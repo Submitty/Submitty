@@ -24,7 +24,7 @@ set_permissions () {
         css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi|cjs)
             chmod 445 ${fullpath}
             ;;
         html)
@@ -375,6 +375,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp -R ${NODE_FOLDER}/pdfjs-dist/build/* ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.mjs ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs
+    mkdir ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs3/umd/markerjs3.js ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs3/umd/markerjs3.js.map ${VENDOR_FOLDER}/markerjs3
+    cp ${NODE_FOLDER}/@markerjs/markerjs-ui/markerjs-ui.umd.cjs ${VENDOR_FOLDER}/markerjs3/markerjs-ui.umd.js
     cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
     cp -R ${NODE_FOLDER}/pdfjs-dist/wasm ${VENDOR_FOLDER}/pdfjs
     cp -R ${NODE_FOLDER}/pdfjs-dist/image_decoders ${VENDOR_FOLDER}/pdfjs
@@ -389,10 +393,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # twig.js
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
-    # jspdf
-    mkdir ${VENDOR_FOLDER}/jspdf
-    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
-    cp ${NODE_FOLDER}/jspdf/dist/jspdf.umd.min.js.map ${VENDOR_FOLDER}/jspdf/jspdf.min.js.map
     # highlight.js
     mkdir ${VENDOR_FOLDER}/highlight.js
     cp ${NODE_FOLDER}/@highlightjs/cdn-assets/highlight.min.js ${VENDOR_FOLDER}/highlight.js/

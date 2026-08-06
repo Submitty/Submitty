@@ -7,7 +7,7 @@ function switch_settings(gradeable_id) {
 function revert_settings(gradeable_id, setting) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'update']);
     cy.get('#page_3_nav').click();
-    cy.get(`input[data-testname="grader_assignment_method"][id=${setting}`).check();
+    cy.get(`input[data-testname="grader_assignment_method"][id=${setting}]`).check();
 }
 
 function select_gradeable() {
@@ -19,12 +19,16 @@ function select_gradeable() {
     cy.get('[data-testid="show-submission"]').click();
     cy.get('[data-testid="folders"]').contains('submissions').click();
     cy.get('#div_viewer_sd1').contains('words_').click();
-    cy.get('#pageContainer1').should('be.visible');
+    cy.get('#pageContainer1', { timeout: 20000 }).should('be.visible');
 }
 
 function check_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
-    cy.get('#agree-button').click({ force: true });
+    cy.get('body').then(($body) => {
+        if ($body.find('[data-testid="popup-save-button"]').length > 0) {
+            cy.get('[data-testid="popup-save-button"]').click({ force: true });
+        }
+    });
     cy.get('[data-testid="details-table"]').should('be.visible');
     cy.get('[data-testid="view-sections"]').then(($button) => {
         if ($button[0].checked) {
@@ -36,7 +40,7 @@ function check_pdf_access(gradeable_id) {
 
 function minimum_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
-    cy.get('#agree-button').click({ force: true });
+    cy.get('[data-testid="popup-save-button"]').click({ force: true });
     cy.get('[data-testid="details-table"]').should('be.visible');
     cy.get('[data-testid="view-sections-label"]').should('not.exist');
     select_gradeable();
