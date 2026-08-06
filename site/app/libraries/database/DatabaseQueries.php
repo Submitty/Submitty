@@ -8077,7 +8077,7 @@ AND gc_id IN (
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  string[]                        $submitter_ids
-     * @return array<string, int> Map of id=>version
+     * @return bool[] Map of id=>version
      */
     public function getActiveVersions(Gradeable $gradeable, array $submitter_ids) {
         if (count($submitter_ids) === 0) {

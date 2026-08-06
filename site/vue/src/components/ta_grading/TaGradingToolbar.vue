@@ -4,7 +4,6 @@ import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
-
 import Cookies from 'js-cookie';
 
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
@@ -109,7 +108,10 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
       style="display: flex; align-items: center;"
       @click="toggleClusteringMode"
     >
-      <i :class="['fas', taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip', 'icon-header', 'icon-streched']" />
+      <i
+        class="fas icon-header icon-streched"
+        :class="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip'"
+      />
       <span style="margin-left: 5px; font-size: 16px;">
         {{ taGradingClusterMode ? 'Clustering Mode ON' : 'Clustering Mode OFF' }}
       </span>

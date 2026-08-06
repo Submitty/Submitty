@@ -47,7 +47,6 @@ class GradingClusterConfigRepository extends EntityRepository {
         ')
         ->setParameter('gradeable_id', $gradeable_id)
         ->getSingleScalarResult();
-
         return $count > 0;
     }
 }
