@@ -183,6 +183,11 @@ pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
 (umask 022 && pip3 install .)
 
+# sometimes, pip will set the permissions incorrectly, depending on what they were previously
+# this ensures that the directory & contents are always installed with the correct permissions
+find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type d -exec chmod 755 {} \;
+find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type f -exec chmod 644 {} \;
+
 popd > /dev/null
 
 
