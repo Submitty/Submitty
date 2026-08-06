@@ -6557,7 +6557,7 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
-              g_custom_sort AS custom_sort,
+              g_use_custom_grading_order AS custom_sort,
               g_enable_custom_sort AS enable_custom_sort,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
@@ -7330,7 +7330,7 @@ AND gc_id IN (
               g_min_grading_group,
               g_syllabus_bucket,
               g_allow_custom_marks,
-              g_custom_sort,
+              g_use_custom_grading_order,
               g_enable_custom_sort)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
@@ -7521,7 +7521,7 @@ AND gc_id IN (
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
                   g_allow_custom_marks=?,
-                  g_custom_sort=?,
+                  g_use_custom_grading_order=?,
                   g_enable_custom_sort=?
                 WHERE g_id=?",
                 $params
@@ -7647,7 +7647,7 @@ AND gc_id IN (
         $this->course_db->query(
             "
             SELECT user_id, team_id, sort_order
-            FROM gradeable_custom_order
+            FROM gradeable_custom_grading_order
             WHERE g_id = ?
             ORDER BY sort_order
             ",
@@ -7667,7 +7667,7 @@ AND gc_id IN (
     public function clearCustomGradingOrder(string $gradeable_id): void {
         $this->course_db->query(
             "
-            DELETE FROM gradeable_custom_order
+            DELETE FROM gradeable_custom_grading_order
             WHERE g_id = ?
             ",
             [$gradeable_id]
@@ -7692,7 +7692,7 @@ AND gc_id IN (
             foreach ($ordered_submitter_ids as $sort_order => $submitter_id) {
                 $this->course_db->query(
                     "
-                    INSERT INTO gradeable_custom_order (
+                    INSERT INTO gradeable_custom_grading_order (
                         g_id,
                         {$submitter_column},
                         sort_order
