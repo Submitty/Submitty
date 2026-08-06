@@ -21,9 +21,10 @@ from . import regenerate_bulk_images
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import generate_pdf_images
-from . import INSTALL_DIR, DATA_DIR
+from . import INSTALL_DIR, REPOSITORY_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
+from . import DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASS, DATABASE_COURSE_USER
 
 
 class AbstractJob(ABC):
@@ -379,18 +380,51 @@ class CreateCourse(AbstractJob):
                 return False
         return True
 
+    def _run_psql(self, dbname, sql, output_file):
+        env = dict(os.environ, PGPASSWORD=DATABASE_PASS)
+        subprocess.run(
+            ["psql", "-h", DATABASE_HOST, "-U", DATABASE_USER, "-p", str(DATABASE_PORT), "-d", dbname, "-c", sql],
+            stdout=output_file, stderr=output_file, env=env
+        )
+
     def run_job(self):
         semester = self.job_details['semester']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
         base_group = self.job_details['group_name']
+        dbname = f"submitty_{semester}_{course}"
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group
         ))
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", f"{INSTALL_DIR}/sbin/create_course.py", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+
+            self._run_psql("postgres", f"CREATE DATABASE {dbname}", output_file)
+            self._run_psql(dbname, f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {DATABASE_COURSE_USER};", output_file)
+            self._run_psql(dbname, f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {DATABASE_COURSE_USER};", output_file)
+            self._run_psql(
+                "submitty",
+                "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type) "
+                f"VALUES ('{semester}', '{course}', '{base_group}', '{head_instructor}', 0);",
+                output_file
+            )
+
+            subprocess.run(
+                ["python3", f"{REPOSITORY_DIR}/migration/run_migrator.py", "-e", "course", "--course", semester, course, "migrate", "--initial"],
+                stdout=output_file, stderr=output_file
+            )
+
+            self._run_psql(
+                dbname,
+                "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('General Questions', 0, NULL);"
+                "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Homework Help', 1, NULL);"
+                "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Quizzes', 2, NULL);"
+                "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Tests', 3, NULL);",
+                output_file
+            )
+
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
