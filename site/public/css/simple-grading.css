@@ -89,6 +89,17 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow-x: auto;
 }
 
+#data-table {
+    --fixed-cols-width: 410px;
+}
+
+#data-table.lab-dynamic-columns {
+    min-width: max(
+        100%,
+        calc(var(--fixed-cols-width) + var(--lab-checkpoint-cols, 1) * 125px)
+    );
+}
+
 /* Key Styles */
 
 .simple-key-full-credit,
