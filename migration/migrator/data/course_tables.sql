@@ -1207,7 +1207,6 @@ CREATE TABLE public.gradeable (
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    g_custom_sort boolean DEFAULT false NOT NULL,
     g_use_custom_grading_order boolean DEFAULT false NOT NULL,
     g_enable_custom_sort boolean DEFAULT false NOT NULL
 );
