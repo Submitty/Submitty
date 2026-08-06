@@ -445,7 +445,8 @@ class DockerUI extends AbstractModel {
             $unique_owners = array_unique(array_map(fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names));
 
             if (count($unique_owners) <= 1) {
-                $owner_display = reset($unique_owners) ?: '';
+                $first_owner = reset($unique_owners);
+                $owner_display = $first_owner === false ? '' : $first_owner;
             }
             else {
                 $owner_display = implode(' / ', $display);
