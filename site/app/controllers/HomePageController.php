@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -401,6 +402,26 @@ class HomePageController extends AbstractController {
                 JsonResponse::getErrorResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home']))
+            );
+        }
+
+        $create_course_script = FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'sbin', 'create_course.py');
+        $cmd = sprintf(
+            'sudo %s %s %s %s %s 2>&1',
+            escapeshellarg($create_course_script),
+            escapeshellarg($semester),
+            escapeshellarg($course_title),
+            escapeshellarg($head_instructor),
+            escapeshellarg($group_name)
+        );
+        exec($cmd, $output, $return_code);
+        if ($return_code !== 0) {
+            $error = "Failed to provision course filesystem.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
 

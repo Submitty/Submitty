@@ -242,7 +242,7 @@ def main():
     print("All user/group validation checks passed.")
 
     identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
-    course_dir = build_course_filesystem(cfg, identity)
+    course_dir = build_course_filesystem(cfg, identity.semester, identity.course, identity.instructor, identity.ta_group)
     print_success(cfg, identity, course_dir)
 
 
