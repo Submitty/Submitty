@@ -50,7 +50,7 @@ if [[ "$OS_NAME" == *"Linux"* ]]; then
     API_BASE_URL="http://127.0.0.1:1511"
 else
     # For macOS and Windows
-    DOCKER_NET_ARGS="--add-host=host.docker.internal:host-gateway"
+    DOCKER_NET_ARGS=""
     API_BASE_URL="http://host.docker.internal:1511"
 fi
 
