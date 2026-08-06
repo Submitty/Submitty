@@ -2565,8 +2565,7 @@ class ElectronicGraderController extends AbstractController {
                     $custom_message,
                     $marks,
                     $component_version,
-                    !$silent_edit,
-                    true //execute database query immediately
+                    !$silent_edit
                 );
             }
             else {
@@ -2582,24 +2581,25 @@ class ElectronicGraderController extends AbstractController {
 
                     $valid_members = $cluster->getValidMembers($active_versions);
                     $is_current_valid = false; //this tells us that if this student is valid itself or not (i.e. whether student should belong in Unclustered mode)
+                    //checking among all valid_members if anyone of them is this student
                     foreach ($valid_members as $member) {
                         if (($member->getUserId() ?? $member->getTeamId()) === $submitter_id) {
                             $is_current_valid = true;
                         }
                     }
                     // if this student is valid then other students in its cluster can also be graded simultaneously
+                    //but if not then this student should be graded as 'Unclustered'
                     if ($is_current_valid) {
                         foreach ($valid_members as $member) {
                             $submitters_to_grade[] = $member->getUserId() ?? $member->getTeamId();
                         }
                     }
                 }
-                //if the student is "Unclustered" that means he just needs to be graded individually
+                //if the student is "Unclustered" that means he just needs to be graded individually, so we add to the submitters_to_grade array
                 if (count($submitters_to_grade) === 0) {
                     $submitters_to_grade[] = $submitter_id;
                 }
-                $ta_graded_gradeables_to_save = [];
-
+                //running a for-loop to assign marks to all members in submitters_to_grade
                 foreach ($submitters_to_grade as $s_id) {
                     $gg = $this->tryGetGradedGradeable($gradeable, $s_id);
                     if ($gg === false) {
@@ -2622,18 +2622,8 @@ class ElectronicGraderController extends AbstractController {
                         $custom_message,
                         $marks,
                         $component_version,
-                        !$silent_edit,
-                        false //do not save to database yet
+                        !$silent_edit
                     );
-                    $ta_graded_gradeables_to_save[] = $ta_gg;
-                }
-
-                $this->core->getQueries()->bulkSaveTaGradedGradeables($ta_graded_gradeables_to_save);
-                foreach ($ta_graded_gradeables_to_save as $ta_gg) {
-                    $submitter = $ta_gg->getGradedGradeable()->getSubmitter();
-                    if ($submitter->isTeam()) {
-                        $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
-                    }
                 }
             }
 
@@ -2748,7 +2738,7 @@ class ElectronicGraderController extends AbstractController {
         return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::CLOSE_COMPONENT);
     }
 
-    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite, bool $save_to_db = true) {
+    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
         // Only update the grader if we're set to overwrite it
         if ($overwrite) {
             $graded_component->setGrader($grader);
@@ -2785,13 +2775,11 @@ class ElectronicGraderController extends AbstractController {
         // Reset the user viewed date since we updated the grade
         $ta_graded_gradeable->resetUserViewedDate();
 
-        if ($save_to_db) {
-            // Finally, save the changes to the database
-            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-            $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
-            if ($submitter->isTeam()) {
-                $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
-            }
+        // Finally, save the changes to the database
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
         }
     }
 

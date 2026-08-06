@@ -51,15 +51,6 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   />
 
   <NavigationButton
-    v-if="clusteringEnabled && clustersExist"
-    :on-click="toggleClusteringMode"
-    :visible-icon="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-timeline'"
-    button-id="toggle-cluster-mode"
-    :title="taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)'"
-    :style="taGradingClusterMode ? 'color: var(--standard-vibrant-yellow);' : ''"
-  />
-
-  <NavigationButton
     :on-click="gotoPrevStudent"
     visible-icon="fa-caret-left"
     button-id="prev-student"
@@ -106,6 +97,24 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     optional-spanid="grading-setting-btn"
     optional-test-id="grading-setting-btn"
   />
+  <span
+    v-if="clusteringEnabled && clustersExist"
+    id="toggle-cluster-mode-cont"
+    class="ta-navlink-cont"
+  >
+    <button
+      id="toggle-cluster-mode"
+      class="invisible-btn"
+      :title="taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)'"
+      style="display: flex; align-items: center;"
+      @click="toggleClusteringMode"
+    >
+      <i :class="['fas', taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip', 'icon-header', 'icon-streched']" />
+      <span style="margin-left: 5px; font-size: 16px;">
+        {{ taGradingClusterMode ? 'Clustering Mode ON' : 'Clustering Mode OFF' }}
+      </span>
+    </button>
+  </span>
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"
