@@ -9,6 +9,7 @@ describe('Peer panel version conflicts', () => {
 
     const gradingUrl = (anonId) => ['sample', 'gradeable', gradeableId, 'grading', `grade?who_id=${anonId}&sort=id&direction=ASC`];
 
+    // timeouts needed when getting peer components since they take longer to load than page
     const peerComponent = (componentId) => cy.get(`#peer-component-${componentId}`, { timeout: 10000 });
 
     const openEditPeerComponentsForm = () => {
@@ -133,6 +134,6 @@ describe('Peer panel version conflicts', () => {
             expect([...$marks].some((mark) => mark.checked)).to.equal(true);
         });
         cy.get(`[data-testid="clear-peer-marks-btn"][data-peer-id="${peerGraderId}"]`).click();
-        cy.get(marksSelector).should('not.be.checked');
+        cy.get(marksSelector, { timeout: 10000 }).should('not.be.checked');
     });
 });
