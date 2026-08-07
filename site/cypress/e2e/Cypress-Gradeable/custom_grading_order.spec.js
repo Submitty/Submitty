@@ -4,7 +4,7 @@ describe('Custom grading order for individual grading', () => {
     const semester = getCurrentSemester();
     const FIXTURE_PATH = 'cypress/fixtures/custom_grading_order';
     const DOWNLOAD_PATH = 'cypress/downloads';
-    const GRADEABLE_ID = 'open_peer_homework'; 
+    const GRADEABLE_ID = 'open_peer_homework';
 
     beforeEach(() => {
         cy.login('instructor');
@@ -28,15 +28,14 @@ describe('Custom grading order for individual grading', () => {
         });
     });
 
-    
     it('Toggle the Custom Grading Order Tab visibility', () => {
         cy.get('[data-testid="no_enable_custom_sort"]').check();
         cy.get('[data-testid="page-6-nav"]').should('not.be.visible');
         cy.get('[data-testid="yes_enable_custom_sort"]').check();
         cy.get('[data-testid="page-6-nav"]').should('be.visible').click();
         cy.get('[data-testid="custom-sort-control"]').should('be.visible');
-        cy.get('[data-testid="custom-sort-status"]').should('contain.text','disabled'); 
-    }); 
+        cy.get('[data-testid="custom-sort-status"]').should('contain.text', 'disabled');
+    });
 
     it('Download the current grading order as a CSV unmodified', () => {
         cy.get('[data-testid="yes_enable_custom_sort"]').check();
@@ -75,8 +74,7 @@ describe('Custom grading order for individual grading', () => {
         cy.get('[data-testid="custom-sort-status"]').should('contain.text', 'enabled');
     });
 
-
-    it('Upload CSV should provide error message due to duplicate userID',() => {
+    it('Upload CSV should provide error message due to duplicate userID', () => {
         const duplicateFile = `${FIXTURE_PATH}/duplicate.csv`;
         cy.intercept('POST', '**/custom_sort/csv').as('uploadCsv');
 
@@ -105,8 +103,6 @@ describe('Custom grading order for individual grading', () => {
 
         cy.get('[data-testid="yes_enable_custom_sort"]').check();
         cy.get('[data-testid="page-6-nav"]').should('be.visible').click();
-
-
         cy.get('[data-testid="custom-sort-csv-upload-button"]').click();
         cy.get('[data-testid="custom-sort-csv-upload-file"]').selectFile(typoFile, { force: true });
         cy.get('[data-testid="custom-sort-csv-upload-submit"]').click();
@@ -118,8 +114,8 @@ describe('Custom grading order for individual grading', () => {
 
             expect(interception.response.statusCode).to.eq(200);
             expect(body.status).to.eq('error');
-             expect(body.message).to.contain('User ID');
-        });        
+            expect(body.message).to.contain('User ID');
+        });
     });
 
     it('Appends a missing user to the bottom of the custom order', () => {
@@ -132,8 +128,8 @@ describe('Custom grading order for individual grading', () => {
         cy.get('[data-testid="custom-sort-csv-upload-submit"]').click();
 
         cy.wait('@uploadCsv').then((interception) => {
-            const body =
-                typeof interception.response.body === 'string'
+            const body
+                = typeof interception.response.body === 'string'
                     ? JSON.parse(interception.response.body)
                     : interception.response.body;
 
@@ -256,7 +252,7 @@ describe('Custom grading order for individual grading', () => {
         cy.get('[data-testid="details-section-rows"][data-section-id="1"]').find('tr').eq(1).should('contain.text', 'aphacker');
     });
 
-    after(() => {  
+    after(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', GRADEABLE_ID, 'update']);
         cy.on('window:confirm', () => true);
@@ -267,7 +263,7 @@ describe('Custom grading order for individual grading', () => {
         cy.get('body').then(($body) => {
             if ($body.find('[data-testid="clear-custom-sort"]:visible').length) {
                 cy.get('[data-testid="clear-custom-sort"]').click();
-                }
+            }
         });
     });
 });
