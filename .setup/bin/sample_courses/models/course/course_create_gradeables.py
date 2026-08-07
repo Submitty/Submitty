@@ -361,6 +361,21 @@ class Course_create_gradeables:
                                 if skip_grading > 0.3 and random.random() > 0.01:
                                     ins = insert(self.gradeable_data_overall_comment).values(**overall_comment_values)
                                     res = self.conn.execute(ins)
+                                peer_grader_ids = []
+                                for component in gradeable.components:
+                                    if component.is_peer_component:
+                                        stmt = (
+                                            select(self.peer_assign.columns.grader_id)
+                                            .where(
+                                                self.peer_assign.columns.g_id == gradeable.id
+                                            )
+                                            .where(
+                                                self.peer_assign.columns.user_id == user.id
+                                            )
+                                            .order_by(self.peer_assign.columns.grader_id)
+                                        )
+                                        peer_grader_ids = self.conn.execute(stmt).scalars().all()
+                                        break                               
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         # This is used to simulate unfinished grading.
@@ -385,18 +400,7 @@ class Course_create_gradeables:
                                         first = False
 
                                     if component.is_peer_component:
-                                        stmt = (
-                                            select(self.peer_assign.columns.grader_id)
-                                            .where(
-                                                self.peer_assign.columns.g_id == gradeable.id
-                                            )
-                                            .where(
-                                                self.peer_assign.columns.user_id == user.id
-                                            )
-                                            .order_by(self.peer_assign.columns.grader_id)
-                                        )
-
-                                        grader_ids = self.conn.execute(stmt).scalars().all()
+                                        grader_ids = peer_grader_ids
                                     else:
                                         grader_ids = [self.instructor.id]
                                     for grader_id in grader_ids:
