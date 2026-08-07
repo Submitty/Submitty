@@ -265,18 +265,18 @@ describe('Custom grading order for individual grading', () => {
         cy.get('[data-testid="details-section-rows"][data-section-id="1"]').find('tr').eq(1).should('contain.text', 'aphacker');
     });
 
-    after(() => {   
-        cy.login('instructor');
-        cy.visit(['sample', 'gradeable', GRADEABLE_ID, 'update']);
-        cy.on('window:confirm', () => true);
-        cy.get('#page_3_nav').click();
-        cy.get('[data-testid="yes_enable_custom_sort"]').should('be.visible').check();
-        cy.get('[data-testid="page-6-nav"]').should('be.visible').click();
+        after(() => {   
+            cy.login('instructor');
+            cy.visit(['sample', 'gradeable', GRADEABLE_ID, 'update']);
+            cy.on('window:confirm', () => true);
+            cy.get('#page_3_nav').click();
+            cy.get('[data-testid="yes_enable_custom_sort"]').should('be.visible').check();
+            cy.get('[data-testid="page-6-nav"]').should('be.visible').click();
 
-        cy.get('body').then(($body) => {
-            if ($body.find('[data-testid="clear-custom-sort"]:visible').length) {
-                cy.get('[data-testid="clear-custom-sort"]').click();
-            }
+            cy.get('body').then(($body) => {
+                if ($body.find('[data-testid="clear-custom-sort"]:visible').length) {
+                    cy.get('[data-testid="clear-custom-sort"]').click();
+                }
         });
     });
 });
@@ -335,8 +335,8 @@ describe('Custom grading order for team grading', () => {
         cy.get('[data-testid="custom-sort-csv-upload-submit"]').click();
 
         cy.wait('@uploadCsv').then((interception) => {
-            const body =
-                typeof interception.response.body === 'string'
+            const body
+                = typeof interception.response.body === 'string'
                     ? JSON.parse(interception.response.body)
                     : interception.response.body;
 
@@ -352,7 +352,7 @@ describe('Custom grading order for team grading', () => {
 
         cy.get('[data-testid="custom-sort-control"]').find('tbody tr').eq(2).should('contain.text', '00000_abernl');
 
-        cy.visit(['sample','gradeable',TEAM_GRADEABLE_ID,'grading', 'details',]);
+        cy.visit(['sample', 'gradeable', TEAM_GRADEABLE_ID, 'grading', 'details']);
 
         cy.get('#toggle-view-sections').uncheck({ force: true });
 
@@ -361,7 +361,7 @@ describe('Custom grading order for team grading', () => {
         cy.get('[data-testid="details-section-rows"][data-section-id="1"]').find('tr').eq(1).should('contain.text', '00001_adamsg');
     });
     it('Reverts the team custom grading order back to the default order', () => {
-        const reorderFile ='cypress/fixtures/custom_grading_order/team_reordered.csv';
+        const reorderFile = 'cypress/fixtures/custom_grading_order/team_reordered.csv';
 
         cy.intercept('POST', '**/custom_sort/csv').as('uploadCsv');
         cy.intercept('POST', '**/custom_sort/clear').as('clearCustomSort');
@@ -376,8 +376,8 @@ describe('Custom grading order for team grading', () => {
         cy.get('[data-testid="custom-sort-csv-upload-submit"]').click();
 
         cy.wait('@uploadCsv').then((interception) => {
-            const body =
-                typeof interception.response.body === 'string'
+            const body
+                = typeof interception.response.body === 'string'
                     ? JSON.parse(interception.response.body)
                     : interception.response.body;
 
@@ -387,11 +387,11 @@ describe('Custom grading order for team grading', () => {
 
         cy.reload();
 
-        cy.get('[data-testid="custom-sort-control"]').find('tbody tr') .eq(0).should('contain.text', '00007_bitdiddle');
+        cy.get('[data-testid="custom-sort-control"]').find('tbody tr').eq(0).should('contain.text', '00007_bitdiddle');
 
-        cy.get('[data-testid="custom-sort-control"]') .find('tbody tr').eq(1).should('contain.text', '00001_adamsg');
+        cy.get('[data-testid="custom-sort-control"]').find('tbody tr').eq(1).should('contain.text', '00001_adamsg');
 
-        cy.visit(['sample','gradeable', TEAM_GRADEABLE_ID,'grading','details',]);
+        cy.visit(['sample', 'gradeable', TEAM_GRADEABLE_ID, 'grading', 'details']);
 
         cy.get('#toggle-view-sections').uncheck({ force: true });
 
@@ -416,7 +416,7 @@ describe('Custom grading order for team grading', () => {
 
         cy.get('[data-testid="custom-sort-control"]').find('tbody tr').eq(1).should('contain.text', '00007_bitdiddle');
 
-        cy.visit(['sample','gradeable',TEAM_GRADEABLE_ID,'grading', 'details',]);
+        cy.visit(['sample', 'gradeable', TEAM_GRADEABLE_ID, 'grading', 'details']);
 
         cy.get('#toggle-view-sections').uncheck({ force: true });
 
