@@ -26,7 +26,7 @@ def generate_api_token(install_dir, user_id: str) -> str:
     refactoring api_token_generate.php into Python / adding /api/admin/token."""
     result = subprocess.run(
         ["php", str(install_dir / "sbin" / "api_token_generate.php"), user_id],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     )
     if result.returncode != 0:
         die(f"Failed to generate API token for {user_id}: {result.stderr.strip()}")

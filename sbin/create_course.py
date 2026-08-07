@@ -21,6 +21,9 @@ CONF_DIR = Path(__file__).resolve().parent.parent / "config"
 
 @dataclass
 class CourseIdentity:
+    """
+    A simple data class to hold the identity of a course.
+    """
     semester: str
     course: str
     instructor: str
@@ -144,46 +147,51 @@ def ensure_semester_directory(cfg, semester: str) -> Path:
     return semester_dir
 
 
-def create_directory_tree(course_dir: Path, cfg, instructor: str, ta_group: str):
+def create_directory_tree(course_dir: Path, cfg, identity: CourseIdentity):
+    instructor = identity.instructor
+    ta_group = identity.ta_group
     php_user = cfg["php_user"]
     daemon_user = cfg["daemon_user"]
 
-    WRITABLE_PERM = 0o2770  # u=rwx,g=rwxs,o=
-    READABLE_PERM = 0o2750  # u=rwx,g=rxs,o=
+    writable_perm = 0o2770  # u=rwx,g=rwxs,o=
+    readable_perm = 0o2750  # u=rwx,g=rxs,o=
 
-    create_and_set(course_dir, WRITABLE_PERM, instructor, ta_group)
+    create_and_set(course_dir, writable_perm, instructor, ta_group)
 
     for sub in ("build", "config", "config/build", "config/form",
                 "bin", "provided_code", "instructor_solution",
                 "test_input", "test_output", "custom_validation_code",
                 "reports", "reports/summary_html"):
-        create_and_set(course_dir / sub, WRITABLE_PERM, instructor, ta_group)
+        create_and_set(course_dir / sub, writable_perm, instructor, ta_group)
 
     for sub in ("submissions", "forum_attachments", "annotations",
                 "config_upload", "site"):
-        create_and_set(course_dir / sub, READABLE_PERM, php_user, ta_group)
+        create_and_set(course_dir / sub, readable_perm, php_user, ta_group)
 
     for sub in ("submissions_processed",):
-        create_and_set(course_dir / sub, WRITABLE_PERM, daemon_user, ta_group)
+        create_and_set(course_dir / sub, writable_perm, daemon_user, ta_group)
 
     for sub in ("results", "generated_output", "results_public", "checkout"):
-        create_and_set(course_dir / sub, READABLE_PERM, daemon_user, ta_group)
+        create_and_set(course_dir / sub, readable_perm, daemon_user, ta_group)
 
     for sub in ("uploads", "uploads/bulk_pdf", "uploads/polls",
                 "uploads/student_images", "uploads/student_images/tmp",
                 "uploads/course_materials"):
-        create_and_set(course_dir / sub, READABLE_PERM, php_user, ta_group)
+        create_and_set(course_dir / sub, readable_perm, php_user, ta_group)
 
     for sub in ("uploads/split_pdf", "lichen"):
-        create_and_set(course_dir / sub, WRITABLE_PERM, daemon_user, ta_group)
+        create_and_set(course_dir / sub, writable_perm, daemon_user, ta_group)
 
     for sub in ("uploads/seating", "rainbow_grades",
                 "reports/all_grades", "reports/seating", "reports/polls"):
-        create_and_set(course_dir / sub, WRITABLE_PERM, php_user, ta_group)
+        create_and_set(course_dir / sub, writable_perm, php_user, ta_group)
 
 
-def copy_and_template_files(course_dir: Path, cfg, semester: str, course: str,
-                            instructor: str, ta_group: str):
+def copy_and_template_files(course_dir: Path, cfg, identity: CourseIdentity):
+    semester = identity.semester
+    course = identity.course
+    instructor = identity.instructor
+    ta_group = identity.ta_group
     install_dir = cfg["submitty_install_dir"]
     php_user = cfg["php_user"]
     database_name = f"submitty_{semester}_{course}"
@@ -210,19 +218,19 @@ def copy_and_template_files(course_dir: Path, cfg, semester: str, course: str,
     replace_fillin_variables(config_json, fillins)
 
 
-def build_course_filesystem(cfg, semester: str, course: str, instructor: str, ta_group: str) -> Path:
+def build_course_filesystem(cfg, identity: CourseIdentity) -> Path:
     """
     Runs the full filesystem-provisioning sequence for a course.
     Raises on any failure (mkdir on an existing dir, missing users, etc.).
     Returns the created course_dir.
     """
-    course_dir = cfg["submitty_data_dir"] / "courses" / semester / course
+    course_dir = cfg["submitty_data_dir"] / "courses" / identity.semester / identity.course
     if course_dir.exists():
         die(f"specific course directory {course_dir} already exists")
 
-    ensure_semester_directory(cfg, semester)
-    create_directory_tree(course_dir, cfg, instructor, ta_group)
-    copy_and_template_files(course_dir, cfg, semester, course, instructor, ta_group)
+    ensure_semester_directory(cfg, identity.semester)
+    create_directory_tree(course_dir, cfg, identity)
+    copy_and_template_files(course_dir, cfg, identity)
     return course_dir
 
 
@@ -242,7 +250,7 @@ def main():
     print("All user/group validation checks passed.")
 
     identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
-    course_dir = build_course_filesystem(cfg, identity.semester, identity.course, identity.instructor, identity.ta_group)
+    course_dir = build_course_filesystem(cfg, identity)
     print_success(cfg, identity, course_dir)
 
 
