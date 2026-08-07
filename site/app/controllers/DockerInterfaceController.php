@@ -212,19 +212,19 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/admin/remove_image", methods: ["POST"])]
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
-        $image = $_POST['image'] ?? '';
 
-        if (!preg_match($pattern, $image)) {
-            return JsonResponse::getFailResponse('Invalid Docker image name.');
+        // Accept a list of names (primary and/or aliases); fall back to the legacy single-image param.
+        $images = $_POST['images'] ?? null;
+        if (!is_array($images)) {
+            $images = isset($_POST['image']) ? [$_POST['image']] : [];
         }
+        $images = array_values(array_unique(array_filter(
+            $images,
+            fn($i) => is_string($i) && $i !== ''
+        )));
 
-        if ($this->core->getQueries()->getDockerImageOwner($image) === false) {
-            return JsonResponse::getFailResponse('This image is not listed.');
-        }
-
-        $user = $this->core->getUser();
-        if (!$this->core->getQueries()->removeDockerImageOwner($image, $user)) {
-            return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
+        if (count($images) === 0) {
+            return JsonResponse::getFailResponse('No image selected for removal.');
         }
 
         $jsonFilePath = FileUtils::joinPaths(
@@ -234,9 +234,73 @@ class DockerInterfaceController extends AbstractController {
         );
         $json = FileUtils::readJsonFile($jsonFilePath);
 
-        foreach ($json as $capability_key => $capability) {
-            if (($key = array_search($image, $capability, true)) !== false) {
-                array_splice($json[$capability_key], $key, 1);
+        // Names actually present in the config (independent of ownership).
+        $in_config = [];
+        foreach ($json as $capability) {
+            foreach ($capability as $name) {
+                $in_config[$name] = true;
+            }
+        }
+
+        $user = $this->core->getUser();
+        $removed = [];
+        $removed = [];
+        $not_listed = [];
+        $not_owned = [];
+
+        $owners = $this->core->getQueries()->getAllDockerImageOwners();
+        foreach ($images as $image) {
+            if (!preg_match($pattern, $image)) {
+                $not_listed[] = $image;
+                continue;
+            }
+
+            // sometimes the image will have no owner, and the query returns an empty string
+            $owner = $owners[$image] ?? false;
+            if ($owner === '') {
+                $owner = false;
+            }
+
+            // if there is no owner, you should probably not be deleting this
+            if ($owner === false && !isset($in_config[$image])) {
+                $not_listed[] = $image;
+                continue;
+            }
+
+            // if the image has no owner and the user is not a superuser, they probably shouldn't be deleting this
+            if ($owner === false && !$user->isSuperUser()) {
+                $not_owned[] = $image;
+                continue;
+            }
+
+            // if you don't own this image, can't delete it
+            if ($owner !== false && !$user->isSuperUser() && $owner !== $user->getId()) {
+                $not_owned[] = $image;
+                continue;
+            }
+
+            if ($owner !== false) {
+                $this->core->getQueries()->removeDockerImageOwner($image, $user);
+            }
+            $removed[] = $image;
+        }
+
+        if (count($removed) === 0) {
+            $reasons = [];
+            if (count($not_listed) > 0) {
+                $reasons[] = 'not listed in the configuration: ' . implode(', ', $not_listed);
+            }
+            if (count($not_owned) > 0) {
+                $reasons[] = 'managed by another instructor/superuser: ' . implode(', ', $not_owned);
+            }
+            return JsonResponse::getFailResponse('Nothing was removed. Images ' . implode('. Images ', $reasons) . '.');
+        }
+
+        foreach ($removed as $name) {
+            foreach ($json as $capability_key => $capability) {
+                if (($key = array_search($name, $capability, true)) !== false) {
+                    array_splice($json[$capability_key], $key, 1);
+                }
             }
         }
 
@@ -245,8 +309,29 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
-                                                            Click \'Update dockers and machines\' to apply changes.');
+        $message = implode(', ', $removed) . " has been removed from the configuration. "
+            . "Click 'Update dockers and machines' to apply changes.";
+        if (count($not_listed) > 0) {
+            $message .= ' Not listed in the configuration: ' . implode(', ', $not_listed) . '.';
+        }
+        if (count($not_owned) > 0) {
+            $message .= ' You can only remove images you own: ' . implode(', ', $not_owned) . '.';
+        }
+
+        $failures = [];
+        if (count($not_listed) > 0) {
+            $failures[] = 'Not listed in the configuration: ' . implode(', ', $not_listed) . '.';
+        }
+        if (count($not_owned) > 0) {
+            $failures[] = 'You can only remove images you own: ' . implode(', ', $not_owned) . '.';
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'success_message' => implode(', ', $removed) . " has been removed from the configuration. "
+                . "Click 'Update dockers and machines' to apply changes.",
+            'error_message' => count($failures) > 0 ? implode(' ', $failures) : null,
+            'removed' => $removed,
+        ]);
     }
 
     #[Route("/admin/docker_update_status", methods: ["POST"])]
