@@ -672,7 +672,7 @@ class CourseMaterialsController extends AbstractController {
 
                         if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) === "application/zip") {
                             if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                                return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
+                                return JsonResponse::getErrorResponse("You may not use double quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
                             }
                             $is_zip_file = true;
                         }
