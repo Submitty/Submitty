@@ -29,9 +29,9 @@
 					{% set peer_has_version_conflict = true %}
 				{% endif %}
 			{% endfor %}
-	    	<button type="button" class="btn btn-danger" onclick="clearPeerMarks( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Delete All Grading by Peer Grader {{peer}} for Student {{submitter_id}}'s Submission</button>
+	    	<button type="button" class="btn btn-danger" data-peer-id="{{peer}}" data-testid="clear-peer-marks-btn" onclick="clearPeerMarks( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Delete All Grading by Peer Grader {{peer}} for Student {{submitter_id}}'s Submission</button>
             {% if peer_has_version_conflict %}
-	    		<button type="button" class="btn clear-peer-version-conflicts" data-peer-id="{{peer}}" onclick="resolvePeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Clear Version Conflicts</button>
+	    		<button type="button" class="btn clear-peer-version-conflicts" data-peer-id="{{peer}}" data-testid="resolve-peer-version-conflicts-btn" onclick="resolvePeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{csrf_token}}')">Clear Version Conflicts</button>
 	    	{% endif %}
 	    	</br>
             <div class="peer-edit-components">
@@ -61,7 +61,7 @@
                             {% for mark in component.marks %}
                                 <div class="row">
                                     <div class="col-no-gutters indicator">
-                                        <input type="checkbox" class="peer-edit-mark" data-component-id="{{component.id}}" data-peer-id="{{peer}}" value="{{mark}}" onchange="peerComponentMarksChanged('{{peer}}', '{{component.id}}')"
+                                        <input type="checkbox" class="peer-edit-mark" data-component-id="{{component.id}}" data-peer-id="{{peer}}" value="{{mark}}" data-testid="peer-edit-mark" onchange="peerComponentMarksChanged('{{peer}}', '{{component.id}}')"
                                             {% if peer_details.marks_assigned is defined and
                                                 peer_details.marks_assigned[component.id][peer] is defined and
                                                 mark in peer_details.marks_assigned[component.id][peer] %}
@@ -78,7 +78,7 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn peer-save-component" data-component-id="{{component.id}}" data-peer-id="{{peer}}" onclick="savePeerComponent( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{component.id}}', '{{csrf_token}}')">
+                        <button type="button" class="btn peer-save-component" data-component-id="{{component.id}}" data-peer-id="{{peer}}" data-testid="save-component-btn" onclick="savePeerComponent( '{{submitter_id}}', '{{gradeable_id}}', '{{peer}}', '{{component.id}}', '{{csrf_token}}')">
                             Save Component
                         </button>
                         <span class="peer-component-save-status" data-component-id="{{component.id}}" data-peer-id="{{peer}}">
