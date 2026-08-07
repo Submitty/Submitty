@@ -8,6 +8,7 @@ Filesystem and permission provisioning for a new Submitty course.
 import argparse
 import json
 import os
+import subprocess
 import sys
 import grp
 import pwd
@@ -28,6 +29,8 @@ class CourseIdentity:
     course: str
     instructor: str
     ta_group: str
+    self_registration_type: int = 0
+    archived: bool = False
 
 
 def load_json(path: Path):
@@ -48,15 +51,22 @@ def check_root():
 def load_config():
     submitty_json = load_json(CONF_DIR / "submitty.json")
     users_json = load_json(CONF_DIR / "submitty_users.json")
+    database_json = load_json(CONF_DIR / "database.json")
 
     return {
         "submitty_data_dir": Path(submitty_json["submitty_data_dir"]),
         "submitty_install_dir": Path(submitty_json["submitty_install_dir"]),
+        "submitty_repository": Path(submitty_json["submitty_repository"]),
         "submission_url": submitty_json["submission_url"],
         "php_user": users_json["php_user"],
         "daemon_user": users_json["daemon_user"],
         "cgi_user": users_json["cgi_user"],
         "course_builders_group": users_json["course_builders_group"],
+        "database_host": database_json["database_host"],
+        "database_port": database_json["database_port"],
+        "database_user": database_json["database_user"],
+        "database_password": database_json["database_password"],
+        "database_course_user": database_json["database_course_user"],
     }
 
 
@@ -234,6 +244,82 @@ def build_course_filesystem(cfg, identity: CourseIdentity) -> Path:
     return course_dir
 
 
+def run_psql(cfg, database: str, sql: str) -> int:
+    """
+    Runs a single psql command against the given database. Output is not
+    captured, so it flows through to this script's own stdout/stderr.
+    Returns the psql process's exit code.
+    """
+    env = dict(os.environ, PGPASSWORD=cfg["database_password"])
+    result = subprocess.run(
+        ["psql", "-h", cfg["database_host"], "-U", cfg["database_user"],
+         "-p", str(cfg["database_port"]), "-d", database, "-c", sql],
+        env=env,
+    )
+    return result.returncode
+
+
+def build_course_database(cfg, identity: CourseIdentity):
+    """
+    Creates the course's own database, registers it in the master
+    database, runs its initial migration, and seeds default forum
+    categories. Dies on any failure, rolling back the master courses
+    row if migration fails so a retry doesn't hit a stale row.
+    """
+    semester = identity.semester
+    course = identity.course
+    database_name = f"submitty_{semester}_{course}"
+    course_user = cfg["database_course_user"]
+
+    print(f"\nCreating database {database_name}\n")
+    if run_psql(cfg, "postgres", f"CREATE DATABASE {database_name}") != 0:
+        die(f"Failed to create database {database_name}")
+
+    if run_psql(
+        cfg, database_name,
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {course_user};"
+    ) != 0:
+        die("Failed to grant table privileges to course database user")
+
+    if run_psql(
+        cfg, database_name,
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {course_user};"
+    ) != 0:
+        die("Failed to grant sequence privileges to course database user")
+
+    insert_course_sql = (
+        "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type) "
+        f"VALUES ('{semester}', '{course}', '{identity.ta_group}', '{identity.instructor}', "
+        f"{identity.self_registration_type});"
+    )
+    if run_psql(cfg, "submitty", insert_course_sql) != 0:
+        print("HINT:  'insert or update on table \"courses\" violates foreign key constraint...'")
+        print(f"       may indicate that term {semester} does not exist in master DB.")
+        print("       To fix, try running 'create_term.sh'.")
+        die("Failed to add this course to the master Submitty database.")
+
+    migrator = cfg["submitty_repository"] / "migration" / "run_migrator.py"
+    migrate_result = subprocess.run(
+        ["python3", str(migrator), "-e", "course", "--course", semester, course, "migrate", "--initial"],
+    )
+    if migrate_result.returncode != 0:
+        run_psql(cfg, "submitty", f"DELETE FROM courses WHERE term='{semester}' AND course='{course}';")
+        die(f"Failed to create tables within database {database_name}")
+
+    forum_categories_sql = (
+        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('General Questions', 0, NULL);"
+        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Homework Help', 1, NULL);"
+        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Quizzes', 2, NULL);"
+        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Tests', 3, NULL);"
+    )
+    if run_psql(cfg, database_name, forum_categories_sql) != 0:
+        die("Failed create default discussion forum categories.")
+
+    if identity.archived:
+        run_psql(cfg, "submitty", f"UPDATE courses SET status=2 WHERE term='{semester}' AND course='{course}';")
+        print(f"Archived Course {course}")
+
+
 def print_success(cfg, identity: CourseIdentity, course_dir: Path):
     print("\nSUCCESS!\n")
     print(f"SUCCESS!  new course   {identity.course} {identity.semester}   "
@@ -251,7 +337,10 @@ def load_and_validate_identity():
     args = parse_args()
     validate(args, cfg)
     print("All user/group validation checks passed.")
-    identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
+    identity = CourseIdentity(
+        args.semester, args.course, args.instructor, args.ta_www_group,
+        args.self_registration_type, args.archive
+    )
     return cfg, identity
 
 
@@ -259,6 +348,7 @@ def main():
     check_root()
     cfg, identity = load_and_validate_identity()
     course_dir = build_course_filesystem(cfg, identity)
+    build_course_database(cfg, identity)
     print_success(cfg, identity, course_dir)
 
 
