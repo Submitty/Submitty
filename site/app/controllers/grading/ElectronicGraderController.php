@@ -1076,13 +1076,19 @@ class ElectronicGraderController extends AbstractController {
 
         $sort = $_COOKIE['sort'] ?? 'id';
         $direction = $_COOKIE['direction'] ?? 'ASC';
-        if ($peer) {
-            $sort = $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
-                ? 'random'
-                : 'peer';
+
+        if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+            $sort = 'random';
             $direction = 'ASC';
         }
-
+        elseif ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
+        elseif ($peer) {
+            $sort = 'peer';
+            $direction = 'ASC';
+        }
 
         //Get grading_details Columns
         $grading_details_columns = [];
@@ -1096,25 +1102,6 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
-
-        $sort = $_COOKIE['sort'] ?? 'id';
-        $direction = $_COOKIE['direction'] ?? 'ASC';
-        if (
-            $peer
-            && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
-        ) {
-            $sort = 'random';
-            $direction = 'ASC';
-        }
-        elseif ($gradeable->getCustomSort()) {
-            $sort = 'custom';
-            $direction = 'ASC';
-        }
-        elseif ($peer) {
-            $sort = 'peer';
-            $direction = 'ASC';
-        }
-        $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
         $section_key = $order->getSectionKey();
