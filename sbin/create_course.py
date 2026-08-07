@@ -254,7 +254,7 @@ def run_psql(cfg, database: str, sql: str) -> int:
     result = subprocess.run(
         ["psql", "-h", cfg["database_host"], "-U", cfg["database_user"],
          "-p", str(cfg["database_port"]), "-d", database, "-c", sql],
-        env=env,
+        env=env,check=False,
     )
     return result.returncode
 
@@ -277,13 +277,15 @@ def build_course_database(cfg, identity: CourseIdentity):
 
     if run_psql(
         cfg, database_name,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {course_user};"
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        f"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {course_user};"
     ) != 0:
         die("Failed to grant table privileges to course database user")
 
     if run_psql(
         cfg, database_name,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {course_user};"
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        f"GRANT SELECT, UPDATE ON SEQUENCES TO {course_user};"
     ) != 0:
         die("Failed to grant sequence privileges to course database user")
 
@@ -300,23 +302,27 @@ def build_course_database(cfg, identity: CourseIdentity):
 
     migrator = cfg["submitty_repository"] / "migration" / "run_migrator.py"
     migrate_result = subprocess.run(
-        ["python3", str(migrator), "-e", "course", "--course", semester, course, "migrate", "--initial"],
+        ["python3", str(migrator), "-e", "course", "--course",
+          semester, course, "migrate", "--initial"], check=False,
     )
     if migrate_result.returncode != 0:
-        run_psql(cfg, "submitty", f"DELETE FROM courses WHERE term='{semester}' AND course='{course}';")
+        run_psql(cfg, "submitty",
+                 f"DELETE FROM courses WHERE term='{semester}' AND course='{course}';")
         die(f"Failed to create tables within database {database_name}")
 
-    forum_categories_sql = (
-        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('General Questions', 0, NULL);"
-        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Homework Help', 1, NULL);"
-        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Quizzes', 2, NULL);"
-        "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES ('Tests', 3, NULL);"
-    )
+    sql_prefix = "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES "
+    forum_categories_sql = [
+        f"{sql_prefix}('General Questions', 0, NULL);",
+        f"{sql_prefix}('Homework Help', 1, NULL);",
+        f"{sql_prefix}('Quizzes', 2, NULL);",
+        f"{sql_prefix}('Tests', 3, NULL);",
+    ]
     if run_psql(cfg, database_name, forum_categories_sql) != 0:
         die("Failed create default discussion forum categories.")
 
     if identity.archived:
-        run_psql(cfg, "submitty", f"UPDATE courses SET status=2 WHERE term='{semester}' AND course='{course}';")
+        run_psql(cfg, "submitty",
+                 f"UPDATE courses SET status=2 WHERE term='{semester}' AND course='{course}';")
         print(f"Archived Course {course}")
 
 
