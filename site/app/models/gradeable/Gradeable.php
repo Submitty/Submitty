@@ -2588,6 +2588,9 @@ class Gradeable extends AbstractModel {
 
     public function setDiscussionBased(bool $discussion_based): void {
         $this->discussion_based = $discussion_based;
+        if (!$discussion_based) {
+            $this->discussion_thread_id = [];
+        }
         $this->modified = true;
     }
 
