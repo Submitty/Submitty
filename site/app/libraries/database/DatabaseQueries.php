@@ -9859,6 +9859,11 @@ SQL;
         return $this->submitty_db->getRowCount() === 1;
     }
 
+    public function termExists(string $semester): bool {
+        $this->submitty_db->query("SELECT COUNT(*) FROM terms WHERE term_id=?", [$semester]);
+        return $this->submitty_db->row()['count'] > 0;
+    }
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
             "SELECT c2.course, c2.term FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
