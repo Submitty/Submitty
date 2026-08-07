@@ -461,6 +461,7 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
         cy.get('[data-testid="timer"]').should('be.visible');
+        // this timeout is set to 30 seconds because Cypress needs to wait for the poll to end.
         cy.get('[data-testid="timer"]', { timeout: 30000 }).should('contain', 'Poll Ended');
         cy.go('back');
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
