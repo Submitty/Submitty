@@ -157,8 +157,33 @@ window.addEventListener('DOMContentLoaded', () => {
         randomFilterBox.checked = (randomFilterStatus === 'random');
     }
 
+    const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
+    if (groupByClustersBox) {
+        const groupByClustersStatus = Cookies.get('group_by_clusters');
+        groupByClustersBox.checked = groupByClustersStatus === 'true';
+    }
+
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
         withdrawnFilterElements.show();
     }
 });
+
+function changeGroupByClusters() {
+    const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
+    Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
+    window.location.reload();
+}
+
+function updateClusteringStatus(status) {
+    document.body.setAttribute('data-clustering-status', status);
+    $('#clustering-loading-banner').toggle(status === 'fetching');
+}
+
+function handleClusteringDone() {
+    window.location.reload();
+}
+
+function handleClusteringError(message) {
+    alert(message);
+}
