@@ -288,6 +288,7 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
+        cy.get('[data-testid="display-date-registered"]').check();
 
         // Generate grade summaries
         cy.intercept('GET', buildUrl(['testing', 'reports', 'summaries'])).as('generate-grade-summaries');
@@ -297,6 +298,18 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="btn-build-customization"]').click();
         cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'Rainbow grades successfully generated!');
+
+        // Verify the sort order dropdown and registration date are present
+        cy.visit(['testing', 'gradebook']);
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'reg date');
+        cy.get('[data-testid="rainbow-grades-sort-select"]').should('be.visible');
+
+        // Check that the table exists and the warning banner is not present
+        cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
+        cy.get('[data-testid="display-grade-summary"]').should('be.visible');
+        cy.window().its('rainbowGradesGeneratedManually').should('eq', false);
+        cy.get('[data-testid="manual-generation-warning-banner"]').should('not.exist');
+
         cy.visit(['testing', 'grades']);
         ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
             cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
@@ -337,6 +350,60 @@ describe('Test Rainbow Grading', () => {
         cy.login('student');
         cy.visit(['testing', 'grades']);
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Rainbow Grades are not enabled for this course.');
+    });
+
+    it('Gradebook Sort Selector Switches Between Generated Tables', () => {
+        // auto_rainbow_grades.py builds 'overall' plus SORT_ORDERS and deletes stale
+        // output-by-*.html first, so this list is exact
+        const expectedSorts = ['overall', 'section', 'hw', 'lab', 'test', 'exam'];
+
+        cy.visit(['testing', 'gradebook']);
+        cy.get('[data-testid="rainbow-grades-sort-select"]').as('sort-select');
+        cy.get('@sort-select').find('option').should('have.length', expectedSorts.length);
+        expectedSorts.forEach((key) => {
+            cy.get('@sort-select').find(`option[value="${key}"]`).should('exist');
+        });
+
+        cy.get('@sort-select').should('have.value', 'overall');
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
+
+        cy.get('@sort-select').select('section');
+        cy.location('search').should('eq', '?sort=section');
+        cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'section');
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
+
+        // Test that sort orders can be accessed by a link
+        cy.visit(['testing', 'gradebook?sort=hw']);
+        cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'hw');
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
+
+        // an unrecognized sort falls back to overall rather than rendering an empty page
+        cy.visit(['testing', 'gradebook?sort=not_a_real_sort']);
+        cy.get('[data-testid="rainbow-grades-sort-select"]').should('have.value', 'overall');
+        cy.get('[data-testid="rainbow-grades"]').should('contain', 'USERNAME');
+    });
+    it('CSV Download Follows The Selected Sort', () => {
+        const csvUrl = buildUrl(['testing', 'reports', 'rainbow_grades_csv'], true);
+        const overallFilename = /filename=testing_rainbow_grades_\d/;
+
+        cy.request(`${csvUrl}?sort=overall`).then((response) => {
+            expect(response.status).to.equal(200);
+            expect(response.headers['content-type']).to.contain('application/csv');
+            expect(response.headers['content-disposition']).to.match(overallFilename);
+            // date_registered is written to the CSV as well as the HTML table
+            expect(String(response.body)).to.contain('reg date');
+        });
+
+        cy.request(`${csvUrl}?sort=section`).then((response) => {
+            expect(response.status).to.equal(200);
+            expect(response.headers['content-disposition']).to.contain('testing_rainbow_grades_section_');
+        });
+
+        cy.request(`${csvUrl}?sort=../../../../etc/passwd`).then((response) => {
+            expect(response.status).to.equal(200);
+            expect(response.headers['content-disposition']).to.match(overallFilename);
+            expect(String(response.body)).to.not.contain('root:');
+        });
     });
 });
 describe('Test Automatic Nightly Processing for Rainbow Grades', () => {
@@ -428,6 +495,7 @@ const reset = () => {
         '[data-testid="display-final-grade"]',
         '[data-testid="display-final-cutoff"]',
         '[data-testid="display-instructor-notes"]',
+        '[data-testid="display-date-registered"]',
         '[data-testid="display-benchmarks-average"]',
         '[data-testid="display-benchmarks-stddev"]',
         '[data-testid="display-benchmarks-perfect"]',
@@ -437,51 +505,50 @@ const reset = () => {
         '[data-testid="display-benchmarks-lowest_d"]',
     ];
 
-    const textboxes = [
-        '[data-testid="cust-messages-textarea"]',
-        '[data-testid="benchmark-lowest_a-"]',
-        '[data-testid="benchmark-lowest_b-"]',
-        '[data-testid="benchmark-lowest_c-"]',
-        '[data-testid="benchmark-lowest_d"]',
-        '[data-testid="section-and-labels-1"]',
-        '[data-testid="section-and-labels-2"]',
-        '[data-testid="section-and-labels-3"]',
-        '[data-testid="section-and-labels-4"]',
-        '[data-testid="section-and-labels-5"]',
-        '[data-testid="section-and-labels-6"]',
-        '[data-testid="section-and-labels-7"]',
-        '[data-testid="section-and-labels-8"]',
-        '[data-testid="section-and-labels-9"]',
-        '[data-testid="section-and-labels-10"]',
-        '[data-testid="cutoff-A"]',
-        '[data-testid="cutoff-A-"]',
-        '[data-testid="cutoff-B+"]',
-        '[data-testid="cutoff-B"]',
-        '[data-testid="cutoff-B-"]',
-        '[data-testid="cutoff-C+"]',
-        '[data-testid="cutoff-C"]',
-        '[data-testid="cutoff-C-"]',
-        '[data-testid="cutoff-D+"]',
-        '[data-testid="cutoff-D"]',
-    ];
+    const textboxes = {
+        '[data-testid="cust-messages-textarea"]': '',
+        '[data-testid="benchmark-lowest_a-"]': '0.9',
+        '[data-testid="benchmark-lowest_b-"]': '0.8',
+        '[data-testid="benchmark-lowest_c-"]': '0.7',
+        '[data-testid="benchmark-lowest_d"]': '0.6',
+        '[data-testid="section-and-labels-1"]': '1',
+        '[data-testid="section-and-labels-2"]': '2',
+        '[data-testid="section-and-labels-3"]': '3',
+        '[data-testid="section-and-labels-4"]': '4',
+        '[data-testid="section-and-labels-5"]': '5',
+        '[data-testid="section-and-labels-6"]': '6',
+        '[data-testid="section-and-labels-7"]': '7',
+        '[data-testid="section-and-labels-8"]': '8',
+        '[data-testid="section-and-labels-9"]': '9',
+        '[data-testid="section-and-labels-10"]': '10',
+        '[data-testid="cutoff-A"]': '93',
+        '[data-testid="cutoff-A-"]': '90',
+        '[data-testid="cutoff-B+"]': '87',
+        '[data-testid="cutoff-B"]': '83',
+        '[data-testid="cutoff-B-"]': '80',
+        '[data-testid="cutoff-C+"]': '77',
+        '[data-testid="cutoff-C"]': '73',
+        '[data-testid="cutoff-C-"]': '70',
+        '[data-testid="cutoff-D+"]': '67',
+        '[data-testid="cutoff-D"]': '60',
+    };
 
     checkboxes.forEach((testId) => {
         cy.get('body').then(($body) => {
             const $el = $body.find(testId);
-            // Only uncheck and wait for save if the checkbox is checked
-            if ($el.is(':visible') && $el.length && $el.is(':checked')) {
+            if ($el.length && $el.is(':checked')) {
                 cy.wrap($el).uncheck({ force: true });
                 cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
             }
         });
     });
 
-    textboxes.forEach((testId) => {
+    Object.entries(textboxes).forEach(([testId, defaultValue]) => {
         cy.get('body').then(($body) => {
             const $el = $body.find(testId);
-            // Only clear and wait for save if the textbox is not empty
-            if ($el.is(':visible') && $el.length && $el.val() !== '') {
-                cy.wrap($el).clear();
+            if ($el.length && $el.val() !== defaultValue) {
+                cy.wrap($el).invoke('val', defaultValue);
+                cy.wrap($el).trigger('change', { force: true });
                 cy.get('[data-testid="save-status"]', { timeout: 10000 }).should('contain', 'All changes saved');
             }
         });
