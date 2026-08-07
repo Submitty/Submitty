@@ -242,14 +242,22 @@ def print_success(cfg, identity: CourseIdentity, course_dir: Path):
           f"{cfg['submission_url']}/{identity.semester}/{identity.course}")
 
 
-def main():
-    check_root()
+def load_and_validate_identity():
+    """
+    Loads config, parses args, and validates them against the system.
+    Returns (cfg, identity) for the requested course.
+    """
     cfg = load_config()
     args = parse_args()
     validate(args, cfg)
     print("All user/group validation checks passed.")
-
     identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
+    return cfg, identity
+
+
+def main():
+    check_root()
+    cfg, identity = load_and_validate_identity()
     course_dir = build_course_filesystem(cfg, identity)
     print_success(cfg, identity, course_dir)
 

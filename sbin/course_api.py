@@ -12,9 +12,7 @@ import requests  # pylint: disable=import-error
 
 from create_course import (
     CourseIdentity,
-    load_config,
-    parse_args,
-    validate,
+    load_and_validate_identity,
     print_success,
     die,
 )
@@ -52,12 +50,7 @@ def call_php_api(base_url: str, token: str, identity: CourseIdentity):
 
 
 def main():
-    cfg = load_config()
-    args = parse_args()
-    validate(args, cfg)
-    print("All user/group validation checks passed.")
-
-    identity = CourseIdentity(args.semester, args.course, args.instructor, args.ta_www_group)
+    cfg, identity = load_and_validate_identity()
     course_dir = cfg["submitty_data_dir"] / "courses" / identity.semester / identity.course
 
     token = generate_api_token(cfg["submitty_install_dir"], identity.instructor)
