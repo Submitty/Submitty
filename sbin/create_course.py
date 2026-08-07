@@ -254,7 +254,7 @@ def run_psql(cfg, database: str, sql: str) -> int:
     result = subprocess.run(
         ["psql", "-h", cfg["database_host"], "-U", cfg["database_user"],
          "-p", str(cfg["database_port"]), "-d", database, "-c", sql],
-        env=env,check=False,
+        env=env, check=False,
     )
     return result.returncode
 
@@ -303,7 +303,7 @@ def build_course_database(cfg, identity: CourseIdentity):
     migrator = cfg["submitty_repository"] / "migration" / "run_migrator.py"
     migrate_result = subprocess.run(
         ["python3", str(migrator), "-e", "course", "--course",
-          semester, course, "migrate", "--initial"], check=False,
+         semester, course, "migrate", "--initial"], check=False,
     )
     if migrate_result.returncode != 0:
         run_psql(cfg, "submitty",
