@@ -6,4 +6,5 @@ namespace app\entities\grading_cluster;
 
 enum GradingClusterAlgorithm: string {
     case DummySplit = 'dummy_split';
+    case SingleCluster = 'single_cluster';
 }
