@@ -162,10 +162,6 @@ class GradingOrder extends AbstractModel {
                 'custom' => $submitters,
             ];
 
-             $this->section_submitters = [
-                'custom' => $submitters,
-             ];
-
              return;
         }
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
