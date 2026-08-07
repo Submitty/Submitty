@@ -1102,7 +1102,8 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
-
+        $order->sort($sort, $direction);
+        
         $section_submitters = $order->getSectionSubmitters();
         $section_key = $order->getSectionKey();
         $graders = $order->getSectionGraders();
