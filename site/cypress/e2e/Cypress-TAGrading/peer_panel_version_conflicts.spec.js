@@ -26,7 +26,7 @@ describe('Peer panel version conflicts', () => {
                 form: true,
                 body: {
                     anon_id: conflictedAnonId,
-                    graded_version: 2,
+                    graded_version: 2, // creates conflict
                     component_ids: componentIds,
                     csrf_token: win.csrfToken,
                 },
