@@ -134,7 +134,10 @@ const buildCourseUrl = (course: Course) => {
               v-for="(courses, semester) in groupCoursesBySemester(rank.courses)"
               :key="semester"
             >
-              <ul class="bare-list course-list">
+              <ul
+                class="bare-list course-list"
+                :data-testid="`${course_type}-button-list`"
+              >
                 <li
                   v-for="course in courses"
                   :key="`${course.semester}_${course.title}`"
