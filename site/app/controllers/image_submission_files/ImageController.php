@@ -246,6 +246,16 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('Failed to save annotation file');
         }
 
+        // Annotation added or updated, and the student hasn't seen it yet
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $ta_graded_gradeable->resetUserViewedDate();
+        // save this change to the database
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+
         return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
     }
 }
