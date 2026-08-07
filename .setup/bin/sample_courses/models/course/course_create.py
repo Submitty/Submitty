@@ -25,6 +25,7 @@ from sample_courses import (
 from sample_courses.utils.dependent import add_to_group
 from sample_courses.utils.create_or_generate import create_group
 
+
 class Course_create:
     """
     Contains the functions to create the course
