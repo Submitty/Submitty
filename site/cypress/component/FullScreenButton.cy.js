@@ -60,10 +60,17 @@ describe('FullScreenButton', () => {
             cy.get('@eventHandler').should('not.have.been.called');
         });
 
-        it('emits when activated by keyboard', () => {
+        it('emits when activated by enter', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', {});
             cy.get('[data-testid="fullscreen-btn"]').focus();
             cy.get('[data-testid="fullscreen-btn"]').type('{enter}');
+            cy.get('@eventHandler').should('have.been.calledOnceWith', true);
+        });
+
+        it('emits when activated by space', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', {});
+            cy.get('[data-testid="fullscreen-btn"]').focus();
+            cy.get('[data-testid="fullscreen-btn"]').press(Cypress.Keyboard.Keys.SPACE);
             cy.get('@eventHandler').should('have.been.calledOnceWith', true);
         });
     });
