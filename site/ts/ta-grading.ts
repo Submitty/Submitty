@@ -480,11 +480,14 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
             mark_ids,
         },
         type: 'POST',
-        success: function () {
+        success: function (response: { data?: { badge_html?: string } }) {
             const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
             save_status.text('Saved');
             $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            if (response.data && response.data.badge_html) {
+                $(`.box-badge[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).html(response.data.badge_html);
+            }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
             setTimeout(() => {
                 save_status.text('');
