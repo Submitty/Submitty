@@ -1872,7 +1872,7 @@ HTML;
      *
      * @return array<string, mixed> String-keyed bag of data for the component.
      */
-    private function getPeerEditData(GradedGradeable $graded_gradeable): array {
+    public function getPeerEditData(GradedGradeable $graded_gradeable): array {
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
