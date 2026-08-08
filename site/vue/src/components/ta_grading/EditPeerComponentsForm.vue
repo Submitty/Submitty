@@ -33,9 +33,11 @@ const props = defineProps<{
     peerDetails: PeerDetails;
     marks: Record<string, MarkInfo>;
     activeVersion?: number | null;
+    visible?: boolean;
 }>();
 
 const emit = defineEmits<{
+    'toggle': [];
     'clear-marks': [detail: {
         submitterId: string;
         gradeableId: string;
@@ -61,7 +63,6 @@ const emit = defineEmits<{
     }];
 }>();
 
-const visible = ref(false);
 const selectedPeer = ref(props.peers[0] ?? '');
 const checkedMarkOverrides = ref<Record<string, boolean>>({});
 
@@ -70,7 +71,7 @@ function markKey(componentId: string, peer: string, markId: number): string {
 }
 
 function toggle() {
-    visible.value = !visible.value;
+    emit('toggle');
 }
 
 function peerDisplayName(peer: string): string {
