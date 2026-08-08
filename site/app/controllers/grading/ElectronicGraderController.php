@@ -3981,7 +3981,16 @@ class ElectronicGraderController extends AbstractController {
                 $active_version,
                 false
             );
-            $this->core->getOutput()->renderJsonSuccess('Peer component saved successfully');
+            $badge_html = $this->core->getOutput()->renderTwigTemplate('functions/BadgeSnippet.twig', [
+                'earned' => $graded_component->getScore(),
+                'max' => $component->getMaxValue(),
+                'extra_credit' => $component->isExtraCredit(),
+                'active_same_as_graded' => true,
+            ]);
+            $this->core->getOutput()->renderJsonSuccess([
+                'message' => 'Peer component saved successfully',
+                'badge_html' => $badge_html,
+            ]);
         }
         catch (\InvalidArgumentException $exception) {
             $this->core->getOutput()->renderJsonFail($exception->getMessage());
