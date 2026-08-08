@@ -38,7 +38,6 @@ function loadTemplates() {
         { id: 'OverallComment', href: '/templates/grading/OverallComment.twig' },
         { id: 'TotalScoreBox', href: '/templates/grading/TotalScoreBox.twig' },
         { id: 'TotalPeerScoreBox', href: '/templates/grading/TotalPeerScoreBox.twig' },
-        { id: 'ConflictMarks', href: '/templates/grading/ConflictMarks.twig' },
         { id: 'RubricTotalBox', href: '/templates/grading/RubricTotalBox.twig' },
         { id: 'Redactions', href: '/templates/admin/Redactions.twig' },
     ];
