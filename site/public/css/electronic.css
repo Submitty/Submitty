@@ -127,10 +127,6 @@ aside {
     padding-bottom: 3px;
 }
 
-.ta-navlink-cont {
-    color: var(--text-black);
-}
-
 /* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar .ta-navlink-cont:hover {
     transform: translate(0, -2px);
@@ -142,7 +138,7 @@ aside {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont:hover,
-.ta-navlink-cont:hover .icon-header,
+.ta-navlink-cont:hover i,
 .ta-navlink-cont:hover span {
     color: initial;
 }
@@ -184,6 +180,7 @@ button > i.fas:hover {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
+    color: var(--text-black);
     position: relative;
     margin-right: 4px;
     border: 2px solid var(--default-border-color);
