@@ -4,17 +4,29 @@ import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
+import Cookies from 'js-cookie';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
     progress: number;
+    clusteringEnabled?: boolean;
+    clustersExist?: boolean;
+    taGradingClusterMode?: boolean;
 }>();
 
 const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
 }>();
+const toggleClusteringMode = () => {
+    if (!clustersExist) {
+        return; // Disabled if no clusters
+    }
+    const currentMode = taGradingClusterMode;
+    Cookies.set('ta_grading_cluster_mode', currentMode ? 'false' : 'true', { expires: 1, path: '/' });
+    window.location.reload();
+};
 
 // need to assign because ta-grading-panels-init.ts is not called
 Object.assign(taLayoutDet, getSavedTaLayoutDetails());
@@ -84,6 +96,27 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     optional-spanid="grading-setting-btn"
     optional-test-id="grading-setting-btn"
   />
+  <span
+    v-if="clusteringEnabled && clustersExist"
+    id="toggle-cluster-mode-cont"
+    class="ta-navlink-cont"
+  >
+    <button
+      id="toggle-cluster-mode"
+      class="invisible-btn"
+      :title="taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)'"
+      style="display: flex; align-items: center;"
+      @click="toggleClusteringMode"
+    >
+      <i
+        class="fas icon-header icon-streched"
+        :class="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip'"
+      />
+      <span style="margin-left: 5px; padding-right: 5px; font-size: 16px; color: inherit;">
+        {{ taGradingClusterMode ? 'Clustering Mode ON' : 'Clustering Mode OFF' }}
+      </span>
+    </button>
+  </span>
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"
