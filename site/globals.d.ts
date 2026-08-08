@@ -24,6 +24,7 @@ declare global {
             ) => Promise<void>;
         };
         removeMessagePopup: (key: number) => void;
+        enableKeyToClick: () => void;
         displayErrorMessage: (message: string) => void;
         displaySuccessMessage: (message: string) => void;
         displayWarningMessage: (message: string) => void;

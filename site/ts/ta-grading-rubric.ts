@@ -18,6 +18,7 @@ declare global {
         onCancelEditRubricComponent(me: HTMLElement): void;
         onChangeOverallComment(me: HTMLElement): Promise<void>;
         onCancelComponent(me: HTMLElement): Promise<void>;
+        onSaveComponent(me: HTMLElement): Promise<void>;
         onCustomMarkChange(me: HTMLElement): Promise<void>;
         onToggleMark(me: HTMLElement): Promise<void>;
         onToggleMarkById(data: { componentId: number; markId: number }): Promise<void>;
@@ -1081,6 +1082,7 @@ function getNewMarkId() {
 function setRubricDOMElements(elements: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
     const gradingBox = $('#grading-box');
     gradingBox.html(elements);
+    window.enableKeyToClick();
 
     if (isInstructorEditEnabled()) {
         setupSortableComponents();
@@ -1236,6 +1238,7 @@ function keyPressHandler(e: JQueryKeyEventObject) {
  */
 function setComponentContents(component_id: number, contents: string) {
     getComponentJQuery(component_id).parent('.component-container').html(contents);
+    window.enableKeyToClick();
 
     // Enable sorting for this component if in edit mode
     if (isEditModeEnabled()) {
@@ -1250,6 +1253,7 @@ function setComponentContents(component_id: number, contents: string) {
  */
 function setComponentHeaderContents(component_id: number, contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
     getComponentJQuery(component_id).find('.header-block').html(contents);
+    window.enableKeyToClick();
 }
 
 /**
@@ -2154,6 +2158,16 @@ window.onCancelComponent = async function (me: HTMLElement) {
         }
     }
 };
+window.onSaveComponent = async function (me: HTMLElement) {
+    const component_id = getComponentIdFromDOMElement(me);
+    try {
+        await toggleComponent(component_id, true);
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error saving component! ${(err as Error).message}`);
+    }
+};
 
 window.onCancelEditRubricComponent = function (me: HTMLElement) {
     const component_id = getComponentIdFromDOMElement(me);
@@ -2642,6 +2656,7 @@ window.reloadPeerRubric = async function (gradeable_id: string, anon_id: string)
             true, false, getDisplayVersion());
         const gradingBox = $('#peer-grading-box');
         gradingBox.html(elements);
+        window.enableKeyToClick();
     }
     catch (err) {
         alert(`Could not render gradeable: ${(err as Error).message}`);
@@ -3040,8 +3055,17 @@ async function openComponent(component_id: number) {
         await openComponentGrading(component_id);
     }
     resizeNoScrollTextareas();
-}
 
+    // Move focus into the newly revealed component so keyboard users
+    // land on the first interactive mark instead of staying on the header
+    const firstMark = getComponentJQuery(component_id)
+        .find(".key_to_click")
+        .not(".header-block")
+        .first();
+    if (firstMark.length > 0) {
+        firstMark.trigger("focus");
+    }
+}
 /**
  * Scroll such that a given component is visible
  * @param component_id
