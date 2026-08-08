@@ -333,6 +333,16 @@ class HomePageController extends AbstractController {
             );
         }
 
+        if (!$this->core->getQueries()->termExists($semester)) {
+            $error = "Semester doesn't exist.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
         if ($this->core->getQueries()->courseExists($_POST['course_semester'], $_POST['course_title'])) {
             $error = "Course with that semester/title already exists.";
             $this->core->addErrorMessage($error);
