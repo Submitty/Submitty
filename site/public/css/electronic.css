@@ -127,7 +127,7 @@ aside {
     padding-bottom: 3px;
 }
 
-.grading_toolbar .ta-navlink-cont {
+.ta-navlink-cont {
     color: var(--text-black);
 }
 
@@ -140,9 +140,10 @@ aside {
     background-color: var(--subheading-underscore-grey);
 }
 
-.grading_toolbar .ta-navlink-cont:hover,
-.grading_toolbar .ta-navlink-cont:hover .icon-header,
-.grading_toolbar .ta-navlink-cont:hover span {
+/* stylelint-disable-next-line no-descending-specificity */
+.ta-navlink-cont:hover,
+.ta-navlink-cont:hover .icon-header,
+.ta-navlink-cont:hover span {
     color: initial;
 }
 
