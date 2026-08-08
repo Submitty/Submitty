@@ -112,7 +112,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
         class="fas icon-header icon-streched"
         :class="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip'"
       />
-      <span style="margin-left: 5px; font-size: 16px;">
+      <span style="margin-left: 5px; padding-right: 5px; font-size: 16px; color: inherit;">
         {{ taGradingClusterMode ? 'Clustering Mode ON' : 'Clustering Mode OFF' }}
       </span>
     </button>

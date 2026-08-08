@@ -127,6 +127,10 @@ aside {
     padding-bottom: 3px;
 }
 
+.grading_toolbar .ta-navlink-cont {
+    color: var(--text-black);
+}
+
 /* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar .ta-navlink-cont:hover {
     transform: translate(0, -2px);
@@ -134,6 +138,12 @@ aside {
     transition: transform 0.2s;
     box-shadow: 0 0 5px 5px var(--subheading-underscore-grey);
     background-color: var(--subheading-underscore-grey);
+}
+
+.grading_toolbar .ta-navlink-cont:hover,
+.grading_toolbar .ta-navlink-cont:hover .icon-header,
+.grading_toolbar .ta-navlink-cont:hover span {
+    color: initial;
 }
 
 .ta-navlink-cont button {
