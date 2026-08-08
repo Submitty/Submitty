@@ -1,11 +1,11 @@
+import { ref, h, defineComponent } from 'vue';
 import EditPeerComponentsForm from '../../vue/src/components/ta_grading/EditPeerComponentsForm.vue';
-import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
 const defaultProps = {
-    peers: ['student_aaa', 'student_bbb'],
+    peers: ['student1', 'student2'],
     peerNames: {
-        student_aaa: 'Alice Aaa (student_aaa)',
-        student_bbb: 'Bob Bbb (student_bbb)',
+        student1: 'Student 1',
+        student2: 'Student 2',
     },
     submitterId: 'submitter_xyz',
     gradeableId: 'gradeable_001',
@@ -16,18 +16,18 @@ const defaultProps = {
         { id: 'comp_2', title: 'Documentation', max: 5, marks: [201], extra_credit: false },
     ],
     componentScores: {
-        comp_1: { student_aaa: 7 },
-        comp_2: { student_aaa: 3 },
+        comp_1: { student1: 7 },
+        comp_2: { student1: 3 },
     },
     peerDetails: {
-        graders: { comp_1: ['student_aaa'], comp_2: ['student_aaa'] },
+        graders: { comp_1: ['student1'], comp_2: ['student1'] },
         marks_assigned: {
-            comp_1: { student_aaa: [101] },
-            comp_2: { student_aaa: [201] },
+            comp_1: { student1: [101] },
+            comp_2: { student1: [201] },
         },
         graded_versions: {
-            comp_1: { student_aaa: 2 },
-            comp_2: { student_aaa: 2 },
+            comp_1: { student1: 2 },
+            comp_2: { student1: 2 },
         },
         version_conflicts: {},
     },
@@ -38,8 +38,28 @@ const defaultProps = {
     },
 };
 
-function mountDefault(props = {}) {
-    return cy.mount(EditPeerComponentsForm, { props: { ...defaultProps, ...props } });
+// Mounts the component inside a wrapper that flips `visible` on `toggle`, mirroring
+// how the real parent (PeerPanel.twig + toggleEditPeerComponentsForm) controls it.
+// Pass [eventName, alias] pairs as `emitSpies` to stub emits and assert on them
+// with `cy.get('@alias')`.
+function mountWithToggleWrapper(props = {}, emitSpies = []) {
+    const visible = ref(false);
+    const Wrapper = defineComponent({
+        setup() {
+            const listeners = emitSpies.reduce((acc, [name, alias]) => {
+                acc[`on${name.charAt(0).toUpperCase()}${name.slice(1)}`] = cy.stub().as(alias);
+                return acc;
+            }, {});
+            return () => h(EditPeerComponentsForm, {
+                ...defaultProps,
+                ...props,
+                visible: visible.value,
+                onToggle: () => { visible.value = !visible.value; },
+                ...listeners,
+            });
+        },
+    });
+    return cy.mount(Wrapper);
 }
 
 function openPopup() {
@@ -48,67 +68,63 @@ function openPopup() {
 
 // Mounts a single-peer component with one component and the given earned score, used to exercise the score badge rendering.
 function mountScore(earned, max, extraCredit = false) {
-    return cy.mount(EditPeerComponentsForm, {
-        props: {
-            ...defaultProps,
-            peers: ['student_aaa'],
-            components: [{ id: 'comp_1', title: 'Test Component', max, marks: [], extra_credit: extraCredit }],
-            componentScores: { comp_1: { student_aaa: earned } },
-            peerDetails: { graders: {}, marks_assigned: {} },
-        },
+    return mountWithToggleWrapper({
+        peers: ['student1'],
+        components: [{ id: 'comp_1', title: 'Test Component', max, marks: [], extra_credit: extraCredit }],
+        componentScores: { comp_1: { student1: earned } },
+        peerDetails: { graders: {}, marks_assigned: {} },
     });
 }
 
 describe('EditPeerComponentsForm', () => {
     describe('rendering', () => {
-        it('opens and closes the popup from the trigger', () => {
-            mountDefault();
+        it('opens/closes the popup (mouse and keyboard), lists peers, and renders per-peer blocks with accessible buttons', () => {
+            mountWithToggleWrapper();
             cy.get('[data-testid="edit-peer-trigger"]').should('contain.text', 'Edit Peer Components');
+            cy.get('[data-testid="edit-peer-trigger"]').should('have.attr', 'title');
+            cy.get('[data-testid="edit-peer-select"]').should('not.exist');
+
+            // Opens via keyboard and exposes accessible buttons.
+            cy.get('[data-testid="edit-peer-trigger"]').focus();
+            cy.get('[data-testid="edit-peer-trigger"]').type('{enter}');
+            cy.get('[data-testid="edit-peer-select"]').should('be.visible');
+            cy.get('[data-testid="clear-peer-marks"]').should('have.attr', 'title');
+            cy.get('[data-testid="save-peer-component"]').first().should('have.attr', 'title');
+            cy.get('[data-testid="clear-version-conflicts"]').should('not.exist');
+
+            cy.get('[data-testid="close-button"]').click();
             cy.get('[data-testid="edit-peer-select"]').should('not.exist');
 
             openPopup();
             cy.get('[data-testid="edit-peer-select"]').should('be.visible');
-
-            cy.get('[data-testid="close-button"]').click();
-            cy.get('[data-testid="edit-peer-select"]').should('not.exist');
-        });
-
-        it('renders each peer as an option using its display name, falling back to the raw id', () => {
-            mountDefault();
-            openPopup();
             cy.get('[data-testid="edit-peer-select"] option').should('have.length', 2);
-            cy.get('[data-testid="edit-peer-select"]').contains('option', 'Alice Aaa (student_aaa)');
-            cy.get('[data-testid="edit-peer-select"]').contains('option', 'Bob Bbb (student_bbb)');
+            cy.get('[data-testid="edit-peer-select"]').contains('option', 'Student 1');
+            cy.get('[data-testid="edit-peer-select"]').contains('option', 'Student 2');
 
-            mountDefault({ peerNames: {} });
-            openPopup();
-            cy.get('[data-testid="edit-peer-select"]').contains('option', 'student_aaa');
-        });
-
-        it('renders component titles and their mark rows', () => {
-            mountDefault();
-            openPopup();
             cy.get('[data-testid="component-title"]').first().should('contain.text', 'Code Quality');
             cy.get('[data-testid="mark-row-101"]').should('exist');
             cy.get('[data-testid="mark-row-102"]').should('exist');
             cy.get('[data-testid="mark-row-201"]').should('exist');
-        });
 
-        it('defaults to the first peer and switches visible blocks on select', () => {
-            mountDefault();
-            openPopup();
-            cy.get('[data-testid="edit-peer-select"]').should('have.value', 'student_aaa');
+            cy.get('[data-testid="edit-peer-select"]').should('have.value', 'student1');
             cy.get('[data-testid="peer-block"]').first().should('be.visible');
             cy.get('[data-testid="peer-block"]').eq(1).should('not.be.visible');
 
-            cy.get('[data-testid="edit-peer-select"]').select('student_bbb');
+            cy.get('[data-testid="edit-peer-select"]').select('student2');
             cy.get('[data-testid="peer-block"]').first().should('not.be.visible');
             cy.get('[data-testid="peer-block"]').eq(1).should('be.visible');
+
+            cy.get('[data-testid="close-button"]').click();
+            cy.get('[data-testid="edit-peer-select"]').should('not.exist');
+
+            mountWithToggleWrapper({ peerNames: {} });
+            openPopup();
+            cy.get('[data-testid="edit-peer-select"]').contains('option', 'student1');
         });
     });
 
     describe('score badge', () => {
-        it('colors the badge by score and shows earned / max text', () => {
+        it('renders badge color, text, and extra-credit formatting, hiding the badge when unused', () => {
             mountScore(10, 10);
             openPopup();
             cy.get('[data-testid="score-pill-badge"]').should('have.class', 'green-background');
@@ -144,9 +160,7 @@ describe('EditPeerComponentsForm', () => {
             openPopup();
             cy.get('[data-testid="score-pill-badge"]').should('have.text', '\u22123');
             cy.get('[data-testid="score-pill-badge"]').should('have.class', 'red-background');
-        });
 
-        it('shows extra credit as "+earned", gray at 0 and green above', () => {
             mountScore(0, 10, true);
             openPopup();
             cy.get('[data-testid="score-pill-badge"]').should('have.text', '+0');
@@ -156,23 +170,24 @@ describe('EditPeerComponentsForm', () => {
             openPopup();
             cy.get('[data-testid="score-pill-badge"]').should('have.text', '+4');
             cy.get('[data-testid="score-pill-badge"]').should('have.class', 'green-background');
-        });
 
-        it('hides the badge when max is 0 or the peer has no score', () => {
             mountScore(0, 0);
             openPopup();
             cy.get('[data-testid="no-badge"]').should('exist');
             cy.get('[data-testid="score-pill-badge"]').should('not.exist');
 
-            mountDefault({ componentScores: {}, peerDetails: { graders: {}, marks_assigned: {} } });
+            mountWithToggleWrapper({
+                componentScores: {},
+                peerDetails: { graders: {}, marks_assigned: {} },
+            });
             openPopup();
             cy.get('[data-testid="box-badge"]').should('not.exist');
         });
     });
 
     describe('mark checkboxes', () => {
-        it('checks assigned marks, leaves unassigned unchecked, and unchecks peers with no data', () => {
-            mountDefault();
+        it('reflects assigned marks, persists toggles across close/reopen, and emits mark-change/clear-marks/save-component', () => {
+            mountWithToggleWrapper({}, [['markChange', 'onMarkChange'], ['clearMarks', 'onClearMarks'], ['saveComponent', 'onSaveComponent']]);
             openPopup();
 
             cy.get('[data-testid="peer-block"]').first().within(() => {
@@ -185,25 +200,12 @@ describe('EditPeerComponentsForm', () => {
                 });
             });
 
-            cy.get('[data-testid="edit-peer-select"]').select('student_bbb');
-            cy.get('[data-testid="peer-block"]').eq(1).within(() => {
-                cy.get('[data-testid="mark-checkbox"]').should('have.length.greaterThan', 0);
-                cy.get('[data-testid="mark-checkbox"]').each(($checkbox) => {
-                    cy.wrap($checkbox).should('not.be.checked');
-                });
-            });
-        });
-
-        it('emits mark-change on toggle and persists toggles across close/reopen', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'markChange', defaultProps, 'onMarkChange');
-            openPopup();
-
             cy.get('[data-testid="peer-block"]').first().within(() => {
                 cy.get('[data-testid="mark-row-102"]').within(() => {
                     cy.get('[data-testid="mark-checkbox"]').check();
                 });
             });
-            cy.get('@onMarkChange').should('have.been.calledWith', { peer: 'student_aaa', componentId: 'comp_1' });
+            cy.get('@onMarkChange').should('have.been.calledWith', { peer: 'student1', componentId: 'comp_1' });
 
             // Popup.vue destroys the slot DOM on close (v-if), so reopening must
             // re-render from local state rather than the stale page-load props.
@@ -235,76 +237,15 @@ describe('EditPeerComponentsForm', () => {
                     cy.get('[data-testid="mark-checkbox"]').should('be.checked');
                 });
             });
-        });
-    });
 
-    describe('version conflicts', () => {
-        it('shows warnings and the clear button only for conflicting peers, and emits resolve-version-conflicts', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'resolveVersionConflicts', {
-                ...defaultProps,
-                peerDetails: {
-                    ...defaultProps.peerDetails,
-                    graded_versions: {
-                        comp_1: { student_aaa: 1 },
-                        comp_2: { student_aaa: 2 },
-                    },
-                    version_conflicts: {
-                        comp_1: { student_aaa: true },
-                        comp_2: { student_aaa: false },
-                    },
-                },
-            }, 'onResolveVersionConflicts');
-            openPopup();
-
-            cy.get('[data-testid="version-warning"]').should('have.length', 1);
-            cy.get('[data-testid="version-warning"]')
-                .should('contain.text', 'Version Conflict: student_aaa graded version 1')
-                .should('contain.text', 'but version 2 is active');
-            cy.get('[data-testid="clear-version-conflicts"]').should('be.visible');
-
-            cy.get('[data-testid="clear-version-conflicts"]').click();
-            cy.get('@onResolveVersionConflicts').should('have.been.calledOnceWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
-                peer: 'student_aaa',
-                csrfToken: 'csrf_abc123',
-            });
-
-            mountDefault();
-            openPopup();
-            cy.get('[data-testid="version-warning"]').should('not.exist');
-            cy.get('[data-testid="clear-version-conflicts"]').should('not.exist');
-        });
-    });
-
-    describe('emits', () => {
-        it('emits clear-marks with the currently selected peer', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'clearMarks', defaultProps, 'onClearMarks');
-            openPopup();
-
+            // clear-marks / save-component emits use the selected peer + component.
             cy.get('[data-testid="clear-peer-marks"]').first().click();
-            cy.get('@onClearMarks').should('have.been.calledOnceWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
-                peer: 'student_aaa',
-                csrfToken: 'csrf_abc123',
-            });
-
-            cy.get('[data-testid="edit-peer-select"]').select('student_bbb');
-            cy.get('[data-testid="peer-block"]:visible').within(() => {
-                cy.get('[data-testid="clear-peer-marks"]').click();
-            });
             cy.get('@onClearMarks').should('have.been.calledWith', {
                 submitterId: 'submitter_xyz',
                 gradeableId: 'gradeable_001',
-                peer: 'student_bbb',
+                peer: 'student1',
                 csrfToken: 'csrf_abc123',
             });
-        });
-
-        it('emits save-component with the correct detail on click', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'saveComponent', defaultProps, 'onSaveComponent');
-            openPopup();
 
             cy.get('[data-testid="peer-block"]').first().within(() => {
                 cy.get('[data-testid="save-peer-component"]').first().click();
@@ -312,27 +253,33 @@ describe('EditPeerComponentsForm', () => {
             cy.get('@onSaveComponent').should('have.been.calledOnceWith', {
                 submitterId: 'submitter_xyz',
                 gradeableId: 'gradeable_001',
-                peer: 'student_aaa',
+                peer: 'student1',
                 componentId: 'comp_1',
                 csrfToken: 'csrf_abc123',
             });
-        });
-    });
 
-    describe('accessibility', () => {
-        it('opens via keyboard and exposes accessible buttons', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'clearMarks', defaultProps, 'onClearMarks');
+            // A peer with no grading data shows all unchecked.
+            cy.get('[data-testid="edit-peer-select"]').select('student2');
+            cy.get('[data-testid="peer-block"]').eq(1).within(() => {
+                cy.get('[data-testid="mark-checkbox"]').should('have.length.greaterThan', 0);
+                cy.get('[data-testid="mark-checkbox"]').each(($checkbox) => {
+                    cy.wrap($checkbox).should('not.be.checked');
+                });
+            });
 
-            cy.get('[data-testid="edit-peer-trigger"]').should('have.attr', 'title');
-            cy.get('[data-testid="edit-peer-trigger"]').focus();
-            cy.get('[data-testid="edit-peer-trigger"]').type('{enter}');
-            cy.get('[data-testid="edit-peer-select"]').should('be.visible');
+            // clear-marks uses the currently selected peer.
+            cy.get('[data-testid="peer-block"]:visible').within(() => {
+                cy.get('[data-testid="clear-peer-marks"]').click();
+            });
+            cy.get('@onClearMarks').should('have.been.calledWith', {
+                submitterId: 'submitter_xyz',
+                gradeableId: 'gradeable_001',
+                peer: 'student2',
+                csrfToken: 'csrf_abc123',
+            });
 
-            cy.get('[data-testid="clear-peer-marks"]').should('have.attr', 'title');
-            cy.get('[data-testid="save-peer-component"]').first().should('have.attr', 'title');
-            cy.get('[data-testid="clear-version-conflicts"]').should('not.exist');
-
-            cy.get('[data-testid="peer-block"]').first().within(() => {
+            // clear-peer-marks also activates via keyboard.
+            cy.get('[data-testid="peer-block"]:visible').within(() => {
                 cy.get('[data-testid="clear-peer-marks"]').focus();
                 cy.get('[data-testid="clear-peer-marks"]').type('{enter}');
             });
@@ -340,39 +287,81 @@ describe('EditPeerComponentsForm', () => {
         });
     });
 
+    describe('version conflicts', () => {
+        it('shows warnings and the clear button only for conflicting peers, and emits resolve-version-conflicts', () => {
+            mountWithToggleWrapper({
+                peerDetails: {
+                    ...defaultProps.peerDetails,
+                    graded_versions: {
+                        comp_1: { student1: 1 },
+                        comp_2: { student1: 2 },
+                    },
+                    version_conflicts: {
+                        comp_1: { student1: true },
+                        comp_2: { student1: false },
+                    },
+                },
+            }, [['resolveVersionConflicts', 'onResolveVersionConflicts']]);
+            openPopup();
+
+            cy.get('[data-testid="version-warning"]').should('have.length', 1);
+            cy.get('[data-testid="version-warning"]')
+                .should('contain.text', 'Version Conflict: student1 graded version 1')
+                .should('contain.text', 'but version 2 is active');
+            cy.get('[data-testid="clear-version-conflicts"]').should('be.visible');
+
+            cy.get('[data-testid="clear-version-conflicts"]').click();
+            cy.get('@onResolveVersionConflicts').should('have.been.calledOnceWith', {
+                submitterId: 'submitter_xyz',
+                gradeableId: 'gradeable_001',
+                peer: 'student1',
+                csrfToken: 'csrf_abc123',
+            });
+
+            mountWithToggleWrapper();
+            openPopup();
+            cy.get('[data-testid="version-warning"]').should('not.exist');
+            cy.get('[data-testid="clear-version-conflicts"]').should('not.exist');
+        });
+    });
+
     describe('edge cases', () => {
-        it('falls back to empty strings in payloads when identifiers are missing', () => {
-            mountWithEmitSpy(EditPeerComponentsForm, 'clearMarks', {
-                ...defaultProps,
+        it('falls back to empty identifiers and handles empty peers / missing marks without crashing', () => {
+            mountWithToggleWrapper({
                 submitterId: undefined,
                 gradeableId: undefined,
                 csrfToken: undefined,
                 peerDetails: {
                     ...defaultProps.peerDetails,
-                    version_conflicts: { comp_1: { student_aaa: true } },
+                    version_conflicts: { comp_1: { student1: true } },
                 },
-            }, 'onClearMarks');
+            }, [['clearMarks', 'onClearMarks']]);
             openPopup();
 
             cy.get('[data-testid="clear-peer-marks"]').first().click();
             cy.get('@onClearMarks').should('have.been.calledOnceWith', {
                 submitterId: '',
                 gradeableId: '',
-                peer: 'student_aaa',
+                peer: 'student1',
                 csrfToken: '',
             });
 
             cy.get('[data-testid="clear-version-conflicts"]').click();
             cy.get('[data-testid="save-peer-component"]').first().click();
-        });
 
-        it('handles empty peers and missing mark entries without crashing', () => {
-            mountDefault({ peers: [], componentScores: {}, peerDetails: { graders: {}, marks_assigned: {} } });
+            mountWithToggleWrapper({
+                peers: [],
+                componentScores: {},
+                peerDetails: { graders: {}, marks_assigned: {} },
+            });
             openPopup();
             cy.get('[data-testid="edit-peer-select"] option').should('have.length', 0);
             cy.get('[data-testid="warning-text"]').should('be.visible');
 
-            mountDefault({ components: [{ id: 'comp_1', title: 'Test', max: 10, marks: [999] }], marks: {} });
+            mountWithToggleWrapper({
+                components: [{ id: 'comp_1', title: 'Test', max: 10, marks: [999] }],
+                marks: {},
+            });
             openPopup();
             cy.get('[data-testid="mark-row-999"]').should('exist');
             cy.get('[data-testid="mark-points"]').should('have.text', '');
