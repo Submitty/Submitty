@@ -18,19 +18,20 @@ import {
     toggleComponent as oldToggleComponent,
 } from './ta-grading-rubric';
 import { gotoNextStudent, gotoPrevStudent } from './ta-grading-toolbar';
+import { updateVueComponent } from './utils/vue';
 
 declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
-        changeCurrentPeer(): void;
         peerComponentMarksChanged (peer_id: string, component_id: string): void;
+        peerEditFormData?: Record<string, unknown>;
+        toggleEditPeerComponentsForm(): void;
         clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
         reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
-        newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
@@ -419,10 +420,17 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
     return stored_paths;
 }
 
-window.changeCurrentPeer = function () {
-    const peer = $('#edit-peer-select').val() as string;
-    $('.edit-peer-components-block').hide();
-    $(`#edit-peer-components-form-${peer}`).show();
+// Tracks whether the peer edit popup is open.
+let peerEditFormVisible = false;
+
+window.toggleEditPeerComponentsForm = function () {
+    peerEditFormVisible = !peerEditFormVisible;
+    if (window.peerEditFormData) {
+        updateVueComponent('#edit-peer-components-form', {
+            ...window.peerEditFormData,
+            visible: peerEditFormVisible,
+        });
+    }
 };
 
 window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
@@ -480,11 +488,19 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
             mark_ids,
         },
         type: 'POST',
-        success: function () {
+        dataType: 'json',
+        success: function (response: { peer_edit_data?: Record<string, unknown> }) {
             const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
             save_status.text('Saved');
             $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            if (response.peer_edit_data) {
+                window.peerEditFormData = response.peer_edit_data;
+                updateVueComponent('#edit-peer-components-form', {
+                    ...window.peerEditFormData,
+                    visible: peerEditFormVisible,
+                });
+            }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
             setTimeout(() => {
                 save_status.text('');
@@ -517,9 +533,17 @@ window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_i
             submitter_id,
         },
         type: 'POST',
-        success: function () {
+        dataType: 'json',
+        success: function (response: { peer_edit_data?: Record<string, unknown> }) {
             $(`.peer-edit-version-warning[data-peer-id="${peer_id}"]`).remove();
             $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
+            if (response.peer_edit_data) {
+                window.peerEditFormData = response.peer_edit_data;
+                updateVueComponent('#edit-peer-components-form', {
+                    ...window.peerEditFormData,
+                    visible: peerEditFormVisible,
+                });
+            }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
         },
         error: function () {
@@ -553,13 +577,6 @@ window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_
             console.log('Failed to clear all peer version conflicts');
         },
     });
-};
-
-window.newEditPeerComponentsForm = function () {
-    $('.popup-form').css('display', 'none');
-    const form = $('#edit-peer-components-form');
-    form.css('display', 'block');
-    captureTabInModal('edit-peer-components-form');
 };
 
 function rotateImage(url: string | undefined, rotateBy: string) {
