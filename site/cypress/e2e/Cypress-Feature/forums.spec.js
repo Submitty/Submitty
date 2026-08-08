@@ -603,3 +603,82 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Course syllabus');
     });
 });
+
+describe('Should test blocking and unblocking a user from posting in forum', () => {
+    const blockTestThread = 'Block Test Thread';
+
+    beforeEach(() => {
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[title="Create Thread"]').click();
+        cy.get('#title').type(blockTestThread);
+        cy.get('.thread_post_content').type('Post to be blocked');
+        cy.get('.cat-buttons').contains('Comment').click();
+        cy.get('[name="post"]').click();
+        cy.logout();
+
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(blockTestThread).click();
+    });
+
+    afterEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(blockTestThread).click();
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('body').then(($body) => {
+            if ($body.find('[aria-label="Unblock from Forum"]').length) {
+                cy.get('[aria-label="Unblock from Forum"]').click();
+            }
+        });
+    });
+
+    it('Should block a user and reflect the change in the dropdown', () => {
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Block from Forum"]').click();
+        cy.get('#block-user-form').should('be.visible');
+        cy.get('a.btn-danger').contains('Block User').click();
+
+        cy.reload();
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Unblock from Forum"]').should('exist');
+    });
+
+    it('Should prevent a blocked user from posting in the forum', () => {
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Block from Forum"]').click();
+        cy.get('#block-user-form').should('be.visible');
+        cy.get('a.btn-danger').contains('Block User').click();
+        cy.logout();
+
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(blockTestThread).click();
+        cy.get('#reply_box_3').type('This should not be allowed');
+        cy.get('[data-testid="forum-submit-reply-all"]').click();
+        cy.contains('You are currently blocked from making forum posts.').should('be.visible');
+    });
+    it('Should unblock a user and allow them to post again', () => {
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Block from Forum"]').click();
+        cy.get('#block-user-form').should('be.visible');
+        cy.get('a.btn-danger').contains('Block User').click();
+
+        cy.reload();
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Unblock from Forum"]').click();
+
+        cy.reload();
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[aria-label="Block from Forum"]').should('exist');
+        cy.logout();
+
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(blockTestThread).click();
+        cy.get('#reply_box_3').type('This should be allowed now');
+        cy.get('[data-testid="forum-submit-reply-all"]').click();
+        cy.contains('This should be allowed now').should('be.visible');
+    });
+});
