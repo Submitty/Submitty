@@ -6,28 +6,27 @@ interface Props {
     isExpiring: boolean;
     canPin: boolean;
     isFavorite: boolean;
-    csrfToken: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-    'pin-thread': [payload: { threadId: number; csrfToken: string }];
-    'unpin-thread': [payload: { threadId: number; csrfToken: string }];
-    'bookmark-thread': [payload: { threadId: number }];
-    'unbookmark-thread': [payload: { threadId: number }];
+    'pin-thread': [threadId: number];
+    'unpin-thread': [threadId: number];
+    'bookmark-thread': [threadId: number];
+    'unbookmark-thread': [threadId: number];
 }>();
 
 function emitPin() {
-    emit('pin-thread', { threadId: props.threadId, csrfToken: props.csrfToken });
+    emit('pin-thread', props.threadId);
 }
 function emitUnpin() {
-    emit('unpin-thread', { threadId: props.threadId, csrfToken: props.csrfToken });
+    emit('unpin-thread', props.threadId);
 }
 function emitBookmark() {
-    emit('bookmark-thread', { threadId: props.threadId });
+    emit('bookmark-thread', props.threadId);
 }
 function emitUnbookmark() {
-    emit('unbookmark-thread', { threadId: props.threadId });
+    emit('unbookmark-thread', props.threadId);
 }
 </script>
 

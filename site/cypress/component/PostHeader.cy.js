@@ -8,13 +8,12 @@ const defaultProps = {
     isExpiring: false,
     canPin: true,
     isFavorite: false,
-    csrfToken: 'csrf-token-123',
 };
 
 describe('PostHeader', () => {
     it('renders the thread title', () => {
         cy.mount(PostHeader, { props: defaultProps });
-        cy.get('[data-testid="post-header"]').should('contain', '(456) Sample Thread');
+        cy.get('[data-testid="post-header"]').should('contain', defaultProps.title);
     });
 
     it('shows the pin button for instructors when the thread is not announced', () => {
@@ -26,13 +25,10 @@ describe('PostHeader', () => {
         cy.get('[data-testid="pinned-icon"]').should('not.exist');
     });
 
-    it('emits pin-thread with threadId and csrfToken when pin is clicked', () => {
+    it('emits pin-thread with threadId when pin is clicked', () => {
         mountWithEmitSpy(PostHeader, 'pin-thread', defaultProps);
         cy.get('[data-testid="pin-thread-button"]').click({ force: true });
-        cy.get('@eventHandler').should('have.been.calledOnceWith', {
-            threadId: 456,
-            csrfToken: 'csrf-token-123',
-        });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
     it('shows the unpin button when announced and canPin; emits unpin-thread on click', () => {
@@ -43,10 +39,7 @@ describe('PostHeader', () => {
             .and('have.attr', 'title', 'Unpin thread');
         cy.get('[data-testid="pin-thread-button"]').should('not.exist');
         cy.get('[data-testid="unpin-thread-button"]').click({ force: true });
-        cy.get('@eventHandler').should('have.been.calledOnceWith', {
-            threadId: 456,
-            csrfToken: 'csrf-token-123',
-        });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
     it('uses the expiring variant class on the unpin button when expiring', () => {
@@ -83,7 +76,7 @@ describe('PostHeader', () => {
             .and('have.attr', 'title', 'Unbookmark Thread');
         cy.get('[data-testid="bookmark-thread-button"]').should('not.exist');
         cy.get('[data-testid="unbookmark-thread-button"]').click({ force: true });
-        cy.get('@eventHandler').should('have.been.calledOnceWith', { threadId: 456 });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
     it('shows the bookmark button when not favorited and emits bookmark-thread on click', () => {
@@ -93,17 +86,14 @@ describe('PostHeader', () => {
             .and('have.class', 'pinned-thread');
         cy.get('[data-testid="unbookmark-thread-button"]').should('not.exist');
         cy.get('[data-testid="bookmark-thread-button"]').click({ force: true });
-        cy.get('@eventHandler').should('have.been.calledOnceWith', { threadId: 456 });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
     it('keyboard activation (Enter and Space) emits pin-thread', () => {
         mountWithEmitSpy(PostHeader, 'pin-thread', defaultProps);
         cy.get('[data-testid="pin-thread-button"]').focus();
         cy.get('[data-testid="pin-thread-button"]').type('{enter}');
-        cy.get('@eventHandler').should('have.been.calledOnceWith', {
-            threadId: 456,
-            csrfToken: 'csrf-token-123',
-        });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
         cy.get('[data-testid="pin-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
@@ -112,10 +102,7 @@ describe('PostHeader', () => {
         mountWithEmitSpy(PostHeader, 'unpin-thread', { ...defaultProps, isAnnounced: true });
         cy.get('[data-testid="unpin-thread-button"]').focus();
         cy.get('[data-testid="unpin-thread-button"]').type('{enter}');
-        cy.get('@eventHandler').should('have.been.calledOnceWith', {
-            threadId: 456,
-            csrfToken: 'csrf-token-123',
-        });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
         cy.get('[data-testid="unpin-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
@@ -124,7 +111,7 @@ describe('PostHeader', () => {
         mountWithEmitSpy(PostHeader, 'bookmark-thread', defaultProps);
         cy.get('[data-testid="bookmark-thread-button"]').focus();
         cy.get('[data-testid="bookmark-thread-button"]').type('{enter}');
-        cy.get('@eventHandler').should('have.been.calledOnceWith', { threadId: 456 });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
         cy.get('[data-testid="bookmark-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
@@ -133,7 +120,7 @@ describe('PostHeader', () => {
         mountWithEmitSpy(PostHeader, 'unbookmark-thread', { ...defaultProps, isFavorite: true });
         cy.get('[data-testid="unbookmark-thread-button"]').focus();
         cy.get('[data-testid="unbookmark-thread-button"]').type('{enter}');
-        cy.get('@eventHandler').should('have.been.calledOnceWith', { threadId: 456 });
+        cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
         cy.get('[data-testid="unbookmark-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
