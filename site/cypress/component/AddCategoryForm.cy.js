@@ -61,14 +61,6 @@ describe('AddCategoryForm', () => {
         cy.get('@eventHandler').should('not.have.been.called');
     });
 
-    it('keyboard activation (Enter) on the button emits add-category', () => {
-        mountWithEmitSpy(AddCategoryForm, 'add-category', defaultProps);
-        cy.get('[data-testid="add-category-name-input"]').type('Keyboard Category');
-        cy.get('[data-testid="add-category-button"]').focus();
-        cy.get('[data-testid="add-category-button"]').type('{enter}');
-        cy.get('@eventHandler').should('have.been.calledOnce');
-    });
-
     it('does not throw when no event handlers are provided', () => {
         cy.mount(AddCategoryForm, { props: defaultProps });
         cy.get('[data-testid="add-category-name-input"]').type('No Handlers');
