@@ -2,14 +2,8 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import flatpickr from 'flatpickr';
 
-interface Props {
-    csrfToken: string;
-}
-
-const props = defineProps<Props>();
-
 const emit = defineEmits<{
-    'add-category': [payload: { name: string; visibleDate: string; csrfToken: string }];
+    'add-category': [payload: { name: string; visibleDate: string }];
     'max-length': [];
 }>();
 
@@ -25,7 +19,6 @@ function onAddCategory() {
     emit('add-category', {
         name: name.value,
         visibleDate: visibleDate.value,
-        csrfToken: props.csrfToken,
     });
 }
 

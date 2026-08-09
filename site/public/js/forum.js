@@ -1534,7 +1534,7 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(newCategory, visibleDate, csrf_token) {
+function addNewCategory(newCategory, visibleDate) {
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
         url: url,
@@ -1543,7 +1543,7 @@ function addNewCategory(newCategory, visibleDate, csrf_token) {
             newCategory: newCategory,
             visibleDate: visibleDate,
             rank: $('[id^="categorylistitem-').length,
-            csrf_token: csrf_token,
+            csrf_token: csrfToken,
         },
         success: function (data) {
             try {

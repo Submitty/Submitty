@@ -37,11 +37,8 @@
         {% include 'Vue.twig' with {
             type: 'component',
             name: 'forum/AddCategoryForm',
-            args: {
-                csrfToken: csrf_token,
-            },
             events: {
-                'add-category': '(event) => { addNewCategory(event.name, event.visibleDate, event.csrfToken); }',
+                'add-category': '(event) => { addNewCategory(event.name, event.visibleDate); }',
                 'max-length': '(event) => { alert("Maximum input length reached!"); }'
             }
         } %}
