@@ -17,20 +17,25 @@ const emit = defineEmits<{
     'unbookmark-thread': [threadId: number];
 }>();
 
-const pinControlClass = props.isAnnounced
-    ? (props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement')
-    : 'not-active-thread-announcement';
+const pinClass = !props.canPin
+    ? (props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement')
+    : (props.isAnnounced
+            ? (props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement')
+            : 'not-active-thread-announcement');
 
-const pinControlTitle = props.isAnnounced
-    ? (props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread')
-    : 'Pin thread to the top';
-
-const pinnedIconClass = props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement';
+const pinTitle = !props.canPin
+    ? 'Pinned Thread'
+    : (props.isAnnounced
+            ? (props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread')
+            : 'Pin thread to the top');
 
 const bookmarkClass = props.isFavorite ? 'current-favorite' : 'pinned-thread';
 const bookmarkTitle = props.isFavorite ? 'Unbookmark Thread' : 'Bookmark Thread';
 
 function onPinClick() {
+    if (!props.canPin) {
+        return;
+    }
     if (props.isAnnounced) {
         emit('unpin-thread', props.threadId);
     }
@@ -52,30 +57,22 @@ function onBookmarkClick() {
 <template>
   <span data-testid="post-header">
     <a
-      v-if="canPin"
-      :class="pinControlClass"
+      v-if="canPin || isAnnounced"
+      :class="pinClass"
       data-testid="pin-thread-button"
       tabindex="0"
       role="button"
-      :title="pinControlTitle"
-      :aria-label="pinControlTitle"
+      :title="pinTitle"
+      :aria-label="pinTitle"
       @click="onPinClick"
       @keydown.enter.prevent="onPinClick"
       @keydown.space.prevent="onPinClick"
     >
       <i
         class="fas fa-thumbtack"
-        :class="isAnnounced ? '' : 'golden_hover'"
+        :class="(!canPin || isAnnounced) ? '' : 'golden_hover'"
       />
     </a>
-    <i
-      v-else-if="isAnnounced"
-      class="fas fa-thumbtack"
-      :class="pinnedIconClass"
-      data-testid="pinned-icon"
-      title="Pinned Thread"
-      aria-label="Pinned Thread"
-    />
 
     <a
       :class="bookmarkClass"

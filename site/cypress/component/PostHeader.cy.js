@@ -21,7 +21,6 @@ describe('PostHeader', () => {
         cy.get('[data-testid="pin-thread-button"]')
             .should('exist')
             .and('have.class', 'not-active-thread-announcement');
-        cy.get('[data-testid="pinned-icon"]').should('not.exist');
     });
 
     it('emits pin-thread with threadId when pin is clicked', () => {
@@ -36,7 +35,6 @@ describe('PostHeader', () => {
             .should('exist')
             .and('have.class', 'active-thread-remove-announcement')
             .and('have.attr', 'title', 'Unpin thread');
-        cy.get('[data-testid="pinned-icon"]').should('not.exist');
         cy.get('[data-testid="pin-thread-button"]').click({ force: true });
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
@@ -49,20 +47,23 @@ describe('PostHeader', () => {
     });
 
     it('renders a static pinned icon (no action) for non-instructors when announced', () => {
-        cy.mount(PostHeader, { props: { ...defaultProps, isAnnounced: true, canPin: false } });
-        cy.get('[data-testid="pinned-icon"]').should('exist').and('have.class', 'active-thread-announcement');
-        cy.get('[data-testid="pin-thread-button"]').should('not.exist');
+        mountWithEmitSpy(PostHeader, 'pin-thread', { ...defaultProps, isAnnounced: true, canPin: false });
+        cy.get('[data-testid="pin-thread-button"]')
+            .should('exist')
+            .and('have.class', 'active-thread-announcement')
+            .and('have.attr', 'title', 'Pinned Thread');
+        cy.get('[data-testid="pin-thread-button"]').click({ force: true });
+        cy.get('@eventHandler').should('not.have.been.called');
     });
 
     it('uses the expiring variant class on the static pinned icon', () => {
         cy.mount(PostHeader, { props: { ...defaultProps, isAnnounced: true, canPin: false, isExpiring: true } });
-        cy.get('[data-testid="pinned-icon"]').should('have.class', 'active-thread-announcement-expiring');
+        cy.get('[data-testid="pin-thread-button"]').should('have.class', 'active-thread-announcement-expiring');
     });
 
     it('renders no pin element when canPin is false and the thread is not announced', () => {
         cy.mount(PostHeader, { props: { ...defaultProps, canPin: false } });
         cy.get('[data-testid="pin-thread-button"]').should('not.exist');
-        cy.get('[data-testid="pinned-icon"]').should('not.exist');
     });
 
     it('shows the unbookmark control when favorited and emits unbookmark-thread on click', () => {
