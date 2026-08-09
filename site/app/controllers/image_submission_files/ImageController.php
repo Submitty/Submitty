@@ -213,7 +213,7 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('Creating annotation version folder failed');
         }
 
-        $decoded_annotations = json_decode($annotations, true) !== null ? json_decode($annotations, true) : [];
+        $decoded_annotations = json_decode($annotations, true) ?? [];
         $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
 
         // Check if annotations have no markers (empty annotations)
@@ -244,6 +244,16 @@ class ImageController extends AbstractController {
 
         if (file_put_contents($annotation_file_path, $annotation_json) === false) {
             return JsonResponse::getErrorResponse('Failed to save annotation file');
+        }
+
+        // Annotation added or updated, and the student hasn't seen it yet
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $ta_graded_gradeable->resetUserViewedDate();
+        // save this change to the database
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
         }
 
         return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
