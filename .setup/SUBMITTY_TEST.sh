@@ -23,6 +23,7 @@ HELP_MESSAGE="
     php-lint  : phpcs & phpstan (with default options only)
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
+    js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     py-flake8 : run flake8 [option: specific_file.py]
     py-pylint : run pylint [option: specific_file.py]
@@ -41,6 +42,18 @@ case "${1:-}" in
         ;;
 esac
 
+# determine the OS to set Docker run command network opts, as well as Jest env variables
+# this is necessary for javascript unit testing with the --api option
+OS_NAME="$(uname -s)"
+if [[ "$OS_NAME" == *"Linux"* ]]; then
+    DOCKER_NET_ARGS="--network=host"
+    API_BASE_URL="http://127.0.0.1:1511"
+else
+    # For macOS and Windows
+    DOCKER_NET_ARGS=""
+    API_BASE_URL="http://host.docker.internal:1511"
+fi
+
 # build docker image using SUBMITTY_ROOT
 echo "Setting up Docker image '$IMAGE_NAME'..."
 docker build -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SUBMITTY_ROOT"
@@ -52,7 +65,11 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
-    docker run --rm $terminal_flag -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
+
+    # $DOCKER_NET_ARGS and $terminal_flag unquoted so they expand their contents
+    # (including if they have no contents)
+    # shellcheck disable=SC2086
+    docker run --rm $terminal_flag $DOCKER_NET_ARGS -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
@@ -86,8 +103,8 @@ run_php_stan() {
 
 run_php_cs() {
     parse_args "${@:2}"
-    script=lint
-    $FIX && script=lint:fix
+    script="lint"
+    $FIX && script="lint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site composer run-script "$script" -- "${ARGS[@]}"
@@ -98,8 +115,8 @@ run_php_cs() {
 
 run_js_es() {
     parse_args "${@:2}"
-    script=eslint
-    $FIX && script=eslint:fix
+    script="eslint"
+    $FIX && script="eslint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
@@ -108,10 +125,22 @@ run_js_es() {
     fi
 }
 
+run_js_unit() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        script="test:api"
+        # see site/test/api/utils.ts for more info about env BASE_URL
+        run_in_container /home/submitty/site env BASE_URL="$API_BASE_URL" npm run "$script"
+    else
+        script="test"
+        run_in_container /home/submitty/site npm run "$script"
+    fi
+}
+
 run_css_style() {
     parse_args "${@:2}"
-    script=css-stylelint
-    $FIX && script=css-stylelint:fix
+    script="css-stylelint"
+    $FIX && script="css-stylelint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
@@ -180,6 +209,9 @@ case "${1:-}" in
         ;;
     js-lint)
         run_js_es "$@"
+        ;;
+    js-unit)
+        run_js_unit "$@"
         ;;
     css-lint)
         run_css_style "$@"
