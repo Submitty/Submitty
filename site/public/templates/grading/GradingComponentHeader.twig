@@ -15,7 +15,7 @@
 <span class="col-no-gutters badge-container">
     {% include "../misc/Vue.twig" with {
         "type": "component",
-        "name": "ta_grading/HeaderScore",
+        "name": "ta_grading/RubricHeaderScore",
         "args": {
             "totalScore": graded_component.total_score is defined ? graded_component.total_score : null,
             "maxValue": component.max_value
