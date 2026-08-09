@@ -19,7 +19,7 @@ const name = ref('');
 const visibleDate = ref('');
 const dateInput = ref<HTMLInputElement | null>(null);
 
-let flatpickrInstance: ReturnType<typeof flatpickr> | null = null;
+let flatpickrInstance: flatpickr.Instance | null = null;
 
 function onAddCategory() {
     emit('add-category', {
@@ -52,9 +52,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-    if (flatpickrInstance && !Array.isArray(flatpickrInstance)) {
-        flatpickrInstance.destroy();
-    }
+    flatpickrInstance?.destroy();
     flatpickrInstance = null;
 });
 </script>
@@ -66,10 +64,10 @@ onBeforeUnmount(() => {
   >
     <input
       v-model="name"
+      class="add-category-name-input"
       data-testid="add-category-name-input"
       aria-label="New Category"
       placeholder="New Category"
-      style="resize:none;"
       type="text"
       name="new_category"
       :maxlength="MAX_NAME_LENGTH"
@@ -86,10 +84,9 @@ onBeforeUnmount(() => {
     >
     <button
       type="button"
+      class="btn btn-primary btn-sm add-category-button"
       data-testid="add-category-button"
       title="Add new category"
-      style="margin-left:10px;"
-      class="btn btn-primary btn-sm"
       tabindex="0"
       @click="onAddCategory"
     >
@@ -97,3 +94,17 @@ onBeforeUnmount(() => {
     </button>
   </span>
 </template>
+
+<style scoped>
+.add-category-form {
+    float: right;
+}
+
+.add-category-name-input {
+    resize: none;
+}
+
+.add-category-button {
+    margin-left: 10px;
+}
+</style>
