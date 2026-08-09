@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-
 interface Props {
     threadId: number;
     title: string;
@@ -19,21 +17,18 @@ const emit = defineEmits<{
     'unbookmark-thread': [threadId: number];
 }>();
 
-const pinControlClass = computed(() => {
-    if (props.isAnnounced) {
-        return props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement';
-    }
-    return 'not-active-thread-announcement';
-});
+const pinControlClass = props.isAnnounced
+    ? (props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement')
+    : 'not-active-thread-announcement';
 
-const pinControlTitle = computed(() => {
-    if (props.isAnnounced) {
-        return props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread';
-    }
-    return 'Pin thread to the top';
-});
+const pinControlTitle = props.isAnnounced
+    ? (props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread')
+    : 'Pin thread to the top';
 
-const pinnedIconClass = computed(() => (props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement'));
+const pinnedIconClass = props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement';
+
+const bookmarkClass = props.isFavorite ? 'current-favorite' : 'pinned-thread';
+const bookmarkTitle = props.isFavorite ? 'Unbookmark Thread' : 'Bookmark Thread';
 
 function onPinClick() {
     if (props.isAnnounced) {
@@ -43,9 +38,6 @@ function onPinClick() {
         emit('pin-thread', props.threadId);
     }
 }
-
-const bookmarkClass = computed(() => (props.isFavorite ? 'current-favorite' : 'pinned-thread'));
-const bookmarkTitle = computed(() => (props.isFavorite ? 'Unbookmark Thread' : 'Bookmark Thread'));
 
 function onBookmarkClick() {
     if (props.isFavorite) {
