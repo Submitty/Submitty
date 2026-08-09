@@ -13,7 +13,7 @@ const defaultProps = {
 describe('PostHeader', () => {
     it('renders the thread title', () => {
         cy.mount(PostHeader, { props: defaultProps });
-        cy.get('[data-testid="post-header"]').should('contain', defaultProps.title);
+        cy.get('[data-testid="create-post-head"]').should('contain', defaultProps.title);
     });
 
     it('shows the pin button for instructors when the thread is not announced', () => {

@@ -55,7 +55,10 @@ function onBookmarkClick() {
 </script>
 
 <template>
-  <span data-testid="post-header">
+  <h2
+    class="create-post-head"
+    data-testid="create-post-head"
+  >
     <a
       v-if="canPin || isAnnounced"
       :class="pinClass"
@@ -92,5 +95,5 @@ function onBookmarkClick() {
     </a>
 
     {{ title }}
-  </span>
+  </h2>
 </template>

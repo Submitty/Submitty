@@ -1,30 +1,24 @@
 <div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}" data-parent_id="{{ parent_id }}">
     {% if first == true %}
 
-        {% set post_header_id = uniqid() %}
-        <h2 class="create-post-head" id="vue-{{ post_header_id }}" data-testid="create-post-head">
-        </h2>
-        <script>
-            window.submitty.render(
-                "#vue-{{ post_header_id }}",
-                "component",
-                "forum/PostHeader",
-                {{ {
-                    threadId: activeThread.id,
-                    title: activeThreadTitle,
-                    isAnnounced: activeThreadAnnouncement,
-                    isExpiring: expiring,
-                    canPin: userGroup <= 2,
-                    isFavorite: isCurrentFavorite,
-                } | json_encode() | raw() }},
-                {
-                    'pin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to pin this thread to the top for seven days?", 1); }',
-                    'unpin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to unpin this thread?", 0); }',
-                    'bookmark-thread': 'function (event) { bookmarkThread(event, "1"); }',
-                    'unbookmark-thread': 'function (event) { bookmarkThread(event, "0"); }'
-                }
-            );
-        </script>
+        {% include "Vue.twig" with {
+            type: "component",
+            name: "forum/PostHeader",
+            args: {
+                threadId: activeThread.id,
+                title: activeThreadTitle,
+                isAnnounced: activeThreadAnnouncement,
+                isExpiring: expiring,
+                canPin: userGroup <= 2,
+                isFavorite: isCurrentFavorite,
+            },
+            events: {
+                'pin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to pin this thread to the top for seven days?", 1); }',
+                'unpin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to unpin this thread?", 0); }',
+                'bookmark-thread': 'function (event) { bookmarkThread(event, "1"); }',
+                'unbookmark-thread': 'function (event) { bookmarkThread(event, "0"); }'
+            }
+        } only %}
 
     {% endif %}
 
