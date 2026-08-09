@@ -1,37 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type {
+    ConflictInfo,
+    MarkConflictResolution,
+    MarkInfo,
+    RawConflictInfo,
+    RawMark,
+} from '@/types/MarkConflict.ts';
 import Popup from '../Popup.vue';
 import MarkConflictOption from './MarkConflictOption.vue';
-
-type MarkConflictResolution = 'dom' | 'server' | 'old-server';
-
-interface RawMark {
-    id: number;
-    points: number;
-    title: string | undefined;
-    publish: boolean;
-}
-
-interface RawConflictInfo {
-    domMark: RawMark;
-    serverMark: RawMark | null;
-    oldServerMark: RawMark | null;
-    localDeleted: boolean;
-}
-
-interface MarkInfo {
-    id: number;
-    points: number;
-    title: string | null;
-    publish: boolean;
-}
-
-interface ConflictInfo {
-    domMark: MarkInfo;
-    serverMark: MarkInfo | null;
-    oldServerMark: MarkInfo | null;
-    localDeleted: boolean;
-}
 
 const props = defineProps<{
     conflicts: Record<number, RawConflictInfo>;
@@ -45,7 +22,12 @@ const emit = defineEmits<{
 }>();
 
 function buildMarkInfo(mark: RawMark): MarkInfo {
-    return { id: mark.id, points: mark.points, title: mark.title ?? null, publish: mark.publish };
+    return {
+        id: mark.id,
+        points: mark.points,
+        title: mark.title ?? null,
+        publish: mark.publish,
+    };
 }
 
 const conflictsList = computed<ConflictInfo[]>(() =>
@@ -82,7 +64,7 @@ function onToggle() {
     @toggle="onToggle"
   >
     <template #trigger>
-      <span class="hidden-trigger" />
+      <span class="hide" />
     </template>
     <template #default>
       <h4 data-testid="mark-conflict-description">
@@ -141,10 +123,6 @@ function onToggle() {
 </template>
 
 <style scoped>
-.hidden-trigger {
-    display: none;
-}
-
 .mark-conflict-row {
     margin-top: 5px;
     margin-bottom: 5px;

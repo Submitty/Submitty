@@ -1,32 +1,26 @@
 <script setup lang="ts">
-type MarkConflictResolution = 'dom' | 'server' | 'old-server';
+import type { MarkConflictResolution, MarkInfo } from '@/types/MarkConflict';
 
-interface MarkOptionInfo {
-    id: number;
-    points: number;
-    title: string | null;
-    publish: boolean;
-}
-
-withDefaults(defineProps<{
+withDefaults(
+    defineProps<{
     // The mark version to display, or null to show the deleted message
-    mark: MarkOptionInfo | null;
-    // Message shown in place of the mark info when `mark` is null
-    deletedMessage?: string;
-    // Label for the resolution button
-    buttonLabel: string;
-    // Accessible name for the resolution button
-    buttonTitle: string;
-    // Bootstrap button style: 'default' or 'primary'
-    buttonStyle?: 'default' | 'primary';
-    // data-testid prefix for the row, info span, and button
-    testid: string;
-    // Which version this row resolves to when its button is clicked
-    resolution: MarkConflictResolution;
-}>(), {
-    deletedMessage: '',
-    buttonStyle: 'primary',
-});
+        mark: MarkInfo | null;
+        // Message shown in place of the mark info when `mark` is null
+        deletedMessage?: string;
+        // Label for the resolution button
+        buttonLabel: string;
+        // Accessible name for the resolution button
+        buttonTitle: string;
+        // Bootstrap button style: 'default' or 'primary'
+        buttonStyle?: 'default' | 'primary';
+        // data-testid prefix for the row, info span, and button
+        testid: string;
+        // Which version this row resolves to when its button is clicked
+        resolution: MarkConflictResolution;
+    }>(), {
+        deletedMessage: '',
+        buttonStyle: 'primary',
+    });
 
 const emit = defineEmits<{
     resolve: [resolution: MarkConflictResolution];
