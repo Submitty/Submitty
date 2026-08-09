@@ -45,16 +45,22 @@ describe('AddCategoryForm', () => {
         });
     });
 
-    it('emits max-length when the name input reaches 50 characters', () => {
-        mountWithEmitSpy(AddCategoryForm, 'max-length');
+    it('alerts when the name input reaches 50 characters', () => {
+        cy.window().then((win) => {
+            cy.stub(win, 'alert').as('alertStub');
+        });
+        cy.mount(AddCategoryForm);
         cy.get('[data-testid="add-category-name-input"]').type('a'.repeat(50));
-        cy.get('@eventHandler').should('have.been.calledOnce');
+        cy.get('@alertStub').should('have.been.calledOnceWith', 'Maximum input length reached!');
     });
 
-    it('does not emit max-length below 50 characters', () => {
-        mountWithEmitSpy(AddCategoryForm, 'max-length');
-        cy.get('[data-testid="add-category-name-input"]').type('Short name');
-        cy.get('@eventHandler').should('not.have.been.called');
+    it('does not alert below 50 characters', () => {
+        cy.window().then((win) => {
+            cy.stub(win, 'alert').as('alertStub');
+        });
+        cy.mount(AddCategoryForm);
+        cy.get('[data-testid="add-category-name-input"]').type('a'.repeat(49));
+        cy.get('@alertStub').should('not.have.been.called');
     });
 
     it('does not throw when no event handlers are provided', () => {

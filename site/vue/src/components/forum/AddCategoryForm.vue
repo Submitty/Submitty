@@ -4,7 +4,6 @@ import flatpickr from 'flatpickr';
 
 const emit = defineEmits<{
     'add-category': [payload: { name: string; visibleDate: string }];
-    'max-length': [];
 }>();
 
 const MAX_NAME_LENGTH = 50;
@@ -24,7 +23,7 @@ function onAddCategory() {
 
 function onNameKeyup() {
     if (name.value.length >= MAX_NAME_LENGTH) {
-        emit('max-length');
+        alert('Maximum input length reached!');
     }
 }
 
