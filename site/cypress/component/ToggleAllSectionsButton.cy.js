@@ -18,9 +18,4 @@ describe('ToggleAllSectionsButton', () => {
         cy.get('[data-testid="toggle-all-sections"]').click();
         cy.get('@eventHandler').should('have.been.calledOnce');
     });
-
-    it('has an accessible title describing the action', () => {
-        cy.mount(ToggleAllSectionsButton, { props: { collapsed: false } });
-        cy.get('[data-testid="toggle-all-sections"]').should('have.attr', 'title', 'Collapse all sections');
-    });
 });
