@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface Props {
     threadId: number;
     title: string;
@@ -9,6 +11,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
 const emit = defineEmits<{
     'pin-thread': [threadId: number];
     'unpin-thread': [threadId: number];
@@ -16,84 +19,89 @@ const emit = defineEmits<{
     'unbookmark-thread': [threadId: number];
 }>();
 
-function emitPin() {
-    emit('pin-thread', props.threadId);
+const pinControlClass = computed(() => {
+    if (props.isAnnounced) {
+        return props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement';
+    }
+    return 'not-active-thread-announcement';
+});
+
+const pinControlTitle = computed(() => {
+    if (props.isAnnounced) {
+        return props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread';
+    }
+    return 'Pin thread to the top';
+});
+
+const pinnedIconClass = computed(() => (props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement'));
+
+function onPinClick() {
+    if (props.isAnnounced) {
+        emit('unpin-thread', props.threadId);
+    }
+    else {
+        emit('pin-thread', props.threadId);
+    }
 }
-function emitUnpin() {
-    emit('unpin-thread', props.threadId);
-}
-function emitBookmark() {
-    emit('bookmark-thread', props.threadId);
-}
-function emitUnbookmark() {
-    emit('unbookmark-thread', props.threadId);
+
+const bookmarkClass = computed(() => (props.isFavorite ? 'current-favorite' : 'pinned-thread'));
+const bookmarkTitle = computed(() => (props.isFavorite ? 'Unbookmark Thread' : 'Bookmark Thread'));
+
+function onBookmarkClick() {
+    if (props.isFavorite) {
+        emit('unbookmark-thread', props.threadId);
+    }
+    else {
+        emit('bookmark-thread', props.threadId);
+    }
 }
 </script>
 
 <template>
   <span data-testid="post-header">
     <a
-      v-if="props.canPin && props.isAnnounced"
-      :class="props.isExpiring ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement'"
-      data-testid="unpin-thread-button"
+      v-if="canPin"
+      :class="pinControlClass"
+      data-testid="pin-thread-button"
       tabindex="0"
-      :title="props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread'"
-      :aria-label="props.isExpiring ? 'Thread is expiring soon click to unpin' : 'Unpin thread'"
-      @click="emitUnpin"
-      @keydown.enter.prevent="emitUnpin"
-      @keydown.space.prevent="emitUnpin"
+      role="button"
+      :title="pinControlTitle"
+      :aria-label="pinControlTitle"
+      @click="onPinClick"
+      @keydown.enter.prevent="onPinClick"
+      @keydown.space.prevent="onPinClick"
     >
-      <i class="fas fa-thumbtack" />
+      <i
+        class="fas fa-thumbtack"
+        :class="isAnnounced ? '' : 'golden_hover'"
+      />
     </a>
     <i
-      v-else-if="props.isAnnounced"
+      v-else-if="isAnnounced"
       class="fas fa-thumbtack"
-      :class="props.isExpiring ? 'active-thread-announcement-expiring' : 'active-thread-announcement'"
+      :class="pinnedIconClass"
       data-testid="pinned-icon"
       title="Pinned Thread"
       aria-label="Pinned Thread"
     />
-    <a
-      v-else-if="props.canPin"
-      class="not-active-thread-announcement"
-      data-testid="pin-thread-button"
-      tabindex="0"
-      title="Pin thread to the top"
-      aria-label="Pin thread to the top"
-      @click="emitPin"
-      @keydown.enter.prevent="emitPin"
-      @keydown.space.prevent="emitPin"
-    >
-      <i class="fas fa-thumbtack golden_hover" />
-    </a>
 
     <a
-      v-if="props.isFavorite"
-      class="current-favorite"
-      data-testid="unbookmark-thread-button"
-      tabindex="0"
-      title="Unbookmark Thread"
-      aria-label="Unbookmark Thread"
-      @click="emitUnbookmark"
-      @keydown.enter.prevent="emitUnbookmark"
-      @keydown.space.prevent="emitUnbookmark"
-    >
-      <i class="fas fa-bookmark" />
-    </a>
-    <a
-      v-else
-      class="pinned-thread"
+      :class="bookmarkClass"
       data-testid="bookmark-thread-button"
       tabindex="0"
-      title="Bookmark Thread"
-      aria-label="Bookmark Thread"
-      @click="emitBookmark"
-      @keydown.enter.prevent="emitBookmark"
-      @keydown.space.prevent="emitBookmark"
+      role="button"
+      :title="bookmarkTitle"
+      :aria-label="bookmarkTitle"
+      @click="onBookmarkClick"
+      @keydown.enter.prevent="onBookmarkClick"
+      @keydown.space.prevent="onBookmarkClick"
     >
-      <i class="fas fa-bookmark golden_hover red-hover" />
+      <i
+        class="fas fa-bookmark"
+        :class="isFavorite ? '' : 'golden_hover red-hover'"
+      />
     </a>
 
-    {{ props.title }}
+    {{ title }}
   </span>
 </template>

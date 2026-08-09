@@ -21,7 +21,6 @@ describe('PostHeader', () => {
         cy.get('[data-testid="pin-thread-button"]')
             .should('exist')
             .and('have.class', 'not-active-thread-announcement');
-        cy.get('[data-testid="unpin-thread-button"]').should('not.exist');
         cy.get('[data-testid="pinned-icon"]').should('not.exist');
     });
 
@@ -31,20 +30,20 @@ describe('PostHeader', () => {
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
-    it('shows the unpin button when announced and canPin; emits unpin-thread on click', () => {
+    it('shows the unpin control when announced and canPin; emits unpin-thread on click', () => {
         mountWithEmitSpy(PostHeader, 'unpin-thread', { ...defaultProps, isAnnounced: true });
-        cy.get('[data-testid="unpin-thread-button"]')
+        cy.get('[data-testid="pin-thread-button"]')
             .should('exist')
             .and('have.class', 'active-thread-remove-announcement')
             .and('have.attr', 'title', 'Unpin thread');
-        cy.get('[data-testid="pin-thread-button"]').should('not.exist');
-        cy.get('[data-testid="unpin-thread-button"]').click({ force: true });
+        cy.get('[data-testid="pinned-icon"]').should('not.exist');
+        cy.get('[data-testid="pin-thread-button"]').click({ force: true });
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
-    it('uses the expiring variant class on the unpin button when expiring', () => {
+    it('uses the expiring variant class on the unpin control when expiring', () => {
         cy.mount(PostHeader, { props: { ...defaultProps, isAnnounced: true, isExpiring: true } });
-        cy.get('[data-testid="unpin-thread-button"]')
+        cy.get('[data-testid="pin-thread-button"]')
             .should('have.class', 'active-thread-remove-expiring-announcement')
             .and('have.attr', 'title', 'Thread is expiring soon click to unpin');
     });
@@ -52,7 +51,6 @@ describe('PostHeader', () => {
     it('renders a static pinned icon (no action) for non-instructors when announced', () => {
         cy.mount(PostHeader, { props: { ...defaultProps, isAnnounced: true, canPin: false } });
         cy.get('[data-testid="pinned-icon"]').should('exist').and('have.class', 'active-thread-announcement');
-        cy.get('[data-testid="unpin-thread-button"]').should('not.exist');
         cy.get('[data-testid="pin-thread-button"]').should('not.exist');
     });
 
@@ -64,27 +62,24 @@ describe('PostHeader', () => {
     it('renders no pin element when canPin is false and the thread is not announced', () => {
         cy.mount(PostHeader, { props: { ...defaultProps, canPin: false } });
         cy.get('[data-testid="pin-thread-button"]').should('not.exist');
-        cy.get('[data-testid="unpin-thread-button"]').should('not.exist');
         cy.get('[data-testid="pinned-icon"]').should('not.exist');
     });
 
-    it('shows the unbookmark button when favorited and emits unbookmark-thread on click', () => {
+    it('shows the unbookmark control when favorited and emits unbookmark-thread on click', () => {
         mountWithEmitSpy(PostHeader, 'unbookmark-thread', { ...defaultProps, isFavorite: true });
-        cy.get('[data-testid="unbookmark-thread-button"]')
+        cy.get('[data-testid="bookmark-thread-button"]')
             .should('exist')
             .and('have.class', 'current-favorite')
             .and('have.attr', 'title', 'Unbookmark Thread');
-        cy.get('[data-testid="bookmark-thread-button"]').should('not.exist');
-        cy.get('[data-testid="unbookmark-thread-button"]').click({ force: true });
+        cy.get('[data-testid="bookmark-thread-button"]').click({ force: true });
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
-    it('shows the bookmark button when not favorited and emits bookmark-thread on click', () => {
+    it('shows the bookmark control when not favorited and emits bookmark-thread on click', () => {
         mountWithEmitSpy(PostHeader, 'bookmark-thread', defaultProps);
         cy.get('[data-testid="bookmark-thread-button"]')
             .should('exist')
             .and('have.class', 'pinned-thread');
-        cy.get('[data-testid="unbookmark-thread-button"]').should('not.exist');
         cy.get('[data-testid="bookmark-thread-button"]').click({ force: true });
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
@@ -100,10 +95,10 @@ describe('PostHeader', () => {
 
     it('keyboard activation (Enter and Space) emits unpin-thread', () => {
         mountWithEmitSpy(PostHeader, 'unpin-thread', { ...defaultProps, isAnnounced: true });
-        cy.get('[data-testid="unpin-thread-button"]').focus();
-        cy.get('[data-testid="unpin-thread-button"]').type('{enter}');
+        cy.get('[data-testid="pin-thread-button"]').focus();
+        cy.get('[data-testid="pin-thread-button"]').type('{enter}');
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
-        cy.get('[data-testid="unpin-thread-button"]').type(' ');
+        cy.get('[data-testid="pin-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
 
@@ -118,10 +113,10 @@ describe('PostHeader', () => {
 
     it('keyboard activation (Enter and Space) emits unbookmark-thread', () => {
         mountWithEmitSpy(PostHeader, 'unbookmark-thread', { ...defaultProps, isFavorite: true });
-        cy.get('[data-testid="unbookmark-thread-button"]').focus();
-        cy.get('[data-testid="unbookmark-thread-button"]').type('{enter}');
+        cy.get('[data-testid="bookmark-thread-button"]').focus();
+        cy.get('[data-testid="bookmark-thread-button"]').type('{enter}');
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
-        cy.get('[data-testid="unbookmark-thread-button"]').type(' ');
+        cy.get('[data-testid="bookmark-thread-button"]').type(' ');
         cy.get('@eventHandler').should('have.been.calledTwice');
     });
 });
