@@ -35,6 +35,7 @@ import glob
 import os
 import os.path
 import random
+import subprocess
 
 from sqlalchemy import create_engine, Table, MetaData, insert
 
@@ -243,6 +244,13 @@ def main() -> None:
             courses[course].make_course_json()
 
     # restart the autograding daemon
+
+    # the below call is necessary for a successful restart of submitty_daemon_jobs_handler
+    print("reinitializing the submitty-admin authentication token...")
+    subprocess.check_call([
+        "python3",
+        os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "bin", "init_auto_rainbow.py")
+    ])
     print("restarting the autograding and jobs handler daemons")
     os.system("systemctl restart submitty_autograding_shipper")
     os.system("systemctl restart submitty_autograding_worker")
