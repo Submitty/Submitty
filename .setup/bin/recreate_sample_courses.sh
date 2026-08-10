@@ -42,6 +42,12 @@ cd ../../
 python3 ./.setup/bin/partial_reset.py
 python3 ./.setup/bin/setup_sample_courses.py ${FLAG} ${COURSES}
 
+# the below is necessary for a successful restart of submitty_daemon_jobs_handler.
+# partial_reset.py runs this before submitty-admin exists, causing
+# submitty_daemon_jobs_handler to crash with a KeyError when checking submitty_users.json
+# for 'verified_submitty_admin_user'
+python3 ./.setup/bin/init_auto_rainbow.py
+
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 service php${PHP_VERSION}-fpm restart
 
