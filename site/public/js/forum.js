@@ -1534,9 +1534,7 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(csrf_token) {
-    const newCategory = $('#new_category_text').val();
-    const visibleDate = $('#category_visible_date').val();
+function addNewCategory(newCategory, visibleDate) {
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
         url: url,
@@ -1545,7 +1543,7 @@ function addNewCategory(csrf_token) {
             newCategory: newCategory,
             visibleDate: visibleDate,
             rank: $('[id^="categorylistitem-').length,
-            csrf_token: csrf_token,
+            csrf_token: csrfToken,
         },
         success: function (data) {
             try {
@@ -1561,7 +1559,6 @@ function addNewCategory(csrf_token) {
                 return;
             }
             displaySuccessMessage(`Successfully created category ${escapeSpecialChars(newCategory)}.`);
-            $('#new_category_text').val('');
             // Create new item in #ui-category-list using dummy category
             const category_id = json['data']['new_id'];
             const category_color_code = '#000080';
