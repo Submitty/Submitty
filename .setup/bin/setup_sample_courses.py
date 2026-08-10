@@ -35,7 +35,6 @@ import glob
 import os
 import os.path
 import random
-import subprocess
 
 from sqlalchemy import create_engine, Table, MetaData, insert
 
