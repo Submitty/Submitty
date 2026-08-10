@@ -1466,6 +1466,7 @@ class AdminGradeableController extends AbstractController {
             'student_download',
             'student_submit',
             'peer_grading',
+            'peer_files_restricted',
             'peer_autograding',
             'peer_rubric',
             'peer_files',
@@ -1534,6 +1535,21 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties, true)) {
                 $post_val = $post_val === 'true';
+            }
+
+            if ($prop === 'peer_file_patterns') {
+                try {
+                    $post_val = json_decode($post_val, true, 512, JSON_THROW_ON_ERROR);
+                    if (!is_array($post_val)) {
+                        throw new \InvalidArgumentException(
+                            'Peer file patterns must be an array.'
+                        );
+                    }
+                }
+                catch (\JsonException | \InvalidArgumentException $e) {
+                    $errors[$prop] = $e->getMessage();
+                    continue;
+                }
             }
 
             if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
