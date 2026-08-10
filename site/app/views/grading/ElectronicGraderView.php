@@ -1297,7 +1297,6 @@ HTML;
         // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
