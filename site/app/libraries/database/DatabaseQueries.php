@@ -1094,6 +1094,7 @@ WHERE term=? AND course=? AND user_id=?",
                 "UPDATE users SET rotating_section=?, registration_subsection=?{$date_registered_sql} WHERE user_id=?",
                 $params
             );
+            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
 
@@ -6632,6 +6633,8 @@ AND gc_id IN (
                   autograding,
                   rubric,
                   files,
+                  peer_files_restricted,
+                  peer_file_patterns,
                   solution_notes,
                   discussion
                 FROM peer_grading_panel
@@ -7408,6 +7411,8 @@ AND gc_id IN (
                 $gradeable->getPeerAutograding(),
                 $gradeable->getPeerRubric(),
                 $gradeable->getPeerFiles(),
+                $gradeable->getPeerFilesRestricted(),
+                json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                 $gradeable->getPeerSolutions(),
                 $gradeable->getPeerDiscussion(),
             ];
@@ -7418,10 +7423,12 @@ AND gc_id IN (
                     autograding,
                     rubric,
                     files,
+                    peer_files_restricted,
+                    peer_file_patterns,
                     solution_notes,
                     discussion
                 )
-                VALUES(?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
                 $params
             );
         }
@@ -7600,18 +7607,22 @@ AND gc_id IN (
                     $gradeable->getPeerAutograding(),
                     $gradeable->getPeerRubric(),
                     $gradeable->getPeerFiles(),
+                    $gradeable->getPeerFilesRestricted(),
+                    json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                     $gradeable->getPeerSolutions(),
                     $gradeable->getPeerDiscussion()
                 ];
                 // Update row if exists, else Insert row
                 $this->course_db->query(
                     "
-                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, peer_files_restricted, peer_file_patterns, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)
                     ON CONFLICT (g_id) DO UPDATE
                     SET autograding = EXCLUDED.autograding,
                         rubric = EXCLUDED.rubric,
                         files = EXCLUDED.files,
+                        peer_files_restricted = EXCLUDED.peer_files_restricted,
+                        peer_file_patterns = EXCLUDED.peer_file_patterns,
                         solution_notes = EXCLUDED.solution_notes,
                         discussion = EXCLUDED.discussion
                     ",
@@ -7978,18 +7989,45 @@ AND gc_id IN (
      *
      * @param int[] $component_ids
      */
-    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
+    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, string $grader_id, int $version, array $component_ids): void {
         $this->course_db->query(
             'UPDATE gradeable_component_data AS gcd
             SET gcd_graded_version = ?
-            FROM gradeable_data AS gd
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
             WHERE (
                 gd.g_id = ?
                 AND (gd.gd_user_id = ? OR gd.gd_team_id = ?)
                 AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
                 AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND (
+                    gc.gc_is_peer = FALSE
+                    OR gcd.gcd_grader_id = ?
+                )
             )',
-            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids)
+            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids, [$grader_id])
+        );
+    }
+    /**
+     * Changes the graded version of a gradeable for all peer components for all peer graders
+     *
+     */
+    public function changeGradedVersionOfAllPeerComponents(string $gradeable_id, string $submitter_id, int $version): void {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND gc.g_id = gd.g_id
+                AND gc.gc_is_peer = TRUE
+            )',
+            [$version, $gradeable_id, $submitter_id]
         );
     }
 
@@ -8987,6 +9025,7 @@ WHERE current_state IN
               u.course_section_id,
               u.rotating_section,
               u.registration_type,
+              u.date_registered,
               ldeu.late_day_exceptions,
               ldeu.reason_for_exception,
               u.registration_subsection';

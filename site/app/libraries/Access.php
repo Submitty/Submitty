@@ -8,6 +8,7 @@ use app\models\gradeable\Submitter;
 use app\models\GradingSection;
 use app\models\User;
 use app\entities\poll\Poll;
+use app\libraries\FileUtils;
 use InvalidArgumentException;
 
 class Access {
@@ -496,7 +497,7 @@ class Access {
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
+                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() <= 0) {
                     $grading_checks = false;
                 }
             }
@@ -519,10 +520,28 @@ class Access {
                 }
             }
 
-            if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
+            if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && ($group === User::GROUP_STUDENT || $peer_only_staff_grader)) {
                 //Check their peer assignment
                 if (!$this->isGradedGradeableInPeerAssignment($gradeable, $graded_gradeable, $user)) {
                     $grading_checks = false;
+                }
+                if ($grading_checks && ($args['dir'] ?? null) === 'submissions' && isset($args['path']) && $gradeable->getPeerFilesRestricted()) {
+                    $submission_base = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable->getId(), $graded_gradeable->getSubmitter()->getId());
+                    $normalized_path = str_replace('\\', '/', $args['path']);
+                    $normalized_base = rtrim(str_replace('\\', '/', $submission_base), '/');
+                    if (!str_starts_with($normalized_path, $normalized_base . '/')) {
+                        $grading_checks = false;
+                    }
+                    else {
+                        $relative_path = ltrim(substr($normalized_path, strlen($normalized_base)), '/');
+                        // The first path section is the submission version.
+                        $relative_parts = explode('/', $relative_path);
+                        array_shift($relative_parts);
+                        $relative_path = implode('/', $relative_parts);
+                        if (!$gradeable->canPeerViewFile($relative_path)) {
+                            $grading_checks = false;
+                        }
+                    }
                 }
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW) && !$gradeable->getPeerFiles()) {
                     $grading_checks = false;
