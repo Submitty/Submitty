@@ -1297,7 +1297,6 @@ HTML;
         // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
@@ -1521,11 +1520,18 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader, bool $anon_mode) {
-        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
+        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable, bool $apply_peer_file_restriction = false) {
             $files[$start_dir_name] = [];
+            $added_visible_file = false;
+            $gradeable = $graded_gradeable->getGradeable();
+            $user = $this->core->getUser();
+            $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
+                    if ($apply_peer_file_restriction && $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && !$gradeable->canPeerViewFile($file['relative_name'])) {
+                        continue;
+                    }
                     $skipping = false;
                     foreach ($hidden_files as $file_regex) {
                         $file_regex = trim($file_regex);
@@ -1553,8 +1559,12 @@ HTML;
                             $working_dir = &$working_dir[$dir];
                         }
                         $working_dir[$file['name']] = $file['path'];
+                        $added_visible_file = true;
                     }
                 }
+            }
+            if ($is_restricted_peer_grader && !$added_visible_file) {
+                unset($files[$start_dir_name]);
             }
         };
         $submissions = [];
@@ -1562,6 +1572,13 @@ HTML;
         $results_public = [];
         $checkout = [];
         $submissions_processed = [];
+        $show_no_matching_peer_files_banner = false;
+
+        $gradeable = $graded_gradeable->getGradeable();
+        $user = $this->core->getUser();
+        $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
+        $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), 'user_assignment_settings.json');
+        $user_assignment_settings_path = $is_restricted_peer_grader ? null : $uas;
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
@@ -1575,11 +1592,12 @@ HTML;
             $gradeable = $graded_gradeable->getGradeable();
             $user = $this->core->getUser();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable, true);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
+            $show_no_matching_peer_files_banner = $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && $submissions === [];
         }
         $student_grader = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
@@ -1588,13 +1606,14 @@ HTML;
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
-        $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $user_assignment_settings_missing = $display_version_instance !== null && !file_exists($uas);
         $user_assignment_settings_unreadable = $display_version_instance !== null && file_exists($uas) && !is_readable($uas);
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
+        $this->core->getOutput()->addInternalCss('details.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1612,9 +1631,10 @@ HTML;
             "active_version" => $display_version,
             "anon_mode" => $anon_mode,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $uas,
+            "user_assignment_settings_path" => $user_assignment_settings_path,
             "user_assignment_settings_missing" => $user_assignment_settings_missing,
-            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable
+            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable,
+            "show_no_matching_peer_files_banner" => $show_no_matching_peer_files_banner
         ]);
     }
 
