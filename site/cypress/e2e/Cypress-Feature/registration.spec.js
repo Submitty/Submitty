@@ -94,7 +94,7 @@ describe('Tests for self registering for courses', () => {
         cy.login('instructor2');
         cy.visit(['testing', 'users']);
         cy.get('[data-testid="edit-student-gutmal-button"]').click();
-        cy.get('#user_date_registered')
+        cy.get('[data-testid="user-date-registered"]')
             .should('have.attr', 'readonly')
             .invoke('val')
             .should((value) => {
