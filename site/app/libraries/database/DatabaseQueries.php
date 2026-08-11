@@ -6635,6 +6635,8 @@ AND gc_id IN (
                   autograding,
                   rubric,
                   files,
+                  peer_files_restricted,
+                  peer_file_patterns,
                   solution_notes,
                   discussion
                 FROM peer_grading_panel
@@ -7415,6 +7417,8 @@ AND gc_id IN (
                 $gradeable->getPeerAutograding(),
                 $gradeable->getPeerRubric(),
                 $gradeable->getPeerFiles(),
+                $gradeable->getPeerFilesRestricted(),
+                json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                 $gradeable->getPeerSolutions(),
                 $gradeable->getPeerDiscussion(),
             ];
@@ -7425,10 +7429,12 @@ AND gc_id IN (
                     autograding,
                     rubric,
                     files,
+                    peer_files_restricted,
+                    peer_file_patterns,
                     solution_notes,
                     discussion
                 )
-                VALUES(?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
                 $params
             );
         }
@@ -7611,18 +7617,22 @@ AND gc_id IN (
                     $gradeable->getPeerAutograding(),
                     $gradeable->getPeerRubric(),
                     $gradeable->getPeerFiles(),
+                    $gradeable->getPeerFilesRestricted(),
+                    json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                     $gradeable->getPeerSolutions(),
                     $gradeable->getPeerDiscussion()
                 ];
                 // Update row if exists, else Insert row
                 $this->course_db->query(
                     "
-                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, peer_files_restricted, peer_file_patterns, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)
                     ON CONFLICT (g_id) DO UPDATE
                     SET autograding = EXCLUDED.autograding,
                         rubric = EXCLUDED.rubric,
                         files = EXCLUDED.files,
+                        peer_files_restricted = EXCLUDED.peer_files_restricted,
+                        peer_file_patterns = EXCLUDED.peer_file_patterns,
                         solution_notes = EXCLUDED.solution_notes,
                         discussion = EXCLUDED.discussion
                     ",
