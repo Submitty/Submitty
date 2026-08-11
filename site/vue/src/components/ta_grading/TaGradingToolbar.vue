@@ -104,7 +104,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     <button
       id="toggle-cluster-mode"
       class="invisible-btn"
-      :title="taGradingClusterMode ? 'Clustering Mode: ON (Click to disable)' : 'Clustering Mode: OFF (Click to enable)'"
+      :title="taGradingClusterMode ? 'Cluster Grading: ON (Click to disable)' : 'Cluster Grading: OFF (Click to enable)'"
       style="display: flex; align-items: center;"
       @click="toggleClusteringMode"
     >
@@ -113,7 +113,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
         :class="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip'"
       />
       <span style="margin-left: 5px; padding-right: 5px; font-size: 16px; color: var(--text-black);">
-        {{ taGradingClusterMode ? 'Clustering Mode ON' : 'Clustering Mode OFF' }}
+        {{ taGradingClusterMode ? 'Cluster Grading ON' : 'Cluster Grading OFF' }}
       </span>
     </button>
   </span>

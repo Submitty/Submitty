@@ -66,11 +66,11 @@
                 {% if ta_grading_cluster_mode %}
                     {% if is_unclustered %}
                         <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
-                            Clustering Mode Enabled: This student is in the "Unclustered" group and will be graded normally as an individual.
+                            Cluster Grading Enabled: This student is in the "Unclustered" group and will be graded normally as an individual.
                         </div>
                     {% else %}
                         <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
-                            Clustering Mode Enabled: The grade you apply here will automatically be applied to all students within this student's cluster.
+                            Cluster Grading Enabled: The grade you apply here will automatically be applied to all {{ cluster_student_count }} students within this student's cluster.
                         </div>
                     {% endif %}
                 {% endif %}

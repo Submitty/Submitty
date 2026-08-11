@@ -1,6 +1,6 @@
 import { buildUrl } from '../../support/utils.js';
 
-describe('Grading Clustering Mode', () => {
+describe('Cluster Grading', () => {
     it('allows opening create modal and toggling cluster view', () => {
         cy.login();
         // Enable clustering at course level

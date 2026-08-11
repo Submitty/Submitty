@@ -2145,12 +2145,21 @@ class ElectronicGraderController extends AbstractController {
         $ta_grading_cluster_mode = ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true' && $clustering_enabled && $clusters_exist;
 
         $is_unclustered = true; // default to true
+        $cluster_student_count = 0;
+        $cluster_name = null;
         if ($ta_grading_cluster_mode) {
             $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $graded_gradeable->getSubmitter()->getId());
             if ($cluster !== null) {
                 $submitter_id = $graded_gradeable->getSubmitter()->getId();
-                $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, [$submitter_id]);
+                
+                $member_ids = [];
+                foreach ($cluster->getMembers() as $member) {
+                    $member_ids[] = $member->getUserId() ?? $member->getTeamId();
+                }
+                
+                $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, $member_ids);
                 $valid_members = $cluster->getValidMembers($active_versions);
+                $cluster_student_count = count($valid_members);
 
                 foreach ($valid_members as $member) {
                     if (($member->getUserId() ?? $member->getTeamId()) === $submitter_id) {
@@ -2158,9 +2167,13 @@ class ElectronicGraderController extends AbstractController {
                         break;
                     }
                 }
+
+                if (!$is_unclustered) {
+                    $cluster_name = $cluster->getClusterName() ?? "Cluster " . $cluster->getId();
+                }
             }
         }
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_unclustered);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_unclustered, $cluster_student_count, $cluster_name);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -2600,6 +2613,8 @@ class ElectronicGraderController extends AbstractController {
                     $submitters_to_grade[] = $submitter_id;
                 }
                 //running a for-loop to assign marks to all members in submitters_to_grade
+                // Wrap in a transaction so either all cluster members are graded or none are
+                $this->core->getCourseDB()->beginTransaction();
                 foreach ($submitters_to_grade as $s_id) {
                     $gg = $this->tryGetGradedGradeable($gradeable, $s_id);
                     if ($gg === false) {
@@ -2611,6 +2626,9 @@ class ElectronicGraderController extends AbstractController {
                         continue;
                     }
 
+                    // use each member's own active version to avoid version conflicts
+                    $member_version = $active_versions[$s_id] ?? $component_version;
+
                     $ta_gg = $gg->getOrCreateTaGradedGradeable();
                     $gc = $ta_gg->getOrCreateGradedComponent($component, $grader, true);
 
@@ -2621,18 +2639,25 @@ class ElectronicGraderController extends AbstractController {
                         $custom_points,
                         $custom_message,
                         $marks,
-                        $component_version,
+                        $member_version,
                         !$silent_edit
                     );
                 }
+                $this->core->getCourseDB()->commit();
             }
 
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
+            if ($this->core->getCourseDB()->inTransaction()) {
+                $this->core->getCourseDB()->rollback();
+            }
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         }
         catch (\Exception $e) {
+            if ($this->core->getCourseDB()->inTransaction()) {
+                $this->core->getCourseDB()->rollback();
+            }
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }

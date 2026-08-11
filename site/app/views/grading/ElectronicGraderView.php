@@ -1053,7 +1053,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
@@ -1188,7 +1188,7 @@ HTML;
                     <div class="content-item content-item-right">
 HTML;
 
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_unclustered);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_unclustered, $cluster_student_count, $cluster_name);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -1235,7 +1235,7 @@ HTML;
         }
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         if (!$isPeerGrader || $isPeerRubric) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader, $ta_grading_cluster_mode, $is_unclustered);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader, $ta_grading_cluster_mode, $is_unclustered, $cluster_student_count);
         }
         if (!$isPeerGrader || $isPeerSolutions) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1354,7 +1354,7 @@ HTML;
      * @param string $direction
      * @return string
      */
-    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
         if (
@@ -1374,17 +1374,6 @@ HTML;
         $i_am_a_peer = false;
         if ($peer && $this->core->getUser()->getGroup() === 4) {
             $i_am_a_peer = true;
-        }
-
-        $cluster_name = null;
-        $cluster_size = 0;
-        if ($ta_grading_cluster_mode && $clustering_enabled && !$is_unclustered) {
-            $submitter_id = $graded_gradeable->getSubmitter()->getId();
-            $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable->getId(), $submitter_id);
-            if ($cluster !== null) {
-                $cluster_name = $cluster->getClusterName() ?? "Cluster " . $cluster->getId();
-                $cluster_size = count($cluster->getMembers());
-            }
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
@@ -1407,7 +1396,7 @@ HTML;
             "clusters_exist" => $clusters_exist,
             "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
             "cluster_name" => $cluster_name,
-            "cluster_size" => $cluster_size
+            "cluster_size" => $cluster_student_count
         ]);
     }
 
@@ -1761,7 +1750,7 @@ HTML;
      * @param bool $show_silent_edit
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader, bool $ta_grading_cluster_mode = false, bool $is_unclustered = true, int $cluster_student_count = 0) {
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
@@ -1827,6 +1816,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
                 "is_unclustered" => $is_unclustered,
+                "cluster_student_count" => $cluster_student_count,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
