@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: \app\repositories\grading_cluster\GradingClusterRepository::class)]
 #[ORM\Table(name: "ta_grading_clusters")]
 class GradingCluster {
     #[ORM\Id]

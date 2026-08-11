@@ -136,6 +136,13 @@ aside {
     background-color: var(--subheading-underscore-grey);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
+.ta-navlink-cont:hover,
+.ta-navlink-cont:hover i,
+.ta-navlink-cont:hover span {
+    color: initial;
+}
+
 .ta-navlink-cont button {
     cursor: pointer;
 }
@@ -173,6 +180,7 @@ button > i.fas:hover {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
+    color: var(--text-black);
     position: relative;
     margin-right: 4px;
     border: 2px solid var(--default-border-color);

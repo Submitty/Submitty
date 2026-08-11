@@ -44,4 +44,13 @@ describe('Grading Clustering Mode', () => {
         cy.get('button').contains('Create Clusters').should('not.exist');
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.exist');
     });
+    it('hides clustering toggle icon on rubric panel when no clusters exist', () => {
+        cy.login();
+        cy.visit(['sample', 'config']);
+        cy.get('[data-testid="submission-clustering-enabled"]').check();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=Oith0AebfRyC8xK&sort=id&direction=ASC']);
+
+        // The clustering toggle icon should not exist since clusters are not formed
+        cy.get('#toggle-cluster-mode').should('not.exist');
+    });
 });
