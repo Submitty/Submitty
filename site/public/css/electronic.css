@@ -251,28 +251,18 @@ progress::-webkit-progress-value {
 .grade-panel button:focus-visible,
 .grade-panel input:focus-visible,
 .grade-panel textarea:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
 .grade-panel .key_to_click:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar button:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar input:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar textarea:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar .key_to_click:focus-visible {
-    outline: none;
-    border-color: transparent;
-    border-radius: inherit;
-    box-shadow: 0 0 0 2px var(--standard-focus-cornflower-blue), 0 0 0 3px #ffffff;
-}
-
-/* In dark mode, --standard-focus-cornflower-blue is too dark to be visible
-   against the dark background and button colors, so used a brighter color */
-[data-theme="dark"] .grade-panel button:focus-visible,
-[data-theme="dark"] .grade-panel input:focus-visible,
-[data-theme="dark"] .grade-panel textarea:focus-visible,
-[data-theme="dark"] .grade-panel .key_to_click:focus-visible,
-[data-theme="dark"] .grading_toolbar button:focus-visible,
-[data-theme="dark"] .grading_toolbar input:focus-visible,
-[data-theme="dark"] .grading_toolbar textarea:focus-visible,
-[data-theme="dark"] .grading_toolbar .key_to_click:focus-visible {
-    box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px #ffffff;
+    outline: 2px solid var(--hover-dark-border-actionable-blue);
+    outline-offset: 2px;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
