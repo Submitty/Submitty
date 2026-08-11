@@ -6,12 +6,14 @@ const props = defineProps<{
     toggleAnon: boolean;
     gradeInquiryOnly: boolean;
     canFilterWithdrawn: boolean;
+    canGroupByClusters: boolean;
     anonMode: boolean;
     gradeableId: string;
     initialViewSections?: boolean;
     initialRandomOrder?: boolean;
     initialInquiryOnly?: boolean;
     initialHideWithdrawn?: boolean;
+    initialGroupByClusters?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -21,12 +23,14 @@ const emit = defineEmits<{
     'anon-change': [checked: boolean];
     'inquiry-change': [checked: boolean];
     'withdrawn-change': [checked: boolean];
+    'group-by-clusters-change': [checked: boolean];
 }>();
 
 const viewSectionsChecked = ref(props.initialViewSections ?? false);
 const randomOrderChecked = ref(props.initialRandomOrder ?? false);
 const inquiryOnlyChecked = ref(props.initialInquiryOnly ?? false);
 const withdrawnHiddenChecked = ref(props.initialHideWithdrawn ?? false);
+const groupByClustersChecked = ref(props.initialGroupByClusters ?? false);
 
 onMounted(() => {
     emit('mounted', { inquiryOnly: inquiryOnlyChecked.value });
@@ -59,6 +63,12 @@ const onFilterWithdrawn = (event: Event) => {
     const checked = (event.target as HTMLInputElement).checked;
     withdrawnHiddenChecked.value = checked;
     emit('withdrawn-change', checked);
+};
+
+const onChangeGroupByClusters = (event: Event) => {
+    const checked = (event.target as HTMLInputElement).checked;
+    groupByClustersChecked.value = checked;
+    emit('group-by-clusters-change', checked);
 };
 </script>
 
@@ -141,6 +151,29 @@ const onFilterWithdrawn = (event: Event) => {
         data-testid="filter-withdrawn-checkbox"
         :checked="withdrawnHiddenChecked"
         @change="onFilterWithdrawn"
+      >
+    </label>
+
+    <label
+      v-if="canGroupByClusters"
+      for="toggle-group-by-clusters"
+      data-testid="group-by-clusters-label"
+      class="column-wrapper"
+    >
+      Group by Clusters
+      <a
+        aria-label="Group by Clusters Help"
+        href="https://submitty.org/grader/rubric_grading/cluster_grading"
+        target="_blank"
+      >
+        <i class="far fa-question-circle" />
+      </a>
+      <input
+        id="toggle-group-by-clusters"
+        type="checkbox"
+        data-testid="group-by-clusters-checkbox"
+        :checked="groupByClustersChecked"
+        @change="onChangeGroupByClusters"
       >
     </label>
   </div>

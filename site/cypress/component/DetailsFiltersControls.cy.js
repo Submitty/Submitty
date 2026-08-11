@@ -7,6 +7,7 @@ describe('DetailsFiltersControls', () => {
         toggleAnon: false,
         gradeInquiryOnly: false,
         canFilterWithdrawn: false,
+        canGroupByClusters: false,
         anonMode: false,
         gradeableId: 'test',
     });
@@ -18,6 +19,7 @@ describe('DetailsFiltersControls', () => {
         cy.get('[data-testid="anon-students-label"]').should('not.exist');
         cy.get('[data-testid="inquiry-only-label"]').should('not.exist');
         cy.get('[data-testid="filter-withdrawn-label"]').should('not.exist');
+        cy.get('[data-testid="group-by-clusters-label"]').should('not.exist');
     });
 
     it('renders all conditional filters when their props are true', () => {
@@ -28,6 +30,7 @@ describe('DetailsFiltersControls', () => {
                 toggleAnon: true,
                 gradeInquiryOnly: true,
                 canFilterWithdrawn: true,
+                canGroupByClusters: true,
             },
         });
         cy.get('[data-testid="random-order-label"]').should('exist');
@@ -35,6 +38,7 @@ describe('DetailsFiltersControls', () => {
         cy.get('[data-testid="anon-students-label"]').should('exist');
         cy.get('[data-testid="inquiry-only-label"]').should('exist');
         cy.get('[data-testid="filter-withdrawn-label"]').should('exist');
+        cy.get('[data-testid="group-by-clusters-label"]').should('exist');
     });
 
     describe('initial state from props', () => {
@@ -45,16 +49,19 @@ describe('DetailsFiltersControls', () => {
                     showAllSections: true,
                     gradeInquiryOnly: true,
                     canFilterWithdrawn: true,
+                    canGroupByClusters: true,
                     initialViewSections: true,
                     initialRandomOrder: true,
                     initialInquiryOnly: true,
                     initialHideWithdrawn: true,
+                    initialGroupByClusters: true,
                 },
             });
             cy.get('[data-testid="view-sections"]').should('be.checked');
             cy.get('[data-testid="random-order-checkbox"]').should('be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('be.checked');
+            cy.get('[data-testid="group-by-clusters-checkbox"]').should('be.checked');
         });
 
         it('respects anonMode prop directly as anon checkbox state with gradeableId', () => {
@@ -67,12 +74,13 @@ describe('DetailsFiltersControls', () => {
 
         it('defaults all initial* props to false when undefined', () => {
             cy.mount(DetailsFiltersControls, {
-                props: { ...defaultProps(), showAllSections: true, gradeInquiryOnly: true, canFilterWithdrawn: true },
+                props: { ...defaultProps(), showAllSections: true, gradeInquiryOnly: true, canFilterWithdrawn: true, canGroupByClusters: true },
             });
             cy.get('[data-testid="view-sections"]').should('not.be.checked');
             cy.get('[data-testid="random-order-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('not.be.checked');
+            cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.be.checked');
         });
 
         it('handles initial* props set to false explicitly (?? false takes left operand)', () => {
@@ -82,16 +90,19 @@ describe('DetailsFiltersControls', () => {
                     showAllSections: true,
                     gradeInquiryOnly: true,
                     canFilterWithdrawn: true,
+                    canGroupByClusters: true,
                     initialViewSections: false,
                     initialRandomOrder: false,
                     initialInquiryOnly: false,
                     initialHideWithdrawn: false,
+                    initialGroupByClusters: false,
                 },
             });
             cy.get('[data-testid="view-sections"]').should('not.be.checked');
             cy.get('[data-testid="random-order-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('not.be.checked');
+            cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.be.checked');
         });
     });
 
@@ -169,6 +180,20 @@ describe('DetailsFiltersControls', () => {
             cy.get('@cb').should('not.be.checked');
         });
 
+        it('emits group-by-clusters-change when toggling group by clusters checkbox', () => {
+            mountWithEmitSpy(DetailsFiltersControls, 'group-by-clusters-change', {
+                ...defaultProps(),
+                canGroupByClusters: true,
+            });
+            cy.get('[data-testid="group-by-clusters-checkbox"]').as('cb');
+            cy.get('@cb').check({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', true);
+            cy.get('@cb').should('be.checked');
+            cy.get('@cb').uncheck({ force: true });
+            cy.get('@eventHandler').should('have.been.calledWith', false);
+            cy.get('@cb').should('not.be.checked');
+        });
+
         it('emits anon-change without tracking local state', () => {
             mountWithEmitSpy(DetailsFiltersControls, 'anon-change', {
                 ...defaultProps(),
@@ -190,6 +215,7 @@ describe('DetailsFiltersControls', () => {
                     toggleAnon: true,
                     gradeInquiryOnly: true,
                     canFilterWithdrawn: true,
+                    canGroupByClusters: true,
                     gradeableId: 'g1',
                 },
             });
@@ -198,6 +224,7 @@ describe('DetailsFiltersControls', () => {
             cy.get('[data-testid="anon-students-checkbox"]').should('exist');
             cy.get('[data-testid="inquiry-only-checkbox"]').should('exist');
             cy.get('[data-testid="filter-withdrawn-checkbox"]').should('exist');
+            cy.get('[data-testid="group-by-clusters-checkbox"]').should('exist');
             cy.get('[data-testid="anon-students-label"]').should('have.attr', 'data-gradeable-id', 'g1');
         });
     });

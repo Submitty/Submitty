@@ -167,21 +167,15 @@ function handleWithdrawnChange(checked) {
     $('[data-student="simple-grade-withdrawn"]').toggle(!checked);
     window.updateSimpleGradingRowNumbersAndColors?.();
     window.updateElectronicGradingRowNumbersAndColors?.();
-    const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
-    if (groupByClustersBox) {
-        const groupByClustersStatus = Cookies.get('group_by_clusters');
-        groupByClustersBox.checked = groupByClustersStatus === 'true';
-    }
 
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
-        withdrawnFilterElements.show();
+        $('[data-student="electronic-grade-withdrawn"]').show();
     }
-});
+}
 
-function changeGroupByClusters() {
-    const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
-    Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
+function handleGroupByClustersChange(checked) {
+    Cookies.set('group_by_clusters', checked ? 'true' : 'false', { path: '/' });
     window.location.reload();
 }
 
