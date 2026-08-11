@@ -140,13 +140,28 @@ class DockerInterfaceController extends AbstractController {
                 )
             );
 
+            // A name already listed in the configuration with no owner row is a system
+            // image shipped with Submitty. Adding it to another capability must not
+            // transfer ownership, it stays unowned so only a sysadmin can remove it.
+            $is_system_image = false;
+            if (is_array($json)) {
+                foreach ($json as $capability_images) {
+                    if (is_array($capability_images) && in_array($_POST['image'], $capability_images, true)) {
+                        $is_system_image = $this->core->getQueries()->getDockerImageOwner($_POST['image']) === false;
+                        break;
+                    }
+                }
+            }
+
             if (!array_key_exists($_POST['capability'], $json)) {
                 $json[$_POST['capability']] = [];
             }
 
             if (!in_array($_POST['image'], $json[$_POST['capability']])) {
                 $json[$_POST['capability']][] = $_POST['image'];
-                $this->core->getQueries()->setDockerImageOwner($_POST['image'], $user_id);
+                if (!$is_system_image) {
+                    $this->core->getQueries()->setDockerImageOwner($_POST['image'], $user_id);
+                }
             }
             else {
                 return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
@@ -244,7 +259,6 @@ class DockerInterfaceController extends AbstractController {
 
         $user = $this->core->getUser();
         $removed = [];
-        $removed = [];
         $not_listed = [];
         $not_owned = [];
 
@@ -309,6 +323,7 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
+        // While these are inaccessible from the UI, the redundancy prevent direct POST removal requests
         $message = implode(', ', $removed) . " has been removed from the configuration. "
             . "Click 'Update dockers and machines' to apply changes.";
         if (count($not_listed) > 0) {
