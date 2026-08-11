@@ -3,12 +3,12 @@
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
                 <span class="col grading_label">Peer Grading
-                    <button type="button" class="btn btn-primary" title="Edit Peer Components" aria-label="Edit Peer Components" onclick="newEditPeerComponentsForm()">
+                    <button type="button" class="btn btn-primary" title="Edit Peer Components" aria-label="Edit Peer Components" data-testid="edit-peer-components-btn" onclick="newEditPeerComponentsForm()">
                         <i class="fas fa-pencil-alt" aria-hidden="true"></i>
                         Edit Peer Components
                     </button>
                     {% if has_peer_version_conflict %}
-                        <button type="button" class="btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
+                        <button type="button" class="btn" data-testid="clear-all-peer-version-conflicts-btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
                             Clear All Peer Version Conflicts
                         </button>
                     {% endif %}
