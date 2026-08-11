@@ -1,4 +1,3 @@
-
 export function applySettings() {
     const grad_acc = Date.parse(document.getElementById('gradeable_access_date').value);
     const grad_sub = Date.parse(document.getElementById('gradeable_submission_date').value);
