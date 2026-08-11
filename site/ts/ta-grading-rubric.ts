@@ -3046,11 +3046,11 @@ async function openComponent(component_id: number) {
     // Move focus into the newly revealed component so keyboard users
     // land on the first interactive mark instead of staying on the header
     const firstMark = getComponentJQuery(component_id)
-        .find(".key_to_click")
-        .not(".header-block")
+        .find('.key_to_click')
+        .not('.header-block')
         .first();
     if (firstMark.length > 0) {
-        firstMark.trigger("focus");
+        firstMark.trigger('focus');
     }
 }
 /**
