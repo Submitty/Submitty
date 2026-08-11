@@ -248,11 +248,7 @@ progress::-webkit-progress-value {
     justify-content: center;
 }
 
-.grade-panel button:focus-visible,
-.grade-panel input:focus-visible,
-.grade-panel textarea:focus-visible,
-/* stylelint-disable-next-line selector-class-pattern */
-.grade-panel .key_to_click:focus-visible,
+.invisible-btn:focus-visible,
 /* stylelint-disable-next-line selector-class-pattern */
 .grading_toolbar button:focus-visible,
 /* stylelint-disable-next-line selector-class-pattern */
