@@ -323,7 +323,7 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        // While these are inaccessible from the UI, the redundancy prevent direct POST removal requests
+        // While these are inaccessible from the UI, the redundancy prevents direct POST removal requests
         $message = implode(', ', $removed) . " has been removed from the configuration. "
             . "Click 'Update dockers and machines' to apply changes.";
         if (count($not_listed) > 0) {
