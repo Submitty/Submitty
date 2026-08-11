@@ -40,7 +40,9 @@ PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
 preserve_list = OrderedDict()
 try:
     with open(PRESERVE_LIST_JSON, 'r') as json_file:
-        preserve_list = json.load(json_file, object_pairs_hook=OrderedDict)
+        content = json_file.read().strip()
+        if content:
+            preserve_list = json.loads(content, object_pairs_hook=OrderedDict)
 except FileNotFoundError:
     pass
 print("preserve list", preserve_list)
