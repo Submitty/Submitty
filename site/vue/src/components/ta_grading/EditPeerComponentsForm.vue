@@ -255,7 +255,7 @@ function hasScore(componentId: string, peer: string): boolean {
           data-testid="clear-version-conflicts"
           @click="resolveVersionConflicts"
         >
-          Clear Version Conflicts
+          Clear Version Conflicts For Peer Grader {{ peer }}
         </button>
         <br>
         <div

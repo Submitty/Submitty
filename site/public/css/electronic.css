@@ -1436,43 +1436,6 @@ tr.is_publish {
     justify-content: center;
 }
 
-/* Mark conflict popup */
-
-#mark-conflict-popup div.mark-conflict-row {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-#mark-conflict-popup .mark-conflict-row span {
-    padding: 3px;
-    border-width: 2px;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-}
-
-#mark-conflict-popup .mark-conflict-row .button-container {
-    width: 150px;
-}
-
-#mark-conflict-popup .mark-conflict-row .button-container input {
-    width: 100%;
-}
-
-#mark-conflict-popup .mark-conflict-row.mark-resolved,
-#mark-conflict-popup .mark-conflict-row.hidden {
-    display: none;
-}
-
-#mark-conflict-popup .conflict-resolve-progress {
-    width: fit-content;
-    margin: 0 auto;
-}
-
-#mark-conflict-popup .mark-conflict-container {
-    margin-top: 25px;
-}
-
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #discussion_browser.rubric_panel {
     border: 5px solid var(--standard-light-seafoam);

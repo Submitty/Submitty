@@ -616,6 +616,20 @@
     overflow-y: hidden;
 }
 
+.full-screen-mode #thread-container {
+    height: 100vh;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+.full-screen-mode #thread_list {
+    max-height: 100vh;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+.full-screen-mode #posts_list {
+    max-height: 100vh;
+}
+
 .stats-table-container {
     padding-left: 20px;
     padding-bottom: 10px;
