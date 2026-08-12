@@ -2151,12 +2151,12 @@ class ElectronicGraderController extends AbstractController {
             $cluster = $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingCluster::class)->findClusterBySubmitter($gradeable_id, $graded_gradeable->getSubmitter()->getId());
             if ($cluster !== null) {
                 $submitter_id = $graded_gradeable->getSubmitter()->getId();
-                
+
                 $member_ids = [];
                 foreach ($cluster->getMembers() as $member) {
                     $member_ids[] = $member->getUserId() ?? $member->getTeamId();
                 }
-                
+
                 $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, $member_ids);
                 $valid_members = $cluster->getValidMembers($active_versions);
                 $cluster_student_count = count($valid_members);
