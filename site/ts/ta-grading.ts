@@ -27,6 +27,7 @@ declare global {
         peerComponentMarksChanged (peer_id: string, component_id: string): void;
         peerEditFormData?: Record<string, unknown>;
         toggleEditPeerComponentsForm(): void;
+        onPeerChange (peer: string): void;
         clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
         savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
         resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
@@ -423,14 +424,25 @@ function findAllClosedFiles(elem: JQuery<HTMLElement>, current_path: string = ''
 // Tracks whether the peer edit popup is open.
 let peerEditFormVisible = false;
 
-window.toggleEditPeerComponentsForm = function () {
-    peerEditFormVisible = !peerEditFormVisible;
+let peerEditSelectedPeer = '';
+
+function renderPeerEditForm() {
     if (window.peerEditFormData) {
         updateVueComponent('.js-edit-peer-components-form', {
             ...window.peerEditFormData,
             visible: peerEditFormVisible,
+            selectedPeer: peerEditSelectedPeer,
         });
     }
+}
+
+window.toggleEditPeerComponentsForm = function () {
+    peerEditFormVisible = !peerEditFormVisible;
+    renderPeerEditForm();
+};
+
+window.onPeerChange = function (peer: string) {
+    peerEditSelectedPeer = peer;
 };
 
 window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
@@ -496,10 +508,7 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
             if (response.peer_edit_data) {
                 window.peerEditFormData = response.peer_edit_data;
-                updateVueComponent('.js-edit-peer-components-form', {
-                    ...window.peerEditFormData,
-                    visible: peerEditFormVisible,
-                });
+                renderPeerEditForm();
             }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
             setTimeout(() => {
@@ -539,10 +548,7 @@ window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_i
             $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
             if (response.peer_edit_data) {
                 window.peerEditFormData = response.peer_edit_data;
-                updateVueComponent('.js-edit-peer-components-form', {
-                    ...window.peerEditFormData,
-                    visible: peerEditFormVisible,
-                });
+                renderPeerEditForm();
             }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
         },

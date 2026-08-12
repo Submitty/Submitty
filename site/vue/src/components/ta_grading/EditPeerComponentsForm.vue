@@ -14,10 +14,12 @@ const props = defineProps<{
     marks: Record<string, MarkInfo>;
     activeVersion?: number | null;
     visible?: boolean;
+    selectedPeer?: string;
 }>();
 
 const emit = defineEmits<{
     'toggle': [];
+    'peer-change': [peer: string];
     'clear-marks': [detail: {
         submitterId: string;
         gradeableId: string;
@@ -40,8 +42,13 @@ const emit = defineEmits<{
     }];
 }>();
 
-const selectedPeer = ref(props.peers[0] ?? '');
+const selectedPeer = ref(props.selectedPeer ?? props.peers[0] ?? '');
 const checkedMarkOverrides = ref<Record<string, boolean>>({});
+
+function onPeerChange(event: Event) {
+    selectedPeer.value = (event.target as HTMLSelectElement).value;
+    emit('peer-change', selectedPeer.value);
+}
 
 function markKey(componentId: string, peer: string, markId: number): string {
     return `${peer}:${componentId}:${markId}`;
@@ -193,8 +200,9 @@ function hasScore(componentId: string, peer: string): boolean {
       </span>
       <select
         id="edit-peer-select"
-        v-model="selectedPeer"
+        :value="selectedPeer"
         data-testid="edit-peer-select"
+        @change="onPeerChange"
       >
         <option
           v-for="peer in peers"

@@ -20,6 +20,7 @@
                         },
                         'events': {
                             'toggle': 'toggleEditPeerComponentsForm',
+                            'peer-change': 'onPeerChange',
                             'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, window.csrfToken); }',
                             'resolve-version-conflicts': '(detail) => { resolvePeerVersionConflicts(detail.submitterId, detail.gradeableId, detail.peer, window.csrfToken); }',
                             'save-component': '(detail) => { savePeerComponent(detail.submitterId, detail.gradeableId, detail.peer, detail.componentId, window.csrfToken); }',
