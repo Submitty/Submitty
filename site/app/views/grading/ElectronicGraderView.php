@@ -1904,7 +1904,8 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "grader_id" => $this->core->getUser()->getId(),
-                "display_version" => $display_version
+                "display_version" => $display_version,
+                "csrf_token" => $this->core->getCsrfToken()
             ]
         ));
     }
@@ -1984,7 +1985,6 @@ HTML;
             "submitter_id" => $submitter,
             "peer_details" => $peer_details,
             "components" => $components_details_array,
-            "csrf_token" => $this->core->getCsrfToken(),
             "component_scores" => $component_scores,
             "marks" => $marks,
             "active_version" => $active_version

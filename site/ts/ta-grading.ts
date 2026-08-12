@@ -426,7 +426,7 @@ let peerEditFormVisible = false;
 window.toggleEditPeerComponentsForm = function () {
     peerEditFormVisible = !peerEditFormVisible;
     if (window.peerEditFormData) {
-        updateVueComponent('#edit-peer-components-form', {
+        updateVueComponent('.js-edit-peer-components-form', {
             ...window.peerEditFormData,
             visible: peerEditFormVisible,
         });
@@ -496,7 +496,7 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
             if (response.peer_edit_data) {
                 window.peerEditFormData = response.peer_edit_data;
-                updateVueComponent('#edit-peer-components-form', {
+                updateVueComponent('.js-edit-peer-components-form', {
                     ...window.peerEditFormData,
                     visible: peerEditFormVisible,
                 });
@@ -539,7 +539,7 @@ window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_i
             $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
             if (response.peer_edit_data) {
                 window.peerEditFormData = response.peer_edit_data;
-                updateVueComponent('#edit-peer-components-form', {
+                updateVueComponent('.js-edit-peer-components-form', {
                     ...window.peerEditFormData,
                     visible: peerEditFormVisible,
                 });

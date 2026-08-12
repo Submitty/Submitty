@@ -1,33 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from '../Popup.vue';
-
-interface PeerComponent {
-    id: string;
-    title: string;
-    max: number;
-    marks: number[];
-    extra_credit?: boolean;
-}
-
-interface MarkInfo {
-    title: string;
-    points: string;
-}
-
-interface PeerDetails {
-    graders: Record<string, string[]>;
-    marks_assigned: Record<string, Record<string, number[]>>;
-    graded_versions?: Record<string, Record<string, number>>;
-    version_conflicts?: Record<string, Record<string, boolean>>;
-}
+import type { MarkInfo, PeerComponent, PeerDetails } from '../../types/PeerGrading';
 
 const props = defineProps<{
     peers: string[];
     peerNames?: Record<string, string>;
     submitterId: string;
     gradeableId: string;
-    csrfToken: string;
     components: PeerComponent[];
     componentScores: Record<string, Record<string, number>>;
     peerDetails: PeerDetails;
@@ -42,20 +22,17 @@ const emit = defineEmits<{
         submitterId: string;
         gradeableId: string;
         peer: string;
-        csrfToken: string;
     }];
     'resolve-version-conflicts': [detail: {
         submitterId: string;
         gradeableId: string;
         peer: string;
-        csrfToken: string;
     }];
     'save-component': [detail: {
         submitterId: string;
         gradeableId: string;
         peer: string;
         componentId: string;
-        csrfToken: string;
     }];
     'mark-change': [detail: {
         peer: string;
@@ -83,7 +60,6 @@ function clearMarks() {
         submitterId: props.submitterId ?? '',
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -92,7 +68,6 @@ function resolveVersionConflicts() {
         submitterId: props.submitterId ?? '',
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -102,7 +77,6 @@ function saveComponent(componentId: string) {
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
         componentId,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -240,6 +214,7 @@ function hasScore(componentId: string, peer: string): boolean {
         <button
           type="button"
           class="btn btn-danger"
+          :data-peer-id="peer"
           title="Delete all grading by this peer grader"
           data-testid="clear-peer-marks"
           @click="clearMarks"
