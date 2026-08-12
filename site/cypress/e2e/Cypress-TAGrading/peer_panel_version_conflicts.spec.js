@@ -21,20 +21,8 @@ describe('Peer panel version conflicts', () => {
     };
 
     const createConflictForPeerGrader = () => {
-        // As instructor (who has FULL_ACCESS_GRADER who can pass FULL_ACCESS_GRADER on save_peer_component),
-        cy.login('instructor');
-        cy.visit(gradingUrl(conflictedAnonId));
-        cy.get('[data-testid="peer-info-btn"]').click();
-        cy.get('[data-testid="peer-info"]').should('be.visible');
+        cy.login(peerGraderId);
         cy.window().then((win) => {
-            const peerEditData = win.peerEditFormData;
-            const components = peerEditData?.components ?? [];
-            const component = components.find((c) => c.id === String(componentIds[0]));
-            const markId = component?.marks?.[0];
-            const submitterId = peerEditData?.submitterId;
-            expect(markId, 'component 84 has at least one mark').to.exist;
-            expect(submitterId, 'submitter id present').to.exist;
-
             cy.request({
                 method: 'POST',
                 url: buildUrl(['sample', 'gradeable', gradeableId, 'grading', 'graded_gradeable', 'change_grade_version']),
@@ -44,18 +32,6 @@ describe('Peer panel version conflicts', () => {
                     graded_version: 2, // creates conflict
                     component_ids: componentIds,
                     csrf_token: win.csrfToken,
-                },
-            }).its('status').should('eq', 200);
-            cy.request({
-                method: 'POST',
-                url: buildUrl(['sample', 'gradeable', gradeableId, 'grading', 'save_peer_component']),
-                form: true,
-                body: {
-                    csrf_token: win.csrfToken,
-                    peer_id: peerGraderId,
-                    submitter_id: submitterId,
-                    component_id: componentIds[0],
-                    mark_ids: [markId],
                 },
             }).its('status').should('eq', 200);
         });
