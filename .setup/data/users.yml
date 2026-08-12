@@ -40,6 +40,8 @@
 #
 #   registration_section: [optional] registration section to place the user into. Defaults to NULL.
 #
+#   registration_type: [optional] registration type to place the user into (ie graded, withdrawn, audit). Defaults to graded.
+#
 #   rotating_section: [optional] rotating section to place the user into. Defaults to NULL.
 #
 #   courses: This is a either a list of strings of courses to add the user to or a list of dictionaries that contain
