@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     showAllSections: boolean;
@@ -17,7 +17,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'mounted': [{ inquiryOnly: boolean }];
     'view-sections-change': [checked: boolean];
     'sort-order-change': [checked: boolean];
     'anon-change': [checked: boolean];
@@ -31,10 +30,6 @@ const randomOrderChecked = ref(props.initialRandomOrder ?? false);
 const inquiryOnlyChecked = ref(props.initialInquiryOnly ?? false);
 const withdrawnHiddenChecked = ref(props.initialHideWithdrawn ?? false);
 const groupByClustersChecked = ref(props.initialGroupByClusters ?? false);
-
-onMounted(() => {
-    emit('mounted', { inquiryOnly: inquiryOnlyChecked.value });
-});
 
 const onChangeSections = (event: Event) => {
     const checked = (event.target as HTMLInputElement).checked;

@@ -85,15 +85,6 @@ describe('DetailsFiltersControls', () => {
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.be.checked');
     });
 
-    it('emits mounted with the initial inquiry-only state', () => {
-        mountWithEmitSpy(DetailsFiltersControls, 'mounted', {
-            ...defaultProps(),
-            gradeInquiryOnly: true,
-            initialInquiryOnly: true,
-        });
-        cy.get('@eventHandler').should('have.been.calledWith', { inquiryOnly: true });
-    });
-
     checkboxTestCases.forEach(([testId, eventName]) => {
         it(`emits ${eventName} with the checked state when toggling its checkbox`, () => {
             mountWithEmitSpy(DetailsFiltersControls, eventName, {

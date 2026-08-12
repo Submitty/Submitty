@@ -1,6 +1,6 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
-/* exported handleDetailsFiltersMounted, handleViewSectionsChange, handleSortOrderChange, handleAnonChange, handleInquiryChange, handleWithdrawnChange */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only */
+/* exported handleViewSectionsChange, handleSortOrderChange, handleAnonChange, handleInquiryChange, handleWithdrawnChange, handleGroupByClustersChange */
 
 const MOBILE_BREAKPOINT = 951;
 
@@ -94,40 +94,6 @@ function toggleAllSections() {
     }
 }
 
-function inquiryUpdate() {
-    const status = Cookies.get('inquiry_status');
-
-    if (status === 'on') {
-        $('.grade-button').each(function () {
-            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').addClass('inquiry-only-disabled'); // hide gradeable items without active inquiries, overrrides withdrawn filter
-            }
-        });
-    }
-    else {
-        $('.grade-button').each(function () {
-            $(this).closest('.grade-table').removeClass('inquiry-only-disabled'); // show all gradeable items
-        });
-    }
-}
-
-function handleDetailsFiltersMounted(state) {
-    const withdrawnRow = $('[data-student="electronic-grade-withdrawn"]');
-    withdrawnRow.hide();
-    if (((Cookies.get('include_withdrawn_students') || 'omit') === 'include') || (window.is_team_assignment)) {
-        withdrawnRow.show();
-    }
-    if (state.inquiryOnly) {
-        $('.grade-button').each(function () {
-            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').addClass('inquiry-only-disabled');
-            }
-        });
-        document.getElementById('inquiry-banner').style.display = '';
-    }
-    window.updateElectronicGradingRowNumbersAndColors?.();
-}
-
 function handleViewSectionsChange(checked) {
     Cookies.set('view', checked ? 'assigned' : 'all', { path: document.body.dataset.coursePath, expires: 365 });
     localStorage.setItem('general-setting-navigate-assigned-students-only', checked ? 'true' : 'false');
@@ -163,10 +129,8 @@ function handleInquiryChange(checked) {
 
 function handleWithdrawnChange(checked) {
     Cookies.set('include_withdrawn_students', checked ? 'omit' : 'include', { path: document.body.dataset.coursePath, expires: 365 });
-    $('[data-student="electronic-grade-withdrawn"]').toggle(!checked);
+    $('[data-student="electronic-grade-withdrawn"]').toggle(!checked).toggleClass('hidden-withdrawn-student-row', checked);
     $('[data-student="simple-grade-withdrawn"]').toggle(!checked);
-    window.updateSimpleGradingRowNumbersAndColors?.();
-    window.updateElectronicGradingRowNumbersAndColors?.();
 
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {

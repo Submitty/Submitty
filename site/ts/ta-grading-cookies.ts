@@ -7,8 +7,6 @@ declare global {
         filter_null_section: () => void;
         filter_withdrawn_students: () => void;
         sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
-        updateSimpleGradingRowNumbersAndColors: () => void;
-        updateElectronicGradingRowNumbersAndColors: () => void;
     }
 }
 
