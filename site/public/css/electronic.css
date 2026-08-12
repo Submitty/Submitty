@@ -1113,7 +1113,7 @@ tr.is_publish {
     margin-bottom: 15px;
 }
 
-#edit-peer-components-form .popup-form {
+.js-edit-peer-components-form .popup-form {
     font-size: 1rem;
 }
 

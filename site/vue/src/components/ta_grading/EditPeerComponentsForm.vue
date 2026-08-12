@@ -164,6 +164,7 @@ function hasScore(componentId: string, peer: string): boolean {
 
 <template>
   <Popup
+    id="edit-peer-components-form"
     title="Edit Peer Components Form"
     :visible="visible"
     @toggle="toggle"

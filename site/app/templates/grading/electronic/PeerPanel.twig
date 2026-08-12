@@ -2,7 +2,7 @@
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
-                <span class="col grading_label">Peer Grading
+                <div class="col grading_label">Peer Grading
                     {% include 'Vue.twig' with {
                         'type': 'component',
                         'name': 'ta_grading/EditPeerComponentsForm',
@@ -34,7 +34,7 @@
                             Clear All Peer Version Conflicts
                         </button>
                     {% endif %}
-                </span>
+                </div>
                 <div class="inner-container" id="peer-grading-box">
                     {% if has_active_version %}
                         <script>
