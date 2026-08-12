@@ -1230,13 +1230,20 @@ class ElectronicGraderController extends AbstractController {
 
         $algorithms = [];
         foreach (\app\entities\grading_cluster\GradingClusterAlgorithm::cases() as $case) {
+            if ($case === \app\entities\grading_cluster\GradingClusterAlgorithm::CustomUpload) {
+                continue;
+            }
             $algorithms[$case->value] = [
                 'name' => $case->name,
                 'description' => $case->description()
             ];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map);
+        $available_docker_images = \app\controllers\grading\GradingClusterController::getDockerImagesFromConfig(
+            $this->core->getConfig()->getSubmittyDataPath()
+        );
+
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map, $available_docker_images);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
