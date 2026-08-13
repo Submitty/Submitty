@@ -38,7 +38,12 @@
             },
             'class': 'grading_toolbar',
             'events': {
-                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }'
+                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }',
+                'toggle-cluster-mode': '() => { 
+                    const currentMode = ' ~ (ta_grading_cluster_mode ? 'true' : 'false') ~ '; 
+                    Cookies.set("ta_grading_cluster_mode", !currentMode, { expires: 1, path: "/" });
+                    window.location.reload(); 
+                }'
             }
         }%}
     </div>

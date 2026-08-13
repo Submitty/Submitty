@@ -19,6 +19,10 @@ class GradingClusterRepository extends EntityRepository {
      * @return \app\entities\grading_cluster\GradingCluster|null
      */
     public function findClusterBySubmitter(string $gradeable_id, string $submitter_id): ?\app\entities\grading_cluster\GradingCluster {
+        if ($gradeable_id === '' || $submitter_id === '') {
+            return null;
+        }
+
         return $this->getEntityManager()->createQuery('
             SELECT cl, m
             FROM \app\entities\grading_cluster\GradingCluster cl

@@ -136,13 +136,6 @@ aside {
     background-color: var(--subheading-underscore-grey);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
-.ta-navlink-cont:hover,
-.ta-navlink-cont:hover i,
-.ta-navlink-cont:hover span {
-    color: initial;
-}
-
 .ta-navlink-cont button {
     cursor: pointer;
 }
@@ -180,17 +173,11 @@ button > i.fas:hover {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
-    color: var(--text-black);
     position: relative;
     margin-right: 4px;
     border: 2px solid var(--default-border-color);
     border-radius: 5px;
     box-shadow: var(--default-box-shadow);
-}
-
-.gradeable .peer-version-conflict .indicator,
-.gradeable .peer-version-conflict .indicator i {
-    color: inherit;
 }
 
 #prev-student-navlink i,
@@ -365,7 +352,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #peer_info_btn {
-    border: 2px solid var(--standard-mediumorchid);
+    border: 2px solid var(--standard-plum-purple);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -373,7 +360,7 @@ progress::-webkit-progress-value {
 #peer_info_btn.active,
 #peer_info_select option:hover,
 #peer_info_select option:focus {
-    background: var(--standard-mediumorchid);
+    background: var(--standard-plum-purple);
 }
 /* stylelint-enable selector-id-pattern */
 
@@ -630,7 +617,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #peer_info.rubric_panel {
-    border: 5px solid var(--standard-mediumorchid);
+    border: 5px solid var(--standard-plum-purple);
 }
 
 /* stylelint-disable-next-line selector-class-pattern, no-duplicate-selectors */
@@ -760,8 +747,8 @@ progress::-webkit-progress-value {
 }
 
 .icon-selected.fa-users {
-    box-shadow: 0 0 3px 3px var(--standard-mediumorchid);
-    background-color: var(--standard-mediumorchid);
+    box-shadow: 0 0 3px 3px var(--standard-plum-purple);
+    background-color: var(--standard-plum-purple);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -1059,16 +1046,8 @@ tr.is_publish {
     cursor: default;
 }
 
-.gradeable .component .peer-component-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    font-size: 20px;
-}
-
 .gradeable .peer-border {
-    border: 3px solid var(--standard-mediumorchid);
+    border: 3px solid var(--standard-plum-purple);
 }
 
 .gradeable .component .badge-container.edit-mode {
@@ -1079,52 +1058,6 @@ tr.is_publish {
     color: var(--error-alert-dark-red);
     font-weight: bold;
     font-size: medium;
-}
-
-.gradeable .peer-version-warning {
-    margin: 5px 15px;
-}
-
-.gradeable .peer-version-conflict {
-    color: var(--error-alert-dark-red);
-    border-left: 2px solid var(--error-alert-dark-red);
-    border-right: 2px solid var(--error-alert-dark-red);
-}
-
-.gradeable .peer-version-conflict-top {
-    border-top: 2px solid var(--error-alert-dark-red);
-}
-
-.gradeable .peer-version-conflict-bottom {
-    border-bottom: 2px solid var(--error-alert-dark-red);
-}
-
-.gradeable #peer-grading-table {
-    border-collapse: collapse;
-}
-
-.peer-edit-marks-list {
-    clear: both;
-}
-
-.peer-edit-version-warning {
-    color: var(--error-alert-dark-red);
-    font-weight: bold;
-    clear: both;
-}
-
-.peer-edit-components {
-    margin-top: 15px;
-}
-
-.peer-edit-component:not(:last-child) {
-    margin-bottom: 15px;
-}
-
-.peer-component-save-status {
-    margin-left: 5px;
-    color: var(--standard-dark-green);
-    font-weight: bold;
 }
 
 .gradeable .graded-by {
@@ -1438,6 +1371,43 @@ tr.is_publish {
 
 .gradeable .received-marks-list.container .row .col-no-gutters.indicator {
     justify-content: center;
+}
+
+/* Mark conflict popup */
+
+#mark-conflict-popup div.mark-conflict-row {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#mark-conflict-popup .mark-conflict-row span {
+    padding: 3px;
+    border-width: 2px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+#mark-conflict-popup .mark-conflict-row .button-container {
+    width: 150px;
+}
+
+#mark-conflict-popup .mark-conflict-row .button-container input {
+    width: 100%;
+}
+
+#mark-conflict-popup .mark-conflict-row.mark-resolved,
+#mark-conflict-popup .mark-conflict-row.hidden {
+    display: none;
+}
+
+#mark-conflict-popup .conflict-resolve-progress {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+#mark-conflict-popup .mark-conflict-container {
+    margin-top: 25px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */

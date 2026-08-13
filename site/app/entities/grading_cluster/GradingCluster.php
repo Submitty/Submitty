@@ -71,7 +71,7 @@ class GradingCluster {
     public function getValidMembers(array $active_versions): array {
         $valid = [];
         foreach ($this->members as $m) {
-            $id = $m->getUserId() ?? $m->getTeamId();
+            $id = $m->getSubmitterId();
             if (isset($active_versions[$id]) && $active_versions[$id] === $m->getActiveVersion()) {
                 $valid[] = $m;
             }

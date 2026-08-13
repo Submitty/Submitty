@@ -87,9 +87,8 @@ async function submitClustering() {
 <template>
   <button
     v-if="canCreateClustering"
-    class="btn btn-primary"
+    class="btn btn-primary create-clusters-btn"
     data-testid="create-clusters-btn"
-    style="margin-left: auto;"
     @click="toggleModal"
   >
     {{ currentAlgorithm ? 'Re-create Clusters' : 'Create Clusters' }}
@@ -98,18 +97,20 @@ async function submitClustering() {
   <Teleport to="body">
     <div
       v-if="showModal"
-      class="popup-form"
-      style="display: block;"
+      class="popup-form popup-form-active"
     >
       <div
         class="popup-box"
         @click.self="toggleModal"
       >
         <div
-          class="popup-window"
-          style="width: 400px; margin: auto;"
+          data-testid="create-clusters-modal"
+          class="popup-window clustering-modal-window"
         >
-          <div class="form-title">
+          <div
+            data-testid="create-clusters-form-title"
+            class="form-title"
+          >
             <h1>{{ currentAlgorithm ? 'Re-create Clusters' : 'Create Clusters' }}</h1>
             <button
               data-testid="close-button"
@@ -121,7 +122,7 @@ async function submitClustering() {
             </button>
           </div>
           <div class="form-body">
-            <p style="margin-bottom: 15px;">
+            <p class="clustering-modal-text">
               Select an algorithm to generate clusters for this gradeable.
             </p>
             <select
@@ -150,16 +151,13 @@ async function submitClustering() {
 
             <p
               v-if="selectedAlgorithm && algorithms[selectedAlgorithm]"
-              style="margin-top: 15px;"
+              class="clustering-modal-desc"
             >
               {{ algorithms[selectedAlgorithm].description }}
             </p>
 
             <div class="form-buttons">
-              <div
-                class="form-button-container"
-                style="justify-content: flex-end; display: flex; gap: 10px;"
-              >
+              <div class="form-button-container clustering-modal-buttons">
                 <a
                   class="btn btn-default close-button key_to_click"
                   tabindex="0"
@@ -186,5 +184,26 @@ async function submitClustering() {
 <style scoped>
 .clustering-select {
     width: 100%;
+}
+.create-clusters-btn {
+    margin-left: auto;
+}
+.popup-form-active {
+    display: block;
+}
+.clustering-modal-window {
+    width: 400px;
+    margin: auto;
+}
+.clustering-modal-text {
+    margin-bottom: 15px;
+}
+.clustering-modal-desc {
+    margin-top: 15px;
+}
+.clustering-modal-buttons {
+    justify-content: flex-end;
+    display: flex;
+    gap: 10px;
 }
 </style>

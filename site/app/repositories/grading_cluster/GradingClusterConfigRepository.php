@@ -39,14 +39,15 @@ class GradingClusterConfigRepository extends EntityRepository {
      * Checks if a gradeable has any clusters configured without fetching them all.
      */
     public function hasClusters(string $gradeable_id): bool {
-        $count = $this->getEntityManager()->createQuery('
-            SELECT COUNT(cl.id)
+        $result = $this->getEntityManager()->createQuery('
+            SELECT 1
             FROM \app\entities\grading_cluster\GradingClusterConfig c
             JOIN c.clusters cl
             WHERE c.gradeable_id = :gradeable_id
         ')
         ->setParameter('gradeable_id', $gradeable_id)
-        ->getSingleScalarResult();
-        return $count > 0;
+        ->setMaxResults(1)
+        ->getOneOrNullResult();
+        return $result !== null;
     }
 }
