@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig, loadTemplates, CodeMirror */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, Twig, loadTemplates, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -712,24 +712,30 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
-            let alerted = false;
-            const build_info = response['data'][0];
-            const cmake_info = response['data'][1];
-            const make_info = response['data'][2];
+            const build_info = response['data']['build_output'] ?? null;
+            const cmake_info = response['data']['cmake_output'] ?? null;
+            const preprocessed_config = response['data']['preprocessed_config'] ?? null;
+            const generated_complete_config = response['data']['generated_complete_config'] ?? null;
+
+            // Determine if there are build errors or warnings
+            let has_errors_or_warnings = false;
+            if (build_info !== null) {
+                const lower_build_info = build_info.toLowerCase();
+                const clean_build_info = lower_build_info
+                    .replace(/warning:\s+to\s+insert\s+the\s+autograding\s+data\s+to\s+the\s+database,\s+the\s+build_homework_function\s+script\s+must\s+be\s+run\s+as\s+sudo/g, '')
+                    .replace(/warning:\s+to\s+set\s+the\s+autograding\s+config\s+allowed\s+minutes,\s+the\s+build_homework_function\s+script\s+must\s+be\s+run\s+as\s+sudo/g, '');
+
+                has_errors_or_warnings = clean_build_info.includes('make error') ||
+                                         clean_build_info.includes('error') ||
+                                         clean_build_info.includes('warning') ||
+                                         clean_build_info.includes('the submitty configuration validator detected');
+            }
+
+            const show_generated_configs = has_errors_or_warnings && (preprocessed_config !== null || generated_complete_config !== null);
 
             if (build_info !== null) {
                 // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
-                for (const line of build_info.split('\n')) {
-                    if (line.includes('WARNING:')) {
-                        alerted = true;
-                        displayWarningMessage(line.split('WARNING:')[1].trim());
-                    }
-                    else if (line.includes('ERROR:')) {
-                        alerted = true;
-                        displayErrorMessage(line.split('ERROR:')[1].trim());
-                    }
-                }
             }
             else {
                 $('#build-log-body').text('There is currently no build output.');
@@ -741,18 +747,38 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             else {
                 $('#cmake-log-body').text('There is currently no cmake output.');
             }
-            if (make_info !== null) {
+            if (preprocessed_config !== null) {
                 // eslint-disable-next-line no-restricted-syntax
-                $('#make-log-body').html(make_info);
+                $('#preprocessed-config-body').html(preprocessed_config);
             }
             else {
-                // eslint-disable-next-line no-restricted-syntax
-                $('#make-log-body').html('There is currently no make output.');
+                $('#preprocessed-config-body').text('There is currently no preprocessed config for this build.');
             }
-
-            if (alerted || !rebuilt) {
+            if (generated_complete_config !== null) {
+                // eslint-disable-next-line no-restricted-syntax
+                $('#generated-complete-config-body').html(generated_complete_config);
+            }
+            else {
+                $('#generated-complete-config-body').text('There is currently no generated complete config.');
+            }
+            if (build_info !== null || !rebuilt) {
                 // Display the build log for respective rebuild warnings/errors or manual instructor requests
-                $('.log-container').show();
+                $('#build-log-container').show();
+                $('#cmake-log-container').show();
+
+                if (show_generated_configs) {
+                    $('#generated-config-help').show();
+                    $('#generated-config-note').prop('hidden', false).show();
+                    $('#preprocessed-config-container').show();
+                    $('#generated-complete-config-container').show();
+                }
+                else {
+                    $('#generated-config-help').hide();
+                    $('#generated-config-note').prop('hidden', true).hide();
+                    $('#preprocessed-config-container').hide();
+                    $('#generated-complete-config-container').hide();
+                }
+
                 $('#open-build-log').hide();
                 $('#close-build-log').show();
             }
@@ -795,7 +821,10 @@ function ajaxCheckBuildStatus() {
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
                 $('#rebuild-status').text('Gradeable build failed');
-                $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
+                $('#autograding_config_error').text(
+                    'The current configuration is not valid. Check the build log for details, '
+                    + 'and use the generated config sections if the reported line numbers do not match your source file.',
+                );
                 $('.config_search_error').show();
             }
             else {
