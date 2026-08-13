@@ -10,19 +10,19 @@ describe('Cluster Grading', () => {
         cy.get('[data-testid="view-sections"]').click();
 
         // Verify initial state
-        cy.get('[data-testid="create-clusters-btn"]').should('be.visible');
+        cy.get('button').contains('Create Clusters').should('be.visible');
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.exist');
 
         // Modal popup opens on click
-        cy.get('[data-testid="create-clusters-btn"]').click();
-        cy.get('[data-testid="create-clusters-modal"]').should('be.visible');
-        cy.get('[data-testid="create-clusters-form-title"]').contains('Create Clusters');
+        cy.get('button').contains('Create Clusters').click();
+        cy.get('.popup-window').should('be.visible');
+        cy.get('.form-title').contains('Create Clusters');
         cy.get('[data-testid="clustering-algorithm-select"]').should('be.visible');
         cy.get('[data-testid="clustering-algorithm-select"] option').contains('DummySplit').should('be.visible');
 
         // Close modal
-        cy.get('[data-testid="close-button"]:visible').click();
-        cy.get('[data-testid="create-clusters-modal"]:visible').should('not.exist');
+        cy.get('.form-title .close-button:visible').click();
+        cy.get('.popup-window:visible').should('not.exist');
     });
     it('hides clustering options when clustering is disabled', () => {
         cy.login();
@@ -33,7 +33,7 @@ describe('Cluster Grading', () => {
 
         // Verify clustering features are visible
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.get('[data-testid="create-clusters-btn"]').should('be.visible');
+        cy.get('button').contains('Create Clusters').should('be.visible');
 
         // Disable clustering at course level
         cy.visit(['sample', 'config']);
@@ -41,7 +41,7 @@ describe('Cluster Grading', () => {
 
         // Check if buttons are hidden on the grading page
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.get('[data-testid="create-clusters-btn"]').should('not.exist');
+        cy.get('button').contains('Create Clusters').should('not.exist');
         cy.get('[data-testid="group-by-clusters-checkbox"]').should('not.exist');
     });
     it('hides clustering toggle icon on rubric panel when no clusters exist', () => {
