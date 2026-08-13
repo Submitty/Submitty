@@ -13,6 +13,7 @@ import sys
 import grp
 import pwd
 import shutil
+import requests  # pylint: disable=import-error
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -51,7 +52,6 @@ def check_root():
 def load_config():
     submitty_json = load_json(CONF_DIR / "submitty.json")
     users_json = load_json(CONF_DIR / "submitty_users.json")
-    database_json = load_json(CONF_DIR / "database.json")
 
     return {
         "submitty_data_dir": Path(submitty_json["submitty_data_dir"]),
@@ -62,11 +62,6 @@ def load_config():
         "daemon_user": users_json["daemon_user"],
         "cgi_user": users_json["cgi_user"],
         "course_builders_group": users_json["course_builders_group"],
-        "database_host": database_json["database_host"],
-        "database_port": database_json["database_port"],
-        "database_user": database_json["database_user"],
-        "database_password": database_json["database_password"],
-        "database_course_user": database_json["database_course_user"],
     }
 
 
@@ -232,7 +227,6 @@ def build_course_filesystem(cfg, identity: CourseIdentity) -> Path:
     """
     Runs the full filesystem-provisioning sequence for a course.
     Raises on any failure (mkdir on an existing dir, missing users, etc.).
-    Returns the created course_dir.
     """
     course_dir = cfg["submitty_data_dir"] / "courses" / identity.semester / identity.course
     if course_dir.exists():
@@ -244,61 +238,64 @@ def build_course_filesystem(cfg, identity: CourseIdentity) -> Path:
     return course_dir
 
 
-def run_psql(cfg, database: str, sql: str) -> int:
+def get_api_token(cfg, user_id: str) -> str:
     """
-    Runs a single psql command against the given database. Output is not
-    captured, so it flows through to this script's own stdout/stderr.
-    Returns the psql process's exit code.
+    Mints a JWT for user_id via the existing api_token_generate.php.
     """
-    env = dict(os.environ, PGPASSWORD=cfg["database_password"])
+    script = cfg["submitty_install_dir"] / "sbin" / "api_token_generate.php"
     result = subprocess.run(
-        ["psql", "-h", cfg["database_host"], "-U", cfg["database_user"],
-         "-p", str(cfg["database_port"]), "-d", database, "-c", sql],
-        env=env, check=False,
+        ["php", str(script), user_id],
+        capture_output=True, text=True, check=False,
     )
-    return result.returncode
+    if result.returncode != 0:
+        die(f"Failed to generate API token for {user_id}: {result.stderr.strip()}")
+    return result.stdout.strip()
+
+
+def call_course_db_api(cfg, token: str, action: str, **fields) -> bool:
+    """
+    Calls the /api/courses/db endpoint, which runs the requested Postgres/SQL
+    step through DatabaseQueries.php.
+    """
+    try:
+        resp = requests.post(
+            f"{cfg['submission_url']}/api/courses/db",
+            data={"action": action, **fields},
+            headers={"Authorization": token},
+            timeout=30,
+        )
+        body = resp.json()
+    except (requests.RequestException, ValueError) as e:
+        print(f"course_db API call ({action}) failed: {e}")
+        return False
+    if body.get("status") != "success":
+        print(f"course_db API call ({action}) failed: {body.get('message', 'Unknown error')}")
+        return False
+    return True
 
 
 def build_course_database(cfg, identity: CourseIdentity):
     """
     Creates the course's own database, registers it in the master
     database, runs its initial migration, and seeds default forum
-    categories. Dies on any failure, rolling back the master courses
-    row if migration fails so a retry doesn't hit a stale row.
+    categories.
     """
     semester = identity.semester
     course = identity.course
     database_name = f"submitty_{semester}_{course}"
-    course_user = cfg["database_course_user"]
+
+    token = get_api_token(cfg, identity.instructor)
 
     print(f"\nCreating database {database_name}\n")
-    if run_psql(cfg, "postgres", f"CREATE DATABASE {database_name}") != 0:
-        die(f"Failed to create database {database_name}")
-
-    if run_psql(
-        cfg, database_name,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public "
-        f"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {course_user};"
-    ) != 0:
-        die("Failed to grant table privileges to course database user")
-
-    if run_psql(
-        cfg, database_name,
-        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public "
-        f"GRANT SELECT, UPDATE ON SEQUENCES TO {course_user};"
-    ) != 0:
-        die("Failed to grant sequence privileges to course database user")
-
-    insert_course_sql = (
-        "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type) "
-        f"VALUES ('{semester}', '{course}', '{identity.ta_group}', '{identity.instructor}', "
-        f"{identity.self_registration_type});"
-    )
-    if run_psql(cfg, "submitty", insert_course_sql) != 0:
-        print("HINT:  'insert or update on table \"courses\" violates foreign key constraint...'")
-        print(f"       may indicate that term {semester} does not exist in master DB.")
-        print("       To fix, try running 'create_term.sh'.")
-        die("Failed to add this course to the master Submitty database.")
+    if not call_course_db_api(
+        cfg, token, "create",
+        semester=semester, course=course,
+        group_name=identity.ta_group, instructor=identity.instructor,
+        self_registration_type=identity.self_registration_type,
+    ):
+        print("HINT: this can also fail if the term doesn't exist in the master DB.")
+        print("      To fix, try running 'create_term.sh'.")
+        die(f"Failed to create database {database_name} and register the course.")
 
     migrator = cfg["submitty_repository"] / "migration" / "run_migrator.py"
     migrate_result = subprocess.run(
@@ -306,24 +303,15 @@ def build_course_database(cfg, identity: CourseIdentity):
          semester, course, "migrate", "--initial"], check=False,
     )
     if migrate_result.returncode != 0:
-        run_psql(cfg, "submitty",
-                 f"DELETE FROM courses WHERE term='{semester}' AND course='{course}';")
+        call_course_db_api(cfg, token, "rollback", semester=semester, course=course)
         die(f"Failed to create tables within database {database_name}")
 
-    sql_prefix = "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES "
-    forum_categories_sql = [
-        f"{sql_prefix}('General Questions', 0, NULL);",
-        f"{sql_prefix}('Homework Help', 1, NULL);",
-        f"{sql_prefix}('Quizzes', 2, NULL);",
-        f"{sql_prefix}('Tests', 3, NULL);",
-    ]
-    if run_psql(cfg, database_name, forum_categories_sql) != 0:
+    if not call_course_db_api(cfg, token, "seed-forum", semester=semester, course=course):
         die("Failed create default discussion forum categories.")
 
     if identity.archived:
-        run_psql(cfg, "submitty",
-                 f"UPDATE courses SET status=2 WHERE term='{semester}' AND course='{course}';")
-        print(f"Archived Course {course}")
+        if call_course_db_api(cfg, token, "archive", semester=semester, course=course):
+            print(f"Archived Course {course}")
 
 
 def print_success(cfg, identity: CourseIdentity, course_dir: Path):

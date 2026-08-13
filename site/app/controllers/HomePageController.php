@@ -425,6 +425,69 @@ class HomePageController extends AbstractController {
         );
     }
 
+    /**
+     * Internal endpoint used by create_course.py to run the Postgres/SQL
+     * steps of course creation through DatabaseQueries.php.
+     * 
+     * @return MultiResponse
+     */
+    #[Route("/api/courses/db", methods: ["POST"])]
+    public function courseDatabaseOperation() {
+        $action = $_POST['action'] ?? null;
+        $semester = $_POST['semester'] ?? null;
+        $course = $_POST['course'] ?? null;
+
+        if (empty($action) || empty($semester) || empty($course)) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse("Missing action, semester, or course.")
+            );
+        }
+
+        $queries = $this->core->getQueries();
+
+        try {
+            switch ($action) {
+                case 'create':
+                    $group_name = $_POST['group_name'] ?? null;
+                    $instructor = $_POST['instructor'] ?? null;
+                    $self_registration_type = (int) ($_POST['self_registration_type'] ?? 0);
+                    if (empty($group_name) || empty($instructor)) {
+                        return MultiResponse::JsonOnlyResponse(
+                            JsonResponse::getFailResponse("Missing group_name or instructor.")
+                        );
+                    }
+                    $queries->createCourseDatabase($semester, $course);
+                    $queries->grantCoursePrivileges($semester, $course);
+                    $queries->insertCourse($semester, $course, $group_name, $instructor, $self_registration_type);
+                    break;
+
+                case 'rollback':
+                    $queries->deleteCourse($semester, $course);
+                    break;
+
+                case 'seed-forum':
+                    $queries->insertDefaultForumCategories($semester, $course);
+                    break;
+
+                case 'archive':
+                    $queries->archiveCourse($semester, $course);
+                    break;
+
+                default:
+                    return MultiResponse::JsonOnlyResponse(
+                        JsonResponse::getFailResponse("Unknown action: {$action}")
+                    );
+            }
+        }
+        catch (\Exception $e) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse($e->getMessage())
+            );
+        }
+
+        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(null));
+    }
+
     #[Route("/home/courses/new", methods: ["GET"])]
     public function createCoursePage() {
         $user = $this->core->getUser();
