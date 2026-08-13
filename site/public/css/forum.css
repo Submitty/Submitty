@@ -251,6 +251,12 @@
     font-size: 1.17em;
 }
 
+.create-post-head h2 {
+    display: inline;
+    font-size: inherit;
+    margin: 0;
+}
+
 .active-thread-remove-announcement {
     display: inline-block;
     color: var(--standard-medium-orange);

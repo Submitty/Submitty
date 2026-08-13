@@ -55,7 +55,7 @@ function onBookmarkClick() {
 </script>
 
 <template>
-  <h2
+  <div
     class="create-post-head"
     data-testid="create-post-head"
   >
@@ -94,6 +94,6 @@ function onBookmarkClick() {
       />
     </a>
 
-    {{ title }}
-  </h2>
+    <h2>{{ title }}</h2>
+  </div>
 </template>
