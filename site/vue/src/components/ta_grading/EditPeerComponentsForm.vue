@@ -42,8 +42,20 @@ const emit = defineEmits<{
     }];
 }>();
 
-const selectedPeer = ref(props.selectedPeer ?? props.peers[0] ?? '');
+const selectedPeer = ref(props.selectedPeer || props.peers[0] || '');
 const checkedMarkOverrides = ref<Record<string, boolean>>({});
+
+function syncSelectedPeer() {
+    if (props.selectedPeer) {
+        selectedPeer.value = props.selectedPeer;
+        return;
+    }
+    if (!selectedPeer.value || !props.peers.includes(selectedPeer.value)) {
+        selectedPeer.value = props.peers[0] || '';
+    }
+}
+
+syncSelectedPeer();
 
 function onPeerChange(event: Event) {
     selectedPeer.value = (event.target as HTMLSelectElement).value;

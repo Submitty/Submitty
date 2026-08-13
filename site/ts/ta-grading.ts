@@ -426,12 +426,26 @@ let peerEditFormVisible = false;
 
 let peerEditSelectedPeer = '';
 
+function mapPeerEditFormData(peerEditFormData: Record<string, unknown>) {
+    return {
+        peers: (peerEditFormData.peers ?? peerEditFormData.peer_ids ?? []) as string[],
+        peerNames: (peerEditFormData.peerNames ?? peerEditFormData.peer_names ?? {}) as Record<string, string>,
+        submitterId: String(peerEditFormData.submitterId ?? peerEditFormData.submitter_id ?? ''),
+        gradeableId: String(peerEditFormData.gradeableId ?? peerEditFormData.gradeable_id ?? ''),
+        components: (peerEditFormData.components ?? []) as Record<string, unknown>[],
+        componentScores: (peerEditFormData.componentScores ?? peerEditFormData.component_scores ?? {}) as Record<string, Record<string, number>>,
+        peerDetails: (peerEditFormData.peerDetails ?? peerEditFormData.peer_details ?? {}) as Record<string, unknown>,
+        marks: (peerEditFormData.marks ?? {}) as Record<string, unknown>,
+        activeVersion: peerEditFormData.activeVersion ?? peerEditFormData.active_version ?? null,
+        selectedPeer: peerEditSelectedPeer || String(peerEditFormData.selectedPeer ?? peerEditFormData.selected_peer ?? ''),
+    };
+}
+
 function renderPeerEditForm() {
     if (window.peerEditFormData) {
         updateVueComponent('.js-edit-peer-components-form', {
-            ...window.peerEditFormData,
+            ...mapPeerEditFormData(window.peerEditFormData),
             visible: peerEditFormVisible,
-            selectedPeer: peerEditSelectedPeer,
         });
     }
 }
