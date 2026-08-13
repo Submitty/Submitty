@@ -168,7 +168,7 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    #[Route("/admin/update_docker", methods: ["GET"])]
+    #[Route("/admin/update_docker", methods: ["POST"])]
     public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -177,7 +177,7 @@ class DockerInterfaceController extends AbstractController {
         if (!$this->updateDocker()) {
             return JsonResponse::getErrorResponse("Failed to write to file");
         }
-        return JsonResponse::getSuccessResponse("Successfully queued the system to update docker, please refresh the page in a bit.");
+        return JsonResponse::getSuccessResponse("Successfully queued the system to update docker.");
     }
 
     private function updateDocker(): bool {
@@ -247,5 +247,50 @@ class DockerInterfaceController extends AbstractController {
 
         return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
                                                             Click \'Update dockers and machines\' to apply changes.');
+    }
+
+    #[Route("/admin/docker_update_status", methods: ["POST"])]
+    public function checkDockerUpdateStatus(): JsonResponse {
+        $user = $this->core->getUser();
+
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
+
+        $now = $this->core->getDateTimeNow()->format('Ymd');
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "docker" . $now . ".json");
+        $processing_docker_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . "docker" . $now . ".json");
+
+        // check the the queue for the jobs files to see if the update has finished yet
+        $is_in_progress = file_exists($docker_job_file) || file_exists($processing_docker_job_file);
+
+        // return before searching for the log file if the job is still in progress
+        if ($is_in_progress) {
+            return JsonResponse::getSuccessResponse([
+                'in_progress' => $is_in_progress,
+                'log' => ""
+            ]);
+        }
+
+        $log_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker", $now . ".txt");
+
+        $log_output = "Log file not found.";
+
+        if (file_exists($log_file)) {
+            $log_content = file_get_contents($log_file);
+            $delimiter = "================== Simplified Output ==================";
+
+            // search backwards for the last time the simplified output started
+            $last_pos = strrpos($log_content, $delimiter);
+
+            // get everything from 'Simplified Output' to the end of the file
+            $log_output = trim(substr($log_content, $last_pos));
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'in_progress' => $is_in_progress,
+            'log'         => $log_output
+        ]);
     }
 }

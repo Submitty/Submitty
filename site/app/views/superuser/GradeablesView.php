@@ -34,7 +34,6 @@ class GradeablesView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
-        $this->core->getOutput()->addInternalJs("pending-gradeables.js");
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addBreadcrumb("Pending Gradeables");
 

@@ -239,6 +239,120 @@ function updateReleaseDate() {
     onHasReleaseDate();
 }
 
+function getPeerFilePatterns() {
+    const value = $('#peer_file_patterns').val();
+    if (typeof value !== 'string' || value === '') {
+        return [];
+    }
+    try {
+        const patterns = JSON.parse(value);
+        return Array.isArray(patterns) ? patterns : [];
+    }
+    catch {
+        return [];
+    }
+}
+
+function renderPeerFilePatterns() {
+    const patterns = getPeerFilePatterns();
+    const tableBody = $('#peer-file-pattern-table tbody');
+    tableBody.empty();
+    if (patterns.length === 0) {
+        const row = $('<tr>').attr('data-testid', 'peer-file-pattern-empty-row');
+        $('<td>').attr('colspan', 2).text(
+            'No regular expressions have been added. '
+            + 'Peer graders will not see any submitted files.',
+        )
+            .appendTo(row);
+        tableBody.append(row);
+        return;
+    }
+    patterns.forEach((pattern, index) => {
+        const row = $('<tr>').attr('data-testid', 'peer-file-pattern-row');
+        $('<td>').attr('data-testid', 'peer-file-pattern-value').text(pattern).appendTo(row);
+        const actionCell = $('<td>');
+        $('<button>')
+            .attr('type', 'button')
+            .attr('data-pattern-index', index)
+            .attr('data-testid', 'delete-peer-file-pattern')
+            .attr(
+                'aria-label',
+                `Delete file regular expression ${pattern}`,
+            )
+            .addClass('btn btn-default peer-file-pattern-delete')
+            .append(
+                $('<i>')
+                    .addClass('fas fa-trash-alt')
+                    .attr('aria-hidden', 'true'),
+            )
+            .appendTo(actionCell);
+        actionCell.appendTo(row);
+        tableBody.append(row);
+    });
+}
+
+function savePeerFilePatterns(patterns) {
+    const encodedPatterns = JSON.stringify(patterns);
+    $('#peer_file_patterns').val(encodedPatterns);
+    ajaxUpdateGradeableProperty(
+        $('#g_id').val(),
+        {
+            csrf_token: csrfToken,
+            peer_file_patterns: encodedPatterns,
+        },
+        () => {
+            clearError('peer_file_patterns');
+            updateErrorMessage();
+        },
+        updateGradeableErrorCallback,
+    );
+}
+
+function isValidPeerFileRegex(pattern) {
+    if (pattern.length < 3) {
+        return false;
+    }
+    const delimiter = pattern[0];
+    const lastDelimiter = pattern.lastIndexOf(delimiter);
+    if (lastDelimiter <= 0) {
+        return false;
+    }
+    const expression = pattern.slice(1, lastDelimiter);
+    const flags = pattern.slice(lastDelimiter + 1);
+    try {
+        new RegExp(expression, flags);
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
+
+function addPeerFilePattern() {
+    const input = $('#peer-file-pattern-input');
+    const pattern = input.val().trim();
+    if (pattern === '') {
+        displayErrorMessage('Enter a file regular expression.');
+        return;
+    }
+    if (!isValidPeerFileRegex(pattern)) {
+        displayErrorMessage(
+            'Enter a valid regular expression, including delimiters, such as /^report\\.pdf$/ or /\\.java$/.',
+        );
+        return;
+    }
+    const patterns = getPeerFilePatterns();
+    if (patterns.includes(pattern)) {
+        displayErrorMessage('That file regular expression has already been added.');
+        return;
+    }
+    patterns.push(pattern);
+    savePeerFilePatterns(patterns);
+    renderPeerFilePatterns();
+    input.val('');
+    input.trigger('focus');
+}
+
 $(document).ready(() => {
     window.onbeforeunload = function (event) {
         if (Object.keys(errors).length !== 0) {
@@ -251,6 +365,39 @@ $(document).ready(() => {
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
+
+    renderPeerFilePatterns();
+    $('#peer_files').on('change', function () {
+        const filesPanelEnabled = $(this).is(':checked');
+        $('#peer-file-restriction-container').prop('hidden', !filesPanelEnabled);
+    });
+    $('#peer_files_restricted').on('change', function () {
+        const restricted = $(this).is(':checked');
+        $('#peer-file-pattern-controls').prop('hidden', !restricted);
+    });
+    $('#add-peer-file-pattern').on('click', () => {
+        addPeerFilePattern();
+    });
+    $('#peer-file-pattern-input').on('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            addPeerFilePattern();
+        }
+    });
+    $('#peer-file-pattern-table').on(
+        'click',
+        '.peer-file-pattern-delete',
+        function () {
+            const index = Number($(this).attr('data-pattern-index'));
+            const patterns = getPeerFilePatterns();
+            if (!Number.isInteger(index) || index < 0 || index >= patterns.length) {
+                return;
+            }
+            patterns.splice(index, 1);
+            savePeerFilePatterns(patterns);
+            renderPeerFilePatterns();
+        },
+    );
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
@@ -314,7 +461,10 @@ $(document).ready(() => {
         }
 
         const data = { csrf_token: csrfToken };
-        if (this.name === 'hidden_files') {
+        if (this.name === 'peer_files_restricted') {
+            data[this.name] = $(this).is(':checked');
+        }
+        else if (this.name === 'hidden_files') {
             data[this.name] = $(this).val().replace(/\s*,\s*/, ',');
         }
         else {
@@ -391,33 +541,22 @@ $(document).ready(() => {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if ($('input[name="all_grade"]:checked').val() === 'All Grade All') {
-                if (confirm('Each student grades every other student! Continue?')) {
-                    const data = { csrf_token: csrfToken };
-                    data[this.name] = $(this).val();
-                    setRandomGraders($('#g_id').val(), data, (response_data) => {
-                        // Clear errors by setting new values
-                        for (const key in response_data) {
-                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
-                                clearError(key, response_data[key]);
-                            }
-                        }
-                        // Clear errors by just removing red background
-                        for (const key in data) {
-                            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                                clearError(key);
-                            }
-                        }
-                        updateErrorMessage();
-                    }, updateGradeableErrorCallback, true);
-                    return;
-                }
+            const clear_peer_matrix = this.id === 'clear_peer_matrix';
+            const all_grade_all = !clear_peer_matrix
+                && $('input[name="all_grade"]:checked').val() === 'All Grade All';
+
+            let confirmation_message = 'This will update peer matrix. Are you sure?';
+            if (clear_peer_matrix) {
+                confirmation_message = 'This will clear peer matrix. Are you sure?';
             }
-            if (confirm('This will update peer matrix. Are you sure?')) {
+            else if (all_grade_all) {
+                confirmation_message = 'Each student grades every other student! Continue?';
+            }
+            if (confirm(confirmation_message)) {
                 const data = { csrf_token: csrfToken };
                 data[this.name] = $(this).val();
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
-                // Clear errors by setting new values
+                    // Clear errors by setting new values
                     for (const key in response_data) {
                         if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
@@ -430,7 +569,7 @@ $(document).ready(() => {
                         }
                     }
                     updateErrorMessage();
-                }, updateGradeableErrorCallback, false);
+                }, updateGradeableErrorCallback, all_grade_all, clear_peer_matrix);
             }
             else {
                 return false;
@@ -675,21 +814,17 @@ function ajaxCheckBuildStatus() {
         },
     });
 }
-function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all) {
-    let number_to_grade = 1;
-    if (all_grade_all === true) {
+function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all, clear_peer_matrix) {
+    let number_to_grade;
+
+    if (clear_peer_matrix) {
+        number_to_grade = 0;
+    }
+    else if (all_grade_all === true) {
         number_to_grade = 10000;
     }
     else {
         number_to_grade = $('#number_to_peer_grade').val();
-    }
-
-    if (number_to_grade <= 0) {
-        number_to_grade = 0;
-        if (!confirm('This will clear Peer Matrix. Continue?')) {
-            $('#peer_loader').addClass('hide');
-            return false;
-        }
     }
 
     gradeable_id = $('#g_id').val();

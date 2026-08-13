@@ -12,7 +12,8 @@ class AuthTokenView extends AbstractView {
             "vcs_tokens" => $tokens,
             "csrf_token" => $this->core->getCsrfToken(),
             "current_time" => $this->core->getDateTimeNow(),
-            "is_faculty" => $is_faculty
+            "is_faculty" => $is_faculty,
+            "user_id" => $this->core->getUser()->getId()
         ];
         if ($new_vcs_token !== null && $new_vcs_token_val !== null) {
             $params["new_vcs_token"] = $new_vcs_token;

@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
-use app\entities\grading_cluster\GradingCluster;
 use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
-use app\entities\grading_cluster\GradingClusterMember;
 use app\libraries\response\JsonResponse;
-use app\libraries\grading_cluster\DummySplitAlgorithm;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
+use app\libraries\FileUtils;
 
 class GradingClusterController extends AbstractController {
     /**
@@ -25,8 +23,13 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
         }
 
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
         $algorithm = GradingClusterAlgorithm::tryFrom($_POST['algorithm'] ?? '');
@@ -34,37 +37,57 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Invalid or missing algorithm parameter.");
         }
 
-        $em = $this->core->getCourseEntityManager();
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
-        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
-        if ($submitters === []) {
-            return JsonResponse::getErrorResponse("No active submissions found for this gradeable.");
+        $clustering_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "clustering__" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json");
+
+        $clustering_job_data = [
+            "job" => "GradingClustering",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable->getId(),
+            "algorithm" => $algorithm->value
+        ];
+
+        if (
+            (!is_writable($clustering_job_file) && file_exists($clustering_job_file))
+            || file_put_contents($clustering_job_file, json_encode($clustering_job_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return JsonResponse::getErrorResponse("Failed to write clustering job to daemon queue.");
         }
-
-        $cluster_groups = match ($algorithm) {
-            GradingClusterAlgorithm::DummySplit => (new DummySplitAlgorithm())->run($submitters),
-        };
-
-        // Deleting the config cascades and deletes all associated clusters and members
-        $em->getRepository(GradingClusterConfig::class)->deleteByGradeableId($gradeable_id);
-
-        $config = new GradingClusterConfig($gradeable_id, $algorithm);
-        $em->persist($config);
-
-        foreach ($cluster_groups as $cluster_name => $members) {
-            if ($members === []) {
-                continue;
-            }
-
-            $cluster = new GradingCluster($config, $cluster_name);
-            foreach ($members as $member) {
-                new GradingClusterMember($cluster, $member['user_id'] ?? null, $member['team_id'] ?? null, (int) $member['active_version']);
-            }
-            $em->persist($cluster);
-        }
-        $em->flush();
 
         return JsonResponse::getSuccessResponse([]);
+    }
+
+    /**
+     * Checks if the clustering job is currently in progress.
+     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/status", methods: ["GET"])]
+    public function checkClusteringStatus(string $gradeable_id): JsonResponse {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
+        }
+
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $job_name = "clustering__" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json";
+
+        $clustering_job_file = FileUtils::joinPaths($daemon_job_queue_path, $job_name);
+        $processing_job_file = FileUtils::joinPaths($daemon_job_queue_path, "PROCESSING_" . $job_name);
+
+        if (file_exists($clustering_job_file) || file_exists($processing_job_file)) {
+            return JsonResponse::getSuccessResponse(['status' => 'processing']);
+        }
+
+        return JsonResponse::getSuccessResponse(['status' => 'done']);
     }
 
     /**
@@ -73,22 +96,27 @@ class GradingClusterController extends AbstractController {
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering", methods: ["GET"])]
     public function getClusters(string $gradeable_id): JsonResponse {
-        if ($this->tryGetGradeable($gradeable_id, false) === false) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
         $config = $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
-            ->findOneBy(['gradeable_id' => $gradeable_id]);
+            ->findWithClustersAndMembers($gradeable->getId());
 
         if ($config === null) {
             return JsonResponse::getSuccessResponse([
-                "gradeable_id" => $gradeable_id,
+                "gradeable_id" => $gradeable->getId(),
                 "clusters"     => [],
             ]);
         }
 
-        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
+        $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable->getId());
         $active_versions = [];
         foreach ($submitters as $submitter) {
             $id = $submitter['user_id'] ?? $submitter['team_id'];
@@ -98,16 +126,13 @@ class GradingClusterController extends AbstractController {
         $result = [];
         foreach ($config->getClusters() as $cluster) {
             $valid_members = [];
-            foreach ($cluster->getMembers() as $m) {
-                $member_id = $m->getUserId() ?? $m->getTeamId();
-                if (isset($active_versions[$member_id]) && $active_versions[$member_id] === $m->getActiveVersion()) {
-                    $valid_members[] = [
-                        'id'      => $m->getId(),
-                        'user_id' => $m->getUserId(),
-                        'team_id' => $m->getTeamId(),
-                        'active_version' => $m->getActiveVersion(),
-                    ];
-                }
+            foreach ($cluster->getValidMembers($active_versions) as $m) {
+                $valid_members[] = [
+                    'id'      => $m->getId(),
+                    'user_id' => $m->getUserId(),
+                    'team_id' => $m->getTeamId(),
+                    'active_version' => $m->getActiveVersion(),
+                ];
             }
 
             $result[] = [
@@ -120,7 +145,7 @@ class GradingClusterController extends AbstractController {
         }
 
         return JsonResponse::getSuccessResponse([
-            "gradeable_id" => $gradeable_id,
+            "gradeable_id" => $gradeable->getId(),
             "clusters"     => $result,
         ]);
     }

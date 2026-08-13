@@ -193,48 +193,70 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
+    #[AccessControl(role: "INSTRUCTOR")]
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_build_notices", methods: ["POST"])]
+    public function rainbowGradesBuildNotices(): JsonResponse {
+        return JsonResponse::getSuccessResponse([
+            'notice' => $this->getRainbowGradesBuildNotice(),
+        ]);
+    }
+
     /**
-     * Determine whether Rainbow Grades files were likely generated outside the server build pipeline.
+     * Re-evaluate whether the served Rainbow Grades HTML was generated outside the server
+     * build pipeline. Used to refresh the warning banner after a build without reloading
+     * the page.
+     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_manual_status", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_manual_status", methods: ["POST"])]
+    public function rainbowGradesManualStatus(): JsonResponse {
+        return JsonResponse::getSuccessResponse([
+            'rainbow_grades_generated_manually' => $this->isRainbowGradesLikelyManuallyGenerated(),
+        ]);
+    }
+
+    /**
+     * Determine whether the served Rainbow Grades HTML was generated manually or not.
      *
-     * If student HTML files are newer than Build metadata files by a meaningful amount, this strongly
-     * suggests the reports were manually generated and copied in.
-     * Result is cached to avoid repeated expensive directory walks on every request.
+     * A server build rsyncs rainbow_grades/individual_summary_html/* into reports/summary_html,
+     * so every file has an identical twin when the server produced it. A manual generation writes
+     * reports/summary_html independently, leaving files that diverge from individual_summary_html.
+     * Result is cached.
      */
     private function isRainbowGradesLikelyManuallyGenerated(): bool {
-        // Return cached result if available
         if ($this->rg_manual_generation_cache !== null) {
             return $this->rg_manual_generation_cache;
         }
 
         $course_path = $this->core->getConfig()->getCoursePath();
         $summary_html_dir = FileUtils::joinPaths($course_path, 'reports', 'summary_html');
-        $build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'Build');
+        $server_build_dir = FileUtils::joinPaths($course_path, 'rainbow_grades', 'individual_summary_html');
 
-        $latest_individual_html_timestamp = $this->getLatestFileTimestamp(
+        $latest_pushed_html = $this->getLatestFileTimestamp(
             $summary_html_dir,
             function (string $file_path): bool {
                 return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
             }
         );
 
-        if ($latest_individual_html_timestamp === null || $latest_individual_html_timestamp === 0) {
+        if ($latest_pushed_html === null || $latest_pushed_html === 0) {
             $this->rg_manual_generation_cache = false;
             return false;
         }
 
-        $latest_build_meta_timestamp = $this->getLatestFileTimestamp(
-            $build_dir,
+        $latest_server_build = $this->getLatestFileTimestamp(
+            $server_build_dir,
             function (string $file_path): bool {
-                return str_contains(strtolower(basename($file_path)), 'meta');
+                return strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'html';
             }
         );
 
-        if ($latest_build_meta_timestamp === null) {
+        // Summaries exist but no server build produced them -> uploaded manually.
+        if ($latest_server_build === null || $latest_server_build === 0) {
             $this->rg_manual_generation_cache = true;
             return true;
         }
 
-        $result = ($latest_individual_html_timestamp - $latest_build_meta_timestamp) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
+        $result = ($latest_pushed_html - $latest_server_build) > self::RG_MANUAL_GENERATION_THRESHOLD_SECONDS;
         $this->rg_manual_generation_cache = $result;
         return $result;
     }
@@ -486,6 +508,9 @@ class ReportController extends AbstractController {
         $user_data['course_section_id'] = $user->getCourseSectionId();
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
+        $user_data['date_registered'] = $user->getDateRegistered() !== null
+            ? $user->getDateRegistered()->format(\DateTime::ATOM)
+            : null;
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y h:i A T");
 
@@ -848,6 +873,7 @@ class ReportController extends AbstractController {
                 'show_warning' => $show_warning,
                 'days_since_run' => $days_since_run,
                 'rainbow_grades_generated_manually' => $rainbow_grades_generated_manually,
+                'rainbow_build_notice' => $this->getRainbowGradesBuildNotice(),
                 'normalization_warning' => $customization->hasNormalizationWarning(),
             ]);
         }
@@ -1057,6 +1083,7 @@ class ReportController extends AbstractController {
         $debug_contents = file_get_contents($debug_output_path);
         $debug_contents = trim($debug_contents);
         $was_successful = str_ends_with($debug_contents, 'Done');
+        $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
 
         if ($max_wait_time && $failure_detected === false && $was_successful) {
             return JsonResponse::getSuccessResponse($debug_contents);
@@ -1072,30 +1099,104 @@ class ReportController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
-        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
-        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
-        $grade_file = null;
-        if (file_exists($grade_path)) {
-            $grade_file = file_get_contents($grade_path);
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $available_sorts = $this->getAvailableGradebookSorts($rainbow_grades_dir);
+
+        $selected_sort = 'overall';
+        $requested = $_GET['sort'] ?? null;
+        if (is_string($requested) && isset($available_sorts[$requested])) {
+            $selected_sort = $requested;
         }
+        elseif (!isset($available_sorts['overall']) && count($available_sorts) > 0) {
+            $selected_sort = array_key_first($available_sorts);
+        }
+
+        $grade_file = null;
+        if (isset($available_sorts[$selected_sort])) {
+            $grade_path = FileUtils::joinPaths($rainbow_grades_dir, $available_sorts[$selected_sort]['file']);
+            if (file_exists($grade_path)) {
+                $grade_file = file_get_contents($grade_path);
+            }
+        }
+
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file,
-                $grade_summaries_last_run
+                $grade_summaries_last_run,
+                $available_sorts,
+                $selected_sort
             )
         );
     }
 
     /**
+     * Discover which rainbow grades tables have been built in the given directory and
+     * return them as an ordered map of sort-key => ['file' => <filename>, 'label' => <label>].
+     * Recognizes output.html (overall) and output-by-<x>.html (e.g. output-by-section.html).
+     *
+     * @return array<string, array{file: string, label: string}>
+     */
+    private function getAvailableGradebookSorts(string $rainbow_grades_dir): array {
+        $labels = [
+            'overall' => 'By Cumulative Average',
+            'name' => 'By Student Name',
+            'section' => 'By Registration Section',
+            'lab' => 'By Lab',
+            'hw' => 'By Homework',
+            'test' => 'By Test',
+            'quiz' => 'By Quiz',
+            'exam' => 'By Exam',
+            'reading' => 'By Reading',
+            'worksheet' => 'By Worksheet',
+            'project' => 'By Project',
+            'participation' => 'By Participation',
+            'zone' => 'By Exam Seating Zone',
+        ];
+
+        $found = [];
+        foreach (glob(FileUtils::joinPaths($rainbow_grades_dir, 'output*.html')) as $path) {
+            $name = basename($path);
+            if ($name === 'output.html') {
+                $key = 'overall';
+            }
+            elseif (preg_match('/^output-by-([a-z0-9_]+)\.html$/', $name, $m)) {
+                $key = $m[1];
+            }
+            else {
+                continue;
+            }
+            $found[$key] = [
+                'file' => $name,
+                'label' => $labels[$key] ?? ('By ' . ucwords(str_replace('_', ' ', $key))),
+            ];
+        }
+
+        $ordered = [];
+        foreach (array_keys($labels) as $key) {
+            if (isset($found[$key])) {
+                $ordered[$key] = $found[$key];
+                unset($found[$key]);
+            }
+        }
+        foreach ($found as $key => $info) {
+            $ordered[$key] = $info;
+        }
+        return $ordered;
+    }
+
+
+    /**
      * Generate a custom filename for the downloaded CSV file
      */
-    private function generateCustomFilename(): string {
+    private function generateCustomFilename(string $sort = 'overall'): string {
         $course = $this->core->getConfig()->getCourse();
         $timestamp = DateUtils::getFileNameTimeStamp();
-        return "{$course}_rainbow_grades_{$timestamp}.csv";
+        $sort_part = ($sort === 'overall') ? '' : "_{$sort}";
+        return "{$course}_rainbow_grades{$sort_part}_{$timestamp}.csv";
     }
 
 
@@ -1104,13 +1205,18 @@ class ReportController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
     public function downloadRainbowGradesCSVFile(): ?DownloadResponse {
+        // Which sorted CSV to download, should be same as selected
+        $requested = $_GET['sort'] ?? 'overall';
+        $sort = preg_match('/^[a-z0-9_]+$/', $requested) ? $requested : 'overall';
+        $csv_filename = ($sort === 'overall') ? 'output.csv' : 'output-by-' . $sort . '.csv';
+
         // Path to the CSV file for Rainbow Grades
         $csvFilePath = FileUtils::joinPaths(
             '/var/local/submitty/courses',
             $this->core->getConfig()->getTerm(),
             $this->core->getConfig()->getCourse(),
             'rainbow_grades',
-            'output.csv'
+            $csv_filename
         );
 
 
@@ -1118,7 +1224,7 @@ class ReportController extends AbstractController {
         if (file_exists($csvFilePath)) {
             return DownloadResponse::getDownloadResponse(
                 file_get_contents($csvFilePath),
-                $this->generateCustomFilename(),
+                $this->generateCustomFilename($sort),
                 "application/csv"
             );
         }
@@ -1231,5 +1337,55 @@ class ReportController extends AbstractController {
             ];
         }
         return $gradeables;
+    }
+
+    /**
+     * Parse ERROR:/WARNING: lines out of the latest rainbow grades build log.
+     *
+     * @return array<int, array{level: string, message: string}>
+     */
+    private function getRainbowGradesBuildNotices(): array {
+        $debug_output_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades',
+            'auto_debug_output.txt'
+        );
+        if (!file_exists($debug_output_path)) {
+            return [];
+        }
+
+        $notices = [];
+        foreach (explode("\n", (string) file_get_contents($debug_output_path)) as $line) {
+            if (preg_match('/^(ERROR|WARNING): (.+)$/', trim($line), $matches) === 1) {
+                $notices[] = ['level' => strtolower($matches[1]), 'message' => $matches[2]];
+            }
+        }
+        return $notices;
+    }
+
+    /**
+     * Collapse the build notices into a single banner, with error overriding warning.
+     *
+     * @return array{level: string, messages: string[], sysadmin_email: string}|null
+     */
+    private function getRainbowGradesBuildNotice(): ?array {
+        $notices = $this->getRainbowGradesBuildNotices();
+        if (count($notices) === 0) {
+            return null;
+        }
+
+        $level = 'warning';
+        foreach ($notices as $notice) {
+            if ($notice['level'] === 'error') {
+                $level = 'error';
+                break;
+            }
+        }
+
+        return [
+            'level' => $level,
+            'messages' => array_column($notices, 'message'),
+            'sysadmin_email' => $this->core->getConfig()->getSysAdminEmail(),
+        ];
     }
 }

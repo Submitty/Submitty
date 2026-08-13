@@ -22,6 +22,16 @@
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">
+    {% if user_assignment_settings_missing %}
+        <div class="alert alert-danger">
+            <strong>Error: The user_assignment_settings.json file is missing for this submission. Some submission metadata may be unavailable; please contact your system administrator. </strong>
+        </div>
+    {% endif %}
+    {% if user_assignment_settings_unreadable %}
+        <div class="alert alert-danger">
+            <strong> Error: The user_assignment_settings.json file cannot be read due to incorrect file permissions. Please contact your system administrator. </strong>
+        </div>
+    {% endif %}
     <header id="gradeable-info">
         <h1 data-testid="new-submission-info">
             New submission for: {{ gradeable_name }}
@@ -399,19 +409,23 @@
             // GET FILES OF THE HIGHEST VERSION
             if (assignment_version == highest_version && highest_version > 0) {
                 $("#getprev").click(function(e){
-                    loadPreviousFilesOnDropBoxes();
+                    {% if not is_notebook %}
+                        loadPreviousFilesOnDropBoxes();
+                    {% endif %}
                     e.stopPropagation();
                 });
             }
 
             function loadPreviousFilesOnDropBoxes(){
-                $("#startnew").click();
+                {% if not is_notebook %}
+                    $("#startnew").click();
                     {% for file in old_files %}
                         addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
                         readPrevious('{{ file.name }}', {{ file.part }});
                     {% endfor %}
                     setUsePrevious();
                     setButtonStatus();
+                {% endif %}
             }
 
             window.loadPreviousFilesOnDropBoxes = loadPreviousFilesOnDropBoxes;
@@ -524,10 +538,10 @@
     window.term = "{{ term }}";
     window.gradeable_id = "{{ gradeable_id }}";
 
-    function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
+    async function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
-        var days_past_deadline = checkDeadline();
+        var days_past_deadline = await checkDeadline();
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }

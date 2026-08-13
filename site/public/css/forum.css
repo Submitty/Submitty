@@ -321,7 +321,7 @@
 
 .post-action-container {
     margin-top: 8px;
-    margin-left: 10px;
+    margin-left: auto;
     float: right;
     white-space: nowrap;
 }
@@ -336,6 +336,13 @@
     display: inline-block;
     align-items: center;
     justify-content: center;
+}
+
+.post-button-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .upduck-button {
@@ -607,6 +614,20 @@
     position: relative;
     height: 81vh;
     overflow-y: hidden;
+}
+
+.full-screen-mode #thread-container {
+    height: 100vh;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+.full-screen-mode #thread_list {
+    max-height: 100vh;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+.full-screen-mode #posts_list {
+    max-height: 100vh;
 }
 
 .stats-table-container {

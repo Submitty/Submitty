@@ -706,6 +706,8 @@ class ForumThreadView extends AbstractView {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+        // Raw ISO timestamp for Twig date comparisons (avoids locale-formatted string parsing failures)
+        $post_date_raw = DateUtils::dateTimeToString($post->getTimestamp());
 
         if (!$post->getHistory()->isEmpty()) {
             $edit_timestamp = max($post->getHistory()->map(function ($x) {
@@ -820,6 +822,8 @@ class ForumThreadView extends AbstractView {
             "info_name" => json_encode($author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")"),
             "visible_user_json" => json_encode($visible_username),
             "jscriptAnonFix" => json_encode($post->isAnonymous() ? 'true' : 'false'),
+            "full_name" => $author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")",
+            "is_anonymous" => $post->isAnonymous(),
             "pronouns" => trim($author_display_info["pronouns"]),
             "display_pronouns" => $author_display_info["display_pronouns"],
             "is_OP" => ($post->getAuthor()->getId() === $first_post->getAuthor()->getId()) && ($post->isAnonymous() === $first_post->isAnonymous()),
@@ -857,6 +861,7 @@ class ForumThreadView extends AbstractView {
             "post_user_info" => $post_user_info,
             "post_up_duck" => $post_up_duck,
             "post_date" => $date,
+            "post_date_raw" => $post_date_raw,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
             "visible_username" => $visible_username,

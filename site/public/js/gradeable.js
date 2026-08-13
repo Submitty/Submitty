@@ -1,5 +1,5 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
-   renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
+   renderGradingComponentHeader renderInstructorEditGradeable renderRubricTotalBox
    renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
 /* global Twig showVerifyComponent buildCourseUrl displayErrorMessage closePopup getItempoolOptions isItempoolAvailable csrfToken */
 
@@ -38,7 +38,6 @@ function loadTemplates() {
         { id: 'OverallComment', href: '/templates/grading/OverallComment.twig' },
         { id: 'TotalScoreBox', href: '/templates/grading/TotalScoreBox.twig' },
         { id: 'TotalPeerScoreBox', href: '/templates/grading/TotalPeerScoreBox.twig' },
-        { id: 'ConflictMarks', href: '/templates/grading/ConflictMarks.twig' },
         { id: 'RubricTotalBox', href: '/templates/grading/RubricTotalBox.twig' },
         { id: 'Redactions', href: '/templates/admin/Redactions.twig' },
     ];
@@ -180,16 +179,26 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
 
     const peer_details = {};
 
-    // Group together some useful data for rendering:
+    // Group together the peer graders, their selected marks, and whether
+    // their grade was created against a different submission version.
     gradeable.components.forEach((component) => {
-        // The peer details for a specific component (who has graded it and what marks have they chosen.)
         peer_details[component.id] = {
             graders: [],
             marks_assigned: {},
+            graded_versions: {},
+            version_conflicts: {},
         };
-        graded_gradeable.graded_components[component.id].forEach((graded_component) => {
-            peer_details[component.id]['graders'].push(graded_component.grader_id);
-            peer_details[component.id]['marks_assigned'][graded_component.grader_id] = graded_component.mark_ids;
+
+        const gradedComponents = graded_gradeable.graded_components[component.id] ?? [];
+
+        gradedComponents.forEach((graded_component) => {
+            const graderId = graded_component.grader_id;
+
+            peer_details[component.id].graders.push(graderId);
+            peer_details[component.id].marks_assigned[graderId] = graded_component.mark_ids;
+            peer_details[component.id].graded_versions[graderId] = graded_component.graded_version;
+            peer_details[component.id].version_conflicts[graderId]
+                = graded_component.graded_version !== displayVersion;
         });
     });
     // TODO: i don't think this is async
@@ -424,21 +433,6 @@ function renderRubricTotalBox(scores) {
         scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
         resolve(Twig.twig({ ref: 'RubricTotalBox' }).render(scores));
-    });
-}
-
-/**
- *
- * @param conflict_marks
- * @return {Promise<string>}
- */
-function renderConflictMarks(conflict_marks) {
-    return new Promise((resolve) => {
-        // TODO: i don't think this is async
-        resolve(Twig.twig({ ref: 'ConflictMarks' }).render({
-            conflict_marks: conflict_marks,
-            decimal_precision: DECIMAL_PRECISION,
-        }));
     });
 }
 

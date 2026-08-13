@@ -111,5 +111,6 @@ clone_or_update_repo  Lichen  ${Lichen_Version}
 clone_or_update_repo  RainbowGrades  ${RainbowGrades_Version}
 clone_or_update_repo  Tutorial  ${Tutorial_Version}
 clone_or_update_repo  SysadminTools  ${SysadminTools_Version}
+clone_or_update_repo  SubmittyCLI  ${SubmittyCLI_Version}
 clone_or_update_repo  Localization  ${Localization_Version}
 

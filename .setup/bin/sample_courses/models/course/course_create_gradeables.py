@@ -11,7 +11,6 @@ import random
 import shutil
 import subprocess
 import os.path
-import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
@@ -28,6 +27,15 @@ from sample_courses.utils.create_or_generate import (
     create_gradeable_submission,
     create_pdf_annotations
     )
+
+def set_seeded_random_state(*parts):
+    """
+    Set the random state to a seeded value based on the provided parts.
+    """
+    saved_state = random.getstate()
+    seeded_rng = random.Random("|".join(str(part) for part in parts))
+    random.setstate(seeded_rng.getstate())
+    return saved_state
 
 
 class Course_create_gradeables:
@@ -54,7 +62,13 @@ class Course_create_gradeables:
 
     def add_gradeables(self) -> None:
         anon_ids = {}
+        # pre gradeable creation random state
+        initial_state = random.getstate()
         for gradeable in self.gradeables:
+
+            # set the random state to a seeded value based on the gradeable id and course code and return the previous state to be restored later
+            gradeable_state = set_seeded_random_state(gradeable.id, self.code, "gradeables")
+
             #create gradeable specific anonymous ids for users
             prev_state = random.getstate()
             for user in self.users:
@@ -347,6 +361,21 @@ class Course_create_gradeables:
                                 if skip_grading > 0.3 and random.random() > 0.01:
                                     ins = insert(self.gradeable_data_overall_comment).values(**overall_comment_values)
                                     res = self.conn.execute(ins)
+                                peer_grader_ids = []
+                                for component in gradeable.components:
+                                    if component.is_peer_component:
+                                        stmt = (
+                                            select(self.peer_assign.columns.grader_id)
+                                            .where(
+                                                self.peer_assign.columns.g_id == gradeable.id
+                                            )
+                                            .where(
+                                                self.peer_assign.columns.user_id == user.id
+                                            )
+                                            .order_by(self.peer_assign.columns.grader_id)
+                                        )
+                                        peer_grader_ids = self.conn.execute(stmt).scalars().all()
+                                        break                               
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         # This is used to simulate unfinished grading.
@@ -355,29 +384,46 @@ class Course_create_gradeables:
                                         score = 0
                                     else:
                                         max_value_score = random.randint(int(component.lower_clamp * 2), int(component.max_value * 2)) / 2
-                                        uppser_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
-                                        score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
+                                        upper_clamp_score = random.randint(int(component.lower_clamp * 2), int(component.upper_clamp * 2)) / 2
+                                        score = generate_probability_space({0.7: max_value_score, 0.2: upper_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                                    self.conn.execute(
-                                        insert(self.gradeable_component_data).values(
-                                            gc_id=component.key, gd_id=gd_id, gcd_score=score,
-                                            gcd_component_comment=generate_random_ta_comment(), gcd_grader_id=self.instructor.id,
-                                            gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit
-                                        )
-                                    )
+                                    # Generate the comment and selected marks before determining the graders.
+                                    component_comment = generate_random_ta_comment()
+                                    selected_marks = []
                                     first = True
                                     first_set = False
                                     for mark in component.marks:
                                         if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                            self.conn.execute(
-                                                insert(self.gradeable_component_mark_data).values(
-                                                    gc_id=component.key, gd_id=gd_id,
-                                                    gcm_id=mark.key, gcd_grader_id=self.instructor.id
-                                                )
-                                            )
-                                            if(first):
+                                            selected_marks.append(mark.key)
+                                            if first:
                                                 first_set = True
                                         first = False
+
+                                    if component.is_peer_component:
+                                        grader_ids = peer_grader_ids
+                                    else:
+                                        grader_ids = [self.instructor.id]
+                                    for grader_id in grader_ids:
+                                        self.conn.execute(
+                                            insert(self.gradeable_component_data).values(
+                                                gc_id=component.key,
+                                                gd_id=gd_id,
+                                                gcd_score=score,
+                                                gcd_component_comment=component_comment,
+                                                gcd_grader_id=grader_id,
+                                                gcd_grade_time=grade_time,
+                                                gcd_graded_version=versions_to_submit
+                                            )
+                                        )
+                                        for mark_id in selected_marks:
+                                            self.conn.execute(
+                                                insert(self.gradeable_component_mark_data).values(
+                                                    gc_id=component.key,
+                                                    gd_id=gd_id,
+                                                    gcm_id=mark_id,
+                                                    gcd_grader_id=grader_id
+                                                )
+                                            )
                                 self.conn.commit()
 
                     if gradeable.type == 0 and os.path.isdir(submission_path):
@@ -408,6 +454,10 @@ class Course_create_gradeables:
                                 )
                             )
                         self.conn.commit()
+            # restore the random state to the previous state before the last iteration
+            random.setstate(gradeable_state)
+        # restore the random state to the previous state before the gradeable loop
+        random.setstate(initial_state)
 
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':

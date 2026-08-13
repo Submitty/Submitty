@@ -1,3 +1,5 @@
+{% import 'misc/TableSortComponents.twig' as table_sort %}
+
 <div class="content">
     {#
         Default is viewing your sections
@@ -7,35 +9,53 @@
     <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
+            {% set peer_only_grader = gradeable.hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), gradeable.getMinGradingGroup()) %}
             <ul id="details-legend">
                 <li>
                     <i class="grading-example-circle grader-NULL"></i>
                     Ungraded component
                 </li>
-                <li>
-                    <i class="grading-example-circle grader-3"></i>
-                    Component graded by a limited access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-4"></i>
-                    Peer component graded by a student
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-1"></i>
-                    Component graded by a full access grader
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-verified"></i>
-                    Limited access grader verified
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-double"></i>
-                    Component double-graded by a full access grader or instructor
-                </li>
-                <li>
-                    <i class="grading-example-circle grader-active grader-NULL"></i>
-                    Component actively being graded
-                </li>
+                {% if not peer_only_grader %}
+                    <li>
+                        <i class="grading-example-circle grader-3"></i>
+                        Component graded by a limited access grader
+                    </li>
+                    {% if gradeable.hasPeerComponent() %}
+                        <li>
+                            <i class="grading-example-circle grader-peer-left-half"></i>
+                            Peer component graded by another peer grader
+                        </li>
+                        <li>
+                            <i class="grading-example-circle grader-peer-right-half"></i>
+                            Peer component graded by you
+                        </li>
+                        <li>
+                            <i class="grading-example-circle grader-4"></i>
+                            Peer component graded by another peer grader and you
+                        </li>
+                    {% endif %}
+                    <li>
+                        <i class="grading-example-circle grader-1"></i>
+                        Component graded by a full access grader
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-verified"></i>
+                        Limited access grader verified
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-double"></i>
+                        Component double-graded by a full access grader or instructor
+                    </li>
+                    <li>
+                        <i class="grading-example-circle grader-active grader-NULL"></i>
+                        Component actively being graded
+                    </li>
+                {% else %}
+                    <li>
+                        <i class="grading-example-circle grader-4"></i>
+                        Peer component graded by you
+                    </li>
+                {% endif %}
             </ul>
 
             <div class="row-wrapper">
@@ -44,9 +64,11 @@
                     <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
                 </label>
                 {% endif %}
-                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
-                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
-                </label>
+                {% if not is_student %}
+                    <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper"> Randomize Order
+                        <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
+                    </label>
+                {% endif %}
                 {% if toggle_anon_button %}
                 <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
                     <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>
@@ -62,6 +84,14 @@
                     <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
+                {% if full_access_grader_permission and is_clustering_allowed and current_algorithm is not null %}
+                <label for="toggle-group-by-clusters" data-testid="group-by-clusters-label" class="column-wrapper"> Group by Clusters
+                    <a aria-label="Group by Clusters Help" href="https://submitty.org/grader/rubric_grading/cluster_grading" target="_blank">
+                        <i class="far fa-question-circle"></i>
+                    </a>
+                    <input type="checkbox" id="toggle-group-by-clusters" data-testid="group-by-clusters-checkbox" onchange="changeGroupByClusters()" {% if is_group_by_clusters %}checked{% endif %}>
+                </label>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -70,7 +100,18 @@
             <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
         {% endif %}
         {% if not is_instructor %}
-            <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'GradeableMessage',
+                'args': {
+                    'storageKey': storage_key,
+                    'userGroup': core.getUser().getGroup(),
+                    'blindStatus': blind_status,
+                },
+                'events': {
+                    'cancel': '() => { window.location.href = \'' ~ course_url ~ '\'; }',
+                }
+            } %}
         {% endif %}
         {% if can_regrade %}
             <div>
@@ -83,13 +124,24 @@
                 </div>
             </div>
         {% endif %}
-        <button type="button" class="btn btn-primary" onclick="toggleAllSections()" id="toggle-all-sections-btn" data-testid="toggle-all-sections">Collapse All Sections</button>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'ta_grading/ToggleAllSectionsButton',
+            'class': 'js-toggle-all-sections',
+            'style': 'display: inline;',
+            'args': {
+                'collapsed': collapsed_sections|length > 0,
+            },
+            'events': {
+                'toggle-all': 'toggleAllSections',
+            },
+        } %}
         {% include 'Vue.twig' with {
             'type': 'component',
             'name': 'ToggleColumns',
             'style': 'display: inline;',
             'args': {
-                'columns': all_columns|map(column => column.function),
+                'columns': all_columns|map(column => column.header_key),
                 'labels': all_columns|map(column => column.title),
                 'forced': [
                     'grading'
@@ -98,12 +150,37 @@
                 'format': 'json',
             },
         } %}
+        {% if full_access_grader_permission and is_clustering_allowed %}
+            {% include 'Vue.twig' with {
+                'type': 'component',
+                'name': 'ta_grading/CreateClustersModal',
+                'style': 'display: contents;',
+                'args': {
+                    'gradeableId': gradeable.getId(),
+                    'algorithms': algorithms,
+                    'currentAlgorithm': current_algorithm,
+                    'createClusteringUrl': create_clustering_url,
+                    'checkClusteringStatusUrl': check_clustering_status_url,
+                    'csrfToken': core.getCsrfToken(),
+                    'canCreateClustering': full_access_grader_permission
+                },
+                'events': {
+                    'clustering-status': 'updateClusteringStatus',
+                    'clustering-done': 'handleClusteringDone',
+                    'clustering-error': 'handleClusteringError'
+                }
+            } %}
+        {% endif %}
     </div>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
     </div>
     {% endif %}
+
+    <div id="clustering-loading-banner" style="display: none;" class="details-warning-box details-warning-highlight">
+        <i class="fas fa-spinner fa-spin"></i> Generating clusters... This may take a few moments.
+    </div>
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
@@ -141,6 +218,8 @@
         {% endif %}
     </div>
 
+    {{ table_sort.table_sort_manager('details-table') }}
+
     {# This is a data table #}
     <table id="details-table" data-testid="details-table" class="table table-striped table-bordered persist-area table-text-left" data-details-base-path="{{ details_base_path }}">
         <caption />
@@ -148,23 +227,10 @@
         <thead>
             <tr>
                 {% for column in columns %}
-                    {% if column.sort_type is defined %}
-                        <th style="text-align: center" data-col-title="{{ column.title }}">
-                            <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
-                            {% if sort == column.sort_type %}
-                                class="active-sort"
-                            {% endif %}
-                            >
-                                {{ column.title }}
-                                {% if sort == column.sort_type %}
-                                    <i class="fa {{ direction == 'ASC' ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
-                                {% else %}
-                                    <i class="fa fa-sort"></i>
-                                {% endif %}
-                            </a>
-                        </th>
+                    {% if column.data_type is defined and not is_student %}
+                        {{ table_sort.sortable_table_header('details-table', column.title, column.header_key, column.data_type) }}
                     {% else %}
-                        <th style="text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -186,7 +252,9 @@
                             <td colspan="{{ columns|length }}" style="text-align: center">
                                 <i class="collapse-icon fas fa-caret-right"></i>
                                 <i class="expand-icon fas fa-caret-down"></i>
-                                {% if gradeable.isGradeByRegistration()%}
+                                {% if is_group_by_clusters %}
+                                    Students in Cluster {{ section.title }}
+                                {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
                                 {% else %}
                                     Students Assigned to Rotating Section {{ section.title }}
@@ -194,9 +262,11 @@
                             </td>
                         {% endif %}
                     </tr>
-                    <tr class="info">
-                        <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
-                    </tr>
+                    {% if not is_group_by_clusters %}
+                        <tr class="info">
+                            <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
                 {# /Section heading #}
                 {# Student list #}
@@ -259,9 +329,11 @@
 </div>
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, override_data, anon_ids, max_team_name_length, active_graders) %}
-    <tr class="grade-table" data-testid="grade-table"
+    <tr data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
-            style='background: #7bd0f7;'
+            class="grade-table highlighted-row"
+        {% else %}
+            class="grade-table"
         {% endif %}
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn" %}
             data-student="electronic-grade-withdrawn"
@@ -274,47 +346,49 @@
                 This is basically a switch statement. It calls the function we need for
                 the current column and that will give us the table cell.
             #}
-            {% if column.function == "active_version" %}
+            {% if column.header_key == "active_version" %}
                 {{ _self.render_column_active_version(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "autograding" %}
+            {% elseif column.header_key == "autograding" %}
                 {{ _self.render_column_autograding(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "autograding_peer" %}
+            {% elseif column.header_key == "autograding_peer" %}
                 {{ _self.render_column_autograding_peer(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "graded_questions" %}
+            {% elseif column.header_key == "graded_questions" %}
                 {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) }}
-            {% elseif column.function == "grading" %}
+            {% elseif column.header_key == "grading" %}
                 {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
-            {% elseif column.function == "grading_blind" %}
+            {% elseif column.header_key == "grading_blind" %}
                 {{ _self.render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) }}
-            {% elseif column.function == "grading_peer" %}
+            {% elseif column.header_key == "grading_peer" %}
                 {{ _self.render_column_grading_peer(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "index" %}
+            {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "section" %}
-                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "team_edit" %}
+            {% elseif column.header_key == "section" %}
+                {{ _self.render_column_section(context, section, graded_gradeable, index, info, column, null) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
-            {% elseif column.function == "team_id" %}
+            {% elseif column.header_key == "team_id" %}
                 {{ _self.render_column_team_id(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "team_id_anon" %}
+            {% elseif column.header_key == "team_id_anon" %}
                 {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
-            {% elseif column.function == "team_name" %}
+            {% elseif column.header_key == "team_name" %}
                 {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) }}
-            {% elseif column.function == "team_members" %}
+            {% elseif column.header_key == "team_members" %}
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "total" %}
+            {% elseif column.header_key == "total" %}
                 {{ _self.render_column_total(context, section, graded_gradeable, index, info, column, override_data) }}
-            {% elseif column.function == "user_given" %}
+            {% elseif column.header_key == "user_given" %}
                 {{ _self.render_column_user_given(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "user_id" %}
+            {% elseif column.header_key == "user_id" %}
                 {{ _self.render_column_user_id(context, section, graded_gradeable, index, info, column, anon_ids) }}
-            {% elseif column.function == "user_id_anon" %}
+            {% elseif column.header_key == "user_id_anon" %}
                 {{ _self.render_column_user_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
-            {% elseif column.function == "team_members_anon" %}
+            {% elseif column.header_key == "team_members_anon" %}
                 {{ _self.render_column_team_members_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
-            {% elseif column.function == "user_family" %}
+            {% elseif column.header_key == "user_family" %}
                 {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "viewed_grade" %}
+            {% elseif column.header_key == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
             {% endif %}
         {% endfor %}
@@ -328,50 +402,52 @@
                 This is basically a switch statement. It calls the function we need for
                 the current column and that will give us the table cell.
             #}
-            {% if column.function == "active_version" %}
+            {% if column.header_key == "active_version" %}
                 <td></td>
-            {% elseif column.function == "autograding" %}
+            {% elseif column.header_key == "autograding" %}
                 <td></td>
-            {% elseif column.function == "autograding_peer" %}
+            {% elseif column.header_key == "autograding_peer" %}
                 <td></td>
-            {% elseif column.function == "graded_questions" %}
+            {% elseif column.header_key == "graded_questions" %}
                 <td></td>
-            {% elseif column.function == "grading" %}
+            {% elseif column.header_key == "grading" %}
                 <td><b><i>No Team</i></b></td>
-            {% elseif column.function == "grading_peer" %}
+            {% elseif column.header_key == "grading_peer" %}
                 <td></td>
-            {% elseif column.function == "index" %}
+            {% elseif column.header_key == "index" %}
                 {{ _self.render_column_index(context, section, null, index, null, column) }}
-            {% elseif column.function == "section" %}
-                {{ _self.render_column_section(context, section, null, index, null, column) }}
-            {% elseif column.function == "team_edit" %}
+            {% elseif column.header_key == "section" %}
+                {{ _self.render_column_section(context, section, null, index, null, column, user) }}
+            {% elseif column.header_key == "cluster" %}
+                {{ _self.render_column_cluster(context, section, null, index, null, column) }}
+            {% elseif column.header_key == "team_edit" %}
                 {{ _self.render_column_team_edit(context, section, null, index, new_team_onclick, column, edited_past_lock_date) }}
-            {% elseif column.function == "team_id" %}
+            {% elseif column.header_key == "team_id" %}
                 <td></td>
-             {% elseif column.function == "team_id_anon" %}
+             {% elseif column.header_key == "team_id_anon" %}
                 <td></td>
-            {% elseif column.function == "team_name" %}
+            {% elseif column.header_key == "team_name" %}
                 <td></td>
-            {% elseif column.function == "team_members" %}
+            {% elseif column.header_key == "team_members" %}
                 <td>
                     {{ user.getDisplayedGivenName() }}
                     {{ user.getDisplayedFamilyName() }}
                 </td>
-            {% elseif column.function == "team_members_anon" %}
+            {% elseif column.header_key == "team_members_anon" %}
                 <td></td>
-            {% elseif column.function == "total" %}
+            {% elseif column.header_key == "total" %}
                 <td></td>
-            {% elseif column.function == "total_peer" %}
+            {% elseif column.header_key == "total_peer" %}
                 <td></td>
-            {% elseif column.function == "user_given" %}
+            {% elseif column.header_key == "user_given" %}
                 <td></td>
-            {% elseif column.function == "user_id" %}
+            {% elseif column.header_key == "user_id" %}
                 <td></td>
-            {% elseif column.function == "user_id_anon" %}
+            {% elseif column.header_key == "user_id_anon" %}
                 <td></td>
-            {% elseif column.function == "user_family" %}
+            {% elseif column.header_key == "user_family" %}
                 <td></td>
-            {% elseif column.function == "viewed_grade" %}
+            {% elseif column.header_key == "viewed_grade" %}
                 <td></td>
             {% endif %}
         {% endfor %}
@@ -416,7 +492,7 @@
     <td class="td-graded-questions" style="text-align: center">
         <span>
             {# check if current user is a peer only grader #}
-            {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
+            {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
             {% if core.getUser().accessGrading() and not peer_only_grader %}
@@ -432,9 +508,15 @@
                     {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         {% set class_list = class_list | merge(['grader-NULL']) %}
                     {% else %}
-                        {% if info.graded_groups[index] =="peer-null"   %}
+                        {% if info.graded_groups[index] == "peer-null" or info.graded_groups[index] == "peer-no-submission" %}
                             {# Indicates Peer Component #}
                             {% set class_list = class_list | merge(['grader-NULL']) %}
+                        {% elseif info.graded_groups[index] == "peer-left-half" %}
+                            {# Indicates Peer Component graded by someone other than yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-left-half']) %}
+                        {% elseif info.graded_groups[index] == "peer-right-half" %}
+                            {# Indicates Peer Component graded only by yourself #}
+                            {% set class_list = class_list | merge(['grader-peer-right-half']) %}
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
                             {% set class_list = class_list | merge(['grader-' ~ info.graded_groups[index]]) %}
@@ -459,8 +541,17 @@
                     {% elseif info.graded_groups[index] == "peer-null" %}
                         {# Indicates Submitted but Ungraded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                    {% elseif info.graded_groups[index] == "peer-left-half" %}
+                        {# Indicates Component graded by someone else but not current user #}
+                        {% if peer_only_grader %}
+                            <div title="{{ title }}" class="grading-circle grader-NULL"></div>
+                        {% else %}
+                            <div title="{{ title }}" class="grading-circle grader-peer-left-half"></div>
+                        {% endif %}
+                    {% elseif info.graded_groups[index] == "peer-right-half" %}
+                        {# Indicates Component graded only by current user #}
+                        <div title="{{ title }}" class="grading-circle grader-4"></div>
                     {% elseif info.graded_groups[index] == 4 %}
-                        {# Indicates Submitted and Graded Peer Component #}
                         <div title="{{ title }}" class="grading-circle grader-{{ info.graded_groups[index] }}"></div>
                     {% endif %}
                 {% endif %}
@@ -608,7 +699,23 @@
 {% endmacro %}
 
 {# Section Number #}
-{% macro render_column_section(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_section(context, section, graded_gradeable, index, info, column, teamless_user) %}
+    <td>
+        {% if context.is_group_by_clusters %}
+            {% set user = graded_gradeable ? graded_gradeable.getSubmitter().getUser() : teamless_user %}
+            {% if context.gradeable.isGradeByRegistration() %}
+                {{ user.getRegistrationSection() ?? "NULL" }}
+            {% else %}
+                {{ user.getRotatingSection() ?? "NULL" }}
+            {% endif %}
+        {% else %}
+            {{ section.title }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Cluster #}
+{% macro render_column_cluster(context, section, graded_gradeable, index, info, column) %}
     <td>{{ section.title }}</td>
 {% endmacro %}
 
@@ -853,10 +960,3 @@
         }
     }
 </script>
-
-{% include 'grading/electronic/GradeableMessage.twig' with {
-    "course": course,
-    "semester": semester,
-    "gradeable_id": gradeable.getId,
-    "blind_status": blind_status
-}%}

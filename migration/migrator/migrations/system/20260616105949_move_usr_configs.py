@@ -8,6 +8,7 @@ to each capability (worker VMs are committed to support capabilities
 in the autograding_workers.json file.)"""
 
 from pathlib import Path
+import shutil
 
 # The file(s) to move
 files_to_move = [ "autograding_containers.json" ]
@@ -26,7 +27,7 @@ def up(config):
                 raise RuntimeError(f+" exists in both " + str(install_config_dir)
                                    + " and " + str(data_config_dir))
             else:
-                (install_config_dir / f).rename(data_config_dir / f)
+                shutil.move( install_config_dir / f, data_config_dir / f)
         else:
             raise RuntimeError(f+" does not exist in " + str(install_config_dir))
 
@@ -41,7 +42,7 @@ def down(config):
                 raise RuntimeError(f+" exists in both " + str(install_config_dir)
                                    + " and " + str(data_config_dir))
             else:
-                (data_config_dir / f).rename(install_config_dir / f)
+                shutil.move (data_config_dir / f, install_config_dir / f)
         else:
             raise RuntimeError(f+" does not exist in " + str(data_config_dir))
 

@@ -42,6 +42,10 @@ declare global {
 }
 
 const keymap: KeymapEntry<unknown>[] = [];
+const remapping = {
+    active: false,
+    index: 0,
+};
 type KeymapEntry<T> = {
     name: string;
     code: string;
@@ -129,8 +133,14 @@ function getKeyCode(name: string): string {
 }
 
 window.onkeydown = function (e) {
-    // Don't fire hotkeys when the settings popup is open
-    if (isSettingsVisible()) {
+    if (remapping.active) {
+        e.preventDefault();
+        return;
+    }
+
+    // Disable hotkeys while in the menu or the annotation editor
+    // so we don't accidentally press anything
+    if (isSettingsVisible() || isAnnotationEditorVisible()) {
         return;
     }
 
@@ -176,6 +186,9 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
     registerKeyHandler(parameters as KeymapEntry<unknown>, fn as (e: KeyboardEvent, options?: unknown) => void);
 };
 
+function isAnnotationEditorVisible() {
+    return $('#global-annotation-editor-wrapper').is(':visible');
+}
 export function showSettings() {
     notifySettingsVisibility(true);
 }

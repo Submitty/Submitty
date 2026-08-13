@@ -244,6 +244,7 @@ class UsersController extends AbstractController {
             'user_preferred_givenname' => $user->getPreferredGivenName(),
             'user_preferred_familyname' => $user->getPreferredFamilyName(),
             'user_pronouns' => $user->getPronouns(),
+            'date_registered' => $user->getDateRegistered() !== null ? $user->getDateRegistered()->format(\DateTime::ATOM) : null,
             'user_display_pronouns' => $user->getDisplayPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
@@ -934,7 +935,8 @@ class UsersController extends AbstractController {
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
-        ini_set("auto_detect_line_endings", '1');
+        // this line is ignored for deprecation warnings using the '@'... syntax
+        @ini_set("auto_detect_line_endings", '1');
 
         // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
