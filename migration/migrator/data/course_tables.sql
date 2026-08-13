@@ -1726,7 +1726,9 @@ CREATE TABLE public.peer_grading_panel (
     rubric boolean DEFAULT true NOT NULL,
     files boolean DEFAULT true NOT NULL,
     solution_notes boolean DEFAULT true NOT NULL,
-    discussion boolean DEFAULT true NOT NULL
+    discussion boolean DEFAULT true NOT NULL,
+    peer_files_restricted boolean DEFAULT false NOT NULL,
+    peer_file_patterns jsonb DEFAULT '[]'::jsonb NOT NULL
 );
 
 

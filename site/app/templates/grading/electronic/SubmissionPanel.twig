@@ -51,6 +51,11 @@
                 <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies(true);" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
             <br />
+            {% if show_no_matching_peer_files_banner %}
+                <div class="details-warning-box details-warning-highlight" data-testid="no-matching-peer-files-warning">
+                    This student has not submitted any files matching the regular expressions specified by the instructor. Contact the instructor or a TA if this is unexpected.
+                </div>
+            {% endif %}
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
                 {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}
@@ -62,7 +67,7 @@
                     {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
                 {% endif %}
-                {% if not anon_mode and not blind_grader and not user_assignment_settings_missing and not user_assignment_settings_unreadable%}
+                {% if not anon_mode and not blind_grader and not user_assignment_settings_missing and not user_assignment_settings_unreadable and user_assignment_settings_path is not null %}
                     {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader) }}
                 {% endif %}
             </div>
@@ -95,7 +100,7 @@
 {% macro display_file(dir, path, id, indent, title, blind_grader) %}
     {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
     {% set is_image = dir matches '/\\.(jpg|jpeg|png|gif|bmp|webp|tiff|tif)$/i' %}
-    <div>
+    <div data-testid="submission-browser-file" data-file-name="{{ dir }}">
         <div class="file-viewer">
             {% if is_image %}
                 {# For image files: Clicking filename opens in full panel #}
@@ -120,7 +125,7 @@
 {% endmacro %}
 
 {% macro display_dir(dir, contents, id, indent, title, blind_grader) %}
-    <div>
+    <div data-testid="submission-browser-folder" data-folder-name="{{ dir }}">
         <div class="div-viewer">
             <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
