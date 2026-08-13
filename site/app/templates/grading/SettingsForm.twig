@@ -5,6 +5,7 @@
         'fullAccess': core.getUser().getGroup() <= 2
     },
     'events': {
-        'close': '(event) => { window.hideSettings(); }'
+        'setting-change': '(detail) => window.handleSettingChange(detail.storageCode, detail.value)',
+        'hotkey-change': '(detail) => window.handleHotkeyChange(detail.index, detail.code)'
     }
 } %}

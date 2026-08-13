@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
+import Popup from '../Popup.vue';
 import {
     settingsData,
     loadTAGradingSettingData,
-    applySettingChange,
     getKeymap,
-    updateKeymapAndStorage,
     isKeyAlreadyBound,
     eventToKeyCode,
-    onSettingsVisibilityChange,
+    setRemappingActive,
     notifySettingsVisibility,
 } from '../../../../ts/ta-grading-keymap';
 
@@ -17,7 +16,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    close: [];
+    'setting-change': [payload: { storageCode: string; value: string }];
+    'hotkey-change': [payload: { index: number; code: string }];
 }>();
 
 const visible = ref(false);
@@ -38,6 +38,20 @@ function refreshSettings() {
     settings.value = JSON.parse(JSON.stringify(settingsData)) as typeof settingsData;
 }
 
+function toggle() {
+    if (!visible.value) {
+        refreshSettings();
+        refreshHotkeys();
+    }
+    visible.value = !visible.value;
+    notifySettingsVisibility(visible.value);
+    if (!visible.value) {
+        setRemappingActive(false);
+        remapActive.value = false;
+        remapIndex.value = -1;
+    }
+}
+
 function refreshHotkeys() {
     const km = getKeymap();
     hotkeys.value = km.map((h) => ({
@@ -48,19 +62,13 @@ function refreshHotkeys() {
 }
 
 function handleClose() {
+    if (remapActive.value) {
+        setRemappingActive(false);
+        remapActive.value = false;
+        remapIndex.value = -1;
+    }
     visible.value = false;
     notifySettingsVisibility(false);
-    emit('close');
-}
-
-function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-        handleClose();
-        return;
-    }
-    if (remapActive.value) {
-        e.preventDefault();
-    }
 }
 
 function onKeyup(e: KeyboardEvent) {
@@ -75,7 +83,8 @@ function onKeyup(e: KeyboardEvent) {
         return;
     }
 
-    updateKeymapAndStorage(remapIndex.value, code);
+    emit('hotkey-change', { index: remapIndex.value, code });
+    setRemappingActive(false);
     remapActive.value = false;
     remapIndex.value = -1;
     refreshHotkeys();
@@ -87,17 +96,18 @@ function startRemap(index: number) {
     }
     remapActive.value = true;
     remapIndex.value = index;
+    setRemappingActive(true, index);
 }
 
 function unsetRemap(index: number) {
-    updateKeymapAndStorage(index, 'Unassigned');
+    emit('hotkey-change', { index, code: 'Unassigned' });
     refreshHotkeys();
 }
 
 function restoreAll() {
     const km = getKeymap();
     km.forEach((_, index) => {
-        updateKeymapAndStorage(index, km[index].originalCode!);
+        emit('hotkey-change', { index, code: km[index].originalCode! });
     });
     refreshHotkeys();
 }
@@ -105,214 +115,158 @@ function restoreAll() {
 function removeAll() {
     const km = getKeymap();
     km.forEach((_, index) => {
-        updateKeymapAndStorage(index, 'Unassigned');
+        emit('hotkey-change', { index, code: 'Unassigned' });
     });
     refreshHotkeys();
 }
 
 function onSettingChange(storageCode: string, value: string) {
-    applySettingChange(storageCode, value);
+    emit('setting-change', { storageCode, value });
 }
-
-const closeBtn = ref<HTMLButtonElement | null>(null);
-
-watch(visible, (v) => {
-    if (v) {
-        void nextTick(() => closeBtn.value?.focus());
-    }
-});
-
-let unsubscribe: (() => void) | null = null;
-
-onMounted(() => {
-    unsubscribe = onSettingsVisibilityChange((v) => {
-        if (v) {
-            refreshSettings();
-            refreshHotkeys();
-        }
-        visible.value = v;
-        if (!v) {
-            remapActive.value = false;
-            remapIndex.value = -1;
-        }
-    });
-});
-
-onUnmounted(() => {
-    unsubscribe?.();
-});
 </script>
 
 <template>
-  <div
-    v-if="visible"
-    class="popup-form"
-    data-testid="settings-popup"
-    @keydown="onKeydown"
-    @keyup="onKeyup"
+  <Popup
+    id="settings-popup"
+    title="Settings"
+    :visible="visible"
+    @toggle="handleClose"
   >
-    <div
-      class="popup-box"
-      data-testid="popup-overlay"
-      @click.self="handleClose"
-    >
+    <template #trigger>
+      <span class="ta-navlink-cont">
+        <button
+          class="invisible-btn"
+          data-testid="grading-setting-btn"
+          id="settings-btn"
+          tabindex="0"
+          title="Show Grading Settings"
+          @click="toggle"
+        >
+          <i class="fas fa-wrench icon-header icon-streched" />
+        </button>
+      </span>
+    </template>
+    <template #default>
       <div
-        class="popup-window"
-        data-testid="popup-window"
-        @click.stop
+        id="settings-content"
+        class="form-body"
+        @keyup="onKeyup"
       >
-        <div class="form-title">
-          <h1>Settings</h1>
-          <button
-            ref="closeBtn"
-            class="btn btn-default close-button"
-            data-testid="close-button"
-            tabindex="-1"
-            @click="handleClose"
+        <div id="ta-grading-settings-list">
+          <div
+            v-for="group in settings"
+            :key="group.id"
           >
-            Close
-          </button>
+            <h2>{{ group.name }}</h2>
+            <br>
+            <table class="ta-grading-setting-list">
+              <thead>
+                <tr>
+                  <th>Setting</th>
+                  <th>Option</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="setting in group.values"
+                  :key="setting.storageCode"
+                >
+                  <td v-if="setting.options && Object.keys(setting.options).length > 0">
+                    {{ setting.name }}
+                  </td>
+                  <td v-if="setting.options && Object.keys(setting.options).length > 0">
+                    <select
+                      :data-testid="'ta-grading-setting-option-' + setting.storageCode"
+                      class="ta-grading-setting-option"
+                      :value="setting.currValue"
+                      @change="onSettingChange(setting.storageCode, ($event.target as HTMLSelectElement).value)"
+                    >
+                      <option
+                        v-for="(optValue, optKey) in setting.options"
+                        :key="optValue"
+                        :value="optValue"
+                      >
+                        {{ optKey }}
+                      </option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div
-          id="settings-content"
-          class="form-body"
-        >
-          <div id="ta-grading-settings-list">
-            <div
-              v-for="group in settings"
-              :key="group.id"
-            >
-              <h2>{{ group.name }}</h2>
-              <br>
-              <table class="ta-grading-setting-list">
-                <thead>
-                  <tr>
-                    <th>Setting</th>
-                    <th>Option</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="setting in group.values"
-                    :key="setting.storageCode"
-                  >
-                    <td v-if="setting.options && Object.keys(setting.options).length > 0">
-                      {{ setting.name }}
-                    </td>
-                    <td v-if="setting.options && Object.keys(setting.options).length > 0">
-                      <select
-                        :data-testid="'ta-grading-setting-option-' + setting.storageCode"
-                        class="ta-grading-setting-option"
-                        :value="setting.currValue"
-                        @change="onSettingChange(setting.storageCode, ($event.target as HTMLSelectElement).value)"
-                      >
-                        <option
-                          v-for="(optValue, optKey) in setting.options"
-                          :key="optValue"
-                          :value="optValue"
-                        >
-                          {{ optKey }}
-                        </option>
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="hotkeys-header">
-            <div class="hotkeys-title-buttons">
-              <h2>Hotkeys</h2>
-              <div class="hotkeys-buttons">
-                <button
-                  class="btn btn-primary hotkeys-button"
-                  data-testid="restore-all-hotkeys"
-                  @click="restoreAll"
-                >
-                  Restore Default
-                </button>
-                <button
-                  class="btn btn-danger hotkeys-button"
-                  data-testid="remove-all-hotkeys"
-                  @click="removeAll"
-                >
-                  Remove All
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <table
-            class="ta-grading-setting-list"
-            data-testid="hotkeys-list"
-          >
-            <thead>
-              <tr>
-                <th>Action</th>
-                <th>Hotkey</th>
-                <th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(hotkey, index) in hotkeys"
-                :key="index"
-              >
-                <td>{{ hotkey.name || 'Unassigned' }}</td>
-                <td>
-                  <button
-                    :data-testid="'remap-' + index"
-                    class="btn remap-button"
-                    :class="[
-                      remapActive && remapIndex === index ? 'btn-success' : 'btn-default',
-                    ]"
-                    tabindex="0"
-                    @click="startRemap(index)"
-                  >
-                    {{ remapActive && remapIndex === index ? 'Enter Key...' : hotkey.code }}
-                  </button>
-                </td>
-                <td class="button-cell">
-                  <button
-                    :data-testid="'remap-unset-' + index"
-                    class="btn btn-danger"
-                    tabindex="0"
-                    @click="unsetRemap(index)"
-                  >
-                    &times;
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <br>
-          <div class="form-buttons">
-            <div class="form-button-container">
+        <div class="hotkeys-header">
+          <div class="hotkeys-title-buttons">
+            <h2>Hotkeys</h2>
+            <div class="hotkeys-buttons">
               <button
-                class="btn btn-default close-button key_to_click"
-                tabindex="0"
-                @click="handleClose"
+                class="btn btn-primary hotkeys-button"
+                data-testid="restore-all-hotkeys"
+                @click="restoreAll"
               >
-                Close
+                Restore Default
+              </button>
+              <button
+                class="btn btn-danger hotkeys-button"
+                data-testid="remove-all-hotkeys"
+                @click="removeAll"
+              >
+                Remove All
               </button>
             </div>
           </div>
         </div>
+
+        <table
+          class="ta-grading-setting-list"
+          data-testid="hotkeys-list"
+        >
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Hotkey</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(hotkey, index) in hotkeys"
+              :key="index"
+            >
+              <td>{{ hotkey.name || 'Unassigned' }}</td>
+              <td>
+                <button
+                  :data-testid="'remap-' + index"
+                  class="btn remap-button"
+                  :class="[
+                    remapActive && remapIndex === index ? 'btn-success' : 'btn-default',
+                  ]"
+                  tabindex="0"
+                  @click="startRemap(index)"
+                >
+                  {{ remapActive && remapIndex === index ? 'Enter Key...' : hotkey.code }}
+                </button>
+              </td>
+              <td class="button-cell">
+                <button
+                  :data-testid="'remap-unset-' + index"
+                  class="btn btn-danger"
+                  tabindex="0"
+                  @click="unsetRemap(index)"
+                >
+                  &times;
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </div>
+    </template>
+  </Popup>
 </template>
 
 <style scoped>
-.popup-form {
-    height: 100vh;
-}
-.popup-window {
-    height: calc(100vh - 20px);
-}
 .ta-grading-setting-list {
   width: 100%;
   border-collapse: collapse;

@@ -6,38 +6,21 @@
 // -----------------------------------------------------------------------------
 // Keyboard shortcut handling
 
-type _Listener = (visible: boolean) => void;
-let _visible = false;
-const _listeners: _Listener[] = [];
+let settingsVisible = false;
 
-export function notifySettingsVisibility(visible: boolean): void {
-    if (_visible === visible) {
-        return;
-    }
-    _visible = visible;
-    _listeners.forEach((fn) => fn(visible));
-}
-
-export function onSettingsVisibilityChange(fn: _Listener): () => void {
-    _listeners.push(fn);
-    fn(_visible);
-    return () => {
-        const idx = _listeners.indexOf(fn);
-        if (idx >= 0) {
-            _listeners.splice(idx, 1);
-        }
-    };
+export function notifySettingsVisibility(isVisible: boolean): void {
+    settingsVisible = isVisible;
 }
 
 export function isSettingsVisible(): boolean {
-    return _visible;
+    return settingsVisible;
 }
 
 declare global {
     interface Window {
-        showSettings(): void;
-        hideSettings(): void;
         registerKeyHandler(parameters: object, fn: (...args: unknown[]) => unknown): void;
+        handleSettingChange(storageCode: string, value: string): void;
+        handleHotkeyChange(index: number, code: string): void;
     }
 }
 
@@ -46,6 +29,15 @@ const remapping = {
     active: false,
     index: 0,
 };
+
+export function setRemappingActive(active: boolean, index = -1): void {
+    remapping.active = active;
+    remapping.index = index;
+}
+
+export function isRemappingActive(): boolean {
+    return remapping.active;
+}
 type KeymapEntry<T> = {
     name: string;
     code: string;
@@ -133,7 +125,7 @@ function getKeyCode(name: string): string {
 }
 
 window.onkeydown = function (e) {
-    if (remapping.active) {
+    if (isRemappingActive()) {
         e.preventDefault();
         return;
     }
@@ -189,15 +181,6 @@ window.registerKeyHandler = function (parameters: object, fn: Function) {
 function isAnnotationEditorVisible() {
     return $('#global-annotation-editor-wrapper').is(':visible');
 }
-export function showSettings() {
-    notifySettingsVisibility(true);
-}
-window.showSettings = showSettings;
-
-export function hideSettings() {
-    notifySettingsVisibility(false);
-}
-window.hideSettings = hideSettings;
 
 export function getKeymap(): KeymapEntry<unknown>[] {
     return keymap;
@@ -270,6 +253,16 @@ export function applySettingChange(storageCode: string, value: string): string {
     window.dispatchEvent(new CustomEvent('settings-changed', { detail: { storageCode, value } }));
     return value;
 }
+
+export function handleSettingChange(storageCode: string, value: string): void {
+    applySettingChange(storageCode, value);
+}
+window.handleSettingChange = handleSettingChange;
+
+export function handleHotkeyChange(index: number, code: string): void {
+    updateKeymapAndStorage(index, code);
+}
+window.handleHotkeyChange = handleHotkeyChange;
 
 /**
  * Check if a given key code is already bound to another hotkey (by index)

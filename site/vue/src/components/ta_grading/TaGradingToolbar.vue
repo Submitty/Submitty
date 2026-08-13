@@ -2,18 +2,21 @@
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
-import { showSettings } from '../../../../ts/ta-grading-keymap';
+import GradingSettings from '@/components/ta_grading/GradingSettings.vue';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress, fullAccess } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
     progress: number;
+    fullAccess: boolean;
 }>();
 
 const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
+    'setting-change': [payload: { storageCode: string; value: string }];
+    'hotkey-change': [payload: { index: number; code: string }];
 }>();
 
 // need to assign because ta-grading-panels-init.ts is not called
@@ -25,6 +28,14 @@ const fullScreened = taLayoutDet.isFullScreenMode;
 
 function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }) {
     emit('select-layout', layout);
+}
+
+function onSettingChange(payload: { storageCode: string; value: string }) {
+    emit('setting-change', payload);
+}
+
+function onHotkeyChange(payload: { index: number; code: string }) {
+    emit('hotkey-change', payload);
 }
 </script>
 
@@ -76,13 +87,10 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
 
   <PanelSelectorModal @select-layout="selectLayout" />
 
-  <NavigationButton
-    :on-click="showSettings"
-    visible-icon="fa-wrench"
-    button-id="grading-setting-btn"
-    title="Show Grading Settings"
-    optional-spanid="grading-setting-btn"
-    optional-test-id="grading-setting-btn"
+  <GradingSettings
+    :full-access="fullAccess"
+    @setting-change="onSettingChange"
+    @hotkey-change="onHotkeyChange"
   />
   <span
     id="progress-bar-cont"
