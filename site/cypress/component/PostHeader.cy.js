@@ -29,12 +29,16 @@ describe('PostHeader', () => {
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
 
-    it('shows the unpin control when announced and canPin; emits unpin-thread on click', () => {
-        mountWithEmitSpy(PostHeader, 'unpin-thread', { ...defaultProps, isAnnounced: true });
+    it('shows the unpin control when announced and canPin', () => {
+        cy.mount(PostHeader, { props: { ...defaultProps, isAnnounced: true } });
         cy.get('[data-testid="pin-thread-button"]')
             .should('exist')
             .and('have.class', 'active-thread-remove-announcement')
             .and('have.attr', 'title', 'Unpin thread');
+    });
+
+    it('emits unpin-thread with threadId when the unpin control is clicked', () => {
+        mountWithEmitSpy(PostHeader, 'unpin-thread', { ...defaultProps, isAnnounced: true });
         cy.get('[data-testid="pin-thread-button"]').click({ force: true });
         cy.get('@eventHandler').should('have.been.calledOnceWith', defaultProps.threadId);
     });
