@@ -23,11 +23,14 @@
                 'homeUrl': home_url,
                 'prevStudentUrl': prev_student_url,
                 'nextStudentUrl': next_student_url,
-                'progress': progress
+                'progress': progress,
+                'fullAccess': core.getUser().getGroup() <= 2
             },
             'class': 'grading_toolbar',
             'events': {
-                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }'
+                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }',
+                'setting-change': '(detail) => window.handleSettingChange(detail.storageCode, detail.value)',
+                'hotkey-change': '(detail) => window.handleHotkeyChange(detail.index, detail.code)'
             }
         }%}
     </div>

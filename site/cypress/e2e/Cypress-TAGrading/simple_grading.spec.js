@@ -36,15 +36,15 @@ describe('Test cases revolving around simple grading lab', () => {
             });
             // Check Settings Tab
             cy.get('#settings-btn').click({ force: true });
-            cy.get('#settings-popup').should('have.attr', 'style', '');
+            cy.get('#settings-popup').should('be.visible');
             cy.get('#settings-popup').find('[data-testid="close-button"]').click({ multiple: true });
-            cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
+            cy.get('#settings-popup').should('not.exist');
 
             // Check Statistics Tab
             cy.get('#simple-stats-btn').click({ force: true });
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
-            cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
+            cy.get('#settings-popup').should('not.exist');
         });
     });
 });
@@ -90,15 +90,15 @@ describe('Test cases revolving around simple grading test', () => {
 
             // Check Settings Tab
             cy.get('#settings-btn').click({ force: true });
-            cy.get('#settings-popup').should('have.attr', 'style', '');
+            cy.get('#settings-popup').should('be.visible');
             cy.get('#settings-popup').find('[data-testid="close-button"]').click({ multiple: true });
-            cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
+            cy.get('#settings-popup').should('not.exist');
 
             // Check Statistics Tab
             cy.get('#simple-stats-btn').click({ force: true });
             cy.get('#simple-stats-popup').should('have.attr', 'style', 'display: block;');
             cy.get('#simple-stats-popup').find('[data-testid="close-button"]').click({ multiple: true });
-            cy.get('#settings-popup').should('have.attr', 'style', 'display: none;');
+            cy.get('#settings-popup').should('not.exist');
         });
     });
 });

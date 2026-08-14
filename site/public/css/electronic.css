@@ -950,7 +950,6 @@ tr.is_publish {
 }
 
 #settings-content {
-    height: 400px;
     padding-top: 1em;
     overflow-y: auto;
 }
