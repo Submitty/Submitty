@@ -1038,7 +1038,7 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     const categories_value = currentFilterState.categories.join('|');
     const thread_status_value = currentFilterState.statuses.join('|');
-    const search_query = $('#search-content').val();
+    const search_query = currentFilterState.searchContent;
     const unread_select_value = currentFilterState.unread;
     $.ajax({
         url: next_url,
@@ -1155,7 +1155,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     const categories_value = currentFilterState.categories.join('|');
     const thread_status_value = currentFilterState.statuses.join('|');
     const unread_select_value = currentFilterState.unread;
-    const search_query = $('#search-content').val();
+    const search_query = currentFilterState.searchContent;
 
     // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
@@ -2163,33 +2163,36 @@ if (!Array.prototype.toggleElement) {
     });
 }
 
-function setVueSearchQuery(query) {
-    // TODO: remove this bridge when the FilterBar migration (#12804) brings the toolbar
-    // clear button into Vue and clearing flows through the events mapping instead.
-    const searchBar = document.querySelector('.search-bar-wrapper');
-    if (searchBar && typeof searchBar.reRender === 'function') {
-        searchBar.reRender({ searchQuery: query });
-    }
-}
-
-let currentFilterState = { categories: [], statuses: [], unread: false };
+let currentFilterState = { categories: [], statuses: [], unread: false, searchContent: '' };
 
 function seedFilterState(categories, statuses, unread) {
     currentFilterState = {
         categories: (categories ?? []).map(Number),
         statuses: (statuses ?? []).map(Number),
         unread: unread === true,
+        searchContent: '',
     };
 }
 
 function onFilterChange(state) {
     currentFilterState = {
+        ...currentFilterState,
         categories: state.categories,
         statuses: state.statuses,
         unread: state.unread,
     };
     updateClearFilterButton();
     updateThreads(true, saveFilterState);
+}
+
+function onSearchChange(query) {
+    currentFilterState = { ...currentFilterState, searchContent: query };
+    updateClearFilterButton();
+    updateThreads(true, saveFilterState);
+}
+
+function refreshSearchBar(query) {
+    document.querySelector('.search-bar-wrapper')?.reRender({ searchQuery: query });
 }
 
 function refreshFilterBar(seeds) {
@@ -2201,14 +2204,13 @@ function refreshFilterBar(seeds) {
 }
 
 function clearForumFilter() {
-    currentFilterState = { categories: [], statuses: [], unread: false };
+    currentFilterState = { categories: [], statuses: [], unread: false, searchContent: '' };
     refreshFilterBar({
         initialSelectedCategoryIds: [],
         initialSelectedThreadStatuses: [],
         initialUnreadChecked: false,
     });
-    $('#search-content').val('');
-    setVueSearchQuery('');
+    refreshSearchBar('');
     updateClearFilterButton();
 
     return false;
@@ -2218,7 +2220,7 @@ function updateClearFilterButton() {
     const hasFilters = currentFilterState.categories.length > 0
         || currentFilterState.statuses.length > 0
         || currentFilterState.unread
-        || $('#search-content').val().length > 0;
+        || currentFilterState.searchContent.length > 0;
     $('#clear_filter_button').css('visibility', hasFilters ? 'visible' : 'hidden');
 }
 
@@ -2226,7 +2228,7 @@ function getFilterState() {
     return {
         'categories': currentFilterState.categories,
         'thread-status': currentFilterState.statuses,
-        'search-content': $('#search-content').val(),
+        'search-content': currentFilterState.searchContent,
     };
 }
 
@@ -2242,16 +2244,14 @@ function setFilterState(state) {
         categories: (state['categories'] ?? []).map(Number),
         statuses: (state['thread-status'] ?? []).map(Number),
         unread: currentFilterState.unread,
+        searchContent: state['search-content'] ?? '',
     };
     refreshFilterBar({
         initialSelectedCategoryIds: currentFilterState.categories,
         initialSelectedThreadStatuses: currentFilterState.statuses,
         initialUnreadChecked: currentFilterState.unread,
     });
-    if ('search-content' in state) {
-        $('#search-content').val(state['search-content']);
-        setVueSearchQuery(state['search-content']);
-    }
+    refreshSearchBar(currentFilterState.searchContent);
     updateClearFilterButton();
     updateThreads(true, null);
 }

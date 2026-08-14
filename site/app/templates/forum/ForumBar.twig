@@ -19,18 +19,13 @@
 			<form id="forum-search-form" action="javascript:void(0);" data-ays-ignore="true">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="hidden" name="search-content" id="search-content" value="" />
 				{% include "Vue.twig" with {
 					'type': 'component',
 					'name': 'forum/SearchBar',
 					'args': { 'searchQuery': '' },
 					'class': 'search-bar-wrapper',
 					'events': {
-						'search': '(query) => {
-							$("#search-content").val(query);
-							updateClearFilterButton();
-							updateThreads(true, saveFilterState);
-						}'
+						'search': '(query) => onSearchChange(query)'
 					}
 				} %}
 				<div class="search-actions">

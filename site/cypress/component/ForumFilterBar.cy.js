@@ -1,4 +1,5 @@
 import ForumFilterBar from '../../vue/src/components/forum/ForumFilterBar.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils.js';
 
 describe('ForumFilterBar', () => {
     const categories = [
@@ -8,25 +9,28 @@ describe('ForumFilterBar', () => {
         { id: 4, description: 'Upcoming Topics', visibleDate: '2026-07-01T00:00:00Z', diff: -5 },
     ];
 
+    const categoryTestId = (category) => `[data-testid="thread-category-${category.id}"]`;
+
     describe('rendering', () => {
-        it('renders unread button and filters correctly', () => {
+        it('renders the unread toggle and the visible category/status filters', () => {
             cy.mount(ForumFilterBar, { props: { categories } });
             cy.get('[data-testid="filter-unread-label"]').should('be.visible').and('contain', 'Unread Only');
-            cy.get('[data-testid="thread-category-1"]').should('be.visible').and('contain', 'General Questions');
-            cy.get('[data-testid="thread-category-4"]').should('not.exist');
+            cy.get(categoryTestId(categories[0])).should('be.visible').and('contain', categories[0].description);
+            cy.get(categoryTestId(categories[1])).should('be.visible').and('contain', categories[1].description);
+            cy.get(categoryTestId(categories[3])).should('not.exist');
             cy.get('[data-testid="thread-status-comment"]').should('be.visible').and('contain', 'Comment');
         });
 
-        it('handles empty categories array', () => {
+        it('handles an empty categories array', () => {
             cy.mount(ForumFilterBar, { props: { categories: [] } });
             cy.get('[data-testid="forum-filter-bar"]').should('be.visible');
             cy.get('[data-testid="thread-category-filter"]').children().should('have.length', 0);
         });
 
-        it('has accessible titles on all interactive elements', () => {
+        it('exposes accessible titles on all interactive elements', () => {
             cy.mount(ForumFilterBar, { props: { categories } });
             cy.get('[data-testid="filter-unread-label"]').should('have.attr', 'title', 'Toggle unread filter');
-            cy.get('[data-testid="thread-category-1"]').should('have.attr', 'title', 'Filter by General Questions');
+            cy.get(categoryTestId(categories[0])).should('have.attr', 'title', `Filter by ${categories[0].description}`);
             cy.get('[data-testid="thread-status-comment"]').should('have.attr', 'title', 'Filter by comment status');
             cy.get('[data-testid="thread-status-unresolved"]').should('have.attr', 'title', 'Filter by unresolved status');
             cy.get('[data-testid="thread-status-resolved"]').should('have.attr', 'title', 'Filter by resolved status');
@@ -34,45 +38,35 @@ describe('ForumFilterBar', () => {
     });
 
     describe('category filter toggling', () => {
-        it('toggles category button active class and emits update event', () => {
-            const onUpdateCategoryIds = cy.stub().as('updateCategoryIds');
+        it('toggles a category on and off, emitting filter-change each time', () => {
+            mountWithEmitSpy(ForumFilterBar, 'filter-change', { categories }, 'filterHandler');
 
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                    'onUpdate:selectedCategoryIds': onUpdateCategoryIds,
-                },
-            });
+            cy.get(categoryTestId(categories[0])).should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
+            cy.get(categoryTestId(categories[0])).click();
+            cy.get(categoryTestId(categories[0])).should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [categories[0].id], statuses: [], unread: false });
 
-            cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
-            cy.get('@updateCategoryIds').should('have.been.called');
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
+            cy.get(categoryTestId(categories[0])).click();
+            cy.get(categoryTestId(categories[0])).should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [], statuses: [], unread: false });
         });
     });
 
     describe('status filter toggling', () => {
-        it('toggles a single status button', () => {
-            const onUpdateStatuses = cy.stub().as('updateStatuses');
-
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                    'onUpdate:selectedThreadStatuses': onUpdateStatuses,
-                },
-            });
+        it('toggles a status on and off, emitting filter-change each time', () => {
+            mountWithEmitSpy(ForumFilterBar, 'filter-change', { categories }, 'filterHandler');
 
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="thread-status-unresolved"]').click();
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-active');
-            cy.get('@updateStatuses').should('have.been.called');
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [], statuses: [-1], unread: false });
+
             cy.get('[data-testid="thread-status-unresolved"]').click();
             cy.get('[data-testid="thread-status-unresolved"]').should('have.class', 'filter-inactive');
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [], statuses: [], unread: false });
         });
 
-        it('supports multiple statuses selected simultaneously', () => {
+        it('allows multiple statuses selected simultaneously', () => {
             cy.mount(ForumFilterBar, { props: { categories } });
             cy.get('[data-testid="thread-status-comment"]').click();
             cy.get('[data-testid="thread-status-resolved"]').click();
@@ -82,47 +76,20 @@ describe('ForumFilterBar', () => {
     });
 
     describe('unread filter', () => {
-        it('toggles button class and emits update event', () => {
-            const onUpdateUnread = cy.stub().as('updateUnread');
-
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                    'onUpdate:unreadChecked': onUpdateUnread,
-                },
-            });
+        it('toggles unread on and off, emitting filter-change each time', () => {
+            mountWithEmitSpy(ForumFilterBar, 'filter-change', { categories }, 'filterHandler');
 
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="filter-unread-checkbox"]').should('not.be.checked');
             cy.get('[data-testid="filter-unread-label"]').click();
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-active');
             cy.get('[data-testid="filter-unread-checkbox"]').should('be.checked');
-            cy.get('@updateUnread').should('have.been.called');
-        });
-    });
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [], statuses: [], unread: true });
 
-    describe('clear filters', () => {
-        it('resets all filter state when deactivating all filters via clicking', () => {
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                },
-            });
-
-            // Activate some filters
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('[data-testid="thread-status-comment"]').click();
             cy.get('[data-testid="filter-unread-label"]').click();
-
-            // Deactivate by clicking active buttons
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('[data-testid="thread-status-comment"]').click();
-            cy.get('[data-testid="filter-unread-label"]').click();
-
-            cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
-            cy.get('[data-testid="thread-status-comment"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-inactive');
             cy.get('[data-testid="filter-unread-checkbox"]').should('not.be.checked');
+            cy.get('@filterHandler').should('have.been.calledWith', { categories: [], statuses: [], unread: false });
         });
     });
 
@@ -131,12 +98,12 @@ describe('ForumFilterBar', () => {
             cy.mount(ForumFilterBar, {
                 props: {
                     categories,
-                    initialSelectedCategoryIds: [1, 2],
+                    initialSelectedCategoryIds: [categories[0].id, categories[1].id],
                 },
             });
-            cy.get('[data-testid="thread-category-1"]').should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
-            cy.get('[data-testid="thread-category-2"]').should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
-            cy.get('[data-testid="thread-category-3"]').should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
+            cy.get(categoryTestId(categories[0])).should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
+            cy.get(categoryTestId(categories[1])).should('have.class', 'filter-active').and('have.attr', 'data-btn-selected', 'true');
+            cy.get(categoryTestId(categories[2])).should('have.class', 'filter-inactive').and('have.attr', 'data-btn-selected', 'false');
         });
 
         it('applies initial selected statuses from props', () => {
@@ -161,50 +128,39 @@ describe('ForumFilterBar', () => {
             cy.get('[data-testid="filter-unread-label"]').should('have.class', 'filter-active');
             cy.get('[data-testid="filter-unread-checkbox"]').should('be.checked');
         });
+
+        it('coerces string seed ids to numbers', () => {
+            cy.mount(ForumFilterBar, {
+                props: {
+                    categories,
+                    initialSelectedCategoryIds: [String(categories[0].id), String(categories[1].id)],
+                    initialSelectedThreadStatuses: ['0'],
+                },
+            });
+            cy.get(categoryTestId(categories[0])).should('have.class', 'filter-active');
+            cy.get(categoryTestId(categories[1])).should('have.class', 'filter-active');
+            cy.get('[data-testid="thread-status-comment"]').should('have.class', 'filter-active');
+        });
     });
 
-    describe('composite events', () => {
-        it('emits filter-change with all current state on any toggle', () => {
-            const onFilterChange = cy.stub().as('filterChange');
+    describe('composite payload', () => {
+        it('emits a single filter-change reflecting all active filters together', () => {
+            mountWithEmitSpy(ForumFilterBar, 'filter-change', { categories }, 'filterHandler');
 
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                    'onFilter-change': onFilterChange,
-                },
-            });
-
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('@filterChange').should('have.been.calledWith', {
-                categories: [1],
-                statuses: [],
-                unread: false,
-            });
-        });
-
-        it('emits save-state on every toggle action', () => {
-            const onSaveState = cy.stub().as('saveState');
-
-            cy.mount(ForumFilterBar, {
-                props: {
-                    categories,
-                    'onSave-state': onSaveState,
-                },
-            });
-
-            cy.get('[data-testid="thread-category-1"]').click();
-            cy.get('@saveState').should('have.been.called');
-
+            cy.get(categoryTestId(categories[0])).click();
             cy.get('[data-testid="thread-status-comment"]').click();
-            cy.get('@saveState').should('have.been.calledTwice');
-
             cy.get('[data-testid="filter-unread-label"]').click();
-            cy.get('@saveState').should('have.been.calledThrice');
+
+            cy.get('@filterHandler').should('have.been.calledWith', {
+                categories: [categories[0].id],
+                statuses: [0],
+                unread: true,
+            });
         });
     });
 
     describe('edge cases', () => {
-        it('handles category with missing diff field', () => {
+        it('renders a category with a visible date but no diff field', () => {
             cy.mount(ForumFilterBar, {
                 props: {
                     categories: [
@@ -212,10 +168,10 @@ describe('ForumFilterBar', () => {
                     ],
                 },
             });
-            cy.get('[data-testid="thread-category-1"]').should('be.visible').and('contain', 'Exam Review');
+            cy.get(categoryTestId({ id: 1 })).should('be.visible').and('contain', 'Exam Review');
         });
 
-        it('handles category with null visibleDate even with negative diff', () => {
+        it('renders a category with a null visibleDate even with a negative diff', () => {
             cy.mount(ForumFilterBar, {
                 props: {
                     categories: [
@@ -223,7 +179,7 @@ describe('ForumFilterBar', () => {
                     ],
                 },
             });
-            cy.get('[data-testid="thread-category-1"]').should('be.visible').and('contain', 'Announcements');
+            cy.get(categoryTestId({ id: 1 })).should('be.visible').and('contain', 'Announcements');
         });
     });
 });
