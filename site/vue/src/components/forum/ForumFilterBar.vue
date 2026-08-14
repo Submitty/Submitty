@@ -32,9 +32,9 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
     return category.visibleDate === null || (Number(category.diff ?? 0) >= 0);
 };
 
-const selectedCategoryIds = ref<number[]>([...props.initialSelectedCategoryIds]);
-const selectedThreadStatuses = ref<number[]>([...props.initialSelectedThreadStatuses]);
-const unreadChecked = ref(props.initialUnreadChecked);
+const selectedCategoryIds = ref<number[]>((props.initialSelectedCategoryIds ?? []).map(Number));
+const selectedThreadStatuses = ref<number[]>((props.initialSelectedThreadStatuses ?? []).map(Number));
+const unreadChecked = ref(props.initialUnreadChecked === true);
 
 watch(selectedCategoryIds, (ids) => {
     emit('update:selectedCategoryIds', ids);

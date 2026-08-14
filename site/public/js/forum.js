@@ -1222,6 +1222,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
+    Cookies.set('search_query', search_query, { path: '/' });
     const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
@@ -2260,7 +2261,7 @@ function clearForumFilter() {
  * setVueSearchQuery('')) and refreshes the thread list.
  */
 function updateClearFilterButton() {
-    if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0) {
+    if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0 && !$('#unread').is(':checked')) {
         $('#clear_filter_button').css('visibility', 'hidden');
     }
     else {
@@ -2304,11 +2305,15 @@ function loadFilterHandlers() {
 }
 
 function getFilterState() {
-    return window.getFilterState?.();
+    return {
+        'categories': readCategoryValues(),
+        'thread-status': readThreadStatusValues(),
+        'search-content': $('#search-content').val(),
+    };
 }
 
 function saveFilterState() {
-    window.saveFilterState?.();
+    history.pushState(getFilterState(), '');
 }
 
 function setFilterState(state) {
