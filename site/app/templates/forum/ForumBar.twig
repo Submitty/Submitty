@@ -156,6 +156,7 @@
 		{% include "Vue.twig" with {
 			type: "component",
 			name: "forum/ForumFilterBar",
+			class: "js-filter-bar",
 			args: {
 				categories: forum_filter_categories,
 				initialSelectedCategoryIds: cookie_selected_categories|default([]),
@@ -163,7 +164,7 @@
 				initialUnreadChecked: cookie_selected_unread_value|default(false) == 'true',
 			},
 			events: {
-				'filter-change': '() => { setTimeout(() => { updateClearFilterButton(); updateThreads(true, saveFilterState); }, 0); }',
+				'filter-change': '(state) => onFilterChange(state)',
 			}
 		} only %}
 	{% endif %}
@@ -171,6 +172,8 @@
 <hr/>
 {% if thread_exists and show_filter %}
 <script>
+	var forumFilterCategories = {{ forum_filter_categories|json_encode()|raw() }};
+
 	function updateThreads(loadFirstPage, success_callback) {
 		{% if thread_exists %}
 		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);
@@ -178,12 +181,16 @@
 	}
 
 	$( document ).ready(function() {
+		seedFilterState(
+			{{ cookie_selected_categories|default([])|json_encode()|raw() }},
+			{{ cookie_selected_thread_status|default([])|json_encode()|raw() }},
+			{{ cookie_selected_unread_value|default(false) == 'true' }}
+		);
 		updateThreads(true, null);
 		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
-		checkUnread();
 		updateClearFilterButton();
 
 		window.onpopstate = function (e) {

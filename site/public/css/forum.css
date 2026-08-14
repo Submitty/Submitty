@@ -810,11 +810,14 @@
     max-width: 100%;
     width: min(100%, 50rem);
 }
+.js-filter-bar {
+    display: none;
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #forum_filter_bar {
     margin-top: 10px;
     font-size: small;
-    display: none;
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .post_content pre {

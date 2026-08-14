@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 interface ForumCategory {
     id: number;
@@ -21,11 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-    'update:selectedCategoryIds': [ids: number[]];
-    'update:selectedThreadStatuses': [statuses: number[]];
-    'update:unreadChecked': [checked: boolean];
     'filter-change': [state: { categories: number[]; statuses: number[]; unread: boolean }];
-    'save-state': [];
 }>();
 
 const isVisibleCategory = (category: ForumCategory): boolean => {
@@ -35,21 +31,6 @@ const isVisibleCategory = (category: ForumCategory): boolean => {
 const selectedCategoryIds = ref<number[]>((props.initialSelectedCategoryIds ?? []).map(Number));
 const selectedThreadStatuses = ref<number[]>((props.initialSelectedThreadStatuses ?? []).map(Number));
 const unreadChecked = ref(props.initialUnreadChecked === true);
-
-watch(selectedCategoryIds, (ids) => {
-    emit('update:selectedCategoryIds', ids);
-    emitFilterChange();
-}, { deep: true });
-
-watch(selectedThreadStatuses, (statuses) => {
-    emit('update:selectedThreadStatuses', statuses);
-    emitFilterChange();
-}, { deep: true });
-
-watch(unreadChecked, (checked) => {
-    emit('update:unreadChecked', checked);
-    emitFilterChange();
-});
 
 function emitFilterChange(): void {
     emit('filter-change', {
@@ -67,7 +48,7 @@ function toggleCategory(categoryId: number): void {
     else {
         selectedCategoryIds.value = selectedCategoryIds.value.filter((id) => id !== categoryId);
     }
-    emit('save-state');
+    emitFilterChange();
 }
 
 function toggleStatus(statusSelId: number): void {
@@ -78,12 +59,12 @@ function toggleStatus(statusSelId: number): void {
     else {
         selectedThreadStatuses.value = selectedThreadStatuses.value.filter((id) => id !== statusSelId);
     }
-    emit('save-state');
+    emitFilterChange();
 }
 
 function toggleUnread(): void {
     unreadChecked.value = !unreadChecked.value;
-    emit('save-state');
+    emitFilterChange();
 }
 
 function isCategorySelected(categoryId: number): boolean {

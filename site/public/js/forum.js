@@ -3,7 +3,7 @@
     getFileExtension, deleteSingleFile, removeLabel, get_part_number, file_array,
     previous_files, label_array, cancelDeferredSave, captureTabInModal,
     WebSocketClient, removeMessagePopup, CodeMirror, autosaveEnabled, deferredSave,
-    cleanupAutosaveHistory */
+    cleanupAutosaveHistory, forumFilterCategories */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -969,48 +969,6 @@ function changeDisplayOptions(option) {
     window.location.replace(`${buildCourseUrl(['forum', 'threads', thread_id])}?option=${option}`);
 }
 
-function readCategoryValues() {
-    const categories_value = [];
-    $('#thread_category button').each(function () {
-        if ($(this).attr('data-btn-selected') === 'true') {
-            categories_value.push($(this).data('cat_id'));
-        }
-    });
-    return categories_value;
-}
-
-function setCategoryValues(cat_ids) {
-    $('#thread_category button').each(function () {
-        const btnCatId = Number($(this).data('cat_id'));
-        const isActive = $(this).attr('data-btn-selected') === 'true';
-        const shouldBeActive = cat_ids.includes(btnCatId);
-        if (isActive !== shouldBeActive) {
-            this.click();
-        }
-    });
-}
-
-function readThreadStatusValues() {
-    const thread_status_value = [];
-    $('#thread_status_select button').each(function () {
-        if ($(this).attr('data-btn-selected') === 'true') {
-            thread_status_value.push($(this).data('sel_id'));
-        }
-    });
-    return thread_status_value;
-}
-
-function setThreadStatusValues(sel_ids) {
-    $('#thread_status_select button').each(function () {
-        const btnSelId = Number($(this).data('sel_id'));
-        const isActive = $(this).attr('data-btn-selected') === 'true';
-        const shouldBeActive = sel_ids.includes(btnSelId);
-        if (isActive !== shouldBeActive) {
-            this.click();
-        }
-    });
-}
-
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd ? 'next_page' : 'prev_page');
     if (load_page === -1) {
@@ -1078,16 +1036,10 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     const next_url = urlPattern.replace('{{#}}', load_page);
 
-    let categories_value = readCategoryValues();
-    let thread_status_value = readThreadStatusValues();
+    const categories_value = currentFilterState.categories.join('|');
+    const thread_status_value = currentFilterState.statuses.join('|');
     const search_query = $('#search-content').val();
-
-    // var thread_status_value = $("#thread_status_select").val();
-    const unread_select_value = $('#unread').is(':checked');
-    // eslint-disable-next-line eqeqeq
-    categories_value = (categories_value == null) ? '' : categories_value.join('|');
-    // eslint-disable-next-line eqeqeq
-    thread_status_value = (thread_status_value == null) ? '' : thread_status_value.join('|');
+    const unread_select_value = currentFilterState.unread;
     $.ajax({
         url: next_url,
         type: 'POST',
@@ -1200,16 +1152,10 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback) {
-    let categories_value = readCategoryValues();
-    let thread_status_value = readThreadStatusValues();
-
-    const unread_select_value = $('#unread').is(':checked');
+    const categories_value = currentFilterState.categories.join('|');
+    const thread_status_value = currentFilterState.statuses.join('|');
+    const unread_select_value = currentFilterState.unread;
     const search_query = $('#search-content').val();
-    const previous_search_query = $('#thread_list').data('search-query') ?? '';
-    // eslint-disable-next-line eqeqeq
-    categories_value = (categories_value == null) ? '' : categories_value.join('|');
-    // eslint-disable-next-line eqeqeq
-    thread_status_value = (thread_status_value == null) ? '' : thread_status_value.join('|');
 
     // Check if no changes since last update
     if (categories_value === Cookies.get(`${course}_forum_categories`)
@@ -2226,88 +2172,60 @@ function setVueSearchQuery(query) {
     }
 }
 
+let currentFilterState = { categories: [], statuses: [], unread: false };
+
+function seedFilterState(categories, statuses, unread) {
+    currentFilterState = {
+        categories: (categories ?? []).map(Number),
+        statuses: (statuses ?? []).map(Number),
+        unread: unread === true,
+    };
+}
+
+function onFilterChange(state) {
+    currentFilterState = {
+        categories: state.categories,
+        statuses: state.statuses,
+        unread: state.unread,
+    };
+    updateClearFilterButton();
+    updateThreads(true, saveFilterState);
+}
+
+function refreshFilterBar(seeds) {
+    const categories = typeof forumFilterCategories !== 'undefined' ? forumFilterCategories : [];
+    document.querySelector('.js-filter-bar')?.reRender({
+        categories,
+        ...seeds,
+    });
+}
+
 function clearForumFilter() {
-    // keeping Vue's reactive state in sync with the DOM
-    document.querySelectorAll('#thread_category .btn.filter-active').forEach((btn) => {
-        btn.click();
+    currentFilterState = { categories: [], statuses: [], unread: false };
+    refreshFilterBar({
+        initialSelectedCategoryIds: [],
+        initialSelectedThreadStatuses: [],
+        initialUnreadChecked: false,
     });
-    document.querySelectorAll('#thread_status_select .btn.filter-active').forEach((btn) => {
-        btn.click();
-    });
-    const unreadBtn = document.getElementById('filter_unread_btn');
-    if (unreadBtn?.classList.contains('filter-active')) {
-        unreadBtn.click();
-    }
     $('#search-content').val('');
     setVueSearchQuery('');
-    $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').css('visibility', 'hidden');
+    updateClearFilterButton();
 
     return false;
 }
 
-/**
- * TODO for (#12804): When the filter bar migrates to Vue, this function should move into
- * ForumFilterBar.vue. The earlier #12804 draft kept it here and had the Vue component
- * call it — but then the component reached outside its own DOM
- * to toggle a button it doesn't own,
- * which breaks our rule that components only manage their own markup.
- *
- * Cleaner approach: render the Clear Filters button inside ForumFilterBar.vue, tie its
- * visibility to the component's own reactive filter state and on-click just
- * reset the refs and emit 'clear-filters'. Then the Vue.twig events mapping hand that
- * event to clearForumFilter() here, which already clears the search input (via
- * setVueSearchQuery('')) and refreshes the thread list.
- */
 function updateClearFilterButton() {
-    if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0 && !$('#unread').is(':checked')) {
-        $('#clear_filter_button').css('visibility', 'hidden');
-    }
-    else {
-        $('#clear_filter_button').css('visibility', 'visible');
-    }
-}
-
-function loadFilterHandlers() {
-    $('#filter_unread_btn').on('mousedown', function (e) {
-        $(this).toggleClass('filter-inactive filter-active');
-    });
-
-    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
-        e.preventDefault();
-        const current_selection = $(this).data('btn-selected');
-
-        if (current_selection === 'true') {
-            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
-        }
-        else {
-            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
-        }
-
-        updateClearFilterButton();
-        updateThreads(true, saveFilterState);
-        return true;
-    });
-
-    $('#unread').change((e) => {
-        e.preventDefault();
-        updateThreads(true, saveFilterState);
-        checkUnread();
-        return true;
-    });
-
-    window.onpopstate = function (e) {
-        setFilterState(e.state);
-    };
-
-    updateClearFilterButton();
+    const hasFilters = currentFilterState.categories.length > 0
+        || currentFilterState.statuses.length > 0
+        || currentFilterState.unread
+        || $('#search-content').val().length > 0;
+    $('#clear_filter_button').css('visibility', hasFilters ? 'visible' : 'hidden');
 }
 
 function getFilterState() {
     return {
-        'categories': readCategoryValues(),
-        'thread-status': readThreadStatusValues(),
+        'categories': currentFilterState.categories,
+        'thread-status': currentFilterState.statuses,
         'search-content': $('#search-content').val(),
     };
 }
@@ -2320,21 +2238,22 @@ function setFilterState(state) {
     if (state === null) {
         return;
     }
-    if ('categories' in state) {
-        setCategoryValues(state['categories']);
-    }
-    if ('thread-status' in state) {
-        setThreadStatusValues(state['thread-status']);
-    }
+    currentFilterState = {
+        categories: (state['categories'] ?? []).map(Number),
+        statuses: (state['thread-status'] ?? []).map(Number),
+        unread: currentFilterState.unread,
+    };
+    refreshFilterBar({
+        initialSelectedCategoryIds: currentFilterState.categories,
+        initialSelectedThreadStatuses: currentFilterState.statuses,
+        initialUnreadChecked: currentFilterState.unread,
+    });
     if ('search-content' in state) {
         $('#search-content').val(state['search-content']);
         setVueSearchQuery(state['search-content']);
     }
     updateClearFilterButton();
-    // Don't call updateThreads here — the filter-change handler (setTimeout(0))
-    if (!('categories' in state) && !('thread-status' in state) && 'search-content' in state) {
-        setTimeout(() => updateThreads(true, null), 0);
-    }
+    updateThreads(true, null);
 }
 
 function thread_post_handler() {
@@ -2346,7 +2265,7 @@ function thread_post_handler() {
 }
 
 function forumFilterBar() {
-    $('#forum_filter_bar').toggle();
+    $('.js-filter-bar').toggle();
 }
 
 function getDeletedAttachments() {
@@ -2408,19 +2327,6 @@ function updateThread(e) {
             window.location.reload();
         },
     });
-}
-
-function checkUnread() {
-    if ($('#unread').prop('checked')) {
-        // eslint-disable-next-line no-undef
-        unread_marked = true;
-        $('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
-        $('#clear_filter_button').css('visibility', 'visible');
-        return true;
-    }
-    else {
-        return false;
-    }
 }
 
 // Used to update thread content in the "Merge Thread"
