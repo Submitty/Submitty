@@ -1535,9 +1535,7 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(csrf_token) {
-    const newCategory = $('#new_category_text').val();
-    const visibleDate = $('#category_visible_date').val();
+function addNewCategory(newCategory, visibleDate) {
     const url = buildCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
         url: url,
@@ -1546,7 +1544,7 @@ function addNewCategory(csrf_token) {
             newCategory: newCategory,
             visibleDate: visibleDate,
             rank: $('[id^="categorylistitem-').length,
-            csrf_token: csrf_token,
+            csrf_token: csrfToken,
         },
         success: function (data) {
             try {
@@ -1562,7 +1560,6 @@ function addNewCategory(csrf_token) {
                 return;
             }
             displaySuccessMessage(`Successfully created category ${escapeSpecialChars(newCategory)}.`);
-            $('#new_category_text').val('');
             // Create new item in #ui-category-list using dummy category
             const category_id = json['data']['new_id'];
             const category_color_code = '#000080';
@@ -2219,6 +2216,15 @@ if (!Array.prototype.toggleElement) {
     });
 }
 
+function setVueSearchQuery(query) {
+    // TODO: remove this bridge when the FilterBar migration (#12804) brings the toolbar
+    // clear button into Vue and clearing flows through the events mapping instead.
+    const searchBar = document.querySelector('.search-bar-wrapper');
+    if (searchBar && typeof searchBar.reRender === 'function') {
+        searchBar.reRender({ searchQuery: query });
+    }
+}
+
 function clearForumFilter() {
     // keeping Vue's reactive state in sync with the DOM
     document.querySelectorAll('#thread_category .btn.filter-active').forEach((btn) => {
@@ -2231,8 +2237,28 @@ function clearForumFilter() {
     if (unreadBtn?.classList.contains('filter-active')) {
         unreadBtn.click();
     }
+    $('#search-content').val('');
+    setVueSearchQuery('');
+    $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
+    $('#clear_filter_button').css('visibility', 'hidden');
+
+    return false;
 }
 
+/**
+ * TODO for (#12804): When the filter bar migrates to Vue, this function should move into
+ * ForumFilterBar.vue. The earlier #12804 draft kept it here and had the Vue component
+ * call it — but then the component reached outside its own DOM
+ * to toggle a button it doesn't own,
+ * which breaks our rule that components only manage their own markup.
+ *
+ * Cleaner approach: render the Clear Filters button inside ForumFilterBar.vue, tie its
+ * visibility to the component's own reactive filter state and on-click just
+ * reset the refs and emit 'clear-filters'. Then the Vue.twig events mapping hand that
+ * event to clearForumFilter() here, which already clears the search input (via
+ * setVueSearchQuery('')) and refreshes the thread list.
+ */
 function updateClearFilterButton() {
     if (readCategoryValues().length === 0 && readThreadStatusValues().length === 0 && $('#search-content').val().length === 0) {
         $('#clear_filter_button').css('visibility', 'hidden');
@@ -2243,28 +2269,30 @@ function updateClearFilterButton() {
 }
 
 function loadFilterHandlers() {
-    $('#search-submit').on('mousedown', (e) => {
+    $('#filter_unread_btn').on('mousedown', function (e) {
+        $(this).toggleClass('filter-inactive filter-active');
+    });
+
+    $('#thread_category button, #thread_status_select button').on('mousedown', function (e) {
         e.preventDefault();
+        const current_selection = $(this).data('btn-selected');
+
+        if (current_selection === 'true') {
+            $(this).data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
+        }
+        else {
+            $(this).data('btn-selected', 'true').removeClass('filter-inactive').addClass('filter-active');
+        }
+
         updateClearFilterButton();
         updateThreads(true, saveFilterState);
         return true;
     });
 
-    $('#search-content').on('keydown', (e) => {
-        if (e.key === 'Enter') {
-            $('#search-submit').trigger('mousedown');
-        }
-    });
-
-    $('#search-content').on('input', (e) => {
-        $('#search-clear').toggle($('#search-content').val() !== '');
-    });
-
-    $('#search-clear').on('mousedown', (e) => {
-        $('#search-content').val('').trigger('change');
-        $('#search-clear').hide();
-        updateClearFilterButton();
+    $('#unread').change((e) => {
+        e.preventDefault();
         updateThreads(true, saveFilterState);
+        checkUnread();
         return true;
     });
 
@@ -2272,7 +2300,6 @@ function loadFilterHandlers() {
         setFilterState(e.state);
     };
 
-    $('#search-clear').toggle($('#search-content').val() !== '');
     updateClearFilterButton();
 }
 
@@ -2296,6 +2323,7 @@ function setFilterState(state) {
     }
     if ('search-content' in state) {
         $('#search-content').val(state['search-content']);
+        setVueSearchQuery(state['search-content']);
     }
     updateClearFilterButton();
     // Don't call updateThreads here — the filter-change handler (setTimeout(0))

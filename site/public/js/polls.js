@@ -244,7 +244,7 @@ function updateTimer(endDate) {
         timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
     }
 
-    const timerId = setInterval(tick, 20);
+    const timerId = setInterval(tick, 500);
 }
 
 function toggle_section(section_id) {
