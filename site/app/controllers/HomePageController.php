@@ -428,7 +428,7 @@ class HomePageController extends AbstractController {
     /**
      * Internal endpoint used by create_course.py to run the Postgres/SQL
      * steps of course creation through DatabaseQueries.php.
-     * 
+     *
      * @return MultiResponse
      */
     #[Route("/api/courses/db", methods: ["POST"])]
