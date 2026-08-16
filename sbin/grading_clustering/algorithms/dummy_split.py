@@ -17,8 +17,8 @@ class DummySplit(ClusteringAlgorithm):
         for submitter in submitters:
             # submitter is a dict with 'user_id' and 'team_id'
             identifier = submitter.get('user_id') or submitter.get('team_id') or ''
-            
-            # find the first alphabetic character to ignore leading numbers or symbols
+
+            # Find the first alphabetic character to ignore leading numbers or symbols
             first_letter = ''
             for char in identifier:
                 if char.isalpha():
