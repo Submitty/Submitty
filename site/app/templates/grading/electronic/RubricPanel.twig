@@ -64,13 +64,14 @@
                     {% endif %}
                 </div>
                 {% if ta_grading_cluster_mode %}
+                    {% set entity = gradeable.isTeamAssignment() ? "team" : "student" %}
                     {% if not is_clustered %}
                         <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
-                            Cluster Grading Enabled: This student is in the "Unclustered" group and will be graded normally as an individual.
+                            Cluster Grading Enabled: This {{ entity }} is in the "Unclustered" group and will be graded normally as an individual.
                         </div>
                     {% else %}
                         <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
-                            Cluster Grading Enabled: The grade you apply here will automatically be applied to all {{ cluster_student_count }} students within this student's cluster.
+                            Cluster Grading Enabled: Any edits you made to this {{ entity }}'s marks will automatically be applied to all {{ cluster_student_count }} {{ entity }}s within this {{ entity }}'s cluster.
                         </div>
                     {% endif %}
                 {% endif %}
