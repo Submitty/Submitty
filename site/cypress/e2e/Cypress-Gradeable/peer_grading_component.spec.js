@@ -54,7 +54,7 @@ describe('Peer Grading Component testing', () => {
         ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
             cy.visit(['sample', 'gradeable', option, 'grading', 'details']);
             cy.get('[data-testid="popup-window"]').should('exist');
-            cy.get('[data-testid="agree-popup-btn"]').click();
+            cy.get('[data-testid="popup-save-button"]').click();
             cy.get('[data-testid="grade-button"]').eq(0).click();
             cy.get('body').type('{G}');
             cy.get('[data-testid="grading-rubric-label"]').should('contain', 'Grading Rubric');

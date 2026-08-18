@@ -824,6 +824,8 @@ class ForumThreadView extends AbstractView {
             "info_name" => json_encode($author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")"),
             "visible_user_json" => json_encode($visible_username),
             "jscriptAnonFix" => json_encode($post->isAnonymous() ? 'true' : 'false'),
+            "full_name" => $author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")",
+            "is_anonymous" => $post->isAnonymous(),
             "pronouns" => trim($author_display_info["pronouns"]),
             "display_pronouns" => $author_display_info["display_pronouns"],
             "is_OP" => ($post->getAuthor()->getId() === $first_post->getAuthor()->getId()) && ($post->isAnonymous() === $first_post->isAnonymous()),
