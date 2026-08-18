@@ -441,31 +441,28 @@ class AutoGradingView extends AbstractView {
         foreach ($img_files as $file) {
             if (array_key_exists('path', $file)) {
                 $content_type = mime_content_type($file['path']);
-                if (substr($content_type, 0, 5) === "image") {
-                    $file["encoded_name"] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
+                if (substr($content_type, 0, 5) === 'image') {
+                    $file['encoded_name'] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
                     $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
                     $uploaded_imgs[] = $file;
                 }
             }
         }
 
-        $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
-            $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            $files = array_merge($files['submissions'], $files['checkout']);
-        }
-
-        $id = $this->core->getUser()->getId();
-        if ($gradeable->isTeamAssignment()) {
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
 
         // Check for image annotation files
         $img_annotation_paths = [];
         foreach ($uploaded_imgs as $image_file) {
-            // Following ImageController pattern - use MD5 of anon_path for matching
+            // Following ImageController pattern - use MD5 of path for matching
+            /*
+                TODO: switching path to anon_path allows for image annotations not just made on
+                files in submissions_processed to be shown to the student through TAResults.twig,
+                but when trying to view the annotation the student gets 'No annotations found.' error
+            */
             $image_path_md5 = md5($image_file['path']);
 
             if (is_dir($img_annotation_dir)) {
@@ -519,7 +516,6 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'ta_components' => $ta_component_data,
@@ -669,12 +665,9 @@ class AutoGradingView extends AbstractView {
 
         $id = $this->core->getUser()->getId();
 
-        $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
-            $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-            $files = array_merge($files['submissions'], $files['checkout']);
         }
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
@@ -712,7 +705,6 @@ class AutoGradingView extends AbstractView {
         $gradeable_id = $gradeable->getId();
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
-            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'grader_info' => $grader_info,
