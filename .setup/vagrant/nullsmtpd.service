@@ -6,7 +6,7 @@ Documentation=http://github.com/MasterOdin/nullsmtpd
 User=root
 Restart=always
 Type=simple
-ExecStart=/usr/local/bin/nullsmtpd --no-fork --mail-dir /var/local/submitty/logs/emails/mailboxes
+ExecStart=/usr/local/submitty/venv/bin/nullsmtpd --no-fork --mail-dir /var/local/submitty/logs/emails/mailboxes
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 
