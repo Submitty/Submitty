@@ -2158,7 +2158,7 @@ class ElectronicGraderController extends AbstractController {
                 $valid_members = $cluster->getValidMembers($active_versions);
                 $cluster_student_count = count($valid_members);
 
-                // Check if the current student is a valid member or not - means that the current version of 
+                // Check if the current student is a valid member or not - means that the current version of
                 // the student is same or not the time the clusters were created
                 //But if it is not same that means we should consider it "Unclustered", furthermore we should not appply cluster-grading feature to this
                 foreach ($valid_members as $member) {
