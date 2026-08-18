@@ -1,61 +1,40 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from '../Popup.vue';
-
-interface PeerComponent {
-    id: string;
-    title: string;
-    max: number;
-    marks: number[];
-    extra_credit?: boolean;
-}
-
-interface MarkInfo {
-    title: string;
-    points: string;
-}
-
-interface PeerDetails {
-    graders: Record<string, string[]>;
-    marks_assigned: Record<string, Record<string, number[]>>;
-    graded_versions?: Record<string, Record<string, number>>;
-    version_conflicts?: Record<string, Record<string, boolean>>;
-}
+import type { MarkInfo, PeerComponent, PeerDetails } from '../../types/PeerGrading';
 
 const props = defineProps<{
     peers: string[];
     peerNames?: Record<string, string>;
     submitterId: string;
     gradeableId: string;
-    csrfToken: string;
     components: PeerComponent[];
     componentScores: Record<string, Record<string, number>>;
     peerDetails: PeerDetails;
     marks: Record<string, MarkInfo>;
     activeVersion?: number | null;
     visible?: boolean;
+    selectedPeer?: string;
 }>();
 
 const emit = defineEmits<{
     'toggle': [];
+    'peer-change': [peer: string];
     'clear-marks': [detail: {
         submitterId: string;
         gradeableId: string;
         peer: string;
-        csrfToken: string;
     }];
     'resolve-version-conflicts': [detail: {
         submitterId: string;
         gradeableId: string;
         peer: string;
-        csrfToken: string;
     }];
     'save-component': [detail: {
         submitterId: string;
         gradeableId: string;
         peer: string;
         componentId: string;
-        csrfToken: string;
     }];
     'mark-change': [detail: {
         peer: string;
@@ -63,8 +42,25 @@ const emit = defineEmits<{
     }];
 }>();
 
-const selectedPeer = ref(props.peers[0] ?? '');
+const selectedPeer = ref(props.selectedPeer || props.peers[0] || '');
 const checkedMarkOverrides = ref<Record<string, boolean>>({});
+
+function syncSelectedPeer() {
+    if (props.selectedPeer) {
+        selectedPeer.value = props.selectedPeer;
+        return;
+    }
+    if (!selectedPeer.value || !props.peers.includes(selectedPeer.value)) {
+        selectedPeer.value = props.peers[0] || '';
+    }
+}
+
+syncSelectedPeer();
+
+function onPeerChange(event: Event) {
+    selectedPeer.value = (event.target as HTMLSelectElement).value;
+    emit('peer-change', selectedPeer.value);
+}
 
 function markKey(componentId: string, peer: string, markId: number): string {
     return `${peer}:${componentId}:${markId}`;
@@ -83,7 +79,6 @@ function clearMarks() {
         submitterId: props.submitterId ?? '',
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -92,7 +87,6 @@ function resolveVersionConflicts() {
         submitterId: props.submitterId ?? '',
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -102,7 +96,6 @@ function saveComponent(componentId: string) {
         gradeableId: props.gradeableId ?? '',
         peer: selectedPeer.value,
         componentId,
-        csrfToken: props.csrfToken ?? '',
     });
 }
 
@@ -190,6 +183,7 @@ function hasScore(componentId: string, peer: string): boolean {
 
 <template>
   <Popup
+    id="edit-peer-components-form"
     title="Edit Peer Components Form"
     :visible="visible"
     @toggle="toggle"
@@ -218,8 +212,9 @@ function hasScore(componentId: string, peer: string): boolean {
       </span>
       <select
         id="edit-peer-select"
-        v-model="selectedPeer"
+        :value="selectedPeer"
         data-testid="edit-peer-select"
+        @change="onPeerChange"
       >
         <option
           v-for="peer in peers"
@@ -240,6 +235,7 @@ function hasScore(componentId: string, peer: string): boolean {
         <button
           type="button"
           class="btn btn-danger"
+          :data-peer-id="peer"
           title="Delete all grading by this peer grader"
           data-testid="clear-peer-marks"
           @click="clearMarks"

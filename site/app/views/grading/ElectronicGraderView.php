@@ -1767,17 +1767,9 @@ HTML;
         $show_clear_conflicts = false;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
-        $current_user = $this->core->getUser();
         if ($ta_graded_gradeable !== null) {
             foreach ($gradeable->getComponents() as $component) {
-                if ($component->isPeerComponent()) {
-                    $graded_component = $ta_graded_gradeable->getGradedComponent($component, $current_user);
-                    if ($graded_component !== null && $graded_component->getGradedVersion() !== $active_version) {
-                        $show_clear_conflicts = true;
-                        break;
-                    }
-                }
-                elseif (!$is_peer_grader) {
+                if ($component->isPeerComponent() || !$is_peer_grader) {
                     $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
                     if ($graded_component_container === null) {
                         continue;
@@ -1904,7 +1896,8 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "grader_id" => $this->core->getUser()->getId(),
-                "display_version" => $display_version
+                "display_version" => $display_version,
+                "csrf_token" => $this->core->getCsrfToken()
             ]
         ));
     }
@@ -1984,7 +1977,6 @@ HTML;
             "submitter_id" => $submitter,
             "peer_details" => $peer_details,
             "components" => $components_details_array,
-            "csrf_token" => $this->core->getCsrfToken(),
             "component_scores" => $component_scores,
             "marks" => $marks,
             "active_version" => $active_version

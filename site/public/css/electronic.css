@@ -1113,8 +1113,14 @@ tr.is_publish {
     margin-bottom: 15px;
 }
 
-#edit-peer-components-form .popup-form {
+.js-edit-peer-components-form .popup-form {
     font-size: 1rem;
+}
+
+.js-edit-peer-components-form {
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: middle;
 }
 
 .peer-component-save-status {

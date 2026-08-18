@@ -9,7 +9,6 @@ const defaultProps = {
     },
     submitterId: 'submitter_xyz',
     gradeableId: 'gradeable_001',
-    csrfToken: 'csrf_abc123',
     activeVersion: 2,
     components: [
         { id: 'comp_1', title: 'Code Quality', max: 10, marks: [101, 102], extra_credit: false },
@@ -38,12 +37,13 @@ const defaultProps = {
     },
 };
 
-// Mounts the component inside a wrapper that flips `visible` on `toggle`, mirroring
+// Mounts the component inside a wrapper that flips visible on toggle, mirroring
 // how the real parent (PeerPanel.twig + toggleEditPeerComponentsForm) controls it.
-// Pass [eventName, alias] pairs as `emitSpies` to stub emits and assert on them
-// with `cy.get('@alias')`.
+// Pass [eventName, alias] pairs as emitSpies to stub emits and assert on them
+// with cy.get('@alias').
 function mountWithToggleWrapper(props = {}, emitSpies = []) {
     const visible = ref(false);
+    const selectedPeer = ref(props.selectedPeer);
     const Wrapper = defineComponent({
         setup() {
             const listeners = emitSpies.reduce((acc, [name, alias]) => {
@@ -54,7 +54,9 @@ function mountWithToggleWrapper(props = {}, emitSpies = []) {
                 ...defaultProps,
                 ...props,
                 visible: visible.value,
+                selectedPeer: selectedPeer.value,
                 onToggle: () => { visible.value = !visible.value; },
+                onPeerChange: (peer) => { selectedPeer.value = peer; },
                 ...listeners,
             });
         },
@@ -120,6 +122,27 @@ describe('EditPeerComponentsForm', () => {
             mountWithToggleWrapper({ peerNames: {} });
             openPopup();
             cy.get('[data-testid="edit-peer-select"]').contains('option', 'student1');
+        });
+
+        it('honors a selectedPeer prop and emits peer-change so the parent can persist the selection across remounts', () => {
+            // The parent passes a preserved selectedPeer back on re-render.
+            mountWithToggleWrapper({ selectedPeer: 'student2' }, [['peerChange', 'onPeerChange']]);
+            openPopup();
+            cy.get('[data-testid="edit-peer-select"]').should('have.value', 'student2');
+            cy.get('[data-testid="peer-block"]').first().should('not.be.visible');
+            cy.get('[data-testid="peer-block"]').eq(1).should('be.visible');
+
+            // Changing the selection emits peer-change with the new peer.
+            cy.get('[data-testid="edit-peer-select"]').select('student1');
+            cy.get('@onPeerChange').should('have.been.calledWith', 'student1');
+            cy.get('[data-testid="peer-block"]').first().should('be.visible');
+            cy.get('[data-testid="peer-block"]').eq(1).should('not.be.visible');
+
+            // After a remount with a fresh selectedPeer prop, the selection is restored.
+            mountWithToggleWrapper({ selectedPeer: 'student1' });
+            openPopup();
+            cy.get('[data-testid="edit-peer-select"]').should('have.value', 'student1');
+            cy.get('[data-testid="peer-block"]').first().should('be.visible');
         });
     });
 
@@ -241,21 +264,19 @@ describe('EditPeerComponentsForm', () => {
             // clear-marks / save-component emits use the selected peer + component.
             cy.get('[data-testid="clear-peer-marks"]').first().click();
             cy.get('@onClearMarks').should('have.been.calledWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
+                submitterId: defaultProps.submitterId,
+                gradeableId: defaultProps.gradeableId,
                 peer: 'student1',
-                csrfToken: 'csrf_abc123',
             });
 
             cy.get('[data-testid="peer-block"]').first().within(() => {
                 cy.get('[data-testid="save-peer-component"]').first().click();
             });
             cy.get('@onSaveComponent').should('have.been.calledOnceWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
+                submitterId: defaultProps.submitterId,
+                gradeableId: defaultProps.gradeableId,
                 peer: 'student1',
                 componentId: 'comp_1',
-                csrfToken: 'csrf_abc123',
             });
 
             // A peer with no grading data shows all unchecked.
@@ -272,10 +293,9 @@ describe('EditPeerComponentsForm', () => {
                 cy.get('[data-testid="clear-peer-marks"]').click();
             });
             cy.get('@onClearMarks').should('have.been.calledWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
+                submitterId: defaultProps.submitterId,
+                gradeableId: defaultProps.gradeableId,
                 peer: 'student2',
-                csrfToken: 'csrf_abc123',
             });
 
             // clear-peer-marks also activates via keyboard.
@@ -312,10 +332,9 @@ describe('EditPeerComponentsForm', () => {
 
             cy.get('[data-testid="clear-version-conflicts"]').click();
             cy.get('@onResolveVersionConflicts').should('have.been.calledOnceWith', {
-                submitterId: 'submitter_xyz',
-                gradeableId: 'gradeable_001',
+                submitterId: defaultProps.submitterId,
+                gradeableId: defaultProps.gradeableId,
                 peer: 'student1',
-                csrfToken: 'csrf_abc123',
             });
 
             mountWithToggleWrapper();
@@ -330,7 +349,6 @@ describe('EditPeerComponentsForm', () => {
             mountWithToggleWrapper({
                 submitterId: undefined,
                 gradeableId: undefined,
-                csrfToken: undefined,
                 peerDetails: {
                     ...defaultProps.peerDetails,
                     version_conflicts: { comp_1: { student1: true } },
@@ -343,7 +361,6 @@ describe('EditPeerComponentsForm', () => {
                 submitterId: '',
                 gradeableId: '',
                 peer: 'student1',
-                csrfToken: '',
             });
 
             cy.get('[data-testid="clear-version-conflicts"]').click();
