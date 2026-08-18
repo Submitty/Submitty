@@ -52,7 +52,7 @@ class GradingClusterMember {
         return $this->team_id;
     }
 
-    public function getSubmitterId(): ?string {
+    public function getSubmitterId(): string {
         return $this->getUserId() ?? $this->getTeamId();
     }
 

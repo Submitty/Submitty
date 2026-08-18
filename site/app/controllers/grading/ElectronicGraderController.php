@@ -2158,15 +2158,15 @@ class ElectronicGraderController extends AbstractController {
                 $valid_members = $cluster->getValidMembers($active_versions);
                 $cluster_student_count = count($valid_members);
 
+                // Check if the current student is a valid member or not - means that the current version of 
+                // the student is same or not the time the clusters were created
+                //But if it is not same that means we should consider it "Unclustered", furthermore we should not appply cluster-grading feature to this
                 foreach ($valid_members as $member) {
                     if ($member->getSubmitterId() === $submitter_id) {
                         $is_clustered = true;
+                        $cluster_name = $cluster->getClusterName() ?? "Cluster " . $cluster->getId();
                         break;
                     }
-                }
-
-                if ($is_clustered) {
-                    $cluster_name = $cluster->getClusterName() ?? "Cluster " . $cluster->getId();
                 }
             }
         }
@@ -2569,22 +2569,24 @@ class ElectronicGraderController extends AbstractController {
                     $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, $member_ids);
 
                     $valid_members = $cluster->getValidMembers($active_versions);
-                    $is_current_valid = false; //this tells us that if this student is valid itself or not (i.e. whether student should belong in Unclustered mode)
+                    $is_valid_cluster_member = false; //this tells us that if this student is valid itself or not (i.e. whether student should belong in Unclustered mode)
                     //checking among all valid_members if anyone of them is this student
                     foreach ($valid_members as $member) {
                         if ($member->getSubmitterId() === $submitter_id) {
-                            $is_current_valid = true;
+                            $is_valid_cluster_member = true;
+                            break;
                         }
                     }
                     // if this student is valid then other students in its cluster can also be graded simultaneously
                     //but if not then this student should be graded as 'Unclustered'
-                    if ($is_current_valid) {
+                    if ($is_valid_cluster_member) {
                         foreach ($valid_members as $member) {
                             $submitters_to_grade[] = $member->getSubmitterId();
                         }
                     }
                 }
                 //if the student is "Unclustered" that means he just needs to be graded individually, so we add to the submitters_to_grade array
+                //this happens when either cluster is Null or this student is not a valid member
                 if (count($submitters_to_grade) === 0) {
                     $submitters_to_grade[] = $submitter_id;
                 }
@@ -2594,6 +2596,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($submitters_to_grade as $s_id) {
                     $gg = $this->tryGetGradedGradeable($gradeable, $s_id);
                     if ($gg === false) {
+                        Logger::error("Cluster Grading: Could not find graded gradeable for submitter {$s_id} in gradeable {$gradeable_id}");
                         continue;
                     }
 
@@ -2602,7 +2605,9 @@ class ElectronicGraderController extends AbstractController {
                         continue;
                     }
 
-                    // use each member's own active version to avoid version conflicts
+                    //the fallback component_version will be used/triggered only for the current student the TA is on, two cases this might happen-
+                    // 1) current Student is not in a cluster at all, when $cluster=== null
+                    //2) the current student was in a cluster, but deleted all of their submissions
                     $member_version = $active_versions[$s_id] ?? $component_version;
 
                     $ta_gg = $gg->getOrCreateTaGradedGradeable();

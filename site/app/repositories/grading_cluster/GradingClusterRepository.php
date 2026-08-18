@@ -24,16 +24,16 @@ class GradingClusterRepository extends EntityRepository {
         }
 
         return $this->getEntityManager()->createQuery('
-            SELECT cl, m
-            FROM \app\entities\grading_cluster\GradingCluster cl
-            JOIN cl.config c
-            JOIN cl.members m
-            WHERE c.gradeable_id = :gradeable_id
+            SELECT cluster, cluster_member
+            FROM \app\entities\grading_cluster\GradingCluster cluster
+            JOIN cluster.config cluster_config
+            JOIN cluster.members cluster_member
+            WHERE cluster_config.gradeable_id = :gradeable_id
               AND EXISTS (
                   SELECT 1
-                  FROM \app\entities\grading_cluster\GradingClusterMember m2
-                  WHERE m2.cluster = cl 
-                    AND (m2.user_id = :submitter_id OR m2.team_id = :submitter_id)
+                  FROM \app\entities\grading_cluster\GradingClusterMember search_member
+                  WHERE search_member.cluster = cluster 
+                    AND (search_member.user_id = :submitter_id OR search_member.team_id = :submitter_id)
               )
         ')
         ->setParameter('gradeable_id', $gradeable_id)
