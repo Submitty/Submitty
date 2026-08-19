@@ -50,9 +50,10 @@ class ForumThreadView extends AbstractView {
      * displayed in the left panel.
      * @param Thread[] $threads
      * @param Thread[] $merge_thread_options
+     * @param array<string, int> $blocked_author_ids
      * @return mixed[]|string
      */
-    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, bool $ajax = false): array|string {
+    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, array $blocked_author_ids, bool $ajax = false): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $categories = $repo->getCategories();
@@ -80,7 +81,7 @@ class ForumThreadView extends AbstractView {
         $arrowup_visibility = ($initialPageNumber === 0) ? "display:none;" : "";
         $displayThreadContent = $this->displayThreadList($threads, false);
 
-        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false);
+        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, $blocked_author_ids, false);
 
         $this->core->getQueries()->visitThread($user, $thread->getId());
 
@@ -146,6 +147,7 @@ class ForumThreadView extends AbstractView {
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
+                "is_instructor" => $this->core->getUser()->accessAdmin(),
                 "email_enabled" => $generatePostContent["email_enabled"]
             ]);
         }
@@ -271,6 +273,15 @@ class ForumThreadView extends AbstractView {
                     "onclick" => [false, ''],
                     "link" => $this->core->buildCourseUrl(['forum', 'stats']),
                     "required_rank" => 2
+                ],
+                [
+                    "display_text" => 'View Blocked Users',
+                    "id" => 'view_blocked_users',
+                    "optional_class" => [false, ''],
+                    "title" => 'View users blocked from forum posting',
+                    "onclick" => [true, "showBlockedUsersModal()"],
+                    "link" => '#',
+                    "required_rank" => 1
                 ]
             ];
             $other_buttons = [
@@ -298,10 +309,11 @@ class ForumThreadView extends AbstractView {
      * @param bool $includeReply
      * @param string $display_option
      * @param Thread[] $merge_thread_options
+     * @param array<string, int> $blocked_author_ids
      * @param bool $render
      * @return mixed[]|string
      */
-    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, array $blocked_author_ids, bool $render = true): array|string {
         $first = true;
         $post_data = [];
         $anon_user_id = hash('sha3-224', $this->core->getUser()->getId());
@@ -331,6 +343,7 @@ class ForumThreadView extends AbstractView {
                 $display_option,
                 $includeReply,
                 $post_box_id,
+                $blocked_author_ids,
                 false,
             );
             if ($first) {
@@ -699,10 +712,11 @@ class ForumThreadView extends AbstractView {
      * @param string $display_option
      * @param bool $includeReply
      * @param int $post_box_id
+     * @param array<string, int> $blocked_author_ids
      * @param bool $render
      * @return mixed[]|string
      */
-    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false): array|string {
+    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, array $blocked_author_ids, bool $render = false): array|string {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
@@ -874,6 +888,9 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "is_author_blocked" => ($user->accessAdmin() && $post->getAuthor()->getId() !== $user->getId())
+                ? isset($blocked_author_ids[$post->getAuthor()->getId()])
+                : false,
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];

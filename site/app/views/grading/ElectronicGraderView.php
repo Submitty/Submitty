@@ -1487,7 +1487,7 @@ HTML;
         $threads = $repo->getThreadsForGrading($threadIds, $submitters);
         foreach ($threads as $thread) {
             if (count($thread->getPosts()) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", []);
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", [], []);
             }
             else {
                 $posts_view .= <<<HTML
