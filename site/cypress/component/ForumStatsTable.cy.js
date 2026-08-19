@@ -112,6 +112,6 @@ describe('ForumStatsTable', () => {
     it('has accessible markup on expand button and sortable headers', () => {
         cy.mount(ForumStatsTable, { props: defaultProps });
         cy.get('[data-testid="expand-button"]').eq(0).should('have.attr', 'title').and('not.be.empty');
-        cy.get('[data-testid="sortable-header-link"]').eq(0).should('have.attr', 'aria-label', `Sort by User`);
+        cy.get('[data-testid="sortable-header-link"]').eq(0).should('have.attr', 'aria-label', 'Sort by User');
     });
 });
