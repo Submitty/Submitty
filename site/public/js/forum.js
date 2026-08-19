@@ -2212,6 +2212,7 @@ function clearForumFilter() {
     });
     refreshSearchBar('');
     updateClearFilterButton();
+    updateThreads(true, saveFilterState);
 
     return false;
 }

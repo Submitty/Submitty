@@ -818,7 +818,20 @@
 #forum_filter_bar {
     margin-top: 10px;
     font-size: small;
+    gap: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 }
+
+/* stylelint-disable selector-id-pattern */
+#thread_category,
+#thread_status_select {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+/* stylelint-enable selector-id-pattern */
 /* stylelint-disable-next-line selector-class-pattern */
 .post_content pre {
     white-space: pre-wrap;
@@ -847,21 +860,49 @@
 }
 /* stylelint-disable-next-line selector-id-pattern */
 
-.filter-active,
-.filter-active:hover {
+/* stylelint-disable selector-id-pattern */
+#forum_filter_bar .filter-active,
+#forum_filter_bar .filter-active:hover,
+#forum_filter_bar .filter-active:focus,
+#forum_filter_bar .filter-active:active {
     background: var(--actionable-blue);
     color: var(--always-default-white);
 }
 
-.filter-inactive {
+#forum_filter_bar .filter-inactive,
+#forum_filter_bar .filter-inactive:hover,
+#forum_filter_bar .filter-inactive:focus,
+#forum_filter_bar .filter-inactive:active {
     background: var(--always-default-white);
     color: var(--actionable-blue);
 }
 
-[data-theme="dark"] .filter-inactive {
+[data-theme="dark"] #forum_filter_bar .filter-inactive,
+[data-theme="dark"] #forum_filter_bar .filter-inactive:hover,
+[data-theme="dark"] #forum_filter_bar .filter-inactive:focus,
+[data-theme="dark"] #forum_filter_bar .filter-inactive:active {
     background: var(--btn-default-white);
     color: var(--default-black);
 }
+
+#forum_filter_bar .filter-active:active:hover,
+#forum_filter_bar .filter-active:active:focus {
+    background: var(--actionable-blue);
+    color: var(--always-default-white);
+}
+
+#forum_filter_bar .filter-inactive:active:hover,
+#forum_filter_bar .filter-inactive:active:focus {
+    background: var(--always-default-white);
+    color: var(--actionable-blue);
+}
+
+[data-theme="dark"] #forum_filter_bar .filter-inactive:active:hover,
+[data-theme="dark"] #forum_filter_bar .filter-inactive:active:focus {
+    background: var(--btn-default-white);
+    color: var(--default-black);
+}
+/* stylelint-enable selector-id-pattern */
 
 .thread-resolved {
     color: var(--good-green);
