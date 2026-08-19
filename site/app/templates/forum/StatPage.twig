@@ -11,19 +11,13 @@
         "activeThread": null
     } %}
     <div class="stats-table-container">
-        {% set id = uniqid() %}
-        <table class="table table-striped table-bordered persist-area" id="vue-{{ id }}">
-        </table>
-        <script>
-            window.submitty.render(
-                "#vue-{{ id }}",
-                "component",
-                "forum/ForumStatsTable",
-                {{ { users: userData } | json_encode() | raw() }},
-                {
-                    'navigate-to-thread': '(payload) => { window.open(buildCourseUrl(["forum", "threads", payload.threadId]), "_blank"); }'
-                }
-            );
-        </script>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'forum/ForumStatsTable',
+            'args': { 'users': userData },
+            'events': {
+                'navigate-to-thread': '(payload) => { window.open(buildCourseUrl(["forum", "threads", payload.threadId]), "_blank"); }'
+            }
+        } %}
     </div>
 </div>
