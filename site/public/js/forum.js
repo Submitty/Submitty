@@ -2169,9 +2169,14 @@ function seedFilterState(categories, statuses, unread) {
     currentFilterState = {
         categories: (categories ?? []).map(Number),
         statuses: (statuses ?? []).map(Number),
-        unread: unread === true,
+        unread: false,
         searchContent: '',
     };
+    refreshFilterBar({
+        initialSelectedCategoryIds: currentFilterState.categories,
+        initialSelectedThreadStatuses: currentFilterState.statuses,
+        initialUnreadChecked: false,
+    });
 }
 
 function onFilterChange(state) {
