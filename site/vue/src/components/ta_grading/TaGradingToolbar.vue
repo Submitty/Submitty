@@ -54,6 +54,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     title="Previous Student"
     :optional-href="prevStudentUrl"
     optional-spanid="prev-student-navlink"
+    optional-testid="prev-student-navlink"
   />
 
   <NavigationButton
@@ -63,6 +64,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     title="Next Student"
     :optional-href="nextStudentUrl"
     optional-spanid="next-student-navlink"
+    optional-testid="next-student-navlink"
   />
 
   <NavigationButton
