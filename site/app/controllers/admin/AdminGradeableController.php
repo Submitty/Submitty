@@ -17,6 +17,8 @@ use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\GradingOrder;
+use app\libraries\response\WebResponse;
 use app\models\gradeable\Redaction;
 
 /**
@@ -200,6 +202,255 @@ class AdminGradeableController extends AbstractController {
         catch (ValidationException | \Exception $e) {
             return JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage());
         }
+    }
+
+    #[Route(
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
+        methods: ["GET"]
+    )]
+    public function downloadCustomSortCsv(string $gradeable_id): DownloadResponse|WebResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $exception) {
+            return new WebResponse('Error', 'noGradeable', $gradeable_id);
+        }
+
+        $submitters = [];
+        foreach ($gradeable->getAllGradingSections() as $section) {
+            $submitters = array_merge($submitters, $section->getSubmitters());
+        }
+
+        $existing_order = $this->core->getQueries()->getCustomGradingOrder(
+            $gradeable_id
+        );
+
+        usort(
+            $submitters,
+            function ($a, $b) use ($existing_order) {
+                $a_position = $existing_order[$a->getId()] ?? PHP_INT_MAX;
+                $b_position = $existing_order[$b->getId()] ?? PHP_INT_MAX;
+
+                $comparison = $a_position <=> $b_position;
+                if ($comparison !== 0) {
+                    return $comparison;
+                }
+                return strcmp($a->getId(), $b->getId());
+            }
+        );
+
+        $fp = fopen('php://temp', 'r+');
+        $is_team = $gradeable->isTeamAssignment();
+
+        if ($is_team) {
+            fputcsv($fp, [
+                'Sort Order',
+                'Team ID',
+                'Team Name',
+            ]);
+        }
+        else {
+            fputcsv($fp, [
+                'Sort Order',
+                'User ID',
+                'Given Name',
+                'Family Name',
+            ]);
+        }
+
+        foreach ($submitters as $index => $submitter) {
+            $sort_order = $index + 1;
+
+            if ($is_team) {
+                $team = $submitter->getTeam();
+
+                fputcsv($fp, [
+                    $sort_order,
+                    $submitter->getId(),
+                    $team->getTeamName(),
+                ]);
+            }
+            else {
+                $user = $submitter->getUser();
+
+                fputcsv($fp, [
+                    $sort_order,
+                    $submitter->getId(),
+                    $user->getDisplayedGivenName(),
+                    $user->getDisplayedFamilyName(),
+                ]);
+            }
+        }
+
+        rewind($fp);
+        $csv = stream_get_contents($fp);
+        fclose($fp);
+
+        return DownloadResponse::getDownloadResponse(
+            $csv,
+            "{$gradeable_id}_custom_sort.csv",
+            'application/csv'
+        );
+    }
+
+    #[Route(
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
+        methods: ["POST"]
+    )]
+    public function uploadCustomSortCsv(string $gradeable_id): JsonResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+
+        if (!isset($_POST['big_file'])) {
+            return JsonResponse::getErrorResponse('No CSV file was provided.');
+        }
+
+        $lines = preg_split('/\R/', trim($_POST['big_file']));
+
+        if ($lines === false || count($lines) < 2) {
+            return JsonResponse::getErrorResponse(
+                'The CSV must contain a header and at least one submitter.'
+            );
+        }
+
+        $header = str_getcsv(array_shift($lines));
+        $normalized_header = array_map(
+            static function ($column) {
+                return strtolower(trim($column));
+            },
+            $header
+        );
+
+        $id_header = $gradeable->isTeamAssignment() ? 'team id' : 'user id';
+        $id_index = array_search($id_header, $normalized_header, true);
+
+        if ($id_index === false) {
+            return JsonResponse::getErrorResponse(
+                'The CSV must contain a "'
+                . ($gradeable->isTeamAssignment() ? 'Team ID' : 'User ID')
+                . '" column.'
+            );
+        }
+
+        $ordered_submitter_ids = [];
+
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+
+            $row = str_getcsv($line);
+
+            if (!isset($row[$id_index])) {
+                return JsonResponse::getErrorResponse(
+                    'A CSV row is missing a required value.'
+                );
+            }
+
+            $submitter_id = trim($row[$id_index]);
+
+            if ($submitter_id === '') {
+                return JsonResponse::getErrorResponse(
+                    'Submitter IDs cannot be blank.'
+                );
+            }
+
+            if (in_array($submitter_id, $ordered_submitter_ids, true)) {
+                return JsonResponse::getErrorResponse(
+                    "Duplicate submitter ID: {$submitter_id}"
+                );
+            }
+
+            $ordered_submitter_ids[] = $submitter_id;
+        }
+
+        if (count($ordered_submitter_ids) === 0) {
+            return JsonResponse::getErrorResponse(
+                'The CSV does not contain any submitters.'
+            );
+        }
+
+        $current_submitters = [];
+
+        foreach ($gradeable->getAllGradingSections() as $section) {
+            foreach ($section->getSubmitters() as $submitter) {
+                $current_submitters[$submitter->getId()] = true;
+            }
+        }
+
+        $uploaded_ids_sorted = $ordered_submitter_ids;
+        $current_ids_sorted = array_keys($current_submitters);
+        sort($uploaded_ids_sorted);
+        sort($current_ids_sorted);
+
+        $unknown_ids = array_diff($uploaded_ids_sorted, $current_ids_sorted);
+        if (count($unknown_ids) > 0) {
+            return JsonResponse::getErrorResponse(
+                'Unknown submitter ID(s), please check for typos: ' . implode(', ', $unknown_ids)
+            );
+        }
+
+        $missing_ids = array_diff($current_ids_sorted, $uploaded_ids_sorted);
+        $warning_message = null;
+
+        if (count($missing_ids) > 0) {
+            sort($missing_ids);
+            $ordered_submitter_ids = array_merge($ordered_submitter_ids, $missing_ids);
+            $warning_message = 'The following submitters were missing from the CSV and were appended to the bottom of the order: ' . implode(', ', $missing_ids);
+        }
+
+        try {
+            $this->core->getQueries()->replaceCustomGradingOrder(
+                $gradeable_id,
+                $ordered_submitter_ids,
+                $gradeable->isTeamAssignment()
+            );
+
+            $gradeable->setCustomSort(true);
+            $this->core->getQueries()->updateGradeable($gradeable);
+        }
+        catch (\Exception $exception) {
+            return JsonResponse::getErrorResponse(
+                'Unable to save the custom grading order: ' . $exception->getMessage()
+            );
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'message' => 'Custom grading order uploaded successfully.',
+            'warning' => $warning_message,
+        ]);
+    }
+
+    #[Route(
+        "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/clear",
+        methods: ["POST"]
+    )]
+    public function clearCustomSortOrder(string $gradeable_id): JsonResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $exception) {
+            return JsonResponse::getErrorResponse($exception->getMessage());
+        }
+
+        try {
+            $this->core->getQueries()->clearCustomGradingOrder($gradeable_id);
+            $gradeable->setCustomSort(false);
+            $this->core->getQueries()->updateGradeable($gradeable);
+        }
+        catch (\Exception $exception) {
+            return JsonResponse::getErrorResponse(
+                'Unable to clear the custom grading order: ' . $exception->getMessage()
+            );
+        }
+
+        return JsonResponse::getSuccessResponse(
+            'Custom grading order cleared.'
+        );
     }
 
     #[Route("/api/{_semester}/{_course}/{gradeable_id}/download", methods: ["GET"])]
@@ -553,11 +804,23 @@ class AdminGradeableController extends AbstractController {
         CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalJs('admin-gradeable-custom-sort.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $custom_sort_submitters = [];
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            $grading_order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+            $grading_order->sort('custom', 'ASC');
+            foreach ($grading_order->getSectionSubmitters() as $section_submitters) {
+                foreach ($section_submitters as $submitter) {
+                    $custom_sort_submitters[] = $submitter->getId();
+                }
+            }
+        }
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'num_checkpoints' => $num_checkpoints,
             'num_text_components' => $num_text,
             'gradeable' => $gradeable,
+            'custom_sort_submitters' => $custom_sort_submitters,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
             'semester' => $semester,
@@ -610,6 +873,7 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
+            'enable_custom_sort' => $gradeable->getEnableCustomSort(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
             'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
@@ -1305,6 +1569,7 @@ class AdminGradeableController extends AbstractController {
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' => $autograding_config_path,
                 'allow_custom_marks' => true,
+                'enable_custom_sort' => false,
                 //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
@@ -1480,7 +1745,8 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory',
             'has_due_date',
             'has_release_date',
-            'allow_custom_marks'
+            'allow_custom_marks',
+            'enable_custom_sort'
         ];
 
         $discussion_ids = 'discussion_thread_id';
