@@ -9869,6 +9869,11 @@ SQL;
         return $this->submitty_db->getRowCount() === 1;
     }
 
+    public function termExists(string $semester): bool {
+        $this->submitty_db->query("SELECT COUNT(*) FROM terms WHERE term_id=?", [$semester]);
+        return $this->submitty_db->row()['count'] > 0;
+    }
+
     public function getOtherCoursesWithSameGroup(string $semester, string $course): array {
         $this->submitty_db->query(
             "SELECT c2.course, c2.term FROM courses c1 INNER JOIN courses c2 ON c1.group_name = c2.group_name
@@ -10330,5 +10335,90 @@ ORDER BY
             [$gradeable_id]
         );
         return $this->course_db->rows();
+    }
+
+    /**
+     * Opens an admin connection to the given database name, using the same
+     * connection params as the master DB but swapping in $dbname.
+     */
+    private function getAdminConnection(string $dbname) {
+        $config = $this->core->getConfig();
+        $factory = new DatabaseFactory($config->getDatabaseDriver());
+        $params = $config->getSubmittyDatabaseParams();
+        $params['dbname'] = $dbname;
+        $db = $factory->getDatabase($params);
+        $db->connect($config->isDebug());
+        return $db;
+    }
+
+    public function createCourseDatabase(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+        $admin_db = $this->getAdminConnection('postgres');
+        try {
+            $admin_db->query("CREATE DATABASE {$dbname}");
+        }
+        finally {
+            $admin_db->disconnect();
+        }
+    }
+
+    public function grantCoursePrivileges(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+
+        $database_json = \app\libraries\FileUtils::readJsonFile(
+            \app\libraries\FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), 'database.json')
+        );
+        $course_user = $database_json['database_course_user'];
+
+        $admin_db = $this->getAdminConnection($dbname);
+        try {
+            $admin_db->query(
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {$course_user}"
+            );
+            $admin_db->query(
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, UPDATE ON SEQUENCES TO {$course_user}"
+            );
+        }
+        finally {
+            $admin_db->disconnect();
+        }
+    }
+
+    public function insertCourse(string $semester, string $course, string $group_name, string $instructor, int $self_registration_type = 0): void {
+        $this->submitty_db->query(
+            "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type) VALUES (?, ?, ?, ?, ?)",
+            [$semester, $course, $group_name, $instructor, $self_registration_type]
+        );
+    }
+
+    public function deleteCourse(string $semester, string $course): void {
+        $this->submitty_db->query(
+            "DELETE FROM courses WHERE term=? AND course=?",
+            [$semester, $course]
+        );
+    }
+
+    public function archiveCourse(string $semester, string $course): void {
+        $this->submitty_db->query(
+            "UPDATE courses SET status=2 WHERE term=? AND course=?",
+            [$semester, $course]
+        );
+    }
+
+    public function insertDefaultForumCategories(string $semester, string $course): void {
+        $dbname = "submitty_{$semester}_{$course}";
+        $admin_db = $this->getAdminConnection($dbname);
+        try {
+            $categories = ['General Questions', 'Homework Help', 'Quizzes', 'Tests'];
+            foreach ($categories as $rank => $desc) {
+                $admin_db->query(
+                    "INSERT INTO categories_list (category_desc, rank, visible_date) VALUES (?, ?, NULL)",
+                    [$desc, $rank]
+                );
+            }
+        }
+        finally {
+            $admin_db->disconnect();
+        }
     }
 }
