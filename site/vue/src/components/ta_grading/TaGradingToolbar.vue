@@ -53,7 +53,6 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="prev-student"
     title="Previous Student"
     :optional-href="prevStudentUrl"
-    optional-test-id="prev-student-navlink"
     optional-spanid="prev-student-navlink"
   />
 
@@ -63,7 +62,6 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="next-student"
     title="Next Student"
     :optional-href="nextStudentUrl"
-    optional-test-id="next-student-navlink"
     optional-spanid="next-student-navlink"
   />
 
@@ -92,7 +90,6 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="grading-setting-btn"
     title="Show Grading Settings"
     optional-spanid="grading-setting-btn"
-    optional-test-id="grading-setting-btn"
   />
   <span
     v-if="clusteringEnabled && clustersExist"
@@ -118,6 +115,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"
+    data-testid="progress-bar"
   >
     <progress
       class="progressbar"
