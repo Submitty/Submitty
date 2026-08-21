@@ -766,9 +766,8 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf('\'') !== -1
-                || file_array[i][j].name.indexOf('"') !== -1) {
-                alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
+            if (file_array[i][j].name.indexOf('"') !== -1) {
+                alert(`ERROR! You may not use double quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
                 return;
             }
@@ -1021,9 +1020,8 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf('\'') !== -1
-                    || file_array[i][j].name.indexOf('"') !== -1) {
-                    alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
+                if (file_array[i][j].name.indexOf('"') !== -1) {
+                    alert(`ERROR! You may not use double quotes in your filename: ${file_array[i][j].name}`);
                     return;
                 }
                 else if (file_array[i][j].name.indexOf('\\') !== -1
@@ -1136,9 +1134,8 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf('\'') !== -1
-                || file_array[i][j].name.indexOf('"') !== -1) {
-                alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
+            if (file_array[i][j].name.indexOf('"') !== -1) {
+                alert(`ERROR! You may not use double quotes in your filename: ${file_array[i][j].name}`);
                 return;
             }
             else if (file_array[i][j].name.indexOf('\\') !== -1
@@ -1230,9 +1227,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf('\'') !== -1
-                    || file_array[i][j].name.indexOf('"') !== -1) {
-                    alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
+                if (file_array[i][j].name.indexOf('"') !== -1) {
+                    alert(`ERROR! You may not use double quotes in your filename: ${file_array[i][j].name}`);
                     return;
                 }
                 else if (file_array[i][j].name.indexOf('\\') !== -1
