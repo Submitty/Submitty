@@ -74,8 +74,9 @@ describe('Peer panel version conflicts', () => {
             peerComponent(componentId).find('[data-testid="peer-version-warning"]').should('exist');
         });
         openEditPeerComponentsForm(peerGraderId);
+        cy.intercept('POST', '**/save_peer_component').as('savePeerComponent');
         cy.get(`[data-testid="save-peer-component"][data-component-id="84"][data-peer-id="${peerGraderId}"]`).click();
-        cy.get('[data-testid="close-button"]:visible').click();
+        cy.wait('@savePeerComponent');
         cy.reload();
         cy.get('[data-testid="peer-info"]').should('be.visible');
         peerComponent(84).find('[data-testid="peer-version-warning"]').should('not.exist');
@@ -117,8 +118,9 @@ describe('Peer panel version conflicts', () => {
                 cy.wrap($mark).check();
             }
         });
+        cy.intercept('POST', '**/save_peer_component').as('savePeerComponent');
         cy.get(`[data-testid="save-peer-component"][data-component-id="84"][data-peer-id="${peerGraderId}"]`, { timeout: 10000 }).click();
-        cy.get('[data-testid="close-button"]:visible').click();
+        cy.wait('@savePeerComponent');
         cy.reload();
         cy.get('[data-testid="peer-info"]').should('be.visible');
         openEditPeerComponentsForm(peerGraderId);
