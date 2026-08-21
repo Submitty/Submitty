@@ -12,9 +12,12 @@ describe('Peer panel version conflicts', () => {
     // timeouts needed when getting peer components since they take longer to load than page
     const peerComponent = (componentId) => cy.get(`#peer-component-${componentId}`, { timeout: 10000 });
 
-    const openEditPeerComponentsForm = () => {
-        cy.get('[data-testid="edit-peer-components-btn"]').click();
-        cy.get('#edit-peer-components-form').should('be.visible');
+    const openEditPeerComponentsForm = (peerId) => {
+        cy.get('[data-testid="edit-peer-trigger"]').click();
+        cy.get('[data-testid="edit-peer-select"]').should('be.visible');
+        if (peerId) {
+            cy.get('[data-testid="edit-peer-select"]').select(peerId);
+        }
     };
 
     const createConflictForPeerGrader = () => {
@@ -70,9 +73,10 @@ describe('Peer panel version conflicts', () => {
         componentIds.forEach((componentId) => {
             peerComponent(componentId).find('[data-testid="peer-version-warning"]').should('exist');
         });
-        openEditPeerComponentsForm();
-        cy.get(`[data-testid="save-component-btn"][data-component-id="84"][data-peer-id="${peerGraderId}"]`).click();
-        cy.get('[data-testid="close-button"]:visible').click();
+        openEditPeerComponentsForm(peerGraderId);
+        cy.intercept('POST', '**/save_peer_component').as('savePeerComponent');
+        cy.get(`[data-testid="save-peer-component"][data-component-id="84"][data-peer-id="${peerGraderId}"]`).click();
+        cy.wait('@savePeerComponent');
         cy.reload();
         cy.get('[data-testid="peer-info"]').should('be.visible');
         peerComponent(84).find('[data-testid="peer-version-warning"]').should('not.exist');
@@ -101,8 +105,8 @@ describe('Peer panel version conflicts', () => {
         cy.visit(gradingUrl(conflictedAnonId));
         cy.get('[data-testid="peer-info-btn"]').click();
         cy.get('[data-testid="peer-info"]').should('be.visible');
-        openEditPeerComponentsForm();
-        const markSelector = `[data-testid="peer-edit-mark"][data-component-id="84"][data-peer-id="${peerGraderId}"]`;
+        openEditPeerComponentsForm(peerGraderId);
+        const markSelector = `[data-testid="mark-checkbox"][data-component-id="84"][data-peer-id="${peerGraderId}"]`;
         let initiallyChecked;
 
         cy.get(markSelector, { timeout: 10000 }).first().then(($mark) => {
@@ -114,11 +118,12 @@ describe('Peer panel version conflicts', () => {
                 cy.wrap($mark).check();
             }
         });
-        cy.get(`[data-testid="save-component-btn"][data-component-id="84"][data-peer-id="${peerGraderId}"]`, { timeout: 10000 }).click();
-        cy.get('[data-testid="close-button"]:visible').click();
+        cy.intercept('POST', '**/save_peer_component').as('savePeerComponent');
+        cy.get(`[data-testid="save-peer-component"][data-component-id="84"][data-peer-id="${peerGraderId}"]`, { timeout: 10000 }).click();
+        cy.wait('@savePeerComponent');
         cy.reload();
         cy.get('[data-testid="peer-info"]').should('be.visible');
-        openEditPeerComponentsForm();
+        openEditPeerComponentsForm(peerGraderId);
         cy.get(markSelector).first().should(($mark) => {
             expect($mark.is(':checked')).to.equal(!initiallyChecked);
         });
@@ -128,12 +133,14 @@ describe('Peer panel version conflicts', () => {
         cy.visit(gradingUrl(conflictedAnonId));
         cy.get('[data-testid="peer-info-btn"]').click();
         cy.get('[data-testid="peer-info"]').should('be.visible');
-        openEditPeerComponentsForm();
-        const marksSelector = `[data-testid="peer-edit-mark"][data-peer-id="${peerGraderId}"]`;
+        openEditPeerComponentsForm(peerGraderId);
+        const marksSelector = `[data-testid="mark-checkbox"][data-peer-id="${peerGraderId}"]`;
         cy.get(marksSelector).should(($marks) => {
             expect([...$marks].some((mark) => mark.checked)).to.equal(true);
         });
-        cy.get(`[data-testid="clear-peer-marks-btn"][data-peer-id="${peerGraderId}"]`).click();
+        cy.get(`[data-testid="clear-peer-marks"][data-peer-id="${peerGraderId}"]`).click();
+        cy.get('[data-testid="peer-info"]').should('be.visible');
+        openEditPeerComponentsForm(peerGraderId);
         cy.get(marksSelector, { timeout: 10000 }).should('not.be.checked');
     });
 });
