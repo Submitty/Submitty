@@ -23,11 +23,14 @@ function getBadgeStyle(earned: number | null, total: number): string {
 
 const badgeClass = getBadgeStyle(props.totalScore, props.maxValue);
 
-// Round to full integers to match the badge's pre-refactor visual style
+function formatScore(value: number): string {
+    return (Math.round(value * 1000) / 1000).toString();
+}
+
 const displayScore = props.totalScore !== null
-    ? Math.round(props.totalScore).toString()
+    ? formatScore(props.totalScore)
     : '\u2212';
-const displayMax = Math.round(props.maxValue).toString();
+const displayMax = formatScore(props.maxValue);
 </script>
 
 <template>
