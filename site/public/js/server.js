@@ -990,35 +990,36 @@ function markViewed(ids) {
     const data = new FormData();
     data.append('ids', ids);
     data.append('csrf_token', csrfToken);
-    $.ajax({
-        url: buildCourseUrl(['course_materials', 'view']),
-        type: 'POST',
-        data: data,
-        contentType: false,
-        processData: false,
+    fetch(buildCourseUrl(['course_materials', 'view']), {
+        method: 'POST',
+        body: data,
+    })
+    .catch((e) => {
+        displayErrorMessage('Failed to mark viewed.');
+        console.error(e);
     });
 }
 
 function markAllViewed() {
     const data = new FormData();
     data.append('csrf_token', csrfToken);
-    $.ajax({
-        url: buildCourseUrl(['course_materials', 'viewAll']),
-        type: 'POST',
-        data: data,
-        contentType: false,
-        processData: false,
-        success: () => {
-            // Delete badges
-            const badges = document.querySelectorAll('.course-material-badge');
-            badges.forEach((badge) => {
-                badge.remove();
-            });
-        },
-        error: (e) => {
-            displayErrorMessage('Failed to mark all viewed.');
-            console.error(e);
-        },
+    fetch(buildCourseUrl(['course_materials', 'viewAll']), {
+        method: 'POST',
+        body: data,
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Failed to mark all viewed.');
+        }
+        // Delete badges
+        const badges = document.querySelectorAll('.course-material-badge');
+        badges.forEach((badge) => {
+            badge.remove();
+        });
+    })
+    .catch((e) => {
+        displayErrorMessage('Failed to mark all viewed.');
+        console.error(e);
     });
 }
 

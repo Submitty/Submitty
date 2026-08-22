@@ -501,4 +501,24 @@ class HomePageController extends AbstractController {
             $this->core->getCsrfToken()
         );
     }
+    #[Route("/home/courses/check_status", methods: ["POST"])]
+    public function checkCourseStatus(): JsonResponse {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
+
+        $semester = $_POST['course_semester'] ?? '';
+        $course_title = $_POST['course_title'] ?? '';
+
+        if (empty($semester) || empty($course_title)) {
+            return JsonResponse::getFailResponse("Semester and course title are required.");
+        }
+
+        $is_created = $this->core->getQueries()->courseExists($semester, $course_title);
+
+        return JsonResponse::getSuccessResponse([
+            'created' => $is_created
+        ]);
+    }
 }
