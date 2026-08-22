@@ -1,6 +1,7 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only */
-/* exported handleViewSectionsChange, handleSortOrderChange, handleAnonChange, handleInquiryChange, handleWithdrawnChange, handleGroupByClustersChange */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections,
+            collapseAllSections, grade_inquiry_only, reverse_inquiry_only, handleViewSectionsChange, handleSortOrderChange,
+            handleAnonChange, handleInquiryChange, handleWithdrawnChange, handleGroupByClustersChange */
 
 const MOBILE_BREAKPOINT = 951;
 

@@ -1,5 +1,4 @@
 export {};
-
 declare global {
     interface Window {
         filter_overriden_grades: () => void;
