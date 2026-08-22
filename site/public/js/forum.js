@@ -1882,7 +1882,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
+function alterAnnouncement(thread_id, confirmString, type) {
     const confirm = window.confirm(confirmString);
     if (confirm) {
         const url = `${buildCourseUrl(['forum', 'announcements'])}?type=${type}`;
@@ -1891,7 +1891,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
             type: 'POST',
             data: {
                 thread_id: thread_id,
-                csrf_token: csrf_token,
+                csrf_token: csrfToken,
             },
             success: function (data) {
                 window.location.reload();
