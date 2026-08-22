@@ -1915,7 +1915,37 @@ class ElectronicGraderController extends AbstractController {
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
             $goToStudent = null;
-            if ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
+            $cluster_map = [];
+            if ($filter === 'cluster') {
+                $cluster_config = $this->core->getCourseEntityManager()
+                    ->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)
+                    ->findWithClustersAndMembers($gradeable_id);
+                if ($cluster_config !== null) {
+                    $active_versions = [];
+                    foreach ($this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id) as $active_submitter) {
+                        $id = $active_submitter['user_id'] ?? $active_submitter['team_id'];
+                        $active_versions[$id] = (int) $active_submitter['active_version'];
+                    }
+                    foreach ($cluster_config->getClusters() as $cluster) {
+                        foreach ($cluster->getValidMembers($active_versions) as $member) {
+                            $cluster_map[$member->getSubmitterId()] = $cluster->getId();
+                        }
+                    }
+                }
+            }
+            if ($filter === 'cluster' && $to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+            }
+            elseif ($filter === 'cluster' && $to === 'prev') {
+                $goToStudent = $order_grading_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+            }
+            elseif ($filter === 'cluster' && $to === 'next' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+            }
+            elseif ($filter === 'cluster' && $to === 'next') {
+                $goToStudent = $order_grading_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+            }
+            elseif ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'prev') {
