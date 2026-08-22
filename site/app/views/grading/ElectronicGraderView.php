@@ -533,6 +533,10 @@ HTML;
      */
     public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
+        $initial_view_sections = !isset($_COOKIE['view']) || $_COOKIE['view'] === 'assigned';
+        $initial_random_order = isset($_COOKIE['sort']) && $_COOKIE['sort'] === 'random';
+        $initial_inquiry_only = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
+        $initial_hide_withdrawn = !isset($_COOKIE['include_withdrawn_students']) || $_COOKIE['include_withdrawn_students'] !== 'include';
 
         if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
             $is_group_by_clusters = false;
@@ -918,8 +922,6 @@ HTML;
             $message = 'Notice: You are not assigned to grade any students for this gradeable.';
         }
         if ($inquiry_status) {
-            $notice = "Notice: You are viewing students with active grade inquiries.";
-            $message .= ($message === "") ? $notice : "\n" . $notice;
             $message_warning = true;
         }
 
@@ -1018,6 +1020,10 @@ HTML;
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "active_graders" => $active_graders,
+            "initial_view_sections" => $initial_view_sections,
+            "initial_random_order" => $initial_random_order,
+            "initial_inquiry_only" => $initial_inquiry_only,
+            "initial_hide_withdrawn" => $initial_hide_withdrawn,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
