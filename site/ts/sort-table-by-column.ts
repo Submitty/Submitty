@@ -209,6 +209,25 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
     return sort_direction === 'ASC' ? cmp : -cmp;
 }
 
+// Exported so Vue table components can reuse the same comparison logic
+export { compareFn as compareTableValues };
+
+export type SortDirection = 'ASC' | 'DESC';
+
+export function resolveSortToggle(
+    currentKey: string | null,
+    clickedKey: string,
+    currentDirection: SortDirection,
+): { key: string; direction: SortDirection } {
+    if (currentKey === clickedKey) {
+        return {
+            key: clickedKey,
+            direction: currentDirection === 'ASC' ? 'DESC' : 'ASC',
+        };
+    }
+    return { key: clickedKey, direction: 'ASC' };
+}
+
 // Expose on window so Twig event handlers can call these functions
 (window as unknown as Record<string, unknown>).sortTableByColumn = sortTableByColumn;
 (window as unknown as Record<string, unknown>).restoreTableSort = restoreTableSort;
