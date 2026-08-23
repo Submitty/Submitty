@@ -458,6 +458,39 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, pe
     });
 };
 
+function formatBadgeValue(earned: number, max: number, extraCredit: boolean): string {
+    if (extraCredit) {
+        return `+${earned}`;
+    }
+    if (earned < 0) {
+        return max !== 0 ? `\u2212${Math.abs(earned)} / ${max}` : `\u2212${Math.abs(earned)}`;
+    }
+    return `${earned} / ${max}`;
+}
+
+function getBadgeStyle(earned: number, max: number, extraCredit: boolean): string {
+    if (extraCredit) {
+        return earned === 0 ? 'gray-background' : 'green-background';
+    }
+    if (earned < 0) {
+        return earned < 0.5 * max ? 'red-background' : 'yellow-background';
+    }
+    if (earned >= max) {
+        return 'green-background';
+    }
+    return earned > max * 0.5 ? 'yellow-background' : 'red-background';
+}
+
+function shouldShowBadge(earned: number, max: number, extraCredit: boolean): boolean {
+    if (extraCredit) {
+        return true;
+    }
+    if (max > 0) {
+        return true;
+    }
+    return earned < 0;
+}
+
 window.savePeerComponent = function (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string) {
     const mark_ids = $(
         `.peer-edit-mark[data-component-id="${component_id}"][data-peer-id="${peer_id}"]:checked`,
@@ -480,13 +513,22 @@ window.savePeerComponent = function (submitter_id: string, gradeable_id: string,
             mark_ids,
         },
         type: 'POST',
-        success: function (response: { data?: { badge_html?: string } }) {
+        success: function (response: { data?: { earned?: number; max?: number; extra_credit?: boolean } }) {
             const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
             save_status.text('Saved');
             $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
             $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
-            if (response.data && response.data.badge_html) {
-                $(`.box-badge[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).html(response.data.badge_html);
+            if (response.data && response.data.earned !== undefined && response.data.max !== undefined) {
+                const earned = response.data.earned;
+                const max = response.data.max;
+                const extraCredit = !!response.data.extra_credit;
+                const badgeEl = $(`.box-badge[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+                if (shouldShowBadge(earned, max, extraCredit)) {
+                    badgeEl.html(`<span class="badge ${getBadgeStyle(earned, max, extraCredit)}" data-testid="score-pill-badge">${formatBadgeValue(earned, max, extraCredit)}</span>`);
+                }
+                else {
+                    badgeEl.html('<div class="no-badge"></div>');
+                }
             }
             void window.reloadPeerRubric(gradeable_id, getAnonId());
             setTimeout(() => {
