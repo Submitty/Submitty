@@ -525,10 +525,18 @@ HTML;
      *      ag_user_id: ?string,
      *      ag_team_id: ?string,
      * }>> $active_graders
+     * @param bool $is_group_by_clusters
+     * @param array<string, string> $algorithms
+     * @param ?string $current_algorithm
+     * @param array<string, string> $cluster_map
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            $is_group_by_clusters = false;
+        }
 
         $peer = false;
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
@@ -540,6 +548,9 @@ HTML;
         $columns = [];
         $columns[] = ["title" => "#", "header_key" => "index"];
         $columns[] = ["title" => "Section", "header_key" => "section"];
+        if ($is_group_by_clusters) {
+            $columns[] = ["title" => "Cluster", "header_key" => "cluster"];
+        }
 
         $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
             $gradeable->getLimitedAccessBlind() === 2);
@@ -665,6 +676,10 @@ HTML;
             ];
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
+            }
+            elseif ($is_group_by_clusters) {
+                $submitter_id = $row->getSubmitter()->getId();
+                $section_title = $cluster_map[$submitter_id] ?? "Unclustered";
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $row->getSubmitter()->getRegistrationSection();
@@ -808,6 +823,9 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
+            }
+            elseif ($is_group_by_clusters) {
+                $section_title = $cluster_map[$teamless_user->getId()] ?? "Unclustered";
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $teamless_user->getRegistrationSection();
@@ -967,6 +985,12 @@ HTML;
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $shown_columns,
             "all_columns" => $columns,
+            "is_group_by_clusters" => $is_group_by_clusters,
+            "is_clustering_allowed" => $this->core->getConfig()->isSubmissionClusteringEnabled(),
+            "algorithms" => $algorithms,
+            "current_algorithm" => $current_algorithm,
+            "create_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'create_clustering']),
+            "check_clustering_status_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'clustering', 'status']),
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
@@ -1029,7 +1053,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
@@ -1164,7 +1188,7 @@ HTML;
                     <div class="content-item content-item-right">
 HTML;
 
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count, $cluster_name);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -1211,7 +1235,7 @@ HTML;
         }
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         if (!$isPeerGrader || $isPeerRubric) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count);
         }
         if (!$isPeerGrader || $isPeerSolutions) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1297,7 +1321,6 @@ HTML;
         // this css doesn't load properly if added to ImageAnnotationEmbedded.twig so we add it here instead
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
@@ -1331,7 +1354,7 @@ HTML;
      * @param string $direction
      * @return string
      */
-    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
         if (
@@ -1352,6 +1375,7 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() === 4) {
             $i_am_a_peer = true;
         }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "anon_mode" => $anon_mode,
             "peer_blind_grading" => $blind_grading,
@@ -1367,7 +1391,12 @@ HTML;
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
             'team_assignment' => $gradeable->isTeamAssignment(),
-            'isBlind' => $isBlind
+            'isBlind' => $isBlind,
+            "clustering_enabled" => $clustering_enabled,
+            "clusters_exist" => $clusters_exist,
+            "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
+            "cluster_name" => $cluster_name,
+            "cluster_size" => $cluster_student_count
         ]);
     }
 
@@ -1521,11 +1550,18 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $blind_grader, bool $anon_mode) {
-        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
+        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable, bool $apply_peer_file_restriction = false) {
             $files[$start_dir_name] = [];
+            $added_visible_file = false;
+            $gradeable = $graded_gradeable->getGradeable();
+            $user = $this->core->getUser();
+            $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
             $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
+                    if ($apply_peer_file_restriction && $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && !$gradeable->canPeerViewFile($file['relative_name'])) {
+                        continue;
+                    }
                     $skipping = false;
                     foreach ($hidden_files as $file_regex) {
                         $file_regex = trim($file_regex);
@@ -1553,8 +1589,12 @@ HTML;
                             $working_dir = &$working_dir[$dir];
                         }
                         $working_dir[$file['name']] = $file['path'];
+                        $added_visible_file = true;
                     }
                 }
+            }
+            if ($is_restricted_peer_grader && !$added_visible_file) {
+                unset($files[$start_dir_name]);
             }
         };
         $submissions = [];
@@ -1562,6 +1602,13 @@ HTML;
         $results_public = [];
         $checkout = [];
         $submissions_processed = [];
+        $show_no_matching_peer_files_banner = false;
+
+        $gradeable = $graded_gradeable->getGradeable();
+        $user = $this->core->getUser();
+        $is_restricted_peer_grader = $gradeable->hasPeerComponent() && ($user->getGroup() === User::GROUP_STUDENT || ($user->accessGrading() && !$this->core->getAccess()->checkGroupPrivilege($user->getGroup(), $gradeable->getMinGradingGroup())));
+        $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), 'user_assignment_settings.json');
+        $user_assignment_settings_path = $is_restricted_peer_grader ? null : $uas;
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
@@ -1575,11 +1622,12 @@ HTML;
             $gradeable = $graded_gradeable->getGradeable();
             $user = $this->core->getUser();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable, true);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
             $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
+            $show_no_matching_peer_files_banner = $is_restricted_peer_grader && $gradeable->getPeerFilesRestricted() && $submissions === [];
         }
         $student_grader = false;
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
@@ -1588,13 +1636,14 @@ HTML;
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
         $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         $user_ids[$anon_submitter_id] = $submitter_id;
-        $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $user_assignment_settings_missing = $display_version_instance !== null && !file_exists($uas);
         $user_assignment_settings_unreadable = $display_version_instance !== null && file_exists($uas) && !is_readable($uas);
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
+        $this->core->getOutput()->addInternalCss('details.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1612,9 +1661,10 @@ HTML;
             "active_version" => $display_version,
             "anon_mode" => $anon_mode,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
-            "user_assignment_settings_path" => $uas,
+            "user_assignment_settings_path" => $user_assignment_settings_path,
             "user_assignment_settings_missing" => $user_assignment_settings_missing,
-            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable
+            "user_assignment_settings_unreadable" => $user_assignment_settings_unreadable,
+            "show_no_matching_peer_files_banner" => $show_no_matching_peer_files_banner
         ]);
     }
 
@@ -1700,7 +1750,7 @@ HTML;
      * @param bool $show_silent_edit
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0) {
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
@@ -1764,6 +1814,9 @@ HTML;
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,
                 "has_active_version" => $has_active_version,
+                "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
+                "is_clustered" => $is_clustered,
+                "cluster_student_count" => $cluster_student_count,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
