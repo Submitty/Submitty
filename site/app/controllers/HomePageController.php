@@ -502,6 +502,7 @@ class HomePageController extends AbstractController {
         );
     }
     #[Route("/home/courses/check_status", methods: ["POST"])]
+#[Route("/home/courses/check_status", methods: ["POST"])]
     public function checkCourseStatus(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -517,8 +518,20 @@ class HomePageController extends AbstractController {
 
         $is_created = $this->core->getQueries()->courseExists($semester, $course_title);
 
+        $log_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            "logs",
+            "site_errors",
+            "create_" . $semester . "_" . $course_title . ".log"
+        );
+
+        $log_content = "";
+        if (file_exists($log_path)) {
+            $log_content = file_get_contents($log_path);
+        }
+
         return JsonResponse::getSuccessResponse([
-            'created' => $is_created
+            'created' => $is_created,
+            'log' => $log_content
         ]);
     }
-}
