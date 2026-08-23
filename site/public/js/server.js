@@ -985,7 +985,6 @@ function openDiv(id) {
     }
     return false;
 }
-
 function markViewed(ids) {
     const data = new FormData();
     data.append('ids', ids);
@@ -994,10 +993,17 @@ function markViewed(ids) {
         method: 'POST',
         body: data,
     })
-    .catch((e) => {
-        displayErrorMessage('Failed to mark viewed.');
-        console.error(e);
-    });
+        .then(async (response) => {
+            if (!response.ok) {
+                const resData = await response.json().catch(() => null);
+                const errorMsg = resData?.message || 'Failed to mark viewed.';
+                throw new Error(errorMsg);
+            }
+        })
+        .catch((e) => {
+            displayErrorMessage(e.message || 'Failed to mark viewed.');
+            console.error(e);
+        });
 }
 
 function markAllViewed() {
@@ -1007,20 +1013,22 @@ function markAllViewed() {
         method: 'POST',
         body: data,
     })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error('Failed to mark all viewed.');
-        }
-        // Delete badges
-        const badges = document.querySelectorAll('.course-material-badge');
-        badges.forEach((badge) => {
-            badge.remove();
+        .then(async (response) => {
+            if (!response.ok) {
+                const resData = await response.json().catch(() => null);
+                const errorMsg = resData?.message || 'Failed to mark all viewed.';
+                throw new Error(errorMsg);
+            }
+            // Delete badges
+            const badges = document.querySelectorAll('.course-material-badge');
+            badges.forEach((badge) => {
+                badge.remove();
+            });
+        })
+        .catch((e) => {
+            displayErrorMessage(e.message || 'Failed to mark all viewed.');
+            console.error(e);
         });
-    })
-    .catch((e) => {
-        displayErrorMessage('Failed to mark all viewed.');
-        console.error(e);
-    });
 }
 
 function toggleCMFolder(id, open) {
