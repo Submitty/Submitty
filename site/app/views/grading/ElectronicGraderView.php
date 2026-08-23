@@ -531,7 +531,7 @@ HTML;
      * @param array<string, string> $cluster_map
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = [], array $available_docker_images = []) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
@@ -998,7 +998,6 @@ HTML;
             "details_base_url" => $details_base_url,
             "details_base_path" => $details_base_path,
             "collapsed_sections" => $collapsed_sections,
-            "available_docker_images" => $available_docker_images,
             "sort" => $sort,
             "direction" => $direction,
             "can_regrade" => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,

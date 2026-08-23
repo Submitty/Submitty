@@ -9,7 +9,6 @@ const props = defineProps<{
     csrfToken: string;
     canCreateClustering: boolean;
     gradeableId: string;
-    availableDockerImages: string[];
 }>();
 
 const emit = defineEmits<{
@@ -22,7 +21,6 @@ const selectedAlgorithm = ref(props.currentAlgorithm || '');
 const showModal = ref(false);
 const useCustomUpload = ref(false);
 const customFile = ref<File | null>(null);
-const customDockerImage = ref(props.availableDockerImages[0] ?? '');
 const fileInput = ref<HTMLInputElement | null>(null);
 
 function toggleModal() {
@@ -55,7 +53,7 @@ async function submitClustering() {
     if (!useCustomUpload.value && !selectedAlgorithm.value) {
         return;
     }
-    if (useCustomUpload.value && (!customFile.value || !customDockerImage.value)) {
+    if (useCustomUpload.value && !customFile.value) {
         return;
     }
 
@@ -69,7 +67,6 @@ async function submitClustering() {
         if (customFile.value) {
             formData.append('custom_script', customFile.value);
         }
-        formData.append('docker_image', customDockerImage.value);
     } else {
         formData.append('algorithm', selectedAlgorithm.value);
     }
@@ -229,35 +226,10 @@ async function submitClustering() {
                 <p v-if="customFile" class="file-upload-success">
                   <i class="fas fa-check"></i> {{ customFile.name }}
                 </p>
-                <div class="docker-image-container">
-                  <label class="docker-image-label">Docker Image to use:</label>
-                  <select
-                    v-if="availableDockerImages.length > 0"
-                    v-model="customDockerImage"
-                    class="form-control"
-                    data-testid="custom-docker-image-select"
-                  >
-                    <option
-                      v-for="image in availableDockerImages"
-                      :key="image"
-                      :value="image"
-                    >
-                      {{ image }}
-                    </option>
-                  </select>
-                  <p
-                    v-else
-                    class="no-docker-images-message"
-                    data-testid="no-docker-images-message"
-                  >
-                    No Docker images are configured on this system. Ask your system
-                    administrator to add one before using a custom algorithm.
-                  </p>
-                </div>
                 <p class="custom-upload-help-text">
                   Your script must read <code>input.json</code> and write clusters to <code>output.json</code>
                   in its working directory. It runs with no network access, so it cannot install
-                  packages &mdash; choose an image that already contains the libraries you need.
+                  packages.
                 </p>
               </div>
             </div>
@@ -276,7 +248,7 @@ async function submitClustering() {
                 </a>
                 <button
                   class="btn btn-primary"
-                  :disabled="useCustomUpload ? (!customFile || !customDockerImage) : !selectedAlgorithm"
+                  :disabled="useCustomUpload ? !customFile : !selectedAlgorithm"
                   @click="submitClustering"
                 >
                   Submit
@@ -326,21 +298,6 @@ async function submitClustering() {
 
 .custom-upload-container {
     margin-top: 10px;
-}
-
-.docker-image-container {
-    margin-top: 10px;
-}
-
-.docker-image-label {
-    font-size: 0.9em;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.no-docker-images-message {
-    color: var(--error-alert-dark-red, #cc0000);
-    font-size: 0.9em;
 }
 
 .custom-upload-help-text {

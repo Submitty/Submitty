@@ -556,14 +556,11 @@ class GradingClustering(CourseGradeableJob):
         gradeable = self.job_details['gradeable']
         algorithm = self.job_details['algorithm']
         script_path = self.job_details.get('script_path', '')
-        docker_image = self.job_details.get('docker_image', '')
 
         script = str(Path(INSTALL_DIR, 'sbin', 'grading_clustering', 'main.py'))
         cmd = ['python3', script, semester, course, gradeable, algorithm]
         if script_path:
             cmd += ['--script-path', script_path]
-        if docker_image:
-            cmd += ['--docker-image', docker_image]
 
         # the status directory lives under the course, not the daemon job queue.
         # anything created in the queue dir is picked up by the watchdog handler

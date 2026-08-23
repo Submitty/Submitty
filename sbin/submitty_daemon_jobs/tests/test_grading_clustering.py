@@ -90,8 +90,7 @@ class TestGradingClustering(unittest.TestCase):
             'course': 'csci1100',
             'gradeable': 'hw1',
             'algorithm': 'custom_upload',
-            'script_path': '/path/to/script.py',
-            'docker_image': 'continuumio/anaconda3:latest'
+            'script_path': '/path/to/script.py'
         }
 
         # Write into a real temp directory rather than mocking open(), so the

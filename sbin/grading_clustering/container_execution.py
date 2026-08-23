@@ -16,8 +16,13 @@ MEMORY_LIMIT = '512m'  # hard memory ceiling enforced by the kernel
 PIDS_LIMIT = 128  # guards against fork bombs in uploaded code
 CUSTOM_SCRIPT_NAME = 'custom_algorithm.py'
 
+# The dedicated Docker image for running custom clustering algorithms.
+# Built from Submitty/DockerImages (dockerfiles/grading-clustering) and
+# pre-loaded with numpy, pandas, scikit-learn, and scipy.
+CLUSTERING_DOCKER_IMAGE = 'submitty/grading-clustering:latest'
 
-def execute_custom_clustering(script_path, input_data, docker_image):
+
+def execute_custom_clustering(script_path, input_data):
     """
     Execute a custom clustering script inside a secure Docker container.\
     """
@@ -34,7 +39,7 @@ def execute_custom_clustering(script_path, input_data, docker_image):
         os.chmod(work_dir, 0o770)
         os.chmod(input_path, 0o660)
         os.chmod(dest_script, 0o660)
-        _run_container(work_dir, docker_image)
+        _run_container(work_dir)
 
         # Read and validate output
         output_path = os.path.join(work_dir, 'output.json')
@@ -53,7 +58,7 @@ def execute_custom_clustering(script_path, input_data, docker_image):
         shutil.rmtree(work_dir, ignore_errors=True)
 
 
-def _run_container(work_dir, docker_image):
+def _run_container(work_dir):
     """
     Create and run a Docker container to execute the custom clustering script.
     """
@@ -74,7 +79,7 @@ def _run_container(work_dir, docker_image):
         }
 
         container = client.containers.create(
-            docker_image,
+            CLUSTERING_DOCKER_IMAGE,
             command=['python3', os.path.join(work_dir, CUSTOM_SCRIPT_NAME)],
             ulimits=ulimits,
             mem_limit=MEMORY_LIMIT,
@@ -117,8 +122,8 @@ def _run_container(work_dir, docker_image):
 
     except docker.errors.ImageNotFound:
         raise RuntimeError(
-            f"Docker image '{docker_image}' is not available on this machine. "
-            "Ask your system administrator to pull it before running this algorithm."
+            f"Docker image '{CLUSTERING_DOCKER_IMAGE}' is not available on this machine. "
+            "Ask your system administrator to pull it before running custom clustering algorithms."
         )
     except docker.errors.ContainerError as e:
         raise RuntimeError(f"Container execution error: {e}")

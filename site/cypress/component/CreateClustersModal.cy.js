@@ -12,7 +12,6 @@ describe('CreateClustersModal', () => {
         csrfToken: 'test-token',
         canCreateClustering: true,
         gradeableId: 'test_gradeable',
-        availableDockerImages: ['submitty/python:3.6', 'submitty/java:11'],
     };
 
     it('renders "Create Clusters" button if user can create clustering', () => {

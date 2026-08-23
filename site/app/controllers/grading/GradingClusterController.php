@@ -13,39 +13,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\FileUtils;
 
 class GradingClusterController extends AbstractController {
-    /**
-     * The Docker images an instructor may run a custom clustering script in.
-     * @return string[]
-     */
-    public static function getDockerImagesFromConfig(string $submitty_data_path): array {
-        $images = [];
-        $path = FileUtils::joinPaths($submitty_data_path, "config", "autograding_containers.json");
-        if (!file_exists($path)) {
-            return $images;
-        }
-        $containers = json_decode(file_get_contents($path), true);
-        if (!is_array($containers)) {
-            return $images;
-        }
-        foreach ($containers as $capability_images) {
-            if (!is_array($capability_images)) {
-                continue;
-            }
-            foreach ($capability_images as $image) {
-                if (is_string($image)) {
-                    $images[] = $image;
-                }
-            }
-        }
-        return array_values(array_unique($images));
-    }
-
-    /**
-     * @return string[]
-     */
-    private function getAvailableDockerImages(): array {
-        return self::getDockerImagesFromConfig($this->core->getConfig()->getSubmittyDataPath());
-    }
 
     /**
      * Set the group of the given paths to the group that owns the course, so the
@@ -102,19 +69,10 @@ class GradingClusterController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
 
         $script_path = '';
-        $docker_image = '';
         if ($algorithm === GradingClusterAlgorithm::CustomUpload) {
             // Validate uploaded file
             if (!isset($_FILES['custom_script']) || $_FILES['custom_script']['error'] !== UPLOAD_ERR_OK) {
                 return JsonResponse::getErrorResponse("No file was uploaded or the upload failed.");
-            }
-
-            $docker_image = $_POST['docker_image'] ?? '';
-            if (empty($docker_image)) {
-                return JsonResponse::getErrorResponse("A Docker image must be selected for custom algorithms.");
-            }
-            if (!in_array($docker_image, $this->getAvailableDockerImages(), true)) {
-                return JsonResponse::getErrorResponse("Docker image '{$docker_image}' is not an allowed image.");
             }
 
             $uploaded_file = $_FILES['custom_script'];
@@ -185,7 +143,6 @@ class GradingClusterController extends AbstractController {
 
         if ($script_path !== '') {
             $clustering_job_data['script_path'] = $script_path;
-            $clustering_job_data['docker_image'] = $docker_image;
         }
 
         if (

@@ -20,8 +20,6 @@ def main():
                         help="The clustering algorithm to run")
     parser.add_argument("--script-path", default="",
                         help="Path to the custom clustering script (required for custom_upload)")
-    parser.add_argument("--docker-image", default="",
-                        help="Docker image to run the custom clustering script in (required for custom_upload)")
 
     args = parser.parse_args()
 
@@ -49,15 +47,13 @@ def main():
                 raise ValueError("--script-path is required for custom_upload algorithm")
             if not os.path.isfile(args.script_path):
                 raise FileNotFoundError(f"Custom script not found: {args.script_path}")
-            if not args.docker_image:
-                raise ValueError("--docker-image is required for custom_upload algorithm")
             # Imported lazily so that dummy_split does not require the docker package.
             from container_execution import execute_custom_clustering
             input_data = {
                 'submitters': submitters,
                 'gradeable_id': args.gradeable_id
             }
-            cluster_groups = execute_custom_clustering(args.script_path, input_data, args.docker_image)
+            cluster_groups = execute_custom_clustering(args.script_path, input_data)
         elif args.algorithm == 'single_cluster':
             algo = SingleCluster()
             cluster_groups = algo.run(submitters)
