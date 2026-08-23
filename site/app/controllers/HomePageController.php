@@ -526,13 +526,13 @@ class HomePageController extends AbstractController {
         );
 
         $log_content = "";
-        if (file_exists($log_path)) {
-            $log_content = file_get_contents($log_path);
+        if (!$is_created && isset($log_path) && file_exists($log_path)) {
+            $log_content = (string) file_get_contents($log_path);
         }
 
         return JsonResponse::getSuccessResponse([
             'created' => $is_created,
-            'log' => $log_content
+            'log' => $log_content,
         ]);
     }
 }
