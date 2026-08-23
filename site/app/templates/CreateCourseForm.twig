@@ -100,15 +100,18 @@
         </div>
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-
-        <div class="row">
+<div class="row">
             <button class="btn btn-primary" type="submit" data-testid="create-course-submit" style="margin-left:10px;">Create New Course</button>
+        </div>
+
+        <div id="course-creation-log-wrapper" style="display: none; margin-top: 15px;">
+            <p><b>Course Creation Build Log:</b></p>
+            <pre id="course-creation-log" style="background: #f8f9fa; color: #333; border: 1px solid #ccc; padding: 10px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></pre>
         </div>
     </form>
 </div>
 
 {% include 'AddTerm.twig' %}
-
 <script>
     function addNewTerm() {
         $('.popup-form').css('display', 'none');
@@ -160,8 +163,44 @@
         });
     }
 
+    function pollCourseStatus(semester, courseTitle) {
+        $.ajax({
+            type: "POST",
+            url: buildUrl(['home', 'courses', 'check_status']),
+            data: {
+                csrf_token: csrfToken,
+                course_semester: semester,
+                course_title: courseTitle
+            },
+            success: function(response) {
+                if (response.status === "success") {
+                    if (response.data.created) {
+                        window.location.reload();
+                    } else {
+                        if (response.data.log) {
+                            $('#course-creation-log').text(response.data.log);
+                            $('#course-creation-log-wrapper').show();
+                        } else {
+                            setTimeout(function() {
+                                pollCourseStatus(semester, courseTitle);
+                            }, 2000);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     $(document).ready(function() {
         onHeadInstructorChange();
         $('[name="head_instructor"]').change(onHeadInstructorChange);
+
+        $('#course-creation-form').on('submit', function(e) {
+            let semester = $('#semester').val();
+            let courseTitle = $('#course_title').val();
+            setTimeout(function() {
+                pollCourseStatus(semester, courseTitle);
+            }, 1000);
+        });
     });
 </script>
