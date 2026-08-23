@@ -535,3 +535,4 @@ class HomePageController extends AbstractController {
             'log' => $log_content
         ]);
     }
+}
