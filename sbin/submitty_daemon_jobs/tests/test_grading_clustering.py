@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from grading_clustering.algorithms.dummy_split import DummySplit
+from grading_clustering.algorithms.single_cluster import SingleCluster
 from submitty_jobs.jobs import GradingClustering
 
 class TestGradingClustering(unittest.TestCase):
@@ -34,6 +35,19 @@ class TestGradingClustering(unittest.TestCase):
         self.assertEqual(len(clusters), 2)
         self.assertEqual(len(clusters['Cluster A (A-M)']), 0)
         self.assertEqual(len(clusters['Cluster B (N-Z)']), 3)
+
+    def test_single_cluster_algorithm(self):
+        submitters = [
+            {'user_id': 'student1', 'team_id': None, 'active_version': 1},
+            {'user_id': 'student2', 'team_id': None, 'active_version': 2},
+            {'user_id': None, 'team_id': 'team1', 'active_version': 3}
+        ]
+        algo = SingleCluster()
+        clusters = algo.run(submitters)
+        
+        self.assertEqual(len(clusters), 1)
+        self.assertIn('All Submitters', clusters)
+        self.assertEqual(len(clusters['All Submitters']), 3)
 
     @patch('submitty_jobs.jobs.subprocess.run')
     def test_job_run_success(self, mock_subprocess):

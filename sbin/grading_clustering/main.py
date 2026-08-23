@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import clustering_database_queries
 from algorithms.dummy_split import DummySplit
+from algorithms.single_cluster import SingleCluster
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", choices=["dummy_split", "custom_upload"],
+    parser.add_argument("algorithm", choices=["dummy_split", "single_cluster","custom_upload"],
                         help="The clustering algorithm to run")
     parser.add_argument("--script-path", default="",
                         help="Path to the custom clustering script (required for custom_upload)")
@@ -57,6 +58,9 @@ def main():
                 'gradeable_id': args.gradeable_id
             }
             cluster_groups = execute_custom_clustering(args.script_path, input_data, args.docker_image)
+        elif args.algorithm == 'single_cluster':
+            algo = SingleCluster()
+            cluster_groups = algo.run(submitters)
         else:
             raise ValueError(f"Unknown algorithm: {args.algorithm}")
 
