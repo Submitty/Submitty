@@ -138,7 +138,7 @@ async function submitClustering() {
     style="margin-left: auto;"
     @click="toggleModal"
   >
-    Create Clusters
+    {{ currentAlgorithm ? 'Re-create Clusters' : 'Create Clusters' }}
   </button>
 
   <Teleport to="body">
@@ -156,7 +156,7 @@ async function submitClustering() {
           style="width: 400px; margin: auto;"
         >
           <div class="form-title">
-            <h1>Create Clusters</h1>
+            <h1>{{ currentAlgorithm ? 'Re-create Clusters' : 'Create Clusters' }}</h1>
             <button
               data-testid="close-button"
               class="btn btn-default close-button"
