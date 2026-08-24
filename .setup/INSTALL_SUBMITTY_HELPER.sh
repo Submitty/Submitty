@@ -155,6 +155,19 @@ if [ $? -eq 1 ]; then
 fi
 set -e
 
+########################################################################################################################
+########################################################################################################################
+# UPDATE PYTHON AND SOURCE SUBMITTY VIRTUAL ENVIRONMENT
+
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/update_python.sh"
+
+source "${SUBMITTY_INSTALL_DIR}/venv/bin/activate"
+
+
+################################################################################################################
+################################################################################################################
+# RUN THE SYSTEM AND DATABASE MIGRATIONS
+
 if [ "${IS_WORKER}" == 0 ]; then
     bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_migrator.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
@@ -168,14 +181,12 @@ echo -e "Install python_submitty_utils"
 rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
-pip3 install .
-# Setting the permissions are necessary as pip uses the umask of the user/system, which
-# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
-# This gets run here in case we make any python package changes.
-find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+(umask 022 && pip3 install .)
+
+# sometimes, pip will set the permissions incorrectly, depending on what they were previously
+# this ensures that the directory & contents are always installed with the correct permissions
+find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type d -exec chmod 755 {} \;
+find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type f -exec chmod 644 {} \;
 
 popd > /dev/null
 
@@ -601,7 +612,7 @@ done
 if [ "${IS_WORKER}" == 0 ]; then
     # Stop all workers on remote machines
     echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u "${DAEMON_USER}" python3 "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
+    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
     echo -e "done"
 fi
 
@@ -692,7 +703,7 @@ fi
 # errors, and delete them from the table.  A maximum of 10,000 email
 # receipts will be deleted.
 if [ "${IS_WORKER}" == 0 ]; then
-    "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
+    python3 "${SUBMITTY_INSTALL_DIR}/sbin/cleanup_old_email.py" 360 10000
 fi
 
 #############################################################################
@@ -700,7 +711,7 @@ fi
 
 # Deletes all expired sessions from the main Submitty database
 if [ "${IS_WORKER}" == 0 ]; then
-    "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
+    python3 "${SUBMITTY_INSTALL_DIR}/sbin/delete_expired_sessions.py"
 fi
 
 #############################################################################
@@ -845,7 +856,7 @@ else
     echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
-    sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
+    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
     echo -e -n "Done updating workers and installing docker images\n\n"
 
     if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
@@ -853,7 +864,7 @@ else
     else
         # Restart the shipper & workers
         echo -e -n "Restart shipper & workers\n\n"
-        python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py"
+        "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" -u "${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py"
         echo -e -n "Done restarting shipper & workers\n\n"
     fi
 

@@ -40,7 +40,7 @@ repair_autograding() {
         last_status=$(sudo systemctl status "submitty_autograding_shipper")
 
         # Restart all autograding shippers and workers in the proper order
-        restart_output=$(sudo python3 "${restart_script}" 2>&1 /dev/null)
+        restart_output=$(sudo /usr/local/submitty/venv/bin/python3 "${restart_script}" 2>&1 /dev/null)
 
         log_service_restart "autograding" \
             "Failure detected within the Autograding Shipper" \
