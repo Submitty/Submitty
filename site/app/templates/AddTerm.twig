@@ -8,10 +8,55 @@
 {% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+    {% if terms is defined and terms|length > 0 %}
+        {% set now_ts = "now"|date("U") %}
+        <div class="my-3">
+            <span class="option-title block">Existing Terms</span>
+            <span class="block mb-2">Please check the dates below before choosing a start/end date to avoid creating overlapping terms.</span>
+            <div class="term-legend">
+                <span class="term-legend-item"><span class="term-legend-dot term-status-active"></span>Active</span>
+                <span class="term-legend-item"><span class="term-legend-dot term-status-future"></span>Future</span>
+                <span class="term-legend-item"><span class="term-legend-dot term-status-ended"></span>Ended</span>
+            </div>
+            <div style="max-height: 160px; overflow-y: auto; border: 1px solid #666; border-radius: 4px;">
+                <table class="table" style="margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for term in terms|sort((a,b) => b.getStartDate() <=> a.getStartDate()) %}
+                            {% set start_ts = term.getStartDate()|date("U") %}
+                            {% set end_ts = term.getEndDate()|date("U") %}
+                            {% if now_ts < start_ts %}
+                                {% set status = 'future' %}
+                            {% elseif now_ts > end_ts %}
+                                {% set status = 'ended' %}
+                            {% else %}
+                                {% set status = 'active' %}
+                            {% endif %}
+                            <tr class="term-row-{{ status }}">
+                                <td>{{ term.getName() }}</td>
+                                <td>{{ term.getStartDate()|date('m/d/Y') }}</td>
+                                <td>{{ term.getEndDate()|date('m/d/Y') }}</td>
+                                <td><span class="term-status-dot term-status-{{ status }}"></span>{{ status|capitalize }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="flex-col my-3">
         <div class="row">
             <div class="row col-md-6">
-                <label class="col-md-5" for="term-id">Term id:</label>
+                <label class="col-md-5" for="term-id">Term ID:</label>
                 <input type="text" name="term_id" placeholder="s20" id="term-id" class="col-md-6" required/>
             </div>
             <div class="row col-md-6">
@@ -21,17 +66,21 @@
         </div>
         <div class="row mt-3">
             <div class="row col-md-6">
-                <label class="col-md-5" for="term-name">Term name:</label>
+                <label class="col-md-5" for="term-name">Term Name:</label>
                 <input type="text" name="term_name" placeholder="Spring 2020" id="term-name" class="col-md-6" required/>
             </div>
             <div class="row col-md-6">
-                <label class="col-md-5" for="end-date">End Date</label>
+                <label class="col-md-5" for="end-date">End Date:</label>
                 <input type="date" name="end_date" id="end-date" class="col-md-6" required/>
             </div>
         </div>
+        <div class="row mt-2">
+            <div id="term-length-msg" class="col-md-12"></div>
+        </div>
     </div>
+
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" id="add-term-submit" value="Submit" />
 {% endblock %}
