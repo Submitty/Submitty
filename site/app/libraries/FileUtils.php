@@ -392,7 +392,7 @@ class FileUtils {
     }
 
     /**
-     * Given a string filename, checks the string for any quotes, brackets or slashes, returning
+     * Given a string filename, checks the string for any double quotes, brackets or slashes, returning
      * false if any of them are found within the string.
      *
      * @param string $filename
@@ -405,8 +405,7 @@ class FileUtils {
         else {
             foreach (str_split($filename) as $char) {
                 if (
-                    $char == "'"
-                    || $char == '"'
+                    $char == '"'
                     || $char == "\\"
                     || $char == "<"
                     || $char == ">"
