@@ -502,7 +502,6 @@ class HomePageController extends AbstractController {
         );
     }
     #[Route("/home/courses/check_status", methods: ["POST"])]
-#[Route("/home/courses/check_status", methods: ["POST"])]
     public function checkCourseStatus(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
