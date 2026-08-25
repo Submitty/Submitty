@@ -587,18 +587,23 @@ jobs:
 
       - name: Create Databases
         run: |
-          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
-            -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
-          psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
-            -c "CREATE DATABASE submitty"
+          # --- Main Database Service ---
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }}             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser';"
 
-          psql -d postgres -h localhost -U postgres        -p ${{ job.services.postgres-branch.ports['5432'] }} \
-            -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
-          psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }} \
-            -c "CREATE DATABASE submitty"
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }}             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser';"
 
+          sleep 2
+
+          psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-main.ports['5432'] }}             -c "CREATE DATABASE submitty;"
+
+          # --- Branch Database Service ---
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-branch.ports['5432'] }}             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser';"
+
+          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-branch.ports['5432'] }}             -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser';"
+
+          sleep 2
+
+          psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }}             -c "CREATE DATABASE submitty;"
       - name: Create Database Dumper
         run: | # the original dumper requires a `su`, which is not needed when psql as a service
           (
