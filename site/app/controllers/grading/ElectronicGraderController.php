@@ -4122,7 +4122,11 @@ class ElectronicGraderController extends AbstractController {
                 $active_version,
                 false
             );
-            $this->core->getOutput()->renderJsonSuccess('Peer component saved successfully');
+            $peer_edit_data = $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'getPeerEditData', $graded_gradeable);
+            $this->core->getOutput()->renderJsonSuccess([
+                'message' => 'Peer component saved successfully',
+                'peer_edit_data' => $peer_edit_data
+            ]);
         }
         catch (\InvalidArgumentException $exception) {
             $this->core->getOutput()->renderJsonFail($exception->getMessage());
@@ -4171,9 +4175,11 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter->isTeam()) {
             $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
         }
-        $this->core->getOutput()->renderJsonSuccess(
-            'Peer version conflicts resolved successfully'
-        );
+        $peer_edit_data = $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'getPeerEditData', $graded_gradeable);
+        $this->core->getOutput()->renderJsonSuccess([
+            'message' => 'Peer version conflicts resolved successfully',
+            'peer_edit_data' => $peer_edit_data
+        ]);
     }
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
