@@ -822,6 +822,8 @@ class ForumThreadView extends AbstractView {
             "info_name" => json_encode($author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")"),
             "visible_user_json" => json_encode($visible_username),
             "jscriptAnonFix" => json_encode($post->isAnonymous() ? 'true' : 'false'),
+            "full_name" => $author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")",
+            "is_anonymous" => $post->isAnonymous(),
             "pronouns" => trim($author_display_info["pronouns"]),
             "display_pronouns" => $author_display_info["display_pronouns"],
             "is_OP" => ($post->getAuthor()->getId() === $first_post->getAuthor()->getId()) && ($post->isAnonymous() === $first_post->isAnonymous()),
@@ -872,6 +874,7 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "expiring" => $thread->isPinnedExpiring(),
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];

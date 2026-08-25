@@ -185,6 +185,15 @@ popd > /dev/null
 
 echo -e "\nBeginning installation of Submitty\n"
 
+COMMAND=""
+if [ ${IS_WORKER} == 1 ]; then
+    COMMAND=--worker
+fi
+
+python3 "${SUBMITTY_REPOSITORY}/.setup/generate_configs.py" ${COMMAND}
+python3 "${SUBMITTY_REPOSITORY}/.setup/set_config_permissions.py" ${COMMAND}
+python3 "${SUBMITTY_REPOSITORY}/.setup/validate_configs.py" ${COMMAND}
+
 /bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" "$@" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
