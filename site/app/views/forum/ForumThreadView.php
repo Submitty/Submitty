@@ -876,6 +876,7 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
+            "expiring" => $thread->isPinnedExpiring(),
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];
