@@ -1,37 +1,24 @@
 <div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}" data-parent_id="{{ parent_id }}">
     {% if first == true %}
 
-        <h2 class="create-post-head" data-testid="create-post-head">
-
-            {% if userGroup <= 2 and activeThreadAnnouncement %}
-
-                {% set expiringVisual = (expiring) ? 'active-thread-remove-expiring-announcement' : 'active-thread-remove-announcement' %}
-                <a class="{{expiringVisual}} key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Thread is expiring soon click to unpin" aria-label="Thread is expiring soon click to unpin"><i class="fas fa-thumbtack"></i></a>
-
-            {% elseif activeThreadAnnouncement %}
-
-                {% set expiringVisual = (expiring) ? 'active-thread-announcement-expiring' : 'active-thread-announcement' %}
-                <i class="fas fa-thumbtack {{expiringVisual}}" title = "Pinned Thread" aria-label="Pinned Thread"></i>
-
-            {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
-
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top for seven days?', 1, '{{ csrf_token }}')" title="Pin thread to the top" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Pin Thread"></i></a>
-
-            {% endif %}
-
-            {% if isCurrentFavorite %}
-
-                <a class="current-favorite key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark"></i></a>
-
-            {% else %}
-
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover red-hover"></i></a>
-
-            {% endif %}
-
-            {{ activeThreadTitle }}
-
-        </h2>
+        {% include "Vue.twig" with {
+            type: "component",
+            name: "forum/PostHeader",
+            args: {
+                threadId: activeThread.id,
+                title: activeThreadTitle,
+                isAnnounced: activeThreadAnnouncement,
+                isExpiring: expiring,
+                canPin: userGroup <= 2,
+                isFavorite: isCurrentFavorite,
+            },
+            events: {
+                'pin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to pin this thread to the top for seven days?", 1); }',
+                'unpin-thread': 'function (event) { alterAnnouncement(event, "Are you sure you want to unpin this thread?", 0); }',
+                'bookmark-thread': 'function (event) { bookmarkThread(event, "1"); }',
+                'unbookmark-thread': 'function (event) { bookmarkThread(event, "0"); }'
+            }
+        } only %}
 
     {% endif %}
 
