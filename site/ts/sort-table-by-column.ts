@@ -202,7 +202,7 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
         }
         case colDataTypes.String:
         default: {
-            cmp = text_a.localeCompare(text_b);
+            cmp = text_a.localeCompare(text_b, undefined, { numeric: true });
             break;
         }
     }
