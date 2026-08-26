@@ -203,14 +203,7 @@
 
 @media (max-width: 768px) {
     .annotation-toolbar {
-        flex-direction: column;
-        align-items: normal;
-    }
-
-    .annotation-toolbar .btn {
-        margin-right: 0;
-        margin-bottom: 10px;
-        width: 100%;
+        justify-content: center;
     }
 
     #annotation-status {
