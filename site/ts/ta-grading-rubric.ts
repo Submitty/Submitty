@@ -1,5 +1,4 @@
 import { viewFileFullPanel } from './ta-grading';
-import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 import { updateVueComponent, unmountVueComponent } from './utils/vue';
 
 declare global {
@@ -20,6 +19,7 @@ declare global {
         onCancelComponent(me: HTMLElement): Promise<void>;
         onCustomMarkChange(me: HTMLElement): Promise<void>;
         onToggleMark(me: HTMLElement): Promise<void>;
+        onToggleMarkById(data: { componentId: number; markId: number }): Promise<void>;
         onToggleCustomMark(me: HTMLElement): Promise<void>;
         onVerifyAll(me: HTMLElement): Promise<void>;
         onVerifyComponent(me: HTMLElement): Promise<void>;
@@ -50,6 +50,8 @@ declare global {
         PDF_PAGE_INSTRUCTOR: number;
         OLD_GRADED_COMPONENT_LIST: Record<number, ComponentGradeInfo>;
         closeMarkStatsPopup: () => void;
+        onMarkConflictResolve: (detail: { markId: number; resolution: 'dom' | 'server' | 'old-server' }) => Promise<void>;
+        onMarkConflictClose: () => void;
     }
 }
 
@@ -1866,6 +1868,138 @@ window.closeMarkStatsPopup = function () {
     unmountVueComponent('.js-received-mark-form');
 };
 
+interface MarkConflictPopupState {
+    gradeableId: string | undefined;
+    componentId: number;
+    componentTitle: string;
+    conflicts: MarkConflicts;
+    currentIndex: number;
+    resolve: () => void;
+}
+
+let conflictPopupState: MarkConflictPopupState | null = null;
+
+// Re-renders the MarkConflictPopup Vue component with the current popup state.
+function renderConflictPopup() {
+    if (conflictPopupState === null) {
+        return;
+    }
+    updateVueComponent('.js-mark-conflict-popup', {
+        conflicts: conflictPopupState.conflicts,
+        componentTitle: conflictPopupState.componentTitle,
+        currentIndex: conflictPopupState.currentIndex,
+    });
+}
+
+// Closes the MarkConflictPopup, resolves the waiting promise and hides the
+// popup by re-rendering it with no conflicts.
+function closeConflictPopup() {
+    const state = conflictPopupState;
+    conflictPopupState = null;
+    if (state) {
+        state.resolve();
+    }
+    updateVueComponent('.js-mark-conflict-popup', {
+        conflicts: {},
+        componentTitle: '',
+        currentIndex: 0,
+    });
+}
+
+window.onMarkConflictResolve = async function (detail: { markId: number; resolution: 'dom' | 'server' | 'old-server' }): Promise<void> {
+    const state = conflictPopupState;
+    if (state === null) {
+        return;
+    }
+    const conflict = state.conflicts[detail.markId];
+    if (!conflict) {
+        return;
+    }
+    try {
+        if (detail.resolution === 'dom') {
+            if (conflict.localDeleted) {
+                await ajaxDeleteMark(state.gradeableId, state.componentId, detail.markId);
+            }
+            else if (conflict.serverMark === null) {
+                // The mark was deleted from the server, but we want to keep our
+                // changes, so re-add it.
+                const data = await ajaxAddNewMark(
+                    state.gradeableId,
+                    state.componentId,
+                    conflict.domMark.title!,
+                    conflict.domMark.points,
+                    conflict.domMark.publish,
+                );
+                conflict.domMark.id = data.mark_id;
+            }
+            else {
+                await ajaxSaveMark(
+                    state.gradeableId,
+                    state.componentId,
+                    detail.markId,
+                    conflict.domMark.title!,
+                    conflict.domMark.points,
+                    conflict.domMark.publish,
+                );
+            }
+        }
+        else if (detail.resolution === 'old-server') {
+            const mark = conflict.oldServerMark!;
+            await ajaxSaveMark(
+                state.gradeableId,
+                state.componentId,
+                detail.markId,
+                mark.title!,
+                mark.points,
+                mark.publish,
+            );
+        }
+        // resolution === 'server': accept the server state, no AJAX needed
+    }
+    catch (err) {
+        // Keep the popup open so the user can retry.
+        console.error(`Failed to resolve conflict for mark ${detail.markId}:`, err);
+        return;
+    }
+
+    if (conflictPopupState !== state) {
+        return;
+    }
+
+    // Advance to the next conflict or finish once all conflicts are resolved
+    state.currentIndex++;
+    if (state.currentIndex >= Object.keys(state.conflicts).length) {
+        closeConflictPopup();
+    }
+    else {
+        renderConflictPopup();
+    }
+};
+
+window.onMarkConflictClose = function () {
+    closeConflictPopup();
+};
+
+/**
+ * Shows the MarkConflictPopup Vue component and returns a Promise that resolves
+ * once all conflicts are resolved or the popup is closed.
+ * @param component_id
+ * @param conflictMarks
+ */
+function openMarkConflictPopup(component_id: number, conflictMarks: MarkConflicts): Promise<void> {
+    return new Promise((resolve) => {
+        conflictPopupState = {
+            gradeableId: getGradeableId(),
+            componentId: component_id,
+            componentTitle: getComponentJQuery(component_id).attr('data-title')!,
+            conflicts: conflictMarks,
+            currentIndex: 0,
+            resolve,
+        };
+        renderConflictPopup();
+    });
+}
+
 /**
  * Gets if there are any loaded unverified components
  * @returns {boolean}
@@ -2203,6 +2337,18 @@ async function onComponentOrderChange() {
 window.onToggleMark = async function (me: HTMLElement) {
     try {
         await toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error toggling mark! ${(err as Error).message}`);
+    }
+};
+
+// Called via events bridge from MarkSelector.vue's 'toggle-mark' emit
+// Receives structured data instead of a DOM element to derive IDs from
+window.onToggleMarkById = async function (data: { componentId: number; markId: number }) {
+    try {
+        await toggleCommonMark(data.componentId, data.markId);
     }
     catch (err) {
         console.error(err);
@@ -3273,7 +3419,7 @@ async function saveMarkList(component_id: number) {
     }));
     // If conflicts, open the popup
     if (Object.keys(conflictMarks).length !== 0) {
-        await openMarkConflictPopup(component_id, Object.values(conflictMarks));
+        await openMarkConflictPopup(component_id, conflictMarks);
     }
 
     const markOrder: Record<number, number> = {};
