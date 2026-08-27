@@ -5349,7 +5349,7 @@ parameters:
 		-
 			rawMessage: Implicit array creation is not allowed - variable $log_message does not exist.
 			identifier: variable.implicitArray
-			count: 3
+			count: 4
 			path: app/libraries/Logger.php
 
 		-
@@ -5425,6 +5425,18 @@ parameters:
 			path: app/libraries/Logger.php
 
 		-
+			rawMessage: 'Method app\libraries\Logger::logDownload() has no return type specified.'
+			identifier: missingType.return
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			rawMessage: 'Method app\libraries\Logger::logDownload() has parameter $params with no value type specified in iterable type array.'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
 			rawMessage: 'Method app\libraries\Logger::setLogPath() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5463,7 +5475,7 @@ parameters:
 		-
 			rawMessage: 'Unsafe call to private method app\libraries\Logger::logMessage() through static::.'
 			identifier: staticClassAccess.privateMethod
-			count: 3
+			count: 4
 			path: app/libraries/Logger.php
 
 		-
