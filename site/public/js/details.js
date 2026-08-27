@@ -1,11 +1,10 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* exported expandAllSections, collapseAllSections, toggleAllSections, updateToggleButtonLabel, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    updateToggleButtonText();
     const collapsedSections = Cookies.get('collapsed_sections');
     collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
@@ -47,62 +46,15 @@ $(document).ready(() => {
         }
     });
     document.head.appendChild(style);
-
-    if (!localStorage.getItem(gradeableMessageStorageKey()) && document.getElementById('gradeable-message-data').dataset.userlevel !== '1') {
-        const form = $('#gradeable-message-popup');
-        form.css('display', 'block');
-        form.find('.form-body').scrollTop(0);
-    }
 });
-
-function gradeableMessageStorageKey() {
-    const dataElement = document.getElementById('gradeable-message-data');
-    const semester = dataElement.dataset.semester;
-    const course = dataElement.dataset.course;
-    const gradeable = dataElement.dataset.gradeable;
-    return `${semester}-${course}-${gradeable}-message`;
-}
-
-function gradeableMessageAgree() {
-    if (!localStorage.getItem(gradeableMessageStorageKey())) {
-        localStorage.setItem(gradeableMessageStorageKey(), 'agreed');
-        const form = $('#gradeable-message-popup');
-        form.css('display', 'none');
-    }
-    return false;
-}
-
-function gradeableMessageCancel() {
-    window.location = courseUrl;
-}
-
-function showGradeableMessage() {
-    const message = $('#gradeable-message-popup');
-    message.css('display', 'block');
-    $('#agree-button').css('display', 'none');
-    $('#cancel-button').css('display', 'none');
-    $('#close-hidden-button').css('display', 'block');
-}
-
-function hideGradeableMessage() {
-    const message = $('#gradeable-message-popup');
-    message.css('display', 'none');
-}
 
 function getCollapsedSections() {
     return JSON.parse(Cookies.get('collapsed_sections') || '[]');
 }
 
-function updateToggleButtonText() {
-    const collapsed = getCollapsedSections();
-    const button = $('#toggle-all-sections-btn');
-
-    if (collapsed.length === 0) {
-        button.text('Collapse All Sections');
-    }
-    else {
-        button.text('Expand All Sections');
-    }
+// The button label is rendered by the Vue component, from here we push new state to it via reRender.
+function updateToggleButtonLabel(collapsed) {
+    document.querySelector('.js-toggle-all-sections')?.reRender?.({ collapsed });
 }
 
 function updateCollapsedSections() {
@@ -116,7 +68,7 @@ function expandAllSections() {
     });
     collapseItems.clear();
     updateCollapsedSections();
-    updateToggleButtonText();
+    updateToggleButtonLabel(false);
 }
 
 function collapseAllSections() {
@@ -127,7 +79,7 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
-    updateToggleButtonText();
+    updateToggleButtonLabel(true);
 }
 
 function toggleAllSections() {
@@ -197,8 +149,33 @@ window.addEventListener('DOMContentLoaded', () => {
         randomFilterBox.checked = (randomFilterStatus === 'random');
     }
 
+    const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
+    if (groupByClustersBox) {
+        const groupByClustersStatus = Cookies.get('group_by_clusters');
+        groupByClustersBox.checked = groupByClustersStatus === 'true';
+    }
+
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
         withdrawnFilterElements.show();
     }
 });
+
+function changeGroupByClusters() {
+    const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
+    Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
+    window.location.reload();
+}
+
+function updateClusteringStatus(status) {
+    document.body.setAttribute('data-clustering-status', status);
+    $('#clustering-loading-banner').toggle(status === 'fetching');
+}
+
+function handleClusteringDone() {
+    window.location.reload();
+}
+
+function handleClusteringError(message) {
+    alert(message);
+}
