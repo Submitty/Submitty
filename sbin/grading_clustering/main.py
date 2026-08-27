@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import clustering_database_queries
 from algorithms.dummy_split import DummySplit
+from algorithms.single_cluster import SingleCluster
 
 
 def main():
@@ -14,7 +15,7 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", choices=["dummy_split"],
+    parser.add_argument("algorithm", choices=["dummy_split", "single_cluster"],
                         help="The clustering algorithm to run")
 
     args = parser.parse_args()
@@ -37,6 +38,9 @@ def main():
 
         if args.algorithm == 'dummy_split':
             algo = DummySplit()
+            cluster_groups = algo.run(submitters)
+        elif args.algorithm == 'single_cluster':
+            algo = SingleCluster()
             cluster_groups = algo.run(submitters)
         else:
             raise ValueError(f"Unknown algorithm: {args.algorithm}")
