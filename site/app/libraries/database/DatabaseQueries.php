@@ -9378,9 +9378,9 @@ WHERE current_state IN
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
                 ],
-                json_decode($row['ag_graders'], true),
-                json_decode($row['ag_timestamps'], true),
-                json_decode($row['ag_graders_names'], true)
+                json_decode($row['ag_graders'] ?? '[]', true),
+                json_decode($row['ag_timestamps'] ?? '[]', true),
+                json_decode($row['ag_graders_names'] ?? '[]', true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
