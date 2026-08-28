@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
+  <rect width="1000" height="620" fill="#f1f3f5"/>
+  <rect x="50" y="35" width="900" height="550" rx="3" fill="#fff" stroke="#aaa"/>
+  <text x="85" y="90" font-family="Arial,sans-serif" font-size="28" font-weight="600">TA Grading Settings</text>
+  <line x1="85" y1="112" x2="915" y2="112" stroke="#ddd"/>
+  <text x="85" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="600">General</text>
+  <rect x="85" y="180" width="830" height="68" fill="#eee" stroke="#ccc"/>
+  <text x="105" y="222" font-family="Arial,sans-serif" font-size="17" font-weight="600">Setting</text>
+  <text x="610" y="222" font-family="Arial,sans-serif" font-size="17" font-weight="600">Option</text>
+  <rect x="85" y="248" width="830" height="92" fill="#fff" stroke="#ccc"/>
+  <text x="105" y="285" font-family="Arial,sans-serif" font-size="16">Prev/Next student arrow functionality</text>
+  <rect x="600" y="268" width="285" height="48" fill="#fff" stroke="#888"/>
+  <text x="617" y="299" font-family="Arial,sans-serif" font-size="16">Prev/Next Cluster</text>
+  <text x="862" y="299" font-family="Arial,sans-serif" font-size="16">▼</text>
+  <rect x="85" y="340" width="830" height="92" fill="#fff" stroke="#ccc"/>
+  <text x="105" y="377" font-family="Arial,sans-serif" font-size="16">Prev/Next buttons navigate through</text>
+  <rect x="600" y="360" width="285" height="48" fill="#fff" stroke="#888"/>
+  <text x="617" y="391" font-family="Arial,sans-serif" font-size="14">Assigned sections only</text>
+  <text x="862" y="391" font-family="Arial,sans-serif" font-size="16">▼</text>
+  <text x="85" y="490" font-family="Arial,sans-serif" font-size="22" font-weight="600">Hotkeys</text>
+  <text x="85" y="535" font-family="Arial,sans-serif" font-size="15" fill="#666">After: the selector includes Prev/Next Cluster for cluster-aware navigation.</text>
+</svg>
