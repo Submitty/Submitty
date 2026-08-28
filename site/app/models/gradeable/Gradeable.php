@@ -2314,7 +2314,12 @@ class Gradeable extends AbstractModel {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             $dependent_gradeable_points = strval($this->depends_on_points);
-            return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
+            $autograding_config = $dependent_gradeable->getAutogradingConfig();
+            $max_points = $autograding_config !== null ? $autograding_config->getTotalNonHiddenNonExtraCredit() : $this->depends_on_points;
+            $score_phrase = ($this->depends_on_points < $max_points)
+                ? $dependent_gradeable_points . " or more point(s)"
+                : $dependent_gradeable_points . " point(s)";
+            return ($dependent_gradeable->getTitle() . " first with a score of " . $score_phrase);
         }
         else {
             return '';
