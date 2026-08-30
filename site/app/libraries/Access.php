@@ -257,14 +257,6 @@ class Access {
                 "path.write" => "path.write.submissions",
             ]
         ];
-        $this->directories["annotated_pdfs"] = [
-            "base" => $this->core->getConfig()->getCoursePath() . "/annotated_pdfs",
-            "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => [
-                "path.read" => "path.read.submissions",
-                "path.write" => "path.write.submissions",
-            ]
-        ];
 
         $this->directories["community_events"] = [
             "base" => $this->core->getConfig()->getSubmittyPath() . "/community_events",
