@@ -364,6 +364,22 @@ function renderAnnotationsOnImage(): void {
             annotationManager.originalImg.dataset.originalWidth = annotationManager.originalImg.style.width || '';
             annotationManager.originalImg.dataset.originalHeight = annotationManager.originalImg.style.height || '';
         }
+        // Guard MarkerView.prototype.connectedCallback against repeated initialization
+        // when elements are reconnected to the DOM during panel/layout switching (fixes #13170)
+        if (window.markerjs3?.MarkerView && !(window.markerjs3.MarkerView.prototype as unknown as { _submittyConnectedGuard?: boolean })._submittyConnectedGuard) {
+            (window.markerjs3.MarkerView.prototype as unknown as { _submittyConnectedGuard?: boolean })._submittyConnectedGuard = true;
+            const originalConnected = window.markerjs3.MarkerView.prototype.connectedCallback;
+            if (typeof originalConnected === 'function') {
+                window.markerjs3.MarkerView.prototype.connectedCallback = function (this: HTMLElement & { _hasConnected?: boolean }) {
+                    if (this._hasConnected) {
+                        return;
+                    }
+                    this._hasConnected = true;
+                    originalConnected.apply(this);
+                };
+            }
+        }
+
         // Create MarkerView instance
         const markerView = new window.markerjs3.MarkerView();
         markerView.id = 'annotation-marker-view';
