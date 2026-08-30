@@ -384,7 +384,11 @@ def send_pending_notifications():
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 eg.eg_depends_on AS depends_on,
-                eg.eg_submission_due_date AS submission_due_date,
+                CASE
+                    WHEN eg.eg_has_due_date IS TRUE
+                    THEN eg.eg_submission_due_date
+                    ELSE NULL
+                END AS submission_due_date,
                 eg.eg_has_due_date AS has_due_date,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
@@ -413,7 +417,10 @@ def send_pending_notifications():
                 AND eg.eg_student_submit IS TRUE
                 AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
-                AND eg.eg_submission_due_date >= NOW()
+                AND (
+                eg.eg_has_due_date IS FALSE
+                OR eg.eg_submission_due_date >= NOW()
+                )
                 AND (
                     eg.eg_depends_on IS NULL
                     OR (
