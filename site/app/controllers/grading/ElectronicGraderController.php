@@ -4105,7 +4105,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer);
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $peer, true);
         if ($graded_component === null) {
             $this->core->getOutput()->renderJsonFail('Could not fetch peer graded component');
             return;
@@ -4162,7 +4162,7 @@ class ElectronicGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         foreach ($gradeable->getPeerComponents() as $component) {
-            $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer);
+            $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $peer, true);
             if ($graded_component === null) {
                 continue;
             }
