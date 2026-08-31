@@ -37,30 +37,34 @@ export function gotoMainPage() {
     }
 };
 
-export function gotoPrevStudent() {
-    let filter;
+export function getStudentNavigationFilter(
+    clusterMode: boolean,
+    inquiryStatus: string | undefined,
+    configuredFilter: string | null,
+): string {
+    if (clusterMode) {
+        return 'cluster';
+    }
+    if (inquiryStatus === 'on') {
+        return 'active-inquiry';
+    }
+    return configuredFilter !== 'active-inquiry' && configuredFilter !== 'cluster'
+        ? configuredFilter || 'default'
+        : 'default';
+}
+
+export function gotoPrevStudent(clusterMode = false) {
     const navigate_assigned_students_only
         = localStorage.getItem(
             'general-setting-navigate-assigned-students-only',
         ) !== 'false';
 
     const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
+    const filter = getStudentNavigationFilter(
+        clusterMode,
+        inquiry_status,
+        localStorage.getItem('general-setting-arrow-function'),
+    );
     const selector = '#prev-student';
     let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
 
@@ -113,30 +117,18 @@ export function gotoPrevStudent() {
     }
 };
 
-export function gotoNextStudent() {
-    let filter;
+export function gotoNextStudent(clusterMode = false) {
     const navigate_assigned_students_only
         = localStorage.getItem(
             'general-setting-navigate-assigned-students-only',
         ) !== 'false';
 
     const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
+    const filter = getStudentNavigationFilter(
+        clusterMode,
+        inquiry_status,
+        localStorage.getItem('general-setting-arrow-function'),
+    );
     const selector = '#next-student';
     let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
 

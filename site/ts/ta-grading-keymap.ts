@@ -56,7 +56,6 @@ export const settingsData: SettingsData = [
                     'Prev/Next Ungraded Itempool Student': 'ungraded-itempool',
                     'Prev/Next Grade Inquiry': 'inquiry',
                     'Prev/Next Active Grade Inquiry': 'active-inquiry',
-                    'Prev/Next Cluster': 'cluster',
                 },
                 default: 'Prev/Next Student',
             },
