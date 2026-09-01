@@ -82,23 +82,69 @@ describe('FullScreenButton', () => {
             cy.get('@eventHandler').should('have.been.calledOnceWith', false);
         });
 
+        it('emits false when Escape is dispatched on document while full screen', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.get('@eventHandler').should('have.been.calledOnceWith', false);
+        });
+
+        it('emits false when Escape is pressed and button is not focused', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
+            cy.get('[data-testid="fullscreen-btn"]').should('not.have.focus');
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.get('@eventHandler').should('have.been.calledOnceWith', false);
+        });
+
         it('does not emit when Escape is pressed while not full screen', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', {});
-            cy.get('[data-testid="fullscreen-btn"]').trigger('keydown', { key: 'Escape' });
+            cy.document().trigger('keydown', { key: 'Escape' });
             cy.get('@eventHandler').should('not.have.been.called');
+        });
+
+        it('does not emit when Escape event is default-prevented', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
+            cy.document().then((doc) => {
+                const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+                event.preventDefault();
+                doc.dispatchEvent(event);
+            });
+            cy.get('@eventHandler').should('not.have.been.called');
+
+            // Subsequent non-prevented Escape should still work
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.get('@eventHandler').should('have.been.calledOnceWith', false);
         });
 
         it('resets the icon when Escape exits full screen', () => {
             cy.mount(FullScreenButton, { props: { initialFullScreen: true } });
-            cy.get('[data-testid="fullscreen-btn"]').trigger('keydown', { key: 'Escape' });
+            cy.document().trigger('keydown', { key: 'Escape' });
             cy.get('[data-testid="fullscreen-btn"] i').should('have.class', 'fa-expand');
         });
 
         it('emits only once when Escape is pressed twice', () => {
             mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
-            cy.get('[data-testid="fullscreen-btn"]').trigger('keydown', { key: 'Escape' });
-            cy.get('[data-testid="fullscreen-btn"]').trigger('keydown', { key: 'Escape' });
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.document().trigger('keydown', { key: 'Escape' });
             cy.get('@eventHandler').should('have.been.calledOnce');
+        });
+
+        it('removes document keydown listener when exiting full screen via toggle', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
+            cy.get('[data-testid="fullscreen-btn"]').click();
+            cy.get('@eventHandler').should('have.been.calledOnceWith', false);
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.get('@eventHandler').should('have.been.calledOnce');
+        });
+
+        it('removes document keydown listener when unmounted', () => {
+            mountWithEmitSpy(FullScreenButton, 'toggle', { initialFullScreen: true });
+            cy.then(() => {
+                if (Cypress.vueWrapper) {
+                    Cypress.vueWrapper.unmount();
+                }
+            });
+            cy.document().trigger('keydown', { key: 'Escape' });
+            cy.get('@eventHandler').should('not.have.been.called');
         });
     });
 });

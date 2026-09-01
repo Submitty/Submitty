@@ -5,12 +5,10 @@
 
      The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
      loads on every page, so no per-page CSS is needed.
-
-     Pressing escape to exit fullscreen only works when the button is in focus due to our current Vue standards and setup.
 -->
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 
 const { initialFullScreen } = defineProps<{
     initialFullScreen?: boolean;
@@ -28,13 +26,29 @@ function toggle() {
     emit('toggle', isFullScreen.value);
 }
 
-function onEscape() {
-    if (!isFullScreen.value) {
-        return;
+function onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isFullScreen.value && !event.defaultPrevented) {
+        isFullScreen.value = false;
+        emit('toggle', false);
     }
-    isFullScreen.value = false;
-    emit('toggle', false);
 }
+
+watch(
+    isFullScreen,
+    (active) => {
+        if (active) {
+            document.addEventListener('keydown', onKeyDown);
+        }
+        else {
+            document.removeEventListener('keydown', onKeyDown);
+        }
+    },
+    { immediate: true },
+);
+
+onBeforeUnmount(() => {
+    document.removeEventListener('keydown', onKeyDown);
+});
 
 </script>
 
@@ -45,7 +59,6 @@ function onEscape() {
     class="btn btn-default"
     title="Toggle full screen mode"
     @click="toggle"
-    @keydown.esc="onEscape"
   >
     <i
       class="fas"
