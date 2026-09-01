@@ -295,7 +295,9 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
-        run: python3 -m pip install -r .setup/pip/dev_requirements.txt
+        run: |
+          python3 -m pip install -r .setup/pip/dev_requirements.txt
+          python3 -m pip install -e "tools/submitty-cli[dev]"
       - name: Run flake8
         run: python3 -m flake8
       - name: Run pylint
@@ -383,6 +385,24 @@ jobs:
         with:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # submitty-cli unit tests
+      - name: Install submitty-cli dependencies
+        working-directory: tools/submitty-cli
+        run: pip install -e ".[dev]"
+
+      - name: Run submitty-cli tests
+        working-directory: tools/submitty-cli
+        run: |
+          pytest --cov=submitty_cli --cov-report=xml -v
+
+      - name: Upload submitty-cli Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: tools/submitty-cli/coverage.xml
+          flags: submitty_cli
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
