@@ -113,7 +113,7 @@
                 {
                     "commands": [
                         "python3 part1/*.py",
-                        "submitty_count call -l python print part1/*.py"
+                        "submitty_count_ts -l py call print part1/*.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "container0",
@@ -243,9 +243,9 @@
                 {
                     "commands": [
                         "python3 part3/*.py",
-                        "submitty_count token -l python Equal part3/*.py",
-                        "submitty_count token -l python Asterisk part3/*.py",
-                        "submitty_count token -l python Plus part3/*.py"
+                        "submitty_count_ts -l py node = part3/*.py",
+                        "submitty_count_ts  -l py node \\\\* part3/*.py",
+                        "submitty_count_ts  -l py node + part3/*.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "container0",
@@ -362,7 +362,7 @@
                 {
                     "commands": [
                         "python3 part4/*.py",
-                        "submitty_count token -l python While part4/*.py"
+                        "submitty_count_ts -l py node while part4/*.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "container0",
