@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup handleFullScreenKeydown */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -2040,3 +2040,30 @@ function scorePillDark() {
     }
 }
 document.addEventListener('DOMContentLoaded', scorePillDark);
+
+/**
+ * Handles Escape keypresses bubbling up to main#main while in fullscreen mode.
+ * Exits fullscreen and updates the Vue button via its attached .reRender() method.
+ *
+ * @param {KeyboardEvent} event
+ */
+function handleFullScreenKeydown(event) {
+    if (event.key !== 'Escape' || event.defaultPrevented) {
+        return;
+    }
+
+    const main = document.getElementById('main');
+    if (!main || !main.classList.contains('full-screen-mode')) {
+        return;
+    }
+
+    main.classList.remove('full-screen-mode');
+
+    // Update only the fullscreen button(s) located within the fullscreen container (main#main)
+    const wrappers = main.querySelectorAll('.fullscreen-btn-wrapper');
+    wrappers.forEach((wrapper) => {
+        if (typeof wrapper.reRender === 'function') {
+            void wrapper.reRender({ isFullScreen: false });
+        }
+    });
+}

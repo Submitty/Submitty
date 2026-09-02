@@ -8,82 +8,63 @@
 -->
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch } from 'vue';
 
-const { initialFullScreen } = defineProps<{
-    initialFullScreen?: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        initialFullScreen?: boolean;
+        isFullScreen?: boolean;
+    }>(),
+    {
+        initialFullScreen: false,
+        isFullScreen: undefined,
+    },
+);
 
 const emit = defineEmits<{
     toggle: [boolean];
 }>();
 
-const buttonRef = ref<HTMLButtonElement | null>(null);
-const isFullScreen = ref(initialFullScreen);
-const iconClass = computed(() => (isFullScreen.value ? 'fa-compress' : 'fa-expand'));
-
-let targetContainer: HTMLElement | null = null;
-
-function getContainer(): HTMLElement | null {
-    return buttonRef.value?.closest('main') || buttonRef.value?.parentElement || null;
-}
-
-function onKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isFullScreen.value && !event.defaultPrevented) {
-        isFullScreen.value = false;
-        emit('toggle', false);
-    }
-}
-
-function attachContainerListener() {
-    removeContainerListener();
-    targetContainer = getContainer();
-    targetContainer?.addEventListener('keydown', onKeyDown);
-}
-
-function removeContainerListener() {
-    targetContainer?.removeEventListener('keydown', onKeyDown);
-    targetContainer = null;
-}
-
-function toggle() {
-    isFullScreen.value = !isFullScreen.value;
-    emit('toggle', isFullScreen.value);
-}
+const internalFullScreen = ref(props.initialFullScreen);
 
 watch(
-    isFullScreen,
-    (active) => {
-        if (active) {
-            attachContainerListener();
-        }
-        else {
-            removeContainerListener();
+    () => props.isFullScreen,
+    (val) => {
+        if (val !== undefined) {
+            internalFullScreen.value = val;
         }
     },
 );
 
-onMounted(() => {
-    if (isFullScreen.value) {
-        attachContainerListener();
+const active = computed(() =>
+    props.isFullScreen !== undefined ? props.isFullScreen : internalFullScreen.value,
+);
+
+const iconClass = computed(() => (active.value ? 'fa-compress' : 'fa-expand'));
+
+function toggle() {
+    const next = !active.value;
+    internalFullScreen.value = next;
+    emit('toggle', next);
+}
+
+function onEscape() {
+    if (!active.value) {
+        return;
     }
-});
-
-onBeforeUnmount(() => {
-    removeContainerListener();
-});
-
+    internalFullScreen.value = false;
+    emit('toggle', false);
+}
 </script>
 
 <template>
   <button
     id="fullscreen-btn"
-    ref="buttonRef"
     data-testid="fullscreen-btn"
     class="btn btn-default"
     title="Toggle full screen mode"
     @click="toggle"
-    @keydown.esc="onKeyDown"
+    @keydown.esc="onEscape"
   >
     <i
       class="fas"
