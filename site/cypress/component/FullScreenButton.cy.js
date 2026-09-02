@@ -95,7 +95,7 @@ describe('FullScreenButton', () => {
                         }),
                         h('input', {
                             'data-testid': 'page-content-input',
-                            placeholder: 'Page content input',
+                            'placeholder': 'Page content input',
                         }),
                     ]);
                 },
@@ -144,7 +144,7 @@ describe('FullScreenButton', () => {
                         }),
                         h('input', {
                             'data-testid': 'modal-input',
-                            onKeydown: (e) => {
+                            'onKeydown': (e) => {
                                 if (e.key === 'Escape') {
                                     e.preventDefault();
                                 }
