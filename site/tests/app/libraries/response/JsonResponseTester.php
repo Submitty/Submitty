@@ -111,4 +111,25 @@ EOD;
 EOD;
         $this->assertEquals($expected, $core->getOutput()->getOutput());
     }
+
+    public function testSuccessResponseCode() {
+        $core = new Core();
+        $response = JsonResponse::getSuccessResponse(['test' => true]);
+        $response->render($core);
+        $this->assertEquals(200, http_response_code());
+    }
+
+    public function testFailResponseCode() {
+        $core = new Core();
+        $response = JsonResponse::getFailResponse('fail message', null, http_status_code: 401);
+        $response->render($core);
+        $this->assertEquals(401, http_response_code());
+    }
+
+    public function testErrorResponseCode() {
+        $core = new Core();
+        $response = JsonResponse::getErrorResponse('not found message', null, http_status_code: 404);
+        $response->render($core);
+        $this->assertEquals(404, http_response_code());
+    }
 }
