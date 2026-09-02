@@ -8,7 +8,7 @@
 -->
 
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
 const { initialFullScreen } = defineProps<{
     initialFullScreen?: boolean;
@@ -18,12 +18,14 @@ const emit = defineEmits<{
     toggle: [boolean];
 }>();
 
+const buttonRef = ref<HTMLButtonElement | null>(null);
 const isFullScreen = ref(initialFullScreen);
 const iconClass = computed(() => (isFullScreen.value ? 'fa-compress' : 'fa-expand'));
 
-function toggle() {
-    isFullScreen.value = !isFullScreen.value;
-    emit('toggle', isFullScreen.value);
+let targetContainer: HTMLElement | null = null;
+
+function getContainer(): HTMLElement | null {
+    return buttonRef.value?.closest('main') || buttonRef.value?.parentElement || null;
 }
 
 function onKeyDown(event: KeyboardEvent) {
@@ -33,21 +35,42 @@ function onKeyDown(event: KeyboardEvent) {
     }
 }
 
+function attachContainerListener() {
+    removeContainerListener();
+    targetContainer = getContainer();
+    targetContainer?.addEventListener('keydown', onKeyDown);
+}
+
+function removeContainerListener() {
+    targetContainer?.removeEventListener('keydown', onKeyDown);
+    targetContainer = null;
+}
+
+function toggle() {
+    isFullScreen.value = !isFullScreen.value;
+    emit('toggle', isFullScreen.value);
+}
+
 watch(
     isFullScreen,
     (active) => {
         if (active) {
-            document.addEventListener('keydown', onKeyDown);
+            attachContainerListener();
         }
         else {
-            document.removeEventListener('keydown', onKeyDown);
+            removeContainerListener();
         }
     },
-    { immediate: true },
 );
 
+onMounted(() => {
+    if (isFullScreen.value) {
+        attachContainerListener();
+    }
+});
+
 onBeforeUnmount(() => {
-    document.removeEventListener('keydown', onKeyDown);
+    removeContainerListener();
 });
 
 </script>
@@ -55,10 +78,12 @@ onBeforeUnmount(() => {
 <template>
   <button
     id="fullscreen-btn"
+    ref="buttonRef"
     data-testid="fullscreen-btn"
     class="btn btn-default"
     title="Toggle full screen mode"
     @click="toggle"
+    @keydown.esc="onKeyDown"
   >
     <i
       class="fas"
