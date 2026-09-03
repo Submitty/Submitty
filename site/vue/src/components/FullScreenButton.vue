@@ -10,22 +10,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 
-const props = withDefaults(
-    defineProps<{
-        initialFullScreen?: boolean;
-        isFullScreen?: boolean;
-    }>(),
-    {
-        initialFullScreen: false,
-        isFullScreen: undefined,
-    },
-);
+const props = defineProps<{
+    initialFullScreen?: boolean;
+    isFullScreen?: boolean;
+}>();
 
 const emit = defineEmits<{
     toggle: [boolean];
 }>();
 
-const internalFullScreen = ref(props.initialFullScreen);
+const internalFullScreen = ref(props.initialFullScreen ?? false);
 
 watch(
     () => props.isFullScreen,
