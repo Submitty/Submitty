@@ -29,7 +29,7 @@ const internalFullScreen = ref(props.initialFullScreen ?? false);
 watch(
     () => props.isFullScreen,
     (val) => {
-        if (val !== undefined) {
+        if (typeof val === 'boolean') {
             internalFullScreen.value = val;
         }
     },
