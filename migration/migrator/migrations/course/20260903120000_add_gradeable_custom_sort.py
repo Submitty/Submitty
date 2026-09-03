@@ -77,15 +77,4 @@ def down(config, database, semester, course):
     :param course: Name of course being migrated
     :type course: str
     """
-    database.execute("""
-        DROP TABLE IF EXISTS gradeable_custom_grading_order
-    """)
-
-    database.execute("""
-        ALTER TABLE gradeable
-        DROP COLUMN IF EXISTS g_use_custom_grading_order
-    """)
-    database.execute("""
-        ALTER TABLE gradeable
-        DROP COLUMN IF EXISTS g_enable_custom_sort
-    """)
+    pass

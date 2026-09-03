@@ -244,44 +244,35 @@ class AdminGradeableController extends AbstractController {
 
         if ($is_team) {
             fputcsv($fp, [
-                'Sort Order',
                 'Team ID',
                 'Team Name',
             ]);
         }
         else {
             fputcsv($fp, [
-                'Sort Order',
                 'User ID',
                 'Given Name',
                 'Family Name',
             ]);
         }
-
-        foreach ($submitters as $index => $submitter) {
-            $sort_order = $index + 1;
-
+        foreach ($submitters as $submitter) {
             if ($is_team) {
                 $team = $submitter->getTeam();
 
                 fputcsv($fp, [
-                    $sort_order,
                     $submitter->getId(),
                     $team->getTeamName(),
                 ]);
             }
             else {
                 $user = $submitter->getUser();
-
                 fputcsv($fp, [
-                    $sort_order,
                     $submitter->getId(),
                     $user->getDisplayedGivenName(),
                     $user->getDisplayedFamilyName(),
                 ]);
             }
         }
-
         rewind($fp);
         $csv = stream_get_contents($fp);
         fclose($fp);
