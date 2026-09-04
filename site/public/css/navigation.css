@@ -68,6 +68,11 @@
     justify-content: center;
 }
 
+.locked-gradeable-message {
+    color: var(--danger-red);
+    font-size: 0.8rem;
+}
+
 .btn-nav {
     display: flex;
     flex-direction: column;
