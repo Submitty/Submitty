@@ -113,7 +113,6 @@
                     title="You must be on a team to submit to this gradeable"
                 {% else %}
                     onclick="alert('Please complete {{ button.getPrerequisite() }}.');"
-                    title="Please complete {{ button.getPrerequisite() }}."
                 {% endif %}
             {% else %}
                 {# assigns the href unless button has onclick affect #}
