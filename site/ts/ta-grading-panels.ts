@@ -176,15 +176,17 @@ function updatePanelLayoutModes() {
     $('.panel-instructions').remove();
     setMultiPanelModeVisiblities();
     for (const panelIdx in panelsBucket) {
-        const panelCont = document.querySelector(
-            panelsBucket[panelIdx],
-        )?.childNodes;
-        if (!panelCont) {
+        const panelEl = document.querySelector(panelsBucket[panelIdx]);
+        if (!panelEl) {
             continue;
         }
         // Move all the panels from the left and right buckets to the main panels-container
-        for (let idx = 0; idx < panelCont.length; idx++) {
-            document.querySelector('.panels-container')!.append(panelCont[idx]);
+        const children = Array.from(panelEl.childNodes);
+        const panelsContainer = document.querySelector('.panels-container');
+        if (panelsContainer) {
+            for (const child of children) {
+                panelsContainer.append(child);
+            }
         }
     }
 
