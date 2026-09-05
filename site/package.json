@@ -50,7 +50,7 @@
     "vue": "^3.5.27"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^8.0.1",
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-typescript": "^7.28.5",
     "@cypress/code-coverage": "^4.0.3",
