@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-env": "^8.0.2",
     "@babel/preset-typescript": "^7.28.5",
     "@cypress/code-coverage": "^4.0.3",
     "@cypress/skip-test": "^2.6.1",
