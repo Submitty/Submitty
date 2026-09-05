@@ -58,7 +58,7 @@
     "@cypress/vite-dev-server": "^6.0.1",
     "@cypress/vue": "^6.0.2",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@tsconfig/node20": "^20.1.8",
+    "@tsconfig/node20": "^20.1.10",
     "@types/jest": "^30.0.0",
     "@types/jquery": "^3.5.33",
     "@types/jquery.are-you-sure": "^0.0.34",
