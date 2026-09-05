@@ -1182,12 +1182,15 @@ $(() => {
         },
     );
 
-    registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { preventDefault: () => void }) => {
-        const openComponentId = getFirstOpenComponentId();
-        const numComponents = $('#component-list').find(
-            '.component-container',
-        ).length;
+registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { preventDefault: () => void }) => {
+    const openComponentId = getFirstOpenComponentId();
+    const numComponents = $('#component-list').find(
+        '.component-container',
+    ).length;
 
+    if (numComponents === 0) {
+        return;
+    }
         // Note: we use the 'toggle' functions instead of the 'open' functions
         //  Since the 'open' functions don't close any components
         if (openComponentId === NO_COMPONENT_ID) {
