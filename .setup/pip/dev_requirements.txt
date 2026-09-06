@@ -1,12 +1,7 @@
 # Development Requirements
 
-# Linters
-pylint==4.0.8
-flake8-bugbear==25.11.29
-flake8==7.3.0
-
-# Code Formatter
-black==26.5.1
+# Linters and code formatter
+ruff==0.16.6
 
 # For cleanup_active_graders.py
 sqlalchemy==2.0.52
