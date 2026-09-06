@@ -21,6 +21,7 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
+    twig-lint : lint Twig templates
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
@@ -112,6 +113,10 @@ run_php_cs() {
     else
         run_in_container /home/submitty/site composer run-script "$script"
     fi
+}
+
+run_twig_lint() {
+    run_in_container /home/submitty/site php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
 }
 
 run_js_es() {
@@ -208,6 +213,9 @@ case "${1:-}" in
     php-lint)
         run_php_cs
         run_php_stan
+        ;;
+    twig-lint)
+        run_twig_lint
         ;;
     php-unit)
         run_php_unit "$@"
