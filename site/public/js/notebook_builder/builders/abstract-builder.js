@@ -104,8 +104,14 @@ class AbstractBuilder {
                 }
 
                 if (widget) {
-                    widget.load(cell);
-                    this.widgetAdd(widget);
+                    try {
+                        widget.load(cell);
+                        this.widgetAdd(widget);
+                    }
+                    catch (error) {
+                        console.error(`Failed to load notebook cell of type "${cell.type}":`, error);
+                        displayErrorMessage(`An error occurred loading a "${cell.type}" cell.  Check browser developer console for details.`);
+                    }
                 }
             });
         }
