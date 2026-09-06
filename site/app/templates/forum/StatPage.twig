@@ -1,5 +1,3 @@
-{% import "misc/TableSortComponents.twig" as table_sort %}
-
 <div class="content forum_content">
     {% include "forum/ForumBar.twig" with {
         "forum_bar_buttons_right" : forumBarData.forum_bar_buttons_right,
@@ -13,42 +11,13 @@
         "activeThread": null
     } %}
     <div class="stats-table-container">
-        <table class="table table-striped table-bordered persist-area" id="forum-stats-table">
-            <colgroup>
-                <col style="width:15%">
-                <col>
-                <col style="width:15%">
-                <col style="width:15%">
-                <col style="width:15%">
-                <col style="width:25%">
-            </colgroup>
-            <thead>
-                <tr>
-                    {{ table_sort.sortable_table_header('forum-stats-table', 'User', 'user', 'string', using_row_groups = true) }}
-                    {{ table_sort.sortable_table_header('forum-stats-table', 'Total Posts (not deleted)', 'total_posts', 'number', using_row_groups = true) }}
-                    {{ table_sort.sortable_table_header('forum-stats-table', 'Total Threads', 'total_threads', 'number', using_row_groups = true) }}
-                    {{ table_sort.sortable_table_header('forum-stats-table', 'Total Deleted Posts', 'total_deleted', 'number', using_row_groups = true) }}
-                    {{ table_sort.sortable_table_header('forum-stats-table', 'Total Upducks', 'total_upducks', 'number', using_row_groups = true) }}
-                    <th>Show Posts</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in userData %}
-                {# potential problem: if two users have the exact same name #}
-                <tr data-testid="user-stat" class="user_stat">
-                    <td>{{ user.family_name }}, {{ user.given_name }}</td>
-                    <td>{{ user.post_count }}</td>
-                    <td>{{ user.details_total_threads }}</td>
-                    <td>{{ user.num_deleted }}</td>
-                    <td data-testid="upduck-stat" class="upduck_stat">{{ user.total_upducks }}</td>
-                    {% if user.posts %}
-                        <td><button type="button" class="btn btn-default" data-action="expand" data-posts="{{ user.posts }}" data-id="{{ user.ids }}" data-timestamps="{{ user.timestamps }}" data-thread_id="{{ user.thread_ids }}" data-thread_titles="{{ user.thread_titles }}">Expand</button></td>
-                    {% else %}
-                        <td>No Posts</td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% include 'Vue.twig' with {
+            'type': 'component',
+            'name': 'forum/ForumStatsTable',
+            'args': { 'users': userData },
+            'events': {
+                'navigate-to-thread': '(payload) => { window.open(buildCourseUrl(["forum", "threads", payload.threadId]), "_blank"); }'
+            }
+        } %}
     </div>
 </div>
