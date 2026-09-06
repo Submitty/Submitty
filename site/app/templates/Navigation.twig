@@ -113,7 +113,6 @@
                     title="You must be on a team to submit to this gradeable"
                 {% else %}
                     onclick="alert('Please complete {{ button.getPrerequisite() }}.');"
-                    title="Please complete {{ button.getPrerequisite() }}."
                 {% endif %}
             {% else %}
                 {# assigns the href unless button has onclick affect #}
@@ -148,6 +147,11 @@
                 {% endif %}
             {% endif %}
         </a>
+        {% if button.isDisabled() and button.getPrerequisite() is not none %}
+            <div class="locked-gradeable-message">
+                Please complete {{ button.getPrerequisite() }}.
+            </div>
+        {% endif %}
         {% if button.getProgress() != null %}
             <div class="meter">
                 <span style="width: {{ max(2, button.getProgress()) }}%"></span>
