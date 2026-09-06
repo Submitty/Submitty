@@ -26,6 +26,7 @@ HELP_MESSAGE="
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     shell-lint: run ShellCheck
+    yaml-lint : run yamllint
     py-flake8 : run flake8 [option: specific_file.py]
     py-pylint : run pylint [option: specific_file.py]
     py-lint   : py-flake8 & py-pylint [option: specific_file.py]
@@ -154,6 +155,10 @@ run_shell_lint() {
     run_in_container /home/submitty python3 run_shellcheck.py
 }
 
+run_yaml_lint() {
+    run_in_container /home/submitty yamllint .
+}
+
 run_php_unit() {
     parse_args "${@:2}"
     run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
@@ -223,6 +228,9 @@ case "${1:-}" in
         ;;
     shell-lint)
         run_shell_lint
+        ;;
+    yaml-lint)
+        run_yaml_lint
         ;;
     py-flake8)
         run_py_flake8 "$@"
