@@ -296,10 +296,8 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run flake8
-        run: python3 -m flake8
-      - name: Run pylint
-        run: python3 -m pylint --recursive=y .
+      - name: Run ruff
+        run: ruff check .
 
   python-unit:
     name: Python Unit
