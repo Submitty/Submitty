@@ -36,8 +36,8 @@
     "symfony/http-foundation": "6.4.41",
     "symfony/routing": "6.4.41",
     "textalk/websocket": "1.6.3",
-    "twig/markdown-extra": "^3.26",
-    "twig/twig": "3.27.0"
+    "twig/markdown-extra": "^3.28",
+    "twig/twig": "3.28.0"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "1.2.0",
@@ -45,7 +45,7 @@
     "phpstan/phpstan": "2.1.54",
     "phpstan/phpstan-deprecation-rules": "2.0.5",
     "phpstan/phpstan-doctrine": "2.0.21",
-    "phpstan/phpstan-strict-rules": "2.0.10",
+    "phpstan/phpstan-strict-rules": "2.0.12",
     "phpunit/phpunit": "10.5.62",
     "submitty/php-codesniffer": "3.0.1",
     "symfony/finder": "^6.4",
