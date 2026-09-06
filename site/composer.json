@@ -36,7 +36,7 @@
     "symfony/http-foundation": "6.4.41",
     "symfony/routing": "6.4.41",
     "textalk/websocket": "1.6.3",
-    "twig/markdown-extra": "^3.26",
+    "twig/markdown-extra": "^3.28",
     "twig/twig": "3.28.0"
   },
   "require-dev": {
