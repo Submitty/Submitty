@@ -1010,12 +1010,12 @@ class ForumController extends AbstractController {
         $active_blocks = $this->core->getCourseEntityManager()
             ->getRepository(ForumBlockedUser::class)
             ->getActiveBlockedUsers();
-        $post_block_ids = array_values(array_filter(array_map(
+        $post_block_ids = array_values(array_map(
             fn($block) => match ($block->getAction()) {
                 ForumBlockAction::NoForumPosts => $block->getUserId(),
             },
             $active_blocks
-        ), fn($id) => $id !== null));
+        ));
         $users = $this->core->getQueries()->getUsersByIds($post_block_ids) ?? [];
 
         $blocked_users = [];
