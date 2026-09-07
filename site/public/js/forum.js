@@ -1891,15 +1891,15 @@ function unblockUserFromForum(userId) {
             csrf_token: window.csrfToken,
         })
             .done((data) => {
-            handleBlockUserResponse(data, () => {
-                closePopup('block-user-form');
-                displaySuccessMessage('User has been blocked from making forum posts.');
-                location.reload();
+                handleBlockUserResponse(data, () => {
+                    closePopup('block-user-form');
+                    displaySuccessMessage('User has been blocked from making forum posts.');
+                    location.reload();
+                });
             })
-        })
-        .fail(() => {
-            window.alert('Something went wrong while trying to block the user. Please try again.');
-        })
+            .fail(() => {
+                window.alert('Something went wrong while trying to block the user. Please try again.');
+            });
     }
 }
 

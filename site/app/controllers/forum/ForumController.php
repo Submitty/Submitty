@@ -1011,9 +1011,11 @@ class ForumController extends AbstractController {
             ->getRepository(ForumBlockedUser::class)
             ->getActiveBlockedUsers();
         $post_block_ids = array_values(array_filter(array_map(
-            fn($block) => $block->getAction() === ForumBlockAction::NoForumPosts ? $block->getUserId() : null,
+            fn($block) => match ($block->getAction()) {
+                ForumBlockAction::NoForumPosts => $block->getUserId(),
+            },
             $active_blocks
-        )));
+        ), fn($id) => $id !== null));
         $users = $this->core->getQueries()->getUsersByIds($post_block_ids) ?? [];
 
         $blocked_users = [];
@@ -1021,7 +1023,7 @@ class ForumController extends AbstractController {
             if ($block->getAction() !== ForumBlockAction::NoForumPosts) {
                 continue;
             }
-            $user = $user[$block->getUserId()] ?? null;
+            $user = $users[$block->getUserId()] ?? null;
             $display_name = $user !== null ? $user->getDisplayFullName() : $block->getUserId();
             $expiration_date = $block->getExpirationDate();
             $blocked_users[] = [
