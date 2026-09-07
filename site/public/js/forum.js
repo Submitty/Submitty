@@ -1900,7 +1900,20 @@ function showBlockUserForm(userId, displayName) {
 
     $('#block-user-form').css('display', 'block');
 }
-
+function handleBlockUserResponse(data, onSuccess) {
+    let json;
+    try {
+        json = JSON.parse(data);
+    }
+    catch (err) {
+        displayErrorMessage('Error parsing data. Please try again');
+        return;
+    }
+    if (json['status'] === 'fail') {
+        displayErrorMessage(json['message']);
+        return;
+    }
+}
 function submitBlockUser() {
     const userId = $('#block-user-id').val();
     const csrfToken = $('#block-csrf-token').val();
@@ -1913,26 +1926,15 @@ function submitBlockUser() {
         csrf_token: csrfToken,
     })
         .done((data) => {
-            let json;
-
-            try {
-                json = JSON.parse(data);
-            }
-            catch (err) {
-                displayErrorMessage('Error parsing data. Please try again.');
-                return;
-            }
-            if (json['status'] === 'fail') {
-                displayErrorMessage(json['message']);
-                return;
-            }
-            closePopup('block-user-form');
-            displaySuccessMessage('User has been blocked from making forum posts.');
-            location.reload();
+            handleBlockUserResponse(data, () => {
+                closePopup('block-user-form');
+                displaySuccessMessage('User has been blocked from making forum posts.');
+                location.reload();
+            })
         })
         .fail(() => {
             window.alert('Something went wrong while trying to block the user. Please try again.');
-        });
+        })
 }
 
 function unblockUserFromForum(userId) {
@@ -1944,26 +1946,15 @@ function unblockUserFromForum(userId) {
             csrf_token: window.csrfToken,
         })
             .done((data) => {
-                let json;
-                try {
-                    json = JSON.parse(data);
-                }
-                catch (err) {
-                    displayErrorMessage('Error parsing data. Please try again.');
-                    return;
-                }
-
-                if (json['status'] === 'fail') {
-                    displayErrorMessage(json['message']);
-                    return;
-                }
-
-                displaySuccessMessage('User has been unblocked from amking forum posts.');
+            handleBlockUserResponse(data, () => {
+                closePopup('block-user-form');
+                displaySuccessMessage('User has been blocked from making forum posts.');
                 location.reload();
             })
-            .fail(() => {
-                window.alert('Something went wrong while trying to block the user. Please try again.');
-            });
+        })
+        .fail(() => {
+            window.alert('Something went wrong while trying to block the user. Please try again.');
+        })
     }
 }
 
@@ -2007,18 +1998,10 @@ function showBlockedUsersModal() {
                                         csrf_token: window.csrfToken,
                                     },
                                     success: (resp) => {
-                                        try {
-                                            const json = JSON.parse(resp);
-                                            if (json.status === 'fail') {
-                                                displayErrorMessage(json.message);
-                                                return;
-                                            }
+                                        handleBlockUserResponse(resp, () => {
                                             displaySuccessMessage('User has been unblocked from making forum posts.');
                                             showBlockedUsersModal();
-                                        }
-                                        catch (err) {
-                                            displayErrorMessage('Error parsing data. Please try again.');
-                                        }
+                                        });
                                     },
                                     error: () => {
                                         window.alert('Something went wrong while trying to unblock the user. Please try again.');

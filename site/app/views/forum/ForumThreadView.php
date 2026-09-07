@@ -888,9 +888,8 @@ class ForumThreadView extends AbstractView {
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
             "thread_announced" => $thread->isAnnounced(),
-            "is_author_blocked" => ($user->accessAdmin() && $post->getAuthor()->getId() !== $user->getId())
-                ? isset($blocked_author_ids[$post->getAuthor()->getId()])
-                : false,
+            "is_author_blocked" => $post->getAuthor()->getId() !== $user->getId()
+                && isset($blocked_author_ids[$post->getAuthor()->getId()]),
             "show_reply_announcement" => $thread->isPinned() && $user->accessFullGrading() && $first,
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
         ];

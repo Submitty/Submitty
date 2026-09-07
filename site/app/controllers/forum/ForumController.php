@@ -23,6 +23,7 @@ use WebSocket;
 use DateTime;
 use app\entities\forum\ForumBlockAction;
 use app\entities\forum\ForumBlockedUser;
+use app\models\User;
 
 /**
  * Class ForumHomeController
@@ -950,7 +951,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("User not found.");
         }
 
-        if ($user_group <= 2) {
+        if ($user_group <= User::GROUP_FULL_ACCESS_GRADER) {
             return $this->core->getOutput()->renderJsonFail("You cannot block an instructor.");
         }
 
@@ -1009,12 +1010,18 @@ class ForumController extends AbstractController {
         $active_blocks = $this->core->getCourseEntityManager()
             ->getRepository(ForumBlockedUser::class)
             ->getActiveBlockedUsers();
+        $post_block_ids = array_values(array_filter(array_map(
+            fn($block) => $block->getAction() === ForumBlockAction::NoForumPosts ? $block->getUserId() : null,
+            $active_blocks
+        )));
+        $users = $this->core->getQueries()->getUsersByIds($post_block_ids) ?? [];
+
         $blocked_users = [];
         foreach ($active_blocks as $block) {
             if ($block->getAction() !== ForumBlockAction::NoForumPosts) {
                 continue;
             }
-            $user = $this->core->getQueries()->getUserById($block->getUserId());
+            $user = $user[$block->getUserId()] ?? null;
             $display_name = $user !== null ? $user->getDisplayFullName() : $block->getUserId();
             $expiration_date = $block->getExpirationDate();
             $blocked_users[] = [
