@@ -555,6 +555,53 @@ class GradingClustering(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
         algorithm = self.job_details['algorithm']
+        script_path = self.job_details.get('script_path', '')
 
         script = str(Path(INSTALL_DIR, 'sbin', 'grading_clustering', 'main.py'))
-        subprocess.run(['python3', script, semester, course, gradeable, algorithm], check=True)
+        cmd = ['python3', script, semester, course, gradeable, algorithm]
+        if script_path:
+            cmd += ['--script-path', script_path]
+
+        # the status directory lives under the course, not the daemon job queue.
+        # anything created in the queue dir is picked up by the watchdog handler
+        # as if it were a new job.
+        course_dir = Path(DATA_DIR, 'courses', semester, course)
+        status_dir = Path(course_dir, 'clustering', gradeable)
+        status_file = Path(status_dir, 'status.json')
+        try:
+            # the daemon and PHP run as different users but share the course
+            # group, so ownership is taken from the course directory rather than
+            # left to the daemon's umask.
+            course_gid = course_dir.stat().st_gid
+            for directory in (status_dir.parent, status_dir):
+                directory.mkdir(parents=True, exist_ok=True)
+                os.chown(str(directory), -1, course_gid)
+                os.chmod(str(directory), 0o2770)
+            if status_file.exists():
+                status_file.unlink()
+        except OSError as e:
+            print(f'Could not prepare clustering status directory: {e}')
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            error_msg = result.stderr.strip() or result.stdout.strip() or 'Unknown clustering error'
+            if len(error_msg) > 2000:
+                error_msg = error_msg[:2000] + '... (truncated)'
+            self.write_status(status_file, {'error': error_msg})
+            raise subprocess.CalledProcessError(result.returncode, cmd)
+
+        self.write_status(status_file, {'success': True})
+
+    def write_status(self, status_file, payload):
+        """
+        Write the clustering status where PHP can read it. PHP runs as a
+        different user than the daemon, so the file must be group readable.
+        """
+        try:
+            with open(str(status_file), 'w') as f:
+                json.dump(payload, f)
+            os.chown(str(status_file), -1, status_file.parent.stat().st_gid)
+            os.chmod(str(status_file), 0o660)
+        except OSError as e:
+            print(f'Could not write clustering status file: {e}')

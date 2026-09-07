@@ -1230,6 +1230,9 @@ class ElectronicGraderController extends AbstractController {
 
         $algorithms = [];
         foreach (\app\entities\grading_cluster\GradingClusterAlgorithm::cases() as $case) {
+            if ($case === \app\entities\grading_cluster\GradingClusterAlgorithm::CustomUpload) {
+                continue;
+            }
             $algorithms[$case->value] = [
                 'name' => $case->name,
                 'description' => $case->description()

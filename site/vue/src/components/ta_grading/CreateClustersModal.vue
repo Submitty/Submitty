@@ -19,16 +19,41 @@ const emit = defineEmits<{
 
 const selectedAlgorithm = ref(props.currentAlgorithm || '');
 const showModal = ref(false);
+const useCustomUpload = ref(false);
+const customFile = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 function toggleModal() {
     showModal.value = !showModal.value;
     if (!showModal.value) {
         selectedAlgorithm.value = props.currentAlgorithm || '';
+        useCustomUpload.value = false;
+        customFile.value = null;
     }
 }
 
+function onCustomFileChange() {
+    if (fileInput.value && fileInput.value.files && fileInput.value.files.length > 0) {
+        const file = fileInput.value.files[0];
+        if (!file.name.endsWith('.py')) {
+            emit('clustering-error', 'Please upload a Python (.py) file.');
+            clearCustomFile();
+            fileInput.value.value = '';
+            return;
+        }
+        customFile.value = file;
+    }
+}
+
+function clearCustomFile() {
+    customFile.value = null;
+}
+
 async function submitClustering() {
-    if (!selectedAlgorithm.value) {
+    if (!useCustomUpload.value && !selectedAlgorithm.value) {
+        return;
+    }
+    if (useCustomUpload.value && !customFile.value) {
         return;
     }
 
@@ -36,7 +61,15 @@ async function submitClustering() {
     emit('clustering-status', 'fetching');
     const formData = new FormData();
     formData.append('csrf_token', props.csrfToken);
-    formData.append('algorithm', selectedAlgorithm.value);
+
+    if (useCustomUpload.value) {
+        formData.append('algorithm', 'custom_upload');
+        if (customFile.value) {
+            formData.append('custom_script', customFile.value);
+        }
+    } else {
+        formData.append('algorithm', selectedAlgorithm.value);
+    }
 
     try {
         const response = await fetch(props.createClusteringUrl, {
@@ -46,10 +79,20 @@ async function submitClustering() {
 
         const result = (await response.json()) as { status: string; message?: string };
         if (result.status === 'success') {
+            let pollCount = 0;
+            const MAX_POLL_COUNT = 130; // 2 minute 10 seconds timeout
             const pollInterval = setInterval(async () => {
+                pollCount++;
+                if (pollCount > MAX_POLL_COUNT) {
+                    clearInterval(pollInterval);
+                    emit('clustering-status', 'error');
+                    emit('clustering-error', 'Clustering timed out. Check server logs for details.');
+                    selectedAlgorithm.value = props.currentAlgorithm || '';
+                    return;
+                }
                 try {
                     const statusResponse = await fetch(props.checkClusteringStatusUrl);
-                    const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string }; message?: string };
+                    const statusResult = (await statusResponse.json()) as { status: string; data?: { status: string; error_message?: string }; message?: string };
                     if (statusResult.status === 'success' && statusResult.data && statusResult.data.status === 'done') {
                         clearInterval(pollInterval);
                         emit('clustering-status', 'done');
@@ -58,7 +101,7 @@ async function submitClustering() {
                     else if (statusResult.status === 'fail' || (statusResult.data && statusResult.data.status === 'error')) {
                         clearInterval(pollInterval);
                         emit('clustering-status', 'error');
-                        emit('clustering-error', statusResult.message || 'Clustering process failed.');
+                        emit('clustering-error', statusResult.data?.error_message || statusResult.message || 'Clustering process failed.');
                         selectedAlgorithm.value = props.currentAlgorithm || '';
                     }
                 }
@@ -129,6 +172,7 @@ async function submitClustering() {
               v-model="selectedAlgorithm"
               class="form-control clustering-select"
               data-testid="clustering-algorithm-select"
+              :disabled="useCustomUpload"
             >
               <option
                 value=""
@@ -155,6 +199,41 @@ async function submitClustering() {
               {{ algorithms[selectedAlgorithm].description }}
             </p>
 
+            <div class="custom-upload-divider">
+              <span>— or upload a custom algorithm —</span>
+            </div>
+
+            <div class="custom-upload-section">
+              <label class="custom-upload-toggle">
+                <input
+                  type="checkbox"
+                  v-model="useCustomUpload"
+                  data-testid="use-custom-upload-checkbox"
+                  @change="useCustomUpload ? (selectedAlgorithm = '') : (customFile = null)"
+                />
+                Use a custom Python script
+              </label>
+
+              <div v-if="useCustomUpload" class="custom-upload-container">
+                <input
+                  type="file"
+                  accept=".py"
+                  class="form-control"
+                  data-testid="custom-script-upload"
+                  ref="fileInput"
+                  @change="onCustomFileChange"
+                />
+                <p v-if="customFile" class="file-upload-success">
+                  <i class="fas fa-check"></i> {{ customFile.name }}
+                </p>
+                <p class="custom-upload-help-text">
+                  Your script must read <code>input.json</code> and write clusters to <code>output.json</code>
+                  in its working directory. It runs with no network access, so it cannot install
+                  packages.
+                </p>
+              </div>
+            </div>
+
             <div class="form-buttons">
               <div
                 class="form-button-container"
@@ -169,7 +248,7 @@ async function submitClustering() {
                 </a>
                 <button
                   class="btn btn-primary"
-                  :disabled="!selectedAlgorithm"
+                  :disabled="useCustomUpload ? !customFile : !selectedAlgorithm"
                   @click="submitClustering"
                 >
                   Submit
@@ -186,5 +265,44 @@ async function submitClustering() {
 <style scoped>
 .clustering-select {
     width: 100%;
+}
+
+.custom-upload-divider {
+    text-align: center;
+    margin: 15px 0;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.custom-upload-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.custom-upload-toggle input[type="checkbox"] {
+    margin: 0;
+}
+
+.custom-upload-section {
+    margin-bottom: 15px;
+}
+
+.file-upload-success {
+    margin-top: 5px;
+    color: var(--standard-medium-green, #28a745);
+    font-size: 0.9em;
+}
+
+.custom-upload-container {
+    margin-top: 10px;
+}
+
+.custom-upload-help-text {
+    margin-top: 8px;
+    font-size: 0.85em;
+    color: var(--standard-medium-dark-gray, #666666);
 }
 </style>

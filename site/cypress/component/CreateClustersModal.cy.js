@@ -194,7 +194,32 @@ describe('CreateClustersModal', () => {
         });
     });
 
+<<<<<<< HEAD
     it('emits error if polling status returns data.status error', () => {
+=======
+    it('emits error if polling status returns data.status error with error_message', () => {
+        cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
+        cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'error', error_message: 'Custom script did not produce output.json' } } }).as('checkClusteringStatus');
+
+        cy.mount(CreateClustersModal, { props: defaultProps }).then(({ wrapper }) => {
+            cy.wrap(wrapper).as('wrapper');
+        });
+
+        cy.get('[data-testid="create-clusters-btn"]').click();
+        cy.get('[data-testid="clustering-algorithm-select"]').select('dummy_split');
+        cy.get('button').contains('Submit').click();
+
+        cy.wait('@createClustering');
+        cy.wait('@checkClusteringStatus');
+
+        cy.get('@wrapper').should((wrapper) => {
+            expect(wrapper.emitted('clustering-error')).to.exist;
+            expect(wrapper.emitted('clustering-error')[0]).to.deep.equal(['Custom script did not produce output.json']);
+        });
+    });
+
+    it('emits error with fallback message if polling status returns data.status error without error_message', () => {
+>>>>>>> 1b01bbca389913f22a9fe1aadc5c7c7b3c746b92
         cy.intercept('POST', '/test/clustering', { statusCode: 200, body: { status: 'success' } }).as('createClustering');
         cy.intercept('GET', '/test/clustering_status', { statusCode: 200, body: { status: 'success', data: { status: 'error' }, message: 'Server algorithm failed' } }).as('checkClusteringStatus');
 
