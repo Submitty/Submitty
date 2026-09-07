@@ -1,0 +1,16 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}block-user-form{% endblock %}
+{% block title_tag %}<h1>Block User from Forum</h1>{% endblock %}
+{% block body %}
+    <input type="hidden" id="block-user-id" value="" />
+    <input type="hidden" id="block-csrf-token" value="" />
+    <p>Block <strong id="block-user-display-name"></strong> from making forum posts.</p>
+    <div class="form-group">
+        <label for="block-expiration-date">Expiration Date (optional):</label>
+        <input type="text" id="block-expiration-date" class="form-control" placeholder="Leave blank for indefinite block" />
+    </div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <a class="btn btn-danger key_to_click" tabindex="0" onclick="submitBlockUser()">Block User</a>
+{% endblock %}
