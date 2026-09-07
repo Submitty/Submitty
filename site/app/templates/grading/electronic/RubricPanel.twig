@@ -50,9 +50,10 @@
                     {% endif %}
 
                     {# Silent Edit Checkbox #}
-                    {% if show_silent_edit %}
+                    {% if show_silent_edit and not ta_grading_cluster_mode %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
+                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>
+                            <label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
@@ -62,6 +63,18 @@
                     </div>
                     {% endif %}
                 </div>
+                {% if ta_grading_cluster_mode %}
+                    {% set entity = gradeable.isTeamAssignment() ? "team" : "student" %}
+                    {% if not is_clustered %}
+                        <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
+                            Cluster Grading Enabled: This {{ entity }} is in the "Unclustered" group and will be graded normally as an individual.
+                        </div>
+                    {% else %}
+                        <div class="system-message danger" style="position: sticky; top: 0; z-index: 100;">
+                            Cluster Grading Enabled: Any edits you made to this {{ entity }}'s marks will automatically be applied to all {{ cluster_student_count }} {{ entity }}s within this {{ entity }}'s cluster.
+                        </div>
+                    {% endif %}
+                {% endif %}
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>
                 <div class="inner-container" id="grading-box">

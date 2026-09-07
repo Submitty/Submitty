@@ -5,16 +5,26 @@ import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress, clusteringEnabled, clustersExist, taGradingClusterMode } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
     progress: number;
+    clusteringEnabled?: boolean;
+    clustersExist?: boolean;
+    taGradingClusterMode?: boolean;
 }>();
 
 const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
+    'toggle-cluster-mode': [];
 }>();
+const toggleClusteringMode = () => {
+    if (!clustersExist) {
+        return; // Disabled if no clusters
+    }
+    emit('toggle-cluster-mode');
+};
 
 // need to assign because ta-grading-panels-init.ts is not called
 Object.assign(taLayoutDet, getSavedTaLayoutDetails());
@@ -82,11 +92,32 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="grading-setting-btn"
     title="Show Grading Settings"
     optional-spanid="grading-setting-btn"
-    optional-test-id="grading-setting-btn"
   />
+  <span
+    v-if="clusteringEnabled && clustersExist"
+    id="toggle-cluster-mode-cont"
+    class="ta-navlink-cont"
+  >
+    <button
+      id="toggle-cluster-mode"
+      data-testid="toggle-cluster-mode"
+      class="invisible-btn cluster-mode-btn"
+      :title="taGradingClusterMode ? 'Cluster Grading: ON (Click to disable)' : 'Cluster Grading: OFF (Click to enable)'"
+      @click="toggleClusteringMode"
+    >
+      <i
+        class="fas icon-header icon-streched"
+        :class="taGradingClusterMode ? 'fa-chart-diagram' : 'fa-grip'"
+      />
+      <span class="cluster-mode-text">
+        {{ taGradingClusterMode ? 'Cluster Grading ON' : 'Cluster Grading OFF' }}
+      </span>
+    </button>
+  </span>
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"
+    data-testid="progress-bar"
   >
     <progress
       class="progressbar"
@@ -98,3 +129,16 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     </span>
   </span>
 </template>
+
+<style scoped>
+.cluster-mode-btn {
+    display: flex;
+    align-items: center;
+}
+.cluster-mode-text {
+    margin-left: 5px;
+    padding-right: 5px;
+    font-size: 16px;
+    color: var(--text-black);
+}
+</style>

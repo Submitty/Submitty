@@ -64,12 +64,13 @@ FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
 if not args.worker:
-    # Set secrets session token
-    config = OrderedDict()
-    CHARACTERS = string.ascii_letters + string.digits
-    config['session'] = ''.join(secrets.choice(CHARACTERS) for _ in range(64))
-    with open(SECRETS_PHP_JSON, 'w') as json_file:
-        json.dump(config, json_file, indent=2)
+    # Set secrets session token, skip if it already exists so we don't invalidate log in sessions.
+    if not os.path.exists(SECRETS_PHP_JSON):
+        config = OrderedDict()
+        CHARACTERS = string.ascii_letters + string.digits
+        config['session'] = ''.join(secrets.choice(CHARACTERS) for _ in range(64))
+        with open(SECRETS_PHP_JSON, 'w') as json_file:
+            json.dump(config, json_file, indent=2)
 
     # Change file permissions
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
