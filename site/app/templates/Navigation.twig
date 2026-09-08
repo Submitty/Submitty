@@ -147,7 +147,7 @@
                 {% endif %}
             {% endif %}
         </a>
-        {% if button.isDisabled() and button.getPrerequisite() is not none %}
+        {% if button.getPrerequisite() is not empty %}
             <div class="locked-gradeable-message">
                 Please complete {{ button.getPrerequisite() }}.
             </div>

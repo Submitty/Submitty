@@ -69,12 +69,14 @@
 }
 
 .locked-gradeable-message {
-    margin-top: 4px;
-    padding: 6px 8px;
-    border-left: 4px solid var(--alert-danger-red);
+    margin-top: 2px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-color: var(--alert-background-danger-red);
     color: var(--alert-danger-red);
-    font-size: 0.85rem;
+    font-size: 14px;
 }
 
 .btn-nav {
