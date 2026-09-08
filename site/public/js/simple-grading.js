@@ -4,7 +4,7 @@
 function updateVisibility() {
     const showGraders = $('#show-graders').is(':checked');
     const showDates = $('#show-dates').is(':checked');
-    $('.cell-grade').each(() => {
+    $('.cell-grade').each(function () {
         const graderElement = $(this).find('.simple-grade-grader');
         const dateElement = $(this).find('.simple-grade-date');
         if (showGraders && graderElement.text().trim() !== '') {
