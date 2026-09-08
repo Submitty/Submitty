@@ -199,7 +199,7 @@
             <div class="team_assignment team_yes" id="team_yes">
 
                 <label for="team_size_max">What is the maximum team size?</label>
-                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save new-gradeable" type="text"
+                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save new-gradeable" type="number" min="1" step="1"
                            value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
                 {#Use teams from a previous gradeable:
