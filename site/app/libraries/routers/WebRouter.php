@@ -112,10 +112,11 @@ class WebRouter {
 
             $logged_in = $core->isApiLoggedIn($request);
 
-            // prevent user that is not logged in from going anywhere except AuthenticationController
+            // prevent user that is not logged in from going anywhere except AuthenticationController/TokenController
             if (
                 !$logged_in
                 && !str_ends_with($router->parameters['_controller'], 'AuthenticationController')
+                && !str_ends_with($router->parameters['_controller'], 'TokenController')
             ) {
                 return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
