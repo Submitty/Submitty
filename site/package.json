@@ -56,7 +56,7 @@
     "@cypress/code-coverage": "^4.0.3",
     "@cypress/skip-test": "^2.6.1",
     "@cypress/vite-dev-server": "^6.0.1",
-    "@cypress/vue": "^6.0.2",
+    "@cypress/vue": "^7.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@tsconfig/node20": "^20.1.10",
     "@types/jest": "^30.0.0",
