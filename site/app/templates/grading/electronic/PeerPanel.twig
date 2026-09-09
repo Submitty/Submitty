@@ -2,17 +2,40 @@
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
-                <span class="col grading_label">Peer Grading
-                    <button type="button" class="btn btn-primary" title="Edit Peer Components" aria-label="Edit Peer Components" data-testid="edit-peer-components-btn" onclick="newEditPeerComponentsForm()">
-                        <i class="fas fa-pencil-alt" aria-hidden="true"></i>
-                        Edit Peer Components
-                    </button>
+                <div class="col grading_label">Peer Grading
+                    {% include 'Vue.twig' with {
+                        'type': 'component',
+                        'name': 'ta_grading/EditPeerComponentsForm',
+                        'class': 'js-edit-peer-components-form',
+                        'args': {
+                            'peers': peers,
+                            'peerNames': peer_names,
+                            'submitterId': submitter_id,
+                            'gradeableId': gradeable_id,
+                            'components': components,
+                            'componentScores': component_scores,
+                            'peerDetails': peer_details,
+                            'marks': marks,
+                            'activeVersion': active_version,
+                        },
+                        'events': {
+                            'toggle': 'toggleEditPeerComponentsForm',
+                            'peer-change': 'onPeerChange',
+                            'clear-marks': '(detail) => { clearPeerMarks(detail.submitterId, detail.gradeableId, detail.peer, window.csrfToken); }',
+                            'resolve-version-conflicts': '(detail) => { resolvePeerVersionConflicts(detail.submitterId, detail.gradeableId, detail.peer, window.csrfToken); }',
+                            'save-component': '(detail) => { savePeerComponent(detail.submitterId, detail.gradeableId, detail.peer, detail.componentId, window.csrfToken); }',
+                            'mark-change': '(detail) => { peerComponentMarksChanged(detail.peer, detail.componentId); }',
+                        },
+                    } %}
+                    <script>
+                        window.peerEditFormData = {{ { peers: peers, peerNames: peer_names, submitterId: submitter_id, gradeableId: gradeable_id, components: components, componentScores: component_scores, peerDetails: peer_details, marks: marks, activeVersion: active_version } | json_encode() | raw() }};
+                    </script>
                     {% if has_peer_version_conflict %}
                         <button type="button" class="btn" data-testid="clear-all-peer-version-conflicts-btn" onclick="clearAllPeerVersionConflicts('{{submitter_id}}', '{{gradeable_id}}', '{{anon_id}}', '{{csrf_token}}')">
                             Clear All Peer Version Conflicts
                         </button>
                     {% endif %}
-                </span>
+                </div>
                 <div class="inner-container" id="peer-grading-box">
                     {% if has_active_version %}
                         <script>
