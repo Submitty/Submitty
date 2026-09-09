@@ -56,46 +56,67 @@
 				'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
 			} %}
 			{% if show_more is defined and show_more %}
-			<div data-testid="more-dropdown" class="dropdown more-dropdown">
-				<div class="btn-group">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						More
-					</button>
-					<div class="dropdown-menu dropdown-menu-right">
-						{% if activeThread != null %}
-							<a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
-							<div class="dropdown-divider"></div>
-						{% endif %}
-						{% for more in more_data|slice(1) %}
-							{% if user_group <= more.required_rank %}
-								{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
-								{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-									<a id="{{ more.id }}" data-testid="{{ more.id }}" class="dropdown-item" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
-							{% endif %}
-						{% endfor %}
-						{% if core.getUser().accessGrading() %}
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="{{ manage_categories_url }}" title="Edit Forum Categories" data-testid="edit-categories-link">Edit Categories</a>
-						{% endif %}
-						{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item key_to_click" href="#" id="toggle-attachments-button" tabindex="0" title="Click to toggle all post attachments" onclick="loadAllInlineImages()">
-								<span class="status"></span>
-								<span class="attachment-badge badge">{{ total_attachments }}</span>
-							</a>
-							<div class="dropdown-divider"></div>
-							<a class="key_to_click dropdown-item"  id="tree" title="Sort posts by reply hierarchy" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical Post Order</a>
-							<a href="#" id="time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by ascending chronological order" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological Post Order  <i class="fas fa-angle-up"></i> </a>
-							<a href="#" id="reverse-time" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by descending chronological order" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological Post Order  <i class="fas fa-angle-down"></i> </a>
-							{% if user_group <= core.getUser().accessGrading() %}
-								<a href="#" id="alpha" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's last name" onclick="changeDisplayOptions('alpha')">Alphabetical Post Order</a>
-								<a href="#" id="alpha_by_registration" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's registration section then last name" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration Post Order</a>
-								<a href="#" id="alpha_by_rotating" class="key_to_click dropdown-item" tabindex="0" title="Sort posts by author's rotating section then last name" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating Post Order</a>
-							{% endif %}
-						{% endif %}
-					</div>
-				</div>
-			</div>
+			{% set moreItems = [] %}
+			{% if activeThread is not null %}
+				{% set moreItems = moreItems|merge([{
+						'id': 'mark-unread',
+						'displayText': 'Unread Thread',
+						'title': 'Mark Thread Unread'
+					}]) %}
+			{% endif %}
+			{% if more_data is defined %}
+				{% for more in more_data|slice(1) %}
+					{% if user_group <= more.required_rank %}
+						{% set moreItems = moreItems|merge([{
+							'id': more.id,
+							'displayText': more.display_text,
+							'title': more.title,
+							'link': more.link
+						}]) %}
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+			{% if core.getUser().accessGrading() and manage_categories_url is defined %}
+				{% set moreItems = moreItems|merge([{
+					'id': 'edit-categories',
+					'displayText': 'Edit Categories',
+					'title': 'Edit Forum Categories',
+					'link': manage_categories_url
+				}]) %}
+			{% endif %}
+			{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
+				{% set moreItems = moreItems|merge([{
+						'id': 'toggle-attachments',
+						'displayText': 'Show Attachments',
+						'title': 'Click to toggle all post attachments',
+						'badgeText': total_attachments is defined ? ''~total_attachments : ''
+					}]) %}
+				{% set currentDisplayOption = display_option is defined ? display_option : '' %}
+				{% set moreItems = moreItems|merge([
+					{ 'id': 'display-tree', 'displayText': 'Hierarchical Post Order', 'title': 'Sort posts by reply hierarchy' },
+					{ 'id': 'display-time', 'displayText': 'Chronological Post Order (Asc)', 'title': 'Sort posts by ascending chronological order' },
+					{ 'id': 'display-reverse-time', 'displayText': 'Chronological Post Order (Desc)', 'title': 'Sort posts by descending chronological order' }
+				]) %}
+				{% if user_group <= core.getUser().accessGrading() %}
+					{% set moreItems = moreItems|merge([
+						{ 'id': 'display-alpha', 'displayText': 'Alphabetical Post Order', 'title': "Sort posts by author's last name" },
+						{ 'id': 'display-alpha_by_registration', 'displayText': 'Alpha by Registration Post Order', 'title': 'Sort posts by author registration section then last name' },
+						{ 'id': 'display-alpha_by_rotating', 'displayText': 'Alpha by Rotating Post Order', 'title': 'Sort posts by author rotating section then last name' }
+					]) %}
+				{% endif %}
+			{% endif %}
+			{% include "Vue.twig" with {
+				'type': 'component',
+				'name': 'DropdownButton',
+				'args': {
+					'label': 'More',
+					'items': moreItems
+				},
+				'events': {
+					'select': 'forumHandleMoreDropdownSelect',
+					'navigate': '(url) => { window.location.href = url; }'
+				}
+			} %}
 			{% endif %}
 		</div>
 		<div>
