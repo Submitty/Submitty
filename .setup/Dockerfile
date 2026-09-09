@@ -15,6 +15,7 @@ RUN apt-get update \
     unzip \
     poppler-utils \
     libzbar0 \
+    shellcheck \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
