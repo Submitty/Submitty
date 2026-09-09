@@ -105,7 +105,7 @@ const expectColumnSortsAscendingAndDescending = (headerText, columnIndex, normal
 describe('Test cases revolving around student activity dashboard sorting', () => {
     beforeEach(() => {
         cy.login('instructor');
-        cy.visit('/courses/s26/sample/activity');
+        cy.visit(['sample', 'activity']);
         cy.get('#data-table tbody tr').should('have.length.greaterThan', 1);
     });
 
