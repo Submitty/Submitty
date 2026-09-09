@@ -55,6 +55,7 @@
     "test": "phpunit",
     "lint": "php vendor/bin/phpcs --extensions=php ./app",
     "lint:fix": "php vendor/bin/phpcbf --extensions=php ./app",
+    "lint:twig": "php scripts/symfony_console lint:twig app/ public/ room_templates/",
     "static-analysis": "php vendor/bin/phpstan analyze"
   }
 }
