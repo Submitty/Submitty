@@ -148,7 +148,7 @@
             {% endif %}
         </a>
         {% if button.getPrerequisite() is not empty %}
-            <div class="locked-gradeable-message">
+            <div class="locked-gradeable-message" data-testid="locked-gradeable-message">
                 Please complete {{ button.getPrerequisite() }}.
             </div>
         {% endif %}
