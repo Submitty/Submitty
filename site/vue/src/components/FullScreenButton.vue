@@ -1,47 +1,51 @@
+<!-- This component only emits `toggle`, applying full screen is the host page's job.
+     Wire it up in the Twig include:
+
+     'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
+
+     The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
+     loads on every page, so no per-page CSS is needed.
+
+     Pressing escape to exit fullscreen only works when the button is in focus due to our current Vue standards and setup.
+-->
+
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 
-function getMain(): HTMLElement | null {
-    return document.querySelector('main#main');
-}
+const { initialFullScreen } = defineProps<{
+    initialFullScreen?: boolean;
+}>();
 
-const isFullScreen = ref(getMain()?.classList.contains('full-screen-mode') ?? false);
+const emit = defineEmits<{
+    toggle: [boolean];
+}>();
+
+const isFullScreen = ref(initialFullScreen);
 const iconClass = computed(() => (isFullScreen.value ? 'fa-compress' : 'fa-expand'));
 
-function setFullScreen(on: boolean) {
-    const main = getMain();
-    if (!main) {
+function toggle() {
+    isFullScreen.value = !isFullScreen.value;
+    emit('toggle', isFullScreen.value);
+}
+
+function onEscape() {
+    if (!isFullScreen.value) {
         return;
     }
-    main.classList.toggle('full-screen-mode', on);
-    isFullScreen.value = on;
+    isFullScreen.value = false;
+    emit('toggle', false);
 }
 
-function toggle() {
-    setFullScreen(!isFullScreen.value);
-}
-
-function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && isFullScreen.value) {
-        setFullScreen(false);
-    }
-}
-
-onMounted(() => {
-    document.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <template>
   <button
     id="fullscreen-btn"
+    data-testid="fullscreen-btn"
     class="btn btn-default"
     title="Toggle full screen mode"
     @click="toggle"
+    @keydown.esc="onEscape"
   >
     <i
       class="fas"

@@ -244,44 +244,35 @@ class AdminGradeableController extends AbstractController {
 
         if ($is_team) {
             fputcsv($fp, [
-                'Sort Order',
                 'Team ID',
                 'Team Name',
             ]);
         }
         else {
             fputcsv($fp, [
-                'Sort Order',
                 'User ID',
                 'Given Name',
                 'Family Name',
             ]);
         }
-
-        foreach ($submitters as $index => $submitter) {
-            $sort_order = $index + 1;
-
+        foreach ($submitters as $submitter) {
             if ($is_team) {
                 $team = $submitter->getTeam();
 
                 fputcsv($fp, [
-                    $sort_order,
                     $submitter->getId(),
                     $team->getTeamName(),
                 ]);
             }
             else {
                 $user = $submitter->getUser();
-
                 fputcsv($fp, [
-                    $sort_order,
                     $submitter->getId(),
                     $user->getDisplayedGivenName(),
                     $user->getDisplayedFamilyName(),
                 ]);
             }
         }
-
         rewind($fp);
         $csv = stream_get_contents($fp);
         fclose($fp);
@@ -792,7 +783,6 @@ class AdminGradeableController extends AbstractController {
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-            $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalJs('gradeable-config-utils.js');
@@ -1732,6 +1722,7 @@ class AdminGradeableController extends AbstractController {
             'student_download',
             'student_submit',
             'peer_grading',
+            'peer_files_restricted',
             'peer_autograding',
             'peer_rubric',
             'peer_files',
@@ -1801,6 +1792,21 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties, true)) {
                 $post_val = $post_val === 'true';
+            }
+
+            if ($prop === 'peer_file_patterns') {
+                try {
+                    $post_val = json_decode($post_val, true, 512, JSON_THROW_ON_ERROR);
+                    if (!is_array($post_val)) {
+                        throw new \InvalidArgumentException(
+                            'Peer file patterns must be an array.'
+                        );
+                    }
+                }
+                catch (\JsonException | \InvalidArgumentException $e) {
+                    $errors[$prop] = $e->getMessage();
+                    continue;
+                }
             }
 
             if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
