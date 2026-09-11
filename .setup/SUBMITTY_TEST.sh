@@ -156,7 +156,7 @@ run_shell_lint() {
 
 run_php_unit() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
+    run_in_container /home/submitty/site php vendor/bin/phpunit ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_flake8() {
@@ -179,22 +179,22 @@ run_py_pylint() {
 
 run_py_unit_utils() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_migration() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/migration python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/migration python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_autograder() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/autograder python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/autograder python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_daemon() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . "${ARGS[@]}"
+    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . ${ARGS[@]+"${ARGS[@]}"}
 }
 
 # process input arguments
