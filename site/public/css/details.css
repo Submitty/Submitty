@@ -124,16 +124,6 @@ tbody tr:not(.info) > td:nth-child(1)::after {
 }
 
 @media (max-width: 950px) {
-    table.table,
-    .table thead,
-    .table tbody,
-    .table th,
-    .table td,
-    .table tr {
-        display: block;
-        border: none;
-    }
-
     /* Hide table headers */
     #details-table thead tr {
         background: none;
