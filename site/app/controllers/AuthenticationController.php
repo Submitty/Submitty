@@ -203,6 +203,26 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * Validate whether the supplied API token is still valid.
+     *
+     * Returns the authenticated user's ID when the bearer token is valid.
+     *
+     * @return MultiResponse
+     */
+    #[Route("/api/token/validate", methods: ["GET"])]
+    public function validateToken() {
+        $user = $this->core->getUser();
+
+        if ($user === null) {
+            return JsonResponse::getFailResponse("Invalid or expired token.");
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'user_id' => $user->getId(),
+        ]);
+    }
+
+    /**
      * Handle stateless authentication for the VCS endpoints.
      *
      * This endpoint is unique from the other authentication methods in
@@ -272,11 +292,18 @@ class AuthenticationController extends AbstractController {
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repository.";
-            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse($msg)
+            );
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
+        return MultiResponse::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse([
+                'message' => $msg,
+                'authenticated' => true,
+            ])
+        );
     }
 
     /**
