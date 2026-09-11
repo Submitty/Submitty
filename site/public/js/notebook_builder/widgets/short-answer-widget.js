@@ -89,7 +89,7 @@ class ShortAnswerWidget extends Widget {
             };
 
             if (answer_type_selector.value !== 'Default') {
-                codebox_config.mode = builder_data.codemirror_langauges[answer_type_selector.value];
+                codebox_config.mode = builder_data.codemirror_languages[answer_type_selector.value];
                 codebox_config.lineNumbers = true;
             }
 
@@ -155,7 +155,7 @@ class ShortAnswerWidget extends Widget {
      */
     getTypeOptions() {
         let all_modes = ['Default'];
-        all_modes = all_modes.concat(Object.keys(builder_data.codemirror_langauges));
+        all_modes = all_modes.concat(Object.keys(builder_data.codemirror_languages));
 
         let result = '';
         all_modes.forEach((mode) => {
