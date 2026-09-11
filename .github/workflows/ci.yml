@@ -369,8 +369,9 @@ jobs:
       - name: Install bulk upload dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y poppler-utils
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y \
+            poppler-utils \
+            libzbar0
 
       - name: Run bulk upload unit tests
         working-directory: sbin/submitty_daemon_jobs
