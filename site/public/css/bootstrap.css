@@ -320,25 +320,25 @@ fieldset[disabled] .btn-info.focus {
 }
 
 .btn-warning {
-    color: var(--btn-text-white);
+    color: var(--warning-brown-text);
     background-color: var(--warning-brown);
 }
 
 .btn-warning:focus,
 .btn-warning.focus {
-    color: var(--btn-text-white);
+    color: var(--warning-brown-text);
     background-color: var(--focus-warning-brown);
 }
 
 .btn-warning:hover {
-    color: var(--btn-text-white);
+    color: var(--warning-brown-text);
     background-color: var(--hover-warning-brown);
 }
 
 .btn-warning:active,
 .btn-warning.active,
 .open > .dropdown-toggle.btn-warning {
-    color: var(--btn-text-white);
+    color: var(--warning-brown-text);
     background-color: var(--active-warning-brown);
 }
 
@@ -351,7 +351,7 @@ fieldset[disabled] .btn-info.focus {
 .btn-warning:active.focus,
 .btn-warning.active.focus,
 .open > .dropdown-toggle.btn-warning.focus {
-    color: var(--btn-text-white);
+    color: var(--warning-brown-text);
     background-color: var(--active-warning-brown);
 }
 

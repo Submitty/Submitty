@@ -10,10 +10,11 @@
     --focus-danger-red: #ff5555;
     --hover-active-danger-red: #ff6661;
     --disabled-danger-red: #ad3937;
-    --warning-brown: #945600;
-    --focus-warning-brown: #ad7c37;
-    --hover-warning-brown: #9c5b00;
-    --active-warning-brown: #b58a4e;
+    --warning-brown: #ffcc00;
+    --focus-warning-brown: #e6b800;
+    --hover-warning-brown: #f2c200;
+    --active-warning-brown: #ffd633;
+    --warning-brown-text: #000000;
     --good-green: #5fb760;
     --hover-good-green: #66cc77;
     --disabled-good-green: #5cb85c;
@@ -285,6 +286,11 @@
     --standard-deep-blue: #9e9eff;
     --standard-peachpuff: #99704c;
     --standard-vibrant-yellow: #757500;
+    --warning-brown: #945600;
+    --focus-warning-brown: #ad7c37;
+    --hover-warning-brown: #9c5b00;
+    --active-warning-brown: #b58a4e;
+    --warning-brown-text: #ffffff;
     --standard-dark-green: #00bd00;
     --standard-bronze: #e6ac00;
     --standard-light-yellow-brown: #8e7306;
