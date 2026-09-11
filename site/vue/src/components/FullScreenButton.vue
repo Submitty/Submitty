@@ -5,37 +5,55 @@
 
      The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
      loads on every page, so no per-page CSS is needed.
-
-     Pressing escape to exit fullscreen only works when the button is in focus due to our current Vue standards and setup.
 -->
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
-const { initialFullScreen } = defineProps<{
-    initialFullScreen?: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        initialFullScreen?: boolean;
+        isFullScreen?: boolean | null;
+    }>(),
+    {
+        isFullScreen: undefined,
+    },
+);
 
 const emit = defineEmits<{
     toggle: [boolean];
 }>();
 
-const isFullScreen = ref(initialFullScreen);
-const iconClass = computed(() => (isFullScreen.value ? 'fa-compress' : 'fa-expand'));
+const internalFullScreen = ref(props.initialFullScreen ?? false);
+
+watch(
+    () => props.isFullScreen,
+    (val) => {
+        if (typeof val === 'boolean') {
+            internalFullScreen.value = val;
+        }
+    },
+);
+
+const active = computed(() =>
+    props.isFullScreen !== undefined ? props.isFullScreen : internalFullScreen.value,
+);
+
+const iconClass = computed(() => (active.value ? 'fa-compress' : 'fa-expand'));
 
 function toggle() {
-    isFullScreen.value = !isFullScreen.value;
-    emit('toggle', isFullScreen.value);
+    const next = !active.value;
+    internalFullScreen.value = next;
+    emit('toggle', next);
 }
 
 function onEscape() {
-    if (!isFullScreen.value) {
+    if (!active.value) {
         return;
     }
-    isFullScreen.value = false;
+    internalFullScreen.value = false;
     emit('toggle', false);
 }
-
 </script>
 
 <template>
