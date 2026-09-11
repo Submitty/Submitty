@@ -214,7 +214,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s)."]').should('have.class', 'disabled');
+            cy.get('[data-testid="locked-gradeable-message"]')
+                .contains('Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s).')
+                .prev('a') // Selects the button immediately before the div containing the message
+                .should('have.class', 'disabled');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);

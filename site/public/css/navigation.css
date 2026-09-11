@@ -68,6 +68,17 @@
     justify-content: center;
 }
 
+.locked-gradeable-message {
+    margin-top: 2px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--alert-background-danger-red);
+    color: var(--alert-danger-red);
+    font-size: 14px;
+}
+
 .btn-nav {
     display: flex;
     flex-direction: column;
