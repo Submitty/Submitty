@@ -19,13 +19,13 @@ as root.
 
 if [ $UID -ne 0 ]; then
     echo "This script requires root to run. Restarting the script under root."
-    exec sudo $0 "$@"
+    exec sudo "$0" "$@"
     exit $?
 fi
 
 set -e
 
-if [ ! $(command -v git ) ]; then
+if ! command -v git &> /dev/null; then
     echo "Installing git..."
     apt-get install -y git
 fi
@@ -36,7 +36,7 @@ if [ ! -d /usr/local/submitty/GIT_CHECKOUT/Submitty ]; then
     git clone https://github.com/Submitty/Submitty /usr/local/submitty/GIT_CHECKOUT/Submitty
 fi
 
-if [ ! $(command -v lsb_release) ]; then
+if ! command -v lsb_release &> /dev/null; then
     echo "Installing lsb-release..."
     apt-get install -y lsb-release
 fi
