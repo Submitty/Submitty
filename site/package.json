@@ -89,7 +89,7 @@
     "jest-environment-jsdom": "^30.5.1",
     "node-fetch": "^2.7.0",
     "nyc": "^18.0.0",
-    "postcss-html": "^1.8.1",
+    "postcss-html": "^2.0.0",
     "prettier": "^3.9.6",
     "regenerator-runtime": "^0.14.1",
     "stylelint": "^17.14.1",
