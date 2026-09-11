@@ -1,2 +1,177 @@
-[tool.black]
+[tool.ruff]
 line-length = 100
+target-version = "py310"
+
+extend-exclude = [
+    ".setup/CONFIGURE_SUBMITTY.py",
+    ".setup/bin/code_watcher.py",
+    ".setup/bin/init_auto_rainbow.py",
+    ".setup/bin/input_forum_data.py",
+    ".setup/bin/reset_system.py",
+    ".setup/bin/reupload_generate_csv.py",
+    ".setup/bin/reupload_old_assignments.py",
+    ".setup/bin/sample_courses/models/course/course_create_gradeables.py",
+    ".setup/bin/track_git_version.py",
+    ".setup/update_database.py",
+    "bin/extract_notes_page.py",
+    "bin/generate_repos.py",
+    "bin/left_right_parse.py",
+    "bin/make_assignments_txt_file.py",
+    "bin/make_generated_output.py",
+    "bin/regrade.py",
+    "grading/python/submitty_router.py",
+    "more_autograding_examples/**",
+    "sbin/anonymize_autograding_logs.py",
+    "sbin/build_config_upload.py",
+    "sbin/check_everything.py",
+    "sbin/compare_reuploads.py",
+    "sbin/count_autograding_logs.py",
+    "sbin/shipper_utils/systemctl_wrapper.py",
+    "sbin/shipper_utils/update_and_install_workers.py",
+    "site/cypress/fixtures/**",
+    "site/node_modules/**",
+]
+
+[tool.ruff.format]
+
+[tool.ruff.lint]
+# E/W = pycodestyle, F = pyflakes, B = flake8-bugbear, PL = pylint
+select = ["E", "W", "F", "B", "PL"]
+ignore = [
+    "E203",  # whitespace before ':' (conflicts with the formatter)
+    "E501",  # line-too-long; not enforced
+    "B9",  # flake8-bugbear's "opinionated" B9xx checks are opt-in
+    "PLR0912",  # too-many-branches
+    "PLR0913",  # too-many-arguments
+    "PLR0914",  # too-many-locals
+    "PLW1514",  # unspecified-encoding
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Some files below skip only the pylint-style checks (PL), others skip only the
+# pycodestyle/pyflakes/bugbear checks (E/W/F/B) — the two are exempted independently,
+# not as a single group, so check which list an entry appears in before assuming
+# a file is fully unlinted.
+".github/workflows/pr_title_tester.py" = ["E501", "W605"]
+"sbin/submitty_daemon_jobs/submitty_jobs/jobs.py" = ["E501"]
+".github/bin/label_abandoned_prs.py" = ["PL"]
+".setup/bin/create_untrusted_users.py" = ["PL"]
+".setup/bin/partial_reset.py" = ["PL"]
+".setup/bin/populate_office_hours_queue.py" = ["PL"]
+".setup/bin/recreate_submissions.py" = ["PL"]
+".setup/bin/refresh_vagrant_workers.py" = ["PL"]
+".setup/bin/sample_courses/**" = ["PL"]
+".setup/bin/sample_courses/models/__init__.py" = ["PL"]
+".setup/bin/sample_courses/models/component.py" = ["PL"]
+".setup/bin/sample_courses/models/course/__init__.py" = ["PL"]
+".setup/bin/sample_courses/models/course/course_create.py" = ["PL"]
+".setup/bin/sample_courses/models/course/course_data.py" = ["PL"]
+".setup/bin/sample_courses/models/course/course_generate_utils.py" = ["PL"]
+".setup/bin/sample_courses/models/course/course_utils.py" = ["PL"]
+".setup/bin/sample_courses/models/gradeable.py" = ["PL"]
+".setup/bin/sample_courses/utils/__init__.py" = ["PL"]
+".setup/bin/sample_courses/utils/create_or_generate.py" = ["PL"]
+".setup/bin/setup_sample_courses.py" = ["PL"]
+".setup/bin/setup_sample_emails.py" = ["PL"]
+".setup/bin/setup_sample_user_data.py" = ["PL"]
+".setup/bin/update_repo_version.py" = ["PL"]
+".setup/testing/check_wip.py" = ["PL"]
+"autograder/autograder/autograding_utils.py" = ["PL", "E501", "F841"]
+"autograder/autograder/config.py" = ["PL"]
+"autograder/autograder/execution_environments/container_network.py" = ["PL"]
+"autograder/autograder/execution_environments/jailed_sandbox.py" = ["PL"]
+"autograder/autograder/execution_environments/rlimit_utils.py" = ["PL"]
+"autograder/autograder/execution_environments/secure_execution_environment.py" = ["PL"]
+"autograder/autograder/grade_item.py" = ["PL"]
+"autograder/autograder/insert_database_version_data.py" = ["PL"]
+"autograder/autograder/packer_unpacker.py" = ["PL"]
+"autograder/autograder/scheduler.py" = ["PL", "E713"]
+"autograder/autograder/testcase.py" = ["PL"]
+"autograder/submitty_autograding_shipper.py" = ["PL"]
+"autograder/submitty_autograding_worker.py" = ["PL"]
+"autograder/tests/test_logger.py" = ["PL"]
+"autograder/tests/test_scheduler.py" = ["PL"]
+"autograder/tests/test_submitty_autograding_shipper.py" = ["PL"]
+"autograder/tests/test_write_grade_history.py" = ["PL"]
+"bin/comment_count.py" = ["PL"]
+"bin/config_syntax_check.py" = ["PL"]
+"bin/grading_done.py" = ["PL"]
+"bin/set_allowed_mins.py" = ["PL"]
+"migration/migrator/cli.py" = ["PL"]
+"migration/migrator/db.py" = ["PL"]
+"migration/migrator/loader.py" = ["PL"]
+"migration/migrator/main.py" = ["PL"]
+"migration/run_migrator.py" = ["PL"]
+"migration/tests/__init__.py" = ["PL"]
+"migration/tests/helpers.py" = ["PL"]
+"migration/tests/test_cli.py" = ["PL"]
+"migration/tests/test_config.py" = ["PL"]
+"migration/tests/test_create.py" = ["PL"]
+"migration/tests/test_db.py" = ["PL"]
+"migration/tests/test_dump.py" = ["PL"]
+"migration/tests/test_dumper.py" = ["PL"]
+"migration/tests/test_handle_migration.py" = ["PL"]
+"migration/tests/test_init.py" = ["PL"]
+"migration/tests/test_load_triggers.py" = ["PL"]
+"migration/tests/test_loader.py" = ["PL"]
+"migration/tests/test_main.py" = ["PL"]
+"migration/tests/test_migrate.py" = ["PL"]
+"migration/tests/test_migrate_environment_down.py" = ["PL"]
+"migration/tests/test_migrate_environment_up.py" = ["PL"]
+"migration/tests/test_print_status.py" = ["PL"]
+"migration/tests/test_rollback.py" = ["PL"]
+"migration/tests/test_status.py" = ["PL"]
+"python_submitty_utils/submitty_utils/dateutils.py" = ["PL"]
+"python_submitty_utils/submitty_utils/ssh_proxy_jump.py" = ["PL"]
+"python_submitty_utils/submitty_utils/submitty_schema_validator.py" = ["PL"]
+"python_submitty_utils/submitty_utils/user.py" = ["PL"]
+"python_submitty_utils/tests/test_dateutils.py" = ["PL"]
+"python_submitty_utils/tests/test_db_utils.py" = ["PL"]
+"python_submitty_utils/tests/test_string_utils.py" = ["PL"]
+"python_submitty_utils/tests/test_submitty_schema_validator.py" = ["PL"]
+"python_submitty_utils/tests/test_user.py" = ["PL"]
+"run_shellcheck.py" = ["PL"]
+"sample_files/sample_CSV/test_grades.py" = ["PL"]
+"sample_files/sample_CSV/verify.py" = ["PL"]
+"sbin/adduser.py" = ["PL"]
+"sbin/adduser_course.py" = ["PL"]
+"sbin/anonymize.py" = ["PL"]
+"sbin/authentication.py" = ["PL"]
+"sbin/auto_rainbow_grades.py" = ["PL"]
+"sbin/auto_rainbow_scheduler.py" = ["PL"]
+"sbin/cleanup_old_email.py" = ["PL"]
+"sbin/database_queries.py" = ["PL"]
+"sbin/delete_expired_sessions.py" = ["PL"]
+"sbin/generate_grade_summaries.py" = ["PL"]
+"sbin/get_version_details.py" = ["PL"]
+"sbin/killall.py" = ["PL"]
+"sbin/restart_shipper_and_all_workers.py" = ["PL"]
+"sbin/send_email.py" = ["PL"]
+"sbin/shipper_utils/docker_command_wrapper.py" = ["PL"]
+"sbin/shipper_utils/get_sysinfo.py" = ["PL"]
+"sbin/submitty_daemon_jobs/submitty_jobs/**" = ["PL"]
+"sbin/submitty_daemon_jobs/tests/**" = ["PL", "E", "W", "F", "B"]
+"tests/e2e/base_testcase.py" = ["PL"]
+"tests/e2e/test_forum.py" = ["PL"]
+"tests/e2e/test_grade_inquiry.py" = ["PL"]
+"tests/e2e/test_homepage.py" = ["PL"]
+"tests/e2e/test_office_hours_queue.py" = ["PL"]
+"tests/e2e/test_prev_next.py" = ["PL"]
+"tests/e2e/test_submission.py" = ["PL"]
+"tests/integrationTests/lib.py" = ["PL"]
+"tests/integrationTests/run.py" = ["PL"]
+"tests/integrationTests/tests/**" = ["PL"]
+"tests/rainbowGrades/test_sample.py" = ["PL"]
+"vagrant-workers/workers.py" = ["PLR2004"]
+".git" = ["E", "W", "F", "B"]
+"ParseLogFiles" = ["E", "W", "F", "B"]
+"grading/json_syntax_checker.py" = ["E", "W", "F", "B"]
+# No __init__.py in this directory, so pylint's recursive package discovery never
+# descends into it; kept unlinted here to match.
+"migration/migrator/migrations/**" = ["E", "W", "F", "B", "PL"]
+"sample_files/**" = ["E", "W", "F", "B"]
+"sbin/untrusted_canary.py" = ["E", "W", "F", "B"]
+"tests/**" = ["E", "W", "F", "B"]
+"autograder/tests/**" = ["E", "W", "F", "B"]
+"migration/tests/**" = ["E", "W", "F", "B"]
+"python_submitty_utils/tests/**" = ["E", "W", "F", "B"]

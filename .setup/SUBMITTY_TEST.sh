@@ -26,9 +26,8 @@ HELP_MESSAGE="
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     shell-lint: run ShellCheck
-    py-flake8 : run flake8 [option: specific_file.py]
-    py-pylint : run pylint [option: specific_file.py]
-    py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+    py-lint   : run ruff check [option: --fix, specific_file.py]
+    py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
     py-unit   : run all python unit tests except migration
     py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
     py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
@@ -159,21 +158,27 @@ run_php_unit() {
     run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
 }
 
-run_py_flake8() {
+run_py_lint() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m flake8 "${ARGS[@]}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff check --fix "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m flake8
+        run_in_container /home/submitty ruff check "${ARGS[@]}"
     fi
 }
 
-run_py_pylint() {
+run_py_format() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m pylint "${ARGS[@]}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff format "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m pylint --recursive=y .
+        run_in_container /home/submitty ruff format --check --diff "${ARGS[@]}"
     fi
 }
 
@@ -224,17 +229,11 @@ case "${1:-}" in
     shell-lint)
         run_shell_lint
         ;;
-    py-flake8)
-        run_py_flake8 "$@"
-        ;;
-    py-pylint)
-        run_py_pylint "$@"
-        ;;
     py-lint)
-        echo "Running pylint..."
-        run_py_pylint "$@"
-        echo "Running flake8..."
-        run_py_flake8 "$@"
+        run_py_lint "$@"
+        ;;
+    py-format)
+        run_py_format "$@"
         ;;
     py-unit-utils)
         run_py_unit_utils "$@"
