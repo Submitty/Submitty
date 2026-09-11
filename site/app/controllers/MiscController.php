@@ -7,6 +7,7 @@ use app\libraries\CodeMirrorUtils;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\NotebookUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
@@ -504,6 +505,16 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "submitter_id" => $submitter_id,
+            "download_type" => "single_zip"
+        ];
+        Logger::logDownload($logger_params);
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $gradeable_path = $this->core->getConfig()->getCoursePath();
@@ -579,6 +590,17 @@ class MiscController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "submitter_id" => "multiple",
+            "download_type" => "bulk_" . ($type ?? "section")
+        ];
+        Logger::logDownload($logger_params);
+
         $paths = ['submissions'];
         if ($gradeable->isVcs()) {
             //VCS submissions are stored in the checkout directory
