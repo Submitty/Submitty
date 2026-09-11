@@ -7697,9 +7697,18 @@ AND gc_id IN (
         try {
             $this->clearCustomGradingOrder($gradeable_id);
 
-            $submitter_column = $is_team ? 'team_id' : 'user_id';
+            if (count($ordered_submitter_ids) > 0) {
+                $submitter_column = $is_team ? 'team_id' : 'user_id';
 
-            foreach ($ordered_submitter_ids as $sort_order => $submitter_id) {
+                $placeholders = [];
+                $params = [];
+                foreach ($ordered_submitter_ids as $sort_order => $submitter_id) {
+                    $placeholders[] = '(?, ?, ?)';
+                    $params[] = $gradeable_id;
+                    $params[] = $submitter_id;
+                    $params[] = $sort_order;
+                }
+
                 $this->course_db->query(
                     "
                     INSERT INTO gradeable_custom_grading_order (
@@ -7707,13 +7716,8 @@ AND gc_id IN (
                         {$submitter_column},
                         sort_order
                     )
-                    VALUES (?, ?, ?)
-                    ",
-                    [
-                        $gradeable_id,
-                        $submitter_id,
-                        $sort_order,
-                    ]
+                    VALUES " . implode(', ', $placeholders),
+                    $params
                 );
             }
 
