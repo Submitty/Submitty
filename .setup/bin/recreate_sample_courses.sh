@@ -31,8 +31,8 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # Get into the script's directory
-DIR=`echo $0 | sed -E 's/\/[^\/]+$/\//'`
-if [ "X$0" != "X$DIR" ]; then
+DIR=$(echo "$0" | sed -E 's/\/[^\/]+$/\//')
+if [ "$0" != "$DIR" ]; then
    cd "$DIR"
 fi
 
@@ -40,6 +40,8 @@ fi
 cd ../../
 
 python3 ./.setup/bin/partial_reset.py
+# FLAG and COURSES are intentionally unquoted to word-split COURSES into separate arguments
+# shellcheck disable=SC2086
 python3 ./.setup/bin/setup_sample_courses.py ${FLAG} ${COURSES}
 
 # Resets the submitty-admin API token (cleared by partial_reset.py) before setup_sample_courses.py restarts daemons.
@@ -48,14 +50,14 @@ python3 /usr/local/submitty/.setup/bin/init_auto_rainbow.py
 
 DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 for i in "${DAEMONS[@]}"; do
-    systemctl stop ${i}
-    systemctl reset-failed ${i} # submitty_daemon_jobs_handler will fail to start in setup_sample_courses.py
+    systemctl stop "${i}"
+    systemctl reset-failed "${i}" # submitty_daemon_jobs_handler will fail to start in setup_sample_courses.py
 done
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-service php${PHP_VERSION}-fpm restart
+service php"${PHP_VERSION}"-fpm restart
 
 DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 for i in "${DAEMONS[@]}"; do
-    systemctl start ${i}
+    systemctl start "${i}"
 done
