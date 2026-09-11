@@ -163,7 +163,10 @@ runs:
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py ${{ inputs.flags }} ${{ inputs.courses }}
+      env:
+        SETUP_FLAGS: ${{ inputs.flags }}
+        SETUP_COURSES: ${{ inputs.courses }}
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py ${SETUP_FLAGS} ${SETUP_COURSES}
       shell: bash
 
     - name: Set up test suite
