@@ -3,8 +3,8 @@ import subprocess
 import datetime
 from datetime import timedelta
 
-pr_json = "gh pr list -L 1000 --json updatedAt,labels,number,comments,reviews"
-terminal_output = subprocess.check_output(pr_json, shell=True, text=True)
+pr_json = ['gh', 'pr', 'list', '-L', '1000', '--json', 'updatedAt,labels,number,comments,reviews']
+terminal_output = subprocess.check_output(pr_json, text=True)
 json_output = json.loads(terminal_output)
 
 eastern = datetime.timezone(datetime.timedelta(hours=-5))
