@@ -142,14 +142,38 @@ function initChatroomSocketClient(chatroomId) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
                 break;
+            case 'chat_open': {
+                const inputContainer = document.querySelector('.input-container');
+                const messageInput = document.querySelector('.message-input');
+                const sendButton = document.querySelector('.send-message-btn');
+
+                if (inputContainer) {
+                    inputContainer.style.display = 'flex';
+                }
+                if (messageInput) {
+                    messageInput.disabled = false;
+                    messageInput.placeholder = 'Enter your message here';
+                }
+                if (sendButton) {
+                    sendButton.disabled = false;
+                }
+                break;
+            }
             case 'chat_close':
                 if (msg.allow_read_only_after_end) {
+                    const inputContainer = document.querySelector('.input-container');
                     const messageInput = document.querySelector('.message-input');
                     const sendButton = document.querySelector('.send-message-btn');
 
-                    messageInput.disabled = true;
-                    messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
-                    sendButton.disabled = true;
+                    if (inputContainer) {
+                        inputContainer.style.display = 'none';
+                    }
+                    if (messageInput) {
+                        messageInput.disabled = true;
+                    }
+                    if (sendButton) {
+                        sendButton.disabled = true;
+                    }
                 }
                 else {
                     window.alert('Chatroom has been closed by the instructor.');
@@ -330,17 +354,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');
 
-        if (!read_only) {
+        if (messageInput && sendButton) {
             messageInput.addEventListener('keypress', (event) => {
                 if (event.keyCode === 13 && !event.shiftKey) {
                     event.preventDefault();
                     sendButton.click();
                 }
             });
-        }
-        if (!read_only) {
+
             sendButton.addEventListener('click', (event) => {
                 event.preventDefault();
+                if (messageInput.disabled) {
+                    return;
+                }
                 const messageContent = messageInput.value.trim();
                 if (messageContent === '') {
                     alert('Please enter a message.');
@@ -353,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageInput.value = '';
             });
         }
-        if (read_only) {
+        if (read_only && messageInput && sendButton) {
             messageInput.disabled = true;
             messageInput.placeholder = 'This chat session has ended. Messages are read-only.';
             sendButton.disabled = true;
