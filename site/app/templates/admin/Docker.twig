@@ -159,16 +159,51 @@
                         <span class="badge badge-{{ capability_to_color_mapping[capability]}}">{{capability}}</span>
                     {% endfor %}
                 </td>
-                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
+                <td>{{ remove_image_data[image.primary_name].owner_display }}</td>
                 <td>
-                    {% if is_super_user or (docker_image_owners[image.primary_name] is defined and user_id == docker_image_owners[image.primary_name]) %}
-                        <button class="send-button btn btn-default" id="{{ image.primary_name }}" data-image-id="{{ image.primary_name }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
+                    {% if remove_image_data[image.primary_name].can_remove %}
+                        <button 
+                            class="send-button btn btn-default" 
+                            id="{{ image.primary_name }}" 
+                            data-image-id="{{ image.primary_name }}" 
+                            data-owners="{{ remove_image_data[image.primary_name].owners | e('html_attr') }}"
+                            data-testid="remove-image-button" 
+                            onclick="openRemoveDialog(this, '{{ admin_url }}/remove_image')"
+                        >Remove</button>
                     {% endif %}
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="popup-form" style="display: none;" id="remove-image-form" data-testid="remove-image-form">
+    <div class="popup-box">
+        <div class="popup-window" style="position: relative;">
+            <div class="form-title">
+                <h1>Remove Image</h1>
+            </div>
+            <div class="form-body">
+                <p id="remove-image-intro-single" data-testid="remove-image-intro-single" style="display: none;">
+                    {# only one alias modal text here #}
+                    Remove this image from the configuration. You can only remove images you own.
+                </p>
+                <p id="remove-image-intro-multiple" data-testid="remove-image-intro-multiple" style="display: none;">
+                    {# more than one alias modal text here #}
+                    Select which images/aliases to remove from the configuration. Aliases point at the same underlying image, so any number of the options below can be removed. You can only remove images you own.
+                </p>
+                <div id="remove-image-options" data-testid="remove-image-options"></div>
+                <span id="remove-image-error" data-testid="remove-image-error" style="color: var(--standard-red, red);"></span>
+                <div class="form-buttons">
+                    <div class="form-button-container">
+                        <a onclick="closePopup('remove-image-form');" class="btn btn-default" data-testid="remove-image-cancel">Cancel</a>
+                        <button id="remove-image-submit" data-testid="remove-image-submit" class="btn btn-danger" type="button" onclick="submitRemoveImage()">Remove Selected</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% if no_image_capabilities | length > 0 %}
@@ -276,4 +311,6 @@
 <script>
     window.dockerAdminUrl = '{{ admin_url }}';
     window.dockerUpdateNeeded = {{ update_needed ? 'true' : 'false' }};
+    window.dockerUserId = '{{ user_id }}';
+    window.dockerIsSuperUser = {{ is_super_user ? 'true' : 'false' }};
 </script>
