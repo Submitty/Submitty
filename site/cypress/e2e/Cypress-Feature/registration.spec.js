@@ -94,16 +94,26 @@ describe('Tests for self registering for courses', () => {
         cy.login('instructor2');
         cy.visit(['testing', 'users']);
         cy.get('[data-testid="edit-student-gutmal-button"]').click();
-        cy.get('[data-testid="registration-date-input"]').invoke('val').should('not.eq', 'N/A').and('not.be.empty');
+        cy.get('[data-testid="user-date-registered"]')
+            .should('have.attr', 'readonly')
+            .invoke('val')
+            .should((value) => {
+                expect(value).to.not.equal('N/A');
+                expect(value).to.not.equal('');
+            });
         cy.get('[data-testid="registration-section-dropdown"]').select('Not Registered');
-        cy.get('[data-testid="submit-user-form-button"]').click();
+
         cy.intercept(
             {
                 url: `/courses/${getCurrentSemester()}/testing/user_information`,
                 times: 1,
             },
         ).as('userInformation');
+
+        cy.get('[data-testid="submit-user-form-button"]').click();
+
         cy.get('[data-testid="popup-message"]').should('contain', 'User \'gutmal\' updated');
+
         cy.wait('@userInformation');
         cy.logout();
         cy.login('gutmal');
