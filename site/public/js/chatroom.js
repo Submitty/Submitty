@@ -30,7 +30,8 @@ function renderChatroomRow(chatroomId, description, title, hostName, isAllowAnon
         title: title,
         hostName: hostName,
         isAllowAnon: isAllowAnon,
-        isReadOnly: allowReadOnlyAfterEnd,
+        allowReadOnlyAfterEnd: allowReadOnlyAfterEnd,
+        isReadOnly: isReadOnly,
         isAdmin: isAdmin,
         isActive: isActive,
         baseUrl: base_url,
@@ -175,12 +176,13 @@ function initChatroomSocketClient(chatroomId) {
 function initChatroomListSocketClient(user_admin, base_url) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        const isActive = msg.type === 'chat_open';
+        const isActive = msg.type === 'chat_edit' ? msg.is_active : msg.type === 'chat_open';
 
         switch (msg.type) {
             case 'chat_open':
             case 'chat_close':
             case 'chat_create':
+            case 'chat_edit':
                 handleChatStateChange(msg, user_admin, isActive, base_url);
                 break;
             case 'chat_delete':
