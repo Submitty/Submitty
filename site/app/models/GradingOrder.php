@@ -247,6 +247,58 @@ class GradingOrder extends AbstractModel {
     }
 
     /**
+     * Get the previous submitter outside of the current cluster.
+     *
+     * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
+     */
+    public function getPrevSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map): ?Submitter {
+        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, -1);
+    }
+
+    /**
+     * Get the next submitter outside of the current cluster.
+     *
+     * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
+     */
+    public function getNextSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map): ?Submitter {
+        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, 1);
+    }
+
+    /**
+     * Find the first matching submitter in the requested direction that is not
+     * in the current submitter's cluster. Unclustered submitters retain the
+     * normal student-by-student navigation behavior.
+     *
+     * @param callable $fn
+     * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
+     */
+    private function getClusterSubmitter(Submitter $submitter, callable $fn, array $cluster_map, int $step): ?Submitter {
+        $index = $this->containsSubmitter($submitter) ? $this->getSubmitterIndex($submitter) : ($step < 0 ? $this->getSubmitterCount() : -1);
+        if ($index === false) {
+            return null;
+        }
+
+        $current_cluster = $cluster_map[$submitter->getId()] ?? null;
+        do {
+            $index += $step;
+            $candidate = $this->getSubmitterByIndex($index);
+            if ($candidate === false) {
+                return null;
+            }
+            $candidate_cluster = $cluster_map[$candidate->getId()] ?? null;
+        } while (($current_cluster !== null && $candidate_cluster === $current_cluster) || !$fn($candidate));
+        return $candidate;
+    }
+
+    private function getSubmitterCount(): int {
+        $count = 0;
+        foreach ($this->section_submitters as $section) {
+            $count += count($section);
+        }
+        return $count;
+    }
+
+    /**
      * Queries the database to populate $this->not_fully_graded
      *
      * @param int $component_id

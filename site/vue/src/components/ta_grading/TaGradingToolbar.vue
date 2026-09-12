@@ -48,7 +48,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   />
 
   <NavigationButton
-    :on-click="gotoPrevStudent"
+    :on-click="() => gotoPrevStudent(taGradingClusterMode)"
     visible-icon="fa-caret-left"
     button-id="prev-student"
     title="Previous Student"
@@ -58,7 +58,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   />
 
   <NavigationButton
-    :on-click="gotoNextStudent"
+    :on-click="() => gotoNextStudent(taGradingClusterMode)"
     visible-icon="fa-caret-right"
     button-id="next-student"
     title="Next Student"
