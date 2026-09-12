@@ -453,6 +453,7 @@ async function ajaxSaveGradedComponent(gradeable_id: string | undefined, compone
                 custom_message: custom_message,
                 silent_edit: silent_edit,
                 mark_ids: mark_ids,
+                cluster_grading: $('#grading_rubric').attr('data-cluster-grading'),
             },
         }) as Record<string, string | undefined>;
     }
