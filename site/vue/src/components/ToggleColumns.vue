@@ -30,12 +30,16 @@ function loadColumns() {
                 selected.value[columns.indexOf(col)] = true;
             }
         }
-        return;
     }
     else if (format === 'bits') {
         const cookieData = Cookies.get(cookie)?.split('-') || Array(columns.length).fill('1');
         selected.value = columns.map((_, i) => cookieData[i] === '1');
     }
+    columns.forEach((col, idx) => {
+        if (forced.includes(col)) {
+            selected.value[idx] = true;
+        }
+    });
 }
 function saveColumns() {
     if (format === 'json') {
