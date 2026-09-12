@@ -94,15 +94,24 @@ describe('Tests for self registering for courses', () => {
         cy.login('instructor2');
         cy.visit(['testing', 'users']);
         cy.get('[data-testid="edit-student-gutmal-button"]').click();
+        cy.get('[data-testid="user-date-registered"]').should('have.attr', 'readonly');
+        cy.get('[data-testid="user-date-registered"]')
+            .invoke('val')
+            .should('match', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
         cy.get('[data-testid="registration-section-dropdown"]').select('Not Registered');
-        cy.get('[data-testid="submit-user-form-button"]').click();
+
         cy.intercept(
             {
-                url: `/courses/${getCurrentSemester()}/testing/user_information`,
+                method: 'POST',
+                url: `/courses/${getCurrentSemester()}/testing/users?type=users`,
                 times: 1,
             },
         ).as('userInformation');
+
+        cy.get('[data-testid="submit-user-form-button"]').click();
+
         cy.get('[data-testid="popup-message"]').should('contain', 'User \'gutmal\' updated');
+
         cy.wait('@userInformation');
         cy.logout();
         cy.login('gutmal');
