@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import argparse
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,8 +16,10 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", choices=["dummy_split", "single_cluster"],
+    parser.add_argument("algorithm", choices=["dummy_split", "single_cluster","custom_upload"],
                         help="The clustering algorithm to run")
+    parser.add_argument("--script-path", default="",
+                        help="Path to the custom clustering script (required for custom_upload)")
 
     args = parser.parse_args()
 
@@ -39,6 +42,18 @@ def main():
         if args.algorithm == 'dummy_split':
             algo = DummySplit()
             cluster_groups = algo.run(submitters)
+        elif args.algorithm == 'custom_upload':
+            if not args.script_path:
+                raise ValueError("--script-path is required for custom_upload algorithm")
+            if not os.path.isfile(args.script_path):
+                raise FileNotFoundError(f"Custom script not found: {args.script_path}")
+            # Imported lazily so that dummy_split does not require the docker package.
+            from container_execution import execute_custom_clustering
+            input_data = {
+                'submitters': submitters,
+                'gradeable_id': args.gradeable_id
+            }
+            cluster_groups = execute_custom_clustering(args.script_path, input_data)
         elif args.algorithm == 'single_cluster':
             algo = SingleCluster()
             cluster_groups = algo.run(submitters)
@@ -51,7 +66,15 @@ def main():
 
         print(f"Successfully ran {args.algorithm} clustering for {args.gradeable_id}")
     except SQLAlchemyError as e:
-        print(f"Database error while generating clusters: {e}")
+        print(f"Database error while generating clusters: {e}", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)
+    except (RuntimeError, ValueError, FileNotFoundError) as e:
+        # These carry messages written for the grader and are shown in the UI.
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error while generating clusters: {e}", file=sys.stderr)
         traceback.print_exc()
         sys.exit(1)
     finally:
