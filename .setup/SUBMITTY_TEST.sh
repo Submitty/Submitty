@@ -116,7 +116,7 @@ run_php_cs() {
 }
 
 run_twig_lint() {
-    run_in_container /home/submitty/site php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
+    run_in_container /home/submitty/site composer run-script lint:twig
 }
 
 run_js_es() {
