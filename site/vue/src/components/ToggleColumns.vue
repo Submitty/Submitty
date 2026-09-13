@@ -2,6 +2,7 @@
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
 import Popup from './Popup.vue';
+import { pageNavigation } from '../utils/pageNavigation';
 export type ColumnFormats = 'bits' | 'json';
 
 const { columns, labels, cookie, hiddenColumns = [], forced = [], format = 'bits', buttonWrapped } = defineProps<{
@@ -48,7 +49,7 @@ function saveColumns() {
             cookieData[col] = selected.value[i];
         });
         Cookies.set(cookie, JSON.stringify(cookieData), { expires: 365, path: '/' });
-        window.location.reload();
+        pageNavigation.reload();
         return;
     }
     else if (format === 'bits') {
@@ -58,7 +59,7 @@ function saveColumns() {
             { expires: 365, path: '/' },
         );
     }
-    window.location.reload();
+    pageNavigation.reload();
 }
 function fillAll(val: boolean) {
     selected.value = selected.value.map((_, idx) => forced?.includes(columns[idx]) || val);
