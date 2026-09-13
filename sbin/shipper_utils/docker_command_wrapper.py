@@ -1,4 +1,5 @@
 """Pull/remove docker image."""
+
 import argparse
 import docker
 import sys
@@ -7,17 +8,29 @@ import traceback
 
 def parse_arguments():
     """Parse the arguments provided to the script."""
-    parser = argparse.ArgumentParser(description='A wrapper for the various\
+    parser = argparse.ArgumentParser(
+        description="A wrapper for the various\
                                                  systemctl functions. This\
                                                  script must be run as the\
-                                                 submitty supervisor.')
+                                                 submitty supervisor."
+    )
 
     action_group = parser.add_mutually_exclusive_group(required=True)
     action_group.add_argument("--pull", metavar="IMAGE", type=str, help="The image to pull.")
     action_group.add_argument("--remove", action="store_true", help="Remove all unused images.")
 
-    parser.add_argument("--required-images", type=str, nargs='*', help="A list of required images to keep during removal.")
-    parser.add_argument("--system-images", type=str, nargs='*', help="A list of system images to always keep during removal.")
+    parser.add_argument(
+        "--required-images",
+        type=str,
+        nargs="*",
+        help="A list of required images to keep during removal.",
+    )
+    parser.add_argument(
+        "--system-images",
+        type=str,
+        nargs="*",
+        help="A list of system images to always keep during removal.",
+    )
     return parser.parse_args()
 
 
@@ -55,8 +68,10 @@ def remove_images(client, required_images, system_images):
                 continue
             except docker.errors.APIError as e:
                 # Check if the error occurs as a result of running container and skip
-                if 'image is being used by running container' in str(e):
-                    print(f"WARNING: Image/tag {image_tag_to_remove} is in use by a running container, skipping")
+                if "image is being used by running container" in str(e):
+                    print(
+                        f"WARNING: Image/tag {image_tag_to_remove} is in use by a running container, skipping"
+                    )
                     continue
                 else:
                     # Handle other potential API errors
@@ -73,8 +88,8 @@ def remove_images(client, required_images, system_images):
         raise e
 
     try:
-        pruned_info = client.images.prune(filters={'dangling': True})
-        images_deleted = pruned_info.get('ImagesDeleted')
+        pruned_info = client.images.prune(filters={"dangling": True})
+        images_deleted = pruned_info.get("ImagesDeleted")
         if images_deleted and len(images_deleted) > 0:
             print(f"Pruned {len(images_deleted)} dangling image(s)")
     except Exception as e:
@@ -85,7 +100,7 @@ def remove_images(client, required_images, system_images):
     print("Image removal complete.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parse_arguments()
     client = docker.client.from_env()
 
@@ -93,7 +108,7 @@ if __name__ == '__main__':
         if args.remove:
             remove_images(client, args.required_images or [], args.system_images or [])
         elif args.pull:
-            repo, tag = args.pull.split(':')
+            repo, tag = args.pull.split(":")
             client.images.pull(repository=repo, tag=tag)
     except Exception:
         traceback.print_exc()

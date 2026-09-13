@@ -11,7 +11,8 @@ import traceback
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/comment_count/config"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/comment_count/submissions"
+SAMPLE_SUBMISSIONS = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/comment_count/submissions"
+
 
 @prebuild
 def initialize(test):
@@ -26,36 +27,44 @@ def initialize(test):
         os.mkdir(data_path)
     except OSError:
         pass
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-                     os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
 
 
 ############################################################################
 
+
 def cleanup(test):
-    subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "*")))
+    subprocess.call(["rm"] + ["-rf"] + glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data", "*")))
 
 
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
         traceback.print_exc()
         raise
 
+
 @testcase
 def correct(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
-                     os.path.join(test.testcase_path, "data")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "solution.py"),
+            os.path.join(test.testcase_path, "data"),
+        ]
+    )
     # subprocess.call(["cp",
     #                  os.path.join(SAMPLE_SUBMISSIONS, "solution.cpp"),
     #                  os.path.join(test.testcase_path, "data")])
@@ -65,13 +74,16 @@ def correct(test):
     test.json_diff("results.json", "results.json_correct")
 
 
-
 @testcase
 def less(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "less.py"),
-                     os.path.join(test.testcase_path, "data")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "less.py"),
+            os.path.join(test.testcase_path, "data"),
+        ]
+    )
     # subprocess.call(["cp",
     #                  os.path.join(SAMPLE_SUBMISSIONS, "buggy.cpp"),
     #                  os.path.join(test.testcase_path, "data")])
@@ -84,9 +96,13 @@ def less(test):
 @testcase
 def extra(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "extra.py"),
-                     os.path.join(test.testcase_path, "data")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "extra.py"),
+            os.path.join(test.testcase_path, "data"),
+        ]
+    )
     # subprocess.call(["cp",
     #                  os.path.join(SAMPLE_SUBMISSIONS, "extra.cpp"),
     #                  os.path.join(test.testcase_path, "data")])

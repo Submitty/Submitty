@@ -17,7 +17,7 @@ from autograder import config as submitty_config
 
 # ==================================================================================
 
-JOB_ID = '~WORK~'
+JOB_ID = "~WORK~"
 
 # Worker should leave a warning in the log if the disk usage meets the
 # warning threshold
@@ -35,11 +35,11 @@ def worker_process(
     which_machine: str,
     address: str,
     which_untrusted: str,
-    my_server: str
+    my_server: str,
 ):
 
     # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
+    if not int(os.getuid()) == int(config.submitty_users["daemon_uid"]):
         config.logger.log_message("ERROR: must be run by DAEMON_USER")
         raise SystemExit(
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
@@ -53,53 +53,44 @@ def worker_process(
     worker_name = f"{my_server}_{address}_{which_untrusted}"
 
     # Set up key autograding_DONE directories
-    done_dir = os.path.join(config.submitty['submitty_data_dir'], "autograding_DONE")
+    done_dir = os.path.join(config.submitty["submitty_data_dir"], "autograding_DONE")
     done_queue_file = os.path.join(done_dir, f"{worker_name}_queue.json")
     results_zip = os.path.join(done_dir, f"{worker_name}_results.zip")
 
     # Set up key autograding_TODO directories
-    todo_dir = os.path.join(config.submitty['submitty_data_dir'], "autograding_TODO")
+    todo_dir = os.path.join(config.submitty["submitty_data_dir"], "autograding_TODO")
     autograding_zip = os.path.join(todo_dir, f"{worker_name}_autograding.zip")
     submission_zip = os.path.join(todo_dir, f"{worker_name}_submission.zip")
     todo_queue_file = os.path.join(todo_dir, f"{worker_name}_queue.json")
 
     # Establish the the directory in which we will do our work
     working_directory = os.path.join(
-        config.submitty['submitty_data_dir'],
-        'autograding_tmp',
-        which_untrusted,
-        "tmp"
+        config.submitty["submitty_data_dir"], "autograding_tmp", which_untrusted, "tmp"
     )
 
     while True:
         if os.path.exists(todo_queue_file):
-
             # force cleanup docker networks at the start of autograding
-            docker_cleanup_output = os.popen("sudo /usr/local/submitty/sbin/docker_cleanup.sh "+which_untrusted).read()
-            if (docker_cleanup_output.strip() != "no docker networks to cleanup"):
+            docker_cleanup_output = os.popen(
+                "sudo /usr/local/submitty/sbin/docker_cleanup.sh " + which_untrusted
+            ).read()
+            if docker_cleanup_output.strip() != "no docker networks to cleanup":
                 config.logger.log_message(
                     f"ERROR stuck docker network on {which_machine} "
                     f"{which_untrusted}. {docker_cleanup_output}",
-                    which_untrusted=which_untrusted
+                    which_untrusted=which_untrusted,
                 )
 
             try:
                 # Attempt to grade the submission. Get back the location of the results.
                 results_zip_tmp = grade_item.grade_from_zip(
-                    config,
-                    working_directory,
-                    which_untrusted,
-                    autograding_zip,
-                    submission_zip
+                    config, working_directory, which_untrusted, autograding_zip, submission_zip
                 )
                 shutil.copyfile(results_zip_tmp, results_zip)
                 os.remove(results_zip_tmp)
                 # At this point, we will assume that grading has progressed successfully enough to
                 # return a coherent answer, and will say as much in the done queue file
-                response = {
-                        'status': 'success',
-                        'message': 'Grading completed successfully'
-                    }
+                response = {"status": "success", "message": "Grading completed successfully"}
             except Exception:
                 # If we threw an error while grading, log it.
                 config.logger.log_message(
@@ -116,23 +107,20 @@ def worker_process(
                 # directory.
 
                 # Because we failed grading, we will respond with an empty results zip.
-                results_zip_tmp = zipfile.ZipFile(results_zip, 'w')
+                results_zip_tmp = zipfile.ZipFile(results_zip, "w")
                 results_zip_tmp.close()
 
                 # We will also respond with a done_queue_file which contains a failure message.
-                response = {
-                    'status': 'fail',
-                    'message': traceback.format_exc()
-                }
+                response = {"status": "fail", "message": traceback.format_exc()}
             finally:
                 # Regardless of if we succeeded or failed, create a done queue file to
                 # send to the shipper.
-                with open(todo_queue_file, 'r') as infile:
+                with open(todo_queue_file, "r") as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
-                    queue_obj['autograding_status'] = response
-                    queue_obj['errors'] = config.logger.accumulated_traces
-                with open(done_queue_file, 'w') as outfile:
+                    queue_obj["autograding_status"] = response
+                    queue_obj["errors"] = config.logger.accumulated_traces
+                with open(done_queue_file, "w") as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
                 # Clean up temporary files.
                 with contextlib.suppress(FileNotFoundError):
@@ -157,7 +145,7 @@ def try_run_worker(
     which_machine: str,
     address: str,
     which_untrusted: str,
-    my_server: str
+    my_server: str,
 ):
     """Try and run `worker_process`.
 
@@ -181,16 +169,16 @@ def try_run_worker(
 # ==================================================================================
 # ==================================================================================
 def launch_workers(config, my_name, my_stats):
-    num_workers = my_stats['num_autograding_workers']
+    num_workers = my_stats["num_autograding_workers"]
 
     # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
+    if not int(os.getuid()) == int(config.submitty_users["daemon_uid"]):
         raise SystemExit(
             "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
         )
 
     # verify the disk space is enough
-    disk_usage = shutil.disk_usage('/')
+    disk_usage = shutil.disk_usage("/")
     disk_usage_percentage = float(disk_usage.used) / float(disk_usage.total)
 
     if disk_usage_percentage >= DISK_USAGE_ERROR_THRESHOLD:
@@ -212,12 +200,12 @@ def launch_workers(config, my_name, my_stats):
         untrusted_users.put("untrusted" + str(i).zfill(2))
 
     # launch the worker threads
-    address = my_stats['address']
-    if address != 'localhost':
+    address = my_stats["address"]
+    if address != "localhost":
         which_machine = f"{my_stats['username']}@{address}"
     else:
         which_machine = address
-    my_server = my_stats['server_name']
+    my_server = my_stats["server_name"]
     processes = list()
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
@@ -233,7 +221,7 @@ def launch_workers(config, my_name, my_stats):
             alive = 0
             for i in range(0, num_workers):
                 if processes[i].is_alive():
-                    alive = alive+1
+                    alive = alive + 1
                 else:
                     config.logger.log_message(f"ERROR: process {i} is not alive")
             if alive != num_workers:
@@ -267,7 +255,7 @@ def launch_workers(config, my_name, my_stats):
 # ==================================================================================
 def read_autograding_worker_json(config: submitty_config.Config, worker_json_path: os.PathLike):
     try:
-        with open(worker_json_path, 'r') as infile:
+        with open(worker_json_path, "r") as infile:
             name_and_stats = json.load(infile)
             # grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]
@@ -286,7 +274,7 @@ def read_autograding_worker_json(config: submitty_config.Config, worker_json_pat
 # ==================================================================================
 # Removes any existing files or folders in the autograding_done folder.
 def cleanup_old_jobs(config: submitty_config.Config):
-    for file_path in Path(config.submitty['submitty_data_dir'], "autograding_DONE").glob("*"):
+    for file_path in Path(config.submitty["submitty_data_dir"], "autograding_DONE").glob("*"):
         file_path = str(file_path)
         config.logger.log_message(f"Remove autograding DONE file: {file_path}")
         try:
@@ -294,21 +282,20 @@ def cleanup_old_jobs(config: submitty_config.Config):
         except Exception:
             config.logger.log_stack_trace(traceback.format_exc())
 
+
 # ==================================================================================
 
 
 if __name__ == "__main__":
-    config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config")
     config = submitty_config.Config.path_constructor(config_dir, JOB_ID, capture_traces=True)
 
     cleanup_old_jobs(config)
-    print('cleaned up old jobs')
+    print("cleaned up old jobs")
     my_name, my_stats = read_autograding_worker_json(
         config,
         os.path.join(
-            config.submitty['submitty_data_dir'],
-            'autograding_TODO',
-            'autograding_worker.json'
+            config.submitty["submitty_data_dir"], "autograding_TODO", "autograding_worker.json"
         ),
     )
     launch_workers(config, my_name, my_stats)

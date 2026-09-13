@@ -60,7 +60,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     after = result.scalar() or 0
     print(f"email to delete after count: {after}")
 
-    print(f"deleted email count {before-after}\n")
+    print(f"deleted email count {before - after}\n")
 
 
 def main():
@@ -72,7 +72,7 @@ def main():
         days_to_preserve = 360
         if len(sys.argv) > 1:
             days_to_preserve = int(sys.argv[1])
-        if (days_to_preserve < 7):
+        if days_to_preserve < 7:
             print("ERROR: Should preserve at least 1 week of email")
             return
         print(f"preserving {days_to_preserve} days of email")
@@ -80,7 +80,7 @@ def main():
         maximum_to_delete = 1000
         if len(sys.argv) > 2:
             maximum_to_delete = int(sys.argv[2])
-        if (maximum_to_delete < 10 or maximum_to_delete > 100000):
+        if maximum_to_delete < 10 or maximum_to_delete > 100000:
             print("ERROR: maximum to delete should be between 10 and 100000")
             return
         print(f"deleting at most {maximum_to_delete} emails")
@@ -89,8 +89,9 @@ def main():
 
     except Exception as email_send_error:
         e = "[{}] Error Sending Email: {}".format(
-            str(datetime.datetime.now()), str(email_send_error))
-        database_queries.LOG_FILE.write(e+"\n")
+            str(datetime.datetime.now()), str(email_send_error)
+        )
+        database_queries.LOG_FILE.write(e + "\n")
         print(e)
 
 
