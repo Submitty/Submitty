@@ -16,23 +16,49 @@ class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Open Homework']")):
+    def setup_test_start(
+        self,
+        gradeable_category="open",
+        gradeable_id="open_homework",
+        button_name="submit",
+        loaded_selector=(
+            By.XPATH,
+            "//h1[1][normalize-space(text())='New submission for: Open Homework']",
+        ),
+    ):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)
 
     def create_file_paths(self, multiple=False, autograding=False):
-        examples_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples"))
+        examples_path = os.path.abspath(
+            os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples")
+        )
         if autograding:
-            file_paths = [os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame.cpp")]
+            file_paths = [
+                os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame.cpp")
+            ]
             if multiple:
-                return file_paths + [os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame_buggy.cpp")]
+                return file_paths + [
+                    os.path.join(
+                        examples_path, "cpp_hidden_tests", "submissions", "frame_buggy.cpp"
+                    )
+                ]
             else:
                 return file_paths
         else:
-            file_paths = [os.path.join(examples_path, "python_simple_homework", "submissions", "infinite_loop_too_much_output.py")]
+            file_paths = [
+                os.path.join(
+                    examples_path,
+                    "python_simple_homework",
+                    "submissions",
+                    "infinite_loop_too_much_output.py",
+                )
+            ]
             if multiple:
-                return file_paths + [os.path.join(examples_path, "python_simple_homework", "submissions", "part1.py")]
+                return file_paths + [
+                    os.path.join(examples_path, "python_simple_homework", "submissions", "part1.py")
+                ]
             else:
                 return file_paths
 
@@ -40,19 +66,33 @@ class TestSubmission(BaseTestCase):
     def input_files(self, file_paths=[], drag_and_drop=False, target_id="upload1"):
         if drag_and_drop:
             # create an input element of type files
-            self.driver.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file', multiple:'', style: 'display: none'}).appendTo('body');")
+            self.driver.execute_script(
+                "seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file', multiple:'', style: 'display: none'}).appendTo('body');"
+            )
             upload_element = self.driver.find_element(By.ID, "seleniumUpload")
         else:
-            upload_element = self.driver.find_element(By.ID, target_id).find_element(By.XPATH, "//input[@type='file']")
+            upload_element = self.driver.find_element(By.ID, target_id).find_element(
+                By.XPATH, "//input[@type='file']"
+            )
         # send all the files to the element as args
         upload_element.send_keys("\n".join(file_paths))
         if drag_and_drop:
             # simulate the drop event for the files
-            self.driver.execute_script("e = document.createEvent('HTMLEvents'); e.initEvent('drop', true, true); e.dataTransfer = {{files: seleniumUpload.get(0).files }}; document.getElementById('{}').dispatchEvent(e);".format(target_id))
+            self.driver.execute_script(
+                "e = document.createEvent('HTMLEvents'); e.initEvent('drop', true, true); e.dataTransfer = {{files: seleniumUpload.get(0).files }}; document.getElementById('{}').dispatchEvent(e);".format(
+                    target_id
+                )
+            )
 
     # returns the number of submissions
     def get_submission_count(self, include_zero=False):
-        return len(self.driver.find_elements(By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option"+(""if include_zero else"[not(@value='0')]")))
+        return len(
+            self.driver.find_elements(
+                By.XPATH,
+                "//div[@class='content']/div[@id='version-cont']/select/option"
+                + ("" if include_zero else "[not(@value='0')]"),
+            )
+        )
 
     def accept_alerts(self, num_alerts):
         try:
@@ -62,7 +102,9 @@ class TestSubmission(BaseTestCase):
         except TimeoutException as ex:
             pass
 
-    def make_submission(self, file_paths=[], drag_and_drop=False, target_id="upload1", autograding=False):
+    def make_submission(
+        self, file_paths=[], drag_and_drop=False, target_id="upload1", autograding=False
+    ):
         # get the starting submission count
         submission_count = self.get_submission_count()
 
@@ -79,17 +121,19 @@ class TestSubmission(BaseTestCase):
         self.accept_alerts(2)
 
         # Making sure that the files are submitted properly by waiting for the submission success popup (inner message)
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='success-0']")))
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[@id='success-0']"))
+        )
 
         # make sure the submission count has increased
-        self.assertEqual(submission_count+1, self.get_submission_count())
+        self.assertEqual(submission_count + 1, self.get_submission_count())
 
         # create a set of file names and compare them to the displayed submitted files
         file_names = {os.path.basename(file_path) for file_path in file_paths}
-        submitted_files_text = self.driver.find_element(By.ID, 'submitted-files').text
+        submitted_files_text = self.driver.find_element(By.ID, "submitted-files").text
         for submitted_file_text in submitted_files_text.strip().split("\n"):
-            idx = submitted_file_text.rfind('(')
-            file_name = submitted_file_text[:idx-1].strip()
+            idx = submitted_file_text.rfind("(")
+            file_name = submitted_file_text[: idx - 1].strip()
             file_names.discard(file_name)
         self.assertEqual(0, len(file_names))
 
@@ -99,7 +143,9 @@ class TestSubmission(BaseTestCase):
             for i in range(6):
                 try:
                     time.sleep(0.1)
-                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[div/@id='tc_0']")))
+                    WebDriverWait(self.driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[div/@id='tc_0']"))
+                    )
                     autograding_done = True
                 except TimeoutException as ex:
                     self.driver.refresh()
@@ -108,32 +154,52 @@ class TestSubmission(BaseTestCase):
 
     def change_submission_version(self):
         # find the version selection dropdown and click
-        version_select_elem = self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/select")
+        version_select_elem = self.driver.find_element(
+            By.XPATH, "//div[@class='content']/div[@id='version-cont']/select"
+        )
         version_select_elem.click()
 
         # find an unselected version and click
-        new_version_elem = version_select_elem.find_element(By.XPATH, "//option[not(@selected) and not(@value='0')]")
+        new_version_elem = version_select_elem.find_element(
+            By.XPATH, "//option[not(@selected) and not(@value='0')]"
+        )
         new_version = new_version_elem.get_attribute("value")
         new_version_elem.click()
 
         # wait until the page reloads to change the selected version, then click the "Grade This Version" button
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected]".format(new_version))))
-        self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='version_change']").click()
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected]".format(
+                        new_version
+                    ),
+                )
+            )
+        )
+        self.driver.find_element(
+            By.XPATH,
+            "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='version_change']",
+        ).click()
 
         # accept late day alert
         self.accept_alerts(1)
 
         # wait until the page reloads to change the active version, completing the test
-        select = Select(self.driver.find_element(By.ID, 'submission-version-select'))
+        select = Select(self.driver.find_element(By.ID, "submission-version-select"))
         select_idx = -1
         for i in range(len(select.options)):
-            if select.options[i].text.endswith('GRADE THIS VERSION'):
+            if select.options[i].text.endswith("GRADE THIS VERSION"):
                 select_idx = i
         self.assertGreater(select_idx, -1)
         select.select_by_visible_text(select.options[select_idx].text)
 
-        version_xpath = "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, version_xpath)))
+        version_xpath = "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(
+            new_version
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, version_xpath))
+        )
 
     # for test cases that require switching versions, make submissions to ensure they will
     def ensure_multiple_versions(self):
@@ -145,6 +211,7 @@ class TestSubmission(BaseTestCase):
     # ========================================== #
     # ============== TEST CASES ================ #
     # ========================================== #
+
 
 #     # test a normal upload of a single file
 #     def test_normal_upload(self):

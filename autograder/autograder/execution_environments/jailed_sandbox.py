@@ -13,12 +13,35 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     untrusted user.
     """
 
-    def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job,
-                 complete_config_obj, testcase_info, autograding_directory, log_path,
-                 stack_trace_log_path, is_test_environment):
-        super().__init__(config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job,
-                         complete_config_obj, testcase_info, autograding_directory, log_path,
-                         stack_trace_log_path, is_test_environment)
+    def __init__(
+        self,
+        config,
+        job_id,
+        untrusted_user,
+        testcase_directory,
+        is_vcs,
+        is_batch_job,
+        complete_config_obj,
+        testcase_info,
+        autograding_directory,
+        log_path,
+        stack_trace_log_path,
+        is_test_environment,
+    ):
+        super().__init__(
+            config,
+            job_id,
+            untrusted_user,
+            testcase_directory,
+            is_vcs,
+            is_batch_job,
+            complete_config_obj,
+            testcase_info,
+            autograding_directory,
+            log_path,
+            stack_trace_log_path,
+            is_test_environment,
+        )
 
     def _handle_error_signal(self, _signum, _frame):
         """
@@ -40,11 +63,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         execute command from the random input directory to generate random input.
         """
         return self.execute(
-            untrusted_user,
-            script,
-            arguments,
-            logfile,
-            cwd=self.random_input_directory
+            untrusted_user, script, arguments, logfile, cwd=self.random_input_directory
         )
 
     def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
@@ -53,11 +72,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         execute command from the random output directory to generate random output.
         """
         return self.execute(
-            untrusted_user,
-            script,
-            arguments,
-            logfile,
-            cwd=self.random_output_directory
+            untrusted_user, script, arguments, logfile, cwd=self.random_output_directory
         )
 
     def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
@@ -83,16 +98,14 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
         script = os.path.join(cwd, script)
         # If we are in a test environment, don't bother with untrusted execute.
         if self.is_test_environment:
-            full_script = [script, ]
+            full_script = [
+                script,
+            ]
         else:
             full_script = [
-                os.path.join(
-                    self.SUBMITTY_INSTALL_DIR,
-                    "sbin",
-                    "untrusted_execute"
-                ),
+                os.path.join(self.SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                 untrusted_user,
-                script
+                script,
             ]
 
         # Make sure the signal matches to .setup/untrusted_execute.c
@@ -100,11 +113,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
 
         success = False
         try:
-            success = subprocess.call(
-                full_script + arguments,
-                stdout=logfile,
-                cwd=cwd
-            )
+            success = subprocess.call(full_script + arguments, stdout=logfile, cwd=cwd)
         except Exception:
             self.log_message("ERROR. See traces entry for more details.")
             self.log_stack_trace(traceback.format_exc())

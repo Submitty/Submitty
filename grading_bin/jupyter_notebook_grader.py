@@ -31,14 +31,14 @@ def execute_notebook(notebook_path, output_path, timeout=600):
     """
     notebook_filename = Path(notebook_path)
 
-    with open(notebook_filename, encoding='utf-8') as f:
+    with open(notebook_filename, encoding="utf-8") as f:
         # Load the notebook and do not convert it to a specific version
         nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
 
     # Validate submitty_id if present. Alphanumeric characters, hyphens, and underscores are allowed
     for cell_idx, cell in enumerate(nb.cells):
-        submitty_id = cell.metadata.get('submitty_id')
-        if submitty_id and re.fullmatch(r'^[A-Za-z0-9-_]+$', submitty_id) is None:
+        submitty_id = cell.metadata.get("submitty_id")
+        if submitty_id and re.fullmatch(r"^[A-Za-z0-9-_]+$", submitty_id) is None:
             raise ValueError(
                 f"Invalid characters in submitty_id '{submitty_id}' for cell {cell_idx}. "
                 "Only alphanumeric characters, hyphens, and underscores are allowed."
@@ -53,20 +53,18 @@ def execute_notebook(notebook_path, output_path, timeout=600):
     # - kernel_name: the kernel to use for execution (e.g., 'python3')
     # - allow_errors: if True, allows the execution to continue even
     #                 if a cell raises an error (Optional, defaults to False)
-    ep = ExecutePreprocessor(
-        timeout=timeout, kernel_name='python3', allow_errors=True
-    )
+    ep = ExecutePreprocessor(timeout=timeout, kernel_name="python3", allow_errors=True)
 
     try:
-        ep.preprocess(nb, {'metadata': {'path': notebook_filename.parent}})
+        ep.preprocess(nb, {"metadata": {"path": notebook_filename.parent}})
     # Raised if a cell execution fails and allow_errors is False
     except CellExecutionError:
         msg = f'Error executing the notebook "{notebook_filename}".\n\n'
-        msg += 'See notebook executed.ipynb for the traceback.'
+        msg += "See notebook executed.ipynb for the traceback."
         print(msg)
         raise
 
-    with open(output_path, mode='w', encoding='utf-8') as f:
+    with open(output_path, mode="w", encoding="utf-8") as f:
         nbformat.write(nb, f)
 
     for cell_idx, cell in enumerate(nb.cells):
@@ -80,30 +78,30 @@ def save_code_output_cell(output, file_name):
         output (nbformat.NotebookNode): The output of the code cell.
         file_name (str): The base name for the output files.
     """
-    if output.output_type == 'stream':
-        if output.name == 'stdout':
+    if output.output_type == "stream":
+        if output.name == "stdout":
             cell_txt = Path(f"{file_name}_stdout.txt")
-            cell_txt.write_text(output.text.strip(), encoding='utf-8')
+            cell_txt.write_text(output.text.strip(), encoding="utf-8")
 
-        if output.name == 'stderr':
+        if output.name == "stderr":
             cell_txt = Path(f"{file_name}_stderr.txt")
-            cell_txt.write_text(output.text.strip(), encoding='utf-8')
+            cell_txt.write_text(output.text.strip(), encoding="utf-8")
 
-    elif output.output_type in ('execute_result', 'display_data'):
+    elif output.output_type in ("execute_result", "display_data"):
         data = output.get("data", {})
         if "text/plain" in data:
             cell_txt = Path(f"{file_name}_result.txt")
-            cell_txt.write_text(data["text/plain"], encoding='utf-8')
+            cell_txt.write_text(data["text/plain"], encoding="utf-8")
 
         if "image/png" in data:
             img_data = base64.b64decode(data["image/png"])
             img = Path(f"{file_name}.png")
             img.write_bytes(img_data)
 
-    elif output.output_type == 'error':
+    elif output.output_type == "error":
         traceback = "\n".join(output.get("traceback", []))
         cell_err = Path(f"{file_name}.err")
-        cell_err.write_text(traceback, encoding='utf-8')
+        cell_err.write_text(traceback, encoding="utf-8")
 
 
 def save_output(cell_idx, cell):
@@ -114,7 +112,7 @@ def save_output(cell_idx, cell):
         cell (nbformat.NotebookNode): The cell to save.
     """
     # If the cell has a metadata field 'submitty_id', use it as the file name
-    submitty_id = cell.metadata.get('submitty_id')
+    submitty_id = cell.metadata.get("submitty_id")
     if submitty_id:
         file_name = f"{submitty_id}"
     else:
@@ -122,45 +120,34 @@ def save_output(cell_idx, cell):
 
     # Create an empty error file for the cell
     cell_err = Path(f"{file_name}.err")
-    cell_err.write_text("", encoding='utf-8')
+    cell_err.write_text("", encoding="utf-8")
 
     # Handle different output types
     # https://nbformat.readthedocs.io/en/latest/format_description.html#cell-types
-    if cell.cell_type == 'markdown':
+    if cell.cell_type == "markdown":
         cell_txt = Path(f"{file_name}.txt")
-        cell_txt.write_text(cell.source.strip(), encoding='utf-8')
+        cell_txt.write_text(cell.source.strip(), encoding="utf-8")
 
-    elif cell.cell_type == 'code':
+    elif cell.cell_type == "code":
         source_code = cell.source.strip()
         if source_code:
             cell_txt = Path(f"{file_name}_source.txt")
-            cell_txt.write_text(source_code, encoding='utf-8')
+            cell_txt.write_text(source_code, encoding="utf-8")
 
-        for output in cell.get('outputs', []):
+        for output in cell.get("outputs", []):
             save_code_output_cell(output, file_name)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Execute a Jupyter notebook and save outputs."
-    )
+    parser = argparse.ArgumentParser(description="Execute a Jupyter notebook and save outputs.")
     parser.add_argument(
-        '-i', '--input',
-        required=True,
-        help="Path to Jupyter notebook file to execute."
+        "-i", "--input", required=True, help="Path to Jupyter notebook file to execute."
     )
 
-    parser.add_argument(
-        '-o', '--output',
-        required=True,
-        help="Path to save the executed notebook."
-    )
+    parser.add_argument("-o", "--output", required=True, help="Path to save the executed notebook.")
 
     parser.add_argument(
-        '-t', '--timeout',
-        type=int,
-        default=600,
-        help="Maximum time in seconds to execute a cell"
+        "-t", "--timeout", type=int, default=600, help="Maximum time in seconds to execute a cell"
     )
 
     args = parser.parse_args()
@@ -170,7 +157,9 @@ if __name__ == "__main__":
     if not notebook_files:
         raise FileNotFoundError(f"No Jupyter notebook files found named {args.input}")
     if len(notebook_files) > 1:
-        raise ValueError(f"Multiple Jupyter notebook files found for '{args.input}'. "
-                         "Please ensure there is only one file matching the pattern.")
+        raise ValueError(
+            f"Multiple Jupyter notebook files found for '{args.input}'. "
+            "Please ensure there is only one file matching the pattern."
+        )
 
     execute_notebook(notebook_files[0], args.output, args.timeout)

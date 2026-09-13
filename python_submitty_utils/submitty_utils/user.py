@@ -15,6 +15,8 @@ def get_php_db_password(password):
     """
     proc = subprocess.Popen(
         ["php", "-r", "print(password_hash('{}', PASSWORD_DEFAULT));".format(password)],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     (out, err) = proc.communicate()
-    return out.decode('utf-8')
+    return out.decode("utf-8")

@@ -1,11 +1,12 @@
 """Config class for the autograder package."""
+
 import os
 import json
 from pathlib import Path
 
 from .autograding_utils import Logger
 
-DEFAULT_DATABASE_DRIVER = 'psql'
+DEFAULT_DATABASE_DRIVER = "psql"
 
 
 class Config:
@@ -24,7 +25,7 @@ class Config:
         log_path: os.PathLike,
         error_path: os.PathLike,
         job_id: str = "NO JOB",
-        capture_traces: bool = False
+        capture_traces: bool = False,
     ):
         """
         dictionary objects rather than by reading json files.
@@ -46,7 +47,7 @@ class Config:
             log_dir=self.log_path,
             stack_trace_dir=self.error_path,
             job_id=job_id,
-            capture_traces=capture_traces
+            capture_traces=capture_traces,
         )
 
     @classmethod
@@ -57,31 +58,29 @@ class Config:
 
         :param config_path: Path or str to the config directory for Submitty
         """
-        database = get_data(config_path, 'database')
-        if database is not None and 'database_driver' not in database:
-            database['database_driver'] = DEFAULT_DATABASE_DRIVER
+        database = get_data(config_path, "database")
+        if database is not None and "database_driver" not in database:
+            database["database_driver"] = DEFAULT_DATABASE_DRIVER
 
-        submitty = get_data(config_path, 'submitty')
-        submitty_users = get_data(config_path, 'submitty_users')
+        submitty = get_data(config_path, "submitty")
+        submitty_users = get_data(config_path, "submitty_users")
 
-        log_path = submitty['autograding_log_path']
-        error_path = os.path.join(submitty['site_log_path'], 'autograding_stack_traces')
+        log_path = submitty["autograding_log_path"]
+        error_path = os.path.join(submitty["site_log_path"], "autograding_stack_traces")
 
-        return cls(
-            submitty, database, submitty_users, log_path, error_path, job_id, capture_traces
-        )
+        return cls(submitty, database, submitty_users, log_path, error_path, job_id, capture_traces)
 
     def load_workers_json(self, config_path):
         """
         Given a path that contains a 'autograding_worker.json', load it into memory.
         """
-        self.workers_json = get_data(config_path, 'autograding_worker.json')
+        self.workers_json = get_data(config_path, "autograding_worker.json")
 
 
 def get_data(config_path, filename):
-    myfile = Path(config_path, f'{filename}.json')
+    myfile = Path(config_path, f"{filename}.json")
     if os.path.isfile(myfile):
-        with myfile.open('r') as open_file:
+        with myfile.open("r") as open_file:
             return json.load(open_file)
     else:
         # NOTE: database.json does not exist on the worker machine!

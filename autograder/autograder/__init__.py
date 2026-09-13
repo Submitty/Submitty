@@ -1,1 +1,1 @@
-""" init.py for autograder package """
+"""init.py for autograder package"""

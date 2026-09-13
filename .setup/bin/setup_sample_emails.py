@@ -39,26 +39,28 @@ def main():
 
     submitty_engine = create_engine(
         "postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST)
-        )
+    )
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData()
-    email_table = Table('emails', submitty_metadata, autoload_with=submitty_engine)
+    email_table = Table("emails", submitty_metadata, autoload_with=submitty_engine)
 
     courses = list(submitty_conn.execute(text("SELECT term, course FROM courses")))
     users = {}
 
     for course in courses:
-        users[course.course + ' ' + course.term] = list(submitty_conn.execute(
-            text(
-                "SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
+        users[course.course + " " + course.term] = list(
+            submitty_conn.execute(
+                text(
+                    "SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
                 ON courses_users.user_id = users.user_id\
                 WHERE courses_users.term = '{}'\
                 AND courses_users.course = '{}'".format(course.term, course.course)
+                )
             )
-        ))
-    users["superuser"] = list(submitty_conn.execute(
-        text("SELECT DISTINCT user_id, user_email FROM users")
-    ))
+        )
+    users["superuser"] = list(
+        submitty_conn.execute(text("SELECT DISTINCT user_id, user_email FROM users"))
+    )
 
     # These are not realistic emails as the email content does not check who owns
     #  the course and the body is often times nonsensical
@@ -79,14 +81,14 @@ def main():
                         created=email["created"],
                         email_address=email["email_address"],
                         term=email["term"],
-                        course=email["course"]
+                        course=email["course"],
                     )
                 )
             submitty_conn.commit()
         # course email
         else:
             course = courses[course_selected]
-            emails = generateRandomCourseEmail(users[course.course + ' ' + course.term], course)
+            emails = generateRandomCourseEmail(users[course.course + " " + course.term], course)
             for email in emails:
                 submitty_conn.execute(
                     insert(email_table).values(
@@ -96,17 +98,19 @@ def main():
                         created=email["created"],
                         email_address=email["email_address"],
                         term=email["term"],
-                        course=email["course"]
+                        course=email["course"],
                     )
                 )
             submitty_conn.commit()
 
 
 def generateRandomSuperuserEmail(recipients):
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserEmailBody.txt')) as body_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'SuperuserSubject.txt')) as subject_file:
-        body = random.choice(body_file.read().strip().split('\n'))
-        subject = random.choice(subject_file.read().strip().split('\n'))
+    with (
+        open(os.path.join(SETUP_DATA_PATH, "random", "SuperuserEmailBody.txt")) as body_file,
+        open(os.path.join(SETUP_DATA_PATH, "random", "SuperuserSubject.txt")) as subject_file,
+    ):
+        body = random.choice(body_file.read().strip().split("\n"))
+        subject = random.choice(subject_file.read().strip().split("\n"))
     now = dateutils.get_current_time()
     emails = []
     for recipient in recipients:
@@ -118,17 +122,19 @@ def generateRandomSuperuserEmail(recipients):
                 "created": now,
                 "email_address": recipient.user_email,
                 "term": None,
-                "course": None
+                "course": None,
             }
         )
     return emails
 
 
 def generateRandomCourseEmail(recipients, course):
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'CourseEmailBody.txt')) as body_file, \
-            open(os.path.join(SETUP_DATA_PATH, 'random', 'CourseSubject.txt')) as subject_file:
-        body = random.choice(body_file.read().strip().split('\n'))
-        subject = random.choice(subject_file.read().strip().split('\n'))
+    with (
+        open(os.path.join(SETUP_DATA_PATH, "random", "CourseEmailBody.txt")) as body_file,
+        open(os.path.join(SETUP_DATA_PATH, "random", "CourseSubject.txt")) as subject_file,
+    ):
+        body = random.choice(body_file.read().strip().split("\n"))
+        subject = random.choice(subject_file.read().strip().split("\n"))
     now = dateutils.get_current_time()
     emails = []
     for recipient in recipients:
@@ -140,7 +146,7 @@ def generateRandomCourseEmail(recipients, course):
                 "created": now,
                 "email_address": recipient.user_email,
                 "term": course.term,
-                "course": course.course
+                "course": course.course,
             }
         )
 

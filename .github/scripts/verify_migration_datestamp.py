@@ -14,9 +14,9 @@ MIGRATION_DIRS = [
     Path("migration/migrator/migrations/master"),
 ]
 
-MIGRATION_PATTERN = re.compile(r'^(\d{14})_.*\.py$')
+MIGRATION_PATTERN = re.compile(r"^(\d{14})_.*\.py$")
 DATESTAMP_FORMAT = "%Y%m%d%H%M%S"
-MAX_AGE_DAYS = int(os.environ.get('MAX_MIGRATION_AGE_DAYS', '7'))
+MAX_AGE_DAYS = int(os.environ.get("MAX_MIGRATION_AGE_DAYS", "7"))
 
 
 def parse_migration_filename(filename):
@@ -33,24 +33,25 @@ def parse_migration_filename(filename):
 
 def get_changed_migration_files():
     try:
-        base_ref = os.environ.get('GITHUB_BASE_REF', 'main')
+        base_ref = os.environ.get("GITHUB_BASE_REF", "main")
         result = subprocess.run(
-            ['git', 'diff', '--name-only', '--diff-filter=AM', f'origin/{base_ref}...HEAD'],
+            ["git", "diff", "--name-only", "--diff-filter=AM", f"origin/{base_ref}...HEAD"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
 
-        files = result.stdout.strip().split('\n')
+        files = result.stdout.strip().split("\n")
         migration_files = []
 
         for filepath in files:
             # Normalize path for comparison (git always uses forward slashes)
-            normalized_path = filepath.replace('\\', '/')
+            normalized_path = filepath.replace("\\", "/")
             for migration_dir in MIGRATION_DIRS:
-                migration_dir_str = str(migration_dir).replace('\\', '/')
-                if (normalized_path.startswith(migration_dir_str) and
-                        normalized_path.endswith('.py')):
+                migration_dir_str = str(migration_dir).replace("\\", "/")
+                if normalized_path.startswith(migration_dir_str) and normalized_path.endswith(
+                    ".py"
+                ):
                     filename = os.path.basename(filepath)
                     if filename != "__init__.py":
                         migration_files.append((filepath, filename))
@@ -83,7 +84,7 @@ def _print_stale_migrations_report(stale_migrations, now):
     print("\nTo fix, rename the file with today's datestamp:")
     for filepath, filename, _datestamp, _age_days in stale_migrations:
         migration_type = os.path.basename(os.path.dirname(filepath))
-        description = filename.split('_', 1)[1] if '_' in filename else 'description.py'
+        description = filename.split("_", 1)[1] if "_" in filename else "description.py"
         new_datestamp = now.strftime(DATESTAMP_FORMAT)
         new_filename = f"{new_datestamp}_{description}"
         new_path = f"migration/migrator/migrations/{migration_type}/{new_filename}"
@@ -140,7 +141,7 @@ def verify_migration_freshness():
             continue
 
         age_days = (now - datestamp).days
-        age_str = datestamp.strftime('%Y-%m-%d %H:%M:%S')
+        age_str = datestamp.strftime("%Y-%m-%d %H:%M:%S")
 
         print(f"Migration date: {age_str}")
         print(f"Age: {age_days} day(s)")
