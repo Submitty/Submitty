@@ -96,6 +96,16 @@ span.peer-progress-bar {
     background: var(--standard-mediumorchid);
 }
 
+/* Why a gradeable's button is disabled, under the button rather than in a
+   tooltip, so a student sees it without hovering. */
+.button-disabled-reason {
+    margin: 4px 0 0;
+    font-size: 12px;
+    font-style: italic;
+    text-align: center;
+    color: var(--text-black);
+}
+
 @media (max-width: 401px) {
     .course-section-heading,
     .course-main .course-title {
