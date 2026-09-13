@@ -1,4 +1,5 @@
 import ToggleColumns from '../../vue/src/components/ToggleColumns.vue';
+import { pageNavigation } from '../../vue/src/utils/pageNavigation';
 
 describe('ToggleColumns', () => {
     it('toggles the matching checkbox when its visible label is clicked', () => {
@@ -41,6 +42,43 @@ describe('ToggleColumns', () => {
     });
 
     ['bits', 'json'].forEach((format) => {
+        it(`saves mandatory and optional selections in ${format} preferences`, () => {
+            const cookie = `test_saved_columns_${format}`;
+            cy.stub(pageNavigation, 'reload').as('reloadPage');
+            cy.mount(ToggleColumns, {
+                props: {
+                    columns: ['user-id', 'first-name', 'last-name'],
+                    labels: ['User ID', 'Given Name', 'Family Name'],
+                    forced: ['user-id'],
+                    cookie,
+                    format,
+                    buttonWrapped: true,
+                },
+            });
+            cy.get('[data-testid="toggle-columns"]').click();
+            cy.contains('a', 'All Off').click();
+            cy.contains('a', 'All On').click();
+            cy.get('[data-testid="toggle-first-name"]').should('be.checked');
+            cy.get('[data-testid="toggle-last-name"]').should('be.checked');
+            cy.contains('label', 'Given Name').click();
+            cy.get('[data-testid="popup-save-button"]').click();
+            cy.get('@reloadPage').should('have.been.calledOnce');
+            cy.getCookie(cookie).should((saved) => {
+                expect(saved).not.to.be.null;
+                const value = decodeURIComponent(saved.value);
+                if (format === 'bits') {
+                    expect(value).to.equal('1-0-1');
+                }
+                else {
+                    expect(JSON.parse(value)).to.deep.equal({
+                        'user-id': true,
+                        'first-name': false,
+                        'last-name': true,
+                    });
+                }
+            });
+        });
+
         it(`restores forced selections from saved ${format} preferences`, () => {
             const cookie = `test_forced_${format}`;
             const value = format === 'bits'
