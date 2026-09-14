@@ -3,7 +3,7 @@
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
-                <div class="row row-wrap vertical-center">
+                <div class="row row-wrap vertical-center rubric-header-sticky">
                     <span id="gradeable-version-container" data-gradeable_version="{{ display_version }}" hidden></span>
                     <span class="col grading_label" data-testid="grading-rubric-label">Grading Rubric</span>
                     {# Wrong version warnings #}

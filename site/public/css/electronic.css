@@ -635,6 +635,15 @@ progress::-webkit-progress-value {
     opacity: 0.95;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
+.rubric-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--standard-pale-blue-gray);
+    padding: 5px 0;
+}
+
 .sol-textbox-cont {
     height: calc(100% - 120px);
     width: 100%;
