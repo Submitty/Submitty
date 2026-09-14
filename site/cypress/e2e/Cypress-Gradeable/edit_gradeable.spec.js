@@ -214,7 +214,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s)."]').should('have.class', 'disabled');
+            // The lock reason is shown as text under the disabled button, not as a tooltip (#13229).
+            cy.contains('.button-disabled-reason', 'Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s).')
+                .should('be.visible')
+                .prev('a')
+                .should('have.class', 'disabled');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
