@@ -27,6 +27,8 @@ class ChatroomController extends AbstractController {
      *     title?:      string,
      *     description?:string,
      *     allow_anon?:   bool,
+     *     allow_read_only_after_end?: bool,
+     *     is_active?:    bool,
      *     host_name?:  string,
      *     base_url?:   string,
      *     user_id?:    string,
@@ -208,6 +210,17 @@ class ChatroomController extends AbstractController {
         $chatroom->setAllowAnon(isset($_POST['allow-anon']));
 
         $em->flush();
+
+        $this->sendSocketMessage([
+            'type' => 'chat_edit',
+            'chatroom_id' => $chatroom->getId(),
+            'title' => $chatroom->getTitle(),
+            'description' => $chatroom->getDescription(),
+            'allow_anon' => $chatroom->isAllowAnon(),
+            'allow_read_only_after_end' => $chatroom->allowReadOnlyAfterEnd(),
+            'is_active' => $chatroom->isActive(),
+            'host_name' => $chatroom->getHostName(),
+        ]);
 
         $this->core->addSuccessMessage("Chatroom successfully updated");
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
