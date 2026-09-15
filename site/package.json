@@ -19,7 +19,7 @@
     "@codemirror/lang-python": "6.2.1",
     "@codemirror/language": "6.12.4",
     "@codemirror/language-data": "6.5.2",
-    "@codemirror/legacy-modes": "6.5.3",
+    "@codemirror/legacy-modes": "6.5.4",
     "@codemirror/lint": "6.9.7",
     "@codemirror/search": "6.7.2",
     "@codemirror/state": "6.7.2",
