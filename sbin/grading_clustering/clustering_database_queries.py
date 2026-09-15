@@ -5,14 +5,13 @@ from sqlalchemy import create_engine, text
 import sys
 
 try:
-    CONFIG_PATH = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '..', '..', 'config')
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "config")
+    with open(os.path.join(CONFIG_PATH, "database.json")) as open_file:
         DATABASE_CONFIG = json.load(open_file)
 
-    DB_HOST = DATABASE_CONFIG['database_host']
-    DB_USER = DATABASE_CONFIG['database_user']
-    DB_PASSWORD = DATABASE_CONFIG['database_password']
+    DB_HOST = DATABASE_CONFIG["database_host"]
+    DB_USER = DATABASE_CONFIG["database_user"]
+    DB_PASSWORD = DATABASE_CONFIG["database_password"]
 except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
     print(f"[{datetime.datetime.now()}] ERROR: Database Configuration Failed {config_fail_error}")
     sys.exit(1)
@@ -49,11 +48,9 @@ def get_active_submitters(conn, gradeable_id):
             team_id = row[1]
             active_version = row[2]
 
-        submitters.append({
-            'user_id': user_id,
-            'team_id': team_id,
-            'active_version': active_version
-        })
+        submitters.append(
+            {"user_id": user_id, "team_id": team_id, "active_version": active_version}
+        )
     return submitters
 
 
@@ -71,12 +68,12 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
     """)
     result = conn.execute(config_query, {"gradeable_id": gradeable_id, "algorithm": algorithm})
     row = result.fetchone()
-    config_id = row.id if hasattr(row, 'id') else row[0]
+    config_id = row.id if hasattr(row, "id") else row[0]
 
     # Bulk insert clusters to prevent excessive queries
     cluster_names = [name for name, members in cluster_groups.items() if members]
     if not cluster_names:
-        if hasattr(conn, 'commit'):
+        if hasattr(conn, "commit"):
             conn.commit()
         return
 
@@ -97,8 +94,8 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
 
     cluster_id_map = {}
     for row in result:
-        cluster_id = row.id if hasattr(row, 'id') else row[0]
-        cluster_name = row.cluster_name if hasattr(row, 'cluster_name') else row[1]
+        cluster_id = row.id if hasattr(row, "id") else row[0]
+        cluster_name = row.cluster_name if hasattr(row, "cluster_name") else row[1]
         cluster_id_map[cluster_name] = cluster_id
 
     # Bulk insert members
@@ -112,9 +109,9 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
         for m in members:
             member_values.append(f"(:cid_{m_idx}, :uid_{m_idx}, :tid_{m_idx}, :av_{m_idx})")
             member_params[f"cid_{m_idx}"] = c_id
-            member_params[f"uid_{m_idx}"] = m['user_id']
-            member_params[f"tid_{m_idx}"] = m['team_id']
-            member_params[f"av_{m_idx}"] = m['active_version']
+            member_params[f"uid_{m_idx}"] = m["user_id"]
+            member_params[f"tid_{m_idx}"] = m["team_id"]
+            member_params[f"av_{m_idx}"] = m["active_version"]
             m_idx += 1
 
     if member_values:
@@ -125,5 +122,5 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
         member_query = text(member_insert_sql)
         conn.execute(member_query, member_params)
 
-    if hasattr(conn, 'commit'):
+    if hasattr(conn, "commit"):
         conn.commit()

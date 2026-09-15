@@ -21,9 +21,7 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=datetime(
-            2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York")
-        ),
+        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=ZoneInfo("America/New_York")),
     )
     def test_write_submitty_date_default(self, current_time):
         date = dateutils.write_submitty_date()
@@ -55,9 +53,7 @@ class TestDateUtils(TestCase):
         )
         for testcase in testcases:
             with self.subTest(i=testcase[0]):
-                self.assertEqual(
-                    testcase[1], dateutils.write_submitty_date(testcase[0])
-                )
+                self.assertEqual(testcase[1], dateutils.write_submitty_date(testcase[0]))
 
     def test_write_submitty_date_microseconds(self):
         testcases = (
@@ -70,17 +66,13 @@ class TestDateUtils(TestCase):
                 "2020-06-12 03:21:30.123+0000",
             ),
             (
-                datetime(
-                    2020, 6, 12, 3, 21, 30, 211500, tzinfo=ZoneInfo("America/New_York")
-                ),
+                datetime(2020, 6, 12, 3, 21, 30, 211500, tzinfo=ZoneInfo("America/New_York")),
                 "2020-06-12 03:21:30.211-0400",
             ),
         )
         for testcase in testcases:
             with self.subTest(i=testcase[0]):
-                self.assertEqual(
-                    testcase[1], dateutils.write_submitty_date(testcase[0], True)
-                )
+                self.assertEqual(testcase[1], dateutils.write_submitty_date(testcase[0], True))
 
     def test_invalid_type_write_submitty_date(self):
         testcases = ("2020-06-12 03:21:30.123+0000", 10)
@@ -89,8 +81,7 @@ class TestDateUtils(TestCase):
                 with self.assertRaises(TypeError) as cm:
                     dateutils.write_submitty_date(10)
                 self.assertEqual(
-                    "Invalid type. Expected datetime or datetime string,"
-                    " got <class 'int'>.",
+                    "Invalid type. Expected datetime or datetime string, got <class 'int'>.",
                     str(cm.exception),
                 )
 
@@ -132,9 +123,7 @@ class TestDateUtils(TestCase):
 
         for test_case in test_cases:
             with self.subTest(i=test_case[0]):
-                self.assertEqual(
-                    test_case[1], dateutils.read_submitty_date(test_case[0])
-                )
+                self.assertEqual(test_case[1], dateutils.read_submitty_date(test_case[0]))
 
     def test_read_submitty_date_unexpected_format(self):
         date = "2024-03-29"
@@ -174,9 +163,7 @@ class TestDateUtils(TestCase):
 
     @patch(
         "submitty_utils.dateutils.get_current_time",
-        return_value=datetime(
-            2016, 10, 14, 22, 11, 32, 0, tzinfo=tzlocal.get_localzone()
-        ),
+        return_value=datetime(2016, 10, 14, 22, 11, 32, 0, tzinfo=tzlocal.get_localzone()),
     )
     def test_parse_datetime(self, _current_time):
         local_zone = tzlocal.get_localzone()
@@ -242,17 +229,13 @@ class TestDateUtils(TestCase):
     def test_parse_datetime_invalid_type(self):
         with self.assertRaises(TypeError) as cm:
             dateutils.parse_datetime(10)
-        self.assertEqual(
-            "Invalid type, expected str, got <class 'int'>", str(cm.exception)
-        )
+        self.assertEqual("Invalid type, expected str, got <class 'int'>", str(cm.exception))
 
     def test_parse_datetime_invalid_format(self):
         with self.assertRaises(ValueError) as cm:
             dateutils.parse_datetime("invalid datetime")
 
-        self.assertEqual(
-            "Invalid string for date parsing: invalid datetime", str(cm.exception)
-        )
+        self.assertEqual("Invalid string for date parsing: invalid datetime", str(cm.exception))
 
     @patch("submitty_utils.dateutils.datetime")
     def test_get_semester(self, mock):

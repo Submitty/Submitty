@@ -11,11 +11,11 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Where to dump intermediate test files
 WORKING_DIR = os.path.abspath(
-    os.path.join('..', '..', '..', 'test_suite', 'unitTests', 'autograder')
+    os.path.join("..", "..", "..", "test_suite", "unitTests", "autograder")
 )
 # Temporary log directories
-AUTOGRADING_LOGS = os.path.join(WORKING_DIR, 'autograding')
-STACK_TRACES = os.path.join(WORKING_DIR, 'autograding_stack_traces')
+AUTOGRADING_LOGS = os.path.join(WORKING_DIR, "autograding")
+STACK_TRACES = os.path.join(WORKING_DIR, "autograding_stack_traces")
 
 
 def fake_log_filename(self) -> str:
@@ -44,7 +44,7 @@ class TestLogger(unittest.TestCase):
         os.mkdir(AUTOGRADING_LOGS)
         os.mkdir(STACK_TRACES)
 
-    @mock.patch('autograder.autograding_utils.Logger', '_log_filename', fake_log_filename)
+    @mock.patch("autograder.autograding_utils.Logger", "_log_filename", fake_log_filename)
     def _make_logger(self, capture_traces: bool = False) -> Logger:
         """Make a new logger object.
 
@@ -54,7 +54,7 @@ class TestLogger(unittest.TestCase):
             log_dir=AUTOGRADING_LOGS,
             stack_trace_dir=STACK_TRACES,
             capture_traces=capture_traces,
-            job_id="TEST"
+            job_id="TEST",
         )
 
     def test_simple_message(self):
@@ -88,55 +88,57 @@ class TestLogger(unittest.TestCase):
         logger.log_stack_trace("Specified uh-oh!", which_untrusted="localhost")
         logger.log_stack_trace(
             "Full uh-oh!",
-            is_batch=True, which_untrusted="localhost", job_id="UH-OH!",
-            jobname="some long job name here"
+            is_batch=True,
+            which_untrusted="localhost",
+            job_id="UH-OH!",
+            jobname="some long job name here",
         )
 
         # Accumulated traces should occur chronologically
         expected = [
             {
-                'trace': "Uh-oh!",
+                "trace": "Uh-oh!",
                 # The below are the default values for the function.
                 # Note the 'TEST': this value isn't in the function signature (it is None), but
                 # is replaced with the logger instance's job ID when omitted.
-                'is_batch': False,
-                'which_untrusted': "",
-                'job_id': "TEST",
-                'jobname': "",
+                "is_batch": False,
+                "which_untrusted": "",
+                "job_id": "TEST",
+                "jobname": "",
             },
             {
-                'trace': "Batch uh-oh!",
-                'is_batch': True,
-                'which_untrusted': "",
-                'job_id': "TEST",
-                'jobname': "",
+                "trace": "Batch uh-oh!",
+                "is_batch": True,
+                "which_untrusted": "",
+                "job_id": "TEST",
+                "jobname": "",
             },
             {
-                'trace': "ID'd uh-oh!",
-                'is_batch': False,
-                'which_untrusted': "",
-                'job_id': "UH-OH!",
-                'jobname': "",
+                "trace": "ID'd uh-oh!",
+                "is_batch": False,
+                "which_untrusted": "",
+                "job_id": "UH-OH!",
+                "jobname": "",
             },
             {
-                'trace': "Jobname uh-oh!",
-                'is_batch': False,
-                'which_untrusted': "",
-                'job_id': "TEST",
-                'jobname': "some long job name here",
+                "trace": "Jobname uh-oh!",
+                "is_batch": False,
+                "which_untrusted": "",
+                "job_id": "TEST",
+                "jobname": "some long job name here",
             },
             {
-                'trace': "Specified uh-oh!",
-                'is_batch': False,
-                'which_untrusted': "localhost",
-                'job_id': "TEST",
-                'jobname': "",
+                "trace": "Specified uh-oh!",
+                "is_batch": False,
+                "which_untrusted": "localhost",
+                "job_id": "TEST",
+                "jobname": "",
             },
             {
-                'trace': "Full uh-oh!",
-                'is_batch': True,
-                'which_untrusted': "localhost",
-                'job_id': "UH-OH!",
+                "trace": "Full uh-oh!",
+                "is_batch": True,
+                "which_untrusted": "localhost",
+                "job_id": "UH-OH!",
                 "jobname": "some long job name here",
             },
         ]

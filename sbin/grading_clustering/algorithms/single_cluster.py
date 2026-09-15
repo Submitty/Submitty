@@ -11,6 +11,4 @@ class SingleCluster(ClusteringAlgorithm):
     """
 
     def run(self, submitters):
-        return {
-            'All Submitters': submitters
-        }
+        return {"All Submitters": submitters}

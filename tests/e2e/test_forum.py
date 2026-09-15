@@ -11,11 +11,17 @@ import unittest
 
 class TestForum(BaseTestCase):
     def __init__(self, testname):
-        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True, socket_page='discussion_forum')
-
+        super().__init__(
+            testname,
+            user_id="instructor",
+            user_password="instructor",
+            user_name="Quinn",
+            use_websockets=True,
+            socket_page="discussion_forum",
+        )
 
     def init_and_enable_discussion(self):
-        self.click_class('sample')
+        self.click_class("sample")
         if len(self.driver.find_elements(By.XPATH, "//a[@id='nav-sidebar-forum']")) == 0:
             self.driver.find_element(By.XPATH, "//a[@id='nav-sidebar-course-settings']").click()
             self.driver.find_element(By.NAME, "forum_enabled").click()
@@ -24,22 +30,22 @@ class TestForum(BaseTestCase):
         self.forum_page_url = self.driver.current_url
 
     def switch_to_page_create_thread(self):
-        if '/threads/new' in self.driver.current_url:
+        if "/threads/new" in self.driver.current_url:
             pass
-        elif '/forum' in self.driver.current_url:
+        elif "/forum" in self.driver.current_url:
             self.driver.find_element(By.XPATH, "//a[contains(text(),'Create Thread')]").click()
         else:
             assert False
-        assert '/threads/new' in self.driver.current_url
+        assert "/threads/new" in self.driver.current_url
 
     def switch_to_page_view_thread(self):
-        if '/threads/new' in self.driver.current_url:
+        if "/threads/new" in self.driver.current_url:
             self.driver.find_element(By.XPATH, "//a[contains(text(),'Back to Threads')]").click()
-        elif '/forum' in self.driver.current_url:
+        elif "/forum" in self.driver.current_url:
             pass
         else:
             assert False
-        assert '/forum' in self.driver.current_url
+        assert "/forum" in self.driver.current_url
 
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
@@ -47,16 +53,26 @@ class TestForum(BaseTestCase):
         return os.path.basename(tfname)
 
     def select_categories(self, categories_list):
-        assert '/threads/new' in self.driver.current_url
+        assert "/threads/new" in self.driver.current_url
         for category, set_it in categories_list:
-            category_button = self.driver.find_element(By.XPATH,
-                "//div[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
-            if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
+            category_button = self.driver.find_element(
+                By.XPATH,
+                "//div[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(
+                    category
+                ),
+            )
+            if ("cat-selected" in category_button.get_attribute("class")) ^ set_it:
                 category_button.click()
 
-    def create_thread(self, title, first_post, ignore_if_exists=False, upload_attachment=False,
-                      categories_list=[("Question", True)]):
-        assert '/forum' in self.driver.current_url
+    def create_thread(
+        self,
+        title,
+        first_post,
+        ignore_if_exists=False,
+        upload_attachment=False,
+        categories_list=[("Question", True)],
+    ):
+        assert "/forum" in self.driver.current_url
         if ignore_if_exists and self.thread_exists(title):
             return
         attachment_file = None
@@ -75,16 +91,20 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
-        self.check_socket_message('new_thread')
+        self.check_socket_message("new_thread")
 
-        assert '/threads' in self.driver.current_url
+        assert "/threads" in self.driver.current_url
         return attachment_file
 
     def thread_exists(self, title):
-        assert '/forum' in self.driver.current_url
-        target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
+        assert "/forum" in self.driver.current_url
+        target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(
+            title
+        )
         self.driver.execute_script('$("#thread_list").scrollTop(0);')
-        thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
+        thread_count = int(
+            self.driver.execute_script('return $("#thread_list .thread_box").length;')
+        )
         while True:
             # Scroll down in thread list until required thread is found
             divs = self.driver.find_elements(By.XPATH, target_xpath)
@@ -92,9 +112,13 @@ class TestForum(BaseTestCase):
                 # Thread Found
                 break
             # Scroll Down
-            self.driver.execute_script("$('#thread_list').scrollTop($('#thread_list').prop('scrollHeight'));")
+            self.driver.execute_script(
+                "$('#thread_list').scrollTop($('#thread_list').prop('scrollHeight'));"
+            )
             self.wait_after_ajax()
-            new_thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
+            new_thread_count = int(
+                self.driver.execute_script('return $("#thread_list .thread_box").length;')
+            )
             assert new_thread_count >= thread_count
             if thread_count == new_thread_count:
                 break
@@ -103,28 +127,38 @@ class TestForum(BaseTestCase):
 
     def icon_exists(self, thread_title, icon_class):
         assert self.thread_exists(thread_title)
-        div = self.driver.find_element(By.XPATH, "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(thread_title))
+        div = self.driver.find_element(
+            By.XPATH,
+            "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(
+                thread_title
+            ),
+        )
         icons = div.find_elements(By.XPATH, ".//i[contains(@class, '{}')]".format(icon_class))
         return len(icons) > 0
 
     def view_thread(self, title, return_info=False):
-        assert '/forum' in self.driver.current_url
+        assert "/forum" in self.driver.current_url
         assert self.thread_exists(title)
-        div = self.driver.find_element(By.XPATH,
-            "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
+        div = self.driver.find_element(
+            By.XPATH,
+            "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title),
+        )
         if return_info:
             categories = []
             for element in div.find_elements(By.XPATH, ".//span[contains(@class, 'label_forum')]"):
                 categories.append(element.text.strip())
-            return {'categories': categories}
+            return {"categories": categories}
         div.click()
         self.wait_after_ajax()
-        thread_title = self.driver.find_elements(By.XPATH,
+        thread_title = self.driver.find_elements(
+            By.XPATH,
             "//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(
-                title))
+                title
+            ),
+        )
         assert len(thread_title) > 0
         thread_title_with_id = thread_title[0].text.strip()
-        thread_title_pos = thread_title_with_id.index(')') + 2
+        thread_title_pos = thread_title_with_id.index(")") + 2
         assert thread_title_with_id[thread_title_pos:] == title.strip()
 
     def find_posts(self, content, must_exists=True, move_to_thread=None, check_attachment=None):
@@ -138,9 +172,14 @@ class TestForum(BaseTestCase):
             posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
             self.wait_after_ajax()
             self.wait_for_element(
-                (By.XPATH, (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content))
+                (
+                    By.XPATH,
+                    (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content),
+                )
             )
-            attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
+            attachmentSrc = posts[0].find_elements(
+                By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment)
+            )
             assert len(attachmentSrc) > 0
         return posts
 
@@ -148,7 +187,9 @@ class TestForum(BaseTestCase):
         attachment_file = None
         post = self.find_posts(post_content)[0]
         post_id = post.get_attribute("id")
-        edit_form = self.driver.find_elements(By.XPATH, "//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
+        edit_form = self.driver.find_elements(
+            By.XPATH, "//input[@value='{}' and @name='parent_id']/..".format(post_id)
+        )[-1]  # Last One
         text_area = edit_form.find_element(By.XPATH, ".//textarea")
         upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
         submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
@@ -163,13 +204,13 @@ class TestForum(BaseTestCase):
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
 
-        x = submit_button.location['x'] + (submit_button.size['width'] / 2)
-        y = submit_button.location['y'] + (submit_button.size['height'] / 2)
+        x = submit_button.location["x"] + (submit_button.size["width"] / 2)
+        y = submit_button.location["y"] + (submit_button.size["height"] / 2)
 
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
-        self.check_socket_message('new_post')
+        self.check_socket_message("new_post")
         # Test existence only
         self.find_posts(newcontent, must_exists=True, check_attachment=attachment_file)
         return attachment_file
@@ -179,8 +220,7 @@ class TestForum(BaseTestCase):
         self.driver.find_elements(By.XPATH, "//a[@title='Remove post']")[0].click()
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
-        self.check_socket_message('delete_thread')
-
+        self.check_socket_message("delete_thread")
 
     def resolve_thread(self, title):
         assert self.icon_exists(title, "fa-question")
@@ -188,7 +228,7 @@ class TestForum(BaseTestCase):
         self.driver.find_element(By.XPATH, "//a[@title='Mark thread as resolved']").click()
         self.wait_after_ajax()
         assert self.icon_exists(title, "fa-check")
-        self.check_socket_message('resolve_thread')
+        self.check_socket_message("resolve_thread")
 
     def announce_thread(self, title):
         assert not self.icon_exists(title, "thread-announcement")
@@ -197,7 +237,7 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
         assert self.icon_exists(title, "thread-announcement")
-        self.check_socket_message('announce_thread')
+        self.check_socket_message("announce_thread")
 
     def create_dummy_file(self):
         # Download image to create dummy image file
@@ -235,24 +275,34 @@ trailer
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element(By.ID, "merge-threads")
         self.driver.find_element(By.XPATH, "//a[contains(text(),'Merge Threads')]").click()
-        cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Close')]")
+        cancel_button = merge_threads_div.find_element(
+            By.XPATH, ".//a[contains(normalize-space(.), 'Close')]"
+        )
         assert merge_threads_div.value_of_css_property("display") == "block"
         if parent_thread_title is None:
             cancel_button.click()
             assert merge_threads_div.value_of_css_property("display") == "none"
         else:
-            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Merge Thread']")
-            possible_parents = merge_threads_div.find_element(By.XPATH, ".//a[@class='chosen-single']").click()
-            self.driver.find_element(By.XPATH,
-                                     ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
+            submit_button = merge_threads_div.find_element(
+                By.XPATH, ".//input[@value='Merge Thread']"
+            )
+            possible_parents = merge_threads_div.find_element(
+                By.XPATH, ".//a[@class='chosen-single']"
+            ).click()
+            self.driver.find_element(
+                By.XPATH, ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)
+            ).click()
             if press_cancel:
                 cancel_button.click()
             else:
                 submit_button.click()
-                self.check_socket_message('merge_thread')
-            assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
+                self.check_socket_message("merge_thread")
+            assert (
+                self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display")
+                == "none"
+            )
 
-    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
+    @unittest.skipUnless(os.environ.get("CI") is None, "cannot run in CI")
     def test_infinite_scroll(self):
         self.init_and_enable_discussion()
         list_title = []
@@ -278,7 +328,7 @@ trailer
             self.delete_thread(title)
             assert not self.thread_exists(title)
 
-    @unittest.skipUnless(os.environ.get('CI') is None, "cannot run in CI")
+    @unittest.skipUnless(os.environ.get("CI") is None, "cannot run in CI")
     def test_forum_pdf_attachment_upload(self):
         self.init_and_enable_discussion()
         self.switch_to_page_create_thread()
@@ -296,28 +346,70 @@ trailer
         self.select_categories([("Question", True)])
 
         upload_button = self.driver.find_element(By.XPATH, "//input[@type='file']")
-        upload_box = upload_button.find_element(By.XPATH, "./ancestor::div[contains(@class, 'upload_attachment_box')]")
-        file_table = upload_box.find_element(By.XPATH, ".//table[contains(@class, 'file-upload-table')]")
+        upload_box = upload_button.find_element(
+            By.XPATH, "./ancestor::div[contains(@class, 'upload_attachment_box')]"
+        )
+        file_table = upload_box.find_element(
+            By.XPATH, ".//table[contains(@class, 'file-upload-table')]"
+        )
         upload_button.send_keys("\n".join([pdf_file, invalid_file]))
 
         wait = WebDriverWait(self.driver, 10)
         wait.until(lambda driver: len(file_table.find_elements(By.CLASS_NAME, "file-label")) == 1)
-        wait.until(lambda driver: len(file_table.find_elements(By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(pdf_file)))) == 1)
-        assert len(file_table.find_elements(By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(invalid_file)))) == 0
+        wait.until(
+            lambda driver: (
+                len(
+                    file_table.find_elements(
+                        By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(pdf_file))
+                    )
+                )
+                == 1
+            )
+        )
+        assert (
+            len(
+                file_table.find_elements(
+                    By.XPATH, ".//tr[@fname='{}']".format(os.path.basename(invalid_file))
+                )
+            )
+            == 0
+        )
 
         messages = self.driver.find_element(By.ID, "messages")
         wait.until(lambda driver: "Invalid file type" in messages.text)
 
         self.driver.find_element(By.XPATH, "//input[@value='Publish thread']").click()
         wait.until(EC.url_contains("/forum/threads/"))
-        self.check_socket_message('new_thread')
+        self.check_socket_message("new_thread")
 
-        attachment_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[starts-with(@id, 'button_attachments_')]")))
+        attachment_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, "//a[starts-with(@id, 'button_attachments_')]"))
+        )
         attachment_button.click()
 
-        attachment_well = wait.until(EC.visibility_of_element_located((By.XPATH, "//div[contains(@class, 'attachment-well')]")))
-        wait.until(lambda driver: len(attachment_well.find_elements(By.XPATH, ".//iframe[contains(@class, 'attachment-pdf-preview')]")) == 1)
-        assert len(attachment_well.find_elements(By.XPATH, ".//*[contains(text(), '{}')]".format(os.path.basename(pdf_file)))) > 0
+        attachment_well = wait.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//div[contains(@class, 'attachment-well')]")
+            )
+        )
+        wait.until(
+            lambda driver: (
+                len(
+                    attachment_well.find_elements(
+                        By.XPATH, ".//iframe[contains(@class, 'attachment-pdf-preview')]"
+                    )
+                )
+                == 1
+            )
+        )
+        assert (
+            len(
+                attachment_well.find_elements(
+                    By.XPATH, ".//*[contains(text(), '{}')]".format(os.path.basename(pdf_file))
+                )
+            )
+            > 0
+        )
 
 
 if __name__ == "__main__":

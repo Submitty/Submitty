@@ -82,24 +82,16 @@ class Gradeable(object):
                 self.id = gradeable["gradeable_config"]
 
             if "eg_max_random_submissions" in gradeable:
-                self.max_random_submissions = int(
-                    gradeable["eg_max_random_submissions"]
-                )
+                self.max_random_submissions = int(gradeable["eg_max_random_submissions"])
 
             if "eg_max_individual_submissions" in gradeable:
-                self.max_individual_submissions = int(
-                    gradeable["eg_max_individual_submissions"]
-                )
+                self.max_individual_submissions = int(gradeable["eg_max_individual_submissions"])
 
             if "config_path" in gradeable:
                 self.config_path = gradeable["config_path"]
             else:
-                examples_path = os.path.join(
-                    MORE_EXAMPLES_DIR, self.gradeable_config, "config"
-                )
-                tutorial_path = os.path.join(
-                    TUTORIAL_DIR, self.gradeable_config, "config"
-                )
+                examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "config")
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
                 if os.path.isdir(examples_path):
                     self.config_path = examples_path
                 elif os.path.isdir(tutorial_path):
@@ -107,12 +99,8 @@ class Gradeable(object):
                 else:
                     self.config_path = None
 
-            examples_path = os.path.join(
-                MORE_EXAMPLES_DIR, self.gradeable_config, "submissions"
-            )
-            tutorial_path = os.path.join(
-                TUTORIAL_DIR, self.gradeable_config, "submissions"
-            )
+            examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
+            tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if "eg_lichen_sample_path" in gradeable:
                 # pdb.set_trace()
                 self.lichen_sample_path = gradeable["eg_lichen_sample_path"]
@@ -125,9 +113,7 @@ class Gradeable(object):
                     random.shuffle(self.plagiarism_submissions)
 
                 if "eg_plagiarism_versions_per_user" in gradeable:
-                    self.plagiarism_versions_per_user = gradeable[
-                        "plagiarism_versions_per_user"
-                    ]
+                    self.plagiarism_versions_per_user = gradeable["plagiarism_versions_per_user"]
 
             if "sample_path" in gradeable:
                 self.sample_path = gradeable["sample_path"]
@@ -183,19 +169,29 @@ class Gradeable(object):
         )
         if self.type == 0:
             self.submission_open_date = dateutils.parse_datetime(
-                gradeable["eg_submission_open_date"] if "eg_submission_open_date" in gradeable else time_start
+                gradeable["eg_submission_open_date"]
+                if "eg_submission_open_date" in gradeable
+                else time_start
             )
             self.submission_due_date = dateutils.parse_datetime(
-                gradeable["eg_submission_due_date"] if "eg_submission_due_date" in gradeable else time_end
+                gradeable["eg_submission_due_date"]
+                if "eg_submission_due_date" in gradeable
+                else time_end
             )
             self.team_lock_date = dateutils.parse_datetime(
-                gradeable["eg_team_lock_date"] if "eg_team_lock_date" in gradeable else self.submission_due_date
+                gradeable["eg_team_lock_date"]
+                if "eg_team_lock_date" in gradeable
+                else self.submission_due_date
             )
             self.grade_inquiry_start_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_start_date"] if "eg_grade_inquiry_start_date" in gradeable else time_end
+                gradeable["eg_grade_inquiry_start_date"]
+                if "eg_grade_inquiry_start_date" in gradeable
+                else time_end
             )
             self.grade_inquiry_due_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_due_date"] if "eg_grade_inquiry_due_date" in gradeable else time_end
+                gradeable["eg_grade_inquiry_due_date"]
+                if "eg_grade_inquiry_due_date" in gradeable
+                else time_end
             )
             self.student_view = True
             self.student_view_after_grades = False
@@ -263,18 +259,14 @@ class Gradeable(object):
             assert self.has_due_date is False or (
                 self.submission_open_date <= self.submission_due_date
             )
-            assert self.has_due_date is False or (
-                self.submission_due_date <= self.grade_start_date
-            )
+            assert self.has_due_date is False or (self.submission_due_date <= self.grade_start_date)
             assert self.has_release_date is False or (
                 self.grade_released_date <= self.grade_inquiry_start_date
             )
             assert self.grade_inquiry_start_date <= self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
-                    if os.path.isfile(
-                        os.path.join(self.sample_path, "submissions.yml")
-                    ):
+                    if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
                         self.submissions = load_data_yaml(
                             os.path.join(self.sample_path, "submissions.yml")
                         )
@@ -301,10 +293,7 @@ class Gradeable(object):
                     self.annotations.sort()
         assert self.ta_view_date <= self.grade_start_date
         assert self.grade_start_date <= self.grade_due_date
-        assert (
-            self.has_release_date is False
-            or self.grade_due_date <= self.grade_released_date
-        )
+        assert self.has_release_date is False or self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable["components"])):
@@ -363,11 +352,10 @@ class Gradeable(object):
         conn.commit()
 
         if self.peer_grading is True:
-            with open(
-                os.path.join(SETUP_DATA_PATH, "random", "graders.txt")
-            ) as graders, open(
-                os.path.join(SETUP_DATA_PATH, "random", "students.txt")
-            ) as students:
+            with (
+                open(os.path.join(SETUP_DATA_PATH, "random", "graders.txt")) as graders,
+                open(os.path.join(SETUP_DATA_PATH, "random", "students.txt")) as students,
+            ):
                 graders = graders.read().strip().split()
                 students = students.read().strip().split()
                 length = len(graders)
@@ -404,7 +392,7 @@ class Gradeable(object):
                     eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
                     eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
                     eg_depends_on=self.depends_on,
-                    eg_depends_on_points=self.depends_on_points
+                    eg_depends_on_points=self.depends_on_points,
                 )
             )
             conn.commit()
@@ -418,9 +406,7 @@ class Gradeable(object):
         if self.type == 0:
             form_json["config_path"] = self.config_path
         if self.is_repository:
-            form_json["date_due"] = dateutils.write_submitty_date(
-                self.submission_due_date
-            )
+            form_json["date_due"] = dateutils.write_submitty_date(self.submission_due_date)
             form_json["upload_type"] = "repository"
             form_json["vcs_partial_path"] = self.vcs_partial_path
             form_json["using_subdirectory"] = self.using_subdirectory
@@ -431,12 +417,8 @@ class Gradeable(object):
         form_json["instructions_url"] = self.instructions_url
         form_json["ta_view_date"] = dateutils.write_submitty_date(self.ta_view_date)
         if self.type == 0:
-            form_json["date_submit"] = dateutils.write_submitty_date(
-                self.submission_open_date
-            )
-            form_json["date_due"] = dateutils.write_submitty_date(
-                self.submission_due_date
-            )
+            form_json["date_submit"] = dateutils.write_submitty_date(self.submission_open_date)
+            form_json["date_due"] = dateutils.write_submitty_date(self.submission_due_date)
             form_json["grade_inquiry_start_date"] = dateutils.write_submitty_date(
                 self.grade_inquiry_start_date
             )
@@ -445,9 +427,7 @@ class Gradeable(object):
             )
         form_json["date_grade"] = dateutils.write_submitty_date(self.grade_start_date)
         form_json["date_grade_due"] = dateutils.write_submitty_date(self.grade_due_date)
-        form_json["date_released"] = dateutils.write_submitty_date(
-            self.grade_released_date
-        )
+        form_json["date_released"] = dateutils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:
             form_json["section_type"] = self.get_submission_type()

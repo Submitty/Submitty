@@ -27,6 +27,7 @@ class Job:
     path : str
         Path to this job's queue file.
     """
+
     def __init__(self, config: Config, path: str):
         self.config = config
         self.path = path
@@ -98,14 +99,14 @@ class Worker:
         self.properties = properties
         self.process = shipper_process
         self.folder = os.path.join(
-            self.config.submitty['submitty_data_dir'],
-            'in_progress_grading',
+            self.config.submitty["submitty_data_dir"],
+            "in_progress_grading",
             self.name,
         )
 
     def is_enabled(self) -> bool:
         """Check if this worker is enabled."""
-        return self.properties.get('enabled', False)
+        return self.properties.get("enabled", False)
 
     def is_shipper_process_alive(self) -> bool:
         """Check if the worker's corresponding shipper process is still alive."""
@@ -122,17 +123,15 @@ class Worker:
         capabilities in the job's `required_capabilities` dictionary.
         """
         if job.queue_obj is None:
-            self.config.logger.log_message(
-                f"NOTE: Skipping over {job.path}."
-            )
+            self.config.logger.log_message(f"NOTE: Skipping over {job.path}.")
             return False
-        if 'required_capabilities' not in job.queue_obj:
+        if "required_capabilities" not in job.queue_obj:
             self.config.logger.log_message(
                 f"ERROR: Queue file at {job.path} missing `required_capabilities` key"
             )
             return False
-        requirements = job.queue_obj['required_capabilities']
-        return requirements in self.properties['capabilities']
+        requirements = job.queue_obj["required_capabilities"]
+        return requirements in self.properties["capabilities"]
 
 
 class BaseScheduler(ABC):
@@ -154,8 +153,7 @@ class BaseScheduler(ABC):
         self.workers = workers
 
         self.queue_folder = os.path.join(
-            self.config.submitty['submitty_data_dir'],
-            'to_be_graded_queue'
+            self.config.submitty["submitty_data_dir"], "to_be_graded_queue"
         )
 
     def _list_jobs(self) -> list:
@@ -207,17 +205,19 @@ class FCFSScheduler(BaseScheduler):
         # 2. Interative / non-regrade job
         # 3. Time entering queue
         # 4. Ppath name
-        jobs.sort(key=lambda j:
-                  (
-                    not ("vcs_checkout" in j.queue_obj and
-                         j.queue_obj["vcs_checkout"] and
-                         not ("checkout_total_size" in j.queue_obj)),
-                    "regrade" in j.queue_obj and j.queue_obj["regrade"],
-                    j.queue_obj['queue_time'],
-                    j.path
-                  ),
-                  reverse=False
-                  )
+        jobs.sort(
+            key=lambda j: (
+                not (
+                    "vcs_checkout" in j.queue_obj
+                    and j.queue_obj["vcs_checkout"]
+                    and not ("checkout_total_size" in j.queue_obj)
+                ),
+                "regrade" in j.queue_obj and j.queue_obj["regrade"],
+                j.queue_obj["queue_time"],
+                j.path,
+            ),
+            reverse=False,
+        )
 
         # for testing / debugging
         print("JOBS QUEUE count=" + str(len(jobs)))
@@ -225,7 +225,7 @@ class FCFSScheduler(BaseScheduler):
         for j in jobs:
             position += 1
             regrade = "regrade" in j.queue_obj and j.queue_obj["regrade"]
-            qt = j.queue_obj['queue_time']
+            qt = j.queue_obj["queue_time"]
             print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path)
 
         for job in jobs:
