@@ -155,7 +155,7 @@ class DisplayImageTester extends BaseUnitTest {
         );
     }
 
-    public function saveUserImageProvider(): array {
+    public static function saveUserImageProvider(): array {
         $meta = explode('.', self::TEST_IMAGE);
         $file_extension = $meta[1];
         $test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
