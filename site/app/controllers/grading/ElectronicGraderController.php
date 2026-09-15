@@ -2442,10 +2442,15 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
+        $cluster_grading = $_POST['cluster_grading'] ?? null;
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
         // Validate required parameters
+        if (!in_array($cluster_grading, ['true', 'false'], true)) {
+            $this->core->getOutput()->renderJsonFail('Invalid or missing cluster_grading parameter. Please refresh the page.');
+            return;
+        }
         if ($custom_message === null) {
             $this->core->getOutput()->renderJsonFail('Missing custom_message parameter');
             return;
@@ -2538,7 +2543,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         $clustering_enabled = $this->core->getConfig()->isSubmissionClusteringEnabled() && $this->core->getUser()->accessFullGrading();
-        $ta_grading_cluster_mode = $clustering_enabled && ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true' && $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
+        $ta_grading_cluster_mode = $clustering_enabled && $cluster_grading === 'true' && $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
 
         // Check if the user can silently edit assigned marks
         if ($ta_grading_cluster_mode || !$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
