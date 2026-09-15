@@ -1,3 +1,4 @@
+import { getCurrentSemester } from '../../support/utils';
 import { buildUrl } from '../../support/utils';
 
 const verifyUpdateMessage = (exists = true) => {
@@ -150,5 +151,181 @@ describe('Test cases revolving around notification/email settings', () => {
     it('Should allow the user to subscribe and unsubscribe to individual notification/email inputs', () => {
         cy.get('input[data-testid="checkbox-input"]')
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
+    });
+});
+
+const no_unseen_message = 'No unseen notifications.';
+
+// Tracks total notifications created (for forum announcement titles)
+let notificationCount = 0;
+
+/* Create an announcement by making a direct request to the
+thread creation endpoint (rather than navigating there with Cypress). */
+const createAnnouncement = (title, content, course) => {
+    cy.window().then(async (win) => {
+        const body = {
+            'title': title,
+            'markdown_status': 0,
+            'lock_thread_date': '',
+            'thread_post_content': content,
+            'cat[]': '1',
+            'thread_status': -1,
+            'Announcement': 'Announcement',
+            'csrf_token': win.csrfToken,
+        };
+        return cy.request({
+            method: 'POST',
+            url: buildUrl([course, 'forum', 'threads', 'new']),
+            form: true,
+            body: body,
+
+        }).then((res) => {
+            const body = JSON.parse(res.body);
+            expect(res.status).to.eq(200);
+            expect(body.status).to.eq('success');
+        });
+    });
+};
+
+/* Wrapper to create announcements in bulk. Not part of
+beforeEach because we need a variable number of announcements
+for each test. */
+const createAnnouncements = (count, course) => {
+    // Using ta because they are registered for the TESTING course
+    cy.login('ta');
+    cy.visit([course, 'forum']);
+
+    for (let i = 0; i < count; i++) {
+        createAnnouncement(`Cypress Thread ${notificationCount}`, 'This is a Cypress-generated announcement.', course);
+        notificationCount++;
+    }
+
+    cy.logout();
+};
+
+const clearAllNotifications = () => {
+    cy.login('student');
+    cy.visit();
+    cy.get('[data-testid="mark-seen-btn"]').click();
+    cy.get('[data-testid="select-mark-all"]').click();
+    cy.contains('button', 'Mark Seen').click();
+    cy.logout();
+};
+
+const clearIndividualNotification = () => {
+    cy.get('[data-testid="notification"]').first().find('.notification-seen').click();
+};
+
+const assertDisplayedNotifications = (count) => {
+    cy.get('[data-testid="notification"]').should('have.length', count);
+};
+
+describe('Tests for managing and displaying notifications', () => {
+    // User is in unseen only mode
+    before(() => {
+        cy.login('student');
+        cy.visit();
+        clearAllNotifications();
+    });
+
+    beforeEach(() => {
+        cy.login('student');
+        cy.visit();
+        // Always start in unseen only mode
+        cy.get('[data-testid="toggle-unseen-only"]').then(($btn) => {
+            if ($btn.text().includes('Show Unseen Only')) {
+                cy.wrap($btn).click();
+            }
+        });
+        cy.logout();
+    });
+
+    // Incase the test doesn't already do this
+    afterEach(() => {
+        cy.logout();
+        clearAllNotifications();
+    });
+
+    it('Should test batch mark seen', () => {
+        createAnnouncements(3, 'sample');
+        cy.login('student');
+        cy.visit();
+        cy.get('[data-testid="mark-seen-btn"]').click();
+        cy.get('[data-testid="select-mark-all"]').click();
+        cy.contains('button', 'Mark Seen').click();
+        cy.get('[data-testid="no-unseen-message"]').should('contain', no_unseen_message);
+        cy.visit(buildUrl(['sample', 'notifications']));
+        cy.get('[data-testid="no-unseen-message"]').should('contain', no_unseen_message);
+    });
+
+    it('Should test individual mark seen and never seen message', () => {
+        createAnnouncements(12, 'sample');
+        cy.login('student');
+        cy.visit();
+        assertDisplayedNotifications(10);
+        /* Ideally, this should be the other message, but since Vue only receives a count, it doesn't know that
+        these additional notifications aren't coming until there are less than 10 displayed. */
+        cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 2 additional unseen notifications.');
+        clearIndividualNotification();
+        assertDisplayedNotifications(9);
+        cy.get('[data-testid="never-displayed-message"]').should('contain', 'You have 2 older unseen notifications in your course notifications not displayed here.');
+        cy.visit(buildUrl(['sample', 'notifications']));
+        cy.get('.notification').last().find('.notification-seen').click();
+        cy.visit();
+        cy.get('[data-testid="never-displayed-message"]').should('contain', 'You have 1 older unseen notification in your course notifications not displayed here.');
+        assertDisplayedNotifications(9);
+        clearIndividualNotification(1);
+        assertDisplayedNotifications(8);
+    });
+
+    it('Should test individual mark seen and additional unseen message', () => {
+        createAnnouncements(6, 'sample');
+        createAnnouncements(6, 'testing');
+        cy.login('student');
+        cy.visit();
+        assertDisplayedNotifications(10);
+        cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 2 additional unseen notifications.');
+        clearIndividualNotification();
+        assertDisplayedNotifications(10);
+        cy.get('[data-testid="not-displayed-message"]').should('contain', 'You have 1 additional unseen notification.');
+        clearIndividualNotification();
+        assertDisplayedNotifications(10);
+        cy.get('[data-testid="not-displayed-message"]').should('not.exist');
+        clearIndividualNotification();
+        assertDisplayedNotifications(9);
+    });
+
+    it('Should test course notifications', () => {
+        createAnnouncements(3, 'sample');
+        cy.login('student');
+        cy.visit();
+        cy.visit(buildUrl(['sample', 'notifications']));
+        assertDisplayedNotifications(3);
+        cy.get('.notification.unseen').should('have.length', 3);
+        clearIndividualNotification();
+        assertDisplayedNotifications(2);
+        cy.get('[data-testid="toggle-unseen-only"]').click();
+        cy.get('.notification.unseen').should('have.length', 2);
+        cy.get('[data-testid="toggle-unseen-only"]').click();
+        cy.get('[data-testid="mark-seen-btn"]').click();
+        cy.get('[data-testid="no-unseen-message"]').should('contain', no_unseen_message);
+        cy.get('[data-testid="toggle-unseen-only"]').click();
+        cy.get('.notification.unseen').should('have.length', 0);
+    });
+
+    // Course notifications redirect and notification redirect
+    it('Should test redirects', () => {
+        createAnnouncements(1, 'sample');
+        cy.login('student');
+        cy.visit();
+        cy.get('[data-testid="course-notification-link"]').click();
+        cy.url().should('eq', `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/notifications`);
+        cy.visit();
+        assertDisplayedNotifications(1);
+        cy.get('[data-testid="notification"]').click();
+        cy.url().should('include', '/sample/forum/threads/');
+        cy.visit();
+        assertDisplayedNotifications(0);
+        cy.get('[data-testid="no-unseen-message"]').should('contain', no_unseen_message);
     });
 });
