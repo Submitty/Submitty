@@ -14,6 +14,7 @@ course=__CREATE_COURSE__FILLIN__COURSE__
 ##########################################################################
 
 # the build_homework function is defined here
+# shellcheck disable=SC1091
 . $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
 
 # helper variable
@@ -26,9 +27,10 @@ echo "BUILDING course=$course semester=$semester... "
 date
 
 # generate ASSIGNMENTS.txt
-$SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt $@
+$SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt "$@"
 
 # pull in the homeworks from an auto-generated file
+# shellcheck disable=SC1091
 . $MY_COURSE_DIR/ASSIGNMENTS.txt
 
 echo "--------------------------------------------------------------------------------------"
