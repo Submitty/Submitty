@@ -583,7 +583,8 @@ if not args.worker:
                           "submitty/rust:latest",
                           "submitty/java:latest",
                           "submitty/pdflatex:latest",
-                          "submitty/jupyter:latest"
+                          "submitty/jupyter:latest",
+                          "submitty/grading-clustering:latest"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
