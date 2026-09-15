@@ -34,6 +34,7 @@ const displayHidden = ref(props.displayHidden || false);
       :id="buttonId"
       class="invisible-btn"
       :data-href="optionalHref"
+      :data-testid="buttonId"
       :title="title"
       @click="handleClick"
     >

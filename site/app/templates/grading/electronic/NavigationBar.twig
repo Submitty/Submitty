@@ -13,6 +13,14 @@
                     <br/>
                 {% endif %}
             {% endif %}
+            {% if ta_grading_cluster_mode %}
+                <br/>
+                {% if cluster_name %}
+                    {{ cluster_name }} ({{ cluster_size }} students)
+                {% else %}
+                    Unclustered
+                {% endif %}
+            {% endif %}
         </b>
     </div>
     <div class="navigation-box">
@@ -23,11 +31,19 @@
                 'homeUrl': home_url,
                 'prevStudentUrl': prev_student_url,
                 'nextStudentUrl': next_student_url,
-                'progress': progress
+                'progress': progress,
+                'clusteringEnabled': clustering_enabled,
+                'clustersExist': clusters_exist,
+                'taGradingClusterMode': ta_grading_cluster_mode
             },
             'class': 'grading_toolbar',
             'events': {
-                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }'
+                'select-layout': '({ panels, isLeftTaller, twoInRight }) => { window.changePanelsLayout(panels, isLeftTaller, twoInRight); }',
+                'toggle-cluster-mode': '() => { 
+                    const currentMode = ' ~ (ta_grading_cluster_mode ? 'true' : 'false') ~ '; 
+                    Cookies.set("ta_grading_cluster_mode", !currentMode, { expires: 1, path: "/" });
+                    window.location.reload(); 
+                }'
             }
         }%}
     </div>

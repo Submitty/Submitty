@@ -602,4 +602,15 @@ describe('Should test Search functionality', () => {
         cy.get('#thread_list').contains('Python Tutorials');
         cy.get('#thread_list').contains('Course syllabus');
     });
+
+    it('Should clear the search input when Clear Filters is clicked', () => {
+        cy.get('[data-testid="search-content-input"]').type('Homework 1');
+        cy.get('[data-testid="search-submit"]').click();
+        cy.get('#thread_list').contains('Python Tutorials').should('not.exist');
+
+        cy.get('#clear_filter_button').click();
+        cy.get('[data-testid="search-content-input"]').should('have.value', '');
+        cy.get('#thread_list').contains('Python Tutorials');
+        cy.get('#thread_list').contains('Course syllabus');
+    });
 });

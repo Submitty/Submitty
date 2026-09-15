@@ -72,6 +72,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
+ * @method bool isSubmissionClusteringEnabled()
  * @method bool isChatEnabled()
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
@@ -372,6 +373,9 @@ class Config extends AbstractModel {
     protected $polls_enabled;
     /** @prop
      * @var bool */
+    protected $submission_clustering_enabled;
+    /** @prop
+     * @var bool */
     protected $chat_enabled;
 
     /** @prop-read
@@ -648,6 +652,7 @@ class Config extends AbstractModel {
             'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions', 'chat_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
+        $this->submission_clustering_enabled = $this->course_json['course_details']['submission_clustering_enabled'] ?? false;
 
         if (empty($this->vcs_base_url)) {
             $this->vcs_base_url = $this->vcs_url . $this->term . '/' . $this->course;
@@ -674,6 +679,7 @@ class Config extends AbstractModel {
             'seating_only_for_instructor',
             'queue_enabled',
             'polls_enabled',
+            'submission_clustering_enabled',
             'seek_message_enabled',
             'chat_enabled',
         ];

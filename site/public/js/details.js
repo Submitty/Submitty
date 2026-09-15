@@ -1,11 +1,10 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* exported expandAllSections, collapseAllSections, toggleAllSections, updateToggleButtonLabel, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
 $(document).ready(() => {
-    updateToggleButtonText();
     const collapsedSections = Cookies.get('collapsed_sections');
     collapseItems = new Set(collapsedSections && JSON.parse(collapsedSections));
 
@@ -53,16 +52,9 @@ function getCollapsedSections() {
     return JSON.parse(Cookies.get('collapsed_sections') || '[]');
 }
 
-function updateToggleButtonText() {
-    const collapsed = getCollapsedSections();
-    const button = $('#toggle-all-sections-btn');
-
-    if (collapsed.length === 0) {
-        button.text('Collapse All Sections');
-    }
-    else {
-        button.text('Expand All Sections');
-    }
+// The button label is rendered by the Vue component, from here we push new state to it via reRender.
+function updateToggleButtonLabel(collapsed) {
+    document.querySelector('.js-toggle-all-sections')?.reRender?.({ collapsed });
 }
 
 function updateCollapsedSections() {
@@ -76,7 +68,7 @@ function expandAllSections() {
     });
     collapseItems.clear();
     updateCollapsedSections();
-    updateToggleButtonText();
+    updateToggleButtonLabel(false);
 }
 
 function collapseAllSections() {
@@ -87,7 +79,7 @@ function collapseAllSections() {
         collapseItems.add($(this).attr('data-section-id'));
     });
     updateCollapsedSections();
-    updateToggleButtonText();
+    updateToggleButtonLabel(true);
 }
 
 function toggleAllSections() {
@@ -157,8 +149,33 @@ window.addEventListener('DOMContentLoaded', () => {
         randomFilterBox.checked = (randomFilterStatus === 'random');
     }
 
+    const groupByClustersBox = document.getElementById('toggle-group-by-clusters');
+    if (groupByClustersBox) {
+        const groupByClustersStatus = Cookies.get('group_by_clusters');
+        groupByClustersBox.checked = groupByClustersStatus === 'true';
+    }
+
     // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
         withdrawnFilterElements.show();
     }
 });
+
+function changeGroupByClusters() {
+    const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
+    Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
+    window.location.reload();
+}
+
+function updateClusteringStatus(status) {
+    document.body.setAttribute('data-clustering-status', status);
+    $('#clustering-loading-banner').toggle(status === 'fetching');
+}
+
+function handleClusteringDone() {
+    window.location.reload();
+}
+
+function handleClusteringError(message) {
+    alert(message);
+}
