@@ -90,6 +90,11 @@ function markSeen(course: string, id: number) {
         title="Gradeable"
       />
       <i
+        v-else-if="notification.component === 'grade_inquiry'"
+        class="fas fa-hand-paper notification-type"
+        title="Grade Inquiry"
+      />
+      <i
         v-else-if="notification.component === 'team'"
         class="fas fa-users notification-type"
         title="Team Action"
