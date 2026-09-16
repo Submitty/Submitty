@@ -48,6 +48,9 @@ export default tseslint.config(
                 sourceType: 'module',
             },
         },
+        linterOptions: {
+            reportUnusedDisableDirectives: 'error',
+        },
         rules: {
             // twig and eslint do not play well together, would be nice to re-enable this rule
             'no-unused-vars': 'off',
