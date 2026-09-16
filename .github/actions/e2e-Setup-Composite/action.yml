@@ -90,7 +90,7 @@ runs:
         # Install for local
         pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
         # Install globally
-        sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
+        sudo --preserve-env=HOME pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
       shell: bash
     - name: Get composer cache dir
       id: composer-cache
