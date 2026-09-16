@@ -42,10 +42,6 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %}
 
-    {% for audio_ref in audio %}
-    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
-    {% endfor %}
-
     {% for js_ref in js %}
     <script src='{{ js_ref }}' type={{ '.mjs' in js_ref ? 'module' : '' }}></script>
     {% endfor %}
@@ -125,6 +121,9 @@
 </head>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-course-path="{{ course_path }}" data-csrf-token="{{ csrf_token }}" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
+    {% for audio_ref in audio %}
+    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
+    {% endfor %}
     <div id="submitty-body" class="flex-col">
         {% if not content_only %}
             <div id="mobile-menu">
