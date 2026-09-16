@@ -92,7 +92,6 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     button-id="grading-setting-btn"
     title="Show Grading Settings"
     optional-spanid="grading-setting-btn"
-    optional-test-id="grading-setting-btn"
   />
   <span
     v-if="clusteringEnabled && clustersExist"
@@ -118,6 +117,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   <span
     id="progress-bar-cont"
     class="ta-navlink-cont"
+    data-testid="progress-bar"
   >
     <progress
       class="progressbar"
