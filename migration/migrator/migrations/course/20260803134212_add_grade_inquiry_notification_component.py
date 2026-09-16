@@ -1,5 +1,7 @@
 """Migration for a given Submitty course database."""
 
+from sqlalchemy import text
+
 
 def up(config, database, semester, course):
     """
@@ -15,7 +17,7 @@ def up(config, database, semester, course):
     :type course: str
     """
     with database.engine.connect().execution_options(isolation_level='AUTOCOMMIT') as connection:
-        connection.execute("ALTER TYPE notifications_component ADD VALUE IF NOT EXISTS 'grade_inquiry';")
+        connection.execute(text("ALTER TYPE notifications_component ADD VALUE IF NOT EXISTS 'grade_inquiry';"))
 
 
 def down(config, database, semester, course):
@@ -31,4 +33,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DELETE FROM pg_enum WHERE enumlabel = 'grade_inquiry';")
+    database.execute(text("DELETE FROM pg_enum WHERE enumlabel = 'grade_inquiry';"))
