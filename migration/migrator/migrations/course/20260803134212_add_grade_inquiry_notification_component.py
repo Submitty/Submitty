@@ -14,7 +14,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TYPE notifications_component ADD VALUE IF NOT EXISTS 'grade_inquiry';")
+    with database.engine.connect().execution_options(isolation_level='AUTOCOMMIT') as connection:
+        connection.execute("ALTER TYPE notifications_component ADD VALUE IF NOT EXISTS 'grade_inquiry';")
 
 
 def down(config, database, semester, course):
