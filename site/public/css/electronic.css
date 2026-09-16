@@ -635,7 +635,6 @@ progress::-webkit-progress-value {
     opacity: 0.95;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .rubric-header-sticky {
     position: sticky;
     top: 0;
