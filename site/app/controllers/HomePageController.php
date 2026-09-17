@@ -433,6 +433,8 @@ class HomePageController extends AbstractController {
             ->getRepository(Term::class)
             ->findBy([], ['name' => 'DESC']);
 
+        $this->core->getOutput()->addInternalModuleJs('add-term.js');
+
         return new MultiResponse(
             null,
             new WebResponse(
