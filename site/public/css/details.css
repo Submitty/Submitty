@@ -4,6 +4,10 @@
 
 /* Details Table Styling */
 
+#details-table th {
+    text-align: center;
+}
+
 #details-table tbody.details-info-header {
     font-size: 15px;
 }
@@ -59,6 +63,7 @@ tbody tr:not(.info) > td:nth-child(1)::after {
     display: flex;
     flex-flow: row wrap;
     gap: 6px;
+    align-items: center;
 }
 
 .details-action-box {
