@@ -728,7 +728,7 @@ function openFrame(
             pdf_full_panel
             && url_file.substring(url_file.length - 3) === 'pdf'
         ) {
-            viewFileFullPanel(html_file, url_file, 0, panel as FileFullPanelOptions);
+            viewFileFullPanel(html_file, url_file, 0, panel);
         }
         else {
             const forceFull
