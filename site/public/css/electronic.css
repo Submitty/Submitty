@@ -638,9 +638,13 @@ progress::-webkit-progress-value {
 .rubric-header-sticky {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 20;
     background-color: var(--standard-pale-blue-gray);
     padding: 5px 0;
+}
+
+#grading_rubric.rubric_panel {
+    scroll-padding-top: 60px;
 }
 
 .sol-textbox-cont {
