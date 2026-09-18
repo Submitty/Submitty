@@ -91,6 +91,10 @@
     vertical-align: middle;
 }
 
+#toggle-columns-form .toggle-columns-box + label {
+    cursor: pointer;
+}
+
 #toggle-columns-form .toggle-all-buttons {
     margin-top: 1vh;
 }

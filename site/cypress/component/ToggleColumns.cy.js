@@ -14,6 +14,8 @@ describe('ToggleColumns', () => {
         cy.get('[data-testid="toggle-first-name"]').should('be.checked');
         cy.get('[data-testid="toggle-last-name"]').should('be.checked');
 
+        cy.contains('label', 'Given Name').should('have.css', 'cursor', 'pointer');
+
         cy.contains('label', 'Given Name').click();
         cy.get('[data-testid="toggle-first-name"]').should('not.be.checked');
         cy.get('[data-testid="toggle-last-name"]').should('be.checked');

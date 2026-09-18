@@ -145,4 +145,8 @@ onMounted(loadColumns);
   .toggle-btn {
     font-family: Arial, sans-serif;
   }
+
+  .toggle-columns-box:not(:disabled) + label {
+    cursor: pointer;
+  }
 </style>
