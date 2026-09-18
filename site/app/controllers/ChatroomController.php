@@ -29,6 +29,7 @@ class ChatroomController extends AbstractController {
      *     allow_anon?:   bool,
      *     allow_read_only_after_end?: bool,
      *     is_active?:    bool,
+     *     socket?:       string,
      *     host_name?:  string,
      *     base_url?:   string,
      *     user_id?:    string,
