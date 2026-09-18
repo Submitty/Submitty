@@ -422,7 +422,7 @@ class DockerUI extends AbstractModel {
      * 'owners' is a comma-separated list of name|owner pairs (primary first)
      * an empty owner means no instructor owns that name, likely added by
      * sysadmin or is default
-     * @return array<string, array{owners: string, can_remove: bool}>
+     * @return array<string, array{owners: string, can_remove: bool, owner_display: string}>
      */
     public function getRemoveImageData(string $user_id, bool $is_super_user): array {
         $owners = $this->json_data['image_owners'];
