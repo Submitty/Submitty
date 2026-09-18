@@ -21,7 +21,8 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
-    twig-lint : lint Twig templates [option: --format=json, --show-deprecations, additional paths ...]
+    twig-lint : lint Twig templates
+                usage: twig-lint [--format FORMAT] [--show-deprecations] [--] [<filename>...]
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
