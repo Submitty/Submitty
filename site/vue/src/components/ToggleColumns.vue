@@ -2,7 +2,6 @@
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
 import Popup from './Popup.vue';
-import { pageNavigation } from '../utils/pageNavigation';
 export type ColumnFormats = 'bits' | 'json';
 
 const { columns, labels, cookie, hiddenColumns = [], forced = [], format = 'bits', buttonWrapped } = defineProps<{
@@ -13,6 +12,10 @@ const { columns, labels, cookie, hiddenColumns = [], forced = [], format = 'bits
     forced?: string[];
     format?: ColumnFormats;
     buttonWrapped?: boolean;
+}>();
+
+const emit = defineEmits<{
+    save: [];
 }>();
 
 const selected = ref<boolean[]>([]);
@@ -49,8 +52,6 @@ function saveColumns() {
             cookieData[col] = selected.value[i];
         });
         Cookies.set(cookie, JSON.stringify(cookieData), { expires: 365, path: '/' });
-        pageNavigation.reload();
-        return;
     }
     else if (format === 'bits') {
         Cookies.set(
@@ -59,7 +60,7 @@ function saveColumns() {
             { expires: 365, path: '/' },
         );
     }
-    pageNavigation.reload();
+    emit('save');
 }
 function fillAll(val: boolean) {
     selected.value = selected.value.map((_, idx) => forced?.includes(columns[idx]) || val);
