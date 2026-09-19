@@ -1623,6 +1623,14 @@ class AdminGradeableController extends AbstractController {
                 $errors['syllabus_bucket'] = 'Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets);
             }
 
+            if ($prop === 'team_size_max') {
+                if (!ctype_digit(strval($post_val)) || intval($post_val) < 1) {
+                    $errors['team_size_max'] = 'Maximum team size must be an integer greater than or equal to 1.';
+                    continue;
+                }
+                $post_val = intval($post_val);
+            }
+
             // Try to set the property
             try {
                 //convert the property name to a setter name
@@ -1635,7 +1643,7 @@ class AdminGradeableController extends AbstractController {
                 );
                 $gradeable->$setter_name($post_val);
             }
-            catch (\Exception $e) {
+            catch (\Throwable $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
             }
