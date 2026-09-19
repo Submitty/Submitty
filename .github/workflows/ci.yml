@@ -205,7 +205,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --dev
       - name: Lint Twig Templates
-        run: php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
+        run: composer run-script lint:twig -- --format=github
 
   php-lint:
     name: PHP Lint
