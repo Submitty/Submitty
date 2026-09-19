@@ -340,6 +340,7 @@ describe('Tests for creating, editing and using tests', () => {
                     getChatroom(title2).find('.readonly-badge').should('be.visible');
                     getChatroom(title2).find('[data-testid="edit-chatroom"]').first().click();
                     cy.get('#edit-chatroom-read-only-allow').should('be.checked');
+                    cy.get('#edit-chatroom-form [data-testid="close-button"]').click();
                 },
             ).then(() => {
                 enterChat(title2);
