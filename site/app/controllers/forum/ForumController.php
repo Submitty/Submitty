@@ -734,6 +734,60 @@ class ForumController extends AbstractController {
     }
 
     /**
+     * Builds the notification body for a post that was just edited, naming both the
+     * original author and the editor when they are not the same person, so that a
+     * recipient (in particular the original author) is not misled into thinking they
+     * wrote the edited content. Anonymous authorship is never revealed this way.
+     *
+     * @param Post $post the post that was edited
+     * @param UserEntity $editor the user who performed the edit
+     * @param bool $did_edit_thread whether the edited post is the first post of its thread
+     *
+     * @return string[] { 'subject': string, 'content': string }
+     */
+    private function editedPostNotificationBody(Post $post, UserEntity $editor, bool $did_edit_thread): array {
+        $show_author = $this->modifyAnonymous($post->getAuthor()->getId()) || !$post->isAnonymous();
+        $author_name = $show_author ? $post->getAuthor()->getDisplayFullName() : 'Anonymous';
+        $editor_name = $editor->getDisplayFullName();
+        $same_person = $post->getAuthor()->getId() === $editor->getId();
+
+        $edited_post_preview = $this->previewText($post->getContent());
+        $edited_post_subject_preview = $this->previewText($post->getContent(), 100);
+        $full_course_name = $this->core->getFullCourseName();
+        $thread_title = $post->getThread()->getTitle();
+
+        // The author edited their own post, so there is no second person to distinguish. Naming the
+        // author here would also leak the identity of an anonymous author, so no names are included.
+        if ($same_person) {
+            if ($did_edit_thread) {
+                $subject = "Thread Edited: " . $thread_title;
+                $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $edited_post_preview;
+            }
+            else {
+                $subject = "Post Edited: " . $edited_post_subject_preview;
+                $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nEdited Post: \n\n" . $edited_post_preview;
+            }
+            return ['subject' => $subject, 'content' => $content];
+        }
+
+        // Someone other than the author edited the post. The editor is the actor of this event and is
+        // shown as such in the post history, so it is named. The original author is only named when the
+        // viewer is already allowed to see them (staff, or the author themselves); otherwise the
+        // anonymous author's identity stays hidden.
+        if ($did_edit_thread) {
+            $subject = "Thread Edited: " . $thread_title;
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nOriginal Author: " . $author_name
+                . "\nEdited By: " . $editor_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $edited_post_preview;
+        }
+        else {
+            $subject = "Post Edited: " . $edited_post_subject_preview;
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nOriginal Author: " . $author_name
+                . "\nEdited By: " . $editor_name . "\n\nThread Title: " . $thread_title . "\n\nEdited Post: \n\n" . $edited_post_preview;
+        }
+        return ['subject' => $subject, 'content' => $content];
+    }
+
+    /**
      * Edit a post or thread
      * @return mixed[]
      */
@@ -789,24 +843,22 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail(join(" ", $message));
         }
 
+        // editPost() recorded who performed this edit as the author of the newest history version.
+        $history = $post->getHistory();
+        $editor = ($history->isEmpty() ? $post->getAuthor() : $history->last()->getEditAuthor());
+
         $type = "";
-        $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-        $edited_post_preview = $this->previewText($post->getContent());
-        $edited_post_subject_preview = $this->previewText($post->getContent(), 100);
         if ($did_edit_thread) {
-            $subject = "Thread Edited: " . $thread->getTitle();
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . $edited_post_subject_preview;
-            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $edited_post_preview;
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
             $type = "edit_post";
         }
+        ['subject' => $subject, 'content' => $content] = $this->editedPostNotificationBody($post, $editor, $did_edit_thread);
         $this->sendSocketMessage([
             'type' => $type,
             'thread_id' => $thread_id,
