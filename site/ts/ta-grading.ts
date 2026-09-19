@@ -61,6 +61,7 @@ export function changeStudentArrowTooltips(data: string) {
             data = 'default';
         }
     }
+    // eslint-disable-next-line no-useless-assignment
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':

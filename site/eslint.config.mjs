@@ -74,9 +74,6 @@ export default tseslint.config(
             ],
             'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
             'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
-            // Disabled for ESLint v10 upgrade; enable in a follow-up PR
-            'no-useless-assignment': 'off',
-            'no-unassigned-vars': 'off',
         },
     },
 
