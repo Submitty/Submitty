@@ -64,6 +64,7 @@
                     {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
                 </span>
             </td>
+            <td class="chatroom-status-cell">
                 {% if allowReadOnlyAfterEnd  %}
                     {% if isActive %}
                         <span class="badge badge-secondary readonly-badge">Read-only when closed</span>
@@ -71,6 +72,7 @@
                         <span class="badge badge-secondary readonly-badge">Read-only</span>
                     {% endif %}
                 {% endif %}
+            </td>
             <td data-testid="chatroom-host">
                 {{ hostName|e }}
             </td>
