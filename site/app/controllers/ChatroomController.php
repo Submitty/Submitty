@@ -212,7 +212,7 @@ class ChatroomController extends AbstractController {
 
         $em->flush();
 
-        $this->sendSocketMessage([
+        $msg_array = [
             'type' => 'chat_edit',
             'chatroom_id' => $chatroom->getId(),
             'title' => $chatroom->getTitle(),
@@ -221,7 +221,9 @@ class ChatroomController extends AbstractController {
             'allow_read_only_after_end' => $chatroom->allowReadOnlyAfterEnd(),
             'is_active' => $chatroom->isActive(),
             'host_name' => $chatroom->getHostName(),
-        ]);
+        ];
+        $this->sendSocketMessage($msg_array);
+        $this->sendSocketMessage($msg_array, true);
 
         $this->core->addSuccessMessage("Chatroom successfully updated");
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));

@@ -164,6 +164,9 @@ function initChatroomSocketClient(chatroomId) {
                 }
                 break;
             }
+            case 'chat_edit':
+                updateChatroomTitle(msg.title);
+                break;
             default:
                 console.error(msg);
         }
@@ -171,6 +174,16 @@ function initChatroomSocketClient(chatroomId) {
     window.socketClient.open('chatrooms', {
         chatroom_id: chatroomId,
     });
+}
+
+function updateChatroomTitle(title) {
+    const titleElement = document.querySelector('[data-testid="chat-title"]');
+    if (!titleElement) {
+        return;
+    }
+
+    titleElement.textContent = title.length > 40 ? `${title.slice(0, 40)}...` : title;
+    titleElement.title = title;
 }
 
 function initChatroomListSocketClient(user_admin, base_url) {
