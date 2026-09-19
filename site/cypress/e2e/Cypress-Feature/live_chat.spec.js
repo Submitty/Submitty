@@ -1,4 +1,4 @@
-import { getApiKey, getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
+import { getApiKey, getCurrentSemester, verifyWebSocketFunctionality, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
@@ -312,6 +312,56 @@ describe('Tests for creating, editing and using tests', () => {
     it('Should test editing chats', () => {
         createChatroom(title1, description1, true);
         editChatroom(title1, title2, description2, true, false);
+    });
+
+    it('Should update chatroom edits over WebSocket', () => {
+        createChatroom(title1, description1, false);
+        startChatSession(title1);
+
+        getChatroom(title1).then(($chatroom) => {
+            const id = Number($chatroom.attr('id'));
+            expect(id).to.be.a('number');
+
+            return verifyWebSocketFunctionality(
+                ['sample', 'chat', `${id}`, 'edit'],
+                'POST',
+                'multipart/form-data',
+                {
+                    'title': title2,
+                    'description': description2,
+                    'allow-anon': 'on',
+                    'allow_read_only_after_end': 'on',
+                },
+                () => {
+                    checkChatExists(title2);
+                    checkDescription(title2, description2);
+                    checkAnon(title2, true);
+                    checkChatEnabled(title2);
+                    getChatroom(title2).find('.readonly-badge').should('be.visible');
+                    getChatroom(title2).find('[data-testid="edit-chatroom"]').first().click();
+                    cy.get('#edit-chatroom-read-only-allow').should('be.checked');
+                    cy.get('#edit-chatroom-form [data-testid="close-button"]').click();
+                },
+            ).then(() => {
+                enterChat(title2);
+
+                return verifyWebSocketFunctionality(
+                    ['sample', 'chat', `${id}`, 'edit'],
+                    'POST',
+                    'multipart/form-data',
+                    {
+                        title: title1,
+                        description: description1,
+                        allow_read_only_after_end: 'on',
+                    },
+                    () => {
+                        cy.get('[data-testid="chat-title"]')
+                            .should('have.attr', 'title', title1)
+                            .and('contain.text', title1);
+                    },
+                );
+            });
+        });
     });
 
     it('Should test deleting chats', () => {
