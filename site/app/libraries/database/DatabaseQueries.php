@@ -8691,7 +8691,8 @@ WHERE current_state IN
             helper.user_email AS helper_email,
             helper.user_email_secondary AS helper_email_secondary,
             helper.user_email_secondary_notify AS helper_email_secondary_notify,
-            helper.user_group AS helper_group
+            helper.user_group AS helper_group,
+            helper.user_pronouns AS helper_pronouns
         FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
         WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
         ";
