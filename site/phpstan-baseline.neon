@@ -157,6 +157,12 @@ parameters:
 			path: app/controllers/AuthenticationController.php
 
 		-
+			rawMessage: 'Only booleans are allowed in ||, mixed given on the left side.'
+			identifier: booleanOr.leftNotBoolean
+			count: 1
+			path: app/controllers/AuthenticationController.php
+
+		-
 			rawMessage: PHPDoc tag @var above a method has no effect.
 			identifier: varTag.misplaced
 			count: 2
@@ -165,6 +171,12 @@ parameters:
 		-
 			rawMessage: PHPDoc tag @var with type app\repositories\VcsAuthTokenRepository is not subtype of type app\repositories\VcsAuthTokenRepository<app\entities\VcsAuthToken>.
 			identifier: varTag.type
+			count: 1
+			path: app/controllers/AuthenticationController.php
+
+		-
+			rawMessage: 'Parameter #2 $requirements of static method app\libraries\Utils::isValidPassword() expects array{min_length: int, max_length: int, require_uppercase: bool, require_lowercase: bool, require_numbers: bool, require_special_chars: bool}, array<string, mixed> given.'
+			identifier: argument.type
 			count: 1
 			path: app/controllers/AuthenticationController.php
 
@@ -179,6 +191,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/AutogradingStatusController.php
+
+		-
+			rawMessage: 'Parameter #1 $msg_array of method app\controllers\ChatroomController::sendSocketMessage() expects array{type: string, message_id?: int, chatroom_id?: int, title?: string, description?: string, allow_anon?: bool, host_name?: string, base_url?: string, ...}, array{type: ''chat_close'', chatroom_id: int, title: string, description: string, allow_anon: bool, host_name: string, base_url: string, socket: ''chatrooms'', ...}|array{type: ''chat_open'', chatroom_id: int, title: string, description: string, allow_anon: bool, host_name: string, base_url: string, socket: ''chatrooms''} given.'
+			identifier: argument.type
+			count: 1
+			path: app/controllers/ChatroomController.php
 
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
@@ -571,12 +589,6 @@ parameters:
 			path: app/controllers/NavigationController.php
 
 		-
-			rawMessage: Using nullsafe method call on non-nullable type app\models\User. Use -> instead.
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/controllers/NavigationController.php
-
-		-
 			rawMessage: '''
 				Call to deprecated method webOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return WebResponse directly
@@ -862,6 +874,12 @@ parameters:
 			path: app/controllers/UserProfileController.php
 
 		-
+			rawMessage: 'Parameter #2 $requirements of static method app\libraries\Utils::isValidPassword() expects array{min_length: int, max_length: int, require_uppercase: bool, require_lowercase: bool, require_numbers: bool, require_special_chars: bool}, array<string, mixed> given.'
+			identifier: argument.type
+			count: 1
+			path: app/controllers/UserProfileController.php
+
+		-
 			rawMessage: 'Call to function array_search() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -1056,6 +1074,12 @@ parameters:
 		-
 			rawMessage: 'Method app\controllers\admin\AdminGradeableController::genBlankComponent() has no return type specified.'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: 'Method app\controllers\admin\AdminGradeableController::getGradeableJson() should return array{title: mixed, type: mixed, id: mixed, instructions_url: mixed, syllabus_bucket: mixed, autograding_config_path: mixed, bulk_upload: bool, team_gradeable?: array{team_size_max: int, inherit_from: mixed}, ...} but returns array{title: string, type: string, id: string, instructions_url: string, syllabus_bucket: string, autograding_config_path: string, bulk_upload: bool, team_gradeable?: array{team_size_max: int, inherit_from: ''''}, ...}|array{title: string, type: string, id: string, instructions_url: string, syllabus_bucket: string, autograding_config_path: string}.'
+			identifier: return.type
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -3346,6 +3370,18 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
+			identifier: empty.notAllowed
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			rawMessage: 'Loose comparison via "!=" between mixed and float is not allowed.'
+			identifier: notEqual.notAllowed
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
@@ -3391,13 +3427,7 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			rawMessage: 'Loose comparison via "!=" between mixed and float is not allowed.'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
+			path: app/controllers/image_submission_files/ImageController.php
 
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
@@ -3410,12 +3440,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/controllers/image_submission_files/PDFController.php
-
-		-
-			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
-			identifier: empty.notAllowed
-			count: 1
-			path: app/controllers/image_submission_files/ImageController.php
 
 		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
@@ -3606,6 +3630,12 @@ parameters:
 		-
 			rawMessage: 'Method app\controllers\student\SubmissionController::ajaxRegrade() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: 'Method app\controllers\student\SubmissionController::ajaxRequestGrade() should return app\libraries\response\JsonResponse|array{status: string, data: mixed} but returns array.'
+			identifier: return.type
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3973,6 +4003,12 @@ parameters:
 			path: app/entities/Session.php
 
 		-
+			rawMessage: 'Strict comparison using === between string|null and 0 will always evaluate to false.'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/entities/UnverifiedUserEntity.php
+
+		-
 			rawMessage: 'Property app\entities\UserEntity::$posts with generic interface Doctrine\Common\Collections\Collection does not specify its types: TKey, T'
 			identifier: missingType.generics
 			count: 1
@@ -4109,6 +4145,12 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: app/entities/forum/Post.php
+
+		-
+			rawMessage: 'Class Doctrine\DBAL\Types\Types referenced with incorrect case: Doctrine\DBAL\Types\TYPES.'
+			identifier: class.nameCase
+			count: 3
+			path: app/entities/forum/PostAttachment.php
 
 		-
 			rawMessage: 'Method app\entities\forum\PostHistory::getAttachments() return type with generic interface Doctrine\Common\Collections\Collection does not specify its types: TKey, T'
@@ -7288,6 +7330,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			rawMessage: 'Method app\libraries\database\DatabaseQueries::getBadGradedComponentsCountByGradingSections() should return array<int, int> but returns array<int>.'
+			identifier: return.type
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			rawMessage: 'Method app\libraries\database\DatabaseQueries::getCountNullUsersRotatingSections() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7714,6 +7762,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			rawMessage: 'Method app\libraries\database\DatabaseQueries::getMetricSum() should return array{total_elapsed_time: float, total_max_rss_size: int} but returns array.'
+			identifier: return.type
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			rawMessage: 'Method app\libraries\database\DatabaseQueries::getMetrics() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -7722,6 +7776,12 @@ parameters:
 		-
 			rawMessage: 'Method app\libraries\database\DatabaseQueries::getNewGraders() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: 'Method app\libraries\database\DatabaseQueries::getNotificationDefault() should return array{term: string, course: string}|null but returns non-empty-array|null.'
+			identifier: return.type
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -10390,6 +10450,12 @@ parameters:
 			path: app/models/Notification.php
 
 		-
+			rawMessage: 'Method app\models\Notification::jsonSerialize() should return array{id: int, component: string, metadata: string, content: string, seen: bool, elapsed_time: float, created_at: string, notify_time: string, ...} but returns array{id: int, component: string, metadata: string, content: string, seen: bool, elapsed_time: float, created_at: string, notify_time: string, ...}.'
+			identifier: return.type
+			count: 1
+			path: app/models/Notification.php
+
+		-
 			rawMessage: Property app\models\Notification::$elapsed_time has unknown class app\models\real as its type.
 			identifier: class.notFound
 			count: 1
@@ -10414,7 +10480,7 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int|false and int is not allowed.'
+			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/OfficeHoursQueueModel.php
@@ -15196,13 +15262,13 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
-			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $graders with no value type specified in iterable type array.'
+			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $anon_ids with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
 
 		-
-			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $anon_ids with no value type specified in iterable type array.'
+			rawMessage: 'Method app\views\grading\SimpleGraderView::simpleDisplay() has parameter $graders with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/grading/SimpleGraderView.php
