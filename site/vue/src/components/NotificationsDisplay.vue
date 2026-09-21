@@ -71,6 +71,9 @@ function markSeen() {
                         n.seen = true;
                     }
                 }
+                localUnseenCount.value = 0;
+                $('#nav-sidebar-submitty-notifications .notification-badge, #nav-sidebar-notifications .notification-badge, .notification-badge').remove();
+
             },
             error: function (err) {
                 console.error(err);
@@ -93,6 +96,9 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
         if (n.id === id && n.course === course) {
             n.seen = true;
             localUnseenCount.value--;
+            if (localUnseenCount.value <= 0) {
+                $('#nav-sidebar-submitty-notifications .notification-badge, #nav-sidebar-notifications .notification-badge, .notification-badge').remove();
+            }
             break;
         }
     }
