@@ -57,23 +57,22 @@ const visibleNotifications = computed(() =>
 );
 
 function markSeen() {
-    // Course Page
+    // Optimistic UI update - update state and remove badge immediately
+    for (const n of localNotifications.value) {
+        if (!n.seen) {
+            n.seen = true;
+        }
+    }
+    localUnseenCount.value = 0;
+    document.querySelectorAll('.notification-badge').forEach((el) => el.remove());
+
+    // Course Page AJAX request
     if (props.course) {
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
                 csrf_token: window.csrfToken,
-            },
-            success: function () {
-                for (const n of localNotifications.value) {
-                    if (!n.seen) {
-                        n.seen = true;
-                    }
-                }
-                localUnseenCount.value = 0;
-                $('#nav-sidebar-submitty-notifications .notification-badge, #nav-sidebar-notifications .notification-badge, .notification-badge').remove();
-
             },
             error: function (err) {
                 console.error(err);
@@ -97,7 +96,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
             n.seen = true;
             localUnseenCount.value--;
             if (localUnseenCount.value <= 0) {
-                $('#nav-sidebar-submitty-notifications .notification-badge, #nav-sidebar-notifications .notification-badge, .notification-badge').remove();
+                document.querySelectorAll('.notification-badge').forEach((el) => el.remove());
             }
             break;
         }
