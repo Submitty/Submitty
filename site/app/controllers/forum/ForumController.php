@@ -768,6 +768,12 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Thread is locked");
         }
 
+        $old_title = $thread->getTitle();
+        $old_status = $thread->getStatus();
+        $old_content = $post->getContent();
+        $old_categories = array_map(fn($c) => $c->getId(), $thread->getCategories()->toArray());
+        sort($old_categories);
+
         $status_edit_thread = true;
         $did_edit_thread = false;
         if ($thread->getFirstPost()->getId() === $post->getId()) {
@@ -775,6 +781,14 @@ class ForumController extends AbstractController {
             $did_edit_thread = true;
         }
         $status_edit_post = $this->editPost($post);
+
+        $new_title = $thread->getTitle();
+        $new_status = $thread->getStatus();
+        $new_content = $post->getContent();
+        $new_categories = array_map(fn($c) => $c->getId(), $thread->getCategories()->toArray());
+        sort($new_categories);
+
+        $is_category_only_edit = ($old_title === $new_title) && ($old_status === $new_status) && ($old_content === $new_content) && ($old_categories !== $new_categories);
 
         $message = [];
         if (!$status_edit_thread) {
@@ -814,8 +828,10 @@ class ForumController extends AbstractController {
             'reply_level' => $post->getReplyLevel(),
             'post_box_id' => 1,
         ]);
-        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
-        $this->core->getNotificationFactory()->onPostModified($event);
+        if (!$is_category_only_edit) {
+            $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
+            $this->core->getNotificationFactory()->onPostModified($event);
+        }
         $this->core->getCourseEntityManager()->flush();
 
         return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
