@@ -1458,7 +1458,9 @@ function getGradedComponentFromDOM(component_id: number): ComponentGradeInfo {
         }
     });
 
+    // eslint-disable-next-line no-useless-assignment
     let score = 0.0;
+    // eslint-disable-next-line no-useless-assignment
     let comment = '';
     if (isEditModeEnabled()) {
         const customMarkDOMElement = domElement.find('.custom-mark-data');
@@ -2428,6 +2430,7 @@ window.onVerifyAll = async function () {
 export async function onToggleEditMode() {
     // Get the open components so we know which one to open once they're all saved
     const open_component_ids = getOpenComponentIds();
+    // eslint-disable-next-line no-useless-assignment
     let reopen_component_id = NO_COMPONENT_ID;
 
     // This prevents multiple sequential toggles from screwing things up

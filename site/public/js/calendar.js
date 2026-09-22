@@ -197,6 +197,7 @@ function lighten(colorstr) {
  * @returns {HTMLElement} the HTML Element for the calendar item
  */
 function generateCalendarItem(item) {
+    // eslint-disable-next-line no-useless-assignment
     let tooltip = '';
     if (!item['submission_open'] && item['is_student']) {
         // Student shouldn't be able to access this item
