@@ -1,6 +1,7 @@
 /.idea/
 /output/
 /.vagrant/
+/.utm/
 
 selenium*.jar
 .DS_Store
