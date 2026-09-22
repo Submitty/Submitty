@@ -471,6 +471,11 @@ jobs:
           POSTGRES_USER: postgres
           TZ: America/New_York
           PGTZ: America/New_York
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432
 
@@ -481,6 +486,11 @@ jobs:
           POSTGRES_USER: postgres
           TZ: America/New_York
           PGTZ: America/New_York
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432
 
@@ -718,14 +728,14 @@ jobs:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
           PGTZ: America/New_York
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -927,14 +937,14 @@ jobs:
         containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding-Development", "Autograding-Tutorial"]
     services:
       postgres:
-        image: postgres
+        image: postgres:14
         env:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
           PGTZ: America/New_York
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
