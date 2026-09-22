@@ -27,7 +27,25 @@ jobs:
       # - run: vagrant plugin install vagrant-vbguest
       - run: NO_SUBMISSIONS=1 vagrant up ubuntu-22.04
       - name: Validate image
-        run: curl --show-error --fail --include http://localhost:1511
+        run: |
+          set -euo pipefail
+
+          for attempt in {1..60}; do
+            if curl --show-error --fail --include http://localhost:1511; then
+              exit 0
+            fi
+
+            echo "Submitty is not ready yet (attempt ${attempt}/60)"
+            sleep 5
+          done
+
+          echo "Submitty did not become available on port 1511"
+          vagrant status
+          vagrant ssh -c 'sudo systemctl --no-pager --full status apache2 || true'
+          vagrant ssh -c 'sudo systemctl --no-pager --full status nginx || true'
+          vagrant ssh -c 'sudo ss -ltnp | grep -E ":(80|1511|8443)\b" || true'
+          vagrant ssh -c 'sudo journalctl -u apache2 -u nginx -n 100 --no-pager || true'
+          exit 1
       - name: Acquire Job ID
         if: failure()
         id: get-job-id
