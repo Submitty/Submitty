@@ -616,9 +616,9 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     {% if graded_gradeable.hasActiveGradeInquiry() and not peer_only_grader and core.getUser().getGroup() != 4 %}
-    {% set contents = contents ~ " + Grade Inquiry" %}
-    {% set btn_class = "btn-danger" %}
-    {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
+        {% set contents = contents ~ " + Grade Inquiry" %}
+        {% set btn_class = "btn-danger" %}
+        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
     {% endif %}
 
     <td style="text-align: center;">
