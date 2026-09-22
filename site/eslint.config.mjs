@@ -6,7 +6,7 @@ import jest from 'eslint-plugin-jest';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
-import cypress from 'eslint-plugin-cypress/flat';
+import cypress from 'eslint-plugin-cypress';
 import vuelint from 'eslint-plugin-vue';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import vueParser from 'vue-eslint-parser';
