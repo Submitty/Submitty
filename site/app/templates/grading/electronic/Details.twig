@@ -615,13 +615,15 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveGradeInquiry() %}
-        {% set contents = contents ~ " + Grade Inquiry" %}
-        {% set btn_class = "btn-danger" %}
-        {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
-    {%  endif %}
+    {% if graded_gradeable.hasActiveGradeInquiry() and not peer_only_grader and core.getUser().getGroup() != 4 %}
+    {% set contents = contents ~ " + Grade Inquiry" %}
+    {% set btn_class = "btn-danger" %}
+    {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
+    {% endif %}
+
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() and not peer_only_grader and core.getUser().getGroup() != 4 %}data-grade-inquiry="true"{% endif %}
+            class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
@@ -677,13 +679,13 @@
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% if graded_gradeable.hasActiveGradeInquiry() %}
+    {% if graded_gradeable.hasActiveGradeInquiry() and not peer_only_grader and core.getUser().getGroup() != 4 %}
         {% set contents = contents ~ " + Grade Inquiry" %}
         {% set btn_class = "btn-danger" %}
         {% set badge_count = graded_gradeable.getActiveGradeInquiryCount()  %}
     {%  endif %}
     <td style="text-align: center;">
-        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
+        <a data-testid="grade-button" {% if graded_gradeable.hasActiveGradeInquiry() and not peer_only_grader and core.getUser().getGroup() != 4 %}data-grade-inquiry="true"{% endif %} class="grade-button btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ anon_ids[graded_gradeable.getSubmitter().getId()] }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count is defined and badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
