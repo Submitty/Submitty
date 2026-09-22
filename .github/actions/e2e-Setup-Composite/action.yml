@@ -27,6 +27,14 @@ env:
 runs:
   using: "composite"
   steps:
+    - name: Configure APT retries
+      run: |
+        sudo tee /etc/apt/apt.conf.d/80-retries >/dev/null <<'EOF'
+Acquire::Retries "5";
+Acquire::http::Timeout "30";
+Acquire::https::Timeout "30";
+EOF
+      shell: bash
     - name: Delete huge unnecessary folders, and clean apt cache
       run: |
         rm -rf /opt/hostedtoolcache
