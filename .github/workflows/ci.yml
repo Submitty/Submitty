@@ -726,6 +726,10 @@ jobs:
   Cypress-System:
     name: Cypress (System)
     runs-on: ubuntu-22.04
+    env:
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: submitty_dbuser
     services:
       postgres:
         image: postgres:14
@@ -931,6 +935,10 @@ jobs:
 
   Cypress:
     runs-on: ubuntu-22.04
+    env:
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: submitty_dbuser
     strategy:
       fail-fast: false
       matrix:
