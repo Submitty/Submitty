@@ -21,7 +21,7 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
-    twig-lint : lint Twig templates
+    twig-lint : lint all Twig templates, or pass arguments for specific files
                 usage: twig-lint [--format FORMAT] [--show-deprecations] [--] [<filename>...]
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
@@ -119,7 +119,7 @@ run_php_cs() {
 run_twig_lint() {
     local ARGS=("${@:2}")
     if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty/site composer run-script lint:twig -- "${ARGS[@]}"
+        run_in_container /home/submitty/site composer run-script lint:twig-specific-file -- "${ARGS[@]}"
     else
         run_in_container /home/submitty/site composer run-script lint:twig
     fi
