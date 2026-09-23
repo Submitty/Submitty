@@ -2,8 +2,6 @@
 
 import { getCurrentSemester } from '../../support/utils.js';
 
-import vnu from 'vnu-jar';
-
 const semester = getCurrentSemester();
 const course = 'sample';
 
@@ -56,14 +54,27 @@ const urls = [
 
 describe('Test cases for the site\'s adherence to accessibility guidelines', () => {
     let baseline;
+    const updateBaseline = Cypress.env('updateAccessibilityBaseline');
+    const regeneratedBaseline = {};
 
     before(() => {
         cy.fixture('accessibility_baseline').then((data) => {
             expect(data).to.be.an('object');
             baseline = new Map(Object.entries(data));
+            // preserve existing keys
+            Object.assign(regeneratedBaseline, data);
         });
 
         cy.exec(rm_command, { failOnNonZeroExit: false });
+    });
+
+    after(() => {
+        if (updateBaseline) {
+            cy.writeFile(
+                'cypress/fixtures/accessibility_baseline.json',
+                `${JSON.stringify(regeneratedBaseline, null, 4)}\n`,
+            );
+        }
     });
 
     beforeEach(() => {
@@ -79,7 +90,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
             cy.visit(url.replace('{}/{}', `${semester}/${course}`));
             cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then((content) => {
                 cy.writeFile('cypress/tmp/doc.html', `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
-                    cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then((result) => {
+                    cy.task('vnuValidate', 'cypress/tmp/doc.html').then((result) => {
                         console.log(result.stderr);
                         const output = JSON.parse(result.stderr);
 
@@ -93,13 +104,19 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                             'The “type” attribute is unnecessary for JavaScript resources.',
                         ];
 
+                        const nonSkipped = [];
+
                         for (const error of output.messages) {
-                            if (skipMessages.some((txt) => error.message.startsWith(txt))
-                                || (baseline.get(url) || []).includes(error.message)
+                            if (skipMessages.some((txt) => error.message.startsWith(txt))) {
+                                continue;
+                            }
+                            if (!nonSkipped.includes(error.message)) {
+                                nonSkipped.push(error.message);
+                            }
+                            if ((baseline.get(url) || []).includes(error.message)
                                 || foundErrorMessages.includes(error.message)) {
                                 continue;
                             }
-
                             foundErrorMessages.push(error.message);
                             foundErrors.push({
                                 error: error.message.replace(/\u201c|\u201d/g, '\'').trim(),
@@ -108,7 +125,10 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
                             });
                         }
 
-                        if (foundErrors.length > 0) {
+                        if (updateBaseline) {
+                            regeneratedBaseline[url] = nonSkipped;
+                        }
+                        else if (foundErrors.length > 0) {
                             throw new Error(`Accessibility errors at ${url}:\n${foundErrorMessages.join('\n')}`);
                         }
                     });
