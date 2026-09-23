@@ -750,6 +750,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
       - uses: ./.github/actions/e2e-Setup-Composite
+      - name: Restart services required by Cypress
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl restart apache2
+          sudo systemctl restart submitty_autograding_worker
+          sudo systemctl restart submitty_autograding_shipper
+
+      - name: Wait for Submitty service
+        run: |
+          set -euo pipefail
+          for attempt in {1..30}; do
+            if curl --silent --show-error --fail \
+              --connect-timeout 2 \
+              http://localhost:1511 >/dev/null; then
+              echo "Submitty service is ready"
+              exit 0
+            fi
+            echo "Waiting for port 1511; attempt ${attempt}/30"
+            sleep 2
+          done
+          echo "Service on port 1511 did not become ready"
+          sudo ss -ltnp
+          sudo systemctl --no-pager --full status \
+            apache2 \
+            submitty_autograding_worker \
+            submitty_autograding_shipper || true
+          exit 1
       - name: Cache Node Modules
         uses: actions/cache@v6
         with:
@@ -977,6 +1004,34 @@ jobs:
           flags: >-
             ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
                 '--test_only_grading' }}
+
+      - name: Restart services required by Cypress
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl restart apache2
+          sudo systemctl restart submitty_autograding_worker
+          sudo systemctl restart submitty_autograding_shipper
+
+      - name: Wait for Submitty service
+        run: |
+          set -euo pipefail
+          for attempt in {1..30}; do
+            if curl --silent --show-error --fail \
+              --connect-timeout 2 \
+              http://localhost:1511 >/dev/null; then
+              echo "Submitty service is ready"
+              exit 0
+            fi
+            echo "Waiting for port 1511; attempt ${attempt}/30"
+            sleep 2
+          done
+          echo "Service on port 1511 did not become ready"
+          sudo ss -ltnp
+          sudo systemctl --no-pager --full status \
+            apache2 \
+            submitty_autograding_worker \
+            submitty_autograding_shipper || true
+          exit 1
 
       - name: Cache Node Modules
         uses: actions/cache@v6
