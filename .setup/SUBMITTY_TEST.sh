@@ -25,6 +25,7 @@ HELP_MESSAGE="
     js-lint   : eslint [option: --fix]
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
+    twig-lint : lint twig templates [option: --format github, ...]
     shell-lint: run ShellCheck
     py-lint   : run ruff check [option: --fix, specific_file.py]
     py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
@@ -149,6 +150,15 @@ run_css_style() {
     fi
 }
 
+run_twig_lint() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site composer run-script lint:twig -- "${ARGS[@]}"
+    else
+        run_in_container /home/submitty/site composer run-script lint:twig
+    fi
+}
+
 run_shell_lint() {
     run_in_container /home/submitty python3 run_shellcheck.py
 }
@@ -225,6 +235,9 @@ case "${1:-}" in
         ;;
     css-lint)
         run_css_style "$@"
+        ;;
+    twig-lint)
+        run_twig_lint "$@"
         ;;
     shell-lint)
         run_shell_lint
