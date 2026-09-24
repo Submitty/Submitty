@@ -393,7 +393,7 @@ class GradeInquiryController extends AbstractController {
             }
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading()) {
-                    $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
+                    $details = ['component' => 'grade_inquiry', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
                     $emails[] = new Email($this->core, $details);
                 }
@@ -405,13 +405,13 @@ class GradeInquiryController extends AbstractController {
             if ($submitter->isTeam()) {
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
-                    $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
+                    $details = ['component' => 'grade_inquiry', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
                     $emails[] = new Email($this->core, $details);
                 }
             }
             else {
-                $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
+                $details = ['component' => 'grade_inquiry', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
                 $notifications[] = Notification::createNotification($this->core, $details);
                 $emails[] = new Email($this->core, $details);
             }
