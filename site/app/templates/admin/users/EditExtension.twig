@@ -1,0 +1,24 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-extension-popup{% endblock %}
+{% block title %}Edit Extension{% endblock %}
+{% block body %}
+    <p>Student: <strong id="edit-extension-user"></strong></p>
+    <p><label for="edit-extension-days">Days of Extension:</label></p>
+    <input id="edit-extension-days" type="number" min="0" step="1" required>
+    <p><label for="edit-extension-reason">Reason for Extension:</label></p>
+    <select id="edit-extension-reason" style="width: 100%;">
+        <option value="unspecified">unspecified</option>
+        {% for reason in reasons %}
+            <option value="{{ reason }}">{{ reason }}</option>
+        {% endfor %}
+    </select>
+    <p>The reason is displayed to the student on the Rainbow Grades page.</p>
+    <script>
+        registerSelect2Widget("edit-extension-reason", "edit-extension-popup");
+    </script>
+{% endblock %}
+{% block close_button_text %}Cancel{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <button type="button" class="btn btn-primary" data-testid="save-extension" onclick="saveHomeworkExtension()">Save</button>
+{% endblock %}

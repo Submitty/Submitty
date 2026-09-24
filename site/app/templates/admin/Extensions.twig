@@ -86,6 +86,7 @@
                     <th>Family Name</th>
                     <th>Number of Days of Extension</th>
                     <th>Reason for Extension</th>
+                    <th>Edit</th>
                     <th>Delete</th>
                 </tr>
             </thead>
@@ -97,6 +98,17 @@
                         <td class="align-left">{{ user.user_familyname }}</td>
                         <td>{{ user.late_day_exceptions }}</td>
                         <td>{{ user.reason_for_exception }}</td>
+                        <td>
+                            <button type="button" class="btn btn-default"
+                                    aria-label="Edit {{ user.user_id }}'s extension for {{ current_gradeable['g_id'] }}"
+                                    data-user-id="{{ user.user_id }}"
+                                    data-days="{{ user.late_day_exceptions }}"
+                                    data-reason="{{ user.reason_for_exception }}"
+                                    data-testid="edit-extension"
+                                    onclick="editHomeworkExtension(this)">
+                                <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </td>
                         <td>
                             <a
                                 id="Delete"
@@ -153,3 +165,4 @@
 </script>
 
 {% include('admin/users/MoreExtensions.twig') %}
+{% include('admin/users/EditExtension.twig') %}

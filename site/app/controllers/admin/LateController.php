@@ -234,7 +234,8 @@ class LateController extends AbstractController {
                 foreach ($users_with_exceptions as $user) {
                     if ($user->getId() == $_POST['user_id']) {
                         $simple_late_user = $user;
-                        $no_change = $simple_late_user->getLateDayExceptions() == $late_days;
+                        $no_change = $simple_late_user->getLateDayExceptions() == $late_days
+                            && $simple_late_user->getReasonForException() === $reason_for_exception;
                         break;
                     }
                 }
