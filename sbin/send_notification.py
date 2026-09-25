@@ -136,6 +136,7 @@ def construct_notifications(term, course, pending, notification_type):
             "title": notification.get('g_title'),
             "depends_on": notification.get('depends_on'),
             "submission_due_date": notification.get('submission_due_date'),
+            "has_due_date": notification.get('has_due_date'),
             "team_id": notification.get('team_id'),
             "user_id": notification.get('user_id'),
             "user_email": notification.get('user_email'),
@@ -160,13 +161,23 @@ def construct_notifications(term, course, pending, notification_type):
         # Notification-related content
         if notification_type == "gradeable_release":
             email_subject = f"Submissions Open: {gradeable['title']}"
-            notification_content = (
-                f"{email_subject} | Due {format_timestamp(gradeable['submission_due_date'])}"
-            )
+            notification_content = email_subject
+            if gradeable['has_due_date']:
+                notification_content += (
+                    f" | Due {format_timestamp(gradeable['submission_due_date'])}"
+                )
+
             email_body = (
                 f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
                 f"{get_full_course_name(term, course)}.\n\n"
-                f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
+            )
+
+            if gradeable['has_due_date']:
+                email_body += (
+                    f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
+                )
+
+            email_body += (
                 f"Late Days: {gradeable['remaining_late_days']} remaining, "
                 f"{gradeable['max_late_days']} allowed"
             )
@@ -373,7 +384,12 @@ def send_pending_notifications():
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 eg.eg_depends_on AS depends_on,
-                eg.eg_submission_due_date AS submission_due_date,
+                CASE
+                    WHEN eg.eg_has_due_date IS TRUE
+                    THEN eg.eg_submission_due_date
+                    ELSE NULL
+                END AS submission_due_date,
+                eg.eg_has_due_date AS has_due_date,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
                 COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
@@ -401,7 +417,10 @@ def send_pending_notifications():
                 AND eg.eg_student_submit IS TRUE
                 AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
-                AND eg.eg_submission_due_date >= NOW()
+                AND (
+                eg.eg_has_due_date IS FALSE
+                OR eg.eg_submission_due_date >= NOW()
+                )
                 AND (
                     eg.eg_depends_on IS NULL
                     OR (
@@ -439,7 +458,9 @@ def send_pending_notifications():
                         AND n.content ILIKE '%' || 'Submissions Open: ' || g.g_title || '%'
                     )
                 )
-            GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
+            GROUP BY g.g_id, g.g_title,
+             eg.eg_submission_due_date,eg.eg_has_due_date,
+             u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
                 eg.eg_depends_on, ldc.late_days_remaining
             """), {
