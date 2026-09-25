@@ -603,6 +603,7 @@ progress::-webkit-progress-value {
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #grading_rubric.rubric_panel {
     border: 5px solid var(--standard-dark-mint-green);
+    scroll-padding-top: 120px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
@@ -634,6 +635,16 @@ progress::-webkit-progress-value {
     height: 100%;
     opacity: 0.95;
 }
+
+.rubric-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--standard-pale-blue-gray);
+    padding: 5px 0;
+}
+
+
 
 .sol-textbox-cont {
     height: calc(100% - 120px);
