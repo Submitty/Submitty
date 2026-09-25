@@ -59,6 +59,14 @@ def get_active_submitters(conn, gradeable_id):
 
 def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
     """Insert clustering results back into the database."""
+    # Refuse to destroy an existing clustering when the run produced nothing.
+    cluster_names = [name for name, members in cluster_groups.items() if members]
+    if not cluster_names:
+        raise ValueError(
+            'Clustering produced no non-empty clusters; '
+            'leaving the existing clustering unchanged.'
+        )
+
     # delete old configuration (cascades to clusters and members)
     delete_query = text("DELETE FROM ta_grading_clustering_configs WHERE g_id = :gradeable_id")
     conn.execute(delete_query, {"gradeable_id": gradeable_id})
@@ -72,13 +80,6 @@ def bulk_insert_clustering(conn, gradeable_id, algorithm, cluster_groups):
     result = conn.execute(config_query, {"gradeable_id": gradeable_id, "algorithm": algorithm})
     row = result.fetchone()
     config_id = row.id if hasattr(row, 'id') else row[0]
-
-    # Bulk insert clusters to prevent excessive queries
-    cluster_names = [name for name, members in cluster_groups.items() if members]
-    if not cluster_names:
-        if hasattr(conn, 'commit'):
-            conn.commit()
-        return
 
     # Use a parameterized VALUES clause for clusters
     cluster_values = []
