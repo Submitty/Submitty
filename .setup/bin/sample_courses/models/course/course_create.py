@@ -163,6 +163,7 @@ class Course_create:
                     user_id=user.get_detail(self.code, "id"),
                     user_group=user.get_detail(self.code, "group"),
                     registration_section=reg_section,
+                    registration_type=user.get_detail(self.code, "registration_type"),
                     manual_registration=user.get_detail(self.code, "manual")
                 )
             )
