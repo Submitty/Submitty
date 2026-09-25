@@ -6,5 +6,6 @@ rules:
   document-start: disable
 
 ignore: |
-  site/node_modules/*
-  site/vendor/*
+  site/cypress/fixtures/
+  site/node_modules/
+  site/vendor/
