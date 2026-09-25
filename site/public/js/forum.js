@@ -374,6 +374,14 @@ function socketDeletePostHandler(post_id) {
     });
 }
 
+function insertFirstThread(new_thread) {
+    const insertion_point = $('#thread_list .thread-list-insertion-point').first();
+    const thread = $(new_thread);
+
+    thread.insertAfter(insertion_point).hide().fadeIn('slow');
+    $('.empty-thread-list-message').remove();
+}
+
 function socketNewOrEditThreadHandler(thread_id, edit = false) {
     $.ajax({
         type: 'POST',
@@ -383,7 +391,10 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
             try {
                 const new_thread = JSON.parse(response).data;
                 if (!edit) {
-                    if ($(new_thread).find('.thread-announcement').length !== 0) {
+                    if ($('.thread_box_link').length === 0) {
+                        insertFirstThread(new_thread);
+                    }
+                    else if ($(new_thread).find('.thread-announcement').length !== 0) {
                         const last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
                         if (last_bookmarked_announcement.length !== 0) {
                             $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn('slow');
