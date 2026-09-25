@@ -198,6 +198,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     // keep track of changes
     const new_scores = {};
     const old_scores = {};
+    const changedElems = [];
 
     elems = $(elems);
     elems.each((idx, el) => {
@@ -234,31 +235,32 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 
         if (set_new) {
             new_scores[elem.data('id')] = elem.data('score');
-
-            // update css to reflect score
-            const currentScore = parseFloat(elem.data('score')) || 0;
-
-            if (currentScore === 1.0) {
+            const oldScore = old_scores[elem.data('id')];
+            const newScore = parseFloat(elem.data('score')) || 0;
+            if (newScore === 1.0) {
+                elem.removeClass('simple-half-credit');
                 elem.addClass('simple-full-credit');
-                elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
             }
-            else if (currentScore === 0.5) {
+            else if (newScore === 0.5) {
                 elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
                 elem.addClass('simple-half-credit');
-                elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
             }
             else {
                 elem.removeClass('simple-half-credit');
                 elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
             }
+
+            // create border-right to reflect AJAX save status
+            if (oldScore !== newScore) {
+                elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+                changedElems.push(elem);
+            }
+
+            // mark cell as user-modified so stale WebSocket echoes are ignored
+            elem.data('user-modified', Date.now());
 
             // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
-
-            // create border we can animate to reflect ajax status
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         }
     });
 
@@ -285,10 +287,16 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
-                elems.each((idx, elem) => {
-                    elem = $(elem);
+                changedElems.forEach((elem) => {
                     elem.stop(true, true);
                     elem.css('border-right', '60px solid var(--simple-save-error-red)');
+                });
+            }
+            else {
+                changedElems.forEach((elem) => {
+                    elem.stop(true, true);
+                    elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+                    elem.animate({ 'border-right-width': '0px' }, 400);
                 });
             }
             updateVisibility();
@@ -887,6 +895,15 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
         else {
             const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
             const score = parseFloat(value);
+
+            // Get the current user's grader identity to detect self-echoes
+            const currentGrader = $('#data-table').data('current-grader');
+            const lastModified = elem.data('user-modified');
+            // Prevent updating the cell if the grader is the same as the current grader
+            if (grader === currentGrader && lastModified) {
+                return;
+            }
+
             elem.data('score', score);
             elem.attr('data-score', score);
             elem.data('grader', grader);
@@ -898,21 +915,20 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
 
             switch (score) {
                 case 1.0:
+                    elem.removeClass('simple-half-credit');
                     elem.addClass('simple-full-credit');
-                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
                     break;
                 case 0.5:
                     elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
                     elem.addClass('simple-half-credit');
-                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
                     elem.removeClass('simple-half-credit');
                     elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
                     break;
             }
+
+            // create border-right and animate to 0px to indicate save was received
             elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
             elem.animate({ 'border-right-width': '0px' }, 400);
         }
