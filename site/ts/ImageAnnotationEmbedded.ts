@@ -87,12 +87,16 @@ const emptyState: AnnotationState = {
 };
 
 function createEditorWrapper(): HTMLElement {
-    const editorWrapper = document.createElement('div');
-    editorWrapper.id = 'global-annotation-editor-wrapper';
+    let editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+    if (!editorWrapper) {
+        editorWrapper = document.createElement('div');
+        editorWrapper.id = 'global-annotation-editor-wrapper';
+        document.body.appendChild(editorWrapper);
+    }
+    editorWrapper.innerHTML = '';
     if (annotationManager.globalAnnotationEditor) {
         editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
     }
-    document.body.appendChild(editorWrapper);
     editorWrapper.style.display = 'flex';
     return editorWrapper;
 }
