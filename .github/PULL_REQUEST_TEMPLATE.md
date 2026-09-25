@@ -4,7 +4,9 @@
 https://submitty.org/developer/getting_started/make_a_pull_request for more details). 
 Each title has a prefix, and a limit of 40 chars. A description template has been 
 provided and must be completed in full. Please also ensure that all CI tests 
-are passing. Pull requests that do not meet these requirements are ineligible for 
+are passing.
+If the PR modifies any part of the UI, attaching relevant screenshots/screen-recordings is a compulsory requirement. If the PR modifies any Cypress tests, please attach relevant screenshots confirming that the tests pass locally.
+Pull requests that do not meet these requirements are ineligible for 
 review and may be closed. -->
 
 ### Why is this Change Important & Necessary?
