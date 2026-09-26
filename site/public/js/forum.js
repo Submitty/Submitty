@@ -1267,6 +1267,7 @@ function updateLikesDisplay(post_id, data) {
     const staffLiked = data['likesFromStaff'];
 
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+    // eslint-disable-next-line no-useless-assignment
     let likeCounter = parseInt(likeCounterElement.innerText);
 
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
@@ -1809,6 +1810,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                     displayErrorMessage(json['message']);
                     return;
                 }
+                // eslint-disable-next-line no-useless-assignment
                 let new_url = '';
                 switch (json['data']['type']) {
                     case 'thread':
