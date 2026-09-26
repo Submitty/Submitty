@@ -21,7 +21,15 @@
             "is_full_threads_page": true,
             "activeThread" : null
         } %}
-        <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+        <h4 class="text-center empty-thread-list-message">A thread hasn't been created yet. Be the first to do so!</h4>
+        <div id="thread_list" data-prev_page="{{ prev_page }}" data-next_page="{{ next_page }}">
+            <span class="thread-list-insertion-point" hidden></span>
+        </div>
+        <script>
+            $(function(){
+                initSocketClient();
+            });
+        </script>
     {% else %}
         {%  include "forum/ForumBar.twig" with {
             "current_thread" : button_params.current_thread,
@@ -46,6 +54,7 @@
         <div id="thread_list" data-prev_page="{{ prev_page }}" data-next_page="{{ next_page }}">
             <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
             <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; display: none" aria-hidden="true"></i>
+            <span class="thread-list-insertion-point" hidden></span>
 
             {% include 'forum/displayThreadList.twig' with {
                 "is_full_page" : true,

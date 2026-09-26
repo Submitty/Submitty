@@ -340,6 +340,48 @@ const expectPostHierarchy = (post, expected) => {
     }
 };
 
+describe('Should update an empty forum through the WebSocket handler', () => {
+    it('Should insert the first thread received through the WebSocket handler', () => {
+        cy.login('instructor2');
+        cy.visit(['testing', 'forum']);
+        cy.get('.thread_box_link').should('not.exist');
+        cy.get('#thread_list .thread-list-insertion-point').should('exist');
+
+        const threadId = 1;
+        const nextPage = buildUrl(['testing', 'forum', 'threads', threadId], true);
+        const thread = `
+            <a href="${nextPage}"
+               class="thread_box_link"
+               data-thread_id="${threadId}"
+               data-thread_title="${title5}"
+               id="thread_box_link_${threadId}">
+                <div class="thread_box">
+                    <span data-testid="thread-list-item">${title5}</span>
+                    <div class="thread-content">${content4}</div>
+                    <span class="label_forum">Homework Help</span>
+                </div>
+            </a>
+        `;
+
+        cy.intercept('POST', '**/forum/threads/single', {
+            headers: { 'content-type': 'text/plain' },
+            body: JSON.stringify({ status: 'success', data: thread }),
+        });
+
+        cy.window().then((win) => {
+            win.socketNewOrEditThreadHandler(threadId);
+        });
+
+        cy.get(`#thread_box_link_${threadId}`).should('have.length', 1).and('be.visible').within(() => {
+            cy.get('[data-testid="thread-list-item"]').should('contain', title5);
+            cy.get('.thread-content').should('contain', content4);
+            cy.get('.label_forum').should('contain', 'Homework Help');
+        });
+        cy.get(`#thread_box_link_${threadId}`).should('have.attr', 'href', nextPage);
+        cy.get('.empty-thread-list-message').should('not.exist');
+    });
+});
+
 describe('Should test WebSocket functionality', () => {
     beforeEach(() => {
         cy.login('instructor');
