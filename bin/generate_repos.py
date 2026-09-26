@@ -121,7 +121,10 @@ def create_or_update_repo(folder, subdirectory, which_branch):
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
         for entry in files + dirs:
-            shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+            try:
+                shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+            except FileNotFoundError:
+                continue
     shutil.chown(folder, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 
