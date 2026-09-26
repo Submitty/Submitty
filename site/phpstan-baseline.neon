@@ -3478,12 +3478,6 @@ parameters:
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
-			rawMessage: Implicit array creation is not allowed - variable $notifications might not exist.
-			identifier: variable.implicitArray
-			count: 1
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
 			rawMessage: 'Loose comparison via "!=" between (array<string>|string) and string is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
