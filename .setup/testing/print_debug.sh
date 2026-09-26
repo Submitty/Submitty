@@ -5,14 +5,14 @@
 
 target="/var/log/apache2"
 
-let count=0
+count=0
 echo ${target}
 for f in "${target}"/*
 do
-    sudo echo $(basename $f)
-    sudo cat $f
+    sudo echo "$(basename "$f")"
+    sudo cat "$f"
     echo "~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~"
-    let count=count+1
+    (( count=count+1 ))
 done
 echo ""
 echo "Count: $count"

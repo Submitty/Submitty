@@ -22,10 +22,10 @@ unset _JAVA_OPTIONS
 
 # Setup our python3 version to use for application. We try to use python 3.6.x if available, else fallback to
 # python 3.5.x, but only when we're not explicitly building for python
-if [ -z ${TRAVIS_PYTHON_VERSION} ]; then
+if [ -z "${TRAVIS_PYTHON_VERSION}" ]; then
     PY_VERSION_2=$(pyenv versions | grep -oP "2.7.[0-9]{1,}")
     PY_VERSION_3=$(pyenv versions | grep -oP "3.[0-9]{1,}.[0-9]{1,}" | tail -1)
-    pyenv global ${PY_VERSION_3} ${PY_VERSION_2}
+    pyenv global "${PY_VERSION_3}" "${PY_VERSION_2}"
 fi
 
 mkdir -p ~/.local/bin
@@ -36,13 +36,13 @@ mkdir -p ~/.local/bin
 sudo sed -i -e "s/env_reset/\!env_reset/g" /etc/sudoers
 sudo sed -i -e "s?secure_path=\"?secure_path=\"${PATH}:?g" /etc/sudoers
 
-sudo ln -s $(which python3) /usr/local/bin/python
-sudo ln -s $(which python3) /usr/local/bin/python3
+sudo ln -s "$(which python3)" /usr/local/bin/python
+sudo ln -s "$(which python3)" /usr/local/bin/python3
 
 # Set GH token for Composer so that it does not have API problems. This is a new issue that
 # has come up with Travis for whatever reason, and unfortunately, does mean that building
 # forks and PRs from external collaborators might have issues.
 if [ -n "${GH_TOKEN}" ]; then
     echo "Set GH token for composer"
-    composer config --global github-oauth.github.com ${GH_TOKEN}
+    composer config --global github-oauth.github.com "${GH_TOKEN}"
 fi
