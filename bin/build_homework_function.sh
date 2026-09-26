@@ -18,6 +18,13 @@ function is_daemon_or_root {
     [[ -n "$daemon_user" && "$(whoami)" == "$daemon_user" ]]
 }
 
+function leave_homework_directory {
+    if ! popd > /dev/null 2>&1; then
+        echo "WARNING: unable to restore the previous working directory; using /tmp"
+        cd /tmp || return 1
+    fi
+}
+
 function clean_homework {
     # which assignment to cleanup
     semester="$1"
@@ -181,7 +188,7 @@ function build_homework {
     cpp_res="$?"
     if (( "$cpp_res" != 0 )); then
         echo -e "\nFailed to run cpp preprocessor on ${course_dir}/build/${assignment}/config.json"
-        popd > /dev/null
+        leave_homework_directory
         return 1
     fi
 
@@ -190,7 +197,7 @@ function build_homework {
     py_res="$?"
     if (( "$py_res" != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
-        popd > /dev/null
+        leave_homework_directory
         return 1
     fi
 
@@ -202,7 +209,7 @@ function build_homework {
 
         if (("$set_minutes" != 0)); then
             echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
-            popd > /dev/null
+            leave_homework_directory
             return 1
         fi
     else
@@ -215,7 +222,7 @@ function build_homework {
 
     if (( "$configure_res" != 0 )); then
         echo -e "\nFailed to create a complete_config.json"
-        popd > /dev/null
+        leave_homework_directory
         return 1
     fi
 
@@ -234,7 +241,7 @@ function build_homework {
         echo -e "\nCMAKE ERROR\nlogfile: $hw_build_path/log_cmake_output.txt\n\n"
         cat "$hw_build_path/log_cmake_output.txt"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
-        popd > /dev/null
+        leave_homework_directory
         return 1
     fi
 
@@ -249,7 +256,7 @@ function build_homework {
     if (( "$make_res" != 0 )); then
         echo -e "\nMAKE ERROR\n\n"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
-        popd > /dev/null
+        leave_homework_directory
         return 1
     fi
 
@@ -269,7 +276,7 @@ function build_homework {
     fi
 
     fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
-    popd > /dev/null
+    leave_homework_directory
 }
 
 

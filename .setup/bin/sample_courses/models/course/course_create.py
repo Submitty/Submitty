@@ -285,3 +285,17 @@ class Course_create:
             client = docker.from_env()
             client.images.pull("submitty/tutorial:tutorial_18")
             client.images.pull("submitty/tutorial:database_client")
+
+            containers_json_path = "/var/local/submitty/config/autograding_containers.json"
+            if os.path.exists(containers_json_path):
+                try:
+                    with open(containers_json_path, "r") as f:
+                        containers = json.load(f)
+                    if "default" in containers:
+                        for img in ["submitty/tutorial:tutorial_18", "submitty/tutorial:database_client"]:
+                            if img not in containers["default"]:
+                                containers["default"].append(img)
+                        with open(containers_json_path, "w") as f:
+                            json.dump(containers, f, indent=4)
+                except Exception as e:
+                    print(f"Warning: could not update autograding_containers.json: {e}")
