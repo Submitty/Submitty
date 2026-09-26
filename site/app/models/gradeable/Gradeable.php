@@ -1862,6 +1862,9 @@ class Gradeable extends AbstractModel {
                     $all_users = $this->core->getQueries()->getUsersByRegistrationSections($section_names);
                     foreach ($all_users as $user) {
                         /** @var User $user */
+                        if ($user->getRegistrationType() === 'withdrawn') {
+                            continue;
+                        }
                         $users[$user->getRegistrationSection()][] = $user;
                     }
                 }
@@ -1887,6 +1890,9 @@ class Gradeable extends AbstractModel {
                     $all_users = $this->core->getQueries()->getUsersByRotatingSections($section_names);
                     foreach ($all_users as $user) {
                         /** @var User $user */
+                        if ($user->getRegistrationType() === 'withdrawn') {
+                            continue;
+                        }
                         $users[$user->getRotatingSection()][] = $user;
                     }
                 }
@@ -1934,6 +1940,9 @@ class Gradeable extends AbstractModel {
             $all_users = $this->core->getQueries()->getAllUsers();
             foreach ($all_users as $user) {
                 /** @var User $user */
+                if ($user->getRegistrationType() === 'withdrawn') {
+                    continue;
+                }
                 $users[$user->$get_method() ?? 'NULL'][] = $user;
             }
         }
