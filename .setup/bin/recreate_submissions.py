@@ -8,6 +8,7 @@ import shutil
 from sqlalchemy import create_engine, Table, MetaData, select, insert, update
 import sys
 import typing
+from urllib.parse import quote
 
 from submitty_utils import dateutils as submitty_dateutils
 
@@ -196,7 +197,7 @@ def main():
     parseArgs()
     dbengine_course = create_engine(
         f'postgresql:///submitty_{ARG_SEMESTER}_{ARG_COURSE}?host={ARG_DB_HOST}'
-        f'&port={ARG_DB_PORT}&user={ARG_DB_USER}&password={ARG_DB_PASS}')
+        f'&port={ARG_DB_PORT}&user={quote(ARG_DB_USER, safe="")}&password={quote(ARG_DB_PASS, safe="")}')
     dbconn_course = dbengine_course.connect()
     metadata = MetaData()
     table_users = Table('users', metadata, autoload_with=dbconn_course)
