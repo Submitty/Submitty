@@ -10,6 +10,7 @@ import datetime
 import os
 import sys
 import json
+from urllib.parse import quote
 
 try:
     CONFIG_PATH = os.path.join(
@@ -36,15 +37,15 @@ def setup_db():
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_config['database_host']):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(		# pylint: disable=consider-using-f-string
-            db_config['database_user'],
-            db_config['database_password'],
+            quote(db_config['database_user'], safe=''),
+            quote(db_config['database_password'], safe=''),
             db_name,
             db_config['database_host']
         )
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(			# pylint: disable=consider-using-f-string
-            db_config['database_user'],
-            db_config['database_password'],
+            quote(db_config['database_user'], safe=''),
+            quote(db_config['database_password'], safe=''),
             db_config['database_host'],
             db_name
         )
