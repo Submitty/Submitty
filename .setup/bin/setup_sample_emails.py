@@ -9,6 +9,7 @@ Usage: ./setup_sample_emails.py
 import os
 import random
 import json
+from urllib.parse import quote
 
 from submitty_utils import dateutils
 
@@ -38,7 +39,7 @@ def main():
     random.seed(8430571)
 
     submitty_engine = create_engine(
-        "postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST)
+        "postgresql://{}:{}@{}/submitty".format(quote(DB_USER, safe=''), quote(DB_PASS, safe=''), DB_HOST)
         )
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData()
