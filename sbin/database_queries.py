@@ -7,6 +7,7 @@ This script creates a database connection to be used in other misc scripts
 import json
 import os
 import datetime
+from urllib.parse import quote
 from sqlalchemy import create_engine, MetaData
 import sys
 
@@ -53,10 +54,10 @@ def setup_db():
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            DB_USER, DB_PASSWORD, db_name, DB_HOST)
+            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), db_name, DB_HOST)
     else:
         conn_string = "postgresql://{}:{}@{}/{}".format(
-            DB_USER, DB_PASSWORD, DB_HOST, db_name)
+            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), DB_HOST, db_name)
 
     engine = create_engine(conn_string)
     db = engine.connect()
