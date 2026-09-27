@@ -6,6 +6,7 @@ This script is intended to be run periodically (e.g. by cron) to cleanup stale l
 """
 
 import os
+from urllib.parse import quote
 
 import database_queries
 from sqlalchemy import create_engine, text
@@ -15,9 +16,9 @@ from sqlalchemy.exc import SQLAlchemyError
 def _cleanup_course(db_user, db_pass, db_host, db_name):
     """Delete stale active_graders rows (> 24 hours) from one course database."""
     if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
+        conn_string = f"postgresql://{quote(db_user, safe='')}:{quote(db_pass, safe='')}@/{db_name}?host={db_host}"
     else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
+        conn_string = f"postgresql://{quote(db_user, safe='')}:{quote(db_pass, safe='')}@{db_host}/{db_name}"
 
     try:
         engine = create_engine(conn_string)
