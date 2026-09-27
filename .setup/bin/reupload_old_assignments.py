@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import argparse
+from urllib.parse import quote
 from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, and_, insert, update
 import grp
@@ -76,8 +77,8 @@ def main():
     #Make a connection to the database and grab the necessary tables.
     database = "submitty_" + args.semester + "_" + args.course_name
     print("Connecting to database: ", end="")
-    engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
-                                                           database))
+    engine = create_engine("postgresql://{}:{}@{}/{}".format(
+        quote(DB_USER, safe=''), quote(DB_PASS, safe=''), DB_HOST, database))
     conn = engine.connect()
     metadata = MetaData()
     electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload_with=engine)
