@@ -7,6 +7,7 @@ import os
 from datetime import datetime, timedelta
 from submitty_utils import dateutils
 import json
+from urllib.parse import quote
 
 
 def parse_args():
@@ -43,7 +44,7 @@ def main():
     DB_PASS = settings["database_password"]
 
     engine = create_engine(
-        f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
+        f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={quote(DB_USER, safe='')}&password={quote(DB_PASS, safe='')}")
     conn = engine.connect()
     metadata = MetaData()
     queues_table = Table("queue_settings", metadata, autoload_with=engine)
