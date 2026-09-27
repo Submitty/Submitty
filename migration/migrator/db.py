@@ -1,6 +1,7 @@
 """SQLAlchemy Tables module."""
 
 from pathlib import Path
+from urllib.parse import quote
 from sqlalchemy import Column, create_engine, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
@@ -58,9 +59,11 @@ class Database:
                 )
 
             host = params['database_host']
+            # Percent-encode the user and password so that characters such
+            # as '@', ':', '/' or '%' in them are not read as URL syntax.
             connection_string += '{}:{}@{}/{}'.format(
-                params['database_user'],
-                params['database_password'],
+                quote(params['database_user'], safe=''),
+                quote(params['database_password'], safe=''),
                 f"{host}:{params.get('database_port', 5432)}" if not Path(host).exists() else '',
                 params['dbname']
             )
