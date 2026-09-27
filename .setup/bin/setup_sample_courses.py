@@ -34,6 +34,7 @@ from datetime import datetime
 import glob
 import os
 import os.path
+from urllib.parse import quote
 import random
 
 from sqlalchemy import create_engine, Table, MetaData, insert
@@ -139,7 +140,7 @@ def main() -> None:
     extra_students = generate_random_users(extra_students, users)
 
     submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
-                                    .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
+                                    .format(DB_HOST, DB_PORT, quote(DB_USER, safe=''), quote(DB_PASS, safe='')))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData()
     user_table = Table('users', submitty_metadata, autoload_with=submitty_engine)
