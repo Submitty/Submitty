@@ -59,18 +59,21 @@ const visibleNotifications = computed(() =>
 function markSeen() {
     // Course Page
     if (props.course) {
+        for (const n of localNotifications.value) {
+            if (!n.seen) {
+                n.seen = true;
+            }
+        }
+        localUnseenCount.value = 0;
+        document
+            .querySelectorAll('#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge')
+            .forEach((el) => el.remove());
+
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
                 csrf_token: window.csrfToken,
-            },
-            success: function () {
-                for (const n of localNotifications.value) {
-                    if (!n.seen) {
-                        n.seen = true;
-                    }
-                }
             },
             error: function (err) {
                 console.error(err);
@@ -93,6 +96,17 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
         if (n.id === id && n.course === course) {
             n.seen = true;
             localUnseenCount.value--;
+            const badges = document.querySelectorAll(
+                '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge',
+            );
+            if (localUnseenCount.value <= 0) {
+                badges.forEach((el) => el.remove());
+            }
+            else {
+                badges.forEach((el) => {
+                    el.textContent = `${localUnseenCount.value}`;
+                });
+            }
             break;
         }
     }
@@ -107,6 +121,17 @@ function markAllSeen(courses: Record<string, unknown>[]) {
                 n.seen = true;
             }
         }
+    }
+    const badges = document.querySelectorAll(
+        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge',
+    );
+    if (localUnseenCount.value <= 0) {
+        badges.forEach((el) => el.remove());
+    }
+    else {
+        badges.forEach((el) => {
+            el.textContent = `${localUnseenCount.value}`;
+        });
     }
 }
 
