@@ -10,6 +10,7 @@ import datetime
 import sys
 import getpass
 from json import JSONDecodeError
+from urllib.parse import quote
 from sqlalchemy import create_engine, text  # pylint: disable=import-error
 from sqlalchemy.orm import Session  # pylint: disable=import-error
 from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
@@ -103,10 +104,10 @@ def get_late_day_defaults(term, course):
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
-        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}"
+        connection = (f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@/{db_name}"
                       f"?host={DB_HOST}")
     else:
-        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}"
+        connection = (f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@{DB_HOST}"
                       f"/{db_name}")
 
     engine = create_engine(connection)
