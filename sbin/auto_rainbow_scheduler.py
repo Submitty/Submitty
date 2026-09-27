@@ -10,6 +10,7 @@ the jobs daemon to automatically build or update rainbow grades for that course.
 
 import os
 import json
+from urllib.parse import quote
 from sqlalchemy import create_engine, Table, MetaData, select
 import getpass
 
@@ -91,11 +92,11 @@ def find_all_unarchived_courses():
     db_name = "submitty"
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD,
-                                                              db_name, DB_HOST)
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(
+            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), db_name, DB_HOST)
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD,
-                                                        DB_HOST, db_name)
+        conn_string = "postgresql://{}:{}@{}/{}".format(
+            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), DB_HOST, db_name)
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
