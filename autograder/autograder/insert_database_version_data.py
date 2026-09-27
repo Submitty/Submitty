@@ -6,6 +6,7 @@ handle inserting the row if necessary.
 """
 import json
 import os
+from urllib.parse import quote
 
 from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete, update
@@ -56,9 +57,9 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
+        conn_string = f"postgresql://{quote(db_user, safe='')}:{quote(db_pass, safe='')}@/{db_name}?host={db_host}"
     else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
+        conn_string = f"postgresql://{quote(db_user, safe='')}:{quote(db_pass, safe='')}@{db_host}/{db_name}"
 
     engine = create_engine(conn_string)
     db = engine.connect()
