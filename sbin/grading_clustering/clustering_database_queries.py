@@ -1,6 +1,7 @@
 import json
 import os
 import datetime
+from urllib.parse import quote
 from sqlalchemy import create_engine, text
 import sys
 
@@ -22,9 +23,9 @@ def setup_course_db(db_name):
     """Set up a connection with a specific course database."""
     # pylint: disable=duplicate-code
     if os.path.isdir(DB_HOST):
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}?host={DB_HOST}"
+        conn_string = f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@/{db_name}?host={DB_HOST}"
     else:
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{db_name}"
+        conn_string = f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@{DB_HOST}/{db_name}"
 
     engine = create_engine(conn_string)
     return engine.connect()
