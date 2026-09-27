@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import os.path
+from urllib.parse import quote
 import docker
 import random
 
@@ -86,7 +87,7 @@ class Course_create:
 
         submitty_engine = create_engine(
             f"postgresql:///submitty?host={DB_HOST}&port={DB_PORT}"
-            f"&user={DB_USER}&password={DB_PASS}"
+            f"&user={quote(DB_USER, safe='')}&password={quote(DB_PASS, safe='')}"
         )
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData()
@@ -94,7 +95,7 @@ class Course_create:
 
         engine = create_engine(
             f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}"
-            f"&user={DB_USER}&password={DB_PASS}"
+            f"&user={quote(DB_USER, safe='')}&password={quote(DB_PASS, safe='')}"
         )
         self.conn = engine.connect()
         # need to pass in engine to autoload tables
