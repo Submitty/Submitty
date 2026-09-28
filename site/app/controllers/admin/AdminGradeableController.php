@@ -208,6 +208,7 @@ class AdminGradeableController extends AbstractController {
         "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
         methods: ["GET"]
     )]
+    #[AccessControl(role: "INSTRUCTOR")]
     public function downloadCustomSortCsv(string $gradeable_id): DownloadResponse|WebResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
