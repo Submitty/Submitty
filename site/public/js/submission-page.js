@@ -40,6 +40,7 @@ function syncWithServer(criticalSync) {
         contentType: false,
         success: function (res) {
             lastTime = Date.now();
+            // eslint-disable-next-line no-useless-assignment
             let response = {};
 
             try {
