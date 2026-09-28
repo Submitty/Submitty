@@ -289,6 +289,7 @@ class AdminGradeableController extends AbstractController {
         "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/csv",
         methods: ["POST"]
     )]
+    #[AccessControl(role: "INSTRUCTOR")]
     public function uploadCustomSortCsv(string $gradeable_id): JsonResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -421,6 +422,7 @@ class AdminGradeableController extends AbstractController {
         "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/custom_sort/clear",
         methods: ["POST"]
     )]
+    #[AccessControl(role: "INSTRUCTOR")]
     public function clearCustomSortOrder(string $gradeable_id): JsonResponse {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
