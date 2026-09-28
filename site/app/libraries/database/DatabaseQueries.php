@@ -5430,8 +5430,9 @@ AND gc_id IN (
         return $return;
     }
 
-    public function existsThread($thread_id) {
-        $this->course_db->query("SELECT 1 FROM threads where deleted = false AND id = ?", [$thread_id]);
+    public function existsThread($thread_id, bool $show_deleted = false) {
+        $query = "SELECT 1 FROM threads WHERE id = ?" . ($show_deleted ? "" : " AND deleted = false");
+        $this->course_db->query($query, [$thread_id]);
         $result = $this->course_db->rows();
         return count($result) > 0;
     }
