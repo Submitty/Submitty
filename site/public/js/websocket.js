@@ -135,10 +135,18 @@ class WebSocketClient {
         }
         console.log(`WebSocketClient: Retry in ${this.autoReconnectInterval}ms`);
         this.removeClientListeners();
-        setTimeout(() => {
+        setTimeout(async () => {
             console.log('WebSocketClient: Reconnecting...');
+            try {
+                // Re-request page headers so PHP re-issues a fresh WebSocket token cookie if expired
+                await fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' });
+            }
+            catch (exc) {
+                console.error(`Failed to refresh WebSocket token: ${exc}`);
+            }
             this.open(page, args);
         }, this.autoReconnectInterval);
     }
 }
+
 
