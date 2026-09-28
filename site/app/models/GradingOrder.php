@@ -267,7 +267,10 @@ class GradingOrder extends AbstractModel {
      * @return Submitter|null Previous submitter to grade
      */
     public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
-        return $this->getPrevSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
+        $fn = $this->getFilterFunction($submitter, $component_id, $filter);
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) use ($fn) {
+            return $fn($sub) && !$this->isWithdrawn($sub);
+        });
     }
 
     /**
@@ -279,7 +282,10 @@ class GradingOrder extends AbstractModel {
      * @return Submitter|null Next submitter to grade
      */
     public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
-        return $this->getNextSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
+        $fn = $this->getFilterFunction($submitter, $component_id, $filter);
+        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) use ($fn) {
+            return $fn($sub) && !$this->isWithdrawn($sub);
+        });
     }
 
     /**
@@ -303,6 +309,13 @@ class GradingOrder extends AbstractModel {
         if (is_null($this->grade_inquiry_users)) {
             $this->grade_inquiry_users = $this->core->getQueries()->getGradeInquiriesUsers($this->gradeable->getId(), $ungraded, $component_id);
         }
+    }
+
+    /**
+     * Withdrawn students should never be reachable through prev/next navigation.
+     */
+    private function isWithdrawn(Submitter $sub): bool {
+        return !$sub->isTeam() && $sub->getUser()->getRegistrationType() === 'withdrawn';
     }
 
     /**
