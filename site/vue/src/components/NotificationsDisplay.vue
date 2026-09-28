@@ -56,6 +56,20 @@ const visibleNotifications = computed(() =>
         : filteredNotifications.value.slice(0, 10),
 );
 
+function updateBadgeDOM(count: number) {
+    const badges = document.querySelectorAll(
+        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
+    );
+    if (count <= 0) {
+        badges.forEach((el) => el.remove());
+    }
+    else {
+        badges.forEach((el) => {
+            el.textContent = `${count}`;
+        });
+    }
+}
+
 function markSeen() {
     // Course Page
     if (props.course) {
@@ -65,9 +79,7 @@ function markSeen() {
             }
         }
         localUnseenCount.value = 0;
-        document
-            .querySelectorAll('#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge')
-            .forEach((el) => el.remove());
+        updateBadgeDOM(0);
 
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
@@ -95,18 +107,8 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
         if (n.id === id && n.course === course) {
             n.seen = true;
-            localUnseenCount.value--;
-            const badges = document.querySelectorAll(
-                '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge',
-            );
-            if (localUnseenCount.value <= 0) {
-                badges.forEach((el) => el.remove());
-            }
-            else {
-                badges.forEach((el) => {
-                    el.textContent = `${localUnseenCount.value}`;
-                });
-            }
+            localUnseenCount.value = Math.max(0, localUnseenCount.value - 1);
+            updateBadgeDOM(localUnseenCount.value);
             break;
         }
     }
@@ -115,24 +117,14 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
-        localUnseenCount.value = localUnseenCount.value - Number(count);
+        localUnseenCount.value = Math.max(0, localUnseenCount.value - Number(count));
         for (const n of localNotifications.value) {
             if (n.term === term && n.course === course) {
                 n.seen = true;
             }
         }
     }
-    const badges = document.querySelectorAll(
-        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge',
-    );
-    if (localUnseenCount.value <= 0) {
-        badges.forEach((el) => el.remove());
-    }
-    else {
-        badges.forEach((el) => {
-            el.textContent = `${localUnseenCount.value}`;
-        });
-    }
+    updateBadgeDOM(localUnseenCount.value);
 }
 
 </script>
