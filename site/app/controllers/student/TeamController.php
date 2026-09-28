@@ -10,6 +10,7 @@ use app\models\User;
 use app\models\Team;
 use app\models\gradeable\LateDayInfo;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\routers\AccessControl;
 
 class TeamController extends AbstractController {
     /**
