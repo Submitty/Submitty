@@ -999,7 +999,7 @@ jobs:
 
       - name: Validate image
         if: failure()
-        run: curl --show-error --fail --include http://localhost:1511
+        run: curl --show-error --fail --include http://localhost
 
       - uses: actions/upload-artifact@v7
         if: failure()
