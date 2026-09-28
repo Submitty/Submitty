@@ -644,8 +644,6 @@ progress::-webkit-progress-value {
     padding: 5px 0;
 }
 
-
-
 .sol-textbox-cont {
     height: calc(100% - 120px);
     width: 100%;
