@@ -854,7 +854,9 @@ function gatherInputAnswersByType(type) {
 
     for (let i = 0; i < inputs.length; i++) {
         const this_input_answer = inputs[i];
+        // eslint-disable-next-line no-useless-assignment
         let key = '';
+        // eslint-disable-next-line no-useless-assignment
         let value = '';
         if (type === 'codebox') {
             key = this_input_answer.id;
@@ -956,6 +958,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
+    // eslint-disable-next-line no-useless-assignment
     let message = '';
     // check versions used
     if (versions_used >= versions_allowed) {

@@ -1023,4 +1023,223 @@ STRING;
             chmod($test_file, 0777);
         }
     }
+
+    public function testIsEmptyDirTrue() {
+        FileUtils::createDir($this->path);
+        $this->assertTrue(FileUtils::isEmptyDir($this->path));
+    }
+
+    public function testIsEmptyDirFalse() {
+        FileUtils::createDir($this->path);
+        file_put_contents(FileUtils::joinPaths($this->path, 'test.txt'), 'a');
+        $this->assertFalse(FileUtils::isEmptyDir($this->path));
+    }
+
+    public function testValidateZipFileSizeNotZip() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'notzip.txt');
+        file_put_contents($file, 'not a zip');
+        $this->assertFalse(FileUtils::validateZipFileSize($file));
+    }
+
+    public function testValidateZipFileSizeValidZip() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test.zip');
+        $zip = new \ZipArchive();
+        $zip->open($file, \ZipArchive::CREATE);
+        $zip->addFromString('a.txt', 'hello world');
+        $zip->addFromString('b.txt', 'goodbye world');
+        $zip->close();
+        $this->assertTrue(FileUtils::validateZipFileSize($file));
+    }
+
+    public static function submissionMetaFileProvider() {
+        return [
+            ['.submit.notebook', true],
+            ['.submit.timestamp', true],
+            ['.submit.VCS_CHECKOUT', true],
+            ['.user_assignment_access.json', true],
+            ['.bulk_upload_data.json', true],
+            ['.upload_page_1', true],
+            ['.upload_version_2', true],
+            ['not_a_meta_file.txt', false],
+        ];
+    }
+
+    /**
+     * @dataProvider submissionMetaFileProvider
+     */
+    public function testIsSubmissionMetaFile($filename, $expected) {
+        $this->assertSame($expected, FileUtils::isSubmissionMetaFile($filename));
+    }
+
+    public function testReadAsDataUrl() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test.txt');
+        file_put_contents($file, 'hello world');
+        $expected = 'data:text/plain;base64,' . base64_encode('hello world');
+        $this->assertSame($expected, FileUtils::readAsDataURL($file));
+    }
+
+    public function testReadAsDataUrlNotReadable() {
+        $this->expectException(FileReadException::class);
+        $this->expectExceptionMessage('Unable to read file at the given path.');
+        FileUtils::readAsDataURL(FileUtils::joinPaths($this->path, 'missing.txt'));
+    }
+
+    public function testGetDirContents() {
+        FileUtils::createDir($this->path);
+        file_put_contents(FileUtils::joinPaths($this->path, 'a.txt'), 'a');
+        FileUtils::createDir(FileUtils::joinPaths($this->path, 'sub'));
+        file_put_contents(FileUtils::joinPaths($this->path, 'sub', 'b.txt'), 'b');
+
+        $results = [];
+        FileUtils::getDirContents($this->path, $results);
+        sort($results);
+
+        $expected = [
+            FileUtils::joinPaths($this->path, 'a.txt'),
+            FileUtils::joinPaths($this->path, 'sub'),
+            FileUtils::joinPaths($this->path, 'sub', 'b.txt'),
+        ];
+        sort($expected);
+        $this->assertEquals($expected, $results);
+    }
+
+    public function testGetTopEmptyDir() {
+        FileUtils::createDir(FileUtils::joinPaths($this->path, 'a', 'b', 'c'), true);
+
+        $results = [];
+        FileUtils::getTopEmptyDir(
+            FileUtils::joinPaths($this->path, 'a', 'b', 'c', 'missing.txt'),
+            $this->path,
+            $results
+        );
+
+        $expected = [
+            FileUtils::joinPaths($this->path, 'a'),
+            FileUtils::joinPaths($this->path, 'a', 'b'),
+            FileUtils::joinPaths($this->path, 'a', 'b', 'c'),
+        ];
+        $this->assertEquals($expected, $results);
+    }
+
+    public function testGetTopEmptyDirStopsAtNonEmptyDir() {
+        FileUtils::createDir(FileUtils::joinPaths($this->path, 'x', 'y'), true);
+        file_put_contents(FileUtils::joinPaths($this->path, 'x', 'file.txt'), 'a');
+
+        $results = [];
+        FileUtils::getTopEmptyDir(
+            FileUtils::joinPaths($this->path, 'x', 'y', 'missing.txt'),
+            $this->path,
+            $results
+        );
+
+        $expected = [FileUtils::joinPaths($this->path, 'x', 'y')];
+        $this->assertEquals($expected, $results);
+    }
+
+    public static function validPathProvider() {
+        return [
+            ['folder/file.txt', true],
+            ['folder:name', false],
+            ['folder*name', false],
+            ['folder?name', false],
+            ['folder"name', false],
+            ['folder<name', false],
+            ['folder>name', false],
+            ['folder|name', false],
+            ['folder\0name', false],
+            ['folder/../file.txt', false],
+            ['../file.txt', false],
+        ];
+    }
+
+    /**
+     * @dataProvider validPathProvider
+     */
+    public function testValidPath($path, $expected) {
+        $this->assertSame($expected, FileUtils::validPath($path));
+    }
+
+    public function testCheckForPermissionErrorsFileDoesNotExist() {
+        $file = FileUtils::joinPaths($this->path, 'missing.txt');
+        $this->assertEquals(
+            ["'{$file}' does not exist."],
+            FileUtils::checkForPermissionErrors($file, null, null, null)
+        );
+    }
+
+    /**
+     * /etc/passwd is root-owned, root-group-owned, and world-readable on every Unix system,
+     * which lets us exercise real owner/group name resolution without needing chown/chgrp
+     * privileges (unavailable to the unprivileged, unmapped UID the test container runs as)
+     * to control ownership of a file ourselves. Writability depends on whether the test
+     * happens to run as root, so that expectation is computed rather than hardcoded.
+     */
+    private function expectedNotWritableErrors(string $path): array {
+        return is_writable($path) ? [] : ["'{$path}' is not writable."];
+    }
+
+    public function testCheckForPermissionErrorsOwnerMatch() {
+        $this->assertEquals(
+            $this->expectedNotWritableErrors('/etc/passwd'),
+            FileUtils::checkForPermissionErrors('/etc/passwd', null, 'root', null)
+        );
+    }
+
+    public function testCheckForPermissionErrorsOwnerMismatch() {
+        $expected = array_merge(
+            ["Expected '/etc/passwd' to have owner 'not_a_real_owner' but instead got 'root'."],
+            $this->expectedNotWritableErrors('/etc/passwd')
+        );
+        $this->assertEquals(
+            $expected,
+            FileUtils::checkForPermissionErrors('/etc/passwd', null, 'not_a_real_owner', null)
+        );
+    }
+
+    public function testCheckForPermissionErrorsGroupMismatch() {
+        // No group in this container has any members listed in /etc/group, and an unprivileged
+        // user can't chgrp a file into a group they don't already belong to, so the membership
+        // check below always fails too -- both messages are genuine, simultaneous real output.
+        $expected = array_merge(
+            [
+                "Current user 'nonexistent_user_zzz' is not in the group 'root' that owns '/etc/passwd'.",
+                "Expected '/etc/passwd' to have group 'not_a_real_group' but instead got 'root'.",
+            ],
+            $this->expectedNotWritableErrors('/etc/passwd')
+        );
+        $this->assertEquals(
+            $expected,
+            FileUtils::checkForPermissionErrors('/etc/passwd', 'nonexistent_user_zzz', null, 'not_a_real_group')
+        );
+    }
+
+    public function testCheckForPermissionErrorsUserNotInGroup() {
+        $expected = array_merge(
+            ["Current user 'nonexistent_user_zzz' is not in the group 'root' that owns '/etc/passwd'."],
+            $this->expectedNotWritableErrors('/etc/passwd')
+        );
+        $this->assertEquals(
+            $expected,
+            FileUtils::checkForPermissionErrors('/etc/passwd', 'nonexistent_user_zzz', null, 'root')
+        );
+    }
+
+    public function testCheckForPermissionErrorsNotReadableOrWritable() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test.txt');
+        file_put_contents($file, 'a');
+        try {
+            chmod($file, 0000);
+            $this->assertEquals(
+                ["'{$file}' is not readable.", "'{$file}' is not writable."],
+                FileUtils::checkForPermissionErrors($file, null, null, null)
+            );
+        }
+        finally {
+            chmod($file, 0644);
+        }
+    }
 }
