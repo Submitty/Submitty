@@ -61,6 +61,7 @@ export function changeStudentArrowTooltips(data: string) {
             data = 'default';
         }
     }
+    // eslint-disable-next-line no-useless-assignment
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -728,7 +729,7 @@ function openFrame(
             pdf_full_panel
             && url_file.substring(url_file.length - 3) === 'pdf'
         ) {
-            viewFileFullPanel(html_file, url_file, 0, panel as FileFullPanelOptions);
+            viewFileFullPanel(html_file, url_file, 0, panel);
         }
         else {
             const forceFull
