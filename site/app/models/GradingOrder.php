@@ -264,12 +264,13 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param string $filter The filter to use when checking submitters
+     * @param bool $skip_withdrawn True to skip withdrawn students (individual gradeables only)
      * @return Submitter|null Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
+    public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default', bool $skip_withdrawn = false): ?Submitter {
         $fn = $this->getFilterFunction($submitter, $component_id, $filter);
-        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) use ($fn) {
-            return $fn($sub) && !$this->isWithdrawn($sub);
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) use ($fn, $skip_withdrawn) {
+            return $fn($sub) && !($skip_withdrawn && $this->isWithdrawn($sub));
         });
     }
 
@@ -279,12 +280,13 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param string $filter The filter to use when checking submitters
+     * @param bool $skip_withdrawn True to skip withdrawn students (individual gradeables only)
      * @return Submitter|null Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
+    public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default', bool $skip_withdrawn = false): ?Submitter {
         $fn = $this->getFilterFunction($submitter, $component_id, $filter);
-        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) use ($fn) {
-            return $fn($sub) && !$this->isWithdrawn($sub);
+        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) use ($fn, $skip_withdrawn) {
+            return $fn($sub) && !($skip_withdrawn && $this->isWithdrawn($sub));
         });
     }
 
@@ -312,7 +314,7 @@ class GradingOrder extends AbstractModel {
     }
 
     /**
-     * Withdrawn students should never be reachable through prev/next navigation.
+     * True if the submitter is a withdrawn student on an individual (non-team) gradeable.
      */
     private function isWithdrawn(Submitter $sub): bool {
         return !$sub->isTeam() && $sub->getUser()->getRegistrationType() === 'withdrawn';
