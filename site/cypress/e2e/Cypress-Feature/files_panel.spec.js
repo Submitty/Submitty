@@ -215,9 +215,9 @@ describe('Test cases involving auto opening PDFs in the full panel view', () => 
         cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
         cy.login('instructor');
         gradeStudent('bitdiddle');
+        cy.get('#submission_browser_btn').click();
         cy.get('#autoscroll_id').click();
         cy.get('#autoscroll_id').should('be.checked');
-        cy.get('#submission_browser_btn').click();
         cy.get('#submissions').click();
         assertSubmissionsBrowserOpen();
         cy.get(`[data-file-name="${pdfName}"] [aria-label="Show file in full panel"]`).click();
