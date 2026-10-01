@@ -1,0 +1,3 @@
+Current Balance: 150. Balance should be 150 after depositing 150
+Current Balance: 150. Balance should remain 150 after trying to deposit negative amounts
+Current Balance: 150. Balance should remain 150 after trying to deposit zero

@@ -1,0 +1,4 @@
+Current Balance: 150. Balance should be 50 after withdrawing 50
+Current Balance: 150. Balance should remain 50 after trying to withdraw more than available
+Current Balance: 150. Balance should remain 50 after trying to withdraw nothing
+Current Balance: 100. Balance should be 0 after withdrawing 50
