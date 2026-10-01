@@ -292,3 +292,48 @@ describe('Test cases involving auto opening single file submissions', () => {
         assertSubmissionsBrowserClosed();
     });
 });
+
+describe('Test cases involving zooming images in the full panel view', () => {
+    it('test the zoom buttons on an image submission', () => {
+        cy.login('bitdiddle');
+        cy.visit(['sample', 'gradeable', 'open_homework']);
+        cy.get('#startnew').then(($clearBtn) => {
+            if (!$clearBtn.is(':disabled')) {
+                $clearBtn.click();
+            }
+        });
+        cy.get('#upload1').selectFile('cypress/fixtures/sea_animals.png', { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
+        cy.get('#submitted-files > div').should('contain', 'sea_animals.png');
+        cy.logout();
+
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.login('instructor');
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('bitdiddle').siblings().eq(6).click();
+        cy.get('#submission_browser_btn').click();
+        cy.get('#submissions').click();
+        cy.get('a.image-file[data-file_name="sea_animals.png"]').click();
+
+        cy.get('#annotatable-image').should('be.visible');
+        cy.get('#file-zoom-display').should('have.text', '100%');
+        cy.get('#annotatable-image').invoke('outerWidth').then((fitWidth) => {
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('#file-zoom-display').should('have.text', '120%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth * 1.2, 2);
+
+            // zoom never goes below the size that fits the panel
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('#file-zoom-display').should('have.text', '100%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth, 2);
+        });
+
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#annotatable-image').should('not.exist');
+    });
+});
