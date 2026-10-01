@@ -251,34 +251,7 @@ function clearAnnotations(): void {
         // Hide any open annotation editor instead of removing it
         hideEditorWrapper();
 
-        // Restore original image if it was replaced with MarkerView
-        const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
-        if (markerView && 'targetImage' in markerView && markerView.targetImage) {
-            const originalImgElement: HTMLImageElement = markerView.targetImage;
-
-            // Restore original properties
-            if (originalImgElement.dataset.originalId) {
-                originalImgElement.id = originalImgElement.dataset.originalId;
-                originalImgElement.className = originalImgElement.dataset.originalClass || '';
-
-                // Restore original size properties
-                if (originalImgElement.dataset.originalWidth) {
-                    originalImgElement.style.width = originalImgElement.dataset.originalWidth;
-                }
-                if (originalImgElement.dataset.originalHeight) {
-                    originalImgElement.style.height = originalImgElement.dataset.originalHeight;
-                }
-            }
-
-            // Replace MarkerView back with original image
-            if (markerView.parentElement) {
-                markerView.parentElement.replaceChild(originalImgElement, markerView);
-            }
-
-            // Update manager reference
-            annotationManager.originalImg = originalImgElement;
-            applyImageZoom();
-        }
+        restoreOriginalImage();
 
         $('#annotation-status').text('Annotations cleared (not saved)').css('color', 'red');
     }
@@ -310,7 +283,11 @@ function cleanupAnnotationEditor(): void {
     // Hide and remove any existing annotation editor wrapper to ensure fresh start
     hideEditorWrapper(true);
 
-    // Restore original image if it was replaced with MarkerView
+    restoreOriginalImage();
+}
+
+// Swaps the MarkerView back out for the original image, keeping the current zoom
+function restoreOriginalImage(): void {
     const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
     if (markerView && 'targetImage' in markerView && markerView.targetImage) {
         const originalImgElement: HTMLImageElement = markerView.targetImage;
@@ -340,6 +317,7 @@ function cleanupAnnotationEditor(): void {
     }
 }
 
+// Matches minScale/maxScale for PDFs in PDFEmbedded.js, which shares the zoom controls
 const MIN_IMAGE_ZOOM = 1;
 const MAX_IMAGE_ZOOM = 5;
 
