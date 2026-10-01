@@ -1627,6 +1627,7 @@ class ElectronicGraderController extends AbstractController {
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
      * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
      */
+    #[AccessControl(permission: "grading.electronic.submit_team_form")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")]
     public function randomizeTeamRotatingSections($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
