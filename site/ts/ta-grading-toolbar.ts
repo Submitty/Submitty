@@ -80,6 +80,7 @@ export function gotoPrevStudent(clusterMode = false) {
             // eslint-disable-next-line no-var
             var component_id = getFirstOpenComponentId(true);
             if (component_id === NO_COMPONENT_ID) {
+                // eslint-disable-next-line no-useless-assignment
                 component_id = getFirstOpenComponentId();
             }
             break;
@@ -144,6 +145,7 @@ export function gotoNextStudent(clusterMode = false) {
             // eslint-disable-next-line no-var
             var component_id = getFirstOpenComponentId(true);
             if (component_id === NO_COMPONENT_ID) {
+                // eslint-disable-next-line no-useless-assignment
                 component_id = getFirstOpenComponentId();
             }
             break;

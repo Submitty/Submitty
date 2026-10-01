@@ -88,7 +88,10 @@ class NotificationController extends AbstractController {
         $url = Notification::getUrl($this->core, $metadata);
 
         $thread_id = Notification::getThreadIdIfExists($metadata);
-        if ($thread_id !== null && $thread_id > 0 && !$this->core->getQueries()->existsThread((string) $thread_id)) {
+        $show_deleted = $this->core->getUser()->accessGrading()
+            && isset($_COOKIE['show_deleted'])
+            && $_COOKIE['show_deleted'] === "1";
+        if ($thread_id !== null && $thread_id > 0 && !$this->core->getQueries()->existsThread((string) $thread_id, $show_deleted)) {
             $this->core->addErrorMessage("The content for this notification has been deleted or is no longer available.");
             return new RedirectResponse($this->core->buildCourseUrl());
         }
