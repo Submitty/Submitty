@@ -114,8 +114,8 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                                 // scroll to page on load
                                 const initialPage = $(`#pageContainer${page_id}`);
                                 if (initialPage.length) {
-                                    const scrollContainer = $('#file-content').length ? $('#file-content') : $('#submission_browser');
-                                    scrollContainer.scrollTop(Math.max(page.offsetTop, 0));
+                                    // Which ancestor scrolls depends on the panel layout
+                                    initialPage[0].scrollIntoView({ block: 'start' });
                                 }
                             }
                         }));
