@@ -345,9 +345,10 @@ const MAX_IMAGE_ZOOM = 5;
 
 // The original <img> holds the zoom state because it survives swaps with the MarkerView.
 // Loading a new file creates a new <img>, which resets zoom to 100%.
+// Only the submission panel has zoom controls, so lookups are scoped to its #file-content.
 function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerView | null } {
-    const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
-    const img = markerView?.targetImage ?? document.getElementById('annotatable-image') as HTMLImageElement | null;
+    const markerView = document.querySelector<MarkerView>('#file-content #annotation-marker-view');
+    const img = markerView?.targetImage ?? document.querySelector<HTMLImageElement>('#file-content #annotatable-image');
     return { img, markerView };
 }
 
@@ -356,6 +357,10 @@ function zoomImage(delta: number): boolean {
     const { img, markerView } = getZoomableImage();
     if (!img) {
         return false;
+    }
+    // The fit size can't be measured until the image loads
+    if (!img.naturalWidth) {
+        return true;
     }
 
     // Record the size the image fits the panel at before the first zoom

@@ -897,7 +897,9 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
                     // Clear previous image content before appending new content
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
-                    $('#file-zoom-display').text('100%');
+                    if (panel === 'submission') {
+                        $('#file-zoom-display').text('100%');
+                    }
                 },
             });
         }
