@@ -1189,8 +1189,12 @@ $(() => {
             '.component-container',
         ).length;
 
+        if (numComponents === 0) {
+            return;
+        }
+
         // Note: we use the 'toggle' functions instead of the 'open' functions
-        //  Since the 'open' functions don't close any components
+        // Since the 'open' functions don't close any components
         if (openComponentId === NO_COMPONENT_ID) {
         // No component is open, so open the first one
             const componentId = getComponentIdByOrder(0);
