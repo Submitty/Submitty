@@ -188,6 +188,9 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
 
                         $('#file-content')[0].removeEventListener('wheel', handleWheel);
                         $('#file-content')[0].addEventListener('wheel', handleWheel, { passive: false });
+
+                        // scrollToPage in ta-grading-rubric.ts waits for this to scroll a PDF that was still loading
+                        $(document).trigger('pdf-rendered');
                     });
                 });
             },
