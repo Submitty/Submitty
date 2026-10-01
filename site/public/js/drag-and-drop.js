@@ -504,7 +504,13 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
             },
             type: 'POST',
             success: function (response) {
-                response = JSON.parse(response);
+                try {
+                    response = JSON.parse(response);
+                }
+                catch (e) {
+                    reject({ status: 'failed', message: 'Unexpected server response' });
+                    return;
+                }
                 if (response['status'] === 'success') {
                     resolve(response);
                 }
@@ -512,9 +518,9 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
                     reject(response);
                 }
             },
-            error: function (err) {
+            error: function () {
                 console.log(`Error while trying to validate user id${user_id}`);
-                reject({ status: 'failed', message: err });
+                reject({ status: 'failed', message: `Could not reach the server to validate user id ${user_id}` });
             },
         });
     });
@@ -674,7 +680,13 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             },
             type: 'POST',
             success: function (response) {
-                response = JSON.parse(response);
+                try {
+                    response = JSON.parse(response);
+                }
+                catch (e) {
+                    reject({ status: 'failed', message: 'Unexpected server response' });
+                    return;
+                }
                 if (response['status'] === 'success') {
                     resolve(response);
                 }
@@ -682,9 +694,9 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
                     reject(response);
                 }
             },
-            error: function (err) {
+            error: function () {
                 console.log('Failed while submiting split item');
-                reject({ status: 'failed', message: err });
+                reject({ status: 'failed', message: `Could not reach the server to submit ${user_id}` });
             },
         });
     });
@@ -708,7 +720,13 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
             },
             type: 'POST',
             success: function (response) {
-                response = JSON.parse(response);
+                try {
+                    response = JSON.parse(response);
+                }
+                catch (e) {
+                    reject({ status: 'failed', message: 'Unexpected server response' });
+                    return;
+                }
                 if (response['status'] === 'success') {
                     resolve(response);
                 }
