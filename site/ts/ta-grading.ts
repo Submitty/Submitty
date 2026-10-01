@@ -248,6 +248,10 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
+    if (clear_open_files) {
+        localStorage.removeItem('ta-grading-auto-open-full-panel-file');
+    }
+
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
@@ -806,6 +810,18 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
 
+    // Images and PDFs open here instead of inline, so auto open tracks them separately
+    if (panel === 'submission') {
+        let file_name = name;
+        try {
+            file_name = decodeURIComponent(name);
+        }
+        catch {
+            // name was not URL-encoded
+        }
+        localStorage.setItem('ta-grading-auto-open-full-panel-file', file_name);
+    }
+
     const promise = loadFileForFullView(name, path, page_num, panel);
     $(fileFullPanelOptions[panel]['fileView']).show();
     $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
@@ -931,6 +947,9 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
+    if (panel === 'submission') {
+        localStorage.removeItem('ta-grading-auto-open-full-panel-file');
+    }
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
     // Also remove image annotation containers

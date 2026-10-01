@@ -315,8 +315,21 @@ function readCookies() {
         });
     }
 
+    // Reopen the file last shown in the full panel if this student has a file with the same name
+    let full_panel_restored = false;
+    const full_panel_file = localStorage.getItem('ta-grading-auto-open-full-panel-file');
+    if (autoscroll === 'on' && full_panel_file !== null) {
+        const elem = $('#file-container a[file-url][data-file_name]').toArray().find(
+            (element: HTMLElement) => element.dataset.file_name === full_panel_file,
+        );
+        if (elem !== undefined) {
+            viewFileFullPanel(full_panel_file, decodeURIComponent(elem.getAttribute('file-url')!));
+            full_panel_restored = true;
+        }
+    }
+
     // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
-    if (autoscroll === 'on') {
+    if (autoscroll === 'on' && !full_panel_restored) {
         // the number of files and folders that are open in the submissions and results browser
         const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
         // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)

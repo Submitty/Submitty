@@ -153,6 +153,30 @@ describe('Test cases involving the files panel', () => {
         cy.get('[aria-label="Collapse File"]').click();
         cy.get('#file_viewer_full_panel_iframe').should('not.exist');
     });
+
+    it('test the auto open checkbox with the full panel view', () => {
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('be.checked');
+
+        // every student has a .submit.timestamp, so it should reopen on the next student
+        cy.get('#submissions').click();
+        cy.get('i[title="Show file in full panel"]').first().click();
+        cy.get('#grading_file_name').should('contain', '.submit.timestamp');
+
+        cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
+        cy.get('#grading_file_name').should('contain', '.submit.timestamp');
+        cy.get('#file_viewer_full_panel_iframe').should('be.visible');
+
+        // collapsing the file stops it from reopening
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#prev-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'hamile');
+        cy.get('#file_viewer_full_panel_iframe').should('not.exist');
+
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('not.be.checked');
+    });
 });
 
 describe('Test cases involving auto opening single file submissions', () => {
