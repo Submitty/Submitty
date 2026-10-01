@@ -319,10 +319,8 @@ function readCookies() {
     let full_panel_restored = false;
     const full_panel_file = localStorage.getItem('ta-grading-auto-open-full-panel-file');
     if (autoscroll === 'on' && full_panel_file !== null) {
-        const elem = $('#file-container a[file-url][data-file_name]').toArray().find(
-            (element: HTMLElement) => element.dataset.file_name === full_panel_file,
-        );
-        if (elem !== undefined) {
+        const elem = document.querySelector(`#file-container a[file-url][data-file_name='${CSS.escape(full_panel_file)}']`);
+        if (elem !== null) {
             viewFileFullPanel(full_panel_file, decodeURIComponent(elem.getAttribute('file-url')!));
             full_panel_restored = true;
         }
