@@ -34,6 +34,7 @@ const GENERAL_INFORMATION = {
 
 function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '') {
     try {
+        // eslint-disable-next-line no-unassigned-vars
         let currentTool;
         let NUM_PAGES = 0;
 
