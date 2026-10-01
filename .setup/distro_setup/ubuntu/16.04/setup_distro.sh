@@ -20,14 +20,14 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 apt-get install -qqy software-properties-common
-echo "\n" | add-apt-repository ppa:webupd8team/java
+printf '\n' | add-apt-repository ppa:webupd8team/java
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
 
 apt-get update -qqy
 apt-get install -qqy python python-dev python3 python3-dev libpython3.5
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.101'
     export DATABASE_PORT=15432
 fi
@@ -67,7 +67,7 @@ apt-get install -qqy postgresql-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
 apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip php7.0-mbstring php7.0-xml
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     apt-get install -qqy php7.0-sqlite3 php-xdebug
 fi
 
@@ -111,7 +111,7 @@ apt-get install -qqy -y docker-ce
 systemctl status docker | head -n 100
 
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     apt-get install -qqy gitweb libcgi-session-perl
 fi
 

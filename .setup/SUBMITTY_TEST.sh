@@ -21,13 +21,15 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
+    twig-lint : lint all Twig templates, or pass arguments for specific files
+                usage: twig-lint [--format FORMAT] [--show-deprecations] [--] [<filename>...]
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
-    py-flake8 : run flake8 [option: specific_file.py]
-    py-pylint : run pylint [option: specific_file.py]
-    py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+    shell-lint: run ShellCheck
+    py-lint   : run ruff check [option: --fix, specific_file.py]
+    py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
     py-unit   : run all python unit tests except migration
     py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
     py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
@@ -113,6 +115,15 @@ run_php_cs() {
     fi
 }
 
+run_twig_lint() {
+    local ARGS=("${@:2}")
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site composer run-script lint:twig-specific-file -- "${ARGS[@]}"
+    else
+        run_in_container /home/submitty/site composer run-script lint:twig
+    fi
+}
+
 run_js_es() {
     parse_args "${@:2}"
     script="eslint"
@@ -149,47 +160,57 @@ run_css_style() {
     fi
 }
 
-run_php_unit() {
-    parse_args "${@:2}"
-    run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
+run_shell_lint() {
+    run_in_container /home/submitty python3 run_shellcheck.py
 }
 
-run_py_flake8() {
+run_php_unit() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m flake8 "${ARGS[@]}"
+    run_in_container /home/submitty/site php vendor/bin/phpunit ${ARGS[@]+"${ARGS[@]}"}
+}
+
+run_py_lint() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff check --fix "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m flake8
+        run_in_container /home/submitty ruff check "${ARGS[@]}"
     fi
 }
 
-run_py_pylint() {
+run_py_format() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m pylint "${ARGS[@]}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff format "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m pylint --recursive=y .
+        run_in_container /home/submitty ruff format --check --diff "${ARGS[@]}"
     fi
 }
 
 run_py_unit_utils() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_migration() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/migration python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/migration python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_autograder() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/autograder python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/autograder python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_daemon() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . "${ARGS[@]}"
+    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . ${ARGS[@]+"${ARGS[@]}"}
 }
 
 # process input arguments
@@ -204,6 +225,9 @@ case "${1:-}" in
         run_php_cs
         run_php_stan
         ;;
+    twig-lint)
+        run_twig_lint "$@"
+        ;;
     php-unit)
         run_php_unit "$@"
         ;;
@@ -216,17 +240,14 @@ case "${1:-}" in
     css-lint)
         run_css_style "$@"
         ;;
-    py-flake8)
-        run_py_flake8 "$@"
-        ;;
-    py-pylint)
-        run_py_pylint "$@"
+    shell-lint)
+        run_shell_lint
         ;;
     py-lint)
-        echo "Running pylint..."
-        run_py_pylint "$@"
-        echo "Running flake8..."
-        run_py_flake8 "$@"
+        run_py_lint "$@"
+        ;;
+    py-format)
+        run_py_format "$@"
         ;;
     py-unit-utils)
         run_py_unit_utils "$@"

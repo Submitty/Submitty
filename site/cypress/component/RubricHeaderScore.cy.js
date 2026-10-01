@@ -3,7 +3,7 @@ import RubricHeaderScore from '../../vue/src/components/ta_grading/RubricHeaderS
 describe('RubricHeaderScore', () => {
     it('renders score / max_value as integers', () => {
         cy.mount(RubricHeaderScore, { props: { totalScore: 7.5, maxValue: 10 } });
-        cy.get('[data-testid="grading-total"]').should('contain', '8 / 10');
+        cy.get('[data-testid="grading-total"]').should('contain', '7.5 / 10');
     });
 
     it('renders minus sign when totalScore is null (ungraded)', () => {

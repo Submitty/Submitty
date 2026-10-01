@@ -33,6 +33,9 @@ file (
   "${allowed_autograding_commands_headers}${allowed_autograding_commands_default_definition}${allowed_autograding_commands_default_obj}${end_definition}${allowed_autograding_commands_custom_definition}${allowed_autograding_commands_custom_obj}${end_definition}"
 )
 
+# HOPEFULLY THIS IS ONLY A TEMPORARY WORKAROUND
+add_compile_options(-gdwarf-4)
+
 ###################################################################################
 # source files
 

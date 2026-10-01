@@ -149,6 +149,9 @@
                 'cookie': 'grading_details_columns',
                 'format': 'json',
             },
+            'events': {
+                'save': '() => { window.location.reload(); }',
+            },
         } %}
         {% if full_access_grader_permission and is_clustering_allowed %}
             {% include 'Vue.twig' with {
