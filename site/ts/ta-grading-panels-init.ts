@@ -1,5 +1,5 @@
 import { initializeResizablePanels } from './resizable-panels';
-import { viewFileFullPanel } from './ta-grading';
+import { getFileTreePath, viewFileFullPanel } from './ta-grading';
 import {
     taLayoutDet,
     resetSinglePanelLayout,
@@ -315,13 +315,13 @@ function readCookies() {
         });
     }
 
-    // Reopen the file last shown in the full panel if this student has a file with the same name
+    // Reopen the file last shown in the full panel if this student has a file at the same path
     let full_panel_restored = false;
     const full_panel_file = localStorage.getItem('ta-grading-auto-open-full-panel-file');
     if (autoscroll === 'on' && full_panel_file !== null) {
-        const elem = document.querySelector(`#file-container a[file-url][data-file_name='${CSS.escape(full_panel_file)}']`);
-        if (elem !== null) {
-            viewFileFullPanel(full_panel_file, decodeURIComponent(elem.getAttribute('file-url')!));
+        const elem = $('#file-container a[file-url]').toArray().find((file_link) => getFileTreePath(file_link) === full_panel_file);
+        if (elem !== undefined) {
+            viewFileFullPanel(encodeURIComponent(elem.dataset.file_name!), elem.getAttribute('file-url')!);
             full_panel_restored = true;
         }
     }
@@ -336,8 +336,8 @@ function readCookies() {
         );
         if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
             const elem = SubmissionFiles[0];
-            const fileName = elem.dataset.file_name!;
-            const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
+            const fileName = encodeURIComponent(elem.dataset.file_name!);
+            const fileUrl = elem.getAttribute('file-url')!;
             if (elem.classList.contains('image-file')) {
                 // single submitted image file fills up the whole screen
                 viewFileFullPanel(fileName, fileUrl);

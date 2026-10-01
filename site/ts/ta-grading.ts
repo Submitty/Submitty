@@ -802,6 +802,14 @@ const fileFullPanelOptions = {
     },
 };
 
+// Identifies a file in the submissions and results browser by its folders and name,
+// e.g. "submissions/q2/answer.pdf", which stays the same from student to student.
+export function getFileTreePath(file_link: Element): string {
+    const folders = $(file_link).parents('div[id^=div_viewer_]').toArray().reverse().map((folder) => folder.dataset.file_name);
+    return [...folders, file_link.getAttribute('data-file_name')].join('/');
+}
+
+// name and path are URL-encoded, matching the links in SubmissionPanel.twig
 export function viewFileFullPanel(name: string, path: string, page_num = 0, panelStr: string = 'submission') {
     const panel = panelStr as FileFullPanelOptions;
     if ($(fileFullPanelOptions[panel]['viewer']).length !== 0) {
@@ -812,14 +820,10 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     // Images and PDFs open here instead of inline, so auto open tracks them separately
     if (panel === 'submission') {
-        let file_name = name;
-        try {
-            file_name = decodeURIComponent(name);
+        const file_link = document.querySelector(`#file-container a[file-url="${CSS.escape(path)}"]`);
+        if (file_link !== null) {
+            localStorage.setItem('ta-grading-auto-open-full-panel-file', getFileTreePath(file_link));
         }
-        catch {
-            // name was not URL-encoded
-        }
-        localStorage.setItem('ta-grading-auto-open-full-panel-file', file_name);
     }
 
     const promise = loadFileForFullView(name, path, page_num, panel);
