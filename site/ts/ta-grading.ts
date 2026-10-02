@@ -33,6 +33,8 @@ declare global {
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
+        zoomFile(delta: number): void;
+        triggerPDFScale?(delta: number): void;
         uploadAttachment(): void;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
@@ -895,6 +897,9 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
                     // Clear previous image content before appending new content
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                    if (panel === 'submission') {
+                        $('#file-zoom-display').text('100%');
+                    }
                 },
             });
         }
@@ -928,6 +933,14 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
         }
     }
 }
+
+// The zoom controls in FileView.twig serve both the image and PDF viewers.
+// PDFEmbedded.js defines triggerPDFScale only after a PDF has been opened.
+window.zoomFile = function (delta: number) {
+    if (!window.zoomImage(delta)) {
+        window.triggerPDFScale?.(delta);
+    }
+};
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
