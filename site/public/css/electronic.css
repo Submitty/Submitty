@@ -248,6 +248,31 @@ progress::-webkit-progress-value {
     justify-content: center;
 }
 
+.grade-panel button:focus-visible,
+.grade-panel input:focus-visible,
+.grade-panel textarea:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.grade-panel .key_to_click:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.grading_toolbar button:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.grading_toolbar input:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.grading_toolbar textarea:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.grading_toolbar .key_to_click:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.rubric_panel button:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.rubric_panel input:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.rubric_panel textarea:focus-visible,
+/* stylelint-disable-next-line selector-class-pattern */
+.rubric_panel .key_to_click:focus-visible {
+    outline: 2px solid var(--hover-dark-border-actionable-blue);
+    outline-offset: 2px;
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
     margin-right: 5px;
