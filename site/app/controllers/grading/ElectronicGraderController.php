@@ -1076,13 +1076,19 @@ class ElectronicGraderController extends AbstractController {
 
         $sort = $_COOKIE['sort'] ?? 'id';
         $direction = $_COOKIE['direction'] ?? 'ASC';
-        if ($peer) {
-            $sort = $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING
-                ? 'random'
-                : 'peer';
+
+        if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+            $sort = 'random';
             $direction = 'ASC';
         }
-
+        elseif ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
+        elseif ($peer) {
+            $sort = 'peer';
+            $direction = 'ASC';
+        }
 
         //Get grading_details Columns
         $grading_details_columns = [];
@@ -1096,7 +1102,6 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
-
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
@@ -1879,6 +1884,10 @@ class ElectronicGraderController extends AbstractController {
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;
+        if ($gradeable->getCustomSort()) {
+            $sort = 'custom';
+            $direction = 'ASC';
+        }
         if ($who_id === '') {
             $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
             $order_grading_sections->sort($sort, $direction);
@@ -2442,10 +2451,15 @@ class ElectronicGraderController extends AbstractController {
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['graded_version'] ?? null;
+        $cluster_grading = $_POST['cluster_grading'] ?? null;
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
         // Validate required parameters
+        if (!in_array($cluster_grading, ['true', 'false'], true)) {
+            $this->core->getOutput()->renderJsonFail('Invalid or missing cluster_grading parameter. Please refresh the page.');
+            return;
+        }
         if ($custom_message === null) {
             $this->core->getOutput()->renderJsonFail('Missing custom_message parameter');
             return;
@@ -2538,7 +2552,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         $clustering_enabled = $this->core->getConfig()->isSubmissionClusteringEnabled() && $this->core->getUser()->accessFullGrading();
-        $ta_grading_cluster_mode = $clustering_enabled && ($_COOKIE['ta_grading_cluster_mode'] ?? '') === 'true' && $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
+        $ta_grading_cluster_mode = $clustering_enabled && $cluster_grading === 'true' && $this->core->getCourseEntityManager()->getRepository(\app\entities\grading_cluster\GradingClusterConfig::class)->hasClusters($gradeable_id);
 
         // Check if the user can silently edit assigned marks
         if ($ta_grading_cluster_mode || !$this->core->getAccess()->canI('grading.electronic.silent_edit')) {

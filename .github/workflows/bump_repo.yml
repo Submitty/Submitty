@@ -19,10 +19,13 @@ jobs:
           python-version: 3.11
       - name: Update version
         id: update-version
+        env:
+          REPO_NAME: ${{ github.event.client_payload.repo_name }}
+          REPO_TAG: ${{ github.event.client_payload.tag }}
         run: >
           python3 .setup/bin/update_repo_version.py
-          -r ${{ github.event.client_payload.repo_name }}
-          -v ${{ github.event.client_payload.tag }}
+          -r "$REPO_NAME"
+          -v "$REPO_TAG"
           >> $GITHUB_OUTPUT
       - name: Create Pull Request
         uses: Submitty/peter-evans-create-pull-request@v23.07.00
