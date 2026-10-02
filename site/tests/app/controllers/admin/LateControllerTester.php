@@ -54,7 +54,7 @@ class LateControllerTester extends BaseUnitTest {
         $original_post = $_POST;
         $original_files = $_FILES;
         $_POST = [
-            'g_id' => 'homework',
+            'g_id' => 'gradeable',
             'user_id' => 'student',
             'late_days' => $days,
             'reason_for_exception' => $reason,
@@ -72,7 +72,7 @@ class LateControllerTester extends BaseUnitTest {
             $queries->method('getTeamByGradeableAndUser')->willReturn(null);
             $queries->expects($changed ? $this->once() : $this->never())
                 ->method('updateExtensions')
-                ->with('student', 'homework', $days, $reason);
+                ->with('student', 'gradeable', $days, $reason);
 
             $response = $this->controller->updateExtension();
             $this->assertSame('success', $response->json_response->json['status']);
@@ -91,7 +91,7 @@ class LateControllerTester extends BaseUnitTest {
     public function testReasonOnlyTeamExtension(int $option, array $expected_users): void {
         $original_post = $_POST;
         $original_files = $_FILES;
-        $_POST = ['g_id' => 'homework', 'user_id' => 'student', 'late_days' => '2', 'reason_for_exception' => 'travel', 'option' => $option];
+        $_POST = ['g_id' => 'gradeable', 'user_id' => 'student', 'late_days' => '2', 'reason_for_exception' => 'travel', 'option' => $option];
         $_FILES = [];
         try {
             $user = $this->createMockModel(User::class);
@@ -113,7 +113,7 @@ class LateControllerTester extends BaseUnitTest {
             $queries->expects($this->exactly(count($expected_users)))->method('updateExtensions')
                 ->willReturnCallback(function ($user_id, $g_id, $days, $reason) use (&$updated_users): void {
                     $updated_users[] = $user_id;
-                    $this->assertSame(['homework', '2', 'travel'], [$g_id, $days, $reason]);
+                    $this->assertSame(['gradeable', '2', 'travel'], [$g_id, $days, $reason]);
                 });
             $core = $this->createMock(Core::class);
             $core->method('getQueries')->willReturn($queries);

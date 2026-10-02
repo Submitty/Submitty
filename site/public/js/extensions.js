@@ -1,6 +1,6 @@
 /* global buildCourseUrl, showPopup, closePopup, captureTabInModal */
 /* global luxon */
-/* exported confirmExtension, clearDate, deleteHomeworkExtension, setLateDays, editHomeworkExtension, saveHomeworkExtension */
+/* exported confirmExtension, clearDate, deleteGradeableExtension, setLateDays, editGradeableExtension, saveGradeableExtension */
 const DateTime = luxon.DateTime;
 
 $(document).ready(() => {
@@ -14,7 +14,7 @@ $(document).ready(() => {
     });
 });
 
-function updateHomeworkExtension() {
+function updateGradeableExtension() {
     const fd = new FormData($('#extensions-form').get(0));
     const url = buildCourseUrl(['extensions', 'update']);
     $.ajax({
@@ -46,15 +46,15 @@ function updateHomeworkExtension() {
     });
 }
 
-function deleteHomeworkExtension(user) {
+function deleteGradeableExtension(user) {
     $('#user_id').val(user);
     $('#late-days').val(0);
     $('#reason-for-exception').val('');
-    updateHomeworkExtension();
+    updateGradeableExtension();
 }
 
 /** Populate the editor without changing the pending single-student entry. */
-function editHomeworkExtension(button) {
+function editGradeableExtension(button) {
     const { userId, days, reason } = button.dataset;
     $('#edit-extension-user').text(userId);
     $('#edit-extension-popup').data('user-id', userId);
@@ -70,7 +70,7 @@ function editHomeworkExtension(button) {
 }
 
 /** Save through the existing endpoint, including its team confirmation flow. */
-function saveHomeworkExtension() {
+function saveGradeableExtension() {
     const days = document.getElementById('edit-extension-days');
     if (!days.reportValidity()) {
         return;
@@ -87,7 +87,7 @@ function saveHomeworkExtension() {
     $('#csv-upload').val('');
     $('#extensions-form input[name="option"]').val(-1);
     closePopup('edit-extension-popup');
-    updateHomeworkExtension();
+    updateGradeableExtension();
 }
 
 function clearDate() {
@@ -106,7 +106,7 @@ function setLateDays() {
 function confirmExtension(option) {
     $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
-    updateHomeworkExtension();
+    updateGradeableExtension();
     $('input[name="option"]').val(-1);
 }
 

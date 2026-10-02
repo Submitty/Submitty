@@ -10,7 +10,7 @@ beforeEach(() => {
     document.body.innerHTML = `
         <form id="extensions-form">
             <input name="csrf_token" value="token">
-            <input name="g_id" value="homework">
+            <input name="g_id" value="gradeable">
             <input name="option" value="1">
             <input id="user_id" name="user_id" value="pending">
             <input id="late-days" name="late_days" value="7">
@@ -40,7 +40,7 @@ function openEditor(reason = 'illness') {
     button.dataset.userId = 'student';
     button.dataset.days = '2';
     button.dataset.reason = reason;
-    editor.editHomeworkExtension(button);
+    editor.editGradeableExtension(button);
 }
 
 test('opening and cancelling preserves the pending entry and custom reason text', () => {
@@ -59,7 +59,7 @@ test('opening and cancelling preserves the pending entry and custom reason text'
 test('saving sends edited values and resets the team choice', () => {
     openEditor('custom reason');
     $('#edit-extension-days').val('3');
-    editor.saveHomeworkExtension();
+    editor.saveGradeableExtension();
     expect($.ajax).toHaveBeenCalledTimes(1);
     const request = $.ajax.mock.calls[0][0];
     expect(request.url).toBe('/extensions/update');
@@ -78,7 +78,7 @@ test('saving sends edited values and resets the team choice', () => {
 test.each(['', '-1', '1.5'])('invalid days %s do not submit', (days) => {
     openEditor();
     $('#edit-extension-days').val(days);
-    editor.saveHomeworkExtension();
+    editor.saveGradeableExtension();
     expect($.ajax).not.toHaveBeenCalled();
     expect($('#user_id').val()).toBe('pending');
 });
