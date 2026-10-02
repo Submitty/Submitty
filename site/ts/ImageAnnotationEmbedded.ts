@@ -502,40 +502,44 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
         return new Promise((resolve, reject) => {
             img.onload = async () => {
                 try {
-                    // Create a MarkerJS renderer instance
-                    const renderer = new window.markerjs3.Renderer();
-                    renderer.targetImage = img;
-                    renderer.naturalSize = true;
+                    // Collect each grader's non-empty annotations, sorted by grader ID
+                    const graderStates: AnnotationState[] = [];
+                    const sortedEntries = Object.entries(annotations).sort(([a], [b]) => a.localeCompare(b));
+                    for (const [graderId, annotationsJson] of sortedEntries) {
+                        if (!annotationsJson || typeof annotationsJson !== 'string' || annotationsJson.trim() === '') {
+                            continue;
+                        }
+                        try {
+                            const annotationState = JSON.parse(annotationsJson) as AnnotationState;
+                            if (Array.isArray(annotationState.markers) && annotationState.markers.length > 0) {
+                                graderStates.push(annotationState);
+                            }
+                        }
+                        catch (parseError) {
+                            console.warn(`Skipping annotations for grader ${graderId} that failed to parse:`, parseError);
+                        }
+                    }
 
-                    // Get the first annotation entry for now (temporary implementation).
-                    // TODO: Create a selector for which annotated image you want to view.
-                    const firstEntry = Object.entries(annotations)[0];
-                    if (!firstEntry) {
+                    if (graderStates.length === 0) {
                         reject(new Error('No annotations found.'));
                         return;
                     }
 
-                    const [graderId, annotationsJson] = firstEntry;
-                    if (!annotationsJson || typeof annotationsJson !== 'string' || annotationsJson.trim() === '') {
-                        reject(new Error('No valid annotations found.'));
-                        return;
-                    }
+                    // Layer each grader's annotations onto the previous result
+                    // Rendered separately since markers are positioned relative to their own state's width/height
+                    let targetImage = img;
+                    let dataUrl = '';
+                    for (const annotationState of graderStates) {
+                        const renderer = new window.markerjs3.Renderer();
+                        renderer.targetImage = targetImage;
+                        renderer.naturalSize = true;
+                        dataUrl = await renderer.rasterize(annotationState);
 
-                    try {
-                        const annotationState = JSON.parse(annotationsJson) as AnnotationState;
-                        if (!annotationState.markers || !Array.isArray(annotationState.markers) || annotationState.markers.length === 0) {
-                            reject(new Error('No valid markers found in annotations.'));
-                            return;
-                        }
-
-                        // Generate the annotated image dataURL using the first annotation
-                        const dataUrl = await renderer.rasterize(annotationState);
-                        resolve(dataUrl);
+                        targetImage = new Image();
+                        targetImage.src = dataUrl;
+                        await targetImage.decode();
                     }
-                    catch (parseError) {
-                        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-                        reject(new Error(`Failed to parse annotations for grader ${graderId}: ${errorMessage}`));
-                    }
+                    resolve(dataUrl);
                 }
                 catch (error) {
                     reject(error instanceof Error ? error : new Error(String(error)));
