@@ -302,11 +302,11 @@ describe('Test cases involving zooming images in the full panel view', () => {
                 $clearBtn.click();
             }
         });
-        cy.get('#upload1').selectFile('cypress/fixtures/sea_animals.jpg', { action: 'drag-drop' });
+        cy.get('#upload1').selectFile('cypress/fixtures/copy_of_more_autograding_examples/bulk_upload_pdfs/submissions/blank_QR_numeric_id.png', { action: 'drag-drop' });
         cy.waitPageChange(() => {
             cy.get('#submit').click();
         });
-        cy.get('#submitted-files > div').should('contain', 'sea_animals.jpg');
+        cy.get('#submitted-files > div').should('contain', 'blank_QR_numeric_id.png');
         cy.logout();
 
         cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
@@ -316,7 +316,7 @@ describe('Test cases involving zooming images in the full panel view', () => {
         cy.get('#submission_browser_btn').click();
         cy.get('#submissions').click();
         assertSubmissionsBrowserOpen();
-        cy.get('a.image-file[data-file_name="sea_animals.jpg"]').click();
+        cy.get('a.image-file[data-file_name="blank_QR_numeric_id.png"]').click();
 
         // wait for the image itself to load, not just its alt text
         cy.get('#annotatable-image').should(($img) => {
