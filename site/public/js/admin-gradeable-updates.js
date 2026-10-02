@@ -862,6 +862,7 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
 
         /* To check for Server Error Messages */
         error: function (jqXHR, exception) {
+            // eslint-disable-next-line no-useless-assignment
             let msg = '';
             if (jqXHR.status === 0) {
                 msg = 'Not connect.\n Verify Network.';
