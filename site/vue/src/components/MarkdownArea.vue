@@ -87,9 +87,8 @@ function addMarkdown(type: string) {
     const end = textarea.selectionEnd;
     const selectedText = textarea.value.substring(start, end);
 
-    // eslint-disable-next-line no-useless-assignment
     let insertText = '';
-    // eslint-disable-next-line no-useless-assignment
+
     let cursorOffset = 0;
 
     switch (type) {

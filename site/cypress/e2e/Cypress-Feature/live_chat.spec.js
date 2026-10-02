@@ -220,7 +220,6 @@ const leaveChat = (title) => {
 };
 
 const enterChat = (title, anonymous = false) => {
-    // eslint-disable-next-line no-useless-assignment
     let url = '';
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();

@@ -1147,7 +1147,7 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
     let img = undefined;
     const visible = $(`iframe#${id}`).is(':visible');
     img = $(`iframe#${id}`).contents().find('img');
-    // eslint-disable-next-line no-useless-assignment
+
     let height = 0;
     if ($(`iframe#${id}`).contents().find('html').length !== 0) {
         $(`iframe#${id}`).contents().find('html').css('height', 'inherit');
@@ -1309,7 +1309,6 @@ function updateGradeOverride() {
         cache: false,
         contentType: false,
         success: function (data) {
-            // eslint-disable-next-line no-useless-assignment
             let json = {};
             try {
                 json = JSON.parse(data);
@@ -1344,7 +1343,6 @@ function loadOverriddenGrades(g_id) {
     $.ajax({
         url: url,
         success: function (data) {
-            // eslint-disable-next-line no-useless-assignment
             let json = {};
             try {
                 json = JSON.parse(data);
