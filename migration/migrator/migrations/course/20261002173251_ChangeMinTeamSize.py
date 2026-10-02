@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     database.execute("""
         UPDATE electronic_gradeable
         SET eg_max_team_size = 1
-        WHERE eg_late_days < 1;
+        WHERE eg_max_team_size < 1;
     """)
 
 
