@@ -455,6 +455,7 @@ jobs:
     name: DB Check
     runs-on: ubuntu-22.04
     env:
+      PGUSER: submitty_dbuser
       PGPASSWORD: submitty_dbuser
       MAIN_INSTALL_PATH: ${{ github.WORKSPACE }}/main
       MAIN_DATA_PATH: ${{ github.WORKSPACE }}/main/var
