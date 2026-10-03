@@ -412,7 +412,12 @@ def send_pending_notifications():
                 AND eg.eg_student_submit IS TRUE
                 AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
-                AND eg.eg_submission_due_date >= NOW()
+                AND (
+                    -- With no due date, eg_submission_due_date keeps whatever
+                    -- date was stored before, which may already be past.
+                    eg.eg_has_due_date IS FALSE
+                    OR eg.eg_submission_due_date >= NOW()
+                )
                 AND (
                     eg.eg_depends_on IS NULL
                     OR (
