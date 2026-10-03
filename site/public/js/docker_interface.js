@@ -1,5 +1,5 @@
-/* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
-/* global csrfToken, displayErrorMessage, displaySuccessMessage */
+/* exported collapseSection, openRemoveDialog, submitRemoveImage, removeImage, addImage, updateImage */
+/* global csrfToken, displayErrorMessage, displaySuccessMessage, showPopup, closePopup */
 
 let isUpdateInProgress = false;
 const DOCKER_STATUS_BADGE = 'dockerStatusBadge';
@@ -69,10 +69,71 @@ function addFieldOnChange() {
     }
 }
 
-function confirmationDialog(url, id) {
-    if (confirm(`Are you sure you want to remove ${id} image?`)) {
-        removeImage(url, id);
+let removeDialogUrl = null;
+
+function openRemoveDialog(button, url) {
+    removeDialogUrl = url;
+
+    // data-owners is an ordered list of name|owner pairs, the first is the primary
+    const entries = (button.dataset.owners || '').split(',').filter(Boolean).map((pair) => {
+        const idx = pair.indexOf('|');
+        return { name: pair.slice(0, idx), owner: pair.slice(idx + 1) };
+    });
+    const isMultiple = entries.length > 1;
+    $('#remove-image-intro-single').toggle(!isMultiple);
+    $('#remove-image-intro-multiple').toggle(isMultiple);
+
+    const options = $('#remove-image-options');
+    options.empty();
+
+    entries.forEach((entry, i) => {
+        const checkboxId = `remove-image-option-${i}`;
+        const wrapper = $('<div>', { class: 'remove-image-option' });
+        const label = $('<label>', { for: checkboxId });
+        const checkbox = $('<input>', {
+            type: 'checkbox',
+            id: checkboxId,
+            class: 'remove-image-checkbox',
+            value: entry.name,
+        });
+        checkbox.attr('data-testid', 'remove-image-checkbox');
+
+        const isLocked = !window.dockerIsSuperUser && entry.owner !== window.dockerUserId;
+        if (isLocked) {
+            checkbox.prop('disabled', true);
+            wrapper.addClass('locked');
+        }
+
+        label.append(checkbox);
+
+        const nameSpan = $('<span>', { class: 'remove-image-name' });
+        nameSpan.text(`${entry.name}${i === 0 && entries.length > 1 ? ' (primary)' : ''}`);
+        label.append(nameSpan);
+
+        const note = $('<span>', { class: isLocked ? 'remove-image-locked' : 'remove-image-owner' });
+        note.text(entry.owner === '' ? 'owned by system' : `owned by ${entry.owner}`);
+        label.append(note);
+
+        wrapper.append(label);
+        options.append(wrapper);
+    });
+
+    $('#remove-image-error').text('');
+    showPopup('#remove-image-form');
+}
+
+function submitRemoveImage() {
+    const selected = $('.remove-image-checkbox:checked').map(function () {
+        return $(this).val();
+    }).get();
+
+    if (selected.length === 0) {
+        $('#remove-image-error').text('Select at least one name to remove.');
+        return;
     }
+
+    closePopup('remove-image-form');
+    removeImage(removeDialogUrl, selected);
 }
 
 /**
@@ -113,23 +174,29 @@ function restoreDockerStatusBadge() {
     }
 }
 
-function removeImage(url, id) {
+function removeImage(url, images) {
     $.ajax({
         url: url,
         type: 'POST',
         data: {
-            image: id,
+            images: images,
             csrf_token: csrfToken,
         },
         success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                setDockerStatusBadge(`${id} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
-                displaySuccessMessage(json.data);
-            }
-            else {
-                displayErrorMessage(json.message);
+                setDockerStatusBadge(`${images.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
+                if (json.status === 'success') {
+                    setDockerStatusBadge(`${json.data.removed.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
+                    displaySuccessMessage(json.data.success_message);
+                    if (json.data.error_message) {
+                        displayErrorMessage(json.data.error_message);
+                    }
+                }
+                else {
+                    displayErrorMessage(json.message);
+                }
             }
         },
         error: (err) => {
