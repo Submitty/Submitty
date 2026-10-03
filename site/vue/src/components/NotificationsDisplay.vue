@@ -73,19 +73,20 @@ function updateBadgeDOM(count: number) {
 function markSeen() {
     // Course Page
     if (props.course) {
-        for (const n of localNotifications.value) {
-            if (!n.seen) {
-                n.seen = true;
-            }
-        }
-        localUnseenCount.value = 0;
-        updateBadgeDOM(0);
-
         $.ajax({
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
                 csrf_token: window.csrfToken,
+            },
+            success: function () {
+                for (const n of localNotifications.value) {
+                    if (!n.seen) {
+                        n.seen = true;
+                    }
+                }
+                localUnseenCount.value = 0;
+                updateBadgeDOM(0);
             },
             error: function (err) {
                 console.error(err);
