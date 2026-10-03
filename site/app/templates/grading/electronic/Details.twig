@@ -719,7 +719,23 @@
 
 {# Cluster #}
 {% macro render_column_cluster(context, section, graded_gradeable, index, info, column) %}
-    <td>{{ section.title }}</td>
+    <td>
+        <span class="cluster-name">{{ section.title }}</span>
+        {% if section.cluster_id is defined and section.cluster_id is not null %}
+            <button
+                type="button"
+                class="btn btn-default btn-xs rename-cluster-btn"
+                title="Rename Cluster"
+                aria-label="Rename Cluster"
+                data-cluster-id="{{ section.cluster_id }}"
+                data-cluster-name="{{ section.title }}"
+                data-rename-url="{{ context.core.buildCourseUrl(['gradeable', context.gradeable.getId(), 'clustering', section.cluster_id, 'rename']) }}"
+                onclick="renameCluster(this)"
+            >
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# Edit Team #}

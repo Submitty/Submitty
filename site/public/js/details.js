@@ -1,5 +1,5 @@
-/* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported expandAllSections, collapseAllSections, toggleAllSections, updateToggleButtonLabel, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student, csrfToken */
+/* exported expandAllSections, collapseAllSections, toggleAllSections, updateToggleButtonLabel, grade_inquiry_only, reverse_inquiry_only, inquiry_update, renameCluster */
 
 const MOBILE_BREAKPOINT = 951;
 
@@ -165,6 +165,50 @@ function changeGroupByClusters() {
     const isGrouped = document.getElementById('toggle-group-by-clusters').checked;
     Cookies.set('group_by_clusters', isGrouped ? 'true' : 'false', { path: '/' });
     window.location.reload();
+}
+
+async function renameCluster(button) {
+    const oldName = button.dataset.clusterName;
+    const newName = prompt('Rename cluster:', oldName);
+
+    if (newName === null) {
+        return;
+    }
+
+    const trimmedName = newName.trim();
+    if (trimmedName === '') {
+        alert('Cluster name cannot be empty.');
+        return;
+    }
+    if (trimmedName === oldName) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('cluster_name', trimmedName);
+
+    try {
+        const response = await fetch(button.dataset.renameUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+        const result = await response.json();
+
+        if (result.status !== 'success') {
+            alert(result.message || 'Failed to rename cluster.');
+            return;
+        }
+
+        window.location.reload();
+    }
+    catch (error) {
+        console.error('Error renaming cluster:', error);
+        alert('Failed to connect to the server.');
+    }
 }
 
 function updateClusteringStatus(status) {
