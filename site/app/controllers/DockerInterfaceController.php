@@ -7,6 +7,7 @@ use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\DockerUI;
 
@@ -209,6 +210,7 @@ class DockerInterfaceController extends AbstractController {
         return true;
     }
 
+    #[AccessControl(level: "FACULTY")]
     #[Route("/admin/remove_image", methods: ["POST"])]
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
