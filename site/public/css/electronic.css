@@ -618,6 +618,21 @@ progress::-webkit-progress-value {
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #student_info.rubric_panel {
     border: 5px solid var(--text-black);
+    overflow: hidden;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#student_info > div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#student_info .inner-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
