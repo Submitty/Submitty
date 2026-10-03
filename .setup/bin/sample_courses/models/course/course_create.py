@@ -7,12 +7,12 @@ import hashlib
 import json
 import os
 import os.path
-from urllib.parse import quote
 import docker
 import random
 
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, insert, update
+from submitty_utils import db_utils
 
 from sample_courses import (
     SUBMITTY_DATA_DIR,
@@ -86,16 +86,14 @@ class Course_create:
         print("Database created, now populating ", end="")
 
         submitty_engine = create_engine(
-            f"postgresql:///submitty?host={DB_HOST}&port={DB_PORT}"
-            f"&user={quote(DB_USER, safe='')}&password={quote(DB_PASS, safe='')}"
+            db_utils.generate_connect_string(DB_HOST, DB_PORT, "submitty", DB_USER, DB_PASS)
         )
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData()
         print("(Master DB connection made, metadata bound)...")
 
         engine = create_engine(
-            f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}"
-            f"&user={quote(DB_USER, safe='')}&password={quote(DB_PASS, safe='')}"
+            db_utils.generate_connect_string(DB_HOST, DB_PORT, database, DB_USER, DB_PASS)
         )
         self.conn = engine.connect()
         # need to pass in engine to autoload tables

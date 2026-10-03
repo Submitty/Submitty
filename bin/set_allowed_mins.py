@@ -10,7 +10,8 @@ import datetime
 import os
 import sys
 import json
-from urllib.parse import quote
+
+from submitty_utils import db_utils
 
 try:
     CONFIG_PATH = os.path.join(
@@ -35,21 +36,13 @@ def setup_db():
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         db_config = json.load(open_file)
     db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(db_config['database_host']):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            quote(db_config['database_user'], safe=''),
-            quote(db_config['database_password'], safe=''),
-            db_name,
-            db_config['database_host']
-        )
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
-            quote(db_config['database_user'], safe=''),
-            quote(db_config['database_password'], safe=''),
-            db_config['database_host'],
-            db_name
-        )
+    conn_string = db_utils.generate_connect_string(
+        db_config['database_host'],
+        db_config.get('database_port', 5432),
+        db_name,
+        db_config['database_user'],
+        db_config['database_password'],
+    )
 
     engine = create_engine(conn_string)
     db = engine.connect()

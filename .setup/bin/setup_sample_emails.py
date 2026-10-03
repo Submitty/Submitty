@@ -9,9 +9,9 @@ Usage: ./setup_sample_emails.py
 import os
 import random
 import json
-from urllib.parse import quote
 
 from submitty_utils import dateutils
+from submitty_utils import db_utils
 
 from sqlalchemy import create_engine, Table, MetaData, insert, text
 
@@ -33,13 +33,14 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "database.json")) as data
     database_config_json = json.load(database_config)
     DB_USER = database_config_json["database_user"]
     DB_PASS = database_config_json["database_password"]
+    DB_PORT = database_config_json.get("database_port", 5432)
 
 
 def main():
     random.seed(8430571)
 
     submitty_engine = create_engine(
-        "postgresql://{}:{}@{}/submitty".format(quote(DB_USER, safe=''), quote(DB_PASS, safe=''), DB_HOST)
+        db_utils.generate_connect_string(DB_HOST, DB_PORT, "submitty", DB_USER, DB_PASS)
         )
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData()

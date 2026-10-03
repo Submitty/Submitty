@@ -11,10 +11,11 @@ import smtplib
 import json
 import os
 import datetime
-from urllib.parse import quote
 from sqlalchemy import create_engine, MetaData, Table, bindparam, text, update
 import sys
 import psutil
+
+from submitty_utils import db_utils
 
 
 # ======================================================================
@@ -89,6 +90,7 @@ try:
     EMAIL_INTERNAL_DOMAIN = EMAIL_CONFIG['email_internal_domain']
 
     DB_HOST = DATABASE_CONFIG['database_host']
+    DB_PORT = DATABASE_CONFIG.get('database_port', 5432)
     DB_USER = DATABASE_CONFIG['database_user']
     DB_PASSWORD = DATABASE_CONFIG['database_password']
 
@@ -103,13 +105,8 @@ except Exception as config_fail_error:
 def setup_db():
     """Set up a connection with the submitty database."""
     db_name = "submitty"
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), db_name, DB_HOST)
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
-            quote(DB_USER, safe=''), quote(DB_PASSWORD, safe=''), DB_HOST, db_name)
+    conn_string = db_utils.generate_connect_string(
+        DB_HOST, DB_PORT, db_name, DB_USER, DB_PASSWORD)
 
     engine = create_engine(conn_string)
     db = engine.connect()

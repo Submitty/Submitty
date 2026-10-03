@@ -3,8 +3,8 @@ import os
 import json
 import shutil
 import argparse
-from urllib.parse import quote
 from submitty_utils import dateutils
+from submitty_utils import db_utils
 from sqlalchemy import create_engine, Table, MetaData, and_, insert, update
 import grp
 
@@ -26,6 +26,7 @@ SUBMITTY_DATA_DIR = SUBMITTY_JSON['submitty_data_dir']
 with open(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'database.json')) as open_file:
     DB_JSON = json.load(open_file)
 DB_HOST = DB_JSON['database_host']
+DB_PORT = DB_JSON.get('database_port', 5432)
 DB_USER = DB_JSON['database_user']
 DB_PASS = DB_JSON['database_password']
 
@@ -77,8 +78,8 @@ def main():
     #Make a connection to the database and grab the necessary tables.
     database = "submitty_" + args.semester + "_" + args.course_name
     print("Connecting to database: ", end="")
-    engine = create_engine("postgresql://{}:{}@{}/{}".format(
-        quote(DB_USER, safe=''), quote(DB_PASS, safe=''), DB_HOST, database))
+    engine = create_engine(
+        db_utils.generate_connect_string(DB_HOST, DB_PORT, database, DB_USER, DB_PASS))
     conn = engine.connect()
     metadata = MetaData()
     electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload_with=engine)

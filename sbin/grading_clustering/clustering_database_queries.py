@@ -1,9 +1,10 @@
 import json
 import os
 import datetime
-from urllib.parse import quote
 from sqlalchemy import create_engine, text
 import sys
+
+from submitty_utils import db_utils
 
 try:
     CONFIG_PATH = os.path.join(
@@ -12,6 +13,7 @@ try:
         DATABASE_CONFIG = json.load(open_file)
 
     DB_HOST = DATABASE_CONFIG['database_host']
+    DB_PORT = DATABASE_CONFIG.get('database_port', 5432)
     DB_USER = DATABASE_CONFIG['database_user']
     DB_PASSWORD = DATABASE_CONFIG['database_password']
 except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
@@ -22,10 +24,8 @@ except Exception as config_fail_error:  # pylint: disable=broad-exception-caught
 def setup_course_db(db_name):
     """Set up a connection with a specific course database."""
     # pylint: disable=duplicate-code
-    if os.path.isdir(DB_HOST):
-        conn_string = f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@/{db_name}?host={DB_HOST}"
-    else:
-        conn_string = f"postgresql://{quote(DB_USER, safe='')}:{quote(DB_PASSWORD, safe='')}@{DB_HOST}/{db_name}"
+    conn_string = db_utils.generate_connect_string(
+        DB_HOST, DB_PORT, db_name, DB_USER, DB_PASSWORD)
 
     engine = create_engine(conn_string)
     return engine.connect()
