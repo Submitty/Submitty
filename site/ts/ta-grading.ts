@@ -807,7 +807,8 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
 
     const promise = loadFileForFullView(name, path, page_num, panel);
-    $(fileFullPanelOptions[panel]['fileView']).show();
+    // .show() would set display: block and undo the column layout in electronic.css
+    $(fileFullPanelOptions[panel]['fileView']).css('display', 'flex');
     $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
         = $(fileFullPanelOptions[panel]['panel']).width()!
