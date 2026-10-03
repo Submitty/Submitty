@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 import unittest
+from sqlalchemy.engine import make_url
 import migrator.db
 
 
@@ -78,6 +79,46 @@ class TestDb(unittest.TestCase):
                 'postgresql+psycopg2://user:password@/test?host={}'.format(host),
                 string
             )
+        finally:
+            shutil.rmtree(host)
+
+    def test_get_connection_string_postgresql_escapes_credentials(self):
+        params = {
+            'database_driver': 'psql',
+            'database_host': 'localhost',
+            'database_user': 'us@er',
+            'database_password': 'p@ss:w/o%rd',
+            'dbname': 'test'
+        }
+        string = migrator.db.Database.get_connection_string(params)
+        self.assertEqual(
+            'postgresql+psycopg2://us%40er:p%40ss%3Aw%2Fo%25rd@localhost:5432/test',
+            string
+        )
+        url = make_url(string)
+        self.assertEqual('us@er', url.username)
+        self.assertEqual('p@ss:w/o%rd', url.password)
+        self.assertEqual('localhost', url.host)
+        self.assertEqual(5432, url.port)
+        self.assertEqual('test', url.database)
+
+    def test_get_connection_string_postgresql_path_host_escapes_credentials(self):
+        try:
+            host = tempfile.mkdtemp()
+            params = {
+                'database_driver': 'psql',
+                'database_host': host,
+                'database_user': 'user',
+                'database_password': 'se@cret:/%40x',
+                'dbname': 'test'
+            }
+            string = migrator.db.Database.get_connection_string(params)
+            url = make_url(string)
+            self.assertEqual('user', url.username)
+            self.assertEqual('se@cret:/%40x', url.password)
+            self.assertIsNone(url.host)
+            self.assertEqual('test', url.database)
+            self.assertEqual(host, url.query['host'])
         finally:
             shutil.rmtree(host)
 

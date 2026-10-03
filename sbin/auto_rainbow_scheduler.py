@@ -13,6 +13,8 @@ import json
 from sqlalchemy import create_engine, Table, MetaData, select
 import getpass
 
+from submitty_utils import db_utils
+
 
 # Get path to current file directory
 dir = os.path.dirname(__file__)
@@ -86,16 +88,12 @@ def find_all_unarchived_courses():
     with open(database_config_file) as open_file:
         OPEN_JSON = json.load(open_file)
     DB_HOST = OPEN_JSON['database_host']
+    DB_PORT = OPEN_JSON.get('database_port', 5432)
     DB_USER = OPEN_JSON['database_user']
     DB_PASSWORD = OPEN_JSON['database_password']
     db_name = "submitty"
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD,
-                                                              db_name, DB_HOST)
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD,
-                                                        DB_HOST, db_name)
+    conn_string = db_utils.generate_connect_string(
+        DB_HOST, DB_PORT, db_name, DB_USER, DB_PASSWORD)
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()

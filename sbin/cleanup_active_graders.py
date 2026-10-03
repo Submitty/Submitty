@@ -5,19 +5,15 @@ Deletes old entries from the active_graders table in all course databases.
 This script is intended to be run periodically (e.g. by cron) to cleanup stale locks.
 """
 
-import os
-
 import database_queries
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from submitty_utils import db_utils
 
 
-def _cleanup_course(db_user, db_pass, db_host, db_name):
+def _cleanup_course(db_user, db_pass, db_host, db_port, db_name):
     """Delete stale active_graders rows (> 24 hours) from one course database."""
-    if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
-    else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
+    conn_string = db_utils.generate_connect_string(db_host, db_port, db_name, db_user, db_pass)
 
     try:
         engine = create_engine(conn_string)
@@ -62,6 +58,7 @@ def main():
     db_user = database_queries.DB_USER
     db_pass = database_queries.DB_PASSWORD
     db_host = database_queries.DB_HOST
+    db_port = database_queries.DB_PORT
     count = 0
 
     for row in result:
@@ -75,7 +72,7 @@ def main():
         db_name = f"submitty_{term}_{course}"
 
         try:
-            c = _cleanup_course(db_user, db_pass, db_host, db_name)
+            c = _cleanup_course(db_user, db_pass, db_host, db_port, db_name)
             if c > 0:
                 print(f"Cleaned up {c} stale grader(s) from course {db_name}")
             count += 1
