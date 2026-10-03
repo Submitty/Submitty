@@ -164,8 +164,10 @@
                     'currentAlgorithm': current_algorithm,
                     'createClusteringUrl': create_clustering_url,
                     'checkClusteringStatusUrl': check_clustering_status_url,
+                    'deleteClusteringUrl': delete_clustering_url,
                     'csrfToken': core.getCsrfToken(),
-                    'canCreateClustering': full_access_grader_permission
+                    'canCreateClustering': full_access_grader_permission,
+                    'clustersExist': clusters_exist
                 },
                 'events': {
                     'clustering-status': 'updateClusteringStatus',

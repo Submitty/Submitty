@@ -61,6 +61,32 @@ class GradingClusterController extends AbstractController {
     }
 
     /**
+     * Deletes the clustering configuration and all clusters for a gradeable.
+     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/delete", methods: ["POST"])]
+    public function deleteClustering(string $gradeable_id): JsonResponse {
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return JsonResponse::getErrorResponse("Invalid CSRF token.");
+        }
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
+        }
+
+        $this->core->getCourseEntityManager()
+            ->getRepository(GradingClusterConfig::class)
+            ->deleteByGradeableId($gradeable->getId());
+
+        return JsonResponse::getSuccessResponse("Clusters deleted successfully.");
+    }
+
+    /**
      * Checks if the clustering job is currently in progress.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
