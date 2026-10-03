@@ -173,3 +173,46 @@ footer .footer-separator {
 #loading-bar-percentage {
     margin-left: 10px;
 }
+
+.term-legend {
+    margin: 6px 0 10px;
+    font-size: 0.85em;
+}
+
+.term-legend-item {
+    margin-right: 14px;
+    white-space: nowrap;
+}
+
+.term-legend-dot,
+.term-status-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.term-status-active {
+    background-color: var(--good-green);
+}
+
+.term-status-future {
+    background-color: var(--actionable-blue);
+}
+
+.term-status-ended {
+    background-color: var(--standard-medium-gray);
+}
+
+tr.term-row-active {
+    background-color: rgb(95 183 96 / 12%);
+}
+
+tr.term-row-future {
+    background-color: rgb(0 99 152 / 12%);
+}
+
+tr.term-row-ended {
+    color: var(--standard-medium-gray);
+}
