@@ -3114,8 +3114,10 @@ function scrollToPage(page_num: number) {
     if (lastLoadedFile.charAt(0) === '.') {
         lastLoadedFile = lastLoadedFile.substring(1);
     }
-    if (!lastLoadedFile.includes('pdf')) {
-        const lastLoadedFilePageNum = parseInt(lastLoadedFile.split('_')[2].split('.')[0]);
+    // Bulk upload page images are named upload_page_N.ext; any other file falls back to upload.pdf
+    const lastLoadedPage = /^upload_page_(\d+)\./.exec(lastLoadedFile);
+    if (lastLoadedPage !== null) {
+        const lastLoadedFilePageNum = parseInt(lastLoadedPage[1]);
         if (activeView && page_num === lastLoadedFilePageNum) {
             return;
         }
@@ -3145,12 +3147,17 @@ function scrollToPage(page_num: number) {
     }
     for (let i = 0; i < files.length; i++) {
         if (files[i].innerText.trim() === 'upload.pdf') {
-            if (activeView) {
+            if (activeView && lastLoadedFile === 'upload.pdf') {
+                // The PDF is still loading, so scroll once PDFEmbedded.js reports its pages rendered
+                if ($('#viewer > .page').length === 0) {
+                    $(document).one('pdf-rendered', () => scrollToPage(page_num));
+                    return;
+                }
                 page_num = Math.min($('#viewer > .page').length, page_num);
                 const page = $(`#pageContainer${page_num}`);
                 if (page.length) {
-                    const scrollContainer = $('#file-content').length ? $('#file-content') : $('#submission_browser');
-                    scrollContainer.scrollTop(Math.max(page[0].offsetTop, 0));
+                    // Which ancestor scrolls depends on the panel layout
+                    page[0].scrollIntoView({ block: 'start' });
                 }
             }
             else {
