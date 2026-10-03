@@ -248,6 +248,10 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     const autoscroll = $('#autoscroll_id').is(':checked') ? 'on' : 'off';
     window.Cookies.set('autoscroll', autoscroll, { path: '/' });
 
+    if (clear_open_files) {
+        localStorage.removeItem('ta-grading-auto-open-full-panel-file');
+    }
+
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
@@ -798,6 +802,14 @@ const fileFullPanelOptions = {
     },
 };
 
+// Identifies a file in the submissions and results browser by its folders and name,
+// e.g. "submissions/q2/answer.pdf", which stays the same from student to student.
+export function getFileTreePath(file_link: Element): string {
+    const folders = $(file_link).parents('div[id^=div_viewer_]').toArray().reverse().map((folder) => folder.dataset.file_name);
+    return [...folders, file_link.getAttribute('data-file_name')].join('/');
+}
+
+// name and path are URL-encoded, matching the links in SubmissionPanel.twig
 export function viewFileFullPanel(name: string, path: string, page_num = 0, panelStr: string = 'submission') {
     const panel = panelStr as FileFullPanelOptions;
     if ($(fileFullPanelOptions[panel]['viewer']).length !== 0) {
@@ -805,6 +817,14 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
     }
 
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
+
+    // Images and PDFs open here instead of inline, so auto open tracks them separately
+    if (panel === 'submission') {
+        const file_link = document.querySelector(`#file-container a[file-url="${CSS.escape(path)}"]`);
+        if (file_link !== null) {
+            localStorage.setItem('ta-grading-auto-open-full-panel-file', getFileTreePath(file_link));
+        }
+    }
 
     const promise = loadFileForFullView(name, path, page_num, panel);
     $(fileFullPanelOptions[panel]['fileView']).show();
@@ -931,6 +951,9 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
+    if (panel === 'submission') {
+        localStorage.removeItem('ta-grading-auto-open-full-panel-file');
+    }
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
     // Also remove image annotation containers
