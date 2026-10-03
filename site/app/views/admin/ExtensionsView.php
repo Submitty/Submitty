@@ -50,6 +50,8 @@ class ExtensionsView extends AbstractView {
                 "interview",
                 "travel",
                 "personal issue",
+                "late add",
+                "early submission incentive",
             ],
             "csrf_token" => $this->core->getCsrfToken()
         ]);
