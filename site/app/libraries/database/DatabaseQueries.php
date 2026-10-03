@@ -817,6 +817,18 @@ SQL;
         $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", [$post_id]);
     }
 
+    public function getUserGroup(string $user_id): ?int {
+        $this->course_db->query(
+            "SELECT user_group FROM users WHERE user_id=?",
+            [$user_id]
+        );
+
+        if ($this->course_db->getRowCount() === 0) {
+            return null;
+        }
+
+        return intval($this->course_db->row()['user_group']);
+    }
     public function isStaffPost($author_id) {
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", [$author_id]);
         return intval($this->course_db->row()['user_group']) <= 3;
