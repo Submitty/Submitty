@@ -7,6 +7,7 @@
     const grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
     const discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) %} true {% else %} false {% endif %};
     const peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
+    const peer_participation = {% if isPeerParticipationPanel %} true {% else %} false {% endif %};
     const is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
 
     $(document).ready(function () {
@@ -19,6 +20,7 @@
             grade_inquiry_info,
             discussion_browser,
             peer_info,
+            peer_participation,
             "notebook-view": is_notebook
         });
     })
@@ -123,6 +125,22 @@
                 'type': 'component', 
                 'name': 'PanelPositionSelector', 
                 'args': { 'panelId': 'peer_info' }, 
+                'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
+            } %}
+            </span>
+        {% endif %}
+        {% if isPeerParticipationPanel %}
+            <span class="grade-panel" id="peer_participation_btn" data-testid="peer-participation-btn">
+                <button title="Show/Hide Peer Participation"
+                        class="invisible-btn"
+                        tabindex="0"
+                >
+                    <i class="fas fa-clipboard-list"></i><span>Peer Participation</span>
+                </button>
+            {% include 'Vue.twig' with { 
+                'type': 'component', 
+                'name': 'PanelPositionSelector', 
+                'args': { 'panelId': 'peer_participation' }, 
                 'events': { 'position-change': '(payload) => { setPanelsVisibilities(payload.panelId, null, payload.position); }' } 
             } %}
             </span>
