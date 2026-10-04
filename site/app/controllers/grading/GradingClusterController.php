@@ -37,7 +37,7 @@ class GradingClusterController extends AbstractController {
         if ($cluster_name === '') {
             return JsonResponse::getErrorResponse("Cluster name cannot be empty.");
         }
-        if (strlen($cluster_name) > 255) {
+        if (mb_strlen($cluster_name) > 255) {
             return JsonResponse::getErrorResponse("Cluster name cannot exceed 255 characters.");
         }
 
