@@ -1216,7 +1216,7 @@ class ElectronicGraderController extends AbstractController {
         if ($config === null) {
             $is_group_by_clusters = false;
         }
-        $clusters_exist = $config !== null && !$config->getClusters()->isEmpty();
+        $clusters_exist = $config !== null;
         $cluster_map = [];
         if ($is_group_by_clusters && $config !== null) {
             $submitters = $this->core->getQueries()->getActiveSubmittersForGradeable($gradeable_id);
