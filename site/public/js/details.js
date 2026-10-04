@@ -10,7 +10,10 @@ $(document).ready(() => {
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
-    $('#details-table .details-info-header').click(function () {
+    $('#details-table .details-info-header').click(function (event) {
+        if ($(event.target).closest('.rename-cluster-btn').length > 0) {
+            return;
+        }
         $(this).toggleClass('panel-head-active');
         const id = $(this).attr('data-section-id');
         if (collapseItems.has(id)) {
