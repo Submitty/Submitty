@@ -529,9 +529,10 @@ HTML;
      * @param array<string, string> $algorithms
      * @param ?string $current_algorithm
      * @param array<string, string> $cluster_map
+     * @param bool $clusters_exist
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = [], bool $clusters_exist = false) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
@@ -991,6 +992,8 @@ HTML;
             "current_algorithm" => $current_algorithm,
             "create_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'create_clustering']),
             "check_clustering_status_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'clustering', 'status']),
+            "delete_clustering_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'clustering', 'delete']),
+            "clusters_exist" => $clusters_exist,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
