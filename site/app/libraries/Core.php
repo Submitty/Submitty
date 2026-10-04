@@ -175,8 +175,8 @@ class Core {
 
     private function createEntityManager(AbstractDatabase $database): EntityManager {
         // PHP-FPM's ProtectSystem=full makes /usr read-only, so the cache lives in the data dir.
-        // CLI scripts often run as root, and folders they create there would block PHP-FPM writes.
-        if (PHP_SAPI === 'cli') {
+        // Root-run CLI scripts would create folders there that PHP-FPM can't write to.
+        if (PHP_SAPI === 'cli' && posix_geteuid() === 0) {
             $cache = new ArrayAdapter();
         }
         else {
