@@ -175,13 +175,14 @@ class Core {
 
     private function createEntityManager(AbstractDatabase $database): EntityManager {
         // PHP-FPM's ProtectSystem=full makes /usr read-only, so the cache lives in the data dir.
-        // Root-run CLI scripts would create folders there that PHP-FPM can't write to.
-        if (PHP_SAPI === 'cli' && posix_geteuid() === 0) {
-            $cache = new ArrayAdapter();
+        // Only its owner (the PHP user) writes there. Folders made by other users, such as root
+        // CLI scripts, would block PHP-FPM writes, so they get an in-memory cache.
+        $cache_path = FileUtils::joinPaths($this->config->getSubmittyPath(), 'cache', 'doctrine');
+        if (is_dir($cache_path) && fileowner($cache_path) === posix_geteuid()) {
+            $cache = new PhpFilesAdapter("", 0, $cache_path);
         }
         else {
-            $cache_path = FileUtils::joinPaths($this->config->getSubmittyPath(), 'cache', 'doctrine');
-            $cache = new PhpFilesAdapter("", 0, $cache_path);
+            $cache = new ArrayAdapter();
         }
         $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
