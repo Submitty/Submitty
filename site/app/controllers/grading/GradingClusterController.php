@@ -79,6 +79,12 @@ class GradingClusterController extends AbstractController {
             return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
         }
 
+        $job_name = "clustering__" . $this->core->getConfig()->getTerm() . "__" . $this->core->getConfig()->getCourse() . "__" . $gradeable->getId() . ".json";
+        $queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        if (file_exists(FileUtils::joinPaths($queue_path, $job_name)) || file_exists(FileUtils::joinPaths($queue_path, "PROCESSING_" . $job_name))) {
+            return JsonResponse::getErrorResponse("Clusters are still being generated. Try again after the job finishes.");
+        }
+
         $this->core->getCourseEntityManager()
             ->getRepository(GradingClusterConfig::class)
             ->deleteByGradeableId($gradeable->getId());
