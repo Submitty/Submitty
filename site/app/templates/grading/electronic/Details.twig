@@ -257,6 +257,20 @@
                                 <i class="expand-icon fas fa-caret-down"></i>
                                 {% if is_group_by_clusters %}
                                     Students in Cluster {{ section.title }}
+                                    {% if section.cluster_id is defined and section.cluster_id is not null %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-default btn-xs rename-cluster-btn"
+                                            title="Rename Cluster"
+                                            aria-label="Rename Cluster"
+                                            data-cluster-id="{{ section.cluster_id }}"
+                                            data-cluster-name="{{ section.title }}"
+                                            data-rename-url="{{ core.buildCourseUrl(['gradeable', gradeable.getId(), 'clustering', section.cluster_id, 'rename']) }}"
+                                            onclick="renameCluster(this)"
+                                        >
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    {% endif %}
                                 {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
                                 {% else %}
@@ -719,23 +733,7 @@
 
 {# Cluster #}
 {% macro render_column_cluster(context, section, graded_gradeable, index, info, column) %}
-    <td>
-        <span class="cluster-name">{{ section.title }}</span>
-        {% if section.cluster_id is defined and section.cluster_id is not null %}
-            <button
-                type="button"
-                class="btn btn-default btn-xs rename-cluster-btn"
-                title="Rename Cluster"
-                aria-label="Rename Cluster"
-                data-cluster-id="{{ section.cluster_id }}"
-                data-cluster-name="{{ section.title }}"
-                data-rename-url="{{ context.core.buildCourseUrl(['gradeable', context.gradeable.getId(), 'clustering', section.cluster_id, 'rename']) }}"
-                onclick="renameCluster(this)"
-            >
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        {% endif %}
-    </td>
+    <td>{{ section.title }}</td>
 {% endmacro %}
 
 {# Edit Team #}
