@@ -18,7 +18,7 @@ class GradingClusterController extends AbstractController {
      * Renames an existing cluster for a gradeable.
      */
     #[AccessControl(role: "FULL_ACCESS_GRADER")]
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/{cluster_id}/rename", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/{cluster_id}/rename", methods: ["POST"], requirements: ["cluster_id" => "\d+"])]
     public function renameCluster(string $gradeable_id, int $cluster_id): JsonResponse {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return JsonResponse::getErrorResponse("Invalid CSRF token.");
