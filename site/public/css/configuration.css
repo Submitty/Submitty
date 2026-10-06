@@ -20,6 +20,14 @@
     margin: 0 0 1em;
 }
 
+.textbox-row {
+    display: flex;
+    align-items: center;
+}
+.textbox-row input[type="text"]{
+    flex: 1 0 auto;
+}
+
 textarea.config-row {
     resize: vertical;
 }
