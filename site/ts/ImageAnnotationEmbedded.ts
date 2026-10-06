@@ -12,7 +12,7 @@ declare global {
         downloadImage(): void;
         cleanupAnnotationEditor(): void;
         quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
-        generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<string | null>;
+        generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<AnnotatedView[] | null>;
         popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
     }
 }
@@ -428,16 +428,15 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
         console.error('Error generating annotated image dataURL:', error);
     }
 }
-
 // Utility function to generate annotated filename
-function generateAnnotatedFilename(originalFilename: string): string {
+function generateAnnotatedFilename(originalFilename: string, suffix = ''): string {
     const nameParts = originalFilename.split('.');
     if (nameParts.length > 1) {
         const extension = nameParts.pop()!;
-        return `${nameParts.join('.')}_annotated.${extension}`;
+        return `${nameParts.join('.')}_annotated${suffix}.${extension}`;
     }
     else {
-        return `${originalFilename}_annotated.png`;
+        return `${originalFilename}_annotated${suffix}.png`;
     }
 }
 
@@ -482,9 +481,23 @@ function fetchImageData(gradeable_id: string, filename: string, path: string, an
     return result;
 }
 
-// Renders the annotations on the image stored at the filepath and then returns the dataURL.
-// Potentially refactor to have a centralize render function for use everywhere.
-async function generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<string | null> {
+// The image rendered with one grader's annotations, or all graders' combined
+interface AnnotatedView {
+    label: string;
+    suffix: string;
+    combined: boolean;
+    dataUrl: string;
+}
+
+async function rasterizeAnnotations(targetImage: HTMLImageElement, annotationState: AnnotationState): Promise<string> {
+    const renderer = new window.markerjs3.Renderer();
+    renderer.targetImage = targetImage;
+    renderer.naturalSize = true;
+    return renderer.rasterize(annotationState);
+}
+
+// Returns one view per grader, plus a combined view when there are multiple graders.
+async function generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<AnnotatedView[] | null> {
     try {
         // Fetch image data from the API
         const imageData = fetchImageData(gradeable_id, filename, path, anon_path);
@@ -525,21 +538,32 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
                         return;
                     }
 
-                    // Layer each grader's annotations onto the previous result
-                    // Rendered separately since markers are positioned relative to their own state's width/height
-                    let targetImage = img;
-                    let dataUrl = '';
-                    for (const annotationState of graderStates) {
-                        const renderer = new window.markerjs3.Renderer();
-                        renderer.targetImage = targetImage;
-                        renderer.naturalSize = true;
-                        dataUrl = await renderer.rasterize(annotationState);
-
-                        targetImage = new Image();
-                        targetImage.src = dataUrl;
-                        await targetImage.decode();
+                    // Labeled by number since the client only has grader IDs, not names
+                    const views: AnnotatedView[] = [];
+                    for (let index = 0; index < graderStates.length; index++) {
+                        views.push({
+                            label: `Grader ${index + 1}`,
+                            suffix: graderStates.length > 1 ? `_grader${index + 1}` : '',
+                            combined: false,
+                            dataUrl: await rasterizeAnnotations(img, graderStates[index]),
+                        });
                     }
-                    resolve(dataUrl);
+
+                    if (graderStates.length > 1) {
+                        // Layer each grader's annotations onto the previous result
+                        // Rendered separately since markers are positioned relative to their own state's width/height
+                        let targetImage = img;
+                        let dataUrl = '';
+                        for (const annotationState of graderStates) {
+                            dataUrl = await rasterizeAnnotations(targetImage, annotationState);
+
+                            targetImage = new Image();
+                            targetImage.src = dataUrl;
+                            await targetImage.decode();
+                        }
+                        views.push({ label: 'All Graders', suffix: '_all', combined: true, dataUrl });
+                    }
+                    resolve(views);
                 }
                 catch (error) {
                     reject(error instanceof Error ? error : new Error(String(error)));
@@ -562,9 +586,9 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
 
 async function quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void> {
     try {
-        const dataUrl = await generateDataURL(gradeable_id, filename, path, anon_path);
+        const views = await generateDataURL(gradeable_id, filename, path, anon_path);
 
-        if (!dataUrl) {
+        if (!views) {
             console.error('Failed to generate annotated image data URL');
             alert('Error: Failed to generate annotated image');
             return;
@@ -574,9 +598,14 @@ async function quickDownload(gradeable_id: string, filename: string, path: strin
         const pathParts = path.split('/');
         const originalFilename = pathParts[pathParts.length - 1] || filename;
 
+        if (views.length > 1) {
+            openDownloadChooser(views, originalFilename);
+            return;
+        }
+
         // Generate annotated filename and trigger download
         const downloadFilename = generateAnnotatedFilename(originalFilename);
-        triggerDownload(dataUrl, downloadFilename);
+        triggerDownload(views[0].dataUrl, downloadFilename);
     }
     catch (error) {
         console.error('Error in quickDownload:', error);
@@ -589,62 +618,168 @@ async function quickDownload(gradeable_id: string, filename: string, path: strin
 // Potentially refactoring to combine these usages could be useful.
 async function popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void> {
     try {
-        const dataUrl = await generateDataURL(gradeable_id, filename, path, anon_path);
+        const views = await generateDataURL(gradeable_id, filename, path, anon_path);
 
-        if (!dataUrl) {
+        if (!views) {
             console.error('Failed to generate annotated image data URL');
             alert('Error: Failed to generate annotated image');
             return;
         }
 
-        const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-        if (!popup) {
-            alert('Popup blocked. Please allow popups for this site.');
-            return;
-        }
-
-        const html = popup.document.createElement('html');
-        const head = popup.document.createElement('head');
-        const title = popup.document.createElement('title');
-        const style = popup.document.createElement('style');
-        const body = popup.document.createElement('body');
-        const img = popup.document.createElement('img');
-
-        title.textContent = `Annotated Image: ${filename}`;
-
-        // Set CSS styles (#11111 is standard-gray-black), keep in mind if refactoring
-        style.textContent = `
-            body {
-                margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                background-color: #111111;
-            }
-            img {
-                max-width: 100%;
-                max-height: 100vh;
-                object-fit: contain;
-            }
-        `;
-        img.src = dataUrl;
-        img.alt = `Annotated ${filename}`;
-
-        head.appendChild(title);
-        head.appendChild(style);
-        body.appendChild(img);
-        html.appendChild(head);
-        html.appendChild(body);
-
-        popup.document.documentElement.remove();
-        popup.document.appendChild(html);
+        openAnnotatedPopup(views, filename);
     }
     catch (error) {
         console.error('Error in popupAnnotatedImage:', error);
         alert(`Error opening annotated image: ${(error as Error).message}`);
     }
+}
+
+// View only; downloads go through quickDownload.
+function openAnnotatedPopup(views: AnnotatedView[], filename: string): void {
+    const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    if (!popup) {
+        alert('Popup blocked. Please allow popups for this site.');
+        return;
+    }
+
+    const html = popup.document.createElement('html');
+    const head = popup.document.createElement('head');
+    const title = popup.document.createElement('title');
+    const body = popup.document.createElement('body');
+    const img = popup.document.createElement('img');
+
+    title.textContent = `Annotated Image: ${filename}`;
+    body.className = 'annotated-image-popup';
+    img.src = views[0].dataUrl;
+    img.alt = `Annotated ${filename}`;
+
+    head.appendChild(title);
+    // Link popup style sheets
+    for (const stylesheet of ['colors.css', 'image/image_annotation.css']) {
+        const pageLink = document.querySelector<HTMLLinkElement>(`link[rel="stylesheet"][href*="/css/${stylesheet}"]`);
+        if (pageLink) {
+            const link = popup.document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = pageLink.href;
+            head.appendChild(link);
+        }
+    }
+
+    if (views.length > 1) {
+        const toolbar = popup.document.createElement('div');
+        const warning = popup.document.createElement('p');
+
+        toolbar.className = 'annotated-image-toolbar';
+        warning.className = 'annotated-image-warning';
+        warning.textContent = 'Warning: annotations from different graders may overlap and be illegible.';
+
+        const buttons = views.map((view) => {
+            const button = popup.document.createElement('button');
+            button.textContent = view.label;
+            button.addEventListener('click', () => {
+                img.src = view.dataUrl;
+                img.alt = `${view.label} annotations on ${filename}`;
+                warning.hidden = !view.combined;
+                buttons.forEach((other) => other.classList.toggle('active', other === button));
+            });
+            toolbar.appendChild(button);
+            return button;
+        });
+
+        body.appendChild(toolbar);
+        body.appendChild(warning);
+        buttons[0].click();
+    }
+
+    body.appendChild(img);
+    html.appendChild(head);
+    html.appendChild(body);
+
+    popup.document.documentElement.remove();
+    popup.document.appendChild(html);
+}
+
+// Uses the same structure and classes as Popup.twig
+function openDownloadChooser(views: AnnotatedView[], originalFilename: string): void {
+    const popupId = 'annotation-download-popup';
+    document.getElementById(popupId)?.remove();
+
+    const popupForm = document.createElement('div');
+    const popupBox = document.createElement('div');
+    const popupWindow = document.createElement('div');
+    const formTitle = document.createElement('div');
+    const heading = document.createElement('h1');
+    const formBody = document.createElement('div');
+    const message = document.createElement('p');
+    const optionList = document.createElement('div');
+    const formButtons = document.createElement('div');
+    const buttonContainer = document.createElement('div');
+    const cancel = document.createElement('a');
+
+    const closeChooser = () => {
+        popupForm.remove();
+        document.removeEventListener('keydown', onKeydown);
+        document.body.classList.remove('no-scroll');
+    };
+    const onKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            closeChooser();
+        }
+    };
+
+    popupForm.id = popupId;
+    popupForm.className = 'popup-form';
+    popupBox.className = 'popup-box';
+    popupBox.addEventListener('click', closeChooser);
+    popupWindow.className = 'popup-window';
+    popupWindow.addEventListener('click', (event) => event.stopPropagation());
+    formTitle.className = 'form-title';
+    heading.textContent = 'Download Annotated Image';
+    formBody.className = 'form-body';
+    // Built as an element so the student's filename can't inject HTML
+    const filenameText = document.createElement('strong');
+    filenameText.textContent = originalFilename;
+    message.append('Multiple graders annotated ', filenameText, '. Choose which annotations to download:');
+    optionList.className = 'btn-wrapper';
+    formButtons.className = 'form-buttons';
+    buttonContainer.className = 'form-button-container';
+    cancel.className = 'btn btn-default close-button key_to_click';
+    cancel.tabIndex = 0;
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', closeChooser);
+
+    for (const view of views) {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = view.combined ? 'btn btn-default' : 'btn btn-primary';
+        option.textContent = `${view.combined ? 'All Graders Combined' : view.label} `;
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-download';
+        option.appendChild(icon);
+        if (view.combined) {
+            option.title = 'Annotations from different graders may overlap and be illegible.';
+        }
+        option.addEventListener('click', () => {
+            triggerDownload(view.dataUrl, generateAnnotatedFilename(originalFilename, view.suffix));
+            closeChooser();
+        });
+        optionList.appendChild(option);
+    }
+
+    formTitle.appendChild(heading);
+    buttonContainer.appendChild(cancel);
+    formButtons.appendChild(buttonContainer);
+    formBody.appendChild(message);
+    formBody.appendChild(optionList);
+    formBody.appendChild(formButtons);
+    popupWindow.appendChild(formTitle);
+    popupWindow.appendChild(formBody);
+    popupBox.appendChild(popupWindow);
+    popupForm.appendChild(popupBox);
+    document.body.appendChild(popupForm);
+    document.body.classList.add('no-scroll');
+    document.addEventListener('keydown', onKeydown);
+    (optionList.firstElementChild as HTMLElement | null)?.focus();
 }
 
 function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, string>) {
