@@ -8380,8 +8380,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPastQueue() {
-
+    /**
+     * @param string|null $user_id only return this user's entries, or everyone's when null
+     */
+    public function getPastQueue(?string $user_id = null) {
+        $user_filter = $user_id === null ? "" : "AND queue.user_id = ?";
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -8426,11 +8429,15 @@ AND gc_id IN (
             )
             AS h1
             ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
-            WHERE time_in > ? AND current_state IN ('done')
+            WHERE time_in > ? AND current_state IN ('done') {$user_filter}
             ORDER BY row_number
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
-        $this->course_db->query($query, [$current_date, $current_date, $current_date]);
+        $params = [$current_date, $current_date, $current_date];
+        if ($user_id !== null) {
+            $params[] = $user_id;
+        }
+        $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
 
