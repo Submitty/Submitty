@@ -20,11 +20,6 @@
     margin: 0 0 1em;
 }
 
-.config-row-lessmargin {
-    flex: 1 0 auto;
-    margin: 0 0 0.5em;
-}
-
 textarea.config-row {
     resize: vertical;
 }
