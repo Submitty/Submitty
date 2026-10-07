@@ -1,7 +1,7 @@
 # Development Requirements
 
 # Linters and code formatter
-ruff==0.16.6
+ruff==0.16.8
 
 # For cleanup_active_graders.py
 sqlalchemy==2.0.52
