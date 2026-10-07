@@ -1,0 +1,22 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}custom-sort-csv-upload-form{% endblock %}
+{% block title %}Upload Custom Grading Order CSV{% endblock %}
+{% block body %}
+    <p>
+        Upload a .csv file to set the grading order. Uploading will completely replace the current order.
+    </p>
+    <ol class="full-list">
+        <li>"{{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }}": Required; used to identify each submitter.</li>
+        <li>Any additional columns: Optional; ignored during upload.</li>
+        <li>The order of rows in the file becomes the grading order (top row first).</li>
+    </ol>
+        <p>Only the {{ gradeable.isTeamAssignment() ? 'Team ID' : 'User ID' }} column is used to reorder submissions. Additional columns may be left unchanged and will be ignored.</p>
+        <p><em>This does not change peer assignments—only the order submitters appear while grading.</em></p>
+    <br />
+    <input type="file" id="custom-sort-csv-upload-file" name="upload" class="ignore" accept=".csv" aria-label="Choose File" data-testid="custom-sort-csv-upload-file">
+    <div id="custom-sort-csv-upload-error" class="popup-error-message" style="display:none; color: red; margin-top: 10px;" data-testid="custom-sort-csv-upload-error"></div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="button" id="custom-sort-csv-upload-submit" value="Submit" data-testid="custom-sort-csv-upload-submit" />
+{% endblock %}
