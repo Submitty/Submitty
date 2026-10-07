@@ -2,7 +2,16 @@
     <div class="draggable_content" style="width:100%">
         <div style="padding:20px; margin-top:10px;">
             <span class="col grading_label">Peer Participation</span>
-            <p data-testid="peer-participation-empty">No peer grading participation found.</p>
+            {% if participation is empty %}
+                <p data-testid="peer-participation-empty">No peer grading participation found.</p>
+            {% else %}
+                {% for entry in participation %}
+                    <div data-testid="peer-participation-entry" style="margin-top:15px;">
+                        <strong>Student graded:</strong> {{ entry.goc_user_id }}<br>
+                        <strong>Comment:</strong> {{ entry.goc_overall_comment }}
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 </div>

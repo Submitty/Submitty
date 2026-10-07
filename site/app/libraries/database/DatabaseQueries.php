@@ -5081,6 +5081,24 @@ SQL;
     }
 
     /**
+     * Get the overall peer feedback a student left for others on a gradeable
+     *
+     * @param string $grader_id
+     * @param string $gradeable_id
+     * @return array<int, array{goc_user_id: string, goc_overall_comment: string}>
+     */
+    public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT goc_user_id, goc_overall_comment
+             FROM gradeable_data_overall_comment
+             WHERE goc_grader_id = ? AND g_id = ?
+             ORDER BY goc_user_id",
+            [$grader_id, $gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
      * If the $archived parameter is false, then we run the check:

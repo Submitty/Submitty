@@ -2017,7 +2017,17 @@ HTML;
      * @return string
      */
     public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", []);
+        $submitter = $graded_gradeable->getSubmitter();
+        $participation = [];
+        if (!$submitter->isTeam()) {
+            $participation = $this->core->getQueries()->getPeerParticipationForGrader(
+                $submitter->getId(),
+                $graded_gradeable->getGradeable()->getId()
+            );
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
+            'participation' => $participation
+        ]);
     }
 
     /**
