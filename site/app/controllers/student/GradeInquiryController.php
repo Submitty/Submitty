@@ -385,6 +385,7 @@ class GradeInquiryController extends AbstractController {
                 throw new RuntimeException("Invalid grade inquiry event type: {$type}");
             }
 
+            $notifications = [];
             $emails = [];
             // make graders' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?' . http_build_query(['who_id' => $submitter->getId()])])]);
@@ -401,7 +402,6 @@ class GradeInquiryController extends AbstractController {
 
             // make students' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
-            $notifications = [];
             if ($submitter->isTeam()) {
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
