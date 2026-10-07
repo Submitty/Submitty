@@ -1248,6 +1248,9 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
+        if ($isPeerParticipationPanel) {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable);
+        }
         if ($isDiscussionPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', $graded_gradeable->getGradeable()->getDiscussionThreadId(), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
         }
@@ -2005,6 +2008,16 @@ HTML;
                 "active_version" => $active_version
             ]
         );
+    }
+    
+    /**
+     * Render the Peer Participation panel
+     *
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", []);
     }
 
     /**
