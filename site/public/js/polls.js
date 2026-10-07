@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeStudentSocketClient */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeStudentSocketClient initializeInstructorIndexSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 $(document).ready(() => {
@@ -307,6 +307,21 @@ function initializeInstructorSocketClient(poll_id) {
         instructor: true,
         poll_id: poll_id,
     });
+}
+
+function initializeInstructorIndexSocketClient() {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        switch (msg.type) {
+            case 'update_response_count':
+                $(`#poll_${msg.poll_id}_responses`).text(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open('polls_index');
 }
 
 function initializeStudentSocketClient(poll_id) {

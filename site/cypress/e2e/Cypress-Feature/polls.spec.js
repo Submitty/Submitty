@@ -5,7 +5,7 @@
  * interfere with the tests.
  */
 
-import { verifyWebSocketStatus } from '../../support/utils';
+import { getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
 
 const visitPoll = (title, text, wsEnabled = false) => {
     // 3rd child represents the student view, 7th/8th child represents the instructor view depending on the 'date released' visibility
@@ -370,6 +370,35 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').check(); // Answer 3
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');
+
+        // log into instructor and verify the response count on the polls index page updates live
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        visitPoll('Poll Cypress Test', 'View Poll', true);
+        cy.get('input[name="poll_id"]').first().invoke('val').as('pollId');
+        cy.get('[data-testid="answer-0"]').invoke('val').as('optionId');
+        cy.visit(['sample', 'polls']);
+        verifyWebSocketStatus();
+        cy.get('@pollId').then((pollId) => {
+            const responses = `#poll_${pollId}_responses`;
+            // the callback form of should() retries until the websocket update arrives
+            const expectCount = (count) => cy.get(responses).should(($cell) => expect(parseInt($cell.text())).to.eq(count));
+            const submitResponse = (answer) => cy.window().its('csrfToken').then((csrfToken) => cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/polls/submitResponse`,
+                form: true,
+                body: { 'csrf_token': csrfToken, 'poll_id': pollId, 'answers[]': answer },
+            }));
+            cy.get(responses).invoke('text').then(parseInt).then((initialCount) => {
+                // a new respondent increments the count without reloading the page
+                cy.get('@optionId').then(submitResponse);
+                expectCount(initialCount + 1);
+                // withdrawing the response ("no response") decrements the count
+                submitResponse('-1');
+                expectCount(initialCount);
+            });
+        });
 
         // log into instructor, edit the poll
         cy.logout();
