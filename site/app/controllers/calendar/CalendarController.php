@@ -14,6 +14,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use app\models\CalendarInfo;
 use app\models\GlobalCalendarInfo;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -300,6 +301,7 @@ class CalendarController extends AbstractController {
         return JsonResponse::getErrorResponse("Failed to delete message");
     }
 
+    #[AccessControl(level: "SUPERUSER")]
     #[Route(path: "/calendar/global_items/new", methods: ["POST"])]
     public function createGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -352,6 +354,7 @@ class CalendarController extends AbstractController {
     }
 
 
+    #[AccessControl(level: "SUPERUSER")]
     #[Route(path: "/calendar/global_items/edit", methods: ["POST"])]
     public function editGlobalEvent(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
@@ -415,6 +418,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
+    #[AccessControl(level: "SUPERUSER")]
     #[Route(path: "/calendar/global_items/delete", methods: ["POST"])]
     public function deleteGlobalEvent(): ResponseInterface {
         if (isset($_POST['id'])) {
