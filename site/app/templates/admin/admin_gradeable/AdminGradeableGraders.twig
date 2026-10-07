@@ -71,9 +71,9 @@ Form
 
 <fieldset>
     <legend>Do you want to specify a custom grading order?</legend>
-    <input type="radio" id="yes_enable_custom_sort" name="enable_custom_sort" value="true"
+    <input type="radio" id="yes_enable_custom_sort" data-testid="yes_enable_custom_sort" name="enable_custom_sort" value="true"
         {{ gradeable.getEnableCustomSort() ? 'checked' : '' }}/> <label for="yes_enable_custom_sort">Yes</label>
-    <input type="radio" id="no_enable_custom_sort" name="enable_custom_sort" value="false"
+    <input type="radio" id="no_enable_custom_sort" data-testid="no_enable_custom_sort" name="enable_custom_sort" value="false"
         {{ not gradeable.getEnableCustomSort() ? 'checked' : '' }}/> <label for="no_enable_custom_sort">No</label>
 </fieldset>
 <br />
