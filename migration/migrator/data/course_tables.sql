@@ -148,12 +148,24 @@ CREATE FUNCTION public.calculate_remaining_cache_for_user(user_id text, default_
                 return_cache.late_days_remaining = late_days_remaining;
             --is gradeable event
             ELSE
-                returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
-                late_days_used = late_days_used - returnedrow.late_days_change;
+                IF EXISTS (
+                    SELECT 1
+                    FROM grade_override go
+                    WHERE go.user_id = user_id
+                        AND go.g_id = var_row.g_id
+                ) THEN
+                    return_cache = var_row;
+                    return_cache.late_days_change = 0;
+                    return_cache.late_days_remaining = late_days_remaining;
+                    return_cache.late_day_status = 4;
+                ELSE
+                    returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
+                    late_days_used = late_days_used - returnedrow.late_days_change;
 				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
-                return_cache = var_row;
-                return_cache.late_days_change = returnedrow.late_days_change;
-                return_cache.late_days_remaining = returnedrow.late_days_remaining;
+                    return_cache = var_row;
+                    return_cache.late_days_change = returnedrow.late_days_change;
+                    return_cache.late_days_remaining = returnedrow.late_days_remaining;
+                END IF;
             END IF;
             RETURN NEXT return_cache;
         END LOOP;
@@ -471,6 +483,31 @@ CREATE FUNCTION public.grab_late_day_updates_for_user(user_id text) RETURNS SETO
         END LOOP;
         RETURN;	
     END;
+    $$;
+
+
+--
+-- Name: grade_override_late_day_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.grade_override_late_day_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        #variable_conflict use_variable
+        DECLARE
+            g_id varchar;
+            user_id varchar;
+        BEGIN
+            g_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.g_id ELSE NEW.g_id END;
+            user_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+
+            DELETE FROM late_day_cache ldc
+            WHERE ldc.late_day_date >= (SELECT eg_submission_due_date
+                                        FROM electronic_gradeable eg
+                                        WHERE eg.g_id = g_id)
+            AND ldc.user_id = user_id;
+            RETURN NEW;
+        END;
     $$;
 
 
@@ -3240,6 +3277,13 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
+
+
+--
+-- Name: grade_override grade_override_late_day_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER grade_override_late_day_change AFTER INSERT OR DELETE ON public.grade_override FOR EACH ROW EXECUTE PROCEDURE public.grade_override_late_day_change();
 
 
 --
