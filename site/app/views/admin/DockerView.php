@@ -37,7 +37,7 @@ class DockerView extends AbstractView {
                 "is_faculty" => $is_faculty,
                 "remove_image_data" => $docker_ui->getRemoveImageData(
                     $this->core->getUser()->getId(),
-                    $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER
+                    $this->core->getUser()->isSuperUser()
                 ),
             ]
         );

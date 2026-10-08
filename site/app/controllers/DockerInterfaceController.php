@@ -271,31 +271,21 @@ class DockerInterfaceController extends AbstractController {
                 continue;
             }
 
-            // sometimes the image will have no owner, and the query returns an empty string
-            $owner = $owners[$image] ?? false;
-            if ($owner === '') {
-                $owner = false;
-            }
+            // an empty owner means no instructor owns this name (system/default image)
+            $owner = $owners[$image] ?? '';
 
-            // if there is no owner, you should probably not be deleting this
-            if ($owner === false && !isset($in_config[$image])) {
+            // an unowned name that isn't in the config doesn't exist
+            if ($owner === '' && !isset($in_config[$image])) {
                 $not_listed[] = $image;
                 continue;
             }
 
-            // if the image has no owner and the user is not a superuser, they probably shouldn't be deleting this
-            if ($owner === false && !$user->isSuperUser()) {
+            if (!DockerUI::canRemoveImage($owner, $user->getId(), $user->isSuperUser())) {
                 $not_owned[] = $image;
                 continue;
             }
 
-            // if you don't own this image, can't delete it
-            if ($owner !== false && !$user->isSuperUser() && $owner !== $user->getId()) {
-                $not_owned[] = $image;
-                continue;
-            }
-
-            if ($owner !== false) {
+            if ($owner !== '') {
                 $this->core->getQueries()->removeDockerImageOwner($image, $user);
             }
             $removed[] = $image;

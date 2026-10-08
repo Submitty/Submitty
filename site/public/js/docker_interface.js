@@ -74,11 +74,9 @@ let removeDialogUrl = null;
 function openRemoveDialog(button, url) {
     removeDialogUrl = url;
 
-    // data-owners is an ordered list of name|owner pairs, the first is the primary
-    const entries = (button.dataset.owners || '').split(',').filter(Boolean).map((pair) => {
-        const idx = pair.indexOf('|');
-        return { name: pair.slice(0, idx), owner: pair.slice(idx + 1) };
-    });
+    // data-names is an ordered list of {name, owner, can_remove}, the first is the primary.
+    // can_remove is computed server side by DockerUI::canRemoveImage.
+    const entries = JSON.parse(button.dataset.names || '[]');
     const isMultiple = entries.length > 1;
     $('#remove-image-intro-single').toggle(!isMultiple);
     $('#remove-image-intro-multiple').toggle(isMultiple);
@@ -98,7 +96,7 @@ function openRemoveDialog(button, url) {
         });
         checkbox.attr('data-testid', 'remove-image-checkbox');
 
-        const isLocked = !window.dockerIsSuperUser && entry.owner !== window.dockerUserId;
+        const isLocked = !entry.can_remove;
         if (isLocked) {
             checkbox.prop('disabled', true);
             wrapper.addClass('locked');
@@ -186,17 +184,14 @@ function removeImage(url, images) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                setDockerStatusBadge(`${images.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
-                if (json.status === 'success') {
-                    setDockerStatusBadge(`${json.data.removed.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
-                    displaySuccessMessage(json.data.success_message);
-                    if (json.data.error_message) {
-                        displayErrorMessage(json.data.error_message);
-                    }
+                setDockerStatusBadge(`${json.data.removed.join(', ')} has been removed from the configuration! Click "Update dockers and machines" to apply the changes.`, 'btn-danger');
+                displaySuccessMessage(json.data.success_message);
+                if (json.data.error_message) {
+                    displayErrorMessage(json.data.error_message);
                 }
-                else {
-                    displayErrorMessage(json.message);
-                }
+            }
+            else {
+                displayErrorMessage(json.message);
             }
         },
         error: (err) => {

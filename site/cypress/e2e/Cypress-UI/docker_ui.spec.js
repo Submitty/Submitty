@@ -430,6 +430,57 @@ describe('Docker UI Test', () => {
         cy.get('[data-testid="image-row"]').should('contain.text', 'submitty/python:latest');
     });
 
+    it('Should not show remove option on system images to non-superusers', () => {
+        // Default images have no owner, so a faculty user cannot remove them
+        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest')
+            .should('contain.text', 'system')
+            .find('[data-testid="remove-image-button"]')
+            .should('not.exist');
+    });
+
+    it('Should reject direct removal of a system image by a non-superuser', () => {
+        cy.window().then((win) => {
+            cy.request({
+                method: 'POST',
+                url: '/admin/remove_image',
+                form: true,
+                body: {
+                    'images[]': 'submitty/autograding-default:latest',
+                    'csrf_token': win.csrfToken,
+                },
+            }).then((response) => {
+                const json = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
+                expect(json.status).to.eq('fail');
+                expect(json.message).to.contain('managed by another instructor/superuser: submitty/autograding-default:latest');
+            });
+        });
+
+        // The image is still in the configuration
+        cy.get('[data-testid="docker-status"]').should('contain.text', 'Up-to-Date');
+        cy.reload();
+        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest').should('exist');
+    });
+
+    it('Should allow a superuser to remove system images', () => {
+        cy.logout();
+        cy.login('superuser');
+        cy.visit(docker_ui_path);
+
+        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest')
+            .find('[data-testid="remove-image-button"]')
+            .click();
+        cy.get('[data-testid="remove-image-form"]').should('be.visible');
+
+        // Every name on the image is removable by a superuser
+        cy.get('[data-testid="remove-image-checkbox"]').each(($checkbox) => {
+            cy.wrap($checkbox).should('not.be.disabled');
+        });
+
+        // Don't actually remove the default image
+        cy.get('[data-testid="remove-image-cancel"]').click();
+        cy.get('[data-testid="remove-image-form"]').should('not.be.visible');
+    });
+
     it('Should test instructor user permissions', () => {
         // Logout current user
         cy.logout();

@@ -423,28 +423,37 @@ class DockerUI extends AbstractModel {
     }
 
     /**
+     * Determine whether a user may remove an image/alias.
+     * An empty owner means no instructor owns that name (system/default image).
+     */
+    public static function canRemoveImage(string $owner, string $user_id, bool $is_super_user): bool {
+        if ($is_super_user) {
+            return true;
+        }
+        return $owner !== '' && $owner === $user_id;
+    }
+
+    /**
      * Per-image data for the remove dialog, keyed by primary name.
-     * 'owners' is a comma-separated list of name|owner pairs (primary first)
-     * an empty owner means no instructor owns that name, likely added by
-     * sysadmin or is default
-     * @return array<string, array{owners: string, can_remove: bool, owner_display: string}>
+     * 'names' lists the primary name first, then its aliases. An empty owner
+     * means no instructor owns that name, likely added by sysadmin or is default.
+     * @return array<string, array{names: array<array{name: string, owner: string, can_remove: bool}>, can_remove: bool, owner_display: string}>
      */
     public function getRemoveImageData(string $user_id, bool $is_super_user): array {
         $owners = $this->json_data['image_owners'];
         $result = [];
         foreach ($this->docker_images as $image) {
-            $pairs = [];
-            $can_remove = $is_super_user;
+            $entries = [];
+            $can_remove = false;
             $display = [];
             $names = array_merge([$image->primary_name], $image->aliases);
             foreach ($names as $name) {
                 $owner = $owners[$name] ?? '';
                 $label = $owner === '' ? 'system' : $owner;
                 $display[] = $name === $image->primary_name ? $label . ' (primary)' : $label;
-                $pairs[] = $name . '|' . $owner;
-                if ($owner !== '' && $owner === $user_id) {
-                    $can_remove = true;
-                }
+                $name_can_remove = self::canRemoveImage($owner, $user_id, $is_super_user);
+                $entries[] = ['name' => $name, 'owner' => $owner, 'can_remove' => $name_can_remove];
+                $can_remove = $can_remove || $name_can_remove;
             }
 
             $unique_owners = array_unique(array_map(fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names));
@@ -458,7 +467,7 @@ class DockerUI extends AbstractModel {
             }
 
             $result[$image->primary_name] = [
-                'owners' => implode(',', $pairs),
+                'names' => $entries,
                 'can_remove' => $can_remove,
                 'owner_display' => $owner_display,
             ];
