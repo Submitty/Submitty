@@ -371,7 +371,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');
 
-        // log into instructor and verify the response count on the polls index page updates live
+        // log into instructor and keep the polls index page open while a student answers in a separate session
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
@@ -381,22 +381,42 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
         verifyWebSocketStatus();
         cy.get('@pollId').then((pollId) => {
+            const pollsUrl = `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/polls`;
             const responses = `#poll_${pollId}_responses`;
             // the callback form of should() retries until the websocket update arrives
             const expectCount = (count) => cy.get(responses).should(($cell) => expect(parseInt($cell.text())).to.eq(count));
-            const submitResponse = (answer) => cy.window().its('csrfToken').then((csrfToken) => cy.request({
+            const submitResponse = (csrfToken, answer) => cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/polls/submitResponse`,
+                url: `${pollsUrl}/submitResponse`,
                 form: true,
                 body: { 'csrf_token': csrfToken, 'poll_id': pollId, 'answers[]': answer },
-            }));
-            cy.get(responses).invoke('text').then(parseInt).then((initialCount) => {
-                // a new respondent increments the count without reloading the page
-                cy.get('@optionId').then(submitResponse);
-                expectCount(initialCount + 1);
-                // withdrawing the response ("no response") decrements the count
-                submitResponse('-1');
-                expectCount(initialCount);
+            });
+
+            cy.get(responses).invoke('text').then(parseInt).as('initialCount');
+            // Switch the session to a student without leaving the instructor's page. The instructor's
+            // websocket was authorized when it connected, so it stays subscribed to the polls index.
+            cy.request({
+                method: 'POST',
+                url: '/authentication/check_login',
+                form: true,
+                followRedirect: false,
+                body: { user_id: 'bitdiddle', password: 'bitdiddle', __csrf: 'bitdiddle' },
+            });
+            cy.request(pollsUrl).its('body').then((html) => {
+                // the student's polls page has no instructor controls
+                expect(html).not.to.contain('New Poll');
+                return html.match(/window\.csrfToken = "([^"]+)"/)[1];
+            }).as('studentCsrfToken');
+
+            cy.get('@initialCount').then((initialCount) => {
+                cy.get('@studentCsrfToken').then((studentCsrfToken) => {
+                    // the student's first answer increments the count on the instructor's open page
+                    cy.get('@optionId').then((optionId) => submitResponse(studentCsrfToken, optionId));
+                    expectCount(initialCount + 1);
+                    // the student withdrawing their answer ("no response") decrements it again
+                    submitResponse(studentCsrfToken, '-1');
+                    expectCount(initialCount);
+                });
             });
         });
 
