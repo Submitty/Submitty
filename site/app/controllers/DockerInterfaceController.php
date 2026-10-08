@@ -230,7 +230,7 @@ class DockerInterfaceController extends AbstractController {
     public function removeImage(): JsonResponse {
         $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
 
-        // Accept a list of names (primary and/or aliases); fall back to the legacy single-image param.
+        // Accept a list of names (primary and/or aliases)
         $images = $_POST['images'] ?? null;
         if (!is_array($images)) {
             $images = isset($_POST['image']) ? [$_POST['image']] : [];
