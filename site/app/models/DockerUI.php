@@ -293,9 +293,14 @@ class DockerUI extends AbstractModel {
             return;
         }
 
-        if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
-            $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
+        // Show a union of capabilities across the primary and alias images
+        $capabilities = [];
+        foreach (array_merge([$image->primary_name], $image->aliases) as $name) {
+            if (array_key_exists($name, $this->image_to_capability_mapping)) {
+                $capabilities = array_merge($capabilities, $this->image_to_capability_mapping[$name]);
+            }
         }
+        $image->capabilities = array_values(array_unique($capabilities));
 
         $this->docker_images[$image->primary_name] = $image;
     }
