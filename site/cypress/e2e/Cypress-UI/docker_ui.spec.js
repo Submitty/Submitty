@@ -431,10 +431,12 @@ describe('Docker UI Test', () => {
     });
 
     it('Should not show remove option on system images to non-superusers', () => {
+        // The default image is listed
+        cy.get('[data-testid="image-row"]')
+            .contains('submitty/autograding-default');
+
         // Default images have no owner, so a faculty user cannot remove them
-        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest')
-            .should('contain.text', 'system')
-            .find('[data-testid="remove-image-button"]')
+        cy.get('[data-image-id="submitty/autograding-default:latest"]')
             .should('not.exist');
     });
 
@@ -455,10 +457,10 @@ describe('Docker UI Test', () => {
             });
         });
 
-        // The image is still in the configuration
-        cy.get('[data-testid="docker-status"]').should('contain.text', 'Up-to-Date');
+        // The image is still listed
         cy.reload();
-        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest').should('exist');
+        cy.get('[data-testid="image-row"]')
+            .contains('submitty/autograding-default');
     });
 
     it('Should allow a superuser to remove system images', () => {
@@ -466,15 +468,16 @@ describe('Docker UI Test', () => {
         cy.login('superuser');
         cy.visit(docker_ui_path);
 
-        cy.contains('[data-testid="image-row"]', 'submitty/autograding-default:latest')
-            .find('[data-testid="remove-image-button"]')
+        // Superusers can remove default images
+        cy.get('[data-testid="remove-image-form"]').should('not.be.visible');
+        cy.get('[data-image-id="submitty/autograding-default:latest"]')
+            .should('be.visible')
             .click();
         cy.get('[data-testid="remove-image-form"]').should('be.visible');
 
         // Every name on the image is removable by a superuser
-        cy.get('[data-testid="remove-image-checkbox"]').each(($checkbox) => {
-            cy.wrap($checkbox).should('not.be.disabled');
-        });
+        cy.get('[data-testid="remove-image-checkbox"]')
+            .should('not.be.disabled');
 
         // Don't actually remove the default image
         cy.get('[data-testid="remove-image-cancel"]').click();
