@@ -960,11 +960,11 @@ class Gradeable extends AbstractModel {
      * @param int $max_team_size Must be at least 0
      */
     public function setTeamSizeMax(int $max_team_size) {
-        if ($max_team_size >= 0) {
+        if ($max_team_size > 0) {
             $this->team_size_max = intval($max_team_size);
         }
         else {
-            throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
+            throw new \InvalidArgumentException('Max team size must be greater than 0!');
         }
         $this->modified = true;
     }
