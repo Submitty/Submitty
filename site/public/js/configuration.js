@@ -62,7 +62,7 @@ $(document).ready(() => {
                         message: 'invalid response received from server',
                     };
                 }
-                let failed = response['status'] === 'fail';
+                const failed = response['status'] === 'fail';
                 if (failed) {
                     alert(response['message']);
                     $(elem).focus();
