@@ -531,25 +531,6 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
             },
             type: 'POST',
             success: function (response) {
-<<<<<<< HEAD
-                try {
-                    response = JSON.parse(response);
-                }
-                catch (e) {
-                    reject({ status: 'failed', message: 'Unexpected server response' });
-                    return;
-                }
-                if (response['status'] === 'success') {
-                    resolve(response);
-                }
-                else {
-                    reject(response);
-                }
-            },
-            error: function () {
-                console.log(`Error while trying to validate user id${user_id}`);
-                reject({ status: 'failed', message: `Could not reach the server to validate user id ${user_id}` });
-=======
                 settleJsonResponse(response, resolve, reject);
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -557,7 +538,6 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
                     status: 'failed',
                     message: describeAjaxError(jqXHR, errorThrown, `Validating user id ${user_id}`),
                 });
->>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
         });
     });
@@ -717,25 +697,6 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             },
             type: 'POST',
             success: function (response) {
-<<<<<<< HEAD
-                try {
-                    response = JSON.parse(response);
-                }
-                catch (e) {
-                    reject({ status: 'failed', message: 'Unexpected server response' });
-                    return;
-                }
-                if (response['status'] === 'success') {
-                    resolve(response);
-                }
-                else {
-                    reject(response);
-                }
-            },
-            error: function () {
-                console.log('Failed while submiting split item');
-                reject({ status: 'failed', message: `Could not reach the server to submit ${user_id}` });
-=======
                 settleJsonResponse(response, resolve, reject);
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -743,7 +704,6 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
                     status: 'failed',
                     message: describeAjaxError(jqXHR, errorThrown, `Submitting ${user_id}`),
                 });
->>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
         });
     });
@@ -767,23 +727,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
             },
             type: 'POST',
             success: function (response) {
-<<<<<<< HEAD
-                try {
-                    response = JSON.parse(response);
-                }
-                catch (e) {
-                    reject({ status: 'failed', message: 'Unexpected server response' });
-                    return;
-                }
-                if (response['status'] === 'success') {
-                    resolve(response);
-                }
-                else {
-                    reject(response);
-                }
-=======
                 settleJsonResponse(response, resolve, reject);
->>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 reject({

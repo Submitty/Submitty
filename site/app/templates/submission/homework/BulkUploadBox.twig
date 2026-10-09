@@ -392,77 +392,6 @@
         }
     }
 
-<<<<<<< HEAD
-    async function submitAll(startIndex){
-        var total = Object.keys(path_list).length;
-        var expected_count = parseExpectedPageBox();
-        var has_expected = Array.isArray(expected_count) && expected_count.length > 0;
-        var results = {submitted: 0, skipped: [], failed: []};
-
-        for(var index = startIndex; index <= total; index++){
-            var text_area = document.getElementById("bulk_user_id_" + String(index));
-            var row = document.getElementById("row-" + String(index));
-            if(text_area === null || row === null || text_area.disabled){
-                continue;
-            }
-            var user_id = text_area.value;
-            var label = user_id !== "" ? user_id : "row " + String(index);
-
-            var page_count = document.getElementById("page_count_" + String(index));
-            if(page_count && has_expected
-               && expected_count.indexOf(parseInt(page_count.innerHTML)) === -1){
-                results.skipped.push(label + ": page count doesn't match expected");
-                continue;
-            }
-            if(row.style.backgroundColor == "pink"){
-                results.skipped.push(label + ": invalid submission");
-                continue;
-            }
-
-            try{
-                var response = await validateUserId(CSRF, g_id, user_id);
-                if(response['data']['previous_submission'] !== false){
-                    results.skipped.push(label + ": already has a submission");
-                    continue;
-                }
-                toggleButtons(index, true);
-                var path = decodeURIComponent(path_list[index]);
-                var ok = await uploadSplitHelper(user_id, path, index);
-                if(ok){
-                    results.submitted++;
-                }
-                else{
-                    results.failed.push(label + ": upload failed");
-                }
-            }
-            catch(e){
-                console.error(e);
-                toggleButtons(index, false);
-                var reason = (e && typeof e.message === "string") ? e.message : "validation failed";
-                results.failed.push(label + ": " + reason);
-            }
-        }
-        showBulkSubmitSummary(results);
-    }
-
-    function showBulkSubmitSummary(results){
-        var parts = [];
-        if(results.submitted > 0){
-            parts.push(String(results.submitted) + " submitted");
-        }
-        if(results.skipped.length > 0){
-            parts.push(String(results.skipped.length) + " skipped (" + results.skipped.join("; ") + ")");
-        }
-        if(results.failed.length > 0){
-            parts.push(String(results.failed.length) + " failed (" + results.failed.join("; ") + ")");
-        }
-        if(parts.length === 0){
-            displayMessage("No PDFs were eligible to submit.", "error");
-            return;
-        }
-        var has_problems = results.skipped.length > 0 || results.failed.length > 0;
-        displayMessage(parts.join(". ") + ".", has_problems ? "error" : "success");
-=======
     var bulk_submit_running = false;
 
     function setBulkButtonsDisabled(disable){
@@ -571,7 +500,6 @@
         results.failed.forEach(function(f){
             displayMessage("Failed " + f, "error");
         });
->>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
     }
 
     function confirmDeleteAll(){
