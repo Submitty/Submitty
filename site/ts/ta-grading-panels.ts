@@ -34,7 +34,7 @@ let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'discussion_browser', icon: '.grading_toolbar .fa-comment-alt' },
     { str: 'grade_inquiry_info', icon: '.grading_toolbar .grade_inquiry_icon' },
     { str: 'notebook-view', icon: '.grading_toolbar .fas fa-book-open' },
-    { str: 'peer_participation', icon: '.grading_toolbar .fa-clipboard-list'},
+    { str: 'peer_participation', icon: '.grading_toolbar .fa-clipboard-list' },
 ];
 
 // Width of mobile and Tablet screens width

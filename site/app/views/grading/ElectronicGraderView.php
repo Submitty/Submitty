@@ -2009,7 +2009,7 @@ HTML;
             ]
         );
     }
-    
+
     /**
      * Render the Peer Participation panel
      *
