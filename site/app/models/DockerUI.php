@@ -293,9 +293,14 @@ class DockerUI extends AbstractModel {
             return;
         }
 
-        if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
-            $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
+        // Show a union of capabilities across the primary and alias images
+        $capabilities = [];
+        foreach (array_merge([$image->primary_name], $image->aliases) as $name) {
+            if (array_key_exists($name, $this->image_to_capability_mapping)) {
+                $capabilities = array_merge($capabilities, $this->image_to_capability_mapping[$name]);
+            }
         }
+        $image->capabilities = array_values(array_unique($capabilities));
 
         $this->docker_images[$image->primary_name] = $image;
     }
@@ -415,5 +420,58 @@ class DockerUI extends AbstractModel {
                 }
             }
         }
+    }
+
+    /**
+     * Determine whether a user may remove an image/alias.
+     * An empty owner means no instructor owns that name (system/default image).
+     */
+    public static function canRemoveImage(string $owner, string $user_id, bool $is_super_user): bool {
+        if ($is_super_user) {
+            return true;
+        }
+        return $owner !== '' && $owner === $user_id;
+    }
+
+    /**
+     * Per-image data for the remove dialog, keyed by primary name.
+     * 'names' lists the primary name first, then its aliases. An empty owner
+     * means no instructor owns that name, likely added by sysadmin or is default.
+     * @return array<string, array{names: array<array{name: string, owner: string, can_remove: bool}>, can_remove: bool, owner_display: string}>
+     */
+    public function getRemoveImageData(string $user_id, bool $is_super_user): array {
+        $owners = $this->json_data['image_owners'];
+        $result = [];
+        foreach ($this->docker_images as $image) {
+            $entries = [];
+            $can_remove = false;
+            $display = [];
+            $names = array_merge([$image->primary_name], $image->aliases);
+            foreach ($names as $name) {
+                $owner = $owners[$name] ?? '';
+                $label = $owner === '' ? 'system' : $owner;
+                $display[] = $name === $image->primary_name ? $label . ' (primary)' : $label;
+                $name_can_remove = self::canRemoveImage($owner, $user_id, $is_super_user);
+                $entries[] = ['name' => $name, 'owner' => $owner, 'can_remove' => $name_can_remove];
+                $can_remove = $can_remove || $name_can_remove;
+            }
+
+            $unique_owners = array_unique(array_map(fn($name) => ($owners[$name] ?? '') === '' ? 'system' : $owners[$name], $names));
+
+            if (count($unique_owners) <= 1) {
+                $first_owner = reset($unique_owners);
+                $owner_display = $first_owner === false ? '' : $first_owner;
+            }
+            else {
+                $owner_display = implode(' / ', $display);
+            }
+
+            $result[$image->primary_name] = [
+                'names' => $entries,
+                'can_remove' => $can_remove,
+                'owner_display' => $owner_display,
+            ];
+        }
+        return $result;
     }
 }
