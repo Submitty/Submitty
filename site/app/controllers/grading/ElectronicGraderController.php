@@ -1627,7 +1627,6 @@ class ElectronicGraderController extends AbstractController {
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
      * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
      */
-    #[AccessControl(permission: "grading.electronic.submit_team_form")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")]
     public function randomizeTeamRotatingSections($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1924,20 +1923,18 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
-            $skip_withdrawn = !$this->core->getUser()->accessFullGrading()
-                || ($_COOKIE['include_withdrawn_students'] ?? 'omit') !== 'include';
             $goToStudent = null;
             if ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             elseif ($to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
             }
             // Reassign who_id
             if ($goToStudent !== null) {

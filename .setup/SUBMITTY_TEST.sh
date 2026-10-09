@@ -28,7 +28,6 @@ HELP_MESSAGE="
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     shell-lint: run ShellCheck
-    yaml-lint : run yamllint
     py-lint   : run ruff check [option: --fix, specific_file.py]
     py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
     py-unit   : run all python unit tests except migration
@@ -165,10 +164,6 @@ run_shell_lint() {
     run_in_container /home/submitty python3 run_shellcheck.py
 }
 
-run_yaml_lint() {
-    run_in_container /home/submitty yamllint .
-}
-
 run_php_unit() {
     parse_args "${@:2}"
     run_in_container /home/submitty/site php vendor/bin/phpunit ${ARGS[@]+"${ARGS[@]}"}
@@ -247,9 +242,6 @@ case "${1:-}" in
         ;;
     shell-lint)
         run_shell_lint
-        ;;
-    yaml-lint)
-        run_yaml_lint
         ;;
     py-lint)
         run_py_lint "$@"

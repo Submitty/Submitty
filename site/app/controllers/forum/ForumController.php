@@ -1521,7 +1521,6 @@ class ForumController extends AbstractController {
     }
 
     // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
-    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
