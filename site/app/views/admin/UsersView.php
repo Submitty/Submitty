@@ -92,7 +92,7 @@ class UsersView extends AbstractView {
             foreach ($all_column_keys as $key) {
                 if ($is_assoc) {
                     $active_flags[] = !empty($decoded_columns[$key]);
-                } 
+                }
                 else {
                     $active_flags[] = in_array($key, $decoded_columns, true);
                 }
