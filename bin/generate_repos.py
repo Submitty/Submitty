@@ -121,7 +121,12 @@ def create_or_update_repo(folder, subdirectory, which_branch):
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
         for entry in files + dirs:
-            shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+            # The push above starts git maintenance in the background, which
+            # can delete its lock file after os.walk lists it
+            try:
+                shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+            except FileNotFoundError:
+                pass
     shutil.chown(folder, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 
