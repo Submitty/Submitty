@@ -61,6 +61,7 @@ export function changeStudentArrowTooltips(data: string) {
             data = 'default';
         }
     }
+    // eslint-disable-next-line no-useless-assignment
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -250,7 +251,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
-        const prev_open_files = window.Cookies.get('open_files') || '[]';
+        const prev_open_files = localStorage.getItem('open_files') || '[]';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
         // search for and add open files to our array, then remove closed files
@@ -269,7 +270,10 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     // remove duplicates from the auto-open list
     open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
-    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
+    localStorage.setItem('open_files', JSON.stringify(open_files_array));
+
+    // The list used to live in a cookie that grew large enough to break websocket handshakes.
+    window.Cookies.remove('open_files', { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -728,7 +732,7 @@ function openFrame(
             pdf_full_panel
             && url_file.substring(url_file.length - 3) === 'pdf'
         ) {
-            viewFileFullPanel(html_file, url_file, 0, panel as FileFullPanelOptions);
+            viewFileFullPanel(html_file, url_file, 0, panel);
         }
         else {
             const forceFull
