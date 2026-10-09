@@ -42,11 +42,11 @@ class UsersView extends AbstractView {
 
         if (!is_array($decoded_columns) && str_contains($cookie_raw, '-')) {
             $bit_flags = explode('-', $cookie_raw);
-        } else {
+        } 
+        else {
             $bit_flags = null;
         }
-
-       $default_columns = [
+        $default_columns = [
             'registration-section',
             'user-id',
             'first-name',
@@ -59,8 +59,6 @@ class UsersView extends AbstractView {
             'registration-type',
             'edit-student',
         ];
-        
-
         $all_column_keys = [
             'registration-section',
             'registration-subsection',
@@ -93,11 +91,13 @@ class UsersView extends AbstractView {
             foreach ($all_column_keys as $key) {
                 if ($is_assoc) {
                     $active_flags[] = !empty($decoded_columns[$key]);
-                } else {
+                } 
+                else {
                     $active_flags[] = in_array($key, $decoded_columns, true);
                 }
             }
-        } else {
+        } 
+        else {
             foreach ($all_column_keys as $key) {
                 $active_flags[] = in_array($key, $default_columns, true);
             }

@@ -75,8 +75,6 @@ class UsersController extends AbstractController {
 
         // Get Active student Columns
         $active_student_columns = $_COOKIE['active_student_columns'] ?? '';
-    
-
         $can_rejoin = [];
         $self_rejoin_tester = new SelfRejoinController($this->core);
         $course = $this->core->getConfig()->getCourse();
