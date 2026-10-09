@@ -42,7 +42,7 @@ class UsersView extends AbstractView {
 
         if (!is_array($decoded_columns) && str_contains($cookie_raw, '-')) {
             $bit_flags = explode('-', $cookie_raw);
-        } 
+        }
         else {
             $bit_flags = null;
         }
@@ -86,7 +86,8 @@ class UsersView extends AbstractView {
             foreach ($padded as $val) {
                 $active_flags[] = ($val === '1' || $val === 1 || $val === true);
             }
-        } elseif (is_array($decoded_columns)) {
+        }
+        elseif (is_array($decoded_columns)) {
             $is_assoc = array_keys($decoded_columns) !== range(0, count($decoded_columns) - 1);
             foreach ($all_column_keys as $key) {
                 if ($is_assoc) {
@@ -96,7 +97,7 @@ class UsersView extends AbstractView {
                     $active_flags[] = in_array($key, $decoded_columns, true);
                 }
             }
-        } 
+        }
         else {
             foreach ($all_column_keys as $key) {
                 $active_flags[] = in_array($key, $default_columns, true);
