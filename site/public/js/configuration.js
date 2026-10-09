@@ -3,7 +3,9 @@
 $(document).ready(() => {
     const inputAreas = $('input,textarea,select');
 
-    inputAreas.each(createSaveIndicators);
+    inputAreas.each(function(){createSaveIndicator(this.id);});
+    createSaveIndicator("vcs-legend");
+    const sharedSaveIndicators = setSharedSaveIndicators();;
 
     inputAreas.on('change', function () {
         // Skip elements with the no-autosave class
@@ -11,9 +13,13 @@ $(document).ready(() => {
             return;
         }
 
-        const saveDiv = $(`#${this.id}-save-div`).get(0);
-        const saveText = $(`#${this.id}-save-text`).get(0);
-        const saveIcon = $(`#${this.id}-save-icon`).get(0);
+        let idForSaveIndicator = this.id;
+        if(sharedSaveIndicators.has(idForSaveIndicator)){
+            idForSaveIndicator = sharedSaveIndicators.get(idForSaveIndicator);
+        }
+        const saveDiv = $(`#${idForSaveIndicator}-save-div`).get(0);
+        const saveText = $(`#${idForSaveIndicator}-save-text`).get(0);
+        const saveIcon = $(`#${idForSaveIndicator}-save-icon`).get(0);
         const hasSaveIndicator = saveDiv && saveText && saveIcon;
         if(hasSaveIndicator){
             saveDiv.classList.remove('save-indicator-unchanged', 'save-indicator-saved', 'save-indicator-fail');
@@ -138,25 +144,36 @@ function confirmSelfRegistration(element, needs_reg_sections) {
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
 }
 
-function createSaveIndicators(){
-    let title = $(`label[for="${this.id}"] .option-title`);
-    if(title.length == 0){console.log("SKIPPING " + this.id + " SAVE INDICATOR"); return;}
+function createSaveIndicator(elementId){
+    let title = $(`label[for='${elementId}'] .option-title`);
+    if(title.length == 0 && elementId){
+        title = $(`#${elementId} .option-title`);
+    }
+    if(title.length == 0){return;}
     title = title.get(0);
 
-    let titleRow = document.createElement('span');
+    const titleRow = document.createElement('span');
     titleRow.classList.add('title-row');
     title.parentNode.insertBefore(titleRow, title);
     titleRow.appendChild(title);
 
-    let saveDiv = document.createElement('div');
-    saveDiv.id = this.id + "-save-div";
+    const saveDiv = document.createElement('div');
+    saveDiv.id = elementId + '-save-div';
     saveDiv.classList.add('save-indicator', 'save-indicator-saved');
-    let saveIcon = document.createElement('i');
-    saveIcon.id = this.id + '-save-icon';
-    let saveText = document.createElement('span');
-    saveText.id = this.id + '-save-text';
+    const saveIcon = document.createElement('i');
+    saveIcon.id = elementId + '-save-icon';
+    const saveText = document.createElement('span');
+    saveText.id = elementId + '-save-text';
     saveText.classList.add('subtitle');
     saveDiv.appendChild(saveIcon);
     saveDiv.appendChild(saveText);
     titleRow.appendChild(saveDiv);
+}
+
+function setSharedSaveIndicators(){
+    const sharedSaveIndicators = new Map();
+    sharedSaveIndicators.set('seating-only-for-instructor', 'room-seating-gradeable-id');
+    sharedSaveIndicators.set('default-section-id', 'all-self-registration');
+    sharedSaveIndicators.set('vcs-type-git', 'vcs-legend');
+    return sharedSaveIndicators;
 }

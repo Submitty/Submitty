@@ -15,7 +15,7 @@
             <span class="option-title">Full Course Name</span>
             <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
-        <input type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
+        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
 
 
 
@@ -133,7 +133,7 @@
         </label>
         <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
         <fieldset class="config-row">
-            <legend>
+            <legend id="vcs-legend">
                 <span class="option-title">Version Control System (VCS) Type</span>
                 <br>
                 <span class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</span>
