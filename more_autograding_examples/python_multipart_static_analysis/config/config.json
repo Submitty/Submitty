@@ -2,7 +2,7 @@
     "required_capabilities": "python",
     "autograding_method": "docker",
     "container_options": {
-        "container_image": "submitty/python:latest"
+        "container_image": "submitty/autograding-default:latest"
     },
     
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
