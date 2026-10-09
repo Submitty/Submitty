@@ -91,7 +91,7 @@ class UsersView extends AbstractView {
             $is_assoc = array_keys($decoded_columns) !== range(0, count($decoded_columns) - 1);
             foreach ($all_column_keys as $key) {
                 if ($is_assoc) {
-                    $active_flags[] = !empty($decoded_columns[$key]);
+                    $active_flags[] = isset($decoded_columns[$key]) && $decoded_columns[$key] === true;
                 }
                 else {
                     $active_flags[] = in_array($key, $decoded_columns, true);
