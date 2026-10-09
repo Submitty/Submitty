@@ -3871,7 +3871,7 @@ ALTER TABLE ONLY public.late_days
 --
 
 ALTER TABLE ONLY public.notification_settings
-    ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

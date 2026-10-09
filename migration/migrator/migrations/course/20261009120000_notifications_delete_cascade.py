@@ -1,4 +1,4 @@
-"""Delete a user's notifications when the user is removed from the course."""
+"""Delete a user's notifications and notification settings when the user is removed from the course."""
 
 
 def up(config, database, semester, course):
@@ -20,6 +20,12 @@ def up(config, database, semester, course):
         ADD CONSTRAINT notifications_to_user_id_fkey FOREIGN KEY (to_user_id)
             REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE
     """)
+    database.execute("""
+        ALTER TABLE notification_settings
+        DROP CONSTRAINT IF EXISTS notification_settings_fkey,
+        ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id)
+            REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE
+    """)
 
 
 def down(config, database, semester, course):
@@ -39,5 +45,11 @@ def down(config, database, semester, course):
         ALTER TABLE notifications
         DROP CONSTRAINT IF EXISTS notifications_to_user_id_fkey,
         ADD CONSTRAINT notifications_to_user_id_fkey FOREIGN KEY (to_user_id)
+            REFERENCES users(user_id) ON UPDATE CASCADE
+    """)
+    database.execute("""
+        ALTER TABLE notification_settings
+        DROP CONSTRAINT IF EXISTS notification_settings_fkey,
+        ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id)
             REFERENCES users(user_id) ON UPDATE CASCADE
     """)
