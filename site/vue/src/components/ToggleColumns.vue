@@ -28,7 +28,7 @@ function parseCookieData(): Record<string, boolean> {
     }
     try {
         return JSON.parse(decodeURIComponent(raw)) as Record<string, boolean>;
-    } 
+    }
     catch {
         // Fallback for legacy hyphen-separated bit strings ('1-1-1-0...')
         const bitMap: Record<string, boolean> = {};
