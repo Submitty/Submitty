@@ -828,10 +828,12 @@ fi
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
 if [ "${IS_WORKER}" == 1 ]; then
-    # the supervisor user/group must have write access on the worker machine
-    echo -e -n "Update/confirm worker repository permissions"
-    chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
-    chmod -R g+rw "${SUBMITTY_REPOSITORY}"
+    if [ "${IS_VAGRANT}" == 0 ]; then
+        # the supervisor user/group must have write access on the worker machine
+        echo -e -n "Update/confirm worker repository permissions"
+        chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
+        chmod -R g+rw "${SUBMITTY_REPOSITORY}"
+    fi
 else
     if [ "${IS_VAGRANT}" == 0 ]; then
         # in order to update the submitty source files on the worker machines
