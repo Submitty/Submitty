@@ -94,6 +94,11 @@ function markSeen(course: string, id: number) {
         class="fas fa-users notification-type"
         title="Team Action"
       />
+      <i
+        v-else-if="notification.component === 'student'"
+        class="fas fa-hand-paper notification-type"
+        title="Grade Inquiry"
+      />
 
       <div class="notification-content">
         <p class="notification-text">

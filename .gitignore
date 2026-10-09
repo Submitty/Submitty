@@ -49,6 +49,7 @@ composer.phar
 Pipfile
 Pipfile.lock
 .phpunit.result.cache
+/site/.phpunit.cache/
 
 .env
 .github_actions_ci_flag
