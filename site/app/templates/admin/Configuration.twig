@@ -13,18 +13,14 @@
 
         <label for="course-name" class="config-row">
             <span class="option-title">Full Course Name</span>
-            <br>
             <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
-        <div class="config-row textbox-row">
-            <input type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
-            <i class="fas fa-circle-notch"></i>
-        </div>
+        <input type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
+
 
 
         <label for="course-home-url" class="config-row">
             <span class="option-title">Course Home URL</span>
-            <br>
             <span class="option-alt">Input the url that will link to your course page from the Course Name</span>
         </label>
         <input class="config-row" type="text" name="course_home_url" id="course-home-url" value="{{ fields['course_home_url'] }}" />
@@ -35,7 +31,6 @@
             <input type="checkbox" name="forum_enabled" id="forum-enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} data-testid="forum-enabled"/>
             <label for="forum-enabled">
                 <span class="option-title">Enable Discussion Forum</span>
-                <br>
                 <span class="option-alt">Choose whether to enable a forum for this course.</span>
                 <br>
                 <a id="forum-enabled-message" href="{{ manage_categories_url }}" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
@@ -43,7 +38,6 @@
         </div>
         <label for="create-thread-message" class="config-row">
             <span class="option-title">Create Thread Default Message</span>
-            <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
         {% include "Vue.twig" with { "name" : "MarkdownArea",
@@ -63,14 +57,12 @@
             <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} data-testid="queue-enabled"/>
             <label for="queue-enabled">
                 <span class="option-title">Enable Office Hours Queue</span>
-                <br>
                 <span class="option-alt">Choose whether to enable an Office Hours Queue for this course.</span>
             </label>
         </div>
 
         <label for="queue-message" class="config-row">
             <span class="option-title">Office Hours Queue Welcome Message (Optional)</span>
-            <br>
             <span class="option-alt">
                 What message that should be shown to students before they join the queue?<br>
                 If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
@@ -95,7 +87,6 @@
             <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} />
             <label for="polls-enabled">
                 <span class="option-title">Enable Online Polls</span>
-                <br>
                 <span class="option-alt">Choose whether to enable online polling for this course.</span>
             </label>
         </div>
@@ -106,7 +97,6 @@
             <input type="checkbox" name="chat_enabled" id="chat-enabled" value="true" {{ fields['chat_enabled'] ? 'checked': '' }} />
             <label for="chat-enabled">
                 <span class="option-title">Enable Live Chat</span>
-                <br>
                 <span class="option-alt">Choose whether to enable Live Chatroom for this course.</span>
             </label>
         </div>
@@ -116,7 +106,6 @@
 
         <label for="upload-message" class="config-row">
             <span class="option-title">Upload Message</span>
-            <br>
             <span class="option-alt">
                 What is the message that should be shown to students above the upload area on the submission page?
             </span>
@@ -136,7 +125,6 @@
 
         <label for="private-repository" class="config-row">
             <span class="option-title">Course Autograding Config Directory</span>
-            <br>
             <span class="option-alt">
                 Use your own directories for storing gradeable configs. Will appear in the create/edit gradeable page.
                 To enter multiple directories, type the full paths separated by a comma.
@@ -164,7 +152,6 @@
 
         <label for="vcs-base-url" class="config-row">
             <span class="option-title">Version Control System (VCS) Base URL</span>
-            <br>
             <span class="option-alt">
                 Base URL if students are submitting via VCS repository.<br />
                 external ex. <kbd>https://github.com/test-course</kbd><br />
@@ -180,14 +167,12 @@
             <input type="checkbox" name="seek_message_enabled" id="seek-message-enabled" value="true" {{ fields['seek_message_enabled'] ? 'checked': '' }} />
             <label for="seek-message-enabled">
                 <span class="option-title">Enable Team/Partner Seeking Message</span>
-                <br>
                 <span class="option-alt">Choose whether to enable a team seeking message for this course.</span>
             </label>
         </div>
 
         <label for="seek-message-instructions" class="config-row">
             <span class="option-title">Instructions for Seeking Team/Partner Message</span>
-            <br>
             <span class="option-alt">
                 What instructions should be shown to students before they enter a message?
             </span>
@@ -199,7 +184,6 @@
 
         <label for="default-student-late-days" class="config-row">
             <span class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</span>
-            <br>
             <span class="option-alt">
                 Initial number of late days given to all students at the start of the course.
                 Additional late days can be granted (e.g., as incentives) using the "Late Days Allowed" form.
@@ -209,7 +193,6 @@
 
         <label for="default-hw-late-days" class="config-row">
             <span class="option-title">Default Maximum Late Days Per Assignment</span>
-            <br>
             <span class="option-alt">
                 Specify the default number of late days that may be used on a single homework.  This can be adjusted
                 per assignment on the "Create/Edit Gradeable" form.
@@ -222,14 +205,12 @@
 
         <label for="course-email" class="config-row">
             <span class="option-title">Grades Returned Message</span>
-            <br>
             <span class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</span>
         </label>
         <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
 
         <label for="grade-inquiry-message" class="config-row">
             <span class="option-title">Grade Inquiry Warning Message</span>
-            <br>
             <span class="option-alt">Input the warning message show to students while submitting a grade inquiry.</span>
         </label>
         <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4">{{ fields['grade_inquiry_message'] }}</textarea>
@@ -238,7 +219,6 @@
             <input type="checkbox" name="submission_clustering_enabled" id="submission-clustering-enabled" value="true" {{ fields['submission_clustering_enabled'] ? 'checked' : '' }} data-testid="submission-clustering-enabled"/>
             <label for="submission-clustering-enabled">
                 <span class="option-title">Enable Submission Clustering</span>
-                <br>
                 <span class="option-alt">
                     Allow instructors to use the Submission Clustering feature to group similar submissions for cluster-wide grading.
                 </span>
@@ -261,7 +241,6 @@
             <input type="checkbox" name="display_rainbow_grades_summary" id="display-rainbow-grades-summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} data-testid="display-rainbow-grades-summary"/>
             <label for="display-rainbow-grades-summary">
                 <span class="option-title">Display Rainbow Grades Summary</span>
-                <br>
                 <span class="option-alt">
                     Show Rainbow Grades summaries to students.
                     <strong>Note:</strong>
@@ -309,7 +288,6 @@
         {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
             <span class="option-title">Display Room Seating Guide</span>
-            <br>
             <span class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</span>
         </label>
         <div id="instructor-seating" class="config-row">
@@ -343,7 +321,6 @@
             <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />
             <label for="display-custom-message">
                 <span class="option-title">Display Custom Message</span>
-                <br>
                 <span class="option-alt">Show a custom message to students at the top of the navigation page.</span>
             </label>
         </div>

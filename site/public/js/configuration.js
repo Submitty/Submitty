@@ -1,10 +1,26 @@
 /* global csrfToken, buildCourseUrl */
 
 $(document).ready(() => {
-    $('input,textarea,select').on('change', function () {
+    const inputAreas = $('input,textarea,select');
+
+    inputAreas.each(createSaveIndicators);
+
+    inputAreas.on('change', function () {
         // Skip elements with the no-autosave class
         if ($(this).hasClass('no-autosave')) {
             return;
+        }
+
+        const saveDiv = $(`#${this.id}-save-div`).get(0);
+        const saveText = $(`#${this.id}-save-text`).get(0);
+        const saveIcon = $(`#${this.id}-save-icon`).get(0);
+        const hasSaveIndicator = saveDiv && saveText && saveIcon;
+        if(hasSaveIndicator){
+            saveDiv.classList.remove('save-indicator-unchanged', 'save-indicator-saved', 'save-indicator-fail');
+            saveDiv.classList.add('save-indicator-unsaved')
+            saveText.textContent = 'Saving...';
+            saveIcon.classList.add('fas', 'fa-circle-notch', 'fa-spin');
+            saveIcon.classList.remove('fa-solid', 'fa-check', 'fa-x');
         }
 
         const elem = this;
@@ -40,7 +56,8 @@ $(document).ready(() => {
                         message: 'invalid response received from server',
                     };
                 }
-                if (response['status'] === 'fail') {
+                let failed = response['status'] === 'fail';
+                if (failed) {
                     alert(response['message']);
                     $(elem).focus();
                     elem.value = $(elem).attr('value');
@@ -50,6 +67,20 @@ $(document).ready(() => {
                         $(elem).prop('checked', false);
                     }
                 }
+
+                if(hasSaveIndicator){
+                    saveDiv.classList.remove('save-indicator-unsaved');
+                    saveIcon.classList.remove('fas', 'fa-circle-notch', 'fa-spin');
+                    if(!failed){
+                        saveDiv.classList.add('save-indicator-saved');
+                        saveIcon.classList.add('fa-solid', 'fa-check');
+                    }else{
+                        saveDiv.classList.add('save-indicator-fail');
+                        saveIcon.classList.add('fa-solid', 'fa-x');
+                    }
+                    saveText.textContent = !failed ? 'Saved!' : 'Failed to save.';
+                }
+
                 $(elem).attr('value', elem.value);
             },
         });
@@ -105,4 +136,27 @@ function confirmSelfRegistration(element, needs_reg_sections) {
     }
 
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+}
+
+function createSaveIndicators(){
+    let title = $(`label[for="${this.id}"] .option-title`);
+    if(title.length == 0){console.log("SKIPPING " + this.id + " SAVE INDICATOR"); return;}
+    title = title.get(0);
+
+    let titleRow = document.createElement('span');
+    titleRow.classList.add('title-row');
+    title.parentNode.insertBefore(titleRow, title);
+    titleRow.appendChild(title);
+
+    let saveDiv = document.createElement('div');
+    saveDiv.id = this.id + "-save-div";
+    saveDiv.classList.add('save-indicator', 'save-indicator-saved');
+    let saveIcon = document.createElement('i');
+    saveIcon.id = this.id + '-save-icon';
+    let saveText = document.createElement('span');
+    saveText.id = this.id + '-save-text';
+    saveText.classList.add('subtitle');
+    saveDiv.appendChild(saveIcon);
+    saveDiv.appendChild(saveText);
+    titleRow.appendChild(saveDiv);
 }
