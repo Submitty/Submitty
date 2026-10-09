@@ -485,7 +485,34 @@ function isValidSubmission() {
 
     return false;
 }
+function settleJsonResponse(response, resolve, reject) {
+    let parsed;
+    try {
+        parsed = JSON.parse(response);
+    }
+    catch (e) {
+        console.error('Failed to parse server response:', response);
+        reject({
+            status: 'failed',
+            message: `Failed to parse server response as JSON (${e.message}). Raw response: ${response}`,
+        });
+        return;
+    }
+    if (parsed['status'] === 'success') {
+        resolve(parsed);
+    }
+    else {
+        reject(parsed);
+    }
+}
 
+function describeAjaxError(jqXHR, errorThrown, action) {
+    if (jqXHR.status === 0) {
+        return `${action} failed: could not reach the server`;
+    }
+    const body = jqXHR.responseText ? `: ${jqXHR.responseText}` : '';
+    return `${action} failed (HTTP ${jqXHR.status} ${errorThrown})${body}`;
+}
 /**
  * @param csrf_token
  * @param gradeable_id
@@ -504,6 +531,7 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
             },
             type: 'POST',
             success: function (response) {
+<<<<<<< HEAD
                 try {
                     response = JSON.parse(response);
                 }
@@ -521,6 +549,15 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
             error: function () {
                 console.log(`Error while trying to validate user id${user_id}`);
                 reject({ status: 'failed', message: `Could not reach the server to validate user id ${user_id}` });
+=======
+                settleJsonResponse(response, resolve, reject);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                reject({
+                    status: 'failed',
+                    message: describeAjaxError(jqXHR, errorThrown, `Validating user id ${user_id}`),
+                });
+>>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
         });
     });
@@ -680,6 +717,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             },
             type: 'POST',
             success: function (response) {
+<<<<<<< HEAD
                 try {
                     response = JSON.parse(response);
                 }
@@ -697,6 +735,15 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             error: function () {
                 console.log('Failed while submiting split item');
                 reject({ status: 'failed', message: `Could not reach the server to submit ${user_id}` });
+=======
+                settleJsonResponse(response, resolve, reject);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                reject({
+                    status: 'failed',
+                    message: describeAjaxError(jqXHR, errorThrown, `Submitting ${user_id}`),
+                });
+>>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
         });
     });
@@ -720,6 +767,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
             },
             type: 'POST',
             success: function (response) {
+<<<<<<< HEAD
                 try {
                     response = JSON.parse(response);
                 }
@@ -733,10 +781,15 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                 else {
                     reject(response);
                 }
+=======
+                settleJsonResponse(response, resolve, reject);
+>>>>>>> a3b9b540a85b9859af9eb0db20ccfafc4998ff3b
             },
-            error: function (jqXHR, err_msg) {
-                console.error('Failed while deleting split item');
-                reject({ status: 'failed', message: err_msg });
+            error: function (jqXHR, textStatus, errorThrown) {
+                reject({
+                    status: 'failed',
+                    message: describeAjaxError(jqXHR, errorThrown, `Deleting ${path}`),
+                });
             },
         });
     });
