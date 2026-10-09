@@ -1066,7 +1066,7 @@ HTML;
         $isPeerSolutions = $gradeable->getPeerSolutions();
         $isPeerDiscussion = $gradeable->getPeerDiscussion();
         $is_peer_grader = false;
-        $isPeerPanel = false;
+        $isPeerParticipationPanel = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
