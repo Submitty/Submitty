@@ -165,7 +165,7 @@ class UsersController extends AbstractController {
         //Get Active grader Columns
         $active_grader_columns = '';
         //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
-        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) === 7) {
+        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 7) {
             $active_grader_columns = $_COOKIE['active_grader_columns'];
         }
         else {
@@ -386,7 +386,7 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
-        $user->setRegistrationType(intval($_POST['user_group']) === 4 ? $_POST['registration_type'] : 'staff');
+        $user->setRegistrationType(intval($_POST['user_group']) == 4 ? $_POST['registration_type'] : 'staff');
         //Instructor updated flag tells auto feed to not clobber some of the users data.
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));
@@ -803,7 +803,7 @@ class UsersController extends AbstractController {
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
             $update_users = array_splice($unassigned_user_ids, 0, intval($section_assignment_counts[$section]));
-            if (count($update_users) === 0) {
+            if (count($update_users) == 0) {
                 continue;
             }
             $this->core->getQueries()->updateUsersRotatingSection($section + 1, $update_users);
