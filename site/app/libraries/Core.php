@@ -15,6 +15,7 @@ use app\entities\Session;
 use app\repositories\SessionRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -173,8 +174,15 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database): EntityManager {
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
-        $cache = new PhpFilesAdapter("", 0, $cache_path);
+        // PHP-FPM's ProtectSystem=full makes /usr read-only, so the cache lives in the data dir.
+        // CLI scripts, which often run as root, get an in-memory cache so they never write there.
+        if (PHP_SAPI === 'cli') {
+            $cache = new ArrayAdapter();
+        }
+        else {
+            $cache_path = FileUtils::joinPaths($this->config->getSubmittyPath(), 'cache', 'doctrine');
+            $cache = new PhpFilesAdapter("", 0, $cache_path);
+        }
         $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
