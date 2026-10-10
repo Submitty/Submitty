@@ -5,9 +5,9 @@ from pathlib import Path
 
 VERSION = "2.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
-MIGRATIONS_PATH = DIR_PATH / 'migrations'
-TRIGGERS_PATH = DIR_PATH / 'triggers'
-ENVIRONMENTS = ['master', 'system', 'course']
+MIGRATIONS_PATH = DIR_PATH / "migrations"
+TRIGGERS_PATH = DIR_PATH / "triggers"
+ENVIRONMENTS = ["master", "system", "course"]
 
 
 def get_dir_path():

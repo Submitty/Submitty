@@ -13,6 +13,7 @@ import traceback
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/05_cpp_static_analysis/config"
 SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/05_cpp_static_analysis/submissions/"
 
+
 @prebuild
 def initialize(test):
     try:
@@ -26,35 +27,44 @@ def initialize(test):
         os.mkdir(data_path)
     except OSError:
         pass
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
 
 
 def cleanup(test):
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "*cpp")))
-    subprocess.call(["rm"] + ["-rf"] +
-                glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+    subprocess.call(["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data", "*cpp")))
+    subprocess.call(["rm"] + ["-rf"] + glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(
+        ["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data", "results*"))
+    )
+
 
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
         traceback.print_exc()
         raise
 
+
 @testcase
 def solution(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "solution.cpp"),
-                     os.path.join(test.testcase_path, "data", "solution.cpp")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "solution.cpp"),
+            os.path.join(test.testcase_path, "data", "solution.cpp"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -64,9 +74,13 @@ def solution(test):
 @testcase
 def buggy(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy.cpp"),
-                     os.path.join(test.testcase_path, "data", "buggy.cpp")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "buggy.cpp"),
+            os.path.join(test.testcase_path, "data", "buggy.cpp"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -76,9 +90,13 @@ def buggy(test):
 @testcase
 def buggy2(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy2.cpp"),
-                     os.path.join(test.testcase_path, "data", "buggy2.cpp")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "buggy2.cpp"),
+            os.path.join(test.testcase_path, "data", "buggy2.cpp"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -88,9 +106,13 @@ def buggy2(test):
 @testcase
 def buggy3(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy3.cpp"),
-                     os.path.join(test.testcase_path, "data", "buggy3.cpp")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "buggy3.cpp"),
+            os.path.join(test.testcase_path, "data", "buggy3.cpp"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()

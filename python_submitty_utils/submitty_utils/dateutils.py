@@ -35,9 +35,7 @@ def write_submitty_date(d=None, milliseconds=False):
     if d is None:
         d = get_current_time()
     if not isinstance(d, datetime):
-        raise TypeError(
-            f"Invalid type. Expected datetime or datetime string, got {type(d)}."
-        )
+        raise TypeError(f"Invalid type. Expected datetime or datetime string, got {type(d)}.")
     if d.tzinfo is None:
         d = d.astimezone(get_timezone())
 
@@ -60,21 +58,21 @@ def read_submitty_date(s):
     words = s.split()
     if len(words) < 2 or len(words) > 3:
         raise SystemExit("ERROR: unexpected date format %s" % s)
-    thedatetime = str(words[0] + ' ' + words[1])
+    thedatetime = str(words[0] + " " + words[1])
     try:
         # hoping to find timezone -0400
-        with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
+        with_timezone = datetime.strptime(thedatetime, "%Y-%m-%d %H:%M:%S%z")
     except ValueError:
         try:
             # hoping to find no timezone
-            without_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S')
+            without_timezone = datetime.strptime(thedatetime, "%Y-%m-%d %H:%M:%S")
             with_timezone = without_timezone.astimezone(get_timezone())
         except ValueError:
             try:
                 # hoping to find timezone -04
-                thedatetime = thedatetime+"00"
+                thedatetime = thedatetime + "00"
                 print("dateutils read_submitty_date -- added '00' to ", thedatetime)
-                with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
+                with_timezone = datetime.strptime(thedatetime, "%Y-%m-%d %H:%M:%S%z")
             except ValueError:
                 print("DATE PROBLEM", s)
                 raise SystemExit("ERROR:  invalid date format %s" % s)
@@ -111,52 +109,47 @@ def parse_datetime(date_string):
 
         return date_string
     elif not isinstance(date_string, str):
-        raise TypeError(f'Invalid type, expected str, got {type(date_string)}')
+        raise TypeError(f"Invalid type, expected str, got {type(date_string)}")
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S%z')
+        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z")
     except ValueError:
         pass
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').astimezone(local_timezone)
+        return datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S").astimezone(local_timezone)
     except ValueError:
         pass
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d').replace(
+        return (
+            datetime.strptime(date_string, "%Y-%m-%d")
+            .replace(
                 hour=23,
                 minute=59,
                 second=59,
-            ).astimezone(local_timezone)
+            )
+            .astimezone(local_timezone)
+        )
     except ValueError:
         pass
 
-    m = re.search(
-        '([+|-][0-9]+) (days|day) at ([0-2][0-9]):([0-5][0-9]):([0-5][0-9])',
-        date_string
-    )
+    m = re.search("([+|-][0-9]+) (days|day) at ([0-2][0-9]):([0-5][0-9]):([0-5][0-9])", date_string)
     if m is not None:
         hour = int(m.group(3))
         minu = int(m.group(4))
         sec = int(m.group(5))
         days = int(m.group(1))
         return get_current_time().replace(
-            hour=hour,
-            minute=minu,
-            second=sec,
-            microsecond=0
+            hour=hour, minute=minu, second=sec, microsecond=0
         ) + timedelta(days=days)
 
-    m = re.search('([+|-][0-9]+) (days|day)', date_string)
+    m = re.search("([+|-][0-9]+) (days|day)", date_string)
     if m is not None:
         days = int(m.group(1))
-        return get_current_time().replace(
-            hour=23,
-            minute=59,
-            second=59,
-            microsecond=0
-        ) + timedelta(days=days)
+        return get_current_time().replace(hour=23, minute=59, second=59, microsecond=0) + timedelta(
+            days=days
+        )
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))
 

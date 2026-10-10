@@ -5,7 +5,7 @@ import traceback
 from .. import autograding_utils
 
 
-class SecureExecutionEnvironment():
+class SecureExecutionEnvironment:
     """
     ABSTRACT CLASS: A secure execution environment must be able to securely set up for and
     execute the various phases of compilation, including running the input generation,
@@ -26,7 +26,7 @@ class SecureExecutionEnvironment():
         # Remove these
         log_path,
         stack_trace_log_path,
-        is_test_environment
+        is_test_environment,
     ):
         self.job_id = job_id
         self.is_batch = is_batch_job
@@ -35,38 +35,33 @@ class SecureExecutionEnvironment():
         self.log_path = log_path
         self.stack_trace_log_path = stack_trace_log_path
         self.name = testcase_directory
-        self.patterns = complete_config_obj['autograding']
-        self.pre_commands = testcase_info.get('pre_commands', list())
+        self.patterns = complete_config_obj["autograding"]
+        self.pre_commands = testcase_info.get("pre_commands", list())
         self.is_test_environment = is_test_environment
 
         self.tmp = autograding_directory
-        self.tmp_work = os.path.join(autograding_directory, 'TMP_WORK')
-        self.tmp_autograding = os.path.join(autograding_directory, 'TMP_AUTOGRADING')
-        self.tmp_submission = os.path.join(autograding_directory, 'TMP_SUBMISSION')
+        self.tmp_work = os.path.join(autograding_directory, "TMP_WORK")
+        self.tmp_autograding = os.path.join(autograding_directory, "TMP_AUTOGRADING")
+        self.tmp_submission = os.path.join(autograding_directory, "TMP_SUBMISSION")
         self.tmp_logs = os.path.join(autograding_directory, "TMP_SUBMISSION", "tmp_logs")
         self.tmp_results = os.path.join(autograding_directory, "TMP_RESULTS")
         self.checkout_path = os.path.join(self.tmp_submission, "checkout")
         self.checkout_subdirectory = complete_config_obj["autograding"].get(
-            "use_checkout_subdirectory",
-            ""
+            "use_checkout_subdirectory", ""
         )
         self.directory = os.path.join(self.tmp_work, testcase_directory)
         self.instructor_solution_path = os.path.join(self.tmp_autograding, "instructor_solution")
         self.random_input_directory = os.path.join(
-            self.tmp_work,
-            'random_input',
-            testcase_directory
+            self.tmp_work, "random_input", testcase_directory
         )
         self.random_output_directory = os.path.join(
-            self.tmp_work,
-            "random_output",
-            testcase_directory
+            self.tmp_work, "random_output", testcase_directory
         )
 
         # If we are not in a test environment, we are able to load configuration
         # variables using the CONFIG_PATH.
         if is_test_environment is False:
-            self.SUBMITTY_INSTALL_DIR = config.submitty['submitty_install_dir']
+            self.SUBMITTY_INSTALL_DIR = config.submitty["submitty_install_dir"]
 
         self.config = config
         self.logger = config.logger
@@ -76,12 +71,12 @@ class SecureExecutionEnvironment():
         Run pre commands for a given directory. Currently only cp is supported.
         """
         for pre_command in self.pre_commands:
-            command = pre_command['command']
+            command = pre_command["command"]
             source_testcase = pre_command["testcase"]
-            source_directory = pre_command['source']
-            destination = pre_command['destination']
+            source_directory = pre_command["source"]
+            destination = pre_command["destination"]
 
-            if command == 'cp':
+            if command == "cp":
                 try:
                     autograding_utils.pre_command_copy_file(
                         self.config,
@@ -106,11 +101,11 @@ class SecureExecutionEnvironment():
                 print(f"Invalid pre-command '{command}'")
 
     def _setup_single_directory_for_compilation(self, directory):
-        """ Prepare a directory to be used by a compilation testcase. """
+        """Prepare a directory to be used by a compilation testcase."""
 
-        provided_code_path = os.path.join(self.tmp_autograding, 'provided_code')
-        bin_path = os.path.join(self.tmp_autograding, 'bin')
-        submission_path = os.path.join(self.tmp_submission, 'submission')
+        provided_code_path = os.path.join(self.tmp_autograding, "provided_code")
+        bin_path = os.path.join(self.tmp_autograding, "bin")
+        submission_path = os.path.join(self.tmp_submission, "submission")
 
         # Create the directory
         os.makedirs(directory)
@@ -118,24 +113,22 @@ class SecureExecutionEnvironment():
         # Copy in provided and submitted code.
         autograding_utils.pattern_copy(
             "submission_to_compilation",
-            self.patterns['submission_to_compilation'],
+            self.patterns["submission_to_compilation"],
             submission_path,
             directory,
-            self.tmp_logs
+            self.tmp_logs,
         )
 
         if self.is_vcs:
             checkout_subdir_path = os.path.join(
-                self.tmp_submission,
-                'checkout',
-                self.checkout_subdirectory
+                self.tmp_submission, "checkout", self.checkout_subdirectory
             )
             autograding_utils.pattern_copy(
                 "checkout_to_compilation",
-                self.patterns['submission_to_compilation'],
+                self.patterns["submission_to_compilation"],
                 checkout_subdir_path,
                 directory,
-                self.tmp_logs
+                self.tmp_logs,
             )
 
         if os.path.exists(provided_code_path):
@@ -149,41 +142,38 @@ class SecureExecutionEnvironment():
 
         # Copy compile.out to the current directory.
         shutil.copy(
-            os.path.join(bin_path, "compile.out"),
-            os.path.join(directory, "my_compile.out")
+            os.path.join(bin_path, "compile.out"), os.path.join(directory, "my_compile.out")
         )
 
         # Permission the directory. NOTE: After execution,
         # lockdown_directory_after_execution will be called.
         autograding_utils.add_permissions(
             os.path.join(directory, "my_compile.out"),
-            stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+            stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
         )
         autograding_utils.add_all_permissions(directory)
 
     def lockdown_directory_after_execution(self, directory=None):
-        """ Lock down a directory so that the untrusted user does not have access. """
+        """Lock down a directory so that the untrusted user does not have access."""
         directory = self.directory if directory is None else directory
 
         # If we are not in a test environment, there is an untrusted user,
         # and we must get access to files back from them.
         if self.is_test_environment is False:
             autograding_utils.untrusted_grant_rwx_access(
-                self.SUBMITTY_INSTALL_DIR,
-                self.untrusted_user,
-                directory
+                self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory
             )
         # First give daemon all permissions, then lock down the folder permissions (700).
         autograding_utils.add_all_permissions(directory)
         autograding_utils.lock_down_folder_permissions(directory)
 
     def _setup_single_directory_for_execution(self, directory, testcase_dependencies):
-        """ Prepare a directory to be used by an execution testcase. """
+        """Prepare a directory to be used by an execution testcase."""
 
         # Make the testcase directory.
         os.makedirs(directory)
 
-        submission_path = os.path.join(self.tmp_submission, 'submission')
+        submission_path = os.path.join(self.tmp_submission, "submission")
         checkout_path = os.path.join(self.tmp_submission, "checkout")
 
         # Copy in submitted code.
@@ -192,7 +182,7 @@ class SecureExecutionEnvironment():
             self.patterns["submission_to_runner"],
             submission_path,
             directory,
-            self.tmp_logs
+            self.tmp_logs,
         )
 
         # Copy these helper files for computing access duration
@@ -202,8 +192,7 @@ class SecureExecutionEnvironment():
         shutil.copy(os.path.join(self.tmp_submission, "queue_file.json"), directory)
 
         user_assignment_settings = os.path.join(
-            self.tmp_submission,
-            "user_assignment_settings.json"
+            self.tmp_submission, "user_assignment_settings.json"
         )
         submit_timestamp = os.path.join(self.tmp_submission, "submission", ".submit.timestamp")
         user_assignment_access = os.path.join(self.tmp_submission, ".user_assignment_access.json")
@@ -224,24 +213,24 @@ class SecureExecutionEnvironment():
                 self.patterns["submission_to_runner"],
                 os.path.join(checkout_path, self.checkout_subdirectory),
                 directory,
-                self.tmp_logs
+                self.tmp_logs,
             )
 
         # For the moment, we define testcase dependencies to be on any previous compilation
         # testcases. For these testcase, we copy in compilation_to_runner.
         # TODO: Update this as our idea of testcase_dependencies develops.
         for c in testcase_dependencies:
-            if c.type == 'Compilation':
+            if c.type == "Compilation":
                 autograding_utils.pattern_copy(
                     "compilation_to_runner",
-                    self.patterns['compilation_to_runner'],
+                    self.patterns["compilation_to_runner"],
                     c.secure_environment.directory,
                     directory,
-                    self.tmp_logs
+                    self.tmp_logs,
                 )
 
         # Copy in test input files.
-        test_input_path = os.path.join(self.tmp_work, 'test_input')
+        test_input_path = os.path.join(self.tmp_work, "test_input")
         autograding_utils.copy_contents_into(
             self.config,
             self.job_id,
@@ -253,7 +242,9 @@ class SecureExecutionEnvironment():
         if os.path.exists(self.random_input_directory):
             autograding_utils.pattern_copy(
                 "random_input_to_runner",
-                ["*.txt", ],
+                [
+                    "*.txt",
+                ],
                 self.random_input_directory,
                 directory,
                 self.tmp_logs,
@@ -266,17 +257,14 @@ class SecureExecutionEnvironment():
 
         # Permission the runner.
         autograding_utils.add_permissions(
-            my_runner,
-            stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+            my_runner, stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
         )
 
         # If we are not in a test environment, there is an untrusted user,
         # and we must get access to files back from them.
         if self.is_test_environment is False:
             autograding_utils.untrusted_grant_rwx_access(
-                self.SUBMITTY_INSTALL_DIR,
-                self.untrusted_user,
-                directory
+                self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory
             )
 
         # Permission the directory. NOTE: After execution, lockdown_directory_after_execution
@@ -284,7 +272,7 @@ class SecureExecutionEnvironment():
         autograding_utils.add_all_permissions(directory)
 
     def _setup_single_directory_for_random_output(self, directory, testcase_dependencies):
-        """ Prepare a directory to run instructor code. """
+        """Prepare a directory to run instructor code."""
 
         # First, we set up the directory as we would an execution directory.
         self._setup_single_directory_for_execution(directory, testcase_dependencies)
@@ -301,14 +289,12 @@ class SecureExecutionEnvironment():
         # Fix permissions on the solution code.
         if self.is_test_environment is False:
             autograding_utils.untrusted_grant_rwx_access(
-                self.SUBMITTY_INSTALL_DIR,
-                self.untrusted_user,
-                directory
+                self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory
             )
         autograding_utils.add_all_permissions(directory)
 
     def setup_for_input_generation(self):
-        """ Setup a directory to run input generation commands.  """
+        """Setup a directory to run input generation commands."""
 
         # Make the random input directory.
         os.makedirs(self.random_input_directory)
@@ -325,26 +311,24 @@ class SecureExecutionEnvironment():
         )
 
         # copy run.out to the current directory
-        bin_path = os.path.join(self.tmp_autograding, 'bin')
+        bin_path = os.path.join(self.tmp_autograding, "bin")
         shutil.copy(
             os.path.join(bin_path, "run.out"),
-            os.path.join(self.random_input_directory, "my_runner.out")
+            os.path.join(self.random_input_directory, "my_runner.out"),
         )
 
         # If we are not in a test environment, there is an untrusted user, and we must get
         # access to files back from them.
         if self.is_test_environment is False:
             autograding_utils.untrusted_grant_rwx_access(
-                self.SUBMITTY_INSTALL_DIR,
-                self.untrusted_user,
-                self.random_input_directory
+                self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.random_input_directory
             )
 
         # Permission the directory. NOTE: After execution, lockdown_directory_after_execution
         # will be called.
         autograding_utils.add_permissions(
             os.path.join(self.random_input_directory, "my_runner.out"),
-            stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH
+            stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
         )
         autograding_utils.add_all_permissions(self.random_input_directory)
 
@@ -356,8 +340,7 @@ class SecureExecutionEnvironment():
         """
         os.chdir(self.tmp_work)
         self._setup_single_directory_for_random_output(
-            self.random_output_directory,
-            testcase_dependencies
+            self.random_output_directory, testcase_dependencies
         )
         self._run_pre_commands(self.random_output_directory)
 
@@ -401,14 +384,12 @@ class SecureExecutionEnvironment():
         os.makedirs(public_dir, exist_ok=True)
 
         # Remove any test input files.
-        test_input_path = os.path.join(self.tmp_work, 'test_input')
+        test_input_path = os.path.join(self.tmp_work, "test_input")
         autograding_utils.remove_test_input_files(overall_log, test_input_path, self.directory)
 
         if os.path.exists(self.random_output_directory):
             autograding_utils.remove_test_input_files(
-                overall_log,
-                test_input_path,
-                self.random_output_directory
+                overall_log, test_input_path, self.random_output_directory
             )
 
     def execute_random_input(self, untrusted_user, executable, arguments, logfile, cwd):
@@ -470,24 +451,24 @@ class SecureExecutionEnvironment():
         #         )
 
     def log_message(self, message):
-        """ A useful wrapper for the atuograding_utils.log_message function. """
+        """A useful wrapper for the atuograding_utils.log_message function."""
         self.logger.log_message(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,
-            message=message
+            message=message,
         )
 
     def log_stack_trace(self, trace):
-        """ A useful wrapper for the atuograding_utils.log_message function. """
+        """A useful wrapper for the atuograding_utils.log_message function."""
         self.logger.log_stack_trace(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,
-            trace=trace
+            trace=trace,
         )
 
-    def log_container(self, event, name='', container='', time=0.0):
-        """ A useful wrapper for the atuograding_utils.log_message function. """
-        log_path = os.path.join(self.tmp_logs, 'container_log.txt')
+    def log_container(self, event, name="", container="", time=0.0):
+        """A useful wrapper for the atuograding_utils.log_message function."""
+        log_path = os.path.join(self.tmp_logs, "container_log.txt")
         autograding_utils.log_container(log_path, event, name, container, time)

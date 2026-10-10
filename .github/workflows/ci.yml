@@ -296,8 +296,10 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run ruff
+      - name: Run ruff check
         run: ruff check .
+      - name: Run ruff format
+        run: ruff format --check --diff .
 
   python-unit:
     name: Python Unit

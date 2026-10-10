@@ -10,10 +10,12 @@ import traceback
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples",
-                                        "c_malloc_not_allowed", "config")
-SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples",
-                                  "c_malloc_not_allowed", "submissions")
+SAMPLE_ASSIGNMENT_CONFIG = os.path.join(
+    SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_malloc_not_allowed", "config"
+)
+SAMPLE_SUBMISSIONS = os.path.join(
+    SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_malloc_not_allowed", "submissions"
+)
 
 
 @prebuild
@@ -22,14 +24,17 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
         pass
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-                     os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
 
 
 def cleanup(test):
-    subprocess.call(["rm", "-rf",
-                     os.path.join(test.testcase_path, "data")])
+    subprocess.call(["rm", "-rf", os.path.join(test.testcase_path, "data")])
     os.mkdir(os.path.join(test.testcase_path, "data"))
     os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
 
@@ -37,7 +42,7 @@ def cleanup(test):
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
@@ -48,9 +53,13 @@ def schema_validation(test):
 @testcase
 def malloc(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "malloc.c"),
-                     os.path.join(test.testcase_path, "data", "malloc.c")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "malloc.c"),
+            os.path.join(test.testcase_path, "data", "malloc.c"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -62,9 +71,13 @@ def malloc(test):
 @testcase
 def calloc(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "calloc.c"),
-                     os.path.join(test.testcase_path, "data", "calloc.c")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "calloc.c"),
+            os.path.join(test.testcase_path, "data", "calloc.c"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -76,9 +89,13 @@ def calloc(test):
 @testcase
 def bracket(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "sqbrackets.c"),
-                     os.path.join(test.testcase_path, "data", "sqbrackets.c")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "sqbrackets.c"),
+            os.path.join(test.testcase_path, "data", "sqbrackets.c"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -90,9 +107,13 @@ def bracket(test):
 @testcase
 def compile_err(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "compile_err.c"),
-                     os.path.join(test.testcase_path, "data", "compile_err.c")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "compile_err.c"),
+            os.path.join(test.testcase_path, "data", "compile_err.c"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()

@@ -8,14 +8,22 @@ from submitty_utils import ssh_proxy_jump as ssh
 import subprocess
 import os
 
-SYSCTL_RC = ("Running", "Inactive (1)", "Inactive (2)", "Not Running (3)",
-             "Service Not Found", "Unknown Error")
+SYSCTL_RC = (
+    "Running",
+    "Inactive (1)",
+    "Inactive (2)",
+    "Not Running (3)",
+    "Service Not Found",
+    "Unknown Error",
+)
 
 
 def service_status(service: str) -> int:
-    return subprocess.run([
-                "systemctl", "status", f"{service}", "--no-pager"
-           ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+    return subprocess.run(
+        ["systemctl", "status", f"{service}", "--no-pager"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode
 
 
 def disk_percentage() -> float:
@@ -50,22 +58,22 @@ def print_docker_info() -> bool:
             # rip relevant information
             data = image.attrs
             print("Tag: ", end="")
-            print(', '.join(data["RepoTags"]))
+            print(", ".join(data["RepoTags"]))
             print(f"\t-id: {image.short_id}")
-            print(f'\t-created: {data["Created"]}')
-            print(f'\t-size: {data["Size"]}')
+            print(f"\t-created: {data['Created']}")
+            print(f"\t-size: {data['Size']}")
 
             digests = data.get("RepoDigests")
             if digests:
                 full_digest = data["RepoDigests"][0]
-                digest_parts = full_digest.split('@')
+                digest_parts = full_digest.split("@")
                 if len(digest_parts) == 2:
                     digest = digest_parts[1]
                 else:
                     digest = full_digest
             else:
                 digest = "None"
-            print(f'\t-digest: { digest }')
+            print(f"\t-digest: {digest}")
         return True
     except docker.errors.APIError:
         print("APIError was raised.")
@@ -80,29 +88,33 @@ def print_system_load() -> None:
 
 
 def get_distribution() -> None:
-    subprc = subprocess.run(["lsb_release", "-d"],
-                            stderr=subprocess.DEVNULL,
-                            stdout=subprocess.PIPE)
+    subprc = subprocess.run(
+        ["lsb_release", "-d"], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE
+    )
     return subprc.stdout.decode("ascii")
 
 
 def print_distribution() -> None:
-    subprc = subprocess.run(["lsb_release", "-d"],
-                            stderr=subprocess.DEVNULL,
-                            stdout=subprocess.PIPE)
+    subprc = subprocess.run(
+        ["lsb_release", "-d"], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE
+    )
     print(subprc.stdout.decode("ascii"))
 
 
 TASKS = {
-            "service":  [print_service_info],
-            "disk":     [print_disk_usage],
-            "docker":   [print_docker_info],
-            "sysload":  [print_system_load],
-            "osinfo":   [print_distribution],
-            "all":      [print_service_info, print_disk_usage,
-                         print_docker_info, print_system_load,
-                         print_distribution]
-        }
+    "service": [print_service_info],
+    "disk": [print_disk_usage],
+    "docker": [print_docker_info],
+    "sysload": [print_system_load],
+    "osinfo": [print_distribution],
+    "all": [
+        print_service_info,
+        print_disk_usage,
+        print_docker_info,
+        print_system_load,
+        print_distribution,
+    ],
+}
 
 
 def run_tasks(tasks: list) -> None:
@@ -114,15 +126,18 @@ def run_tasks(tasks: list) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Get system information.")
     parser.add_argument("--workers", action="store_true", help="Update workers")
-    parser.add_argument("--install-path", type=str, default="/usr/local/submitty",
-                        help="Specify install directory for all machines")
-    parser.add_argument("tasks", nargs='+', type=str, choices=TASKS.keys(),
-                        help="Tasks to perform")
+    parser.add_argument(
+        "--install-path",
+        type=str,
+        default="/usr/local/submitty",
+        help="Specify install directory for all machines",
+    )
+    parser.add_argument("tasks", nargs="+", type=str, choices=TASKS.keys(), help="Tasks to perform")
 
     args = parser.parse_args()
 
     daemon_uid = json.load(
-        open(os.path.join(args.install_path, "config", "submitty_users.json"), 'r')
+        open(os.path.join(args.install_path, "config", "submitty_users.json"), "r")
     )["daemon_uid"]
 
     if not args.workers:
@@ -136,12 +151,11 @@ if __name__ == "__main__":
         # workers in form [(name, enabled, address, username)]
         workers = list()
         with open(
-            os.path.join(args.install_path, "config", "autograding_workers.json"), 'r'
+            os.path.join(args.install_path, "config", "autograding_workers.json"), "r"
         ) as workers_json:
             workers_json = json.load(workers_json)
             for w_name, w_info in workers_json.items():
-                workers.append((w_name, w_info["enabled"], w_info["address"],
-                                w_info["username"]))
+                workers.append((w_name, w_info["enabled"], w_info["address"], w_info["username"]))
 
         # Run Tasks for workers
         for name, enabled, addr, user in workers:
@@ -158,8 +172,9 @@ if __name__ == "__main__":
 
             # try to connect to worker
             try:
-                (target_conn, intermediate_conn) =                      \
-                    ssh.ssh_connection_allowing_proxy_jump(user, addr)
+                (target_conn, intermediate_conn) = ssh.ssh_connection_allowing_proxy_jump(
+                    user, addr
+                )
             except Exception as e:
                 if str(e) == "timed out":
                     print(f"WARN: Timed out for {name} ({user}@{addr})")
@@ -170,13 +185,12 @@ if __name__ == "__main__":
             # try to run tasks
             print(f"System Info :: {name}", flush=True)
             cmd = [
-                    "python3",
-                    os.path.join(
-                        args.install_path, "sbin", "shipper_utils",
-                        os.path.basename(__file__)
-                    ),
-                    " ".join(args.tasks)
-                ]
+                "python3",
+                os.path.join(
+                    args.install_path, "sbin", "shipper_utils", os.path.basename(__file__)
+                ),
+                " ".join(args.tasks),
+            ]
 
             try:
                 (_, out, err) = target_conn.exec_command(" ".join(cmd), timeout=10)

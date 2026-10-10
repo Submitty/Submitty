@@ -1,6 +1,7 @@
 """
 Contains the Mark class and User class
 """
+
 from pathlib import Path
 import random
 import os
@@ -130,9 +131,7 @@ class User(object):
                     if "user_group" not in self.courses[course]:
                         self.courses[course]["user_group"] = self.group
             else:
-                raise ValueError(
-                    "Invalid type for courses key, it should either be list or dict"
-                )
+                raise ValueError("Invalid type for courses key, it should either be list or dict")
         if "sudo" in user:
             self.sudo = user["sudo"] is True
         if "user_password" in user:
@@ -154,18 +153,13 @@ class User(object):
     def create_ssh(self) -> None:
         print(f"Creating user {self.id}...")
 
-        os.system(
-            f"useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {self.id}"
-        )
+        os.system(f"useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {self.id}")
         self.set_password()
 
     def create_non_ssh(self) -> None:
         # Change this to f strings
         print(f"Creating user {self.id}...")
-        os.system(
-            "useradd --home /tmp -c 'AUTH ONLY account' "
-            f"-M --shell /bin/false {self.id}"
-        )
+        os.system(f"useradd --home /tmp -c 'AUTH ONLY account' -M --shell /bin/false {self.id}")
         self.set_password()
 
     def create_ldap(self) -> None:
@@ -183,9 +177,7 @@ shadowLastChange: 0
 shadowMax: 0
 shadowWarning: 0"""
         )
-        os.system(
-            f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}'
-        )
+        os.system(f'ldapadd -x -w root_password -D "cn=admin,dc=vagrant,dc=local" -f {path}')
         path.unlink()
 
     def set_password(self) -> None:
@@ -212,13 +204,11 @@ def generate_random_users(total, real_users) -> list:
     :return:
     :rtype: list[User]
     """
-    with open(
-        os.path.join(SETUP_DATA_PATH, "random", "familyNames.txt")
-    ) as family_file, open(
-        os.path.join(SETUP_DATA_PATH, "random", "maleGivenNames.txt")
-    ) as male_file, open(
-        os.path.join(SETUP_DATA_PATH, "random", "womenGivenNames.txt")
-    ) as woman_file:
+    with (
+        open(os.path.join(SETUP_DATA_PATH, "random", "familyNames.txt")) as family_file,
+        open(os.path.join(SETUP_DATA_PATH, "random", "maleGivenNames.txt")) as male_file,
+        open(os.path.join(SETUP_DATA_PATH, "random", "womenGivenNames.txt")) as woman_file,
+    ):
         family_names = family_file.read().strip().split()
         male_names = male_file.read().strip().split()
         women_names = woman_file.read().strip().split()
@@ -226,9 +216,7 @@ def generate_random_users(total, real_users) -> list:
     users = []
     user_ids = []
     anon_ids = []
-    with open(
-        os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w"
-    ) as random_users_file:
+    with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
             if random.random() < 0.5:
                 given_name = random.choice(male_names)

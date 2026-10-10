@@ -28,12 +28,12 @@ class TestPrintStatus(unittest.TestCase):
 
     def setup_test(self, environment, args=None):
         Path(self.dir, environment).mkdir()
-        self.database = migrator.db.Database({'database_driver': 'sqlite'}, environment)
+        self.database = migrator.db.Database({"database_driver": "sqlite"}, environment)
         self.database.DynamicBase.metadata.create_all(self.database.engine)
 
     def test_status_none(self):
-        self.setup_test('master')
-        migrator.main.print_status(self.database, 'master', self.args)
+        self.setup_test("master")
+        migrator.main.print_status(self.database, "master", self.args)
         expected = """Status for master
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -42,11 +42,11 @@ MIGRATION                                                                   STAT
         self.assertEqual(expected, sys.stdout.getvalue())
 
     def test_status_all_up(self):
-        self.setup_test('master')
-        create_migration(self.database, self.dir, 'master', '01_test.py')
-        create_migration(self.database, self.dir, 'master', '02_test.py')
-        create_migration(self.database, self.dir, 'master', '03_test.py')
-        migrator.main.print_status(self.database, 'master', self.args)
+        self.setup_test("master")
+        create_migration(self.database, self.dir, "master", "01_test.py")
+        create_migration(self.database, self.dir, "master", "02_test.py")
+        create_migration(self.database, self.dir, "master", "03_test.py")
+        migrator.main.print_status(self.database, "master", self.args)
         expected = """Status for master
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -58,11 +58,11 @@ MIGRATION                                                                   STAT
         self.assertEqual(expected, sys.stdout.getvalue())
 
     def test_one_missing(self):
-        self.setup_test('master')
-        create_migration(self.database, self.dir, 'master', '01_test.py')
-        create_migration(self.database, self.dir, 'master', '02_test.py', 1, False)
-        create_migration(self.database, self.dir, 'master', '03_test.py')
-        migrator.main.print_status(self.database, 'master', self.args)
+        self.setup_test("master")
+        create_migration(self.database, self.dir, "master", "01_test.py")
+        create_migration(self.database, self.dir, "master", "02_test.py", 1, False)
+        create_migration(self.database, self.dir, "master", "03_test.py")
+        migrator.main.print_status(self.database, "master", self.args)
         expected = """Status for master
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -74,11 +74,11 @@ MIGRATION                                                                   STAT
         self.assertEqual(expected, sys.stdout.getvalue())
 
     def test_one_missing_one_down(self):
-        self.setup_test('master')
-        create_migration(self.database, self.dir, 'master', '01_test.py')
-        create_migration(self.database, self.dir, 'master', '02_test.py', 1, False)
-        create_migration(self.database, self.dir, 'master', '03_test.py', 0, True)
-        migrator.main.print_status(self.database, 'master', self.args)
+        self.setup_test("master")
+        create_migration(self.database, self.dir, "master", "01_test.py")
+        create_migration(self.database, self.dir, "master", "02_test.py", 1, False)
+        create_migration(self.database, self.dir, "master", "03_test.py", 0, True)
+        migrator.main.print_status(self.database, "master", self.args)
         expected = """Status for master
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -90,11 +90,11 @@ MIGRATION                                                                   STAT
         self.assertEqual(expected, sys.stdout.getvalue())
 
     def test_system(self):
-        self.setup_test('system')
-        create_migration(self.database, self.dir, 'system', '01_test.py')
-        create_migration(self.database, self.dir, 'system', '02_test.py', 1, False)
-        create_migration(self.database, self.dir, 'system', '03_test.py', 0, True)
-        migrator.main.print_status(self.database, 'system', self.args)
+        self.setup_test("system")
+        create_migration(self.database, self.dir, "system", "01_test.py")
+        create_migration(self.database, self.dir, "system", "02_test.py", 1, False)
+        create_migration(self.database, self.dir, "system", "03_test.py", 0, True)
+        migrator.main.print_status(self.database, "system", self.args)
         expected = """Status for system
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -106,13 +106,13 @@ MIGRATION                                                                   STAT
         self.assertEqual(expected, sys.stdout.getvalue())
 
     def test_status_course(self):
-        self.setup_test('course')
-        self.args.semester = 'f19'
-        self.args.course = 'csci1000'
-        create_migration(self.database, self.dir, 'course', '01_test.py')
-        create_migration(self.database, self.dir, 'course', '02_test.py', 1, False)
-        create_migration(self.database, self.dir, 'course', '03_test.py', 0, True)
-        migrator.main.print_status(self.database, 'course', self.args)
+        self.setup_test("course")
+        self.args.semester = "f19"
+        self.args.course = "csci1000"
+        create_migration(self.database, self.dir, "course", "01_test.py")
+        create_migration(self.database, self.dir, "course", "02_test.py", 1, False)
+        create_migration(self.database, self.dir, "course", "03_test.py", 0, True)
+        migrator.main.print_status(self.database, "course", self.args)
         expected = """Status for f19.csci1000 (course)
 MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
@@ -121,4 +121,4 @@ MIGRATION                                                                   STAT
 03_test                                                                       DOWN
 
 """
-        self.assertEqual(expected, sys.stdout.getvalue())        
+        self.assertEqual(expected, sys.stdout.getvalue())
