@@ -73,7 +73,7 @@
     "@typescript-eslint/parser": "^8.70.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-typescript": "^14.9.0",
-    "@vue/test-utils": "^2.5.0",
+    "@vue/test-utils": "^2.5.1",
     "@vue/tsconfig": "^0.9.1",
     "babel-jest": "^30.5.2",
     "cypress": "^15.9.0",
