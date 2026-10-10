@@ -1032,6 +1032,10 @@ PDF);
                 ['page' => 'polls', 'term' => 's26', 'course' => 'cs101', 'poll_id' => '1', 'instructor' => 'false'],
                 's26-cs101-polls-1-student'
             ],
+            'polls_index' => [
+                ['page' => 'polls_index', 'term' => 's26', 'course' => 'cs101'],
+                's26-cs101-polls_index'
+            ],
             'grade_inquiry missing gradeable_id' => [
                 ['page' => 'grade_inquiry', 'term' => 's26', 'course' => 'cs101', 'submitter_id' => 'bob'],
                 null

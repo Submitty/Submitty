@@ -73,6 +73,10 @@ class PollController extends AbstractController {
                 }
             }
 
+            $this->core->authorizeWebSocketToken([
+                'page' => 'polls_index',
+            ]);
+
             return new WebResponse(
                 PollView::class,
                 'showPollsInstructor',
@@ -560,6 +564,7 @@ class PollController extends AbstractController {
         $poll->addResponse($response, $custom_poll_option->getId());
         $em->persist($response);
         $em->flush();
+        $this->sendResponseCountUpdate($poll_id);
 
         return JsonResponse::getSuccessResponse(["message" => "Successfully added custom response"]);
     }
@@ -599,6 +604,7 @@ class PollController extends AbstractController {
         $em->remove($custom_option);
         $em->persist($poll);
         $em->flush();
+        $this->sendResponseCountUpdate($poll_id);
 
         return JsonResponse::getSuccessResponse(["message" => "Successfully removed custom response"]);
     }
@@ -693,11 +699,15 @@ class PollController extends AbstractController {
             'message' => [],
         ];
 
+        // The respondent count only changes when the student goes from no response to a response or vice versa
+        $had_response = !$poll->getUserResponses()->isEmpty();
+        $has_response = array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1';
+
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
             $web_socket_message['message'][$response->getOption()->getResponse()] = -1;
         }
-        if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
+        if ($has_response) {
             foreach ($_POST['answers'] as $option_id) {
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
@@ -708,6 +718,9 @@ class PollController extends AbstractController {
 
         $em->flush();
         $this->sendSocketMessage($web_socket_message);
+        if ($had_response !== $has_response) {
+            $this->sendResponseCountUpdate($poll_id);
+        }
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -859,12 +872,23 @@ class PollController extends AbstractController {
     }
 
     /**
+     * Sends the current number of students who have responded to a poll to the instructor polls index page
+     */
+    private function sendResponseCountUpdate(int $poll_id): void {
+        $this->sendSocketMessage([
+            'type' => 'update_response_count',
+            'poll_id' => $poll_id,
+            'message' => $this->core->getCourseEntityManager()->getRepository(Poll::class)->getNumResponses($poll_id),
+        ], 'polls_index');
+    }
+
+    /**
      * This method opens a WebSocket client and sends a message containing corresponding poll updates
      */
-    private function sendSocketMessage(mixed $msg_array): void {
+    private function sendSocketMessage(mixed $msg_array, string $page = 'polls'): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $params = [
-            'page' => 'polls',
+            'page' => $page,
             'term' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
             'poll_id' => isset($msg_array['poll_id']) ? strval($msg_array['poll_id']) : null,

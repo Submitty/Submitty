@@ -90,4 +90,16 @@ class PollRepository extends EntityRepository {
                 ORDER BY p.release_date ASC, p.name ASC')
             ->getResult();
     }
+
+    /**
+     * Get the number of distinct students who have responded to the specified poll
+     */
+    public function getNumResponses(int $poll_id): int {
+        return (int) $this->getEntityManager()
+            ->createQuery('
+                SELECT COUNT(DISTINCT r.student_id) FROM app\entities\poll\Response r
+                WHERE IDENTITY(r.poll) = :poll_id')
+            ->setParameter('poll_id', $poll_id)
+            ->getSingleScalarResult();
+    }
 }

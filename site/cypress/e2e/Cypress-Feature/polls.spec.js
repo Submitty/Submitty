@@ -5,7 +5,7 @@
  * interfere with the tests.
  */
 
-import { verifyWebSocketStatus } from '../../support/utils';
+import { getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
 
 const visitPoll = (title, text, wsEnabled = false) => {
     // 3rd child represents the student view, 7th/8th child represents the instructor view depending on the 'date released' visibility
@@ -370,6 +370,55 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').check(); // Answer 3
         cy.get('button[type=submit]').click();
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 3');
+
+        // log into instructor and keep the polls index page open while a student answers in a separate session
+        cy.logout();
+        cy.login();
+        cy.visit(['sample', 'polls']);
+        visitPoll('Poll Cypress Test', 'View Poll', true);
+        cy.get('input[name="poll_id"]').first().invoke('val').as('pollId');
+        cy.get('[data-testid="answer-0"]').invoke('val').as('optionId');
+        cy.visit(['sample', 'polls']);
+        verifyWebSocketStatus();
+        cy.get('@pollId').then((pollId) => {
+            const pollsUrl = `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/polls`;
+            const responses = `#poll_${pollId}_responses`;
+            // the callback form of should() retries until the websocket update arrives
+            const expectCount = (count) => cy.get(responses).should(($cell) => expect(parseInt($cell.text())).to.eq(count));
+            const submitResponse = (csrfToken, answer) => cy.request({
+                method: 'POST',
+                url: `${pollsUrl}/submitResponse`,
+                form: true,
+                body: { 'csrf_token': csrfToken, 'poll_id': pollId, 'answers[]': answer },
+            });
+
+            cy.get(responses).invoke('text').then(parseInt).as('initialCount');
+            // Switch the session to a student without leaving the instructor's page. The instructor's
+            // websocket was authorized when it connected, so it stays subscribed to the polls index.
+            cy.request({
+                method: 'POST',
+                url: '/authentication/check_login',
+                form: true,
+                followRedirect: false,
+                body: { user_id: 'bitdiddle', password: 'bitdiddle', __csrf: 'bitdiddle' },
+            });
+            cy.request(pollsUrl).its('body').then((html) => {
+                // the student's polls page has no instructor controls
+                expect(html).not.to.contain('New Poll');
+                return html.match(/window\.csrfToken = "([^"]+)"/)[1];
+            }).as('studentCsrfToken');
+
+            cy.get('@initialCount').then((initialCount) => {
+                cy.get('@studentCsrfToken').then((studentCsrfToken) => {
+                    // the student's first answer increments the count on the instructor's open page
+                    cy.get('@optionId').then((optionId) => submitResponse(studentCsrfToken, optionId));
+                    expectCount(initialCount + 1);
+                    // the student withdrawing their answer ("no response") decrements it again
+                    submitResponse(studentCsrfToken, '-1');
+                    expectCount(initialCount);
+                });
+            });
+        });
 
         // log into instructor, edit the poll
         cy.logout();
