@@ -292,3 +292,52 @@ describe('Test cases involving auto opening single file submissions', () => {
         assertSubmissionsBrowserClosed();
     });
 });
+
+describe('Test cases involving zooming images in the full panel view', () => {
+    it('test the zoom buttons on an image submission', () => {
+        cy.login('bitdiddle');
+        cy.visit(['sample', 'gradeable', 'open_homework']);
+        cy.get('#startnew').then(($clearBtn) => {
+            if (!$clearBtn.is(':disabled')) {
+                $clearBtn.click();
+            }
+        });
+        cy.get('#upload1').selectFile('cypress/fixtures/copy_of_more_autograding_examples/bulk_upload_pdfs/submissions/blank_QR_numeric_id.png', { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
+        cy.get('#submitted-files > div').should('contain', 'blank_QR_numeric_id.png');
+        cy.logout();
+
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.login('instructor');
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
+        cy.get('#submission_browser_btn').click();
+        cy.get('#submissions').click();
+        assertSubmissionsBrowserOpen();
+        cy.get('a.image-file[data-file_name="blank_QR_numeric_id.png"]').click();
+
+        // wait for the image itself to load, not just its alt text
+        cy.get('#annotatable-image').should(($img) => {
+            expect($img[0].naturalWidth).to.be.greaterThan(0);
+        });
+        cy.get('#file-zoom-display').should('have.text', '100%');
+        cy.get('#annotatable-image').invoke('outerWidth').then((fitWidth) => {
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('#file-zoom-display').should('have.text', '120%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth * 1.2, 2);
+
+            // zoom never goes below the size that fits the panel
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('#file-zoom-display').should('have.text', '100%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth, 2);
+        });
+
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#annotatable-image').should('not.exist');
+    });
+});
