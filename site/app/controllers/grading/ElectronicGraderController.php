@@ -2112,7 +2112,10 @@ class ElectronicGraderController extends AbstractController {
                 continue;
             }
 
-            $late_status = max($ldi->getStatus(), $late_status ?? 0);
+            $status = $ldi->getStatus();
+            if ($status !== LateDayInfo::STATUS_OVERRIDDEN) {
+                $late_status = max($status, $late_status ?? 0);
+            }
             $rollback_submission = min($rollback_submission, $ld->getLatestValidVersion($graded_gradeable));
         }
 
