@@ -26,7 +26,7 @@ class UsersView extends AbstractView {
         array $download_info,
         array $formatted_tzs,
         bool $use_database = false,
-        string $active_student_columns = '1-1-1-1-1-1-1-1-1-1-1-1'
+        string $active_student_columns = ''
     ): string {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
@@ -36,6 +36,73 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
+
+        $cookie_raw = urldecode($active_student_columns);
+        $decoded_columns = json_decode($cookie_raw, true);
+
+        if (!is_array($decoded_columns) && str_contains($cookie_raw, '-')) {
+            $bit_flags = explode('-', $cookie_raw);
+        }
+        else {
+            $bit_flags = null;
+        }
+        $default_columns = [
+            'registration-section',
+            'user-id',
+            'first-name',
+            'last-name',
+            'pronouns',
+            'rotating-section',
+            'time-zone',
+            'view-grades',
+            'late-days',
+            'registration-type',
+            'edit-student',
+        ];
+        $all_column_keys = [
+            'registration-section',
+            'registration-subsection',
+            'user-id',
+            'first-name',
+            'last-name',
+            'pronouns',
+            'rotating-section',
+            'time-zone',
+            'view-grades',
+            'late-days',
+            'registration-type',
+            'edit-student',
+            'delete-student',
+            'user-numeric-id',
+            'legal-first-name',
+            'legal-last-name',
+            'email',
+            'secondary-email',
+        ];
+
+        $active_flags = [];
+        if ($bit_flags !== null) {
+            $padded = array_pad($bit_flags, 18, '0');
+            foreach ($padded as $val) {
+                $active_flags[] = ($val === '1' || $val === 1 || $val === true);
+            }
+        }
+        elseif (is_array($decoded_columns)) {
+            $is_assoc = array_keys($decoded_columns) !== range(0, count($decoded_columns) - 1);
+            foreach ($all_column_keys as $key) {
+                if ($is_assoc) {
+                    $active_flags[] = isset($decoded_columns[$key]) && $decoded_columns[$key] === true;
+                }
+                else {
+                    $active_flags[] = in_array($key, $decoded_columns, true);
+                }
+            }
+        }
+        else {
+            foreach ($all_column_keys as $key) {
+                $active_flags[] = in_array($key, $default_columns, true);
+            }
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
             "sections" => $sorted_students,
@@ -53,7 +120,8 @@ class UsersView extends AbstractView {
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
             "term" => $this->core->getConfig()->getTerm(),
-            "active_student_columns" => explode('-', $active_student_columns)
+            "active_student_columns" => $active_flags
+
         ]);
     }
 

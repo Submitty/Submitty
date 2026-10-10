@@ -21,9 +21,30 @@ const emit = defineEmits<{
 const selected = ref<boolean[]>([]);
 const visible = ref(false);
 
+function parseCookieData(): Record<string, boolean> {
+    const raw = Cookies.get(cookie);
+    if (!raw) {
+        return {};
+    }
+    try {
+        return JSON.parse(decodeURIComponent(raw)) as Record<string, boolean>;
+    }
+    catch {
+        // Fallback for legacy hyphen-separated bit strings ('1-1-1-0...')
+        const bitMap: Record<string, boolean> = {};
+        if (raw.includes('-')) {
+            const bits = raw.split('-');
+            columns.forEach((col, idx) => {
+                bitMap[col] = bits[idx] === '1';
+            });
+        }
+        return bitMap;
+    }
+}
+
 function loadColumns() {
     if (format === 'json') {
-        const cookieData: Record<string, boolean> = JSON.parse(decodeURIComponent(Cookies.get(cookie) ?? encodeURIComponent('{}'))) as Record<string, boolean>;
+        const cookieData = parseCookieData();
         for (const cookieCol of Object.keys(cookieData)) {
             if (columns.includes(cookieCol)) {
                 selected.value[columns.indexOf(cookieCol)] = cookieData[cookieCol];
@@ -45,9 +66,10 @@ function loadColumns() {
         }
     });
 }
+
 function saveColumns() {
     if (format === 'json') {
-        const cookieData: Record<string, boolean> = JSON.parse(decodeURIComponent(Cookies.get(cookie) ?? encodeURIComponent('{}'))) as Record<string, boolean>;
+        const cookieData = parseCookieData();
         columns.forEach((col, i) => {
             cookieData[col] = selected.value[i];
         });
@@ -62,6 +84,7 @@ function saveColumns() {
     }
     emit('save');
 }
+
 function fillAll(val: boolean) {
     selected.value = selected.value.map((_, idx) => forced?.includes(columns[idx]) || val);
 }
