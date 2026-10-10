@@ -803,7 +803,7 @@ class UsersController extends AbstractController {
         // distribute unassigned users to rotating sections using the $section_assigment_counts array
         for ($section = 0; $section < $num_rotating_sections; $section++) {
             $update_users = array_splice($unassigned_user_ids, 0, intval($section_assignment_counts[$section]));
-            if (count($update_users) == 0) {
+            if (count($update_users) === 0) {
                 continue;
             }
             $this->core->getQueries()->updateUsersRotatingSection($section + 1, $update_users);
@@ -1197,7 +1197,7 @@ class UsersController extends AbstractController {
                                 }
                                 else {
                                     $grading_assignments = explode(',', $vals[$col_num]);
-                                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
+                                    if (count($grading_assignments) !=== count(array_unique($grading_assignments))) {
                                         // Prevent duplicate registration sections from being specified for assignment.
                                         $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
                                         if (!in_array('grading_assignments_format', $bad_columns)) {
