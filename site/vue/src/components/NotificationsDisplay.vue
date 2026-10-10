@@ -7,7 +7,7 @@ has conditionals based on the course boolean to determine functionality.
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
-import { buildCourseUrl } from '../../../ts/utils/server';
+import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
 import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
@@ -18,7 +18,10 @@ const props = defineProps<{
 
 const showPopup = ref(false);
 const showUnseenOnly = ref(true);
-const localUnseenCount = ref(props.unseenCount);
+const initialUnseenCount = props.unseenCount >= 0
+    ? props.unseenCount
+    : props.notifications.filter((n) => !n.seen).length;
+const localUnseenCount = ref(initialUnseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -28,6 +31,9 @@ onMounted(() => {
     }
     else if (pref === 'all') {
         showUnseenOnly.value = false;
+    }
+    if (props.course) {
+        updateBadgeDOM(localUnseenCount.value);
     }
 });
 
@@ -77,7 +83,7 @@ function markSeen() {
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
-                csrf_token: window.csrfToken,
+                csrf_token: window.csrfToken || getCsrfToken(),
             },
             success: function () {
                 for (const n of localNotifications.value) {
