@@ -391,7 +391,7 @@ class HomeworkView extends AbstractView {
                 $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
                     $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
                     $notebook,
-                    $this->core->getUser()->getId(),
+                    $graded_gradeable->getSubmitter()->getId(),
                     $version_instance !== null ? $version_instance->getVersion() : 0,
                     $graded_gradeable->getGradeableId()
                 );
@@ -459,7 +459,7 @@ class HomeworkView extends AbstractView {
             if ($graded_gradeable !== null) {
                 // Get path to VCS_CHECKOUT
                 $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
-                $who_id = $this->core->getUser()->getId();
+                $who_id = $graded_gradeable->getSubmitter()->getId();
                 $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
                 $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
                 $display_version = $version_instance != null ? $version_instance->getVersion() : 0;
@@ -568,7 +568,7 @@ class HomeworkView extends AbstractView {
             $this->core->getConfig()->getCoursePath(),
             'submissions',
             $gradeable->getId(),
-            $this->core->getUser()->getId(),
+            $graded_gradeable?->getSubmitter()->getId(),
             'user_assignment_settings.json'
         );
         $user_assignment_settings_missing = $highest_version > 0 && !file_exists($user_assignment_settings_path);
