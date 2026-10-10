@@ -1902,7 +1902,7 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" between int<1, max> and int is not allowed.'
 			identifier: equal.notAllowed
-			count: 2
+			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
