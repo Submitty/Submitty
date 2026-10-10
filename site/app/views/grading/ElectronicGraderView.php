@@ -1066,12 +1066,14 @@ HTML;
         $isPeerSolutions = $gradeable->getPeerSolutions();
         $isPeerDiscussion = $gradeable->getPeerDiscussion();
         $is_peer_grader = false;
+        $isPeerParticipationPanel = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
+                $isPeerParticipationPanel = true;
             }
             else {
                 $isPeerPanel = false;
@@ -1204,7 +1206,8 @@ HTML;
                 $isGradeInquiryPanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
-                $error_message['message']
+                $error_message['message'],
+                $isPeerParticipationPanel
             );
 
             $return .= <<<HTML
@@ -1244,6 +1247,9 @@ HTML;
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
+        }
+        if ($isPeerParticipationPanel) {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable);
         }
         if ($isDiscussionPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', $graded_gradeable->getGradeable()->getDiscussionThreadId(), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -1400,7 +1406,7 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message, bool $isPeerParticipationPanel): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isPeerGrader' => $isPeerGrader,
@@ -1415,7 +1421,8 @@ HTML;
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
             "error_color" => $error_color,
-            "error_message" => $error_message
+            "error_message" => $error_message,
+            'isPeerParticipationPanel' => $isPeerParticipationPanel
         ]);
     }
 
@@ -2001,6 +2008,26 @@ HTML;
                 "active_version" => $active_version
             ]
         );
+    }
+
+    /**
+     * Render the Peer Participation panel
+     *
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
+        $submitter = $graded_gradeable->getSubmitter();
+        $participation = [];
+        if (!$submitter->isTeam()) {
+            $participation = $this->core->getQueries()->getPeerParticipationForGrader(
+                $submitter->getId(),
+                $graded_gradeable->getGradeable()->getId()
+            );
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
+            'participation' => $participation
+        ]);
     }
 
     /**
