@@ -390,7 +390,10 @@ class CreateCourse(AbstractJob):
         ))
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            # create_course.py handles both filesystem provisioning and the
+            # course database (creation, migrations, forum categories) —
+            # PHP-FPM can't exec, so this all has to run here in the daemon.
+            subprocess.run(["sudo", f"{INSTALL_DIR}/sbin/create_course.py", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
             if VERIFIED_ADMIN_USER != "":
                 subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
