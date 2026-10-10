@@ -1197,7 +1197,7 @@ class UsersController extends AbstractController {
                                 }
                                 else {
                                     $grading_assignments = explode(',', $vals[$col_num]);
-                                    if (count($grading_assignments) !=== count(array_unique($grading_assignments))) {
+                                    if (count($grading_assignments) !== count(array_unique($grading_assignments))) {
                                         // Prevent duplicate registration sections from being specified for assignment.
                                         $bad_row_details[$row_num + 1][] = 'duplicate grading assignments';
                                         if (!in_array('grading_assignments_format', $bad_columns)) {
