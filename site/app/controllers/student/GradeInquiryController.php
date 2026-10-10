@@ -385,9 +385,13 @@ class GradeInquiryController extends AbstractController {
                 throw new RuntimeException("Invalid grade inquiry event type: {$type}");
             }
 
+            $notifications = [];
             $emails = [];
             // make graders' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?' . http_build_query(['who_id' => $submitter->getId()])])]);
+            // The link uses the submitter's anonymous id so the student's name never appears in it.
+            // The grading page resolves an anonymous id back to the submitter.
+            $grader_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?' . http_build_query(['who_id' => $submitter->getAnonId($gradeable_id)])]);
+            $metadata = json_encode(['url' => $grader_url]);
             if (empty($graders)) {
                 $graders = $this->core->getQueries()->getAllGraders();
             }
@@ -395,25 +399,26 @@ class GradeInquiryController extends AbstractController {
                 if ($grader->accessFullGrading()) {
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
-                    $emails[] = new Email($this->core, $details);
+                    // Email reads the link from 'relevant_url', not from 'metadata'
+                    $emails[] = new Email($this->core, $details + ['relevant_url' => $grader_url]);
                 }
             }
 
             // make students' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
-            $notifications = [];
+            $student_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id]);
+            $metadata = json_encode(['url' => $student_url]);
             if ($submitter->isTeam()) {
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
                     $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
-                    $emails[] = new Email($this->core, $details);
+                    $emails[] = new Email($this->core, $details + ['relevant_url' => $student_url]);
                 }
             }
             else {
                 $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
                 $notifications[] = Notification::createNotification($this->core, $details);
-                $emails[] = new Email($this->core, $details);
+                $emails[] = new Email($this->core, $details + ['relevant_url' => $student_url]);
             }
             $this->core->getNotificationFactory()->sendNotifications($notifications);
             if ($this->core->getConfig()->isEmailEnabled()) {
