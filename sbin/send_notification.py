@@ -13,6 +13,7 @@ from json import JSONDecodeError
 from sqlalchemy import create_engine, text  # pylint: disable=import-error
 from sqlalchemy.orm import Session  # pylint: disable=import-error
 from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
+from submitty_utils import db_utils
 
 try:
     CONFIG_PATH = os.path.join(
@@ -37,6 +38,7 @@ try:
         DATABASE_CONFIG = json.load(open_file)
 
     DB_HOST = DATABASE_CONFIG["database_host"]
+    DB_PORT = DATABASE_CONFIG.get("database_port", 5432)
     DB_USER = DATABASE_CONFIG["database_user"]
     DB_PASSWORD = DATABASE_CONFIG["database_password"]
 except (JSONDecodeError, RuntimeError, IOError) as config_fail_error:
@@ -102,12 +104,8 @@ def get_late_day_defaults(term, course):
 
 def connect_db(db_name):
     """Set up a connection with the specific database."""
-    if os.path.isdir(DB_HOST):
-        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}"
-                      f"?host={DB_HOST}")
-    else:
-        connection = (f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}"
-                      f"/{db_name}")
+    connection = db_utils.generate_connect_string(
+        DB_HOST, DB_PORT, db_name, DB_USER, DB_PASSWORD)
 
     engine = create_engine(connection)
     db = Session(engine.connect())

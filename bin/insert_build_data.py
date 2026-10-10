@@ -11,6 +11,8 @@ import os
 import sys
 import json
 
+from submitty_utils import db_utils
+
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
@@ -33,21 +35,13 @@ def setup_db():
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         db_config = json.load(open_file)
     db_name = f"submitty_{SEMESTER}_{COURSE}"
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(db_config['database_host']):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(		# pylint: disable=consider-using-f-string
-            db_config['database_user'],
-            db_config['database_password'],
-            db_name,
-            db_config['database_host']
-        )
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(			# pylint: disable=consider-using-f-string
-            db_config['database_user'],
-            db_config['database_password'],
-            db_config['database_host'],
-            db_name
-        )
+    conn_string = db_utils.generate_connect_string(
+        db_config['database_host'],
+        db_config.get('database_port', 5432),
+        db_name,
+        db_config['database_user'],
+        db_config['database_password'],
+    )
 
     engine = create_engine(conn_string)
     db = engine.connect()

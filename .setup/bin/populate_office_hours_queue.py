@@ -6,6 +6,7 @@ import random
 import os
 from datetime import datetime, timedelta
 from submitty_utils import dateutils
+from submitty_utils import db_utils
 import json
 
 
@@ -43,7 +44,7 @@ def main():
     DB_PASS = settings["database_password"]
 
     engine = create_engine(
-        f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
+        db_utils.generate_connect_string(DB_HOST, DB_PORT, database, DB_USER, DB_PASS))
     conn = engine.connect()
     metadata = MetaData()
     queues_table = Table("queue_settings", metadata, autoload_with=engine)

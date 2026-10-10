@@ -37,6 +37,7 @@ import os.path
 import random
 
 from sqlalchemy import create_engine, Table, MetaData, insert
+from submitty_utils import db_utils
 
 from sample_courses import (
     args, SUBMITTY_INSTALL_DIR,
@@ -138,8 +139,8 @@ def main() -> None:
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
-    submitty_engine = create_engine("postgresql:///submitty?host={}&port={}&user={}&password={}"
-                                    .format(DB_HOST, DB_PORT, DB_USER, DB_PASS))
+    submitty_engine = create_engine(
+        db_utils.generate_connect_string(DB_HOST, DB_PORT, "submitty", DB_USER, DB_PASS))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData()
     user_table = Table('users', submitty_metadata, autoload_with=submitty_engine)

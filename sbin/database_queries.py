@@ -10,6 +10,8 @@ import datetime
 from sqlalchemy import create_engine, MetaData
 import sys
 
+from submitty_utils import db_utils
+
 
 try:
     CONFIG_PATH = os.path.join(
@@ -36,6 +38,7 @@ LOG_FILE = open(os.path.join(
 
 try:
     DB_HOST = DATABASE_CONFIG['database_host']
+    DB_PORT = DATABASE_CONFIG.get('database_port', 5432)
     DB_USER = DATABASE_CONFIG['database_user']
     DB_PASSWORD = DATABASE_CONFIG['database_password']
 
@@ -50,13 +53,8 @@ except Exception as config_fail_error:
 def setup_db():
     """Set up a connection with the submitty database."""
     db_name = "submitty"
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            DB_USER, DB_PASSWORD, db_name, DB_HOST)
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
-            DB_USER, DB_PASSWORD, DB_HOST, db_name)
+    conn_string = db_utils.generate_connect_string(
+        DB_HOST, DB_PORT, db_name, DB_USER, DB_PASSWORD)
 
     engine = create_engine(conn_string)
     db = engine.connect()
