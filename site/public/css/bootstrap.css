@@ -320,26 +320,26 @@ fieldset[disabled] .btn-info.focus {
 }
 
 .btn-warning {
-    color: var(--btn-text-white);
-    background-color: var(--warning-brown);
+    color: var(--default-black);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning:focus,
 .btn-warning.focus {
-    color: var(--btn-text-white);
-    background-color: var(--focus-warning-brown);
+    color: var(--default-black);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning:hover {
-    color: var(--btn-text-white);
-    background-color: var(--hover-warning-brown);
+    color: var(--default-black);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning:active,
 .btn-warning.active,
 .open > .dropdown-toggle.btn-warning {
-    color: var(--btn-text-white);
-    background-color: var(--active-warning-brown);
+    color: var(--default-black);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning:active:hover,
@@ -351,8 +351,8 @@ fieldset[disabled] .btn-info.focus {
 .btn-warning:active.focus,
 .btn-warning.active.focus,
 .open > .dropdown-toggle.btn-warning.focus {
-    color: var(--btn-text-white);
-    background-color: var(--active-warning-brown);
+    color: var(--default-black);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning:active,
@@ -370,7 +370,7 @@ fieldset[disabled] .btn-warning:focus,
 .btn-warning.disabled.focus,
 .btn-warning[disabled].focus,
 fieldset[disabled] .btn-warning.focus {
-    background-color: var(--focus-warning-brown);
+    background-color: var(--standard-vibrant-yellow);
 }
 
 .btn-warning .badge {
