@@ -2310,6 +2310,17 @@ class SubmissionController extends AbstractController {
             $ta = true;
         }
 
+        // Students may only change their own version. Their user id resolves to their team on team gradeables.
+        if (!$ta && $who !== null && $who !== $this->core->getUser()->getId()) {
+            $msg = "You do not have access to that submission.";
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl())
+            );
+        }
+
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";

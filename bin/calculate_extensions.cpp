@@ -227,7 +227,7 @@ int main(int argc, char* argv[]) {
     }
     if (earned) { 
       std::cout << "LATE DAY EARNED FOR " << itr->first << std::endl;
-      std::cerr << itr->first << "," << GRADEABLE << "," << 1 << std::endl;
+      std::cerr << itr->first << "," << GRADEABLE << "," << 1 << ",early submission incentive" << std::endl;
     } else if (attempt) { std::cout << "ATTEMPT by " << itr->first << std::endl; }
     else { std::cout << "ONLY ON TIME " << itr->first << std::endl; }
   }
