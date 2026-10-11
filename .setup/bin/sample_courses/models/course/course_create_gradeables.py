@@ -104,7 +104,13 @@ class Course_create_gradeables:
             if gradeable.is_repository:
                 # generate the repos for the vcs gradeable
                 print(f"generating repositories for gradeable {gradeable.id}")
-                subprocess.check_call(f"sudo {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py {self.semester} {self.code} {gradeable.id}", stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
+                subprocess.check_call(
+                    [
+                        "sudo", f"{SUBMITTY_INSTALL_DIR}/bin/generate_repos.py",
+                        str(self.semester), str(self.code), str(gradeable.id),
+                    ],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+                )
 
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
