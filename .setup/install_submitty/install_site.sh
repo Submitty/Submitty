@@ -160,12 +160,6 @@ fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_DATA_DIR}/cache/twig
 
-# remove old caches under /usr that moved to ${SUBMITTY_DATA_DIR}/cache or are unused
-rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/twig" \
-       "${SUBMITTY_INSTALL_DIR}/site/cache/routes" \
-       "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" \
-       "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
-
 # clear old routes cache
 if [ -d "${SUBMITTY_DATA_DIR}/cache/routes" ]; then
     rm -rf "${SUBMITTY_DATA_DIR}/cache/routes"

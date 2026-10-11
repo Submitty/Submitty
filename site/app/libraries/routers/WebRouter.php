@@ -41,7 +41,6 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
-        // PHP-FPM's ProtectSystem=full makes /usr read-only, so the cache lives in the data dir
         $cache_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'cache', 'routes');
         $cache = new FilesystemAdapter("", 0, $cache_path);
 
