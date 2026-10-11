@@ -1766,6 +1766,20 @@ class SubmissionController extends AbstractController {
             if (!empty($tmp)) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
+                        foreach ($tmp[$i] as $prev_filename) {
+                            if (!is_string($prev_filename)) {
+                                return $this->uploadResult("Invalid previous file name.", false);
+                            }
+                            if (
+                                $prev_filename === ''
+                                || $prev_filename === '.'
+                                || $prev_filename === '..'
+                                || $prev_filename !== basename($prev_filename)
+                                || !FileUtils::isValidFileName($prev_filename)
+                            ) {
+                                return $this->uploadResult("Invalid previous file name '{$prev_filename}'.", false);
+                            }
+                        }
                         $previous_files_src[$i + 1] = $tmp[$i];
                         $previous_files_dst[$i + 1] = $tmp[$i];
                     }
