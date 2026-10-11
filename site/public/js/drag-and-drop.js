@@ -498,6 +498,14 @@ function settleJsonResponse(response, resolve, reject) {
         });
         return;
     }
+    if (parsed === null || typeof parsed !== 'object') {
+        console.error('Unexpected server response:', response);
+        reject({
+            status: 'failed',
+            message: `Unexpected server response (expected a JSON object). Raw response: ${response}`,
+        });
+        return;
+    }
     if (parsed['status'] === 'success') {
         resolve(parsed);
     }
