@@ -198,7 +198,8 @@ class SubmissionController extends AbstractController {
             if ($graded_gradeable != null) {
                 $show_hidden = (!$gradeable->isTaGrading() || $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
                 // can this user access grade inquiries for this graded_gradeable
-                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+                $can_inquiry = $graded_gradeable->getSubmitter()->hasUser($this->core->getUser())
+                    || $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 if ($can_inquiry) {
                     $this->core->authorizeWebSocketToken([
                         'page' => 'grade_inquiry',
