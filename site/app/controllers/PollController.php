@@ -865,9 +865,8 @@ class PollController extends AbstractController {
 
     /**
      * This method opens a WebSocket client and sends a message containing corresponding poll updates
-     * If $notify is true, a failed send adds a notice telling the user the page won't update live
      */
-    private function sendSocketMessage(mixed $msg_array, string $page = 'polls', bool $notify = true): void {
+    private function sendSocketMessage(mixed $msg_array, string $page = 'polls'): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $params = [
             'page' => $page,
@@ -883,15 +882,12 @@ class PollController extends AbstractController {
             $client->json_send($msg_array);
         }
         catch (WebSocket\ConnectionException $e) {
-            if ($notify) {
-                $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
-            }
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
     }
 
     /**
      * Sends the poll's current response count to instructors on the polls index page
-     * Failures are silent because the student who triggered the update never sees that page
      */
     private function sendNumResponses(int $poll_id): void {
         $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
@@ -899,6 +895,6 @@ class PollController extends AbstractController {
             'type' => 'update_num_responses',
             'poll_id' => $poll_id,
             'message' => $repo->getNumResponses($poll_id),
-        ], 'polls_index', false);
+        ], 'polls_index');
     }
 }
