@@ -50,9 +50,9 @@
     "vue": "^3.5.43"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/preset-env": "^7.29.0",
-    "@babel/preset-typescript": "^7.28.5",
+    "@babel/core": "^8.0.0",
+    "@babel/preset-env": "^8.0.6",
+    "@babel/preset-typescript": "^8.0.0",
     "@cypress/code-coverage": "^4.0.3",
     "@cypress/skip-test": "^2.6.1",
     "@cypress/vite-dev-server": "^6.0.1",
@@ -102,6 +102,12 @@
     "vite-plugin-istanbul": "^9.0.1",
     "vnu-jar": "^25.11.17",
     "vue-tsc": "^3.3.11"
+  },
+  "overrides": {
+    "@cypress/code-coverage": {
+      "@babel/core": "$@babel/core",
+      "@babel/preset-env": "$@babel/preset-env"
+    }
   },
   "scripts": {
     "prettier": "prettier --check \"public/css/**/*.css\"",
