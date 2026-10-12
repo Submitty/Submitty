@@ -4,11 +4,22 @@ Generally, the site should be inserting an empty row into the DB for the autogra
 submission and then this script updates said row, but should be fault-tolerant to
 handle inserting the row if necessary.
 """
+
 import json
 import os
 
 from submitty_utils import dateutils
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func, insert, delete, update
+from sqlalchemy import (
+    create_engine,
+    Table,
+    MetaData,
+    bindparam,
+    select,
+    func,
+    insert,
+    delete,
+    update,
+)
 from . import grade_item
 
 
@@ -16,12 +27,13 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
 
-def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
-                         version):
-    db_user = config.database['database_user']
-    db_host = config.database['database_host']
-    db_pass = config.database['database_password']
-    data_dir = config.submitty['submitty_data_dir']
+def insert_into_database(
+    config, semester, course, gradeable_id, user_id, team_id, who_id, is_team, version
+):
+    db_user = config.database["database_user"]
+    db_host = config.database["database_host"]
+    db_pass = config.database["database_password"]
+    data_dir = config.submitty["submitty_data_dir"]
 
     non_hidden_non_ec = 0
     non_hidden_ec = 0
@@ -31,22 +43,22 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     user_or_team_id = team_id if is_team else user_id
 
     tmp_submission = os.path.join(
-        config.submitty['submitty_data_dir'],
-        'courses',
+        config.submitty["submitty_data_dir"],
+        "courses",
         semester,
         course,
-        'results',
+        "results",
         gradeable_id,
         user_or_team_id,
-        version
+        version,
     )
 
     submit_notebook_path = os.path.join(tmp_submission, ".submit.notebook")
     if os.path.exists(submit_notebook_path):
-        with open(submit_notebook_path, 'r') as infile:
-            notebook_data = json.load(infile).get('item_pools_selected', [])
+        with open(submit_notebook_path, "r") as infile:
+            notebook_data = json.load(infile).get("item_pools_selected", [])
     else:
-        print(f'could not find {submit_notebook_path}')
+        print(f"could not find {submit_notebook_path}")
         notebook_data = []
 
     testcases = get_testcases(config, semester, course, gradeable_id, notebook_data)
@@ -63,32 +75,32 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
-    autograding_metrics = Table('autograding_metrics', metadata, autoload_with=engine)
+    autograding_metrics = Table("autograding_metrics", metadata, autoload_with=engine)
     db.execute(
         delete(autograding_metrics)
-        .where(autograding_metrics.c.user_id == bindparam('u_id'))
-        .where(autograding_metrics.c.team_id == bindparam('t_id'))
-        .where(autograding_metrics.c.g_id == bindparam('g_id'))
-        .where(autograding_metrics.c.g_version == bindparam('g_v')),
-        {'u_id': user_id, 't_id': team_id, 'g_id': gradeable_id, 'g_v': version}
+        .where(autograding_metrics.c.user_id == bindparam("u_id"))
+        .where(autograding_metrics.c.team_id == bindparam("t_id"))
+        .where(autograding_metrics.c.g_id == bindparam("g_id"))
+        .where(autograding_metrics.c.g_version == bindparam("g_v")),
+        {"u_id": user_id, "t_id": team_id, "g_id": gradeable_id, "g_v": version},
     )
     db.commit()
 
-    if len(testcases) != len(results['testcases']):
+    if len(testcases) != len(results["testcases"]):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
         raise Exception(
             f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}"
         )
     for i in range(len(testcases)):
         print(f"testcase[{i}]= {json.dumps(results['testcases'][i])}")
-        if testcases[i]['hidden'] and testcases[i]['extra_credit']:
-            hidden_ec += results['testcases'][i]['points']
-        elif testcases[i]['hidden']:
-            hidden_non_ec += results['testcases'][i]['points']
-        elif testcases[i]['extra_credit']:
-            non_hidden_ec += results['testcases'][i]['points']
+        if testcases[i]["hidden"] and testcases[i]["extra_credit"]:
+            hidden_ec += results["testcases"][i]["points"]
+        elif testcases[i]["hidden"]:
+            hidden_non_ec += results["testcases"][i]["points"]
+        elif testcases[i]["extra_credit"]:
+            non_hidden_ec += results["testcases"][i]["points"]
         else:
-            non_hidden_non_ec += results['testcases'][i]['points']
+            non_hidden_non_ec += results["testcases"][i]["points"]
 
         if (
             results["testcases"][i]["elapsed_time"] is not None
@@ -110,9 +122,9 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             )
             db.commit()
 
-    submission_time = results['submission_time']
+    submission_time = results["submission_time"]
 
-    if 'automatic_grading_total' in results.keys():
+    if "automatic_grading_total" in results.keys():
         # automatic_grading_total = results["automatic_grading_total"]
         nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
 
@@ -122,20 +134,23 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         non_hidden_non_ec += nonhidden_diff
         # hidden_non_ec += hidden_diff
 
-    data_table = Table('electronic_gradeable_data', metadata, autoload_with=engine)
+    data_table = Table("electronic_gradeable_data", metadata, autoload_with=engine)
 
     """
     The data row should have been inserted by PHP when the student uploads the submission, requiring
     us to do an update here (as the PHP also deals with the active version for us), but in case
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
-    """   # noqa: B018
+    """  # noqa: B018
     if is_team is True:
-        result = db.execute(select(func.count()).select_from(data_table)
-                            .where(data_table.c.g_id == bindparam('g_id'))
-                            .where(data_table.c.team_id == bindparam('team_id'))
-                            .where(data_table.c.g_version == bindparam('g_version')),
-                            {'g_id': gradeable_id, 'team_id': team_id, 'g_version': version})
+        result = db.execute(
+            select(func.count())
+            .select_from(data_table)
+            .where(data_table.c.g_id == bindparam("g_id"))
+            .where(data_table.c.team_id == bindparam("team_id"))
+            .where(data_table.c.g_version == bindparam("g_version")),
+            {"g_id": gradeable_id, "team_id": team_id, "g_version": version},
+        )
         row = result.fetchone()
         result.close()
         query_type = insert(data_table)
@@ -143,16 +158,22 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             query_type = (
                 update(data_table)
                 .values(
-                    autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),
-                    autograding_non_hidden_extra_credit=bindparam("autograding_non_hidden_extra_credit"),
-                    autograding_hidden_non_extra_credit=bindparam("autograding_hidden_non_extra_credit"),
+                    autograding_non_hidden_non_extra_credit=bindparam(
+                        "autograding_non_hidden_non_extra_credit"
+                    ),
+                    autograding_non_hidden_extra_credit=bindparam(
+                        "autograding_non_hidden_extra_credit"
+                    ),
+                    autograding_hidden_non_extra_credit=bindparam(
+                        "autograding_hidden_non_extra_credit"
+                    ),
                     autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
                     autograding_complete=bindparam("autograding_complete"),
-                    submission_time=bindparam("submission_time")
+                    submission_time=bindparam("submission_time"),
                 )
-                .where(data_table.c.g_id == bindparam('u_g_id'))
-                .where(data_table.c.team_id == bindparam('u_team_id'))
-                .where(data_table.c.g_version == bindparam('u_g_version'))
+                .where(data_table.c.g_id == bindparam("u_g_id"))
+                .where(data_table.c.team_id == bindparam("u_team_id"))
+                .where(data_table.c.g_version == bindparam("u_g_version"))
             )
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
@@ -171,33 +192,42 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 "autograding_hidden_non_extra_credit": hidden_non_ec,
                 "autograding_hidden_extra_credit": hidden_ec,
                 "submission_time": submission_time,
-                "autograding_complete": True
-            }
+                "autograding_complete": True,
+            },
         )
 
     else:
         result = db.execute(
-            select(func.count()).select_from(data_table)
-            .where(data_table.c.g_id == bindparam('g_id'))
-            .where(data_table.c.user_id == bindparam('user_id'))
-            .where(data_table.c.g_version == bindparam('g_version')),
-            {"g_id": gradeable_id, "user_id": user_id, "g_version": version}
+            select(func.count())
+            .select_from(data_table)
+            .where(data_table.c.g_id == bindparam("g_id"))
+            .where(data_table.c.user_id == bindparam("user_id"))
+            .where(data_table.c.g_version == bindparam("g_version")),
+            {"g_id": gradeable_id, "user_id": user_id, "g_version": version},
         )
         count = result.scalar() or 0
         result.close()
         query_type = insert(data_table)
         if count > 0:
-            query_type = update(data_table)\
+            query_type = (
+                update(data_table)
                 .values(
-                        autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),
-                        autograding_non_hidden_extra_credit=bindparam("autograding_non_hidden_extra_credit"),
-                        autograding_hidden_non_extra_credit=bindparam("autograding_hidden_non_extra_credit"),
-                        autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
-                        autograding_complete=bindparam("autograding_complete")
-                )\
-                .where(data_table.c.g_id == bindparam('u_g_id'))\
-                .where(data_table.c.user_id == bindparam('u_user_id'))\
-                .where(data_table.c.g_version == bindparam('u_g_version'))
+                    autograding_non_hidden_non_extra_credit=bindparam(
+                        "autograding_non_hidden_non_extra_credit"
+                    ),
+                    autograding_non_hidden_extra_credit=bindparam(
+                        "autograding_non_hidden_extra_credit"
+                    ),
+                    autograding_hidden_non_extra_credit=bindparam(
+                        "autograding_hidden_non_extra_credit"
+                    ),
+                    autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
+                    autograding_complete=bindparam("autograding_complete"),
+                )
+                .where(data_table.c.g_id == bindparam("u_g_id"))
+                .where(data_table.c.user_id == bindparam("u_user_id"))
+                .where(data_table.c.g_version == bindparam("u_g_version"))
+            )
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
@@ -215,27 +245,30 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 "autograding_hidden_non_extra_credit": hidden_non_ec,
                 "autograding_hidden_extra_credit": hidden_ec,
                 "submission_time": submission_time,
-                "autograding_complete": True
-            }
+                "autograding_complete": True,
+            },
         )
 
     db.commit()
 
     try:
-        autograding_testcase_data = Table('autograding_testcase_data', metadata, autoload_with=engine)
-        autograding_testcase = Table('autograding_testcase', metadata, autoload_with=engine)
+        autograding_testcase_data = Table(
+            "autograding_testcase_data", metadata, autoload_with=engine
+        )
+        autograding_testcase = Table("autograding_testcase", metadata, autoload_with=engine)
         result = db.execute(
             select(autograding_testcase.c.id)
             .where(autograding_testcase.c.g_id == gradeable_id)
-            .order_by(autograding_testcase.c.testcase_order))
+            .order_by(autograding_testcase.c.testcase_order)
+        )
         testcase_ids = [row[0] for row in result.fetchall()]
         rows = build_testcase_rows(
             user_id=user_id,
             team_id=team_id,
             g_version=version,
-            results_testcases=results['testcases'],
+            results_testcases=results["testcases"],
             testcase_ids=testcase_ids,
-            )
+        )
         upsert_testcase_results(db, autograding_testcase_data, rows, user_id, team_id, version)
         db.commit()
     except Exception as e:
@@ -251,13 +284,15 @@ def build_testcase_rows(user_id, team_id, g_version, results_testcases, testcase
     """
     rows = []
     for i, tc_id in enumerate(testcase_ids):
-        rows.append({
-            "atd_id": tc_id,
-            "user_id":    user_id if user_id else None,
-            "team_id":    team_id if team_id else None,
-            "g_version":  int(g_version),
-            "points_earned": results_testcases[i]["points"],
-        })
+        rows.append(
+            {
+                "atd_id": tc_id,
+                "user_id": user_id if user_id else None,
+                "team_id": team_id if team_id else None,
+                "g_version": int(g_version),
+                "points_earned": results_testcases[i]["points"],
+            }
+        )
     return rows
 
 
@@ -268,9 +303,7 @@ def upsert_testcase_results(db, table, rows, user_id, team_id, g_version):
     """
     tc_ids = [row["atd_id"] for row in rows]
     delete_stmt = (
-        delete(table)
-        .where(table.c.atd_id.in_(tc_ids))
-        .where(table.c.g_version == g_version)
+        delete(table).where(table.c.atd_id.in_(tc_ids)).where(table.c.g_version == g_version)
     )
     if user_id is not None:
         delete_stmt = delete_stmt.where(table.c.user_id == user_id)
@@ -295,35 +328,37 @@ def get_testcases(config, semester, course, g_id, notebook_data):
     """
     testcase_specs = []
     build_file = os.path.join(
-        config.submitty['submitty_data_dir'],
+        config.submitty["submitty_data_dir"],
         "courses",
         semester,
         course,
         "config",
         "build",
-        f"build_{g_id}.json"
+        f"build_{g_id}.json",
     )
     if os.path.isfile(build_file):
         with open(build_file) as build_file:
             build_json = json.load(build_file)
-        if 'testcases' in build_json and build_json['testcases'] is not None:
-            testcase_specs += build_json['testcases']
+        if "testcases" in build_json and build_json["testcases"] is not None:
+            testcase_specs += build_json["testcases"]
     else:
-        print(f'could not find {build_file}')
+        print(f"could not find {build_file}")
 
     for notebook_item in notebook_data:
         item_dict = grade_item.get_item_from_item_pool(build_json, notebook_item)
-        if item_dict is not None and 'testcases' in item_dict:
-            testcase_specs += item_dict['testcases']
+        if item_dict is not None and "testcases" in item_dict:
+            testcase_specs += item_dict["testcases"]
 
     testcases = []
     for testcase in testcase_specs:
-        testcases.append({
-                'hidden': testcase.get('hidden', False),
-                'extra_credit': testcase.get('extra_credit', False),
-                'testcase_id': testcase.get('testcase_id', None),
-                'total_points': testcase.get('points', 0)
-            })
+        testcases.append(
+            {
+                "hidden": testcase.get("hidden", False),
+                "extra_credit": testcase.get("extra_credit", False),
+                "testcase_id": testcase.get("testcase_id", None),
+                "total_points": testcase.get("points", 0),
+            }
+        )
     return testcases
 
 
@@ -342,34 +377,36 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
     :return:
     """
 
-    result_details = {'testcases': [], 'submission_time': None}
-    result_dir = os.path.join(data_dir, "courses", semester, course, "results", g_id, who_id,
-                              str(version))
+    result_details = {"testcases": [], "submission_time": None}
+    result_dir = os.path.join(
+        data_dir, "courses", semester, course, "results", g_id, who_id, str(version)
+    )
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:
             result_json = json.load(result_file)
-            if 'testcases' in result_json and result_json['testcases'] is not None:
-                for testcase in result_json['testcases']:
-                    metrics_exist = 'metrics' in testcase and testcase['metrics'] is not None
+            if "testcases" in result_json and result_json["testcases"] is not None:
+                for testcase in result_json["testcases"]:
+                    metrics_exist = "metrics" in testcase and testcase["metrics"] is not None
 
-                    testcase_data = {'points': testcase['points_awarded']}
+                    testcase_data = {"points": testcase["points_awarded"]}
                     testcase_data["elapsed_time"] = (
                         testcase["metrics"]["elapsed_time"] if metrics_exist else None
                     )
                     testcase_data["max_rss_size"] = (
                         testcase["metrics"]["max_rss_size"] if metrics_exist else None
                     )
-                    result_details['testcases'].append(testcase_data)
-            if 'automatic_grading_total' in result_json:
-                result_details['automatic_grading_total'] = result_json['automatic_grading_total']
-            if 'nonhidden_automatic_grading_total' in result_json:
-                result_details['nonhidden_automatic_grading_total'] = \
-                   result_json['nonhidden_automatic_grading_total']
+                    result_details["testcases"].append(testcase_data)
+            if "automatic_grading_total" in result_json:
+                result_details["automatic_grading_total"] = result_json["automatic_grading_total"]
+            if "nonhidden_automatic_grading_total" in result_json:
+                result_details["nonhidden_automatic_grading_total"] = result_json[
+                    "nonhidden_automatic_grading_total"
+                ]
 
     if os.path.isfile(os.path.join(result_dir, "history.json")):
         with open(os.path.join(result_dir, "history.json")) as result_file:
             result_json = json.load(result_file)
             # a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
-            a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
-            result_details['submission_time'] = a.strftime('%Y-%m-%d %H:%M:%S%z')
+            a = dateutils.read_submitty_date(result_json[-1]["submission_time"])
+            result_details["submission_time"] = a.strftime("%Y-%m-%d %H:%M:%S%z")
     return result_details
