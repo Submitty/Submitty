@@ -21,7 +21,7 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 8.2
-  NODE_VERSION: 16
+  NODE_VERSION: 24
   PYTHON_VERSION: "3.10"
 
 runs:
@@ -35,6 +35,9 @@ runs:
         rm -rf "$AGENT_TOOLSDIRECTORY"
         sudo apt-get clean
       shell: bash
+    - uses: actions/setup-node@v7
+      with:
+        node-version: ${{ env.NODE_VERSION }}
     - uses: actions/checkout@v7
       with:
         path: SUBMITTY_CPY/

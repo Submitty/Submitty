@@ -84,7 +84,7 @@ apt-get install -qqy ninja-build
 
 if [ ${WORKER} == 0 ]; then
     # NodeJS
-    NODE_MAJOR=20
+    NODE_MAJOR=24
     sudo rm -f /etc/apt/keyrings/nodesource.gpg
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
     chmod o+r /etc/apt/keyrings/nodesource.gpg
