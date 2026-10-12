@@ -29,8 +29,9 @@ def sort_contours(cnts):
     i = 0
     # construct the list of bounding boxes and sort them
     boundingBoxes = [cv2.boundingRect(c) for c in cnts]
-    cnts, boundingBoxes = zip(*sorted(zip(cnts, boundingBoxes),
-                              key=lambda b: b[1][i], reverse=reverse))
+    cnts, boundingBoxes = zip(
+        *sorted(zip(cnts, boundingBoxes), key=lambda b: b[1][i], reverse=reverse)
+    )
 
     # return the list of sorted contours and bounding boxes
     return (cnts, boundingBoxes)
@@ -44,7 +45,7 @@ def preprocess(img):
     img_bin = 255 - img_bin
 
     # Defining a kernel length
-    kernel_length = np.array(img).shape[1]//80
+    kernel_length = np.array(img).shape[1] // 80
 
     verticle_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, kernel_length))
     horizont_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_length, 1))
@@ -60,17 +61,16 @@ def preprocess(img):
     alpha = 0.5
     beta = 1.0 - alpha
 
-    img_final_bin = cv2.addWeighted(verticle_lines_img,
-                                    alpha, horizontal_lines_img, beta, 0.0)
+    img_final_bin = cv2.addWeighted(verticle_lines_img, alpha, horizontal_lines_img, beta, 0.0)
     img_final_bin = cv2.erode(~img_final_bin, kernel, iterations=3)
 
-    thresh, img_final_bin = cv2.threshold(img_final_bin, 128, 255,
-                                          cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    thresh, img_final_bin = cv2.threshold(
+        img_final_bin, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
+    )
 
     img_final_bin = 255 - img_final_bin
 
-    contours, _ = cv2.findContours(img_final_bin, cv2.RETR_TREE,
-                                   cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(img_final_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     if len(contours) == 0:
         return []
@@ -84,11 +84,12 @@ def preprocess(img):
         x, y, w, h = cv2.boundingRect(c)
         if w > 20 and w < 75 and h > 35 and h < 125:
             idx += 1
-            new_img = img[y:y+h, x:x+w]
+            new_img = img[y : y + h, x : x + w]
             # convert to MNIST expected img
             # resize to 28x28,invert, and leave only 1 channel
-            retval, thresh_gray = cv2.threshold(new_img, thresh=100, maxval=255,
-                                                type=cv2.THRESH_BINARY_INV)
+            retval, thresh_gray = cv2.threshold(
+                new_img, thresh=100, maxval=255, type=cv2.THRESH_BINARY_INV
+            )
 
             # clean up noise and fill in any holes in the digit
             thresh_gray = cv2.medianBlur(thresh_gray, 3)
@@ -98,13 +99,11 @@ def preprocess(img):
 
             # the return values has been changed in opencv 3.x and is reverted in 4.x
             # after upgrading the function only returns contours and hierarchy
-            contours, _ = cv2.findContours(thresh_gray, cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_NONE)
+            contours, _ = cv2.findContours(thresh_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
             if len(contours) < 1:
                 continue
 
-            contours = list(reversed(sorted(contours,
-                                            key=lambda x: cv2.contourArea(x))))
+            contours = list(reversed(sorted(contours, key=lambda x: cv2.contourArea(x))))
 
             # all noise has been removed, so we can combine the left over components
             c = contours[0]
@@ -114,7 +113,7 @@ def preprocess(img):
             x, y, w, h = cv2.boundingRect(c)
 
             thresh_gray = 255 - thresh_gray
-            cut = thresh_gray[y:y+h, x:x+w]
+            cut = thresh_gray[y : y + h, x : x + w]
 
             # redraw the digit at the center of the image
             cut_height = (y + h) - y
@@ -138,25 +137,28 @@ def preprocess(img):
             top += border_size
             bottom += border_size
 
-            new_img = cv2.copyMakeBorder(cut, top, bottom, left, right,
-                                         cv2.BORDER_CONSTANT,
-                                         value=[255, 255, 255])
+            new_img = cv2.copyMakeBorder(
+                cut, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[255, 255, 255]
+            )
             new_img = cv2.dilate(new_img, kernel)
 
             # downscale to expected size with border
             sf = 2
-            new_img = cv2.resize(new_img, (28, 28), fx=sf, fy=sf,
-                                 interpolation=cv2.INTER_AREA)
+            new_img = cv2.resize(new_img, (28, 28), fx=sf, fy=sf, interpolation=cv2.INTER_AREA)
 
             # force a border increase in case the resizing caused a digit to hit the edge
             border_size = 2
-            new_img = cv2.copyMakeBorder(new_img, border_size, border_size,
-                                         border_size, border_size,
-                                         cv2.BORDER_CONSTANT,
-                                         value=[255, 255, 255])
+            new_img = cv2.copyMakeBorder(
+                new_img,
+                border_size,
+                border_size,
+                border_size,
+                border_size,
+                cv2.BORDER_CONSTANT,
+                value=[255, 255, 255],
+            )
 
-            new_img = cv2.resize(new_img, (28, 28), fx=sf, fy=sf,
-                                 interpolation=cv2.INTER_AREA)
+            new_img = cv2.resize(new_img, (28, 28), fx=sf, fy=sf, interpolation=cv2.INTER_AREA)
 
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
             new_img = cv2.dilate(new_img, kernel, iterations=1)
@@ -177,8 +179,9 @@ def preprocess(img):
 def scanForDigits(images):
     """Take the processed sub-images and perform OCR."""
     # Returns a string of the decoded digits
-    model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                              'onnx_models', 'mnist.onnx')
+    model_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "onnx_models", "mnist.onnx"
+    )
     sess = rt.InferenceSession(model_path)
     input_name = sess.get_inputs()[0].name
     output_name = sess.get_outputs()[0].name
@@ -210,7 +213,7 @@ def getDigits(page, qr_data):
     rect = cv2.minAreaRect(rect)
     angle = rect[-1]
 
-    if (angle < -45):
+    if angle < -45:
         angle += 90
 
     page_height, page_width = page.shape
@@ -218,8 +221,9 @@ def getDigits(page, qr_data):
 
     # rotate page if not straight relative to QR code
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    page = cv2.warpAffine(page, M, (page_width, page_height),
-                          flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    page = cv2.warpAffine(
+        page, M, (page_width, page_height), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
+    )
 
     # QR code has shifted, rescan
     qr_data = pyzbar.decode(page, symbols=[ZBarSymbol.QRCODE])
@@ -232,7 +236,7 @@ def getDigits(page, qr_data):
 
     # narrow down the search space by looking only to the right of the QR
     sub_size = (left + width, top, page_width, top + height)
-    page = page[sub_size[1]:sub_size[3], sub_size[0]:sub_size[2]]
+    page = page[sub_size[1] : sub_size[3], sub_size[0] : sub_size[2]]
 
     processed_images = preprocess(page)
     return scanForDigits(processed_images)
