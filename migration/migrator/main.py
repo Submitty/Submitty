@@ -33,24 +33,18 @@ def create(args):
     date_args = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(*date_args)
 
-    check = re.match(r'^[A-Za-z0-9_]+$', args.name)
+    check = re.match(r"^[A-Za-z0-9_]+$", args.name)
     if check is None:
         raise ValueError(
-            "Invalid migration name (must only contain alphanumeric and _): {}".format(
-                args.name
-            )
+            "Invalid migration name (must only contain alphanumeric and _): {}".format(args.name)
         )
     filename = "{}_{}.py".format(ver, args.name)
     for environment in get_environments(args.environments):
         new_file = Path(get_migrations_path(), environment, filename)
-        base_file = Path(
-            get_dir_path(),
-            'data',
-            'base_migration_{}.py'.format(environment)
-        )
-        with new_file.open('w') as open_file, base_file.open() as template_file:
+        base_file = Path(get_dir_path(), "data", "base_migration_{}.py".format(environment))
+        with new_file.open("w") as open_file, base_file.open() as template_file:
             open_file.write(template_file.read())
-        print('Created migration: {}/{}'.format(environment, new_file.name))
+        print("Created migration: {}/{}".format(environment, new_file.name))
 
 
 def status(args):
@@ -66,27 +60,26 @@ def status(args):
     :type args: argparse.Namespace
     """
     for environment in get_environments(args.environments):
-        if environment in ['master', 'system']:
+        if environment in ["master", "system"]:
             loop_args = deepcopy(args)
-            loop_args.config.database['dbname'] = 'submitty'
+            loop_args.config.database["dbname"] = "submitty"
             try:
                 database = db.Database(loop_args.config.database, environment)
                 exists = database.has_table(database.migration_table.__tablename__)
                 if not exists:
-                    print('Could not find migration table for {}'.format(environment))
+                    print("Could not find migration table for {}".format(environment))
                     database.close()
                     continue
                 print_status(database, environment, loop_args)
                 database.close()
             except OperationalError as exc:
                 print(
-                    'Could not get database for migrations for {}:\n  {}'.format(
-                        environment,
-                        str(exc).split("\n")[0]
+                    "Could not get database for migrations for {}:\n  {}".format(
+                        environment, str(exc).split("\n")[0]
                     )
                 )
         else:
-            course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
+            course_dir = Path(args.config.submitty["submitty_data_dir"], "courses")
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
@@ -100,27 +93,24 @@ def status(args):
                         continue
                     loop_args.semester = semester
                     loop_args.course = course
-                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
-                        semester,
-                        course
-                    )
+                    loop_args.config.database["dbname"] = "submitty_{}_{}".format(semester, course)
                     try:
                         database = db.Database(loop_args.config.database, environment)
                         exists = database.has_table(database.migration_table.__tablename__)
                         if not exists:
                             print(
-                                'Could not find migration table for {}.{}'.format(
-                                    semester,
-                                    course
-                                )
+                                "Could not find migration table for {}.{}".format(semester, course)
                             )
                             database.close()
                             continue
                         print_status(database, environment, loop_args)
                         database.close()
                     except OperationalError:
-                        print('Could not get the status for the migrations '
-                              'for {}.{}'.format(semester, course))
+                        print(
+                            "Could not get the status for the migrations for {}.{}".format(
+                                semester, course
+                            )
+                        )
                         continue
 
 
@@ -129,28 +119,29 @@ def print_status(database, environment, args):
     migrations = load_migrations(get_migrations_path() / environment)
     missing_migrations = []
 
-    query = database.session.query(database.migration_table) \
-        .order_by(database.migration_table.id).all()
+    query = (
+        database.session.query(database.migration_table).order_by(database.migration_table.id).all()
+    )
     for migration in query:
         if migration.id in migrations:
-            migrations[migration.id]['status'] = migration.status
-            migrations[migration.id]['table'] = migration
+            migrations[migration.id]["status"] = migration.status
+            migrations[migration.id]["table"] = migration
         else:
             missing_migrations.append(migration.id)
 
-    if environment == 'course':
-        name = '{}.{} ({})'.format(args.semester, args.course, environment)
+    if environment == "course":
+        name = "{}.{} ({})".format(args.semester, args.course, environment)
     else:
         name = environment
 
-    print('Status for {}'.format(name))
-    print('{:75s} {}'.format('MIGRATION', 'STATUS'))
-    print('-'*82)
+    print("Status for {}".format(name))
+    print("{:75s} {}".format("MIGRATION", "STATUS"))
+    print("-" * 82)
     for key in sorted(missing_migrations + list(migrations.keys())):
         if key in migrations:
-            status = 'UP' if migrations[key]['status'] == 1 else 'DOWN'
+            status = "UP" if migrations[key]["status"] == 1 else "DOWN"
         else:
-            status = 'MISSING'
+            status = "MISSING"
         print("{:74s} {:>7s}".format(key, status))
     print()
 
@@ -167,7 +158,7 @@ def migrate(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
-    args.direction = 'up'
+    args.direction = "up"
     handle_migration(args)
 
 
@@ -181,7 +172,7 @@ def rollback(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
-    args.direction = 'down'
+    args.direction = "down"
     handle_migration(args)
 
 
@@ -199,55 +190,49 @@ def handle_migration(args):
     """
     all_missing_migrations: Set[Path] = set()
     for environment in get_environments(args.environments):
-        if environment in ['master', 'system']:
+        if environment in ["master", "system"]:
             loop_args = deepcopy(args)
-            loop_args.config.database['dbname'] = 'submitty'
+            loop_args.config.database["dbname"] = "submitty"
             try:
                 database = db.Database(loop_args.config.database, environment)
             except OperationalError as exc:
                 raise SystemExit(
-                    'Submitty Database Migration Error for {}:\n  {}'.format(
-                        environment,
-                        str(exc).split("\n")[0]
+                    "Submitty Database Migration Error for {}:\n  {}".format(
+                        environment, str(exc).split("\n")[0]
                     )
                 )
-            migrate_environment(
-                database,
-                environment,
-                args,
-                all_missing_migrations
-            )
+            migrate_environment(database, environment, args, all_missing_migrations)
             database.close()
 
-        if environment == 'course':
-            course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
+        if environment == "course":
+            course_dir = Path(args.config.submitty["submitty_data_dir"], "courses")
             if not course_dir.exists():
-                raise SystemExit(
-                    f"Migrator Error:  Could not find courses directory: {course_dir}"
-                )
+                raise SystemExit(f"Migrator Error:  Could not find courses directory: {course_dir}")
 
             database_config = deepcopy(args.config.database)
-            database_config['dbname'] = 'submitty'
+            database_config["dbname"] = "submitty"
             try:
-                database = db.Database(database_config, 'master')
+                database = db.Database(database_config, "master")
             except OperationalError:
                 raise SystemExit(
-                    'Submitty Database Migration Error:  '
-                    'Database does not exist for master for courses'
+                    "Submitty Database Migration Error:  "
+                    "Database does not exist for master for courses"
                 )
 
             courses = {}
-            for course in database.execute('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course').mappings():
-                if course['term'] not in courses:
-                    courses[course['term']] = []
-                courses[course['term']].append(course['course'])
+            for course in database.execute(
+                "SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course"
+            ).mappings():
+                if course["term"] not in courses:
+                    courses[course["term"]] = []
+                courses[course["term"]].append(course["course"])
             database.close()
 
             for semester in courses:
                 for course in courses[semester]:
                     if not Path(course_dir, semester, course).exists():
                         raise SystemExit(
-                            f'Migrator Error:  Could not find directory for {semester} {course}'
+                            f"Migrator Error:  Could not find directory for {semester} {course}"
                         )
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
@@ -256,17 +241,11 @@ def handle_migration(args):
                         continue
                     loop_args.semester = semester
                     loop_args.course = course
-                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
-                        semester,
-                        course
-                    )
+                    loop_args.config.database["dbname"] = "submitty_{}_{}".format(semester, course)
                     try:
                         database = db.Database(loop_args.config.database, environment)
                         migrate_environment(
-                            database,
-                            environment,
-                            loop_args,
-                            all_missing_migrations
+                            database, environment, loop_args, all_missing_migrations
                         )
                         database.close()
                     except OperationalError:
@@ -279,9 +258,9 @@ def handle_migration(args):
         if missing_migration.exists():
             missing_migration.unlink()
 
-    print('Loading trigger functions...', end='')
+    print("Loading trigger functions...", end="")
     load_triggers(args, False)
-    print('DONE')
+    print("DONE")
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -303,17 +282,13 @@ def migrate_environment(database, environment, args, all_missing_migrations):
     :param environment: environment we're using for migration step
     :param args: arguments parsed from argparse
     """
-    if environment == 'course':
-        print("Running {} migrations for {}.{}...".format(
-            args.direction,
-            args.semester,
-            args.course
-        ), end="")
+    if environment == "course":
+        print(
+            "Running {} migrations for {}.{}...".format(args.direction, args.semester, args.course),
+            end="",
+        )
     else:
-        print("Running {} migrations for {}...".format(
-            args.direction,
-            environment
-        ), end="")
+        print("Running {} migrations for {}...".format(args.direction, environment), end="")
 
     missing_migrations = OrderedDict()
     migrations = load_migrations(get_migrations_path() / environment)
@@ -321,8 +296,11 @@ def migrate_environment(database, environment, args, all_missing_migrations):
     # We have to check that the migrator table exixts as it gets created as part
     # of the initial migration for the environment.
     if database.has_table(database.migration_table.__tablename__):
-        query = database.session.query(database.migration_table) \
-            .order_by(database.migration_table.id).all()
+        query = (
+            database.session.query(database.migration_table)
+            .order_by(database.migration_table.id)
+            .all()
+        )
         # We need to determine what migrations are missing, which
         # are migrations that we have rows in the DB for, but do not
         # have a migration file for. As part of the installation process,
@@ -330,12 +308,14 @@ def migrate_environment(database, environment, args, all_missing_migrations):
         # which we can use to "remove" any missing migration.
         for migration in query:
             if migration.id in migrations:
-                migrations[migration.id].update({
-                    'commit_time': migration.commit_time,
-                    'status': migration.status,
-                    'db': True,
-                    'table': migration
-                })
+                migrations[migration.id].update(
+                    {
+                        "commit_time": migration.commit_time,
+                        "status": migration.status,
+                        "db": True,
+                        "table": migration,
+                    }
+                )
             else:
                 missing_migrations[migration.id] = migration
 
@@ -343,20 +323,16 @@ def migrate_environment(database, environment, args, all_missing_migrations):
     if len(missing_migrations) > 0:
         if not changes:
             print()
-        print('Removing {} missing migrations:'.format(len(missing_migrations)))
+        print("Removing {} missing migrations:".format(len(missing_migrations)))
         for key in missing_migrations:
             remove_migration(
-                database,
-                missing_migrations[key],
-                environment,
-                args,
-                all_missing_migrations
+                database, missing_migrations[key], environment, args, all_missing_migrations
             )
             changes = True
         print()
 
-    args.fake = args.set_fake if 'set_fake' in args else False
-    if args.direction == 'up':
+    args.fake = args.set_fake if "set_fake" in args else False
+    if args.direction == "up":
         keys = list(migrations.keys())
         if args.initial is True:
             key = keys.pop(0)
@@ -366,7 +342,7 @@ def migrate_environment(database, environment, args, all_missing_migrations):
             run_migration(database, migrations[key], environment, args)
             args.fake = True
         for key in keys:
-            if migrations[key]['status'] == 0:
+            if migrations[key]["status"] == 0:
                 run_migration(database, migrations[key], environment, args)
                 if args.single:
                     break
@@ -374,9 +350,9 @@ def migrate_environment(database, environment, args, all_missing_migrations):
         migration_list = list(migrations.keys())
         for key in reversed(migration_list):
             if key == migration_list[0]:
-                print("  Cannot rollback {}".format(migrations[key]['id']))
+                print("  Cannot rollback {}".format(migrations[key]["id"]))
                 break
-            elif migrations[key]['status'] == 1:
+            elif migrations[key]["status"] == 1:
                 run_migration(database, migrations[key], environment, args)
                 break
 
@@ -385,23 +361,19 @@ def migrate_environment(database, environment, args, all_missing_migrations):
         print()
 
 
-def remove_migration(
-    database,
-    migration,
-    environment,
-    args,
-    all_missing_migrations: set
-):
+def remove_migration(database, migration, environment, args, all_missing_migrations: set):
     """Remove migrations that exist on the system, but not within the migrator tool."""
     print("  {}".format(migration.id))
     file_path = Path(
-        args.config.submitty['submitty_install_dir'], 'migrations',
-        environment, migration.id + '.py'
+        args.config.submitty["submitty_install_dir"],
+        "migrations",
+        environment,
+        migration.id + ".py",
     )
     all_missing_migrations.add(file_path)
     if file_path.exists() and migration.status == 1:
         module = load_module(migration.id, file_path)
-        call_func(getattr(module, 'down', noop), database, environment, args)
+        call_func(getattr(module, "down", noop), database, environment, args)
     database.session.delete(migration)
     database.session.commit()
 
@@ -414,9 +386,9 @@ def call_func(func, database, environment, args):
     it gets a different list of arguments.
     """
     parameters = [args.config]
-    if environment in ['course', 'master']:
+    if environment in ["course", "master"]:
         parameters.append(database)
-    if environment == 'course':
+    if environment == "course":
         parameters.append(args.semester)
         parameters.append(args.course)
     func(*parameters)
@@ -429,114 +401,118 @@ def noop(*_):
 
 def run_migration(database, migration, environment, args):
     """Run the actual migration/rollback function for the migration module."""
-    print("  {}{}".format(migration['id'], ' (FAKE)' if args.fake else ''))
+    print("  {}{}".format(migration["id"], " (FAKE)" if args.fake else ""))
 
     if not args.fake:
-        call_func(
-            getattr(migration['module'], args.direction, noop),
-            database,
-            environment,
-            args
-        )
+        call_func(getattr(migration["module"], args.direction, noop), database, environment, args)
         database.session.commit()
 
-    status = 1 if args.direction == 'up' else 0
+    status = 1 if args.direction == "up" else 0
     # The migration table may not exist if we rollback the initial migration
     if database.has_table(database.migration_table.__tablename__):
-        if migration['table'] is not None:
-            migration['table'].status = status
+        if migration["table"] is not None:
+            migration["table"].status = status
         else:
-            database.session.add(
-                database.migration_table(id=migration['id'], status=status)
-            )
+            database.session.add(database.migration_table(id=migration["id"], status=status))
         database.session.commit()
 
 
 def dump(args):
-    if args.config.database['database_driver'] != 'psql':
-        raise SystemExit('Cannot dump schema for non-postgresql database')
+    if args.config.database["database_driver"] != "psql":
+        raise SystemExit("Cannot dump schema for non-postgresql database")
 
-    data_dir = Path(args.path) if 'path' in args else Path(__file__).resolve().parent
-    data_dir /= 'data'
+    data_dir = Path(args.path) if "path" in args else Path(__file__).resolve().parent
+    data_dir /= "data"
 
-    if 'master' in args.environments:
-        out_file = data_dir / 'submitty_db.sql'
-        print(f'Dumping master environment to {str(out_file)}... ', end='')
-        dump_database('submitty', out_file)
-        print('DONE')
+    if "master" in args.environments:
+        out_file = data_dir / "submitty_db.sql"
+        print(f"Dumping master environment to {str(out_file)}... ", end="")
+        dump_database("submitty", out_file)
+        print("DONE")
 
-    if 'course' in args.environments:
-        out_file = data_dir / 'course_tables.sql'
-        print(f'Dumping course environment to {str(out_file)}... ', end='')
+    if "course" in args.environments:
+        out_file = data_dir / "course_tables.sql"
+        print(f"Dumping course environment to {str(out_file)}... ", end="")
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
-        dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
-        print('DONE')
+        dump_database(f"submitty_{semester}_sample", data_dir / "course_tables.sql")
+        print("DONE")
 
 
 def load_triggers(args, output=True):
     for environment in args.environments:
-        if environment not in ('master', 'course'):
+        if environment not in ("master", "course"):
             continue
 
         trigger_dir = get_triggers_path() / environment
-        sql = [(f, f.read_text()) for f in trigger_dir.iterdir()
-               if f.is_file() and f.suffix == '.sql']
+        sql = [
+            (f, f.read_text()) for f in trigger_dir.iterdir() if f.is_file() and f.suffix == ".sql"
+        ]
 
         if len(sql) == 0:
             if output:
-                print('Loading trigger functions to {}...DONE'.format(environment))
+                print("Loading trigger functions to {}...DONE".format(environment))
             continue
 
         db_config = deepcopy(args.config.database)
-        db_config['dbname'] = 'submitty'
+        db_config["dbname"] = "submitty"
         try:
-            masterdb = db.Database(db_config, 'master')
+            masterdb = db.Database(db_config, "master")
         except OperationalError as exc:
             raise SystemExit(
-                '\n' * (not output) +  # make sure to appear on new line
-                'Error connecting to master database:\n  {}'.format(str(exc.orig).split('\n')[0])
+                "\n" * (not output)  # make sure to appear on new line
+                + "Error connecting to master database:\n  {}".format(str(exc.orig).split("\n")[0])
             )
 
-        if environment == 'master':
+        if environment == "master":
             if output:
-                print('Loading trigger functions to master...')
+                print("Loading trigger functions to master...")
             for file, data in sql:
                 if output:
-                    print('  ' + file.stem)
+                    print("  " + file.stem)
                 masterdb.execute(data)
             masterdb.commit()
             masterdb.close()
             if output:
-                print('DONE')
+                print("DONE")
 
-        elif environment == 'course':
-            courses = masterdb.execute('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;').mappings().all()
+        elif environment == "course":
+            courses = (
+                masterdb.execute(
+                    "SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;"
+                )
+                .mappings()
+                .all()
+            )
             masterdb.close()
             first_err = True  # make sure first error appears on new line
             for course in courses:
                 db_config = deepcopy(args.config.database)
-                db_config['dbname'] = 'submitty_{}_{}'.format(course['term'], course['course'])
+                db_config["dbname"] = "submitty_{}_{}".format(course["term"], course["course"])
                 try:
-                    coursedb = db.Database(db_config, 'course')
+                    coursedb = db.Database(db_config, "course")
                 except OperationalError as exc:
                     if not output and first_err:
                         print()
                         first_err = False
-                    print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
-                        db_config['dbname'],
-                        str(exc.orig).split('\n')[0]
-                    ))
+                    print(
+                        "Failed to connect to course db '{}'\n  Error: {}".format(
+                            db_config["dbname"], str(exc.orig).split("\n")[0]
+                        )
+                    )
                     continue
 
                 if output:
-                    print('Loading trigger functions to {}.{}...'
-                          .format(course['term'], course['course']))
+                    print(
+                        "Loading trigger functions to {}.{}...".format(
+                            course["term"], course["course"]
+                        )
+                    )
                 for file, data in sql:
                     if output:
-                        print('  ' + file.stem)
+                        print("  " + file.stem)
                     coursedb.execute(data)
                 coursedb.commit()
                 coursedb.close()
                 if output:
-                    print('DONE')
+                    print("DONE")
