@@ -31,9 +31,9 @@ if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.jso
 with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as open_file:
     SUBMITTY_JSON = json.load(open_file)
 
-repository_path = SUBMITTY_JSON['submitty_repository']
+repository_path = SUBMITTY_JSON["submitty_repository"]
 script_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
-runner_dir = os.path.join(SUBMITTY_JSON['submitty_data_dir'], "to_be_graded_queue")
+runner_dir = os.path.join(SUBMITTY_JSON["submitty_data_dir"], "to_be_graded_queue")
 rainbow_path = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "RainbowGrades")
 
 
