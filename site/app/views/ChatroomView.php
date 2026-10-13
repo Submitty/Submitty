@@ -66,7 +66,7 @@ class ChatroomView extends AbstractView {
             'base_url' => $this->core->buildCourseUrl() . '/chat',
             'semester' => $this->core->getConfig()->getTerm(),
             'chatrooms' => $chatroom_rows,
-            'user_admin' => $this->core->getUser()->accessAdmin(),
+            'user_admin' => $this->core->getUser()->accessAdmin()
         ]);
     }
 
@@ -76,7 +76,7 @@ class ChatroomView extends AbstractView {
         $display_name = $user->getDisplayFullName();
         $roomId = $chatroom->getId();
         if ($anonymous) {
-            $display_name = $chatroom->calcAnonName($user->getId());
+            $display_name = $chatroom->calcAnonName($user->getId(), $this->core->getConfig()->getSecretSeedKey());
         }
         else {
             if (!$user->accessAdmin()) {
