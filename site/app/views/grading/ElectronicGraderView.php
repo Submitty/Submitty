@@ -1964,10 +1964,10 @@ HTML;
             "graded_versions" => [],
             "version_conflicts" => []
         ];
+        $peer_users = $this->core->getQueries()->getUsersById($peers_to_list);
         foreach ($peers_to_list as $peer) {
-            $users = $this->core->getQueries()->getUsersById([$peer]);
-            if (isset($users[$peer])) {
-                $peer_user = $users[$peer];
+            if (isset($peer_users[$peer])) {
+                $peer_user = $peer_users[$peer];
                 $peer_names[$peer] = $peer_user->getDisplayedGivenName() . ' ' . $peer_user->getDisplayedFamilyName() . ' (' . $peer . ')';
             }
         }
@@ -1977,11 +1977,10 @@ HTML;
             }
             $component_id = $component->getId();
             foreach ($peers_to_list as $peer) {
-                $users = $this->core->getQueries()->getUsersById([$peer]);
-                if (!isset($users[$peer])) {
+                if (!isset($peer_users[$peer])) {
                     continue;
                 }
-                $peer_user = $users[$peer];
+                $peer_user = $peer_users[$peer];
                 $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer_user);
                 if ($graded_component === null) {
                     continue;
