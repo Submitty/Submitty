@@ -1246,7 +1246,6 @@ HTML;
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($isPeerParticipationPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable);
@@ -1780,17 +1779,9 @@ HTML;
         $show_clear_conflicts = false;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
-        $current_user = $this->core->getUser();
         if ($ta_graded_gradeable !== null) {
             foreach ($gradeable->getComponents() as $component) {
-                if ($component->isPeerComponent()) {
-                    $graded_component = $ta_graded_gradeable->getGradedComponent($component, $current_user);
-                    if ($graded_component !== null && $graded_component->getGradedVersion() !== $active_version) {
-                        $show_clear_conflicts = true;
-                        break;
-                    }
-                }
-                elseif (!$is_peer_grader) {
+                if ($component->isPeerComponent() || !$is_peer_grader) {
                     $graded_component_container = $ta_graded_gradeable->getGradedComponentContainer($component);
                     if ($graded_component_container === null) {
                         continue;
@@ -1908,12 +1899,11 @@ HTML;
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
-                "gradeable_id" => $gradeable->getId(),
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", array_merge(
+            $this->getPeerEditData($graded_gradeable),
+            [
                 "is_ta_grading" => $gradeable->isTaGrading(),
-                "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
                 "anon_id" => $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId()),
-                "csrf_token" => $this->core->getCsrfToken(),
                 "has_peer_version_conflict" => $has_peer_version_conflict,
                 "grading_disabled" => $grading_disabled,
                 "has_submission" => $has_submission,
@@ -1921,18 +1911,20 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "grader_id" => $this->core->getUser()->getId(),
-                "display_version" => $display_version
-            ]);
+                "display_version" => $display_version,
+                "csrf_token" => $this->core->getCsrfToken()
+            ]
+        ));
     }
 
 
     /**
-     * Render the peer component editing panel
+     * Builds the data consumed by the EditPeerComponentsForm Vue component,
+     * which is mounted inline inside PeerPanel.twig.
      *
-     * @param GradedGradeable $graded_gradeable
-     * @return string
+     * @return array<string, mixed> String-keyed bag of data for the component.
      */
-    public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable) {
+    public function getPeerEditData(GradedGradeable $graded_gradeable): array {
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
@@ -1993,21 +1985,17 @@ HTML;
             }
             $components_details_array[] = $component_details;
         }
-        return $this->core->getOutput()->renderTwigTemplate(
-            "grading/electronic/EditPeerComponentsForm.twig",
-            [
-                "gradeable_id" => $gradeable->getId(),
-                "peers" => $peers_to_list,
-                "peer_names" => $peer_names,
-                "submitter_id" => $submitter,
-                "peer_details" => $peer_details,
-                "components" => $components_details_array,
-                "csrf_token" => $this->core->getCsrfToken(),
-                "component_scores" => $component_scores,
-                "marks" => $marks,
-                "active_version" => $active_version
-            ]
-        );
+        return [
+            "gradeable_id" => $gradeable->getId(),
+            "peers" => $peers_to_list,
+            "peer_names" => $peer_names,
+            "submitter_id" => $submitter,
+            "peer_details" => $peer_details,
+            "components" => $components_details_array,
+            "component_scores" => $component_scores,
+            "marks" => $marks,
+            "active_version" => $active_version
+        ];
     }
 
     /**
