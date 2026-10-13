@@ -36,13 +36,16 @@ my_pid = os.getpid()
 for p in psutil.pids():
     try:
         cmdline = psutil.Process(p).cmdline()
-        if (len(cmdline) < 2):
+        if len(cmdline) < 2:
             continue
         # if anything on the command line matches the name of the program
         if cmdline[0].find("python") != -1 and cmdline[1].find(my_program_name) != -1:
             if p != my_pid:
-                print("ERROR!  Another copy of '" + my_program_name +
-                      "' is already running on the server.  Exiting.")
+                print(
+                    "ERROR!  Another copy of '"
+                    + my_program_name
+                    + "' is already running on the server.  Exiting."
+                )
                 sys.exit(1)
     except psutil.NoSuchProcess:
         # Whoops, the process ended before we could look at it.
@@ -52,49 +55,55 @@ for p in psutil.pids():
 # ======================================================================
 
 try:
-    CONFIG_PATH = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config")
 
-    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    with open(os.path.join(CONFIG_PATH, "database.json")) as open_file:
         DATABASE_CONFIG = json.load(open_file)
 
 except Exception as config_fail_error:
-    print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
-        str(datetime.datetime.now()), str(config_fail_error)))
+    print(
+        "[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
+            str(datetime.datetime.now()), str(config_fail_error)
+        )
+    )
     sys.exit(1)
 
 BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
-DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
+DATA_DIR_PATH = SUBMITTY_CONFIG["submitty_data_dir"]
 EMAIL_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "emails")
 TODAY = datetime.datetime.now()
-LOG_FILE = open(os.path.join(
-    EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
-                                                    TODAY.day)), 'a')
+LOG_FILE = open(
+    os.path.join(
+        EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month, TODAY.day)
+    ),
+    "a",
+)
 
 
 try:
-    with open(os.path.join(CONFIG_PATH, 'email.json')) as open_file:
+    with open(os.path.join(CONFIG_PATH, "email.json")) as open_file:
         EMAIL_CONFIG = json.load(open_file)
-    EMAIL_ENABLED = EMAIL_CONFIG.get('email_enabled', False)
-    EMAIL_USER = EMAIL_CONFIG.get('email_user', '')
-    EMAIL_PASSWORD = EMAIL_CONFIG.get('email_password', '')
-    EMAIL_SENDER = EMAIL_CONFIG['email_sender']
-    EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
-    EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
-    EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
-    EMAIL_INTERNAL_DOMAIN = EMAIL_CONFIG['email_internal_domain']
+    EMAIL_ENABLED = EMAIL_CONFIG.get("email_enabled", False)
+    EMAIL_USER = EMAIL_CONFIG.get("email_user", "")
+    EMAIL_PASSWORD = EMAIL_CONFIG.get("email_password", "")
+    EMAIL_SENDER = EMAIL_CONFIG["email_sender"]
+    EMAIL_HOSTNAME = EMAIL_CONFIG["email_server_hostname"]
+    EMAIL_PORT = int(EMAIL_CONFIG["email_server_port"])
+    EMAIL_REPLY_TO = EMAIL_CONFIG["email_reply_to"]
+    EMAIL_INTERNAL_DOMAIN = EMAIL_CONFIG["email_internal_domain"]
 
-    DB_HOST = DATABASE_CONFIG['database_host']
-    DB_USER = DATABASE_CONFIG['database_user']
-    DB_PASSWORD = DATABASE_CONFIG['database_password']
+    DB_HOST = DATABASE_CONFIG["database_host"]
+    DB_USER = DATABASE_CONFIG["database_user"]
+    DB_PASSWORD = DATABASE_CONFIG["database_password"]
 
 except Exception as config_fail_error:
     e = "[{}] ERROR: Email/Database Configuration Failed {}".format(
-        str(datetime.datetime.now()), str(config_fail_error))
-    LOG_FILE.write(e+"\n")
+        str(datetime.datetime.now()), str(config_fail_error)
+    )
+    LOG_FILE.write(e + "\n")
     print(e)
     sys.exit(1)
 
@@ -105,10 +114,10 @@ def setup_db():
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
         conn_string = "postgresql://{}:{}@/{}?host={}".format(
-            DB_USER, DB_PASSWORD, db_name, DB_HOST)
+            DB_USER, DB_PASSWORD, db_name, DB_HOST
+        )
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(
-            DB_USER, DB_PASSWORD, DB_HOST, db_name)
+        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
 
     engine = create_engine(conn_string)
     db = engine.connect()
@@ -126,7 +135,7 @@ def construct_mail_client():
         pass
     client.ehlo()
 
-    if EMAIL_USER != '' and EMAIL_PASSWORD != '':
+    if EMAIL_USER != "" and EMAIL_PASSWORD != "":
         client.login(EMAIL_USER, EMAIL_PASSWORD)
 
     return client
@@ -137,20 +146,22 @@ def get_email_queue(db):
     query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
-    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    domain_format = "%@(%." + EMAIL_INTERNAL_DOMAIN + "|" + EMAIL_INTERNAL_DOMAIN + ")"
     result = db.execute(text(query), {"format": domain_format})
     queued_emails = []
     for row in result:
-        queued_emails.append({
-            'id': row[0],
-            'user_id': row[1],
-            'to_name': row[2],
-            'send_to': row[3],
-            'subject': row[4],
-            'body': row[5],
-            'term': row[6],
-            'course': row[7]
-            })
+        queued_emails.append(
+            {
+                "id": row[0],
+                "user_id": row[1],
+                "to_name": row[2],
+                "send_to": row[3],
+                "subject": row[4],
+                "body": row[5],
+                "term": row[6],
+                "course": row[7],
+            }
+        )
 
     return queued_emails
 
@@ -159,25 +170,28 @@ def get_external_queue(db, num):
     """Get an active queue of external emails waiting to be sent."""
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
     email_address NOT SIMILAR TO :format"""
-    domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
+    domain_format = "%@(%." + EMAIL_INTERNAL_DOMAIN + "|" + EMAIL_INTERNAL_DOMAIN + ")"
     result = db.execute(text(query), {"format": domain_format})
     query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
     error = '' ORDER BY id LIMIT :lim;"""
-    result = db.execute(text(query), {"format": domain_format,
-                        "lim": min(500-int(result.fetchone()[0]), num)})
+    result = db.execute(
+        text(query), {"format": domain_format, "lim": min(500 - int(result.fetchone()[0]), num)}
+    )
     queued_emails = []
     for row in result:
-        queued_emails.append({
-            'id': row[0],
-            'user_id': row[1],
-            'to_name': row[2],
-            'send_to': row[3],
-            'subject': row[4],
-            'body': row[5],
-            'term': row[6],
-            'course': row[7]
-            })
+        queued_emails.append(
+            {
+                "id": row[0],
+                "user_id": row[1],
+                "to_name": row[2],
+                "send_to": row[3],
+                "subject": row[4],
+                "body": row[5],
+                "term": row[6],
+                "course": row[7],
+            }
+        )
     return queued_emails
 
 
@@ -190,10 +204,13 @@ def mark_sent(email_id, db):
 
 def store_error(email_id, db, metadata, myerror):
     """Store an error string for the specified email."""
-    emails_table = Table('emails', metadata, autoload_with=db)
+    emails_table = Table("emails", metadata, autoload_with=db)
     # use bindparam to correctly handle a myerror string with single quote character
-    query = update(emails_table).where(
-        emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
+    query = (
+        update(emails_table)
+        .where(emails_table.c.id == email_id)
+        .values(error=bindparam("b_myerror"))
+    )
     db.execute(query, {"b_myerror": myerror})
     db.commit()
 
@@ -201,14 +218,14 @@ def store_error(email_id, db, metadata, myerror):
 def construct_mail_string(send_to, subject, body):
     """Format an email string."""
     headers = [
-        ('Content-Type', 'text/plain; charset=utf-8'),
-        ('TO', send_to),
-        ('From', EMAIL_SENDER),
-        ('reply-to', EMAIL_REPLY_TO),
-        ('Subject', subject)
+        ("Content-Type", "text/plain; charset=utf-8"),
+        ("TO", send_to),
+        ("From", EMAIL_SENDER),
+        ("reply-to", EMAIL_REPLY_TO),
+        ("Subject", subject),
     ]
 
-    msg = ''
+    msg = ""
     for header in headers:
         msg += "{}: {}\n".format(*header)
 
@@ -224,7 +241,7 @@ def send_email():
 
     success_count = 0
 
-    queued_emails = queued_emails + get_external_queue(db, 100-len(queued_emails))
+    queued_emails = queued_emails + get_external_queue(db, 100 - len(queued_emails))
 
     if len(queued_emails) == 0:
         return
@@ -236,8 +253,9 @@ def send_email():
         if email_data["send_to"] == "":
             store_error(email_data["id"], db, metadata, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
-                str(datetime.datetime.now()), name)
-            LOG_FILE.write(e+"\n")
+                str(datetime.datetime.now()), name
+            )
+            LOG_FILE.write(e + "\n")
             continue
 
         email_data["body"] += (
@@ -260,28 +278,26 @@ def send_email():
             email_data["subject"] = f"[Submitty]: {email_data['subject']}"
 
         email = construct_mail_string(
-            email_data["send_to"], email_data["subject"], email_data["body"])
+            email_data["send_to"], email_data["subject"], email_data["body"]
+        )
 
         try:
-            mail_client.sendmail(EMAIL_SENDER,
-                                 email_data["send_to"], email.encode('utf8'))
+            mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email.encode("utf8"))
             mark_sent(email_data["id"], db)
             success_count += 1
 
         except Exception as email_send_error:
-            store_error(email_data["id"], db, metadata, "ERROR: sending email "
-                        + str(email_send_error))
+            store_error(
+                email_data["id"], db, metadata, "ERROR: sending email " + str(email_send_error)
+            )
             e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
-                str(datetime.datetime.now()),
-                name,
-                email_data["send_to"],
-                str(email_send_error))
-            LOG_FILE.write(e+"\n")
+                str(datetime.datetime.now()), name, email_data["send_to"], str(email_send_error)
+            )
+            LOG_FILE.write(e + "\n")
             print(e)
 
-    e = "[{}] Successfully Emailed {} Users".format(
-        str(datetime.datetime.now()), success_count)
-    LOG_FILE.write(e+"\n")
+    e = "[{}] Successfully Emailed {} Users".format(str(datetime.datetime.now()), success_count)
+    LOG_FILE.write(e + "\n")
 
 
 def main():
@@ -292,8 +308,9 @@ def main():
         send_email()
     except Exception as email_send_error:
         e = "[{}] Error Sending Email: {}".format(
-            str(datetime.datetime.now()), str(email_send_error))
-        LOG_FILE.write(e+"\n")
+            str(datetime.datetime.now()), str(email_send_error)
+        )
+        LOG_FILE.write(e + "\n")
         print(e)
 
 

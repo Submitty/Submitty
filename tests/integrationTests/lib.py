@@ -15,49 +15,28 @@ from submitty_utils import submitty_schema_validator
 # global variable available to be used by the test suite modules
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
 SUBMITTY_INSTALL_DIR = os.path.realpath(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
 )
 
-INTEGRATION_TEST_ROOT_FOLDER = os.path.join(
-    SUBMITTY_INSTALL_DIR,
-    "./test_suite/integrationTests/"
-)
+INTEGRATION_TEST_ROOT_FOLDER = os.path.join(SUBMITTY_INSTALL_DIR, "./test_suite/integrationTests/")
 
-COMPILE_CONFIGURE_BIN_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    'compile_configure_bin.sh'
-)
+COMPILE_CONFIGURE_BIN_PATH = os.path.join(INTEGRATION_TEST_ROOT_FOLDER, "compile_configure_bin.sh")
 
-CONFIGURE_BIN_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    "configure.bin"
-)
+CONFIGURE_BIN_PATH = os.path.join(INTEGRATION_TEST_ROOT_FOLDER, "configure.bin")
 
-BUILD_MAIN_CONFIGUE_PATH = os.path.join(
-    INTEGRATION_TEST_ROOT_FOLDER,
-    'build_main_configure.sh'
-)
+BUILD_MAIN_CONFIGUE_PATH = os.path.join(INTEGRATION_TEST_ROOT_FOLDER, "build_main_configure.sh")
 
 # Verify that this has been installed by just checking that this file is located in
 # a directory next to the config directory which has submitty.json in it
-if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
-    raise SystemExit('You must install the test suite before being able to run it.')
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")):
+    raise SystemExit("You must install the test suite before being able to run it.")
 
-SUBMITTY_TUTORIAL_DIR = os.path.join(
-    SUBMITTY_INSTALL_DIR,
-    "./GIT_CHECKOUT/Tutorial"
-)
+SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "./GIT_CHECKOUT/Tutorial")
 
-GRADING_SOURCE_DIR = os.path.join(
-    SUBMITTY_INSTALL_DIR,
-    "./src/grading"
-)
+GRADING_SOURCE_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "./src/grading")
 
 LOG_FILE = None
-LOG_DIR = os.path.join(
-    SUBMITTY_INSTALL_DIR,
-    "./test_suite/log"
-)
+LOG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "./test_suite/log")
 
 
 def print(*args, **kwargs):
@@ -65,14 +44,14 @@ def print(*args, **kwargs):
     if "sep" not in kwargs:
         kwargs["sep"] = " "
     if "end" not in kwargs:
-        kwargs["end"] = '\n'
+        kwargs["end"] = "\n"
 
     message = kwargs["sep"].join(map(str, args)) + kwargs["end"]
     if LOG_FILE is None:
         # include a couple microseconds in string so that we have unique log file
         # per test run
-        LOG_FILE = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]
-    with open(os.path.join(LOG_DIR, LOG_FILE), 'a') as write_file:
+        LOG_FILE = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+    with open(os.path.join(LOG_DIR, LOG_FILE), "a") as write_file:
         write_file.write(message)
     sys.stdout.write(message)
 
@@ -101,7 +80,7 @@ class ASCIIEscapeManager:
         self.codes = list(map(str, codes))
 
     def __enter__(self):
-        sys.stdout.write(f"\u001B[{';'.join(self.codes)}m")
+        sys.stdout.write(f"\u001b[{';'.join(self.codes)}m")
 
     def __exit__(self, exc_type, exc_value, traceback):
         sys.stdout.write("\033[0m")
@@ -150,14 +129,11 @@ def run_tests(names):
         with bold + green:
             print(f"All {len(names)} modules passed")
 
+
 def __setup():
-    subprocess.check_output([
-            "/bin/bash",
-            COMPILE_CONFIGURE_BIN_PATH,
-            SUBMITTY_INSTALL_DIR,
-            CONFIGURE_BIN_PATH
-        ],
-        stderr=subprocess.STDOUT
+    subprocess.check_output(
+        ["/bin/bash", COMPILE_CONFIGURE_BIN_PATH, SUBMITTY_INSTALL_DIR, CONFIGURE_BIN_PATH],
+        stderr=subprocess.STDOUT,
     )
     pass
 
@@ -166,6 +142,7 @@ def __setup():
 # Currently all tests are run in parallel per-number of threads on a module level.
 # Different modules are run in parallel on different worker threads, but all the
 # test cases within the same module is run on the same thread sequentially.
+
 
 # Executes a single test module, this method is executed across process boundary,
 # Not meant to be called externally.
@@ -232,7 +209,7 @@ def __execute_test_case(index, test_case):
             lineno = None
             tb = traceback.extract_tb(sys.exc_info()[2])
             for i in range(len(tb) - 1, -1, -1):
-                if os.path.basename(tb[i][0]) == '__init__.py':
+                if os.path.basename(tb[i][0]) == "__init__.py":
                     lineno = tb[i][1]
             print(f"Testcase {index} failed on line {lineno} with exception: ", e)
             sys.exc_info()
@@ -258,7 +235,9 @@ def copy_contents_into(source, target):
                     # recurse
                     copy_contents_into(os.path.join(source, item), os.path.join(target, item))
                 elif os.path.isfile(os.path.join(target, item)):
-                    raise RuntimeError(f"ERROR: the target subpath is a file not a directory '{os.path.join(target, item)}'")
+                    raise RuntimeError(
+                        f"ERROR: the target subpath is a file not a directory '{os.path.join(target, item)}'"
+                    )
                 else:
                     # copy entire subtree
                     shutil.copytree(os.path.join(source, item), os.path.join(target, item))
@@ -268,7 +247,9 @@ def copy_contents_into(source, target):
                 try:
                     shutil.copy(os.path.join(source, item), target)
                 except:
-                    raise RuntimeError(f"ERROR COPYING FILE: {os.path.join(source, item)} -> {os.path.join(target, item)}")
+                    raise RuntimeError(
+                        f"ERROR COPYING FILE: {os.path.join(source, item)} -> {os.path.join(target, item)}"
+                    )
 
 
 def move_only_files(source, target):
@@ -315,48 +296,72 @@ class TestcaseWrapper:
         except OSError as e:
             pass
         # copy the cmake file to the build directory
-        subprocess.call(["cp",
-                         os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
-                         os.path.join(self.testcase_path, "build", "CMakeLists.txt")])
+        subprocess.call(
+            [
+                "cp",
+                os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
+                os.path.join(self.testcase_path, "build", "CMakeLists.txt"),
+            ]
+        )
 
         shutil.copy(BUILD_MAIN_CONFIGUE_PATH, os.path.join(self.testcase_path, "build"))
 
         # First, we need to compile and run configure.out
-        with open(os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w") as configure_output:
-            return_code = subprocess.call(["/bin/bash", "build_main_configure.sh", self.testcase_path, SUBMITTY_INSTALL_DIR, CONFIGURE_BIN_PATH],
-                                          cwd=os.path.join(self.testcase_path, "build"), stdout=configure_output, stderr=configure_output)
+        with open(
+            os.path.join(self.testcase_path, "log", "main_configure_build.txt"), "w"
+        ) as configure_output:
+            return_code = subprocess.call(
+                [
+                    "/bin/bash",
+                    "build_main_configure.sh",
+                    self.testcase_path,
+                    SUBMITTY_INSTALL_DIR,
+                    CONFIGURE_BIN_PATH,
+                ],
+                cwd=os.path.join(self.testcase_path, "build"),
+                stdout=configure_output,
+                stderr=configure_output,
+            )
             if return_code != 0:
                 raise RuntimeError(f"Failed to generate main configure: {return_code}")
 
         with open(os.path.join(self.testcase_path, "log", "cmake_output.txt"), "w") as cmake_output:
-            return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
-                                          cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
+            return_code = subprocess.call(
+                ["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
+                cwd=os.path.join(self.testcase_path, "build"),
+                stdout=cmake_output,
+                stderr=cmake_output,
+            )
             if return_code != 0:
                 raise RuntimeError(f"Build (cmake) exited with exit code {return_code}")
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
-            return_code = subprocess.call(["make"],
-                                          cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
+            return_code = subprocess.call(
+                ["make"],
+                cwd=os.path.join(self.testcase_path, "build"),
+                stdout=make_output,
+                stderr=make_output,
+            )
             if return_code != 0:
                 self.debug_print("log/make_output.txt")
                 raise RuntimeError(f"Build (make) exited with exit code {return_code}")
 
     # Run compile.out using some sane arguments.
     def run_compile(self):
-        config_path = os.path.join(self.testcase_path, 'assignment_config', 'complete_config.json')
-        with open(config_path, 'r') as infile:
+        config_path = os.path.join(self.testcase_path, "assignment_config", "complete_config.json")
+        with open(config_path, "r") as infile:
             config = json.load(infile)
-            my_testcases = config['testcases']
+            my_testcases = config["testcases"]
 
-        data_folder = os.path.join(self.testcase_path, 'data')
+        data_folder = os.path.join(self.testcase_path, "data")
 
         # We create a temporary data folder, so that we don't tarnish the original.
-        tmp_data_folder = os.path.join(self.testcase_path, 'tmp_data')
+        tmp_data_folder = os.path.join(self.testcase_path, "tmp_data")
         if os.path.isdir(tmp_data_folder):
             shutil.rmtree(tmp_data_folder)
         os.makedirs(tmp_data_folder)
 
         # Will hold the compiled files and their STDOUT/STDERRs
-        tmp_comp_folder = os.path.join(self.testcase_path, 'tmp_comp')
+        tmp_comp_folder = os.path.join(self.testcase_path, "tmp_comp")
 
         # Make the work folder used by run_run.
         if os.path.isdir(tmp_comp_folder):
@@ -372,19 +377,19 @@ class TestcaseWrapper:
             # We start counting from one.
             for testcase_num in range(1, len(my_testcases) + 1):
                 my_testcase = my_testcases[testcase_num - 1]
-                testcase_folder = os.path.join(tmp_comp_folder, my_testcase['testcase_id'])
+                testcase_folder = os.path.join(tmp_comp_folder, my_testcase["testcase_id"])
 
-                if 'type' in my_testcase:
-                    if my_testcase['type'] != 'FileCheck' and my_testcase['type'] != 'Compilation':
+                if "type" in my_testcase:
+                    if my_testcase["type"] != "FileCheck" and my_testcase["type"] != "Compilation":
                         continue
 
-                    if my_testcase['type'] == 'Compilation':
-                        if 'executable_name' in my_testcase:
-                            provided_executable_list = my_testcase['executable_name']
+                    if my_testcase["type"] == "Compilation":
+                        if "executable_name" in my_testcase:
+                            provided_executable_list = my_testcase["executable_name"]
                             if not isinstance(provided_executable_list, (list,)):
                                 provided_executable_list = list([provided_executable_list])
                             for exe in provided_executable_list:
-                                if exe.strip() == '':
+                                if exe.strip() == "":
                                     continue
                                 executable_path = os.path.join(testcase_folder, exe)
                                 executable_path_list.append((executable_path, exe))
@@ -405,14 +410,17 @@ class TestcaseWrapper:
                         "testuser",
                         "1",
                         "0",
-                        my_testcase['testcase_id']
+                        my_testcase["testcase_id"],
                     ],
-                    cwd=testcase_folder, stdout=log, stderr=log)
+                    cwd=testcase_folder,
+                    stdout=log,
+                    stderr=log,
+                )
 
                 if return_code != 0:
                     raise RuntimeError(f"Compile exited with exit code {return_code}")
 
-        compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
+        compiled_files_directory = os.path.join(self.testcase_path, "compiled_files")
 
         # Don't trust that the developer properly cleaned up after themselves.
         if os.path.isdir(compiled_files_directory):
@@ -429,7 +437,7 @@ class TestcaseWrapper:
             shutil.copy(path, target_path)
 
         # Create the work folder, which will be used by run_run.
-        work_folder = os.path.join(self.testcase_path, 'work')
+        work_folder = os.path.join(self.testcase_path, "work")
         if os.path.isdir(work_folder):
             shutil.rmtree(work_folder)
         os.makedirs(work_folder)
@@ -440,16 +448,16 @@ class TestcaseWrapper:
 
     # Run run.out using some sane arguments.
     def run_run(self):
-        config_path = os.path.join(self.testcase_path, 'assignment_config', 'complete_config.json')
+        config_path = os.path.join(self.testcase_path, "assignment_config", "complete_config.json")
 
-        with open(config_path, 'r') as infile:
+        with open(config_path, "r") as infile:
             config = json.load(infile)
-        my_testcases = config['testcases']
+        my_testcases = config["testcases"]
 
-        data_folder = os.path.join(self.testcase_path, 'data')
-        tmp_data_folder = os.path.join(self.testcase_path, 'tmp_data')
-        work_folder = os.path.join(self.testcase_path, 'work')
-        compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
+        data_folder = os.path.join(self.testcase_path, "data")
+        tmp_data_folder = os.path.join(self.testcase_path, "tmp_data")
+        work_folder = os.path.join(self.testcase_path, "work")
+        compiled_files_directory = os.path.join(self.testcase_path, "compiled_files")
 
         if os.path.isdir(tmp_data_folder):
             shutil.rmtree(tmp_data_folder)
@@ -462,11 +470,11 @@ class TestcaseWrapper:
             for testcase_num in range(1, len(my_testcases) + 1):
                 my_testcase = my_testcases[testcase_num - 1]
 
-                if 'type' in my_testcases[testcase_num - 1]:
-                    if my_testcase['type'] == 'FileCheck' or my_testcase['type'] == 'Compilation':
+                if "type" in my_testcases[testcase_num - 1]:
+                    if my_testcase["type"] == "FileCheck" or my_testcase["type"] == "Compilation":
                         continue
                 # Make the tmp folder for this testcase.
-                testcase_folder = os.path.join(work_folder, my_testcase['testcase_id'])
+                testcase_folder = os.path.join(work_folder, my_testcase["testcase_id"])
 
                 # Don't trust that the developer properly cleaned up after themselves.
                 if os.path.isdir(testcase_folder):
@@ -482,9 +490,12 @@ class TestcaseWrapper:
                         "testuser",
                         "1",
                         "0",
-                        my_testcase['testcase_id']
+                        my_testcase["testcase_id"],
                     ],
-                    cwd=testcase_folder, stdout=log, stderr=log)
+                    cwd=testcase_folder,
+                    stdout=log,
+                    stderr=log,
+                )
                 if return_code != 0:
                     raise RuntimeError(f"run.out exited with exit code {return_code}")
 
@@ -503,9 +514,18 @@ class TestcaseWrapper:
     def run_validator(self, user="testuser", subnum="1", subtime="0"):
         # VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>
         with open(os.path.join(self.testcase_path, "log", "validate_output.txt"), "w") as log:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"),
-                                           "testassignment", user, subnum, subtime],  # "testuser", "1", "0"],
-                                          cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
+            return_code = subprocess.call(
+                [
+                    os.path.join(self.testcase_path, "bin", "validate.out"),
+                    "testassignment",
+                    user,
+                    subnum,
+                    subtime,
+                ],  # "testuser", "1", "0"],
+                cwd=os.path.join(self.testcase_path, "data"),
+                stdout=log,
+                stderr=log,
+            )
             if return_code != 0:
                 raise RuntimeError(f"Validator exited with exit code {return_code}")
 
@@ -521,7 +541,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(os.path.split(f2)[0]):
+        if not "data" in os.path.split(os.path.split(f2)[0]):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -533,25 +553,31 @@ class TestcaseWrapper:
             raise RuntimeError(f"File {filename2} does not exist")
 
         if arg == "":
-            process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                ["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
         elif arg == "-b":
             # Ignore changes in white space
-            process = subprocess.Popen(["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                ["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
         else:
             raise RuntimeError(f"ARGUMENT {arg} TO DIFF NOT TESTED")
         out, _ = process.communicate()
-        out = out.decode('utf-8')
+        out = out.decode("utf-8")
         if process.returncode == 1:
-            raise RuntimeError(f"Difference between {filename1} and {filename2} "
-                               f"exited with exit code {process.returncode}\n\n"
-                               f"Diff:\n{out}")
+            raise RuntimeError(
+                f"Difference between {filename1} and {filename2} "
+                f"exited with exit code {process.returncode}\n\n"
+                f"Diff:\n{out}"
+            )
 
     # Helpful for debugging make errors on CI
     def debug_print(self, f):
         filename = os.path.join(self.testcase_path, f)
         print("\nDEBUG_PRINT: ", filename)
         if os.path.exists(filename):
-            with open(filename, 'r') as fin:
+            with open(filename, "r") as fin:
                 print(fin.read())
         else:
             print("  < file does not exist >")
@@ -564,7 +590,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not "data" in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -585,7 +611,9 @@ class TestcaseWrapper:
         del contents2[num_lines_to_compare:]
 
         if contents1 != contents2:
-            raise RuntimeError(f"Files {filename1} and {filename2} are different within the first {num_lines_to_compare} lines.")
+            raise RuntimeError(
+                f"Files {filename1} and {filename2} are different within the first {num_lines_to_compare} lines."
+            )
 
     ###################################################################################
     def empty_file(self, f):
@@ -610,7 +638,6 @@ class TestcaseWrapper:
         else:
             return obj
 
-
     ###################################################################################
     # Helper function for json_diff. Recursively removes keys from input_dict.
     # Credit: Olivier Melançon.
@@ -629,14 +656,14 @@ class TestcaseWrapper:
     # (indentation, newlines, etc) and also alternate ordering of data
     # inside dictionary/key-value pairs
     # By default ignore metric values if they exist because they are different for every run
-    def json_diff(self, f1, f2="", ignore_keys=['metrics']):
+    def json_diff(self, f1, f2="", ignore_keys=["metrics"]):
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-            f1 = os.path.join('validation', f1)
+            f1 = os.path.join("validation", f1)
         else:
             f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not "data" in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -657,18 +684,20 @@ class TestcaseWrapper:
             # NOTE: The ordered json has extra syntax....
             # so instead, print the original contents to a file and diff that
             # (yes clumsy)
-            with open('json_ordered_1.json', 'w') as outfile:
-                json.dump(contents1, outfile, sort_keys=True, indent=4, separators=(',', ': '))
-            with open('json_ordered_2.json', 'w') as outfile:
-                json.dump(contents2, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+            with open("json_ordered_1.json", "w") as outfile:
+                json.dump(contents1, outfile, sort_keys=True, indent=4, separators=(",", ": "))
+            with open("json_ordered_2.json", "w") as outfile:
+                json.dump(contents2, outfile, sort_keys=True, indent=4, separators=(",", ": "))
             print("\ndiff json_ordered_1.json json_ordered_2.json\n")
-            process = subprocess.Popen(["diff", 'json_ordered_1.json', 'json_ordered_2.json'])
+            process = subprocess.Popen(["diff", "json_ordered_1.json", "json_ordered_2.json"])
             raise RuntimeError(f"JSON files are different:  {filename1} {filename2}")
 
     def empty_json_diff(self, f):
         f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite/integrationTests/data/empty_json_diff_file.json")
+        filename2 = os.path.join(
+            SUBMITTY_INSTALL_DIR, "test_suite/integrationTests/data/empty_json_diff_file.json"
+        )
         return self.json_diff(filename1, filename2)
 
     ###################################################################################
@@ -677,21 +706,21 @@ class TestcaseWrapper:
         if not os.path.isfile(filename):
             raise RuntimeError(f"File {filename} does not exist")
         simplified = []
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             for line in file:
-                if 'Time' in line:
+                if "Time" in line:
                     continue
-                if 'org.junit' in line:
+                if "org.junit" in line:
                     continue
-                if 'sun.reflect' in line:
+                if "sun.reflect" in line:
                     continue
-                if 'java.lang' in line:
+                if "java.lang" in line:
                     continue
-                if 'java.net' in line:
+                if "java.net" in line:
                     continue
-                if 'sun.misc' in line:
+                if "sun.misc" in line:
                     continue
-                if '... ' in line and ' more' in line:
+                if "... " in line and " more" in line:
                     continue
                 # sys.stdout.write(f"LINE: {line}")
                 simplified.append(line)
@@ -704,7 +733,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not "data" in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -715,9 +744,13 @@ class TestcaseWrapper:
 
     # Validate a configuration against the submitty complete_config_schema.json
     def validate_complete_config(self, config_path):
-        schema_path = os.path.join(SUBMITTY_INSTALL_DIR, 'bin', 'json_schemas', 'complete_config_schema.json')
+        schema_path = os.path.join(
+            SUBMITTY_INSTALL_DIR, "bin", "json_schemas", "complete_config_schema.json"
+        )
         try:
-            submitty_schema_validator.validate_complete_config_schema_using_filenames(config_path, schema_path)
+            submitty_schema_validator.validate_complete_config_schema_using_filenames(
+                config_path, schema_path
+            )
         except submitty_schema_validator.SubmittySchemaException as s:
             s.print_human_readable_error()
             raise
