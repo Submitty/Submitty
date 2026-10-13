@@ -24,20 +24,20 @@
     display: flex;
     align-items: center;
 }
-.save-indicator{
+.save-indicator {
     margin: 0 0 0 1em;
 }
-.save-indicator-unchanged{
+.save-indicator-unchanged {
     visibility: hidden;
 }
-.save-indicator-unsaved{
+.save-indicator-unsaved {
     visibility: visible;
 }
-.save-indicator-saved{
+.save-indicator-saved {
     visibility: visible;
     color: var(--standard-dark-green);
 }
-.save-indicator-fail{
+.save-indicator-fail {
     visibility: visible;
     color: var(--standard-light-red);
 }
