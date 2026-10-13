@@ -131,9 +131,7 @@ def sample_rainbow_grades_test():
             os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile")
         )
         shutil.copy(
-            os.path.join(
-                SUBMITTY_INSTALL_DIR, ".setup", "customization_sample.json"
-            ),
+            os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "customization_sample.json"),
             os.path.join(summary_tmp, "customization.json"),
         )
         shutil.copy(
