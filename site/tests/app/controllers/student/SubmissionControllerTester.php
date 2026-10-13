@@ -1332,7 +1332,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your file name in\"valid.txt.", $return['message']);
+        $this->assertEquals("Error: You may not use double quotes, backslashes or angle brackets in your file name in\"valid.txt.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
@@ -1343,7 +1343,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside invalid.zip.", $return['message']);
+        $this->assertEquals("Error: You may not use double quotes, backslashes or angle brackets in your filename for files inside invalid.zip.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
