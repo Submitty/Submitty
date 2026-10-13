@@ -20,6 +20,7 @@ def up(config, database, semester, course):
         WHERE eg_max_team_size <= 0;
     """)
     database.execute("""
+        ALTER TABLE electronic_gradeable
         ADD CONSTRAINT eg_max_team_size_check CHECK (eg_max_team_size > 0);
     """)
     pass
@@ -38,4 +39,8 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    database.execute("""
+        ALTER TABLE electronic_gradeable
+        DROP CONSTRAINT eg_max_team_size_check;
+    """)
     pass
