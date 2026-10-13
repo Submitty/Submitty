@@ -1390,6 +1390,7 @@ gradeables:
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
+    g_bucket: homework
 
   - g_id: future_tas_test
     components:
@@ -2005,3 +2006,4 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
+    g_bucket: homework
